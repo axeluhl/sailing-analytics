@@ -5,6 +5,7 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 
 public class CompositeSettings extends AbstractSettings {
+    // TODO: Remove after lifecycle fix of datamining
     public static class ComponentAndSettingsPair<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, SettingsType> {
         private static final long serialVersionUID = -569811233041583043L;
 
@@ -13,20 +14,40 @@ public class CompositeSettings extends AbstractSettings {
         }
     }
     
+    public static class ComponentLifecycleAndSettingsPair<SettingsType extends Settings> extends Util.Pair<ComponentLifecycle<?, SettingsType, ?>, SettingsType> {
+        private static final long serialVersionUID = -7497728678978241537L;
+
+        public ComponentLifecycleAndSettingsPair(ComponentLifecycle<?, SettingsType, ?> a, SettingsType b) {
+            super(a, b);
+        }
+    }
+    
+    private final Iterable<ComponentLifecycleAndSettingsPair<?>> settingsPerComponentLifecycle;
     private final Iterable<ComponentAndSettingsPair<?>> settingsPerComponent;
 
-    public CompositeSettings(Iterable<ComponentAndSettingsPair<?>> settingsPerComponent) {
+    // TODO: Remove after lifecycle fix of datamining
+    public CompositeSettings(Iterable<ComponentAndSettingsPair<?>> settingsPerComponent, String x) {
+        this.settingsPerComponentLifecycle = null;
         this.settingsPerComponent = settingsPerComponent;
+    }
+
+    public CompositeSettings(Iterable<ComponentLifecycleAndSettingsPair<?>> settingsPerComponent) {
+        this.settingsPerComponentLifecycle = settingsPerComponent;
+        this.settingsPerComponent = null;
     }
 
     public Iterable<ComponentAndSettingsPair<?>> getSettingsPerComponent() {
         return settingsPerComponent;
     }
 
+    public Iterable<ComponentLifecycleAndSettingsPair<?>> getSettingsPerComponentLifecycle() {
+        return settingsPerComponentLifecycle;
+    }
+
     @SuppressWarnings("unchecked")
     public <SettingsType extends Settings> SettingsType getSettingsForType(Class<SettingsType> settingsType) {
         SettingsType result = null;
-        for(ComponentAndSettingsPair<?> componentAndSettings: settingsPerComponent) {
+        for(ComponentLifecycleAndSettingsPair<?> componentAndSettings: settingsPerComponentLifecycle) {
             if(componentAndSettings.getB().getClass().getName().equals(settingsType.getName())) {
                 result = (SettingsType) componentAndSettings.getB();
                 break;

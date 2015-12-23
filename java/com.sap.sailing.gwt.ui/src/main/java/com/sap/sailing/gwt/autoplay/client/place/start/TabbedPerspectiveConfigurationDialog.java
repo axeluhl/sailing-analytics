@@ -12,10 +12,10 @@ import com.sap.sse.gwt.client.shared.perspective.Perspective;
 public class TabbedPerspectiveConfigurationDialog extends CompositeTabbedSettingsDialog {
 
     public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, Perspective<?> perspective) {
-        super(stringConstants, perspective.getComponents(), perspective.getPerspectiveName());
+        super(stringConstants, perspective.getComponentLifecycles(), perspective.getPerspectiveName());
     }
 
     public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, Perspective<?> perspective, DialogCallback<CompositeSettings> callback) {
-        super(stringConstants, perspective.getComponents(), perspective.getPerspectiveName(), callback);
+        super(stringConstants, perspective.getComponentLifecycles(), perspective.getPerspectiveName(), callback);
     }
 }

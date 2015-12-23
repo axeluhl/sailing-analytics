@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboard;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.autoplay.client.place.start.ProxyLeaderboardComponent;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -19,7 +18,7 @@ public class ProxyLeaderboardPerspective extends AbstractPerspective<Leaderboard
     public ProxyLeaderboardPerspective(LeaderboardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
         super();
         this.perspectiveSettings = perspectiveSettings;
-        components.add(new ProxyLeaderboardComponent(defaultLeaderboardSettings, leaderboard, StringMessages.INSTANCE));
+        componentLifecycles.add(new LeaderboardPanelLifecycle(/*leaderboard, */StringMessages.INSTANCE));
     }
 
     @Override

@@ -798,5 +798,4 @@ public class MediaPlayerManagerComponent implements Component<MediaPlayerSetting
     public ErrorReporter getErrorReporter() {
         return errorReporter;
     }
-
 }

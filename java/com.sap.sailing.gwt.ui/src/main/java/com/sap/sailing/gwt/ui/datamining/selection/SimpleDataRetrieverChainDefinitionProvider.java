@@ -211,7 +211,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
 
     @Override
     public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
-        return new CompositeTabbedSettingsDialogComponent(createSettingsComponentsFor(getDataRetrieverChainDefinition()));
+        return new CompositeTabbedSettingsDialogComponent(createSettingsComponentsFor(getDataRetrieverChainDefinition()), "TODO");
     }
 
     private Iterable<Component<?>> createSettingsComponentsFor(final DataRetrieverChainDefinitionDTO retrieverChain) {
@@ -264,7 +264,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
             settings.add(getComponentAndSettings(c));
         }
         
-        return new CompositeSettings(settings);
+        return new CompositeSettings(settings, "TODO");
     }
     
     private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {

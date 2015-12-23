@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentLifecycleAndSettingsPair;
 
 /**
  * A component, that contains a collection of settings components in a tabbed panel.
@@ -11,21 +11,21 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSe
  */
 public class CompositeTabbedSettingsComponent implements Component<CompositeSettings> {
     
-    private final Iterable<Component<?>> components;
+    private final Iterable<ComponentLifecycle<?,?,?>> components;
     private final String title;
     
-    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components) {
+    public CompositeTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?>> components) {
         this(components, null);
     }
 
-    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components, String title) {
+    public CompositeTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?>> components, String title) {
         this.components = components;
         this.title = title;
     }
 
     @Override
     public boolean hasSettings() {
-        for (Component<?> component : components) {
+        for (ComponentLifecycle<?,?,?> component : components) {
             if (component.hasSettings()) {
                 return true;
             }
@@ -45,13 +45,18 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
  
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (CompositeSettings.ComponentLifecycleAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
             updateSettings(componentAndSettings);
         }
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
-        componentAndSettings.getA().updateSettings(componentAndSettings.getB());
+    private <SettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettingsPair<SettingsType> componentLifecycleAndSettings) {
+        ComponentLifecycle<?, SettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getA();
+        if(componentLifecycle.getComponent() != null) {
+            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getB());
+        } else {
+            // ??? store in lifecycle
+        }
     }
 
     @Override
@@ -61,7 +66,7 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
         } else {
             StringBuilder result = new StringBuilder();
             boolean first = true;
-            for (Component<?> component : components) {
+            for (ComponentLifecycle<?,?,?> component : components) {
                 if (first) {
                     first = false;
                 } else {

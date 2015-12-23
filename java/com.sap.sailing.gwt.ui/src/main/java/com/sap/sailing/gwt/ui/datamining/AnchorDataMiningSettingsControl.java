@@ -84,7 +84,7 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
-        return new CompositeTabbedSettingsDialogComponent(components);
+        return new CompositeTabbedSettingsDialogComponent(components, "TODO");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
                 settings.add(componentAndSettings);
             }
         }
-        return new CompositeSettings(settings);
+        return new CompositeSettings(settings, "TODO");
     }
     
     private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {

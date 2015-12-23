@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentLifecycleAndSettingsPair;
 
 /**
  * An abstract base class for perspectives.
@@ -17,41 +17,51 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSe
  */
 public abstract class AbstractPerspective<SettingsType extends Settings> implements Perspective<SettingsType> {
 
-    protected final List<Component<?>> components;
+    protected final List<ComponentLifecycle<?,?,?>> componentLifecycles;
     
     public AbstractPerspective() {
-        components = new ArrayList<Component<?>>();
+        componentLifecycles = new ArrayList<ComponentLifecycle<?,?,?>>();
     }
     
     @Override 
     public CompositeSettings getSettingsOfComponents() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
-        for (Component<?> component : components) {
-            ComponentAndSettingsPair<?> componentAndSettings = getComponentAndSettings(component);
-            if (componentAndSettings != null) {
-                settings.add(componentAndSettings);
+        Collection<ComponentLifecycleAndSettingsPair<?>> settings = new HashSet<>();
+        for (ComponentLifecycle<?,?,?> component : componentLifecycles) {
+            ComponentLifecycleAndSettingsPair<?> componentLifecycleAndSettings = getComponentLifecycleAndSettings(component);
+            if (componentLifecycleAndSettings != null) {
+                settings.add(componentLifecycleAndSettings);
             }
         }
         return new CompositeSettings(settings);
     }
     
-    private <ComponentSettingsType extends Settings> ComponentAndSettingsPair<ComponentSettingsType> getComponentAndSettings(Component<ComponentSettingsType> component) {
-        return component.hasSettings() ? new ComponentAndSettingsPair<ComponentSettingsType>(component, component.getSettings()) : null;
+    private <ComponentSettingsType extends Settings> ComponentLifecycleAndSettingsPair<ComponentSettingsType> getComponentLifecycleAndSettings(ComponentLifecycle<?, ComponentSettingsType, ?> componentLifecycle) {
+        ComponentLifecycleAndSettingsPair<ComponentSettingsType> result = null;
+        if(componentLifecycle.hasSettings()) {
+            ComponentSettingsType settings = componentLifecycle.getComponent() != null ? componentLifecycle.getComponent().getSettings() : componentLifecycle.createDefaultSettings();
+            result = new ComponentLifecycleAndSettingsPair<ComponentSettingsType>(componentLifecycle, settings);
+        }
+        return result;
     }
 
     @Override
     public void updateSettingsOfComponents(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
-            updateSettings(componentAndSettings);
+        for (CompositeSettings.ComponentLifecycleAndSettingsPair<?> componentLifecycleAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
+            updateSettings(componentLifecycleAndSettings);
         }
     }
 
-    private <ComponentSettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<ComponentSettingsType> componentAndSettings) {
-        componentAndSettings.getA().updateSettings(componentAndSettings.getB());
+    private <ComponentSettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettingsPair<ComponentSettingsType> componentLifecycleAndSettings) {
+        ComponentLifecycle<?, ComponentSettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getA();
+        if(componentLifecycle.getComponent() != null) {
+            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getB());
+        } else {
+            // ??? store in lifecycle
+        }
     }
     
     @Override
-    public Iterable<Component<?>> getComponents() {
-        return components;
+    public Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles() {
+        return componentLifecycles;
     }
 }
