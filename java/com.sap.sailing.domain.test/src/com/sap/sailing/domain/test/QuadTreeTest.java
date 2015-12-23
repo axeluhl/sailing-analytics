@@ -8,7 +8,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
-import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {
@@ -23,17 +22,9 @@ public class QuadTreeTest {
         }
     }
     
-    private static class QuadTreeWithPublicGetTop<T> extends QuadTree<T> {
-        private static final long serialVersionUID = -783622065160380333L;
-        @Override
-        public QuadTreeNode<T> getTop() {
-            return super.getTop();
-        }
-    }
-    
     @Test
     public void testNoNPEDuringSecondPutInSameLeaf() {
-        final QuadTreeWithPublicGetTop<Object> qt = new QuadTreeWithPublicGetTop<Object>();
+        final QuadTree<Object> qt = new QuadTree<Object>();
         final Position p = new DegreePosition(0, 0);
         final NullPointerException[] npe = new NullPointerException[1];
         final boolean[] stop = new boolean[1];

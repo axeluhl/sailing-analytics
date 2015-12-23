@@ -1,25 +1,3 @@
-// **********************************************************************
-// 
-// <copyright>
-// 
-//  BBN Technologies
-//  10 Moulton Street
-//  Cambridge, MA 02138
-//  (617) 873-8000
-// 
-//  Copyright (C) BBNT Solutions LLC. All rights reserved.
-// 
-// </copyright>
-// **********************************************************************
-// 
-// $Source$
-// $RCSfile$
-// $Revision: 184 $
-// $Date: 2008-09-16 16:17:21 +0200 (Tue, 16 Sep 2008) $
-// $Author: axel.uhl $
-// 
-// **********************************************************************
-
 package com.sap.sailing.domain.common.quadtree;
 
 import java.io.Serializable;
@@ -32,12 +10,9 @@ import com.sap.sailing.domain.common.quadtree.impl.Bounds;
 import com.sap.sailing.domain.common.quadtree.impl.QuadTreeNode;
 
 /**
- * The QuadTree lets you organize objects in a grid, that redefines itself and focuses more gridding when more objects
- * appear in a certain area.
- * <p>
- * 
- * Note that this class is not thread safe. If multiple threads can access the same instance concurrently, callers have
- * to ensure proper synchronization. Concurrent reads are permissible while any write should block all other operations.
+ * A spatial data structure that provides efficient (O(log n)) access to nearest neighbors and
+ * to objects in a certain radius around another object. The location of objects is provided as
+ * {@link Position}.
  * 
  * @param <T>
  *            type of object stored by coordinates
