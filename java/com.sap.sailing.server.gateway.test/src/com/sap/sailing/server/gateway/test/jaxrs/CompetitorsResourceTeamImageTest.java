@@ -33,7 +33,7 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.filestorage.testsupport.AmazonS3TestSupport;
 
-public class TeamImageTest extends AbstractJaxRsApiTest {    
+public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {    
     private static final String name = "Heiko KRÖGER";
     private static final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
     private static final String boatClassName = "49er";

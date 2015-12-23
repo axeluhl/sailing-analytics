@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -121,6 +120,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
 import com.sap.sailing.gwt.ui.shared.racemap.WindStreamletsRaceboardOverlay;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -140,6 +140,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener,
         RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+    private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
     
@@ -291,6 +292,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final CompetitorSelectionProvider competitorSelection;
     
+    private final RaceCompetitorSet raceCompetitorSet;
+    
     /**
      * Used to check if the first initial zoom to the mark markers was already done.
      */
@@ -423,6 +426,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         windSensorOverlays = new HashMap<WindSource, WindSensorOverlay>();
         courseMarkOverlays = new HashMap<String, CourseMarkOverlay>();
         this.competitorSelection = competitorSelection;
+        this.raceCompetitorSet = new RaceCompetitorSet(competitorSelection);
         competitorSelection.addCompetitorSelectionChangeListener(this);
         settings = new RaceMapSettings();
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
@@ -877,8 +881,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         // overlap if it happens after this update.
         asyncActionsExecutor.execute(new GetRaceMapDataAction(sailingService, competitorsByIdAsString,
             race, useNullAsTimePoint() ? null : newTime, fromTimesForQuickCall, toTimesForQuickCall, /* extrapolate */true,
-                    (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null)), GET_RACE_MAP_DATA_CATEGORY,
-                getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
+                    (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
+                    raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID()),
+            GET_RACE_MAP_DATA_CATEGORY,
+            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
@@ -919,6 +925,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     // process response only if not received out of order
                     if (startedProcessingRequestID < requestID) {
                         startedProcessingRequestID = requestID;
+                        if (raceMapDataDTO.raceCompetitorIdsAsStrings != null) {
+                            try {
+                                raceCompetitorSet.setIdsAsStringsOfCompetitorsInRace(raceMapDataDTO.raceCompetitorIdsAsStrings);
+                            } catch (Exception e) {
+                                GWT.log("Error trying to update competitor set for race "+raceIdentifier.getRaceName()+
+                                        " in regatta "+raceIdentifier.getRegattaName(), e);
+                            }
+                        }
                         quickRanks = raceMapDataDTO.quickRanks;
                         competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber =
                                 raceMapDataDTO.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
@@ -1236,7 +1250,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 if (fixesAndTails.hasFixesFor(competitorDTO)) {
                     Polyline tail = fixesAndTails.getTail(competitorDTO);
                     if (tail == null) {
-                        tailPreparer.run(); // presumably a no-op, but you never know...
+                        if (tailPreparer != null) { // could be we didn't receive boat position data for this competitor; then no tailPreparer will have been created
+                            tailPreparer.run(); // presumably a no-op, but you never know...
+                        }
                         tail = fixesAndTails.createTailAndUpdateIndices(competitorDTO, tailsFromTime, tailsToTime, this);
                     } else {
                         fixesAndTails.updateTail(tail, competitorDTO, tailsFromTime, tailsToTime,
@@ -2080,15 +2096,30 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return vPanel;
     }
 
-    // FIXME bug3378: only fetch those competitors relevant to the race displayed by this RaceMap; see http://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3378#c20
-    // could be a method on CompetitorSelectionProvider, parameterized by a RaceIdentifier, and if nothing is known about the race association, all competitors are returned as a safe default
+    /**
+     * @return the {@link CompetitorSelectionProvider#getSelectedCompetitors()} if
+     *         {@link RaceMapSettings#isShowOnlySelectedCompetitors() only selected competitors are to be shown}, the
+     *         {@link CompetitorSelectionProvider#getFilteredCompetitors() filtered competitors} otherwise. In both cases,
+     *         if we have {@link RaceCompetitorSet information about the competitors participating} in this map's race,
+     *         the result set is reduced to those, no matter if other regatta participants would otherwise have been in
+     *         the result set
+     */
     private Iterable<CompetitorDTO> getCompetitorsToShow() {
-        Iterable<CompetitorDTO> result;
+        final Set<CompetitorDTO> result = new HashSet<>();
         Iterable<CompetitorDTO> selection = competitorSelection.getSelectedCompetitors();
+        final Set<String> raceCompetitorIdsAsString = raceCompetitorSet.getIdsOfCompetitorsParticipatingInRaceAsStrings();
         if (!settings.isShowOnlySelectedCompetitors() || Util.isEmpty(selection)) {
-            result = competitorSelection.getFilteredCompetitors();
+            for (final CompetitorDTO filteredCompetitor : competitorSelection.getFilteredCompetitors()) {
+                if (raceCompetitorIdsAsString == null || raceCompetitorIdsAsString.contains(filteredCompetitor.getIdAsString())) {
+                    result.add(filteredCompetitor);
+                }
+            }
         } else {
-            result = selection;
+            for (final CompetitorDTO selectedCompetitor : selection) {
+                if (raceCompetitorIdsAsString == null || raceCompetitorIdsAsString.contains(selectedCompetitor.getIdAsString())) {
+                    result.add(selectedCompetitor);
+                }
+            }
         }
         return result;
     }
@@ -2590,10 +2621,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         options.setGeodesic(true);
         options.setStrokeOpacity(1.0);
         boolean noCompetitorSelected = Util.isEmpty(competitorSelection.getSelectedCompetitors());
-        if (isHighlighted || noCompetitorSelected) {
+        if (isHighlighted || noCompetitorSelected || getSettings().isShowOnlySelectedCompetitors()) {
             options.setStrokeColor(competitorSelection.getColor(competitor, raceIdentifier).getAsHtml());
         } else {
-            options.setStrokeColor(CssColor.make(200, 200,  200).toString());
+            options.setStrokeColor(LOWLIGHTED_TAIL_COLOR.getAsHtml());
         }
         if (isHighlighted) {
             options.setStrokeWeight(2);
