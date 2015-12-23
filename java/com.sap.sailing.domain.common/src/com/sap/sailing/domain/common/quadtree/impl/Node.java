@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gwt.dev.util.collect.HashSet;
+import java.util.HashSet;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
