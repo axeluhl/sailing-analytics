@@ -216,11 +216,15 @@ public class Node<T> {
      * return it. Otherwise, the children are traversed. For the first child, the nearest key is determined recursively.
      * Other children only need to be traversed if their bounds are closer to <code>point</code> than the key found so
      * far.
+     * 
+     * @param withinDistance
+     *            a key is only considered if it has less than this {@link QuadTree#getLatLngDistance(Position, Position)
+     *            distance} to <code>point</code>
      */
-    public Map.Entry<Position, T> get(Position point) {
+    public Map.Entry<Position, T> get(Position point, double withinDistance) {
         assert (items == null) != (children == null);
         Map.Entry<Position, T> result = null;
-        double minDistance = Double.MAX_VALUE;
+        double minDistance = withinDistance;
         if (items != null) {
             for (final Entry<Position, T> item : items.entrySet()) {
                 double itemDistanceToPoint = QuadTree.getLatLngDistance(point, item.getKey());
@@ -247,6 +251,21 @@ public class Node<T> {
             }
         }
         return result;
+    }
+
+    /**
+     * Get the value nearest to <code>point</code>. If the node is empty, <code>null</code> is returned. Distance is
+     * calculated using the method {@link QuadTree#getLatLngDistance(Position, Position)} which is an approximation
+     * only, based on Euklidian geometry with the latitude/longitude values.
+     * <p>
+     * 
+     * If this is a leaf node, the nearest key by the definition above is used to determine the corresponding value and
+     * return it. Otherwise, the children are traversed. For the first child, the nearest key is determined recursively.
+     * Other children only need to be traversed if their bounds are closer to <code>point</code> than the key found so
+     * far.
+     */
+    public Map.Entry<Position, T> get(Position point) {
+        return get(point, Double.MAX_VALUE);
     }
 
     /**
@@ -283,11 +302,6 @@ public class Node<T> {
             result = QuadTree.getLatLngDistance(point, new DegreePosition(latDegNearestOnBorder, lngDegNearestOnBorder));
         }
         return result;
-    }
-
-    public Map.Entry<Position, T> get(Position point, double withinDistance) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     /**
