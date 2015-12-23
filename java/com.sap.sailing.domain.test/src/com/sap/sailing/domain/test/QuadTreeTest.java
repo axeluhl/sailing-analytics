@@ -25,8 +25,8 @@ public class QuadTreeTest {
     private class GLatLngQuadTree extends QuadTree<Position> {
         private static final long serialVersionUID = 386138477174564517L;
 
-        public GLatLngQuadTree(Position southWest, Position northEast, int i) {
-            super(southWest, northEast, i);
+        public GLatLngQuadTree(Position southWest, Position northEast, int maxItems) {
+            super(southWest, northEast, maxItems);
         }
 
         public void put(Position x) {
@@ -1301,6 +1301,19 @@ public class QuadTreeTest {
         }
         long duration = System.currentTimeMillis() - start;
         performanceReportCase.addMeasurement(new Measurement("removePosition_"+ITERATIONS+"_millis", duration));
+    }
+    
+    @Test
+    public void testDistanceAcrossDateline() {
+        GLatLngQuadTree myQuadtree = new GLatLngQuadTree(new DegreePosition(-10, 170), new DegreePosition(10, -170), /* maxItems */3);
+        final DegreePosition nearToDateline = new DegreePosition(0, 179.5);
+        final DegreePosition farFromDateline = new DegreePosition(0, -175);
+        myQuadtree.put(nearToDateline);
+        myQuadtree.put(farFromDateline);
+        final Position nearestToDatelineWest = myQuadtree.get(new DegreePosition(0, 179.9));
+        final Position nearestToDatelineEast = myQuadtree.get(new DegreePosition(0, -179.9));
+        assertSame(nearToDateline, nearestToDatelineWest);
+        assertSame(nearToDateline, nearestToDatelineEast);
     }
     
     @AfterClass
