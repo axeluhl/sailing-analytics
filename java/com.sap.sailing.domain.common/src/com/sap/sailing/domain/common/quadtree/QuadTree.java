@@ -93,8 +93,9 @@ public class QuadTree<T> implements Serializable {
      */
     public static double getLatLngDistance(Position a, Position b) {
         final double dy = a.getLatDeg() - b.getLatDeg();
-        final double dx = a.getLngDeg() - b.getLngDeg();
-        double distance = Math.sqrt(dy * dy + dx * dx);
+        final double dx = (a.getLngDeg() - b.getLngDeg());
+        final double dxWrapped = Math.abs(dx) <= 180 ? dx : 360.-Math.abs(dx);
+        double distance = Math.sqrt(dy * dy + dxWrapped * dxWrapped);
         return distance;
     }
 }
