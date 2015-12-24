@@ -15,10 +15,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sailing.domain.common.quadtree.impl.Node;
 import com.sap.sailing.domain.test.measurements.Measurement;
 import com.sap.sailing.domain.test.measurements.MeasurementCase;
 import com.sap.sailing.domain.test.measurements.MeasurementXMLFile;
@@ -1334,6 +1336,31 @@ public class QuadTreeTest {
         final double dNearReverse = QuadTree.getLatLngDistance(dateLine, nearToDateline);
         final double dFarReverse = QuadTree.getLatLngDistance(dateLine, farFromDateline);
         assertTrue(dNearReverse < dFarReverse);
+    }
+    
+    private static class NodeWithPublicGetDistance<T> extends Node<T> {
+        public NodeWithPublicGetDistance(Bounds bounds, int maxItems) {
+            super(bounds, maxItems);
+        }
+
+        @Override
+        public double getDistance(Position point) {
+            return super.getDistance(point);
+        }
+    }
+    
+    @Test
+    public void testNodeDistance() {
+        /*
+        {SW: (50.625,-5.625), NE: (53.4375,0.0)}: 15 items in node, 0 child nodes
+        (51.0,-6.0)
+        */
+        NodeWithPublicGetDistance<String> node = new NodeWithPublicGetDistance<>(new BoundsImpl(new DegreePosition(50.625,-5.625), new DegreePosition(53.4375,0.0)),
+                /* maxItems */ 20);
+        Position p = new DegreePosition(51.0, -6.0);
+        // lat is in bounds; lon is nearby, -5.625+6.0 should be the distance
+        final double expectedDistance = -5.625 + 6.0;
+        assertEquals(expectedDistance, node.getDistance(p), 0.0001);
     }
     
     @AfterClass

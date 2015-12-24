@@ -239,7 +239,7 @@ public class Node<T> {
                 // If we have a possible result already, only investigate the child node if it is nearer to point
                 // than the result candidate
                 if (result == null || child.getDistance(result.getKey()) < minDistance) {
-                    final Entry<Position, T> childResult = child.get(point);
+                    final Entry<Position, T> childResult = child.get(point, withinDistance);
                     if (childResult != null) {
                         double childDistance = QuadTree.getLatLngDistance(childResult.getKey(), point);
                         if (childDistance < minDistance) {
@@ -274,7 +274,7 @@ public class Node<T> {
      * {@link Bounds#contains(Position) contained} in this node's {@link #bounds}, the distance returned is
      * <code>0</code>. Otherwise, the distance to the nearest border of this node's {@link #bounds} is determined.
      */
-    private double getDistance(Position point) {
+    protected double getDistance(Position point) {
         final double result;
         if (bounds.contains(point)) {
             result = 0;
@@ -287,13 +287,14 @@ public class Node<T> {
             // copied from this Node's bounds. If these bounds contain point, use point's longitude as it is spanned by
             // this node's bounds. Otherwise, extend the bounds to contain point, then check whether the west or east border
             // was changed to contain point; point was closer to the border that was changed to include point
-            Bounds boundsAtPointLat = new BoundsImpl(new DegreePosition(point.getLatDeg(), bounds.getSouthWest().getLngDeg()),
+            final Bounds boundsAtPointLat = new BoundsImpl(new DegreePosition(point.getLatDeg(), bounds.getSouthWest().getLngDeg()),
                                                        new DegreePosition(point.getLatDeg(), bounds.getNorthEast().getLngDeg()));
             final double lngDegNearestOnBorder;
             if (boundsAtPointLat.contains(point)) {
                 lngDegNearestOnBorder = point.getLngDeg();
             } else {
-                if (boundsAtPointLat.getSouthWest().getLngDeg() == bounds.getSouthWest().getLngDeg()) {
+                final Bounds boundsAtPointLatExtendedToIncludePoint = boundsAtPointLat.extend(point);
+                if (boundsAtPointLatExtendedToIncludePoint.getSouthWest().getLngDeg() == bounds.getSouthWest().getLngDeg()) {
                     lngDegNearestOnBorder = bounds.getNorthEast().getLngDeg();
                 } else {
                     lngDegNearestOnBorder = bounds.getSouthWest().getLngDeg();
@@ -332,5 +333,11 @@ public class Node<T> {
             result = Collections.emptySet();
         }
         return result;
+    }
+    
+    @Override
+    public String toString() {
+        return ""+bounds+": "+(items==null?0:items.size())+" items in node, "+
+                (children==null?0:children.length)+" child nodes";
     }
 }
