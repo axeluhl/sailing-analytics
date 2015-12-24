@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.common.quadtree.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,7 +13,6 @@ import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 
 /**
  * A node in a {@link QuadTree}. There may be internal nodes that have no elements in them but have exactly
@@ -269,37 +266,54 @@ public class Node<T> {
                 }
             }
         } else {
-//            // sort children by proximity / containing-relationship to point to find best result more quickly,
-//            // avoiding scanning through large / deep nodes that may not even contain the point
-//            @SuppressWarnings("unchecked")
-//            final Pair<Node<T>, Double>[] childDistances = (Pair<Node<T>, Double>[]) new Pair<?,?>[4];
-//            for (int i=0; i<4; i++) {
-//                childDistances[i] = new Pair<>(children[i], children[i].getDistance(point));
-//            }
-//            Arrays.sort(childDistances, new Comparator<Pair<Node<T>, Double>>() {
-//                @Override
-//                public int compare(Pair<Node<T>, Double> o1, Pair<Node<T>, Double> o2) {
-//                    return Double.compare(o1.getB(),o2.getB());
-//                }
-//            });
+            // Traverse children in order of ascending distance, making it more likely to find good, near
+            // candidates early, hence enabling skipping more children, investigating fewer items. However,
+            // doing the full java.util.Collections / Arrays sort thing with Comparators and such is way too
+            // expensive as measurements have shown, and the overhead for just the four elements is too high.
+            // It is much more efficient to traverse the small children array multiple times and in each pass
+            // remembering the next minimal child distance so that during the next pass those children can be
+            // inspected. This process repeats until all children have been handled, taking at most four passes.
+            final double[] childDistanceToPoint = new double[4];
+            double minChildDistanceToPoint = Double.MAX_VALUE; // minimal distance of those children not yet done
             for (int i=0; i<4; i++) {
-//                final Node<T> child = childDistances[i].getA();
-                final Node<T> child = children[i];
-                // If we have a possible result already, only investigate the child node if it is nearer to point
-                // than the result candidate and not an empty leaf node (which can be checked more quickly than
-                // performing the rather expensive distance calculation)
-                if (!child.isEmptyLeaf() && child.getDistance(point) < minDistance) {
-                    assert minDistance <= withinDistance;
-                    final GetResult<T> childResult = child.get(point, minDistance);
-                    if (childResult != null) {
-                        if (childResult.getDistance() < minDistance) {
-                            result = childResult;
-                            minDistance = childResult.getDistance();
+                childDistanceToPoint[i] = children[i].getDistance(point);
+                if (childDistanceToPoint[i] < minChildDistanceToPoint) {
+                    minChildDistanceToPoint = childDistanceToPoint[i];
+                }
+            }
+            final boolean done[] = new boolean[4]; // have we handled that child already (skipped or searched)?
+            int doneCount = 0;
+            while (doneCount < 4) {
+                double nextMinChildDistanceToPoint = Double.MAX_VALUE;
+                for (int i=0; doneCount<4 && i<4; i++) {
+                    if (!done[i]) {
+                        if (childDistanceToPoint[i] == minChildDistanceToPoint) {
+                            final Node<T> child = children[i];
+                            // If we have a possible result already, only investigate the child node if it is nearer to point
+                            // than the result candidate and not an empty leaf node (which can be checked more quickly than
+                            // performing the rather expensive distance calculation)
+                            if (!child.isEmptyLeaf() && childDistanceToPoint[i] < minDistance) {
+                                assert minDistance <= withinDistance;
+                                final GetResult<T> childResult = child.get(point, minDistance);
+                                if (childResult != null) {
+                                    if (childResult.getDistance() < minDistance) {
+                                        result = childResult;
+                                        minDistance = childResult.getDistance();
+                                    }
+                                }
+                            } else {
+                                skippedNodes++;
+                            }
+                            done[i] = true;
+                            doneCount++;
+                        } else {
+                            if (childDistanceToPoint[i] < nextMinChildDistanceToPoint) {
+                                nextMinChildDistanceToPoint = childDistanceToPoint[i]; // the distance to handle in the next pass
+                            }
                         }
                     }
-                } else {
-                    skippedNodes++;
                 }
+                minChildDistanceToPoint = nextMinChildDistanceToPoint;
             }
         }
         return result;
