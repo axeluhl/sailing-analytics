@@ -393,9 +393,14 @@ public class Node<T> {
         if (this.bounds.intersects(bounds)) {
             Set<T> preResult = new HashSet<>();
             if (items != null) {
-                for (final Entry<Position, T> item : items.entrySet()) {
-                    if (bounds.contains(item.getKey())) {
-                        preResult.add(item.getValue());
+                if (bounds.contains(this.bounds)) {
+                    // all items must be contained, so no per-item check is required
+                    preResult.addAll(items.values());
+                } else {
+                    for (final Entry<Position, T> item : items.entrySet()) {
+                        if (bounds.contains(item.getKey())) {
+                            preResult.add(item.getValue());
+                        }
                     }
                 }
             } else {
