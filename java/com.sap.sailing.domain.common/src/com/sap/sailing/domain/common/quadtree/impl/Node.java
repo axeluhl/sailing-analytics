@@ -180,7 +180,7 @@ public class Node<T> {
         final Position southCenter = new DegreePosition(bounds.getSouthWest().getLatDeg(),
                 (bounds.getNorthEast().getLngDeg() + bounds.getSouthWest().getLngDeg()) / 2. -
                 // adjust for date line crossing if necessary
-                        bounds.getNorthEast().getLngDeg() >= bounds.getSouthWest().getLngDeg() ? 0. : 360.);
+                        (bounds.getNorthEast().getLngDeg() >= bounds.getSouthWest().getLngDeg() ? 0. : 360.));
         final Position middleCenter = new DegreePosition(middleWest.getLatDeg(), southCenter.getLngDeg());
         final Position middleEast = new DegreePosition(middleWest.getLatDeg(), bounds.getNorthEast().getLngDeg());
         final Position northCenter = new DegreePosition(bounds.getNorthEast().getLatDeg(), southCenter.getLngDeg());
