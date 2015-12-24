@@ -1,18 +1,21 @@
 package com.sap.sailing.domain.common.quadtree.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import java.util.HashSet;
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * A node in a {@link QuadTree}. There may be internal nodes that have no elements in them but have exactly
@@ -23,6 +26,11 @@ import com.sap.sse.common.Util;
  * @param <T>
  */
 public class Node<T> {
+    // TODO remove when done
+    public static int visitedItems;
+    public static int visitedNodes;
+    public static int skippedNodes;
+    
     /**
      * Either an array of exactly four child nodes which are then all non-<code>null</code>, or <code>null</code>,
      * meaning that this node is a child node, having no children but potentially having items. A node that has children
@@ -205,6 +213,31 @@ public class Node<T> {
             children = null;
         }
     }
+    
+    public static class GetResult<T> {
+        private final Position position;
+        private final T value;
+        private final double distance;
+        public GetResult(Position position, T value, double distance) {
+            super();
+            this.position = position;
+            this.value = value;
+            this.distance = distance;
+        }
+        public Position getPosition() {
+            return position;
+        }
+        public T getValue() {
+            return value;
+        }
+        public double getDistance() {
+            return distance;
+        }
+        @Override
+        public String toString() {
+            return "GetResult [position=" + position + ", value=" + value + ", distance=" + distance + "]";
+        }
+    }
 
     /**
      * Get the value nearest to <code>point</code>. If the node is empty, <code>null</code> is returned. Distance is
@@ -221,32 +254,51 @@ public class Node<T> {
      *            a key is only considered if it has less than this {@link QuadTree#getLatLngDistance(Position, Position)
      *            distance} to <code>point</code>
      */
-    public Map.Entry<Position, T> get(Position point, double withinDistance) {
+    public GetResult<T> get(Position point, double withinDistance) {
         assert (items == null) != (children == null);
-        Map.Entry<Position, T> result = null;
+        visitedNodes++;
+        GetResult<T> result = null;
         double minDistance = withinDistance;
         if (items != null) {
             for (final Entry<Position, T> item : items.entrySet()) {
                 double itemDistanceToPoint = QuadTree.getLatLngDistance(point, item.getKey());
+                visitedItems++;
                 if (itemDistanceToPoint < minDistance) {
-                    result = item;
+                    result = new GetResult<T>(item.getKey(), item.getValue(), itemDistanceToPoint);
                     minDistance = itemDistanceToPoint;
                 }
             }
         } else {
+//            // sort children by proximity / containing-relationship to point to find best result more quickly,
+//            // avoiding scanning through large / deep nodes that may not even contain the point
+//            @SuppressWarnings("unchecked")
+//            final Pair<Node<T>, Double>[] childDistances = (Pair<Node<T>, Double>[]) new Pair<?,?>[4];
+//            for (int i=0; i<4; i++) {
+//                childDistances[i] = new Pair<>(children[i], children[i].getDistance(point));
+//            }
+//            Arrays.sort(childDistances, new Comparator<Pair<Node<T>, Double>>() {
+//                @Override
+//                public int compare(Pair<Node<T>, Double> o1, Pair<Node<T>, Double> o2) {
+//                    return Double.compare(o1.getB(),o2.getB());
+//                }
+//            });
             for (int i=0; i<4; i++) {
+//                final Node<T> child = childDistances[i].getA();
                 final Node<T> child = children[i];
                 // If we have a possible result already, only investigate the child node if it is nearer to point
-                // than the result candidate
-                if (result == null || child.getDistance(result.getKey()) < minDistance) {
-                    final Entry<Position, T> childResult = child.get(point, withinDistance);
+                // than the result candidate and not an empty leaf node (which can be checked more quickly than
+                // performing the rather expensive distance calculation)
+                if (!child.isEmptyLeaf() && child.getDistance(point) < minDistance) {
+                    assert minDistance <= withinDistance;
+                    final GetResult<T> childResult = child.get(point, minDistance);
                     if (childResult != null) {
-                        double childDistance = QuadTree.getLatLngDistance(childResult.getKey(), point);
-                        if (childDistance < minDistance) {
+                        if (childResult.getDistance() < minDistance) {
                             result = childResult;
-                            minDistance = childDistance;
+                            minDistance = childResult.getDistance();
                         }
                     }
+                } else {
+                    skippedNodes++;
                 }
             }
         }
@@ -264,8 +316,17 @@ public class Node<T> {
      * Other children only need to be traversed if their bounds are closer to <code>point</code> than the key found so
      * far.
      */
-    public Map.Entry<Position, T> get(Position point) {
+    public GetResult<T> get(Position point) {
         return get(point, Double.MAX_VALUE);
+    }
+    
+    /**
+     * To avoid expensive distance checks, a shortcut can be to check whether this node is an empty
+     * leaf node. This is the case if {@link #items} is not <code>null</code> (indicating a leaf node)
+     * but empty.
+     */
+    private boolean isEmptyLeaf() {
+        return items != null && items.isEmpty();
     }
 
     /**

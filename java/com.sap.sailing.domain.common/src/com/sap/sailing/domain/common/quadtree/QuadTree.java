@@ -1,13 +1,13 @@
 package com.sap.sailing.domain.common.quadtree;
 
 import java.io.Serializable;
-import java.util.Map.Entry;
 
 import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.impl.Node;
+import com.sap.sailing.domain.common.quadtree.impl.Node.GetResult;
 
 /**
  * A spatial data structure that provides efficient (O(log n)) access to nearest neighbors and
@@ -58,7 +58,7 @@ public class QuadTree<T> implements Serializable {
      * based on Euklidian geometry with the latitude/longitude values.
      */
     public T get(Position point) {
-        final Entry<Position, T> result = root.get(point);
+        final GetResult<T> result = root.get(point);
         return result == null ? null : result.getValue();
     }
 
@@ -76,7 +76,7 @@ public class QuadTree<T> implements Serializable {
      * @return the object that was found, null if nothing is within the maximum distance.
      */
     public T get(Position point, double withinDistance) {
-        final Entry<Position, T> result = root.get(point, withinDistance);
+        final GetResult<T> result = root.get(point, withinDistance);
         return result == null ? null : result.getValue();
     }
 

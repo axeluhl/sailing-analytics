@@ -55,7 +55,7 @@ public class QuadTreeTest {
     @Before
     public void setUp() {
         quadtree = new GLatLngQuadTree(new DegreePosition(49,
-                7), new DegreePosition(51, 9), /* maxItems */30);
+                7), new DegreePosition(51, 9), /* maxItems */20);
         quadtree.put(new DegreePosition(50.88505000000001, 7.995520000000001));
         quadtree.put(new DegreePosition(50.884930000000004, 7.996440000000001));
         quadtree.put(new DegreePosition(50.884840000000004, 7.99666));
@@ -1271,6 +1271,7 @@ public class QuadTreeTest {
         }
         long duration = System.currentTimeMillis() - start;
         performanceReportCase.addMeasurement(new Measurement("findNearest_"+ITERATIONS+"_millis", duration));
+        System.out.println("visitedItems: "+Node.visitedItems+", visitedNodes: "+Node.visitedNodes+", skippedNodes: "+Node.skippedNodes);
     }
     
     @Test
