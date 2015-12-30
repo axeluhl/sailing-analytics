@@ -14,11 +14,23 @@ public class CompositeSettings extends AbstractSettings {
         }
     }
     
-    public static class ComponentLifecycleAndSettingsPair<SettingsType extends Settings> extends Util.Pair<ComponentLifecycle<?, SettingsType, ?>, SettingsType> {
-        private static final long serialVersionUID = -7497728678978241537L;
+    public static class ComponentLifecycleAndSettingsPair<SettingsType extends Settings> {
+        private final ComponentLifecycle<?, SettingsType, ?> componentLifecycle;
+        private final SettingsType settings;
 
-        public ComponentLifecycleAndSettingsPair(ComponentLifecycle<?, SettingsType, ?> a, SettingsType b) {
-            super(a, b);
+        public ComponentLifecycleAndSettingsPair(ComponentLifecycle<?, SettingsType, ?> componentLifecycle,
+                SettingsType settings) {
+            super();
+            this.componentLifecycle = componentLifecycle;
+            this.settings = settings;
+        }
+
+        public ComponentLifecycle<?, SettingsType, ?> getA() {
+            return componentLifecycle;
+        }
+        
+        public SettingsType getB() {
+            return settings;
         }
     }
     

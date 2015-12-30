@@ -9,11 +9,9 @@ import com.sap.sse.common.settings.Settings;
  * @param <S> the settings type
  * @param <W> the settings dialog component type
  */
-public interface ComponentLifecycle<C extends Component<S>, /*A extends ComponentConstructorArgs<C, S>,*/ S extends Settings, SDC extends SettingsDialogComponent<S>> {
+public interface ComponentLifecycle<C extends Component<S>, S extends Settings, SDC extends SettingsDialogComponent<S>> {
 
     SDC getSettingsDialogComponent(S settings);
-
-//    C getOrCreateComponent(A contructorArgs);
 
     C getComponent();
 

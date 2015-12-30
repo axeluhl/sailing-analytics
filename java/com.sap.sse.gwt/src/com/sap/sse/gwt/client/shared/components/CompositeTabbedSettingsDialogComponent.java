@@ -3,7 +3,6 @@ package com.sap.sse.gwt.client.shared.components;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TabPanel;
