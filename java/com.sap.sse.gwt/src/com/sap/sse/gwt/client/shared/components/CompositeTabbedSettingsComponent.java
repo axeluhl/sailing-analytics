@@ -51,9 +51,9 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
     }
 
     private <SettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettingsPair<SettingsType> componentLifecycleAndSettings) {
-        ComponentLifecycle<?, SettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getA();
+        ComponentLifecycle<?, SettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getComponentLifecycle();
         if(componentLifecycle.getComponent() != null) {
-            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getB());
+            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getSettings());
         } else {
             // ??? store in lifecycle
         }

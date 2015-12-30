@@ -34,9 +34,9 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     private <SettingsType extends Settings> String getErrorMessage(ComponentLifecycleAndSettingsPair<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getA());
+        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponentLifecycle());
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(componentAndSettings.getB());
+            errorMessage = validator.getErrorMessage(componentAndSettings.getSettings());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
                 errorMessage += "; ";
             }

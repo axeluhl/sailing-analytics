@@ -52,9 +52,9 @@ public abstract class AbstractPerspective<SettingsType extends Settings> impleme
     }
 
     private <ComponentSettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettingsPair<ComponentSettingsType> componentLifecycleAndSettings) {
-        ComponentLifecycle<?, ComponentSettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getA();
+        ComponentLifecycle<?, ComponentSettingsType, ?> componentLifecycle = componentLifecycleAndSettings.getComponentLifecycle();
         if(componentLifecycle.getComponent() != null) {
-            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getB());
+            componentLifecycle.getComponent().updateSettings(componentLifecycleAndSettings.getSettings());
         } else {
             // ??? store in lifecycle
         }

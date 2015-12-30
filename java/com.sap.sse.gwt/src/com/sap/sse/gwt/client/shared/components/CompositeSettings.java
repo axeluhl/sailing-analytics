@@ -25,11 +25,11 @@ public class CompositeSettings extends AbstractSettings {
             this.settings = settings;
         }
 
-        public ComponentLifecycle<?, SettingsType, ?> getA() {
+        public ComponentLifecycle<?, SettingsType, ?> getComponentLifecycle() {
             return componentLifecycle;
         }
         
-        public SettingsType getB() {
+        public SettingsType getSettings() {
             return settings;
         }
     }
@@ -60,8 +60,8 @@ public class CompositeSettings extends AbstractSettings {
     public <SettingsType extends Settings> SettingsType getSettingsForType(Class<SettingsType> settingsType) {
         SettingsType result = null;
         for(ComponentLifecycleAndSettingsPair<?> componentAndSettings: settingsPerComponentLifecycle) {
-            if(componentAndSettings.getB().getClass().getName().equals(settingsType.getName())) {
-                result = (SettingsType) componentAndSettings.getB();
+            if(componentAndSettings.getSettings().getClass().getName().equals(settingsType.getName())) {
+                result = (SettingsType) componentAndSettings.getSettings();
                 break;
             }
         }
