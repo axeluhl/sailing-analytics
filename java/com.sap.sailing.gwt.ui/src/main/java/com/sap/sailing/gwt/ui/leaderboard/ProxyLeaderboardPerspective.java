@@ -15,10 +15,10 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspective;
 public class ProxyLeaderboardPerspective extends AbstractPerspective<LeaderboardPerspectiveSettings> {
     private LeaderboardPerspectiveSettings perspectiveSettings;
     
-    public ProxyLeaderboardPerspective(LeaderboardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings) {
+    public ProxyLeaderboardPerspective(LeaderboardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard) {
         super();
         this.perspectiveSettings = perspectiveSettings;
-        componentLifecycles.add(new LeaderboardPanelLifecycle(/*leaderboard, */StringMessages.INSTANCE));
+        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, StringMessages.INSTANCE));
     }
 
     @Override

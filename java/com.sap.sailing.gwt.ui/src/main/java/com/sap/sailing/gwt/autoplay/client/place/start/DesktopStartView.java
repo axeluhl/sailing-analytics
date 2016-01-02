@@ -24,22 +24,14 @@ import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
-import com.sap.sailing.gwt.ui.client.shared.charts.AbstractCompetitorRaceChart;
-import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
@@ -128,9 +120,8 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        leaderboardPerspective = new ProxyLeaderboardPerspective(new LeaderboardPerspectiveSettings(), leaderboard, createDefaultLeaderboardSettings(leaderboard));
-        raceboardPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard, 
-                createDefaultLeaderboardSettings(leaderboard), createDefaultMultiCompetitorRaceChartSettings(), new MediaPlayerSettings());
+        leaderboardPerspective = new ProxyLeaderboardPerspective(new LeaderboardPerspectiveSettings(), leaderboard);
+        raceboardPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard);
         
         perspectiveSettings.clear();
     }
@@ -248,23 +239,6 @@ public class DesktopStartView extends Composite implements StartView {
         }
     }
 
-    private MultiCompetitorRaceChartSettings createDefaultMultiCompetitorRaceChartSettings() {
-        ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
-        DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
-        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType);
-    }
-    
-    private LeaderboardSettings createDefaultLeaderboardSettings(AbstractLeaderboardDTO leaderboard) {
-        List<String> namesOfRaceColumnsToShow = new ArrayList<String>();
-        for (RaceColumnDTO raceColumn : leaderboard.getRaceList()) {
-            namesOfRaceColumnsToShow.add(raceColumn.getName());
-        }
-        return LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
-                namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                false, /* showRegattaRank */ true, /*showCompetitorSailIdColumns*/ true,
-                /*showCompetitorFullNameColumn*/ true);
-    }
-    
     private String getSelectedLocale() {
         String result = null;
         int selectedIndex = localeSelectionBox.getSelectedIndex();

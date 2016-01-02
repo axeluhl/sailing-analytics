@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -13,28 +14,25 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     }
 
     @Override
-    public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(
-            MultiCompetitorRaceChartSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+    public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
+        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, true);
     }
 
     @Override
     public MultiCompetitorRaceChart getComponent() {
-        // TODO Auto-generated method stub
         return component;
     }
 
     @Override
     public MultiCompetitorRaceChartSettings createDefaultSettings() {
-        // TODO Auto-generated method stub
-        return null;
+        ChartSettings chartSettings = new ChartSettings(AbstractCompetitorRaceChart.DEFAULT_STEPSIZE);
+        DetailType defaultDetailType = DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD;
+        return new MultiCompetitorRaceChartSettings(chartSettings, defaultDetailType);
     }
 
     @Override
     public MultiCompetitorRaceChartSettings cloneSettings(MultiCompetitorRaceChartSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return new MultiCompetitorRaceChartSettings(new ChartSettings(settings.getStepSize()), settings.getDetailType());
     }
 
     @Override
@@ -46,5 +44,4 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     public boolean hasSettings() {
         return true;
     }
-
 }

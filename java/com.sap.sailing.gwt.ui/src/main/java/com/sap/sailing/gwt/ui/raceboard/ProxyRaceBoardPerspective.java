@@ -4,13 +4,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
-import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspective;
@@ -23,15 +20,14 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspective;
 public class ProxyRaceBoardPerspective extends AbstractPerspective<RaceBoardPerspectiveSettings> {
     private RaceBoardPerspectiveSettings perspectiveSettings;
     
-    public ProxyRaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard, LeaderboardSettings defaultLeaderboardSettings,
-            MultiCompetitorRaceChartSettings defaultMultiCompetitorRaceChartSettings, MediaPlayerSettings defaultMediaPlayerSettings) {
+    public ProxyRaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard) {
         super();
         
         this.perspectiveSettings = perspectiveSettings;
         
         componentLifecycles.add(new RaceMapLifecycle(StringMessages.INSTANCE));
         componentLifecycles.add(new WindChartLifecycle(StringMessages.INSTANCE));
-        componentLifecycles.add(new LeaderboardPanelLifecycle(/*leaderboard, */StringMessages.INSTANCE));
+        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, StringMessages.INSTANCE));
         componentLifecycles.add(new MultiCompetitorRaceChartLifecycle(StringMessages.INSTANCE));
         componentLifecycles.add(new MediaPlayerLifecycle(StringMessages.INSTANCE));
     }

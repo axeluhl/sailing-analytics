@@ -14,8 +14,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
 
     @Override
     public WindChartSettingsDialogComponent getSettingsDialogComponent(WindChartSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return new WindChartSettingsDialogComponent(settings, stringMessages);
     }
 
     @Override
@@ -30,8 +29,9 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
 
     @Override
     public WindChartSettings cloneSettings(WindChartSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return new WindChartSettings(settings.isShowWindSpeedSeries(), settings.getWindSpeedSourcesToDisplay(),
+                settings.isShowWindDirectionsSeries(), settings.getWindDirectionSourcesToDisplay(),
+                settings.getResolutionInMilliseconds());
     }
 
     @Override
@@ -43,5 +43,4 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
     public boolean hasSettings() {
         return true;
     }
-
 }

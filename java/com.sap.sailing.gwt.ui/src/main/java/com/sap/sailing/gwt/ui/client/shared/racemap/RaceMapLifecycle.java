@@ -14,8 +14,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSett
     
     @Override
     public RaceMapSettingsDialogComponent getSettingsDialogComponent(RaceMapSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, false);
     }
 
     @Override
@@ -30,8 +29,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSett
 
     @Override
     public RaceMapSettings cloneSettings(RaceMapSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return new RaceMapSettings(settings);
     }
 
     @Override
@@ -43,5 +41,4 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSett
     public boolean hasSettings() {
         return true;
     }
-
 }
