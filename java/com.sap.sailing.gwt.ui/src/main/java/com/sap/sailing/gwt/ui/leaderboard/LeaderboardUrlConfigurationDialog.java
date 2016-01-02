@@ -116,13 +116,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
                     false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
-            leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), raceList, 
-                /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
-                /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
-                settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn(),
-                stringMessages);
+            leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings, raceList, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {
