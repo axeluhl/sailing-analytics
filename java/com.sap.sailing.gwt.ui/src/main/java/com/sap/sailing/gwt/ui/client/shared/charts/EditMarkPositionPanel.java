@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,8 +16,6 @@ import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
@@ -26,7 +23,7 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPositionPanel  extends AbsolutePanel implements Component<AbstractSettings>, RaceSelectionChangeListener {
+public class EditMarkPositionPanel  extends AbsolutePanel implements Component<AbstractSettings> {
     private final RaceMap raceMap;
     
     private Map<String, CourseMarkOverlay> courseMarkOverlays;
@@ -91,10 +88,6 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
                 }
             }));
         }
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {        
     }
 
     @Override
