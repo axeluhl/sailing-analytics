@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -18,10 +17,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class GateCreationDialog extends DataEntryDialog<GateDTO> {    
-    private final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marksWrapper;
+    private final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marksWrapper;
     private final TextBox name;
     private final StringMessages stringMessages;
     
@@ -42,7 +42,7 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
                 }, /* animationEnabled */ false, callback);
         this.stringMessages = stringMessages;
         name = createTextBox("");
-        marksWrapper = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
+        marksWrapper = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {

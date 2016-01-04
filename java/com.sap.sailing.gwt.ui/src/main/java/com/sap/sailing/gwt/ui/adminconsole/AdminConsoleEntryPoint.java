@@ -181,6 +181,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
                 sailingService, this, this, this, getStringMessages());
+        raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(raceLogTrackingEventManagementPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
