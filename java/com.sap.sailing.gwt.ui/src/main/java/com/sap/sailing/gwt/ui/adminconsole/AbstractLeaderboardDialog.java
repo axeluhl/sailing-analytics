@@ -25,7 +25,7 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
 
     @Override
     protected LeaderboardDescriptor getResult() {
-        leaderboardDescriptor.setName(nameTextBox.getValue());
+        leaderboardDescriptor.setName(nameTextBox.getValue().trim()); // avoid trailing blank issues; leaderboard names may appear in URLs
         leaderboardDescriptor.setDisplayName(displayNameTextBox.getValue().trim().isEmpty() ? null : displayNameTextBox.getValue());
         leaderboardDescriptor.setDiscardThresholds(discardThresholdBoxes==null?null:discardThresholdBoxes.getDiscardThresholds());
         return leaderboardDescriptor;

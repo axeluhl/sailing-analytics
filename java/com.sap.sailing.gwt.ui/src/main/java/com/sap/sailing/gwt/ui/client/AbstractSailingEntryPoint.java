@@ -11,12 +11,11 @@ public abstract class AbstractSailingEntryPoint extends AbstractSecureEntryPoint
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        
         EntryPointHelper.registerASyncService((ServiceDefTarget) sailingService, RemoteServiceMappingConstants.sailingServiceRemotePath);
     }
     
     @Override
     protected StringMessages createStringMessages() {
-        return GWT.create(StringMessages.class);
+        return StringMessages.INSTANCE;
     }
 }

@@ -7,13 +7,13 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 
 public abstract class AbstractCourseDesign implements CourseDesign{
-    Position startBoatPosition;
-    Double windSpeed;
-    Bearing windDirection;
-    PositionedMark pinEnd;
-    Position referencePoint;
-    Set<PositionedMark> courseDesignSpecificMarks = new HashSet<PositionedMark>();
-    String courseDesignDescription = "";
+    private Position startBoatPosition;
+    private Double windSpeed;
+    private Bearing windDirection;
+    private PositionedMark pinEnd;
+    private Position referencePoint;
+    private Set<PositionedMark> courseDesignSpecificMarks = new HashSet<PositionedMark>();
+    private String courseDesignDescription = "";
     
     @Override
     public String getCourseDesignDescription() {

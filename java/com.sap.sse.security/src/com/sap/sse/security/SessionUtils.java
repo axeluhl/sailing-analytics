@@ -168,4 +168,8 @@ public class SessionUtils {
         }
         return (Token) session.getAttribute(SESSION_REQUEST_TOKEN);
     }
+
+    public static Object getPrincipal() {
+        return SecurityUtils.getSubject().getPrincipal();
+    }
 }

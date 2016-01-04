@@ -7,7 +7,7 @@
     <g:HTMLPanel>
         <s:header.SAPHeader ui:field="sapHeader" />
         <div style="height:1em;" />
-		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Display language:</span>
 	        </div>
@@ -15,7 +15,7 @@
 				<g:ListBox ui:field="localeSelectionBox" />
 	        </div>
 		</div>
-		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Start browser in full screen mode:</span>
 	        </div>
@@ -23,7 +23,7 @@
 				<g:CheckBox ui:field="startInFullscreenModeBox" />
 	        </div>
 		</div>
-        <div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+        <div class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Event:</span>
 	        </div>
@@ -31,7 +31,7 @@
 				<g:ListBox ui:field="eventSelectionBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardSelectionDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div ui:field="leaderboardSelectionDiv" class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Leaderboard:</span>
 	        </div>
@@ -39,7 +39,7 @@
 				<g:ListBox ui:field="leaderboardSelectionBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardAutoZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div ui:field="leaderboardAutoZoomDiv" class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Leaderboard Auto-Zoom:</span>
 	        </div>
@@ -47,7 +47,7 @@
 				<g:CheckBox ui:field="leaderboardAutoZoomBox" />
 	        </div>
 		</div>
-		<div ui:field="leaderboardZoomDiv" class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div ui:field="leaderboardZoomDiv" class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Leaderboard Zoom-Factor:</span>
 	        </div>
@@ -55,7 +55,7 @@
 				<g:TextBox ui:field="leaderboardZoomBox" />
 	        </div>
 		</div>
-		<div class="{res.mainCss.grid}" style="padding-bottom:1em;">
+		<div class="{res.mediaCss.grid}" style="padding-bottom:1em;">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    <span>Auto-Play video:</span>
 	        </div>
@@ -63,7 +63,7 @@
 				<g:CheckBox ui:field="autoSelectMediaBox" />
 	        </div>
 		</div>
-		<div class="{res.mainCss.grid}">
+		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small2} {res.mediaCss.columns}">
 			    &nbsp;
 	        </div>

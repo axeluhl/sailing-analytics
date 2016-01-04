@@ -2,6 +2,8 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.ConcurrentModificationException;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
+
 /**
  * An extensible track that can still grow by adding more GPS fixes to it. Callers of {@link GPSFixTrack#getFixes()}
  * or {@link #getRawFixes()} or {@link #getFixesIterator(com.sap.sailing.domain.base.TimePoint, boolean)} or

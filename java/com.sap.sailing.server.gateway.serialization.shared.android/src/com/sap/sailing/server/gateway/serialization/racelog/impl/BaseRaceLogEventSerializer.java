@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.TimePoint;
 
 public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceLogEvent> {
     public static final String FIELD_CLASS = "@class";
@@ -31,7 +32,8 @@ public abstract class BaseRaceLogEventSerializer implements JsonSerializer<RaceL
         result.put(FIELD_CLASS, getClassFieldValue());
         result.put(FIELD_ID, object.getId().toString());
         result.put(FIELD_CREATED_AT, object.getCreatedAt().asMillis());
-        result.put(FIELD_TIMESTAMP, object.getLogicalTimePoint().asMillis());
+        final TimePoint logicalTimePoint = object.getLogicalTimePoint();
+        result.put(FIELD_TIMESTAMP, logicalTimePoint==null?null:logicalTimePoint.asMillis());
         result.put(FIELD_PASS_ID, object.getPassId());
 
         JSONArray competitors = new JSONArray();

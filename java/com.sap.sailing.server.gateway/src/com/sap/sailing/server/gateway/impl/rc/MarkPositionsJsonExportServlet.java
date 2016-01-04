@@ -98,8 +98,8 @@ public class MarkPositionsJsonExportServlet extends AbstractJsonHttpServlet {
             }
         }
         
+        setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
-        response.setContentType("application/json");
     }
 
     @SuppressWarnings("unused") //unused since course area has no position yet

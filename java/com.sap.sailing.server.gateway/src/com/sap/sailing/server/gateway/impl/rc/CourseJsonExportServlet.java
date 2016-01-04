@@ -87,7 +87,7 @@ public class CourseJsonExportServlet extends AbstractJsonHttpServlet {
             result = new JSONObject();
         }
         
+        setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
-        response.setContentType("application/json");
     }
 }

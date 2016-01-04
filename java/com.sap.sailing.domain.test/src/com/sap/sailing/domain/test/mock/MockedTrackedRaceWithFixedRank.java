@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -75,6 +76,16 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
                 return null;
             }
         }
+
+        @Override
+        public Boat getBoatOfCompetitorById(Serializable competitorID) {
+            return null;
+        }
+
+        @Override
+        public byte[] getCompetitorMD5() {
+            return null;
+        }
     }
     
     @Override
@@ -88,7 +99,7 @@ public class MockedTrackedRaceWithFixedRank extends MockedTrackedRace {
     }
 
     @Override
-    public int getRank(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRank(Competitor competitor, TimePoint timePoint) {
         return rank;
     }
 

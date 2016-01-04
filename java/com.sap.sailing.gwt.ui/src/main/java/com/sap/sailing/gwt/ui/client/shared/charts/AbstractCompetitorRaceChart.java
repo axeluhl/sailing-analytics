@@ -45,10 +45,8 @@ import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.common.Util;
@@ -59,6 +57,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
  * AbstractCompetitorChart is a chart that can show one sort of competitor data (e.g. current speed over ground, windward
@@ -94,16 +93,16 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Long timeOfLatestRequestInMillis;
     
     protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
             final StringMessages stringMessages, ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
+        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter, detailType, compactChart, allowTimeAdjust,
                 null, null);
     }
 
     AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
@@ -124,9 +123,12 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         createChart();
         setSelectedDetailType(detailType);
-        
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        this.selectedRaceIdentifier = selectedRaceIdentifier;
+        clearChart();
+        if (selectedRaceIdentifier != null) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     /**
@@ -391,7 +393,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml()).setSelected(true));
+                    .setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml()).setSelected(true));
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
             dataSeriesByCompetitor.put(competitor, result);
         }
@@ -408,7 +410,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
                     .setName(stringMessages.markPassing() + " " + competitor.getName());
-            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor).getAsHtml())
+            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
         }
@@ -539,7 +541,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
 
     private boolean hasReversedYAxis(DetailType detailType) {
-        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER ||
+        return selectedDetailType == DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD ||
                 selectedDetailType == DetailType.GAP_TO_LEADER_IN_SECONDS ||
                 selectedDetailType == DetailType.RACE_RANK ||
                 selectedDetailType == DetailType.REGATTA_RANK ||
@@ -548,20 +550,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private boolean isYAxisReversed() {
         return hasReversedYAxis(selectedDetailType);
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRaceIdentifier = selectedRaces.iterator().next();
-        } else {
-            selectedRaceIdentifier = null;
-        }
-
-        clearChart();
-        if (selectedRaceIdentifier != null) {
-            timeChanged(timer.getTime(), null);
-        }
     }
 
     /**

@@ -28,4 +28,14 @@ public class LegImpl implements Leg {
     public String toString() {
         return getFrom() + " -> " + getTo();
     }
+
+    @Override
+    public int getZeroBasedIndexOfStartWaypoint() {
+        return indexOfStartWaypoint;
+    }
+
+    @Override
+    public int compareTo(Leg o) {
+        return getZeroBasedIndexOfStartWaypoint() - o.getZeroBasedIndexOfStartWaypoint();
+    }
 }

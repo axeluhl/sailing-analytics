@@ -16,4 +16,6 @@ public interface LiveDataConnection {
     boolean waitForConnection(long timeoutInMillis) throws InterruptedException;
     
     void addListener(BulkFixReceiver listener);
+    
+    void removeListener(BulkFixReceiver listener);
 }

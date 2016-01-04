@@ -20,12 +20,12 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.splining.HermiteCurve;
 import com.sap.sailing.domain.markpassingcalculation.splining.StraightLine;
 import com.sap.sailing.domain.markpassingcalculation.splining.Vector2D;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
 

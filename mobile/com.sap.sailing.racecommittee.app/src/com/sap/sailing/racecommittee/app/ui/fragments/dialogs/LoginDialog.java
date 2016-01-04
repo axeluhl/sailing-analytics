@@ -1,13 +1,14 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 
@@ -15,7 +16,7 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
 
     private static final LoginType DefaultLoginType = LoginType.NONE;
     public enum LoginType {
-        OFFICER, VIEWER, NONE;
+        OFFICER, VIEWER, NONE
     }
 
     private CharSequence[] loginTypeDescriptions;
@@ -52,36 +53,34 @@ public class LoginDialog extends ActivityAttachedDialogFragment {
     }
 
     @Override
-    protected Builder createDialog(Builder builder) {
-        return builder
-                .setTitle(getString(R.string.login))
-                .setIcon(R.drawable.ic_menu_login)
-                .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                        // see loginTypeDescriptions for the indices of the login types
-                        case 0:
-                            selectedLoginType = LoginType.OFFICER;
-                            author = new LogEventAuthorImpl("Race Officer on Start Vessel", 0);
-                            break;
-                        case 1:
-                            selectedLoginType = LoginType.OFFICER;
-                            author = new LogEventAuthorImpl("Race Officer on Finish Vessel", 1);
-                            break;
-                        case 2:
-                            selectedLoginType = LoginType.OFFICER;
-                            author = new LogEventAuthorImpl("Shore Control", 2);
-                            break;
-                        case 3:
-                            selectedLoginType = LoginType.VIEWER;
-                            author = new LogEventAuthorImpl("Viewer", 3);
-                            break;
-                        default:
-                            selectedLoginType = LoginType.NONE;
-                            break;
-                        }
+    protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
+        return builder.setTitle(getString(R.string.login)).setIcon(R.drawable.ic_assignment_ind_grey600_36dp)
+            .setSingleChoiceItems(loginTypeDescriptions, -1, new OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                    // see loginTypeDescriptions for the indices of the login types
+                    case 0:
+                        selectedLoginType = LoginType.OFFICER;
+                        author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_START, 0);
+                        break;
+                    case 1:
+                        selectedLoginType = LoginType.OFFICER;
+                        author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_FINISH, 1);
+                        break;
+                    case 2:
+                        selectedLoginType = LoginType.OFFICER;
+                        author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_SHORE_CONTROL, 2);
+                        break;
+                    case 3:
+                        selectedLoginType = LoginType.VIEWER;
+                        author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_VIEWER, 3);
+                        break;
+                    default:
+                        selectedLoginType = LoginType.NONE;
+                        break;
                     }
-                });
+                }
+            });
     }
 
     @Override

@@ -17,9 +17,9 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAndGPSFixMovingJsonDeserializer;

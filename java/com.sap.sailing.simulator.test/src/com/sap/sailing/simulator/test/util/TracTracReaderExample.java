@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class TracTracReaderExample {

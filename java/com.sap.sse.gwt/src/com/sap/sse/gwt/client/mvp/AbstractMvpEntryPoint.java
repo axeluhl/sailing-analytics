@@ -20,7 +20,7 @@ import com.sap.sse.gwt.client.mvp.impl.ActivityMapperRegistry;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends AbstractEntryPoint<S> {
+public abstract class AbstractMvpEntryPoint<S extends StringMessages, CF extends ClientFactory> extends AbstractEntryPoint<S> {
 
     
     /**
@@ -39,14 +39,14 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends Ab
      * @param activityMappers
      *            used for a composite activity mapper; the first mapper to provide an activity for a place gets its way
      */
-    public void initMvp(ClientFactory clientFactory, PlaceHistoryMapper historyMapper, ActivityMapper... activityMappers) { 
+    public void initMvp(CF clientFactory, PlaceHistoryMapper historyMapper, ActivityMapper... activityMappers) { 
         // Start ActivityManager for the main widget with our ActivityMapper
         ActivityMapperRegistry activityMapperRegistry = new ActivityMapperRegistry();
         for (ActivityMapper activityMapper : activityMappers) {
             activityMapperRegistry.addActivityMapper(activityMapper);
         }
         EventBus eventBus = clientFactory.getEventBus();
-        ActivityManager activityManager = new ActivityManager(activityMapperRegistry, eventBus);
+        ActivityManager activityManager = createActivityManager(activityMapperRegistry, clientFactory);
         activityManager.setDisplay(clientFactory.getContent());
 
         // Start PlaceHistoryHandler with our PlaceHistoryMapper
@@ -56,5 +56,9 @@ public abstract class AbstractMvpEntryPoint<S extends StringMessages> extends Ab
         RootPanel.get().add(clientFactory.getRoot());
         // Goes to place represented on URL or default place
         historyHandler.handleCurrentHistory();
+    }
+
+    protected ActivityManager createActivityManager(ActivityMapper activityMapperRegistry, CF clientFactory) {
+        return new CustomActivityManager(activityMapperRegistry, clientFactory.getEventBus());
     }
 }

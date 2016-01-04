@@ -37,14 +37,6 @@ public class AbstractMailServiceReplicationTest extends AbstractServerWithSingle
     }
 
     public static class MailServerReplicationTestSetUp extends AbstractServerReplicationTestSetUp<MailService, MailServiceImpl> {
-        public MailServerReplicationTestSetUp() {
-            super();
-        }
-        
-        public MailServerReplicationTestSetUp(int servletPort) {
-            super(servletPort);
-        }
-            
         @Override
         protected MailServiceImpl createNewMaster() throws MailException {
             return createMailCountingService(true);

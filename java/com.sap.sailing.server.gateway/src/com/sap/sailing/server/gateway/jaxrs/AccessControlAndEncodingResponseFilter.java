@@ -15,8 +15,6 @@ public class AccessControlAndEncodingResponseFilter implements ContainerResponse
         httpHeaders.add("Access-Control-Allow-Headers", "Authorization, Origin, X-Requested-With, Content-Type");
         httpHeaders.add("Access-Control-Expose-Headers", "Location, Content-Disposition");
         httpHeaders.add("Access-Control-Allow-Methods", "POST, PUT, GET, DELETE, HEAD, OPTIONS");
-        httpHeaders.remove("Content-Type");
-        httpHeaders.add("Content-Type", "application/json;charset=UTF-8");
         return response;
     }
 }

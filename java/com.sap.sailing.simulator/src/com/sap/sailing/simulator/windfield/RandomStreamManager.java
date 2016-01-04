@@ -2,7 +2,7 @@ package com.sap.sailing.simulator.windfield;
 
 import java.io.Serializable;
 
-import umontreal.iro.lecuyer.rng.RandomStream;
+import com.sap.sailing.simulator.windfield.impl.BlastRandom;
 
 public interface RandomStreamManager extends Serializable {
 
@@ -16,7 +16,7 @@ public interface RandomStreamManager extends Serializable {
      * @param name
      * @return the RandomStream identified by the name
      */
-    public RandomStream getRandomStream(String name);
+    public BlastRandom getRandomStream(String name);
     
     /**
      * Reset all the random streams managed by the class

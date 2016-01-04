@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -27,12 +28,14 @@ import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkDTO;
 import com.sap.sailing.domain.common.dto.PlacemarkOrderDTO;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceStatusDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.media.MediaTrack;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
@@ -46,12 +49,11 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterp
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
@@ -68,12 +70,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     /**
      * Uses a transient competitor store
      */
-    public DomainFactoryImpl() {
-        super(new TransientCompetitorStoreImpl());
+    public DomainFactoryImpl(RaceLogResolver raceLogResolver) {
+        super(new TransientCompetitorStoreImpl(), raceLogResolver);
     }
     
-    public DomainFactoryImpl(CompetitorStore competitorStore) {
-        super(competitorStore);
+    public DomainFactoryImpl(CompetitorStore competitorStore, RaceLogResolver raceLogResolver) {
+        super(competitorStore, raceLogResolver);
     }
 
     @Override
@@ -113,6 +115,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
+        case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
+            return new LowPointWithEliminationsAndRoundsWinnerGets07();
+        case LOW_POINT_LEAGUE_OVERALL:
+            return new LowPointForLeagueOverallLeaderboard();
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -166,63 +172,64 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
-        
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();
-
         Competitor leaderOrWinner = null;
         TimePoint now = MillisecondsTimePoint.now();
         try {
-            if(trackedRace.isLive(now)) {
+            if (trackedRace.isLive(now)) {
                 leaderOrWinner = trackedRace.getOverallLeader(now);
             } else if (trackedRace.getEndOfRace() != null) {
-                for(Competitor competitor: leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
+                for (Competitor competitor : leaderboard.getCompetitorsFromBestToWorst(raceColumn, now)) {
                     Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
-                    if(fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
+                    if (fleetOfCompetitor != null && fleetOfCompetitor.equals(fleet)) {
                         leaderOrWinner = competitor;
                         break;
                     }
                 }
-            }                
-            if(leaderOrWinner != null) {
+            }
+            if (leaderOrWinner != null) {
                 statisticsDTO.hasLeaderOrWinnerData = true;
                 statisticsDTO.leaderOrWinner = convertToCompetitorDTO(leaderOrWinner);
                 GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(leaderOrWinner);
-                if(track != null) {
-                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenFixes();
+                if (track != null) {
+                    statisticsDTO.averageGPSDataSampleInterval = track.getAverageIntervalBetweenRawFixes();
                 }
             }
         } catch (NoWindException e) {
         }
-        
+
         // Measured wind sources data
         statisticsDTO.measuredWindSourcesCount = Util.size(trackedRace.getWindSources(WindSourceType.EXPEDITION));
-        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0; 
+        statisticsDTO.hasMeasuredWindData = statisticsDTO.measuredWindSourcesCount > 0;
 
         // leg progress data
         RaceDefinition race = trackedRace.getRace();
-        if(race.getCourse() != null) {
+        if (race.getCourse() != null) {
             statisticsDTO.hasLegProgressData = true;
             statisticsDTO.totalLegsCount = race.getCourse().getLegs().size();
-            TrackedLeg currentLeg = trackedRace.getCurrentLeg(MillisecondsTimePoint.now());
-            if(currentLeg != null) {
-                statisticsDTO.currentLegNo = race.getCourse().getIndexOfWaypoint(currentLeg.getLeg().getFrom());
-            } else {
-                statisticsDTO.currentLegNo = 0;
-            }
+            statisticsDTO.currentLegNo = trackedRace.getLastLegStarted(MillisecondsTimePoint.now());
         }
-        
+
         // media data
-        if(mediaTracks != null) {
-            for(MediaTrack track: mediaTracks) {
-                switch(track.mimeType.mediaType) {
+        if (mediaTracks != null) {
+            for (MediaTrack track : mediaTracks) {
+                switch (track.mimeType.mediaType) {
                 case audio:
                     statisticsDTO.hasAudioData = true;
-                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1 : statisticsDTO.audioTracksCount++;   
+                    statisticsDTO.audioTracksCount = statisticsDTO.audioTracksCount == null ? 1
+                            : statisticsDTO.audioTracksCount++;
                     break;
                 case video:
                     statisticsDTO.hasVideoData = true;
-                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1 : statisticsDTO.videoTracksCount++;   
+                    statisticsDTO.videoTracksCount = statisticsDTO.videoTracksCount == null ? 1
+                            : statisticsDTO.videoTracksCount++;
+                    break;
+                case image: // TODO should this add to an image count?
+                    break;
+                case unknown: // TODO should this add to an "unknown media" count? Probably not
+                    break;
+                default:
                     break;
                 }
             }
@@ -250,51 +257,58 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         double radiusCalculationFactor = 10.0;
         Placemark startBest = null;
         Placemark finishBest = null;
+        Position startPosition = null;
 
         // Get start postition
-        Iterator<Mark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
-        Position startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
-        if (startPosition != null) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                if (startNearest != null) {
-                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                    double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best start place
-                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                            new Placemark.ByPopulationDistanceRatio(startPosition));
-                }
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (org.json.simple.parser.ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            }
-        }
-
-        // Get finish position
-        Iterator<Mark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
-        Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
-        if (startPosition != null && finishPosition != null) {
-            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                finishBest = startBest;
-            } else {
+        final Waypoint firstWaypoint = race.getRace().getCourse().getFirstWaypoint();
+        if (firstWaypoint != null) {
+            Iterator<Mark> startMarks = firstWaypoint.getMarks().iterator();
+            GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
+            startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
+            if (startPosition != null) {
                 try {
                     // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+                    if (startNearest != null) {
+                        Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                        double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best start place
+                        startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                                new Placemark.ByPopulationDistanceRatio(startPosition));
+                    }
                 } catch (IOException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
                 } catch (org.json.simple.parser.ParseException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                }
+            }
+        }
+
+        // Get finish position
+        final Waypoint lastWaypoint = race.getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            Iterator<Mark> finishMarks = firstWaypoint.getMarks().iterator();
+            GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
+            Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
+            if (startPosition != null && finishPosition != null) {
+                if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                    finishBest = startBest;
+                } else {
+                    try {
+                        // Get distance to nearest placemark and calculate the search radius
+                        Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                        Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                        double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best finish place
+                        finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                                new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    } catch (IOException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    } catch (org.json.simple.parser.ParseException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    }
                 }
             }
         }
@@ -305,7 +319,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
     @Override
     public PlacemarkDTO convertToPlacemarkDTO(Placemark placemark) {
         Position position = placemark.getPosition();
-        return new PlacemarkDTO(placemark.getName(), placemark.getCountryCode(), new PositionDTO(position.getLatDeg(),
+        return new PlacemarkDTO(placemark.getName(), placemark.getCountryCode(), new DegreePosition(position.getLatDeg(),
                 position.getLngDeg()), placemark.getPopulation());
     }
 

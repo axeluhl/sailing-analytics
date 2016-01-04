@@ -32,7 +32,7 @@ public interface DeclinationService {
      *            constructing this service
      */
     Declination getDeclination(TimePoint timePoint, Position position, long timeoutForOnlineFetchInMilliseconds) throws IOException,
-            ClassNotFoundException, ParseException;
+            ParseException;
     
     /**
      * Like {@link #getDeclination(TimePoint, Position, long)}, only that here the caller can specify a required spatial
@@ -50,5 +50,5 @@ public interface DeclinationService {
      *            <code>maxDistance</code> parameter
      */
     Declination getDeclination(TimePoint timePoint, Position position, Distance maxDistance, long timeoutForOnlineFetchInMilliseconds) throws IOException,
-            ClassNotFoundException, ParseException;
+            ParseException;
 }

@@ -28,7 +28,12 @@ public interface LeaderboardGroup extends LeaderboardGroupBase {
     void addLeaderboardGroupListener(LeaderboardGroupListener listener);
     void removeLeaderboardGroupListener(LeaderboardGroupListener listener);
     boolean isDisplayGroupsInReverseOrder();
+    
+    /**
+     * @return a non-live copy of the leaderboard list as it looked when the method was called
+     */
     Iterable<Leaderboard> getLeaderboards();
+    
     int getIndexOf(Leaderboard leaderboard);
     void addLeaderboard(Leaderboard leaderboard);
     void addLeaderboardAt(Leaderboard leaderboard, int index);

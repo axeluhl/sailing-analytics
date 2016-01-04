@@ -14,7 +14,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 
 public class WindFixesFinderTest extends RaceLogAnalyzerTest<WindFixesFinder> {
 
@@ -29,7 +29,7 @@ public class WindFixesFinderTest extends RaceLogAnalyzerTest<WindFixesFinder> {
         
         raceLog.add(event1);
         
-        List<Wind> windList = analyzer.analyze();
+        List<RaceLogWindFixEvent> windList = analyzer.analyze();
         assertNotNull(windList);
         assertEquals(0, windList.size());
     }
@@ -46,10 +46,10 @@ public class WindFixesFinderTest extends RaceLogAnalyzerTest<WindFixesFinder> {
         raceLog.add(event2);
         raceLog.add(event3);
 
-        List<Wind> windList = analyzer.analyze();
+        List<RaceLogWindFixEvent> windList = analyzer.analyze();
         assertNotNull(windList);
         assertEquals(2, windList.size());
-        assertEquals(event3.getWindFix(), windList.get(0));
-        assertEquals(event2.getWindFix(), windList.get(1));
+        assertEquals(event3.getWindFix(), windList.get(0).getWindFix());
+        assertEquals(event2.getWindFix(), windList.get(1).getWindFix());
     }
 }

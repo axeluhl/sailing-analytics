@@ -17,6 +17,7 @@ import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.maps.client.geometrylib.SphericalUtils;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.sap.sailing.domain.common.Mile;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -57,8 +58,8 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
         }
     }
 
-    public RaceCourseCanvasOverlay(MapWidget map, int zIndex, char mode) {
-        super(map, zIndex);
+    public RaceCourseCanvasOverlay(MapWidget map, int zIndex, char mode, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
 
         this.mode = mode;
         startPoint = null;
@@ -229,6 +230,7 @@ public class RaceCourseCanvasOverlay extends FullCanvasOverlay {
     private void center() {
         double cLat = (startPoint.getLatitude() + ((endPoint.getLatitude() - startPoint.getLatitude()) % 180.) / 2. + 90.) % 180. - 90.;
         double cLon = (startPoint.getLongitude() + ((endPoint.getLongitude() - startPoint.getLongitude()) % 360.) / 2. + 180.) % 360. - 180;
+        // startPoint and endPoint are already in the map's coordinate space, so no further mapping through coordinateSystem is required here
         LatLng centerPoint = LatLng.newInstance(cLat, cLon);
         getMap().panTo(centerPoint);
     }

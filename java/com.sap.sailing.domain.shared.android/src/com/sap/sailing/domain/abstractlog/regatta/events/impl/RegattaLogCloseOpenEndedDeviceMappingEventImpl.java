@@ -15,7 +15,13 @@ implements RegattaLogCloseOpenEndedDeviceMappingEvent {
     public RegattaLogCloseOpenEndedDeviceMappingEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, Serializable deviceMappingEventId,
             TimePoint closingTimePoint) {
-        super(createdAt, author, logicalTimePoint, id, deviceMappingEventId, closingTimePoint);
+        super(createdAt, logicalTimePoint, author, id, deviceMappingEventId, closingTimePoint);
+    }
+    
+    public RegattaLogCloseOpenEndedDeviceMappingEventImpl(AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable deviceMappingEventId,
+            TimePoint closingTimePoint) {
+        super(logicalTimePoint, author, deviceMappingEventId, closingTimePoint);
     }
     
     @Override

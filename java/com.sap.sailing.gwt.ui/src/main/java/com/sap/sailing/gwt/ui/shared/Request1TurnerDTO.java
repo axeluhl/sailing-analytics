@@ -1,16 +1,16 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class Request1TurnerDTO implements IsSerializable {
 
     public SimulatorUISelectionDTO selection = null;
-    public PositionDTO oldMovedPoint = null;
-    public PositionDTO newMovedPoint = null;
-    public PositionDTO beforeMovedPoint = null;
-    public PositionDTO edgeStart = null;
-    public PositionDTO edgeEnd = null;
+    public Position oldMovedPoint = null;
+    public Position newMovedPoint = null;
+    public Position beforeMovedPoint = null;
+    public Position edgeStart = null;
+    public Position edgeEnd = null;
 
     public Long oldMovedPointTimePoint = 0L;
     public Double startToEndBearingDegrees = 0.0;
@@ -29,8 +29,8 @@ public class Request1TurnerDTO implements IsSerializable {
 
     }
 
-    public Request1TurnerDTO(SimulatorUISelectionDTO selection, PositionDTO oldMovedPoint, PositionDTO newMovedPoint, PositionDTO beforeMovedPoint,
-            PositionDTO edgeStart, PositionDTO edgeEnd,
+    public Request1TurnerDTO(SimulatorUISelectionDTO selection, Position oldMovedPoint, Position newMovedPoint, Position beforeMovedPoint,
+            Position edgeStart, Position edgeEnd,
             Long oldMovedPointTimePoint, Double startToEndBearingDegrees) {
 
         this.selection = selection;

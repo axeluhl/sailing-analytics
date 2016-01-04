@@ -35,7 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class BarbadosResultImportTest {
-    private static final MillisecondsTimePoint NOW = MillisecondsTimePoint.now();
+    private static final TimePoint NOW = MillisecondsTimePoint.now();
     private static final String SAMPLE_INPUT_NAME_EMPTY_RESULTS = "RESULTS-505Barbados.xlsx";
     private static final String SAMPLE_INPUT_NAME_SOME_RESULTS = "RESULTS2.xlsx";
     private static final String RESOURCES = "resources/";

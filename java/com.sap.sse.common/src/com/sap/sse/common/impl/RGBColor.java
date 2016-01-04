@@ -8,12 +8,9 @@ import com.sap.sse.common.Util;
  */
 public class RGBColor extends AbstractColor {
     private static final long serialVersionUID = -4091876840771631308L;
-    private int red;
-    private int green;
-    private int blue;
-
-    RGBColor() {
-    } // for GWT serializability
+    private final int red;
+    private final int green;
+    private final int blue;
 
     public RGBColor(int red, int green, int blue) {
         this.red = ensureValidRange(red);

@@ -5,16 +5,18 @@
 	version="2.5">
 
 	<servlet>
-		<display-name>Rib Dashboard Service</display-name>
-		<servlet-name>RibDashboardService</servlet-name>
-		<servlet-class>com.sap.sailing.dashboards.gwt.server.RibDashboardServiceImpl
+		<servlet-name>default</servlet-name>
+		<servlet-class>org.eclipse.jetty.servlet.DefaultServlet
 		</servlet-class>
+		<init-param>
+			<param-name>dirAllowed</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+	   		<param-name>useFileMappedBuffer</param-name>
+	   		<param-value>false</param-value>
+	 	</init-param>
 	</servlet>
-	<servlet-mapping>
-		<servlet-name>RibDashboardService</servlet-name>
-		<url-pattern>/service/ribdashboard
-		</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<display-name>Sailing Service</display-name>
@@ -24,6 +26,16 @@
 	<servlet-mapping>
 		<servlet-name>SailingService</servlet-name>
 		<url-pattern>/service/sailing</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<display-name>Dispatch Service</display-name>
+		<servlet-name>DispatchService</servlet-name>
+		<servlet-class>com.sap.sailing.dashboards.gwt.server.DashboardDispatchRPCServletImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DispatchService</servlet-name>
+		<url-pattern>/service/dispatch</url-pattern>
 	</servlet-mapping>
 	
 		<!-- enabling remote logging -->

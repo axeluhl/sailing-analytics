@@ -13,16 +13,15 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -35,12 +34,14 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private Button btnSetDelayToLive;
     private Button btnExport;
     private ExportPopup exportPopup;
+    private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final RegattaRefresher regattaRefresher, RaceSelectionProvider raceSelectionProvider,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
-        super(sailingService, errorReporter, regattaRefresher, raceSelectionProvider, stringMessages, hasMultiSelection);
+            final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
+        super(sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
+        this.actionButtonsEnabled = actionButtonsEnabled;
+        createUI();
     }
 
     private void showSetDelayToLiveDialog() {
@@ -104,78 +105,84 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
-        btnRemoveRace = new Button(stringMessages.remove());
-        btnRemoveRace.ensureDebugId("RemoveRaceButton");
-        btnRemoveRace.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                removeAndUntrackRaces(getSelectedRaces());
-            }
-        });
-        btnRemoveRace.setEnabled(false);
-        trackedRacesButtonPanel.add(btnRemoveRace);
-        
-        btnUntrack = new Button(stringMessages.stopTracking());
-        btnUntrack.ensureDebugId("StopTrackingButton");
-        btnUntrack.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent click) {
-                stopTrackingRaces(getSelectedRaces());
-            }
-        });
-        btnUntrack.setEnabled(false);
-        trackedRacesButtonPanel.add(btnUntrack);
-        
-        btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
-        btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
-        btnSetDelayToLive.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                showSetDelayToLiveDialog();
-            }
-        });
-        trackedRacesButtonPanel.add(btnSetDelayToLive);
+        if(actionButtonsEnabled) {
+            btnRemoveRace = new Button(stringMessages.remove());
+            btnRemoveRace.ensureDebugId("RemoveRaceButton");
+            btnRemoveRace.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
+                }
+            });
+            btnRemoveRace.setEnabled(false);
+            trackedRacesButtonPanel.add(btnRemoveRace);
+            
+            btnUntrack = new Button(stringMessages.stopTracking());
+            btnUntrack.ensureDebugId("StopTrackingButton");
+            btnUntrack.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent click) {
+                    stopTrackingRaces(refreshableSelectionModel.getSelectedSet());
+                }
+            });
+            btnUntrack.setEnabled(false);
+            trackedRacesButtonPanel.add(btnUntrack);
+            
+            btnSetDelayToLive = new Button(stringMessages.setDelayToLive() + "...");
+            btnSetDelayToLive.ensureDebugId("SetDelayToLiveButton");
+            btnSetDelayToLive.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    showSetDelayToLiveDialog();
+                }
+            });
+            trackedRacesButtonPanel.add(btnSetDelayToLive);
 
-        exportPopup = new ExportPopup(stringMessages);
-        btnExport = new Button(stringMessages.export());
-        btnExport.ensureDebugId("ExportButton");
-        btnExport.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                exportPopup.center(getSelectedRaces());
-            }
-        });
-        btnExport.setEnabled(false);
-        trackedRacesButtonPanel.add(btnExport);
+            exportPopup = new ExportPopup(stringMessages);
+            btnExport = new Button(stringMessages.export());
+            btnExport.ensureDebugId("ExportButton");
+            btnExport.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    exportPopup.center(new ArrayList<>(refreshableSelectionModel.getSelectedSet()));
+                }
+            });
+            btnExport.setEnabled(false);
+            trackedRacesButtonPanel.add(btnExport);
+        }
     }
 
     @Override
-    protected void makeControlsReactToSelectionChange(List<RaceDTO> selectedRaces) {
-        if (selectedRaces.isEmpty()) {
-            btnRemoveRace.setEnabled(false);
-            btnUntrack.setEnabled(false);
-            btnExport.setEnabled(false);
-        } else {
-            btnRemoveRace.setEnabled(true);
-            btnUntrack.setEnabled(true);
-            btnExport.setEnabled(true);
+    protected void makeControlsReactToSelectionChange(Set<RaceDTO> selectedRaces) {
+        if (actionButtonsEnabled) {
+            if (selectedRaces.isEmpty()) {
+                btnRemoveRace.setEnabled(false);
+                btnUntrack.setEnabled(false);
+                btnExport.setEnabled(false);
+            } else {
+                btnRemoveRace.setEnabled(true);
+                btnUntrack.setEnabled(true);
+                btnExport.setEnabled(true);
+            }
         }
     }
 
     @Override
     protected void makeControlsReactToFillRegattas(Iterable<RegattaDTO> regattas) {
-        if (Util.isEmpty(regattas)) {
-            btnUntrack.setVisible(false);
-            btnRemoveRace.setVisible(false);
-            btnSetDelayToLive.setVisible(false);
-            btnExport.setVisible(false);
-        } else {
-            btnUntrack.setVisible(true);
-            btnUntrack.setEnabled(false);
-            btnRemoveRace.setVisible(true);
-            btnRemoveRace.setEnabled(false);
-            btnSetDelayToLive.setVisible(true);
-            btnExport.setVisible(true);
+        if(actionButtonsEnabled) {
+            if (Util.isEmpty(regattas)) {
+                btnUntrack.setVisible(false);
+                btnRemoveRace.setVisible(false);
+                btnSetDelayToLive.setVisible(false);
+                btnExport.setVisible(false);
+            } else {
+                btnUntrack.setVisible(true);
+                btnUntrack.setEnabled(false);
+                btnRemoveRace.setVisible(true);
+                btnRemoveRace.setEnabled(false);
+                btnSetDelayToLive.setVisible(true);
+                btnExport.setVisible(true);
+            }
         }
     }
 

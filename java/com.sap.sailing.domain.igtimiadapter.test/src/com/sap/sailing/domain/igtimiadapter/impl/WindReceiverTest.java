@@ -15,6 +15,7 @@ import org.junit.rules.Timeout;
 
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
@@ -25,7 +26,6 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.GpsLatLong;
 import com.sap.sailing.domain.igtimiadapter.datatypes.HDG;
 import com.sap.sailing.domain.igtimiadapter.datatypes.SOG;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 

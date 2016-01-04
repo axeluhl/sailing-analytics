@@ -137,4 +137,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     public Iterable<URL> getUrls() {
         return resultUrlRegistry.getResultUrls(NAME);
     }
+
+    @Override
+    public String getOptionalSampleURL() {
+        return "http://manage2sail.com/api/public/links/event/d30883d3-2876-4d7e-af49-891af6cbae1b?accesstoken=bDAv8CwsTM94ujZ&mediaType=json";
+    }
 }

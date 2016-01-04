@@ -123,6 +123,12 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                     } else {
                         reachableAudioTracks.add(mediaTrack);
                     }
+                case image: // no image media tracks produced by an image
+                    break;
+                case unknown: // we won't overlay an unknown media source
+                    break;
+                default:
+                    break;
                 }
             }
         }
@@ -144,6 +150,12 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                     } else {
                         reachableAudioTracks.add(mediaTrack);
                     }
+                case image: // images don't play as video tracks
+                    break;
+                case unknown: // unknown formats won't be played either
+                    break;
+                default:
+                    break;
                 }
             }
         }

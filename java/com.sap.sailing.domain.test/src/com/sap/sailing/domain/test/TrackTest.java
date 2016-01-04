@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Boat;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.common.AbstractBearing;
@@ -42,19 +41,22 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedWithDegreeBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
-import com.sap.sailing.domain.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MaxSpeedCache;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -757,7 +759,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
@@ -857,7 +859,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
@@ -893,6 +895,55 @@ public class TrackTest {
         assertEquals(toReachInOneThirdOfTimeBetweenFixesInMillis.getMeters(), distance3_new.getMeters()-distance2_new.getMeters(), 0.01);
         assertEquals(toReachInOneThirdOfTimeBetweenFixesInMillis.getMeters(), distance4_new.getMeters()-distance3_new.getMeters(), 0.01);
     }
+
+    /**
+     * Bug 3022 describes a {@link StackOverflowError} that occurs during distance calculations on a {@link GPSFixTrackImpl}.
+     * This test tries to reproduce this behavior, as a starting point for a fix. The recursion happened while a long-distance
+     * race was running. Can there be a certain fix insertion pattern that, combined with a certain request pattern,
+     * produces degenerated cache contents? The race had a live delay of 660s. The trackers were configured to sample every
+     * 120s and to send every 600s. This could mean that for some 60s the live requests were "ahead" of the trackers.
+     */
+    @Test
+    public void testDistanceCacheIncrementalFillUpAndRecursion() {
+        TimePoint start = MillisecondsTimePoint.now();
+        TimePoint fixTime = start;
+        TimePoint queryTime = fixTime;
+        Position p = new DegreePosition(0, 0);
+        Bearing cog = new DegreeBearingImpl(123);
+        final Duration queryInterval = Duration.ONE_SECOND;
+        final Duration readAhead = Duration.ONE_MINUTE;
+        final Duration samplingInterval = Duration.ONE_SECOND.times(120);
+        final Duration transmissionInterval = Duration.ONE_MINUTE.times(10);
+        final Duration raceDuration = Duration.ONE_HOUR.times(48);
+        final Speed speed = new KnotSpeedImpl(12);
+        final Distance distancePerSample = speed.travel(fixTime, fixTime.plus(samplingInterval));
+        final DistanceCache distanceCache = new DistanceCache("test-DistanceCache");
+        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l) {
+            private static final long serialVersionUID = -7277196393160609503L;
+            @Override
+            protected DistanceCache getDistanceCache() {
+                return distanceCache;
+            }
+        };
+        while (fixTime.before(start.plus(raceDuration))) {
+            for (int i=0; i<transmissionInterval.divide(samplingInterval); i++) {
+                // produce a bulk of fixes
+                GPSFix fix = new GPSFixImpl(p, fixTime);
+                track.add(fix);
+                fixTime = fixTime.plus(samplingInterval);
+                p = p.translateGreatCircle(cog, distancePerSample);
+            }
+            Distance lastDistance = Distance.NULL;
+            // now query the distance with constant "from" and increasing "to" where "to" moves until 60s after tp
+            while (queryTime.before(fixTime.plus(readAhead))) {
+                final Distance d = track.getDistanceTraveled(start, queryTime);
+                assertTrue(d.compareTo(lastDistance) >= 0);
+                lastDistance = d;
+                queryTime = queryTime.plus(queryInterval);
+            }
+        }
+        assertTrue(distanceCache.size() <= DistanceCache.MAX_SIZE);
+    }
     
     @Test
     public void testDistanceCacheAccessForPartialStrip() {
@@ -915,7 +966,7 @@ public class TrackTest {
         Bearing bearing = new DegreeBearingImpl(123);
         Speed speed = new KnotSpeedImpl(7);
         Position p = new DegreePosition(0, 0);
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
@@ -1069,10 +1120,10 @@ public class TrackTest {
                 speed.travel(firstFixSoFar.getTimePoint(), firstFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newFirstFix = new GPSFixMovingImpl(newPosition, slightlyBeforeFirstFix, speed);
         track.addGPSFix(newFirstFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
+        TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newFirstFix);
         Position newPositionAtBeginningOfTime = track.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
-        assertTrue(!intervalAffected.getA().after(beginningOfTime));
+        assertTrue(!intervalAffected.from().after(beginningOfTime));
     }
 
     @Test
@@ -1088,10 +1139,10 @@ public class TrackTest {
                 speed.travel(lastFixSoFar.getTimePoint(), lastFixSoFar.getTimePoint().plus(timespan)));
         GPSFixMoving newLastFix = new GPSFixMovingImpl(newPosition, slightlyAfterLastFix, speed);
         track.addGPSFix(newLastFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
+        TimeRange intervalAffected = track.getEstimatedPositionTimePeriodAffectedBy(newLastFix);
         Position newPositionAtEndOfTime = track.getEstimatedPosition(endOfTime, /* extrapolate */false);
         assertFalse(newPositionAtEndOfTime.equals(positionAtEndOfTime));
-        assertTrue(!intervalAffected.getB().before(endOfTime));
+        assertTrue(!intervalAffected.to().before(endOfTime));
     }
 
     @Test
@@ -1106,13 +1157,13 @@ public class TrackTest {
         assertNull(positionAtEndOfTime);
         GPSFixMoving newFix = new GPSFixMovingImpl(new DegreePosition(12, 34), now, new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123)));
         myTrack.addGPSFix(newFix);
-        com.sap.sse.common.Util.Pair<TimePoint, TimePoint> intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
+        TimeRange intervalAffected = myTrack.getEstimatedPositionTimePeriodAffectedBy(newFix);
         Position newPositionAtBeginningOfTime = myTrack.getEstimatedPosition(beginningOfTime, /* extrapolate */false);
         Position newPositionAtEndOfTime = myTrack.getEstimatedPosition(now, /* extrapolate */false);
         assertFalse(newPositionAtBeginningOfTime.equals(positionAtBeginningOfTime));
-        assertTrue(!intervalAffected.getA().after(beginningOfTime));
+        assertTrue(!intervalAffected.from().after(beginningOfTime));
         assertFalse(newPositionAtEndOfTime.equals(positionAtEndOfTime));
-        assertTrue(!intervalAffected.getB().before(endOfTime));
+        assertTrue(!intervalAffected.to().before(endOfTime));
     }
 
     @Test

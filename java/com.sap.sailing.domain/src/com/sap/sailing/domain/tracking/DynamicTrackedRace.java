@@ -3,12 +3,12 @@ package com.sap.sailing.domain.tracking;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
-import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -103,8 +103,4 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
-
-    Bearing getCrossingBearing(Waypoint w, TimePoint t);
-
-    Util.Pair<Mark, Mark> getPortAndStarboardMarks(TimePoint t, Waypoint w);
 }

@@ -1,11 +1,14 @@
 package com.sap.sailing.domain.test;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
@@ -32,18 +35,19 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -60,12 +64,12 @@ public abstract class TrackBasedTest {
     }
 
     public static CompetitorImpl createCompetitor(String competitorName) {
-        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, new TeamImpl("STG", Collections.singleton(
+        return new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                         new PersonImpl(competitorName, new NationalityImpl("GER"),
                         /* dateOfBirth */null, "This is famous " + competitorName)), new PersonImpl("Rigo van Maas",
                         new NationalityImpl("NED"),
                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null));
+                new BoatClassImpl("505", /* typicallyStartsUpwind */true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
     }
     
     /**
@@ -117,10 +121,12 @@ public abstract class TrackBasedTest {
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(trackedRegatta, race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE,
         		EmptyGPSFixStore.INSTANCE, /* delayToLiveInMillis */ 0,
                 /* millisecondsOverWhichToAverageWind */ 30000, /* millisecondsOverWhichToAverageSpeed */ 30000,
-                /* delay for wind estimation cache invalidation */ 0);
+                /* delay for wind estimation cache invalidation */ 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         // in this simplified artificial course, the top mark is exactly north of the right leeward gate
         DegreePosition topPosition = new DegreePosition(54.48, 10.24);
-        TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the fix time
+        TimePoint afterTheRace = new MillisecondsTimePoint(timePointForFixes.asMillis() + 36000000); // 10h after the fix timed
+        trackedRace.setStartOfTrackingReceived(timePointForFixes);
         trackedRace.getOrCreateTrack(left).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.234451), new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(right).addGPSFix(new GPSFixImpl(new DegreePosition(54.4680424, 10.24), new MillisecondsTimePoint(0)));
         trackedRace.getOrCreateTrack(windwardMark).addGPSFix(new GPSFixImpl(topPosition, new MillisecondsTimePoint(0)));

@@ -20,8 +20,12 @@
 		<td>REST</td>
 	</tr>
 	<tr>
+		<td>Input format:</td>
+		<td>JSON (application/json)</td>
+	</tr>
+	<tr>
 		<td>Output format:</td>
-		<td>HTTP 200 (no body)</td>
+		<td>HTTP 200</td>
 	</tr>
 	<tr>
 		<td>Mandatory parameters:</td>
@@ -36,16 +40,16 @@
 		<td>POST</td>
 	</tr>
 	<tr>
-		<td>Mandatory input:</td>
-		<td>JSON</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td><pre>{
+		<td>Example:</td>
+		<td>POST <a href=http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end>http://sapsailing.com/api/v1/leaderboards/{name}/device_mappings/end</a>
+			<pre><code>
+{
     "competitorId" : "af855a56-9726-4a9c-a77e-da955bd289bg",
     "deviceUuid" : "af855a56-9726-4a9c-a77e-da955bd289bf",
     "toMillis" : 1415624564719
-}</pre></td>
+}
+			</code></pre>
+		</td>
 	</tr>
 </table>
 <div style="height: 1em;"></div>

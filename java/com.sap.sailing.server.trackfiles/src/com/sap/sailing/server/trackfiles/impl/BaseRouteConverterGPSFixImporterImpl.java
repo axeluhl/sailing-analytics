@@ -14,10 +14,10 @@ import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.ParserResult;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {    

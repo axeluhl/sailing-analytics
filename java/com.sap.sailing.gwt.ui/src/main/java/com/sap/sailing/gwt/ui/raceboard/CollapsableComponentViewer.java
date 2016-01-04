@@ -6,12 +6,13 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.CollapsablePanel;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentGroup;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentToolbar;
-import com.sap.sailing.gwt.ui.client.shared.components.ComponentViewer;
-import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
+import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentGroup;
+import com.sap.sse.gwt.client.shared.components.ComponentToolbarEntry;
+import com.sap.sse.gwt.client.shared.components.ComponentViewer;
+import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 
 /**
  * A GWT component that visualizes a {@link ComponentGroup} or a {@link Component} including menus to scroll quickly to
@@ -21,7 +22,7 @@ import com.sap.sailing.gwt.ui.client.shared.components.IsEmbeddableComponent;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CollapsableComponentViewer<SettingsType> implements ComponentViewer {
+public class CollapsableComponentViewer<SettingsType extends AbstractSettings> implements ComponentViewer {
     
     public enum ViewerPanelTypes{ABSOLUTE_PANEL,  SCROLL_PANEL}
 
@@ -86,12 +87,12 @@ public class CollapsableComponentViewer<SettingsType> implements ComponentViewer
             if (embeddableComponent.hasToolbar()) {
                 collapsablePanel.setHeaderToolbar(embeddableComponent.getToolbarWidget());
             } else {
-                ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+                ComponentToolbarEntry<SettingsType> toolbar = new ComponentToolbarEntry<SettingsType>(component, stringMessages);
                 toolbar.addSettingsButton();
                 collapsablePanel.setHeaderToolbar(toolbar);
             }
         } else {
-            ComponentToolbar<SettingsType> toolbar = new ComponentToolbar<SettingsType>(component, stringMessages);
+            ComponentToolbarEntry<SettingsType> toolbar = new ComponentToolbarEntry<SettingsType>(component, stringMessages);
             toolbar.addSettingsButton();
             collapsablePanel.setHeaderToolbar(toolbar);
         }

@@ -25,10 +25,11 @@ public interface SwissTimingAdapter {
      *            created, with a single default series and a single default fleet. If a valid {@link RegattaIdentifier}
      *            is specified, a regatta lookup is performed with that identifier; if the regatta is found, it is used
      *            to add the races to. Otherwise, a default regatta as described above will be created and used.
+     * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark passing / split times
      */
     RaceHandle addSwissTimingRace(TrackerManager trackerManager, RegattaIdentifier regattaToAddTo, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, String hostname, int port,
-            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds)
+            StartList startList, RaceLogStore logStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm)
             throws InterruptedException, UnknownHostException, IOException, ParseException, Exception;
 
     StartList readStartListForRace(String raceId, RegattaResults regattaResults);

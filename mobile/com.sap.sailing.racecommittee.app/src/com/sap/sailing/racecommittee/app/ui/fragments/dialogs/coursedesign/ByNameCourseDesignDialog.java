@@ -17,10 +17,10 @@ import android.widget.ListAdapter;
 
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.RaceDialogFragment;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.util.NaturalComparator;
 
 public class ByNameCourseDesignDialog extends RaceDialogFragment {
 
@@ -87,9 +87,7 @@ public class ByNameCourseDesignDialog extends RaceDialogFragment {
     protected void onCourseSelectionButtonClicked(View v) {
         Button selectedButton = (Button) v;
         String internalCourseName = (String) selectedButton.getText();
-
         CourseBase courseLayout = new CourseDataImpl(internalCourseName);
-
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
         dismiss();
     }

@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
@@ -24,9 +24,9 @@ import com.sap.sse.common.TimePoint;
 
 public class BasicRacingProcedureImpl extends BaseRacingProcedure {
 
-    public BasicRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
-            RacingProcedureConfiguration configuration) {
-        super(raceLog, author, factory, configuration);
+    public BasicRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
+            RacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
     }
 
     @Override

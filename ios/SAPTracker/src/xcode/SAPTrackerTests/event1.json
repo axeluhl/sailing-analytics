@@ -1,0 +1,31 @@
+{
+    "id": "35dc9389-b59d-4ebd-8f6b-432065642f40",
+    "name": "505 Worlds 2013",
+    "description": "",
+    "officialWebsiteURL": null,
+    "logoImageURL": null,
+    "startDate": 1429653600000,
+    "endDate": 1430604000000,
+    "venue": {
+        "name": "Barbados",
+        "courseAreas": [{
+            "name": "Barbados",
+            "id": "0b240bfb-e825-4904-8b97-220fb2cea014"
+        }]
+    },
+    "imageURLs": ["http://static.sapsailing.com/ubilabsimages/505Worlds2013_eventteaser.jpg"],
+    "videoURLs": ["https://www.youtube.com/watch?v=ddUfIRBNbnQ"],
+    "sponsorImageURLs": [],
+    "leaderboardGroups": [{
+        "id": "444d5ce7-119e-4c9e-9f81-e914519bdc92",
+        "name": "505 Worlds 2013",
+        "description": "The 505 Worlds 2013 in Barbados",
+        "displayName": null,
+        "hasOverallLeaderboard": false
+    }],
+    "imageSizes": [{
+        "imageURL": "http://static.sapsailing.com/ubilabsimages/505Worlds2013_eventteaser.jpg",
+        "imageWidth": 370,
+        "imageHeight": 240
+    }]
+}

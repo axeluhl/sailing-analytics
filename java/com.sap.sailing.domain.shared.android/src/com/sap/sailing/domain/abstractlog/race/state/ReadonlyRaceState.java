@@ -5,13 +5,14 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -47,9 +48,17 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     RaceLog getRaceLog();
 
     /**
-     * Gets the currently attached {@link ReadonlyRacingProcedure}.
+     * Gets the currently attached {@link ReadonlyRacingProcedure}, providing a default in case there is none provided
+     * in the race log nor the regatta configuration.
      */
     ReadonlyRacingProcedure getRacingProcedure();
+
+    /**
+     * If no racing procedure is defined in the underlying race log, <code>null</code> is returned; otherwise
+     * the racing procedure as it would be returned by {@link #getRacingProcedure()}.
+     * @return
+     */
+    ReadonlyRacingProcedure getRacingProcedureNoFallback();
 
     /**
      * Gets the currently attached {@link ReadonlyRacingProcedure}. Use this method to avoid casting in cases you are
@@ -95,6 +104,12 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
     TimePoint getStartTime();
 
     /**
+     * A more comprehensive answer than {@link #getStartTime()} delivers. The result allows callers to
+     * understand, in particular, why a start time is not known yet.
+     */
+    StartTimeFinderResult getStartTimeFinderResult();
+
+    /**
      * If there is a finishing time set for the current pass, returns it. Otherwise <code>null</code>.
      */
     TimePoint getFinishingTime();
@@ -130,4 +145,5 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If wind has been entered, returns the most recent one. Otherwise <code>null</code>.
      */
     Wind getWindFix();
+
 }

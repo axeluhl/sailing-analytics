@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
-import com.sap.sailing.domain.common.Position;
+import com.google.gwt.maps.client.base.LatLng;
 
 public class Particle {
-    public Position currentPosition;
+    public LatLng currentPosition;
     public Vector previousPixelCoordinate;
     public Vector currentPixelCoordinate;
     public int stepsToLive;

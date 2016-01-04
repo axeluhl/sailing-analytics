@@ -17,7 +17,7 @@ public class DomainFactoryTest {
 
     @Before
     public void before() {
-        com.sap.sailing.domain.base.DomainFactory baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl();
+        com.sap.sailing.domain.base.DomainFactory baseDomainFactory = new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null);
         swissTimingDomainFactory = new com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl(
                 baseDomainFactory);
     }

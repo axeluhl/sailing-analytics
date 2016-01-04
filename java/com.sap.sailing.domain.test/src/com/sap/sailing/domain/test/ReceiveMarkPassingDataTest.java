@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -11,16 +12,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.domain.tractracadapter.impl.ControlPointAdapter;
@@ -88,6 +91,10 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     }
                 });
             }
+
+            @Override
+            public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {    
+            }
         };
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
@@ -101,9 +108,9 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     public void addRaceDefinition(RaceDefinition race, DynamicTrackedRace trackedRace) {
                     }
                 }, /* trackedRegattaRegistry */null,
-                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH,
-                ReceiverType.RAWPOSITIONS)) {
+                mock(RaceLogResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
+                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS,
+                ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
         }
         addListenersForStoredDataAndStartController(receivers);

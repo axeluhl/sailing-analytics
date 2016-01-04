@@ -34,7 +34,7 @@ public class RegattaLogReplicationTest extends
     @Before
     public void createEvent() throws Exception {
         final Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
-        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), author, t(0), 0, competitor);
+        regattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(0), t(0), author, 0, competitor);
 //        anotherRegattaLogEvent = new RegattaLogRegisterCompetitorEventImpl(t(1), author, t(1), 1, null);
     }
     

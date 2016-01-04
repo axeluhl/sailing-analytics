@@ -55,6 +55,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private CheckBox compressSwitch;
     private CheckBox exportWindSwitch;
+    private CheckBox exportDeviceConfigsSwitch;
     private TextBox filterBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
@@ -131,8 +132,9 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean override = overrideSwitch.getValue();
             boolean compress = compressSwitch.getValue();
             boolean exportWind = exportWindSwitch.getValue();
+            boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    new AsyncCallback<UUID>() {
+                    exportDeviceConfigs, new AsyncCallback<UUID>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -341,6 +343,11 @@ public class MasterDataImportPanel extends VerticalPanel {
         exportWindSwitch.setTitle(stringMessages.importWindTooltip());
         exportWindSwitch.setValue(true);
         contentPanel.add(exportWindSwitch);
+        
+        exportDeviceConfigsSwitch = new CheckBox(stringMessages.importDeviceConfigurations());
+        exportDeviceConfigsSwitch.setTitle(stringMessages.importDeviceConfigurationsTooltip());
+        exportDeviceConfigsSwitch.setValue(false);
+        contentPanel.add(exportDeviceConfigsSwitch);
 
         importLeaderboardGroupsButton = new Button(stringMessages.importSelectedLeaderboardGroups());
         importLeaderboardGroupsButton.setEnabled(false);

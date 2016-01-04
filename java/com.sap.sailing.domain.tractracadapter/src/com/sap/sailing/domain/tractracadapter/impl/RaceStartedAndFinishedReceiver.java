@@ -68,27 +68,35 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
         System.out.print("StartStop");
         DynamicTrackedRace trackedRace = getTrackedRace(event.getA());
         if (trackedRace != null) {
-            IStartStopData startEndTrackingTimesData = event.getB();
-            if (startEndTrackingTimesData != null) {
-                final long startTrackingTime = startEndTrackingTimesData.getStartTime();
-                TimePoint startOfTracking = startTrackingTime == 0 ? null : getSimulator() == null ?
-                        new MillisecondsTimePoint(startTrackingTime) :
-                            getSimulator().advance(new MillisecondsTimePoint(startTrackingTime));
-                trackedRace.setStartOfTrackingReceived(startOfTracking);
-                final long endTrackingTime = startEndTrackingTimesData.getStopTime();
-                TimePoint endOfTracking = endTrackingTime == 0 ? null : getSimulator() == null ?
-                        new MillisecondsTimePoint(endTrackingTime) :
-                            getSimulator().advance(new MillisecondsTimePoint(endTrackingTime));
-                trackedRace.setEndOfTrackingReceived(endOfTracking);
-            }
-            IStartStopData startEndRaceTimesData = event.getC();
-            if (startEndRaceTimesData != null) {
-                final long startTime = startEndRaceTimesData.getStartTime();
-                TimePoint startOfRace = startTime == 0 ? null : getSimulator() == null ?
-                        new MillisecondsTimePoint(startTime) :
-                            getSimulator().advance(new MillisecondsTimePoint(startTime));
-                trackedRace.setStartTimeReceived(startOfRace);
-                // Note that end of race can't currently be set on a tracked race
+            final IRace race = event.getA();
+            // An uninitialized race means that all timing data is not valid; we replace start of tracking,
+            // end of tracking and start time received by null values.
+            if (!race.isInitialized()) {
+                trackedRace.setStartOfTrackingReceived(null);
+                trackedRace.setEndOfTrackingReceived(null);
+                trackedRace.setStartTimeReceived(null);
+            } else {
+                IStartStopData startEndTrackingTimesData = event.getB();
+                if (startEndTrackingTimesData != null) {
+                    final long startTrackingTime = startEndTrackingTimesData.getStartTime();
+                    TimePoint startOfTracking = startTrackingTime == 0 ? null
+                            : getSimulator() == null ? new MillisecondsTimePoint(startTrackingTime) : getSimulator()
+                                    .advance(new MillisecondsTimePoint(startTrackingTime));
+                    trackedRace.setStartOfTrackingReceived(startOfTracking);
+                    final long endTrackingTime = startEndTrackingTimesData.getStopTime();
+                    TimePoint endOfTracking = endTrackingTime == 0 ? null
+                            : getSimulator() == null ? new MillisecondsTimePoint(endTrackingTime) : getSimulator()
+                                    .advance(new MillisecondsTimePoint(endTrackingTime));
+                    trackedRace.setEndOfTrackingReceived(endOfTracking);
+                }
+                IStartStopData startEndRaceTimesData = event.getC();
+                if (startEndRaceTimesData != null) {
+                    final long startTime = startEndRaceTimesData.getStartTime();
+                    TimePoint startOfRace = startTime == 0 ? null : getSimulator() == null ? new MillisecondsTimePoint(
+                            startTime) : getSimulator().advance(new MillisecondsTimePoint(startTime));
+                    trackedRace.setStartTimeReceived(startOfRace);
+                    // Note that end of race can't currently be set on a tracked race
+                }
             }
         } else {
             logger.warning("Couldn't find tracked race for race " + event.getA().getName()

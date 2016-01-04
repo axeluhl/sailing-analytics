@@ -2,6 +2,8 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Duration;
+
 
 
 /**
@@ -65,6 +67,11 @@ public interface Distance extends Comparable<Distance>, Serializable {
         }
         
         @Override
+        public Speed inTime(Duration duration) {
+            return Speed.NULL;
+        }
+        
+        @Override
         public Distance add(Distance d) {
             return d;
         }
@@ -97,6 +104,8 @@ public interface Distance extends Comparable<Distance>, Serializable {
      * then the resulting speed will be negative.
      */
     Speed inTime(long milliseconds);
+    
+    Speed inTime(Duration duration);
     
     Distance add(Distance d);
 }

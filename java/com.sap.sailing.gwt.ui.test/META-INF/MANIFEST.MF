@@ -17,7 +17,6 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sse.filestorage
 Bundle-ClassPath: .
 Import-Package: com.sap.sailing.domain.racelogtracking.impl,
- javax.jms;version="1.1.0",
  javax.servlet;version="2.6.0",
  javax.servlet.http;version="2.6.0",
  junit.framework;version="4.8.1",

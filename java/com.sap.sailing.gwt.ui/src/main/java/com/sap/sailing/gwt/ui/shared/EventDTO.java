@@ -16,7 +16,7 @@ public class EventDTO extends EventBaseDTO {
         this(new ArrayList<LeaderboardGroupDTO>());
     }
 
-    private EventDTO(List<LeaderboardGroupDTO> leaderboardGroups) {
+    protected EventDTO(List<LeaderboardGroupDTO> leaderboardGroups) {
         super(leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();
@@ -26,7 +26,7 @@ public class EventDTO extends EventBaseDTO {
         this(name, new ArrayList<LeaderboardGroupDTO>());
     }
 
-    private EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
+    protected EventDTO(String name, List<LeaderboardGroupDTO> leaderboardGroups) {
         super(name, leaderboardGroups);
         this.leaderboardGroups = leaderboardGroups;
         initCurrentServerTime();
@@ -36,7 +36,7 @@ public class EventDTO extends EventBaseDTO {
     public boolean isFakeSeries() {
         return leaderboardGroups.size() == 1 && leaderboardGroups.get(0).hasOverallLeaderboard();
     }
-
+    
     public boolean isRunning() {
         return getCurrentServerTime().after(startDate) && getCurrentServerTime().before(endDate);
     }

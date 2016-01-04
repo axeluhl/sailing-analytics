@@ -68,12 +68,14 @@ Sometimes we need a bundle containing code and resources which can be used by ot
 To create and use such a bundle from another GWT bundle (e.g. com.sap.sailing.gwt.ui) some additional steps compared to the normal Java bundle creation are required.
 
 GWT library bundle project creation
+
 * Add a new Java plugin project, using <git-workspace>/java/<bundle-name> as the project directory
 * Add the GWT-SDK dependency to the project 
 * Add a GWT module file to project (ModuleName.gwt.xml)
 * Add the bundle to the main pom.xml in /git/java
 
 Use the GWT library project in a GWT UI project
+
 * Add the src folder of the GWT library bundle to classpath of all GWT-Launch configurations (required to let the GWT dev mode find the sources of java classes) -> Open GWT launch config, select tab 'classpath', select 'User entries', click 'Advanced' button, choose 'add folders' option and add the src folder of the GWT library project
 * Add the bundle the pom.xml of the GWT UI project (for the maven build)
 

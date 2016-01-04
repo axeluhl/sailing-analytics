@@ -6,9 +6,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public abstract class AbstractChartSettingsComponent<SettingsType extends ChartSettings> implements SettingsDialogComponent<SettingsType> {
     private final ChartSettings settings;

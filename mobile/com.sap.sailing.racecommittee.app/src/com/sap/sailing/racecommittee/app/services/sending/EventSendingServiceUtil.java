@@ -11,6 +11,7 @@ import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public class EventSendingServiceUtil {
+
     /**
      * Creates an intent that contains the event to be sent and the race id which shall be sent to the back end. See
      * constants in <code>AddEntryToRaceLogJsonPostServlet</code> for URL construction rules.
@@ -27,7 +28,7 @@ public class EventSendingServiceUtil {
      */
     public static Intent createEventIntent(Context context, ManagedRace race, Serializable eventId, String serializedEventAsJson,
             Class<? extends ServerReplyCallback> callbackClass) throws UnsupportedEncodingException {
-        String url = MessageSendingService.getRaceLogEventSendAndReceiveUrl(context, 
+        String url = MessageSendingService.getRaceLogEventSendAndReceiveUrl(context,
                 race.getRaceGroup().getName(), race.getName(), race.getFleet().getName());
         return MessageSendingService.createMessageIntent(context, url, race.getId(), eventId, serializedEventAsJson, callbackClass);
     }

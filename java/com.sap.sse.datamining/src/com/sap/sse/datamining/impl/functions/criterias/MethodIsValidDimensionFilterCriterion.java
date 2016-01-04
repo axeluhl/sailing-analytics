@@ -2,7 +2,7 @@ package com.sap.sse.datamining.impl.functions.criterias;
 
 import java.lang.reflect.Method;
 
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public class MethodIsValidDimensionFilterCriterion extends AbstractMethodFilterCriterion {
 

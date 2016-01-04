@@ -90,7 +90,7 @@ public class NOAAImporter {
      * @throws IOException 
      */
     public Declination getDeclination(final Position position, final TimePoint timePoint,
-            long timeoutForOnlineFetchInMilliseconds) throws IOException, ClassNotFoundException, ParseException {
+            long timeoutForOnlineFetchInMilliseconds) throws IOException, ParseException {
         final Declination[] result = new Declination[1];
         Thread fetcher = new Thread("Declination fetcher for "+position+"@"+timePoint) {
             @Override

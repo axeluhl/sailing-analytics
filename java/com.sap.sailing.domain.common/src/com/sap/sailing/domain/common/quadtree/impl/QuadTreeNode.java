@@ -27,7 +27,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.BoundsImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
 
@@ -121,10 +123,10 @@ public class QuadTreeNode<T> implements Serializable {
         double nsHalf = (bounds.getNorthEast().getLatDeg() + bounds.getSouthWest().getLatDeg()) / 2.0;
         double ewHalf = (bounds.getNorthEast().getLngDeg() + bounds.getSouthWest().getLngDeg()) / 2.0;
         children = new QuadTreeNode[4];
-        children[NORTHWEST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
-        children[NORTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
-        children[SOUTHEAST] = new QuadTreeNode<T>(new Bounds(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
-        children[SOUTHWEST] = new QuadTreeNode<T>(new Bounds(bounds.getSouthWest(), new DegreePosition(nsHalf, ewHalf)), maxItems);
+        children[NORTHWEST] = new QuadTreeNode<T>(new BoundsImpl(new DegreePosition(nsHalf, bounds.getSouthWest().getLngDeg()), new DegreePosition(bounds.getNorthEast().getLatDeg(), ewHalf)), maxItems);
+        children[NORTHEAST] = new QuadTreeNode<T>(new BoundsImpl(new DegreePosition(nsHalf, ewHalf), bounds.getNorthEast()), maxItems);
+        children[SOUTHEAST] = new QuadTreeNode<T>(new BoundsImpl(new DegreePosition(bounds.getSouthWest().getLatDeg(), ewHalf), new DegreePosition(nsHalf, bounds.getNorthEast().getLngDeg())), maxItems);
+        children[SOUTHWEST] = new QuadTreeNode<T>(new BoundsImpl(bounds.getSouthWest(), new DegreePosition(nsHalf, ewHalf)), maxItems);
         Vector<QuadTreeLeaf<T>> temp = new Vector<QuadTreeLeaf<T>>(items);
         items.removeAllElements();
         for (Iterator<QuadTreeLeaf<T>> i=temp.iterator(); i.hasNext(); ) {
@@ -391,13 +393,13 @@ public class QuadTreeNode<T> implements Serializable {
         if (children == null) {
             for (Iterator<QuadTreeLeaf<T>> i=items.iterator(); i.hasNext(); ) {
             	QuadTreeLeaf<T> qtl = i.next();
-                if (rect.contains(new DegreePosition(qtl.getPoint().getLatDeg(), qtl.getPoint().getLngDeg()))) {
+                if (rect.contains(qtl.getPoint())) {
                     vector.add(qtl.getObject());
                 }
             }
         } else {
             for (int i = 0; i < children.length; i++) {
-                if (children[i].bounds.containsBounds(rect)) {
+                if (rect.intersects(children[i].bounds)) {
                     children[i].get(rect, vector);
                 }
             }

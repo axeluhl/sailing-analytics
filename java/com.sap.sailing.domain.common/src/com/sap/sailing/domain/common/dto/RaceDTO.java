@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.common.dto;
 
-import java.util.Date;
-
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 
@@ -11,8 +9,10 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
  * @author Axel Uhl (d043530)
  *
  */
-public class RaceDTO extends NamedDTO {
+public class RaceDTO extends BasicRaceDTO {
     private static final long serialVersionUID = 2613189982608149975L;
+
+    public enum RaceLiveState { NOT_TRACKED, TRACKED, TRACKED_AND_LIVE, TRACKED_BUT_NOT_SCHEDULED };
 
     /**
      * Tells if this race is currently being tracked, meaning that a {@link RaceTracker} is
@@ -21,13 +21,10 @@ public class RaceDTO extends NamedDTO {
      */
     public boolean isTracked;
 
-    public Date startOfRace;
-    public Date endOfRace;
     public RaceStatusDTO status;
 
     public PlacemarkOrderDTO places;
 
-    public TrackedRaceDTO trackedRace;
     public TrackedRaceStatisticsDTO trackedRaceStatistics;
 
     private String regattaName;
@@ -40,10 +37,23 @@ public class RaceDTO extends NamedDTO {
     }
 
     public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
-        super(raceIdentifier.getRaceName());
+        super(raceIdentifier, trackedRace);
         this.regattaName = raceIdentifier.getRegattaName();
-        this.trackedRace = trackedRace;
         this.isTracked = isCurrentlyTracked;
+    }
+
+    public RaceLiveState getLiveState(long serverTimePointAsMillis) {
+        RaceLiveState result = RaceLiveState.NOT_TRACKED;
+        if (trackedRace != null && trackedRace.hasGPSData && trackedRace.hasWindData) {
+            result = RaceLiveState.TRACKED;
+            if (isLive(serverTimePointAsMillis)) {
+                result = RaceLiveState.TRACKED_AND_LIVE;
+                if (startOfRace == null) {
+                    result = RaceLiveState.TRACKED_BUT_NOT_SCHEDULED;
+                }
+            }
+        }
+        return result;
     }
 
     public RegattaAndRaceIdentifier getRaceIdentifier() {
@@ -59,13 +69,10 @@ public class RaceDTO extends NamedDTO {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((boatClass == null) ? 0 : boatClass.hashCode());
-        result = prime * result + ((endOfRace == null) ? 0 : endOfRace.hashCode());
         result = prime * result + (isTracked ? 1231 : 1237);
         result = prime * result + ((places == null) ? 0 : places.hashCode());
         result = prime * result + ((regattaName == null) ? 0 : regattaName.hashCode());
-        result = prime * result + ((startOfRace == null) ? 0 : startOfRace.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
-        result = prime * result + ((trackedRace == null) ? 0 : trackedRace.hashCode());
         return result;
     }
 
@@ -83,11 +90,6 @@ public class RaceDTO extends NamedDTO {
                 return false;
         } else if (!boatClass.equals(other.boatClass))
             return false;
-        if (endOfRace == null) {
-            if (other.endOfRace != null)
-                return false;
-        } else if (!endOfRace.equals(other.endOfRace))
-            return false;
         if (isTracked != other.isTracked)
             return false;
         if (places == null) {
@@ -100,20 +102,10 @@ public class RaceDTO extends NamedDTO {
                 return false;
         } else if (!regattaName.equals(other.regattaName))
             return false;
-        if (startOfRace == null) {
-            if (other.startOfRace != null)
-                return false;
-        } else if (!startOfRace.equals(other.startOfRace))
-            return false;
         if (status == null) {
             if (other.status != null)
                 return false;
         } else if (!status.equals(other.status))
-            return false;
-        if (trackedRace == null) {
-            if (other.trackedRace != null)
-                return false;
-        } else if (!trackedRace.equals(other.trackedRace))
             return false;
         return true;
     }

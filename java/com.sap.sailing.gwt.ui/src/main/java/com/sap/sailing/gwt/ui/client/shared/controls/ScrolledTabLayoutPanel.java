@@ -171,7 +171,7 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
         return vPanel;
     }
 
-    private void checkIfScrollButtonsNecessary() {
+    public void checkIfScrollButtonsNecessary() {
         // Defer size calculations until sizes are available, when calculating immediately after
         // add(), all size methods return zero
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
@@ -191,6 +191,19 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
 
         });
 
+    }
+    
+    public void scrollToTab(int tabNumber) {
+        Widget tab = getTab(tabNumber);
+        if (tab == null || !isScrollingNecessary())
+            return;
+        
+        int oldLeft = parsePosition(tabBar.getElement().getStyle().getLeft());
+        int difference = getAbsoluteRightOfTabBar() - getAbsoluteRightOfWidget(tab) - SCROLL_RIGHT_TAB_MARGIN;
+        
+        // Prevent over-scrolling left border
+        int newLeft = Math.min(oldLeft + difference, 0);
+        scrollTo(oldLeft, newLeft);
     }
 
     private void resetScrollPosition() {
@@ -218,6 +231,10 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
                 isScrolling = false;
             }
         }.run(SCROLL_ANIMATION_SPEED);
+    }
+    
+    private boolean isScrollingNecessary() {
+        return isScrollingToLeftNecessary() || isScrollingToRightNecessary();
     }
 
     private boolean isScrollingToRightNecessary() {
@@ -257,6 +274,14 @@ public class ScrolledTabLayoutPanel extends TabLayoutPanel {
             return null;
 
         return tabBar.getWidget(tabBar.getWidgetCount() - 1);
+    }
+    
+    private Widget getTab(int tabNumber) {
+        if (tabNumber < 0 || tabNumber >= tabBar.getWidgetCount()) {
+            return null;
+        }
+        
+        return tabBar.getWidget(tabNumber);
     }
     
     private Widget getFirstTab() {

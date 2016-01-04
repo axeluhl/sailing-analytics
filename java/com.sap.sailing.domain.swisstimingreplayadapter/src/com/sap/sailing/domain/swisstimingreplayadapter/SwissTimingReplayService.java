@@ -39,7 +39,8 @@ public interface SwissTimingReplayService {
      * @param regatta
      *            the regatta to which the race shall be added; if <code>null</code>, a default regatta will be
      *            created/used
+     * @param useInternalMarkPassingAlgorithm use our own instead of the SwissTiming-provided mark rounding / split times
      */
-    void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry);
+    void loadRaceData(String link, Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, boolean useInternalMarkPassingAlgorithm);
 
 }

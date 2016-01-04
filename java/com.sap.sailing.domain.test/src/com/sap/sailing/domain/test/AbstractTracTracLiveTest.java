@@ -149,9 +149,9 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     }
 
     public static Iterable<Pair<TracTracControlPoint, PassingInstruction>> getTracTracControlPointsWithPassingInstructions(Iterable<IControl> controlPoints) {
-        List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<Pair<TracTracControlPoint, PassingInstruction>>();
+        List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
         for (IControl cp : controlPoints) {
-            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), null));
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(new ControlPointAdapter(cp), PassingInstruction.None));
         }
         return ttControlPoints;
     }
@@ -165,7 +165,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     }
 
     public static URI getCourseDesignUpdateURI() throws URISyntaxException {
-        return new URI("http://tracms.traclive.dk/update_course");
+        return new URI("http://" + TracTracConnectionConstants.HOST_NAME + "/update_course");
     }
 
     public static String getTracTracUsername() {

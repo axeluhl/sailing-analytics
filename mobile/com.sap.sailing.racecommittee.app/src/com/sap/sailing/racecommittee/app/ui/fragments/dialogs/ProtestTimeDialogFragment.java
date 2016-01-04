@@ -1,17 +1,18 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ArrayAdapter;
@@ -24,7 +25,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.BoatClassSeriesFleet;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.utils.ScreenHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -32,14 +34,13 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
 
     private static String ARGS_RACE_IDS = ProtestTimeDialogFragment.class.getSimpleName() + ".raceids";
 
-    public static ProtestTimeDialogFragment newInstace(List<ManagedRace> races) {
-        ArrayList<Serializable> raceIds = new ArrayList<Serializable>();
+    public static ProtestTimeDialogFragment newInstance(List<ManagedRace> races) {
+        ArrayList<String> raceIds = new ArrayList<>();
         for (ManagedRace race : races) {
             raceIds.add(race.getId());
         }
         Bundle args = new Bundle();
-        args.putSerializable(ARGS_RACE_IDS, raceIds);
-
+        args.putStringArrayList(ARGS_RACE_IDS, raceIds);
         ProtestTimeDialogFragment fragment = new ProtestTimeDialogFragment();
         fragment.setArguments(args);
         return fragment;
@@ -51,7 +52,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     private View customView;
 
     public ProtestTimeDialogFragment() {
-        races = new ArrayList<ManagedRace>();
+        races = new ArrayList<>();
     }
     
     @Override
@@ -61,7 +62,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     @Override
-    protected Builder createDialog(Builder builder) {
+    protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
         getRacesFromArguments();
         customView = setupView();
         return builder.setTitle(getString(R.string.protest_dialog_title)).setView(customView);
@@ -78,7 +79,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
     }
 
     @Override
-    protected DialogListenerHost getHost() {
+    protected DialogListenerHost getListenerHost() {
         return new DialogListenerHost() {
             @Override
             public DialogResultListener getListener() {
@@ -104,6 +105,16 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         setupRacesList(racesList);
         timePicker = (TimePicker) view.findViewById(R.id.protest_time_time_time_picker);
         setupTimePicker(timePicker);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            // TODO: @Samuel -> please check, why we did this, because I can't remember
+            ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
+            layoutParams.height = 49 * races.size();
+            int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
+            if (layoutParams.height > screenHeight) {
+                layoutParams.height = screenHeight;
+            }
+        }
         return view;
     }
     
@@ -185,11 +196,9 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         if (args == null) {
             throw new IllegalStateException("Arguments needed!");
         }
-
         ReadonlyDataManager manager = DataManager.create(getActivity());
-        @SuppressWarnings("unchecked")
-        ArrayList<Serializable> raceIds = (ArrayList<Serializable>) args.getSerializable(ARGS_RACE_IDS);
-        for (Serializable id : raceIds) {
+        ArrayList<String> raceIds = args.getStringArrayList(ARGS_RACE_IDS);
+        for (String id : raceIds) {
             races.add(manager.getDataStore().getRace(id));
         }
     }
@@ -249,24 +258,24 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment {
         }
 
         public ProtestTimeAdapter(Context context, List<ManagedRace> objects) {
-            super(context, android.R.layout.simple_list_item_multiple_choice, wrap(objects));
+            super(context, R.layout.themeable_protest_list_item, wrap(objects));
         }
 
     }
 
     private static class ManagedRaceItem {
 
-        private BoatClassSeriesFleet group;
+        private RaceGroupSeriesFleet group;
         private ManagedRace race;
 
         public ManagedRaceItem(ManagedRace race) {
             this.race = race;
-            this.group = new BoatClassSeriesFleet(race);
+            this.group = new RaceGroupSeriesFleet(race);
         }
 
         @Override
         public String toString() {
-            return String.format("%s - %s", group.getDisplayName(), race.getRaceName());
+            return String.format("%s - %s", group.getDisplayName(true), race.getRaceName());
         }
 
     }

@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -27,6 +26,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
@@ -34,23 +34,25 @@ import com.sap.sailing.domain.common.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.WithValidityCache;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
-import com.sap.sailing.domain.tracking.WithValidityCache;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl<FixType> implements GPSFixTrack<ItemType, FixType> {
     private static final Logger logger = Logger.getLogger(GPSFixTrackImpl.class.getName());
     private static final long serialVersionUID = -7282869695818293745L;
-    private static final Speed DEFAULT_MAX_SPEED_FOR_SMOOTHING = new KnotSpeedImpl(50);
     protected final Speed maxSpeedForSmoothing;
     
     private final ItemType trackedItem;
@@ -58,7 +60,12 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     
     private final GPSTrackListeners<ItemType, FixType> listeners;
     
-
+    /**
+     * When the owning {@link TrackedRace} is still {@link TrackedRaceStatusEnum#LOADING loading}, validity cache updates are
+     * suspended.
+     */
+    private boolean validityCachingSuspended;
+    
     private static class GPSTrackListeners<I, F extends GPSFix> implements Serializable {
         private static final long serialVersionUID = -7117842092078781722L;
         private Set<GPSTrackListener<I, F>> listeners;
@@ -186,6 +193,25 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         this.listeners = new GPSTrackListeners<ItemType, FixType>();
         this.distanceCache = new DistanceCache(trackedItem==null?"null":trackedItem.toString());
         this.maxSpeedCache = createMaxSpeedCache();
+        this.validityCachingSuspended = false;
+    }
+    
+    @Override
+    public void suspendValidityCaching() {
+        validityCachingSuspended = true;
+    }
+    
+    @Override
+    public void resumeValidityCaching() {
+        lockForWrite();
+        try {
+            this.validityCachingSuspended = false;
+            for (FixType fix : getRawFixes()) {
+                fix.invalidateCache();
+            }
+        } finally {
+            unlockAfterWrite();
+        }
     }
 
     protected MaxSpeedCache<ItemType, FixType> createMaxSpeedCache() {
@@ -356,13 +382,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
+    public TimeRange getEstimatedPositionTimePeriodAffectedBy(GPSFix fix) {
         if (fix == null) {
             throw new IllegalArgumentException("fix must not be null");
         }
         lockForRead();
         try {
-            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ true);
+            Util.Pair<FixType, FixType> fixesForPositionEstimation = getFixesForPositionEstimation(fix.getTimePoint(), /* inclusive */ false);
             final TimePoint start;
             if (fix.equals(fixesForPositionEstimation.getA())) {
                 if (getLastFixBefore(fix.getTimePoint()) == null) {
@@ -393,7 +419,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                     end = fixesForPositionEstimation.getB().getTimePoint();
                 }
             }
-            return new Util.Pair<TimePoint, TimePoint>(start, end);
+            return new TimeRangeImpl(start, end);
         } finally {
             unlockAfterRead();
         }
@@ -552,7 +578,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             } finally {
                 unlockAfterRead();
             }
-            getDistanceCache().cache(from, to, result);
+            if (recursionDepth == 0) {
+                getDistanceCache().cache(from, to, result);
+            }
         }
         return result;
     }
@@ -958,7 +986,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
      * of the <code>gpsFix</code> "upwards." However, if the adjacent earlier fixes have changed their validity by the addition
      * of <code>gpsFix</code>, the distance cache must be invalidated starting with the first fix whose validity changed.
      */
-    protected void invalidateValidityAndEstimatedSpeedAndDistanceCaches(FixType gpsFix) {
+    private void invalidateValidityAndEstimatedSpeedAndDistanceCaches(FixType gpsFix) {
         assertWriteLock();
         TimePoint distanceCacheInvalidationStart = gpsFix.getTimePoint();
         // see also bug 968: cache entries for intervals ending after the last fix need to be removed because they are
@@ -1033,8 +1061,8 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 while (!result && next.compareTo(end) <= 0) {
                     SpeedWithBearing estimatedSpeedAtNext = getEstimatedSpeed(next);
                     if (estimatedSpeedAtNext != null) {
-                        Bearing bearingAtEnd = estimatedSpeedAtNext.getBearing();
-                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtEnd).getDegrees()) > minimumDegreeDifference;
+                        Bearing bearingAtNext = estimatedSpeedAtNext.getBearing();
+                        result = Math.abs(bearingAtStart.getDifferenceTo(bearingAtNext).getDegrees()) > minimumDegreeDifference;
                     }
                     next = new MillisecondsTimePoint(next.asMillis()
                             + Math.max(1000l, getMillisecondsOverWhichToAverageSpeed() / 2));
@@ -1058,7 +1086,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         try {
             firstFixInTrack = getRawFixes().isEmpty();
             result = addWithoutLocking(fix);
-            invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
+            if (!validityCachingSuspended) {
+                invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
+            }
         } finally {
             unlockAfterWrite();
         }
@@ -1091,5 +1121,9 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         for (GPSTrackListener<ItemType, FixType> listener : getListeners()) {
             listener.speedAveragingChanged(oldMillis, millisecondsOverWhichToAverage);
         }
+    }
+    
+    public static Speed getDefaultMaxSpeedForSmoothing() {
+        return DEFAULT_MAX_SPEED_FOR_SMOOTHING;
     }
 }

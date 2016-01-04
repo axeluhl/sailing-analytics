@@ -1,7 +1,8 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFix;
 
 public class DynamicGPSFixTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFix> implements DynamicGPSFixTrack<ItemType, GPSFix> {
     private static final long serialVersionUID = 4035953954507697564L;

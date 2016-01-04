@@ -15,6 +15,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 import com.sap.sailing.simulator.PolarDiagramFactory;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Registers OSGI bundle service for accessing polar diagrams
@@ -27,7 +28,7 @@ public class Activator implements BundleActivator {
     private static Activator INSTANCE;
     
     private final Future<PolarDiagramFactoryImpl> polarFactory;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");

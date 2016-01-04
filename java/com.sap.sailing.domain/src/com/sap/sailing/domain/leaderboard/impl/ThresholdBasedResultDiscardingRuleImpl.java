@@ -17,8 +17,6 @@ import java.util.Set;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NoWindError;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ThresholdBasedResultDiscardingRule;
 import com.sap.sse.common.TimePoint;
@@ -85,12 +83,8 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
             List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
-                    try {
-                        sortedRaces.add(raceColumn);
-                        netPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
-                    } catch (NoWindException e) {
-                        throw new NoWindError(e);
-                    }
+                    sortedRaces.add(raceColumn);
+                    netPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
                 }
             }
             result = new HashSet<RaceColumn>();

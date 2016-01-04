@@ -5,21 +5,22 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.client.BuildVersionRetriever;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.ServerInfoDTO;
+import com.sap.sse.gwt.client.ServerInfoRetriever;
 
 public class SystemInformationPanel extends FlowPanel {
 
     private final Label buildVersionText;
     
-    public SystemInformationPanel(final BuildVersionRetriever buildVersionRetriever, final ErrorReporter errorReporter) {
+    public SystemInformationPanel(final ServerInfoRetriever buildVersionRetriever, final ErrorReporter errorReporter) {
         super();
         buildVersionText = new Label("");
         addFloatingWidget(buildVersionText);
-        buildVersionRetriever.getBuildVersion(new AsyncCallback<String>() {
+        buildVersionRetriever.getServerInfo(new AsyncCallback<ServerInfoDTO>() {
             @Override
-            public void onSuccess(String result) {
-                buildVersionText.setText("Version: " + result);
+            public void onSuccess(ServerInfoDTO result) {
+                buildVersionText.setText("Version: " + result.getBuildVersion());
             }
             
             @Override

@@ -18,7 +18,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -146,7 +146,7 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         }
         ScrollPanel contentScrollPanel = new ScrollPanel();
         long delayBetweenAutoAdvancesInMilliseconds = 3000l;
-        final RaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
+        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
         // make a single live request as the default but don't continue to play by default
         Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
         final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
@@ -180,8 +180,8 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         mainPanel.add(contentScrollPanel);
     }
    
-    private RaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RaceIdentifier result;
+    private RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
+        RegattaAndRaceIdentifier result;
         if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1 &&
                 parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
             result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0), parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
@@ -214,10 +214,14 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
         if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_DETAIL) ||
                 parameterMap.containsKey(LeaderboardUrlSettings.PARAM_LEG_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL) ||
                 parameterMap.containsKey(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED)) {
+                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED) 
+                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
             List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL));
             List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_DETAIL));
             List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL));
+            if (overallDetails.isEmpty()) {
+                overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
+            }
             List<DetailType> legDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_LEG_DETAIL));
             List<String> namesOfRacesToShow = getStringListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME));
             boolean showAddedScores = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ? 
@@ -227,20 +231,34 @@ public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
             boolean autoExpandPreSelectedRace = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE) ?
                     Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE).get(0)) :
                         (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
+           boolean showCompetitorSailIdColumn = true;
+           boolean showCompetitorFullNameColumn = true;
+           if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
+                String value = parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS).get(0);
+                if (value.equals(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_FULL_NAME)) {
+                    showCompetitorSailIdColumn = false;
+                } else if (value.equals(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_SAIL_ID)) {
+                    showCompetitorFullNameColumn = false;
+                } else if (value.trim().equals("")) {
+                    showCompetitorFullNameColumn = false;
+                    showCompetitorSailIdColumn = false;
+                }
+            }
             result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
                     /* namesOfRaceColumnsToShow */ null,
                     namesOfRacesToShow, numberOfLastRacesToShow,
                     autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
                                     namesOfRacesToShow.get(0) : null,
                             /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor);
+                                    raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor,
+                                    showCompetitorSailIdColumn, showCompetitorFullNameColumn);
 
         } else {
             final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
             result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
                     /* overallDetails */ overallDetails, null,
                     /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy);
+                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
         }
         return result;
     }

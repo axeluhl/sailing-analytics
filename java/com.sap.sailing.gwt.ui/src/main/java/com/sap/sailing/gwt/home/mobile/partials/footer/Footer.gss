@@ -1,0 +1,26 @@
+.sitefooter {
+  background: #333;
+  padding: 5em 3em;
+  margin-top: -10em;
+  color: #fff;
+  text-align: center;
+  font-size: 110%;
+}
+.sitefooter a {
+  color: #fff;
+  line-height: 2;
+  padding: 5px; 
+}
+.sitefooter_language {
+  display: block;
+}
+a.sitefooter_language_link {
+  color: #fff;
+}
+a.sitefooter_language_linkactive {
+  color: #efaa00;
+}
+.sitefooter_links {
+  font-weight: 600;
+  padding: 3em 0;
+}

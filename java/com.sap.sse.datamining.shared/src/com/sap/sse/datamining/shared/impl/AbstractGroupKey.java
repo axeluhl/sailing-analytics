@@ -11,10 +11,9 @@ public abstract class AbstractGroupKey implements GroupKey {
         return asString();
     }
     
-    //Enforce hash code and equals in all subclasses
     @Override
-    public abstract boolean equals(Object other);
-    @Override
-    public abstract int hashCode();
+    public int compareTo(GroupKey key) {
+        return asString().compareTo(key.asString());
+    }
 
 }

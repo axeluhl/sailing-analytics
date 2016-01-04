@@ -2,7 +2,7 @@ package com.sap.sailing.domain.abstractlog.shared.events;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.Revokable;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.DefinedMarkFinder;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -19,7 +19,7 @@ import com.sap.sse.common.WithID;
  * If one end of the time range enclosed by {@link #getFrom()} and {@link #getTo()} is open, this can be closed
  * by a {@link CloseOpenEndedDeviceMappingEvent}.
  * 
- * @see DefinedMarkFinder for rules by which {@link DeviceMapping}s are derived from these events.
+ * @see RaceLogDefinedMarkFinder for rules by which {@link DeviceMapping}s are derived from these events.
  * @author Fredrik Teschke
  */
 public interface DeviceMappingEvent<VisitorT, ItemType extends WithID> extends AbstractLogEvent<VisitorT>, Revokable {

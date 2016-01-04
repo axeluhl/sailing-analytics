@@ -26,7 +26,7 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
     private static final Logger logger = Logger.getLogger(IgtimiWindTracker.class.getName());
     private static final int TIME_INTERVAL_TO_TRACK_BEFORE_RACE_START_MILLIS = 10*60*1000; // 10 minutes
     private static final long TIME_INTERVAL_TO_TRACK_AFTER_END_OF_RACE_MILLIS = 60*60*1000; // 60 minutes
-    private final Map<LiveDataConnection, Util.Pair<Iterable<String>, Account>> liveConnectionsAndDeviceSerialNumber;
+    private final Map<LiveDataConnection, Util.Triple<Iterable<String>, Account, IgtimiWindReceiver>> liveConnectionsAndDeviceSerialNumber;
     private final IgtimiWindTrackerFactory windTrackerFactory;
     private boolean stopping;
 
@@ -51,7 +51,8 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
                                     IgtimiWindReceiver windReceiver = new IgtimiWindReceiver(correctByDeclination ? DeclinationService.INSTANCE : null);
                                     liveConnection.addListener(windReceiver);
                                     windReceiver.addListener(new WindListenerSendingToTrackedRace(Collections.singleton(getTrackedRace()), windTrackerFactory));
-                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Pair<Iterable<String>, Account>(devicesWeShouldListenTo, account));
+                                    liveConnectionsAndDeviceSerialNumber.put(liveConnection, new Util.Triple<Iterable<String>, Account, IgtimiWindReceiver>(
+                                            devicesWeShouldListenTo, account, windReceiver));
                                 }
                             }
                         } catch (Exception e) {
@@ -111,15 +112,16 @@ public class IgtimiWindTracker extends AbstractWindTracker implements WindTracke
         synchronized (this) {
             windTrackerFactory.windTrackerStopped(getTrackedRace().getRace(), this);
             for (LiveDataConnection ldc : liveConnectionsAndDeviceSerialNumber.keySet()) {
+                final Util.Triple<Iterable<String>, Account, IgtimiWindReceiver> deviceSerialNumberAndAccountAndReceiver = liveConnectionsAndDeviceSerialNumber.get(ldc);
                 try {
                     logger.info("Stopping Igtimi live connection "+ldc);
-                    ldc.stop();
+                    ldc.stop(); // does reference counting and stops the live connection only if no other client is active anymore
+                    ldc.removeListener(deviceSerialNumberAndAccountAndReceiver.getC());
                 } catch (Exception e) {
-                    final Util.Pair<Iterable<String>, Account> deviceSerialNumberAndAccount = liveConnectionsAndDeviceSerialNumber.get(ldc);
                     logger.log(Level.INFO,
                             "Exception trying to stop Igtimi live connection for wind receiver for race "
-                                    + getTrackedRace().getRace() + " and device " + deviceSerialNumberAndAccount.getA()
-                                    + " in account " + deviceSerialNumberAndAccount.getB());
+                                    + getTrackedRace().getRace() + " and device " + deviceSerialNumberAndAccountAndReceiver.getA()
+                                    + " in account " + deviceSerialNumberAndAccountAndReceiver.getB());
                 }
             }
         }

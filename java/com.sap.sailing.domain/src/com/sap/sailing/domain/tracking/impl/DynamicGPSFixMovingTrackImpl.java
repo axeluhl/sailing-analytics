@@ -19,8 +19,9 @@ import com.sap.sailing.domain.common.confidence.HasConfidence;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.BearingWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 
 public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving>{

@@ -2,8 +2,8 @@ package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.server.RacingEventService;
 
 /**

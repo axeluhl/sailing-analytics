@@ -18,4 +18,8 @@ public enum EmptyRegattaLogStore implements RegattaLogStore {
     @Override
     public void removeRegattaLog(RegattaLikeIdentifier regattaLikeId) {
     }
+
+    @Override
+    public void addImportedRegattaLog(RegattaLog regattaLog, RegattaLikeIdentifier identifier) { 
+    }
 }

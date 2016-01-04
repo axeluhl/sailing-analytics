@@ -70,7 +70,7 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
         try {
             final ObjectInputStream objectInputStream = createObjectInputStreamResolvingAgainstCache(is);
             ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
             try {
                 initiallyFillFromInternal(objectInputStream);
             } finally {
@@ -82,17 +82,32 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
     
     /**
+     * The class loader to use for de-serializing objects. By default, this object's class's class loader is used.
+     */
+    default ClassLoader getDeserializationClassLoader() {
+        return getClass().getClassLoader();
+    }
+    
+    /**
      * Wraps <code>os</code> by an {@link ObjectOutputStream} and invokes
      * {@link #serializeForInitialReplicationInternal(ObjectOutputStream)}.
      */
     @Override
     default void serializeForInitialReplication(OutputStream os) throws IOException {
-        serializeForInitialReplicationInternal(new ObjectOutputStream(os));
+        final ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+        serializeForInitialReplicationInternal(objectOutputStream);
+        objectOutputStream.flush();
     }
     
     @Override
     default O readOperation(InputStream inputStream) throws IOException, ClassNotFoundException {
-        return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
+        ClassLoader oldContextClassloader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(getDeserializationClassLoader());
+        try {
+            return readOperationInternal(createObjectInputStreamResolvingAgainstCache(inputStream));
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldContextClassloader);
+        }
     }
 
     @Override
@@ -182,9 +197,9 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
     }
 
     /**
-     * Checks whether this replicable is a replica. If yes, the operation is not executed locally but instead sent to
-     * the master server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes
-     * and replicates the operation immediately.
+     * Checks whether this replicable is a replica. If yes, the operation is executed locally and sent to the master
+     * server for execution. Otherwise, {@link #applyReplicated(OperationWithResult)} is invoked which executes and
+     * replicates the operation immediately.
      */
     default <T> T apply(OperationWithResult<S, T> operation) {
         boolean needToRemoveThreadLocal = false;
@@ -234,10 +249,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             }
             return result;
         } catch (Exception e) {
-            // FIXME why is the following call not performed in a finally clause? What are the consequences of not "cleaning up" in case the method terminates normally?
-            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
             logger.log(Level.SEVERE, "apply", e);
             throw new RuntimeException(e);
+        } finally {
+            setCurrentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster(false);
         }
     }
 }

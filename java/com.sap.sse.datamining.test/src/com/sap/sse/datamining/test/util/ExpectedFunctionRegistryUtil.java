@@ -9,13 +9,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Boat;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Competitor;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Leg;
-import com.sap.sse.datamining.test.functions.registry.test_classes.Test_Named;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasLegOfCompetitorContext;
-import com.sap.sse.datamining.test.functions.registry.test_contexts.Test_HasRaceContext;
-import com.sap.sse.datamining.test.functions.test_classes.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.impl.functions.MethodWrappingFunction;
+import com.sap.sse.datamining.test.data.Test_HasLegOfCompetitorContext;
+import com.sap.sse.datamining.test.data.Test_HasRaceContext;
+import com.sap.sse.datamining.test.data.impl.Test_ExternalLibraryClass;
+import com.sap.sse.datamining.test.domain.Test_Boat;
+import com.sap.sse.datamining.test.domain.Test_Competitor;
+import com.sap.sse.datamining.test.domain.Test_Leg;
+import com.sap.sse.datamining.test.domain.Test_Named;
 
 public class ExpectedFunctionRegistryUtil {
 
@@ -43,18 +44,29 @@ public class ExpectedFunctionRegistryUtil {
         
         Method getRegattaMethod = Test_HasRaceContext.class.getMethod("getRegatta", new Class<?>[0]);
         Function<?> getRegatta = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRegattaMethod);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRegatta, getName)));
+        Function<?> raceContextGetRegattaName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRegatta, getName));
+        addExpectedDimension(raceContextGetRegattaName);
 
         Method getRaceMethod = Test_HasRaceContext.class.getMethod("getRace", new Class<?>[0]);
         Function<?> getRace = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRaceMethod);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getRace, getName)));
+        Function<?> raceContextGetRaceName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRace, getName));
+        addExpectedDimension(raceContextGetRaceName);
         
         Method getBoatClassMethod = Test_HasRaceContext.class.getMethod("getBoatClass", new Class<?>[0]);
         Function<?> getBoatClass = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatClassMethod);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getBoatClass, getName)));
+        Function<?> raceContextGetBoatClassName = FunctionTestsUtil.getFunctionFactory().createCompoundFunction( Arrays.asList(getBoatClass, getName));
+        addExpectedDimension(raceContextGetBoatClassName);
         
         Method getYearMethod = Test_HasRaceContext.class.getMethod("getYear", new Class<?>[0]);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getYearMethod));
+        MethodWrappingFunction<Object> raceContextGetYear = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getYearMethod);
+        addExpectedDimension(raceContextGetYear);
+        
+        Method getRaceContextMethod = Test_HasLegOfCompetitorContext.class.getMethod("getRaceContext", new Class<?>[0]);
+        Function<?> getRaceContext = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getRaceContextMethod);
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRaceContext, raceContextGetRegattaName)));
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRaceContext, raceContextGetRaceName)));
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRaceContext, raceContextGetBoatClassName)));
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getRaceContext, raceContextGetYear)));
         
         Method getLegNumberMethod = Test_HasLegOfCompetitorContext.class.getMethod("getLegNumber", new Class<?>[0]);
         addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getLegNumberMethod));
@@ -64,13 +76,13 @@ public class ExpectedFunctionRegistryUtil {
         
         Method getTeamMethod = Test_Competitor.class.getMethod("getTeam", new Class<?>[0]);
         Function<?> getTeam = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getTeamMethod);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getTeam, getName)));
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getName)));
         
         Method getBoatMethod = Test_Competitor.class.getMethod("getBoat", new Class<?>[0]);
         Function<?> getBoat = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getBoatMethod);
         Method getSailIDMethod = Test_Boat.class.getMethod("getSailID", new Class<?>[0]);
         Function<?> getSailID = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getSailIDMethod);
-        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getCompetitor, getBoat, getSailID)));
+        addExpectedDimension(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getCompetitor, getBoat, getSailID)));
     }
     
     private void addExpectedDimension(Function<?> dimension) {
@@ -86,7 +98,7 @@ public class ExpectedFunctionRegistryUtil {
         Function<?> getLeg = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getLegMethod);
         Method getDistanceTraveledMethod = Test_Leg.class.getMethod("getDistanceTraveled", new Class<?>[0]);
         Function<?> getDistanceTraveled = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(getDistanceTraveledMethod);
-        addExpectedStatistic(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(null, Arrays.asList(getLeg, getDistanceTraveled)));
+        addExpectedStatistic(FunctionTestsUtil.getFunctionFactory().createCompoundFunction(Arrays.asList(getLeg, getDistanceTraveled)));
     }
     
     private void addExpectedStatistic(Function<?> statistic) {

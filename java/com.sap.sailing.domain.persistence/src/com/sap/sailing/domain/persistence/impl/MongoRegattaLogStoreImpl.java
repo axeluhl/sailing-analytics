@@ -27,16 +27,26 @@ public class MongoRegattaLogStoreImpl implements RegattaLogStore {
             result = regattaLogCache.get(identifier);
         } else {
             result = domainObjectFactory.loadRegattaLog(identifier);
-            MongoRegattaLogStoreVisitor listener = new MongoRegattaLogStoreVisitor(identifier, mongoObjectFactory);
-            result.addListener(listener);
+            addListener(identifier, result);
             regattaLogCache.put(identifier, result);
         }
         return result;
+    }
+
+    private void addListener(RegattaLikeIdentifier identifier, final RegattaLog regattaLog) {
+        MongoRegattaLogStoreVisitor listener = new MongoRegattaLogStoreVisitor(identifier, mongoObjectFactory);
+        regattaLog.addListener(listener);
     }
 
     @Override
     public void removeRegattaLog(RegattaLikeIdentifier identifier) {
         regattaLogCache.remove(identifier);
         mongoObjectFactory.removeRegattaLog(identifier);
+    }
+
+    @Override
+    public void addImportedRegattaLog(RegattaLog regattaLog, RegattaLikeIdentifier identifier) {
+        addListener(identifier, regattaLog);
+        regattaLogCache.put(identifier, regattaLog);
     }
 }

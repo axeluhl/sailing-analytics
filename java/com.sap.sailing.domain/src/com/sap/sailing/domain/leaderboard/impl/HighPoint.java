@@ -27,9 +27,9 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher,
-            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
+            int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double result;
         if (rank == 0) {
             result = null;
@@ -74,7 +74,7 @@ public class HighPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
     

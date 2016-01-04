@@ -1,9 +1,11 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.sap.sse.common.settings.AbstractSettings;
+
 /**
  * Settings for a tracked race.
  */
-public class TrackedRacesSettings {
+public class TrackedRacesSettings extends AbstractSettings {
     private long delayToLiveInSeconds;
 
     public TrackedRacesSettings() {

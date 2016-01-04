@@ -2,7 +2,6 @@ package com.sap.sailing.racecommittee.app.domain.racelog.impl;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         return eventsToAdd;
     }
 
-    private void addEvents(Context context, Serializable raceId, ReadonlyDataManager dataManager,
+    private void addEvents(Context context, String raceId, ReadonlyDataManager dataManager,
             List<RaceLogEvent> eventsToAdd) {
         if (eventsToAdd.isEmpty()) {
             ExLog.i(context, TAG, "No server-side events to add for race " + raceId);

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceInformationFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
@@ -51,13 +52,13 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            GPSFixStore gpsFixStore) {
-        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, gpsFixStore);
+            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
+        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, gpsFixStore, raceLogResolver);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, GPSFixStore gpsFixStore) {
+            WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta(
@@ -68,7 +69,7 @@ public class RaceLogConnectivityParams implements RaceTrackingConnectivityParame
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
-        return new RaceLogRaceTracker(trackedRegatta, this, windStore, gpsFixStore);
+        return new RaceLogRaceTracker(trackedRegatta, this, windStore, gpsFixStore, raceLogResolver);
     }
 
     @Override

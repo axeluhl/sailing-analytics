@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
 import com.sap.sailing.datamining.test.util.ConcurrencyTestsUtil;
 import com.sap.sailing.datamining.test.util.NullProcessor;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -26,7 +27,7 @@ import com.sap.sse.datamining.components.Processor;
 public class TestLeaderboardGroupRetrievalProcessor {
     
     private RacingEventService service;
-    private Processor<RacingEventService, LeaderboardGroup> retriever;
+    private Processor<RacingEventService, LeaderboardGroupWithContext> retriever;
     
     private Collection<LeaderboardGroup> retrievedGroups;
     
@@ -36,16 +37,16 @@ public class TestLeaderboardGroupRetrievalProcessor {
         stub(service.getLeaderboardGroups()).toReturn(getGroupsInService());
 
         retrievedGroups = new HashSet<>();
-        Processor<LeaderboardGroup, Void> receiver = new NullProcessor<LeaderboardGroup, Void>(LeaderboardGroup.class, Void.class) {
+        Processor<LeaderboardGroupWithContext, Void> receiver = new NullProcessor<LeaderboardGroupWithContext, Void>(LeaderboardGroupWithContext.class, Void.class) {
             @Override
-            public void processElement(LeaderboardGroup element) {
-                retrievedGroups.add(element);
+            public void processElement(LeaderboardGroupWithContext element) {
+                retrievedGroups.add(element.getLeaderboardGroup());
             }
         };
         
-        Collection<Processor<LeaderboardGroup, ?>> resultReceivers = new ArrayList<>();
+        Collection<Processor<LeaderboardGroupWithContext, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(receiver);
-        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0);
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sse.common.TimePoint;
 
 /**

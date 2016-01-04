@@ -27,9 +27,10 @@ public enum WindSourceType {
     TRACK_BASED_ESTIMATION(false, 0.5, /* useSpeed */ false),
 
     /**
-     * Inferred from the race course layout if the course is known to have its first leg be an upwind leg
+     * Inferred from the race course layout if the course is known to have its first leg be an upwind leg. This
+     * source has very low confidence and must be superseded by any other wind source.
      */
-    COURSE_BASED(false, 0.3, /* useSpeed */ false),
+    COURSE_BASED(false, 0.01, /* useSpeed */ false),
     
     /**
      * Wind estimation combined from all other wind sources, using <code>TrackedRace.getWind(...)</code>, based on

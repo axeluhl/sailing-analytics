@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin_half"
+            tools:src="@drawable/flag_xray_96dp"/>
+
+        <TextView
+            android:id="@+id/xray_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin_half"
+            android:text="@string/until_xray_removed"
+            android:textAppearance="?textNormal"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin_half"
+            android:src="?arrow_down_normal"/>
+
+        <Button
+            android:id="@+id/flag_down"
+            style="?buttonSolidNormal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin_half"
+            android:text="@string/finishing_done"/>
+    </LinearLayout>
+</RelativeLayout>

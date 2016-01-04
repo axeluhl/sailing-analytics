@@ -1,0 +1,28 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui' 
+        xmlns:dp='urn:import:com.sap.sailing.gwt.home.desktop.partials'>
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .listContainer > div {
+            margin-bottom: 2em;
+        }
+        .temp {
+			font-weight: bold; 
+			font-style: italic;
+		} 
+    </ui:style>
+    <g:HTMLPanel>
+        <div class="{res.mediaCss.grid}">
+            <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns} {res.mainCss.spacermarginbottommedium}" ui:field="regattaInfoContainerUi"/>
+        </div>
+        <dp:regattanavigation.ListNavigationPanel ui:field="listNavigationPanelUi"/>
+        <div class="{res.mediaCss.grid}">
+            <div class="{res.mediaCss.small12} {res.mediaCss.columns} {style.listContainer}" ui:field="listFormatContainerUi">
+                <dp:liveraces.LiveRacesList ui:field="liveRacesListUi" />
+                <dp:racelist.RaceListContainer ui:field="raceListContainerUi" />
+            </div>
+            <dp:regattacompetition.RegattaCompetition addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" ui:field="compFormatContainerUi" />
+        </div>
+        <dp:raceoffice.RaceOfficeSection ui:field="raceOfficeSectionUi" />
+    </g:HTMLPanel>
+</ui:UiBinder>

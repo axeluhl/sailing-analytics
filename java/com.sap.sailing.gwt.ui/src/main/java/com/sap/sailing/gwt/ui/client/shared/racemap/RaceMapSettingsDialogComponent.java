@@ -11,6 +11,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -20,14 +21,17 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
+    private static final int MAX_BUOY_ZONE_RADIUS_IN_METERS = 100;
+    private static final int MAX_STROKE_WEIGHT = 33;
     //Initializing the lists to prevent a null pointer exception in the first validation call
     private List<Util.Pair<CheckBox, ManeuverType>> checkboxAndManeuverType = new ArrayList<Util.Pair<CheckBox, ManeuverType>>();
     private List<Util.Pair<CheckBox, ZoomTypes>> checkboxAndZoomType = new ArrayList<Util.Pair<CheckBox,ZoomTypes>>();
@@ -36,10 +40,14 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox showDouglasPeuckerPointsCheckBox;
     private CheckBox showOnlySelectedCompetitorsCheckBox;
     private CheckBox showWindStreamletOverlayCheckbox;
+    private CheckBox showWindStreamletColorsCheckbox;
+    private CheckBox windUpCheckbox;
     private CheckBox showSimulationOverlayCheckbox;
     private CheckBox showSelectedCompetitorsInfoCheckBox;
     private LongBox tailLengthBox;
     private DoubleBox buoyZoneRadiusBox;
+    private CheckBox transparentHoverlines;
+    private IntegerBox hoverlineStrokeWeight;
     private boolean showViewSimulation;
     
     private final StringMessages stringMessages;
@@ -57,6 +65,36 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
 
+        Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
+        vp.add(generalLabel);
+       
+        windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
+        windUpCheckbox.setValue(initialSettings.isWindUp());
+        vp.add(windUpCheckbox);
+
+        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
+        vp.add(showWindStreamletOverlayCheckbox);
+        
+        showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
+        showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
+        showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
+        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckboxIntended");
+        vp.add(showWindStreamletColorsCheckbox);
+
+        showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                showWindStreamletColorsCheckbox.setEnabled(showWindStreamletOverlayCheckbox.getValue());
+            }
+        });
+        
+        if (showViewSimulation) {
+            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
+            vp.add(showSimulationOverlayCheckbox);
+        }
+
         Label competitorsLabel = dialog.createHeadlineLabel(stringMessages.competitors());
         vp.add(competitorsLabel);
 
@@ -68,16 +106,6 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         showSelectedCompetitorsInfoCheckBox.setValue(initialSettings.isShowSelectedCompetitorsInfo());
         vp.add(showSelectedCompetitorsInfoCheckBox);
 
-        showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
-        showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
-        vp.add(showWindStreamletOverlayCheckbox);
-        
-        if (showViewSimulation) {
-            showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
-            showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
-            vp.add(showSimulationOverlayCheckbox);
-        }
-        
         Label zoomLabel = dialog.createHeadlineLabel(stringMessages.zoom());
         vp.add(zoomLabel);
         
@@ -89,7 +117,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         for (ZoomTypes zoomType : ZoomTypes.values()) {
             if (zoomType != ZoomTypes.NONE) {
                 CheckBox cb = dialog.createCheckbox(RaceMapSettingsTypeFormatter.formatZoomType(zoomType, stringMessages));
-                cb.setValue(initialSettings.getZoomSettings().getTypesToConsiderOnZoom().contains(zoomType), false);
+                cb.setValue(Util.contains(initialSettings.getZoomSettings().getTypesToConsiderOnZoom(), zoomType), false);
                 checkboxAndZoomType.add(new Util.Pair<CheckBox, ZoomTypes>(cb, zoomType));
                 zoomSettingsBoxesPanel.add(cb);
                 
@@ -116,15 +144,25 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         
         Label maneuversLabel = dialog.createHeadlineLabel(stringMessages.maneuverTypesToShowWhenCompetitorIsClicked());
         vp.add(maneuversLabel);
+        int checkBoxCount = ManeuverType.values().length + 1; // including douglas peucker checkbox
+        int gridRowsRequired = checkBoxCount / 2 + checkBoxCount % 2; 
+        Grid maneuverGrid = new Grid(gridRowsRequired, 2);
+        vp.add(maneuverGrid);
+        int currentRowIndex = 0;
+        int currentColumnIndex = 0;
         for (ManeuverType maneuverType : ManeuverType.values()) {
             CheckBox checkbox = dialog.createCheckbox(ManeuverTypeFormatter.format(maneuverType, stringMessages));
             checkbox.setValue(initialSettings.isShowManeuverType(maneuverType));
             checkboxAndManeuverType.add(new Util.Pair<CheckBox, ManeuverType>(checkbox, maneuverType));
-            vp.add(checkbox);
+            maneuverGrid.setWidget(currentRowIndex++, currentColumnIndex, checkbox);
+            if (currentRowIndex >= gridRowsRequired) {
+                currentColumnIndex = 1;
+                currentRowIndex = 0; 
+            }
         }
         showDouglasPeuckerPointsCheckBox = dialog.createCheckbox(stringMessages.douglasPeuckerPoints());
         showDouglasPeuckerPointsCheckBox.setValue(initialSettings.isShowDouglasPeuckerPoints());
-        vp.add(showDouglasPeuckerPointsCheckBox);
+        maneuverGrid.setWidget(currentRowIndex, currentColumnIndex, showDouglasPeuckerPointsCheckBox);
         
         Label helpLinesLabel = dialog.createHeadlineLabel(stringMessages.helpLines());
         vp.add(helpLinesLabel);
@@ -165,7 +203,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         buoyZoneRadiusLabel.getElement().getStyle().setMarginLeft(25, Unit.PX);
         buoyZoneSettingsPanel.add(buoyZoneRadiusLabel);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusLabel, HasVerticalAlignment.ALIGN_MIDDLE);
-        buoyZoneRadiusBox = dialog.createDoubleBox((int) (initialSettings.getBuoyZoneRadiusInMeters()), 4);
+        buoyZoneRadiusBox = dialog.createDoubleBox(Double.valueOf((int) (initialSettings.getBuoyZoneRadiusInMeters())), 4);
         buoyZoneRadiusBox.setEnabled(initialSettings.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS));
         buoyZoneSettingsPanel.add(buoyZoneRadiusBox);
         buoyZoneSettingsPanel.setCellVerticalAlignment(buoyZoneRadiusBox, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -175,6 +213,19 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.FINISHLINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.ADVANTAGELINE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEMIDDLELINE));
+        vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
+        vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
+        
+        transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
+        transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
+        vp.add(transparentHoverlines);
+        
+        HorizontalPanel hoverlineStrokeWeightPanel = new HorizontalPanel();
+        Label hoverlineStrokeWeightLabel = new Label(stringMessages.bufferLineStrokeWeight() + ":");
+        hoverlineStrokeWeightPanel.add(hoverlineStrokeWeightLabel);
+        hoverlineStrokeWeight = dialog.createIntegerBox(initialSettings.getHoverlineStrokeWeight(), 3);
+        hoverlineStrokeWeightPanel.add(hoverlineStrokeWeight);
+        vp.add(hoverlineStrokeWeightPanel);
         
         return vp;
     }
@@ -215,11 +266,13 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowDouglasPeuckerPoints(showDouglasPeuckerPointsCheckBox.getValue());
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
+        result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
         if (showViewSimulation) {
             result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
         } else {
             result.setShowSimulationOverlay(false);            
         }
+        result.setWindUp(windUpCheckbox.getValue());
         result.setShowSelectedCompetitorsInfo(showSelectedCompetitorsInfoCheckBox.getValue());
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             result.setTailLengthInMilliseconds(tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l);
@@ -230,6 +283,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 result.setBuoyZoneRadiusInMeters(value);
             }
         }
+        result.setTransparentHoverlines(transparentHoverlines.getValue());
+        result.setHoverlineStrokeWeight(hoverlineStrokeWeight.getValue());
         return result;
     }
     
@@ -267,8 +322,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BOATTAILS) && valueToValidate.getTailLengthInMilliseconds() <= 0) {
                     errorMessage = stringMessages.tailLengthMustBePositive();
                 } else if (valueToValidate.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE) 
-                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0.0 || valueToValidate.getBuoyZoneRadiusInMeters() > 100.0)) {
-                        errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), "0", "100");
+                        && (valueToValidate.getBuoyZoneRadiusInMeters() < 0 || valueToValidate.getBuoyZoneRadiusInMeters() > MAX_BUOY_ZONE_RADIUS_IN_METERS)) {
+                        errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.buoyZone(), 0, 100);
+                } else if (valueToValidate.getHoverlineStrokeWeight() < 0 || valueToValidate.getHoverlineStrokeWeight() > MAX_STROKE_WEIGHT) {
+                    errorMessage = stringMessages.valueMustBeBetweenMinMax(stringMessages.bufferLineStrokeWeight(), 0, MAX_STROKE_WEIGHT);
                 }
                 return errorMessage;
             }

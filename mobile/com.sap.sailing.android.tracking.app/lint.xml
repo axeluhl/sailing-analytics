@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
+    <issue id="CommitPrefEdits">
+        <ignore path="src/com/sap/sailing/android/tracking/app/utils/AppPreferences.java" />
+    </issue>
+    <issue id="GradleOverrides">
+        <ignore path="AndroidManifest.xml" />
+    </issue>
+    <issue id="RelativeOverlap">
+        <ignore path="res/layout/fragment_tracking.xml" />
+        <ignore path="res/layout-land/fragment_tracking.xml" />
+    </issue>
     <issue id="TypographyDashes">
         <ignore path="res/values/preferences.xml" />
+    </issue>
+    <issue id="UnusedResources">
+        <ignore path="res/color/vpi__light_theme.xml" />
     </issue>
 </lint>

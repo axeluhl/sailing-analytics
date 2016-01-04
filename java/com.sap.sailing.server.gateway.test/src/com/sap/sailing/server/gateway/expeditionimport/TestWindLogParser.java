@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 
 public class TestWindLogParser {
     

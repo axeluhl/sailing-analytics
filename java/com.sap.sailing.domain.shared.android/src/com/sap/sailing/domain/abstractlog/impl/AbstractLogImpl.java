@@ -23,11 +23,11 @@ import com.sap.sailing.domain.abstractlog.RevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
+import com.sap.sse.common.Timed;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 /**
@@ -123,8 +123,11 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
             try {
                 checkIfSuccessfullyRevokes(revokeEvent);
                 lockForWrite();
-                revokedEventIds.add(revokeEvent.getRevokedEventId());
-                unlockAfterWrite();
+                try {
+                    revokedEventIds.add(revokeEvent.getRevokedEventId());
+                } finally {
+                    unlockAfterWrite();
+                }
             } catch (NotRevokableException e) {
                 logger.log(Level.WARNING, e.getMessage());
             }
@@ -133,9 +136,12 @@ extends TrackImpl<EventT> implements AbstractLog<EventT, VisitorT> {
     
     private void checkIfSuccessfullyRevokes(RevokeEvent<?> revokeEvent) throws NotRevokableException {
         lockForRead();
-        EventT revokedEvent = getEventById(revokeEvent.getRevokedEventId());
-        unlockAfterRead();
-
+        EventT revokedEvent;
+        try {
+            revokedEvent = getEventById(revokeEvent.getRevokedEventId());
+        } finally {
+            unlockAfterRead();
+        }
         if (revokedEvent == null) {
             // it can happen that the event that has been revoked is not yet loaded - as we assume
             // that race log events never get removed we can safely continue and assume that

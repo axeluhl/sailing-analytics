@@ -15,6 +15,7 @@ import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
 /**
@@ -41,7 +42,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
         return null;
     }
 
-    Leaderboard getLeaderboard() {
+    public Leaderboard getLeaderboard() {
         return leaderboard;
     }
     
@@ -196,5 +197,26 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
 
     @Override
     public void reloadRaceLog(Fleet fleet) {
+    }
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        return null;
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors() {
+        return leaderboard.getAllCompetitors();
+    }
+
+    @Override
+    public Iterable<Competitor> getAllCompetitors(Fleet fleet) {
+        final Iterable<Competitor> result;
+        if (fleet == metaFleet) {
+            result = leaderboard.getAllCompetitors();
+        } else {
+            result = Collections.emptySet();
+        }
+        return result;
     }
 }

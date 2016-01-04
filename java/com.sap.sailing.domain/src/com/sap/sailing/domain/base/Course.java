@@ -41,4 +41,8 @@ public interface Course extends CourseBase {
      * had been used.
      */
     void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
+    
+    int getNumberOfWaypoints();
+
+    Leg getLeg(int zeroBasedIndexOfWaypoint);
 }

@@ -3,7 +3,7 @@ package com.sap.sailing.datamining.test.util;
 import java.util.Collection;
 
 import com.sap.sse.datamining.functions.Function;
-import com.sap.sse.datamining.impl.functions.FunctionManager;
+import com.sap.sse.datamining.impl.components.management.FunctionManager;
 
 public class OpenFunctionManager extends FunctionManager {
     

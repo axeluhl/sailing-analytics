@@ -18,19 +18,19 @@ import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sse.common.TimePoint;
@@ -100,7 +100,7 @@ public class WindEstimationLockingUnderLoadTest {
         } else {
             double directionInDegrees = 360*Math.random();
             double confidence = Math.random();
-            final MillisecondsTimePoint now = MillisecondsTimePoint.now();
+            final TimePoint now = MillisecondsTimePoint.now();
             result = new WindWithConfidenceImpl<TimePoint>(new WindImpl(new DegreePosition(49, 8), now, new KnotSpeedWithBearingImpl(speedInKnots, new DegreeBearingImpl(directionInDegrees))),
                     confidence, now, /* useSpeed */ true);
         }

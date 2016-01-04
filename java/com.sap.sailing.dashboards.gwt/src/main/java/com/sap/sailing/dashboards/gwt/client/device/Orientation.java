@@ -3,6 +3,8 @@ package com.sap.sailing.dashboards.gwt.client.device;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sse.common.Util.Pair;
+
 /**
  * 
  * @author Alexander Ries (D062114)
@@ -62,8 +64,38 @@ public class Orientation {
     }
 
     public void notifiyListenerAboutHeadingChange(double orientationHeading) {
+        Pair<OrientationType, Double> orienationPair = new Pair<OrientationType, Double>(getOrientationTypeForHeadingInSafari(orientationHeading), new Double(orientationHeading));
         for (OrientationListener orientationListener : orientationListeners) {
-            orientationListener.orientationChanged(orientationHeading);
+            orientationListener.orientationChanged(orienationPair);
         }
+    }
+    
+    
+    private OrientationType getOrientationTypeForHeadingInSafari(double heading){
+        OrientationType orientationType = null;
+        if (heading > -45 && heading <= 0 || heading > 0 && heading < 45){
+            orientationType = OrientationType.PORTRAIT_UP;
+        }else if (heading > 45 && heading < 135){
+            orientationType = OrientationType.LANDSCAPE_RIGHT;
+        }else if (heading > 135 && heading <= 180 || heading >=-180 && heading < -135){
+            orientationType = OrientationType.PORTRAIT_DOWN;
+        }else if (heading > -135 && heading < -45){
+            orientationType = OrientationType.LANDSCAPE_LEFT;
+        }
+        return orientationType;
+    }
+    
+    private OrientationType getOrientationTypeForHeadingInChrome(double heading){
+        OrientationType orientationType = null;
+        if (heading > -45 && heading <= 0 || heading > 0 && heading < 45){
+            orientationType = OrientationType.LANDSCAPE_RIGHT;
+        }else if (heading > 45 && heading < 135){
+            orientationType = OrientationType.PORTRAIT_DOWN;
+        }else if (heading > 135 && heading <= 180 || heading >=-180 && heading < -135){
+            orientationType = OrientationType.LANDSCAPE_LEFT;
+        }else if (heading > -135 && heading < -45){
+            orientationType = OrientationType.PORTRAIT_UP;
+        }
+        return orientationType;
     }
 }

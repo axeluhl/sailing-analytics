@@ -1,0 +1,62 @@
+.siteheader {
+  font-size: 1rem;
+  background: #333;
+  border-bottom: 4px solid #f0ab00;
+  height: 75px;
+  line-height: 1,1em;
+  width: 100%;
+  overflow: hidden;
+  vertical-align: top;
+  position: relative;
+}
+
+.siteheaderLeft {
+    position: relative; top:10px;left:10px;
+	display: inline-block;
+	text-align: left;
+	height: 50px;
+	vertical-align: top;
+}
+
+.siteheaderCentered {
+    position: absolute; top:10px;left:235px;
+	display: inline-block;
+	text-align: left;
+	height:50px;
+	vertical-align: top;
+}
+
+.siteheaderRight {
+    position: absolute; top:10px;right:10px;
+	text-align: right;
+	display: inline-block;
+	height:50px;
+	vertical-align: top;
+}
+
+.logo {
+  margin: 0px;
+  display: inline-block;
+}
+.logotitle {
+  display: inline-block;
+  color: #f6f9fc;
+  font-weight: bold;
+  width: 150px;
+  height: 100%;
+  padding: 17px 15px 0 0;
+  line-height:1,1em;
+  vertical-align: top;
+  text-align: right;
+  border-right: 1px solid rgb(180,180,180);
+  margin: 0px;
+  
+  margin-left: -25px;
+ 
+  box-sizing: border-box;
+}
+.pagetitle {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: bold;
+}

@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
@@ -26,7 +24,7 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
     }
 
     @Override
-    public Serializable getId() {
+    public String getId() {
         return String.format("%s.%s", super.getId(), escapeIdentifierFragment(getRaceName()));
     }
 

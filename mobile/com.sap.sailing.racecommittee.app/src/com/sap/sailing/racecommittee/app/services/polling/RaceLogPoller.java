@@ -100,7 +100,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         } else {
             ExLog.i(context, TAG, "Polling has been deactivated, next polling attempt will be aborted."); 
         }
-    };
+    }
 
     /**
      * Will be run on the main (UI) thread!

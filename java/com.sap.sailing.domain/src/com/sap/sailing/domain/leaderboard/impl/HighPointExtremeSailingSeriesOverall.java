@@ -36,8 +36,8 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
     private static final int MIN_RACES_REQUIRED_TO_BE_SCORED = 5;
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank,
-            Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor,
+            int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         Double result;
         if (rank == 0) {
             result = null;
@@ -51,13 +51,13 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * Implements rule 13.5 of the Extreme Sailing Series notice of race as of August 2012.
      */
     @Override
-    public int compareByBetterScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
         assert o1Scores.size() == o2Scores.size();
         int o1Wins = getWins(o1Scores);
         int o2Wins = getWins(o2Scores);
         int result = o2Wins - o1Wins;
         if (result == 0 && o1Scores.size() >= 1 && o2Scores.size() >= 1) {
-            result = o1Scores.get(o1Scores.size()-1).getB().compareTo(o2Scores.get(o2Scores.size()-1).getB());
+            result = -o1Scores.get(o1Scores.size()-1).getB().compareTo(o2Scores.get(o2Scores.size()-1).getB());
         }
         return result;
     }
@@ -107,8 +107,7 @@ public class HighPointExtremeSailingSeriesOverall extends HighPoint {
      * @throws NoWindException 
      */
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard,
-            Competitor o1, Competitor o2, TimePoint timePoint) throws NoWindException {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
         assert leaderboard instanceof MetaLeaderboard;
         // compare by last regatta if this leaderboard is a meta leaderboard
         final int result;

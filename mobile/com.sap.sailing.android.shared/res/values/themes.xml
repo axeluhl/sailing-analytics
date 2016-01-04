@@ -5,7 +5,7 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="Theme.Welter" parent="android:Theme.Holo.Light">
+    <style name="Theme.Welter" parent="Theme.AppCompat.Light">
         <item name="android:actionDropDownStyle">@style/MyDropDownNav</item>
         <item name="android:actionBarStyle">@style/Widget.Welter.ActionBar</item>
         <item name="android:textColorPrimary">@color/welter_deep_gray</item>
@@ -34,7 +34,9 @@
         <item name="android:textColorHighlightInverse">@color/welter_white</item>
         <item name="android:textColorLink">@color/welter_white</item>
         <item name="android:textColorLinkInverse">@color/welter_white</item>
-        <item name="android:textColorAlertDialogListItem">@color/welter_white</item>
+        <item name="android:textColorAlertDialogListItem">@color/welter_white</item>
+
+
         -->
 
 
@@ -46,10 +48,12 @@
 		<item name="android:listViewStyle">@style/Widget.ListView.Welter</item>
  		 item name="android:windowNoTitle">true</item 
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:tabWidgetStyle">@style/LightTabWidget</item>
+        <item name="android:tabWidgetStyle">@style/LightTabWidget</item>
+
+
         -->
     </style>
 
-    <style name="Theme" parent="android:Theme.Light.NoTitleBar"></style>
+    <style name="Theme" parent="Theme.AppCompat.Light.NoActionBar"></style>
 
 </resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary"
+                tools:ignore="Overdraw">
+
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="4dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/sap_yellow"/>
+
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_bar"
+        android:padding="16dp"
+        android:textSize="16sp"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/white"
+        android:text="@string/your_regattas"/>
+
+</RelativeLayout>

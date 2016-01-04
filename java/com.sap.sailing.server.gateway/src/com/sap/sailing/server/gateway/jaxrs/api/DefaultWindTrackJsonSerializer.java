@@ -6,8 +6,8 @@ import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
 import com.sap.sse.common.TimePoint;
@@ -30,14 +30,9 @@ public class DefaultWindTrackJsonSerializer implements WindTrackJsonSerializer {
         ArrayList<Wind> fixes = new ArrayList<>();
         windTrack.lockForRead();
         try {
-            Iterator<Wind> windIter = windTrack.getFixesIterator(fromTime, /* inclusive */true);
+            Iterator<Wind> windIter = windTrack.getFixesIterator(fromTime, /* inclusive */true, toTime, /* inclusive */ false);
             while (windIter.hasNext()) {
-                Wind wind = windIter.next();
-                if (wind.getTimePoint().compareTo(toTime) > 0) {
-                    break;
-                } else {
-                    fixes.add(wind);
-                }
+                fixes.add(windIter.next());
             }
         } finally {
             windTrack.unlockAfterRead();

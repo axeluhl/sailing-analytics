@@ -622,15 +622,14 @@ int getPosition(){
           { sb.append('\f');
           }
         case 41: break;
-        case 24: 
-          { try{
-														int ch=Integer.parseInt(yytext().substring(2),16);
-														sb.append((char)ch);
-													}
-													catch(Exception e){
-														throw new ParseException(yychar, ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
-													}
-          }
+        case 24: {
+                try {
+                    int ch = Integer.parseInt(yytext().substring(2), 16);
+                    sb.append((char) ch);
+                } catch (Exception e) {
+                    throw new ParseException(yychar, ParseException.ERROR_UNEXPECTED_EXCEPTION, e);
+                }
+            }
         case 42: break;
         case 20: 
           { sb.append('\t');

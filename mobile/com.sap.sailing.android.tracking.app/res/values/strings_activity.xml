@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tracking_activity_checkin_digest_parameter" translatable="false">trackingActivityCheckinDigestParameter</string>
+</resources>

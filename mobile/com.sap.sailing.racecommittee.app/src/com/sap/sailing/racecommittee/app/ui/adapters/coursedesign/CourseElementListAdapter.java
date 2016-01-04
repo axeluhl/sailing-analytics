@@ -27,9 +27,8 @@ public class CourseElementListAdapter extends ArrayAdapter<CourseListDataElement
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (convertView == null) {
-
-            LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_one_row_three_columns, null);
+            LayoutInflater inflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+            view = inflater.inflate(R.layout.welter_one_row_three_columns, parent, false);
         }
 
         CourseListDataElement courseElement = getItem(position);

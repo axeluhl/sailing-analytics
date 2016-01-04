@@ -1,6 +1,7 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.ws.rs.GET;
@@ -13,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -24,14 +26,14 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.polars.PolarDataService;
-import com.sap.sailing.polars.regression.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
@@ -42,10 +44,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.util.kmeans.Cluster;
 
 /**
- * Right now this service is only used for quick debugging and testing of the polar api. It used plain text responses.
- * JSON should be used if this resource is to be consumed.
+ * Right now this service is only used for quick debugging and testing of the polar api. Some services use plain text
+ * responses. JSON or other common formats should be used if the series are to be consumed in production.
  * 
- * @author Frederik Petersen
+ * @author Frederik Petersen / Axel Uhl (maneuver-based wind estimation)
  *
  */
 @Path("/v1/polars")
@@ -70,6 +72,41 @@ public class PolarResource extends AbstractSailingServerResource {
             responseBuilder = Response.noContent();
         }
 
+        return responseBuilder.build();
+    }
+    
+    @GET
+    @Produces("text/plain;charset=UTF-8")
+    @Path("functions")
+    public Response getFunctions() {
+        PolarDataService polarDataService = getService().getPolarDataService();
+        Set<BoatClass> boatClasses = polarDataService.getAllBoatClassesWithPolarSheetsAvailable();
+        ResponseBuilder responseBuilder;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (BoatClass boatClass : boatClasses) {
+            for (LegType legType : new LegType[] { LegType.UPWIND, LegType.DOWNWIND }) {
+               try {
+                   PolynomialFunction speedFunction = polarDataService.getSpeedRegressionFunction(boatClass, legType);
+                   stringBuilder.append("Speed: " + boatClass + " " + legType + ": " + speedFunction.toString() + "\n");
+                   PolynomialFunction angleFunction = polarDataService.getAngleRegressionFunction(boatClass, legType);
+                   stringBuilder.append("Angle: " + boatClass + " " + legType + ": " + angleFunction.toString() + "\n");
+               } catch (NotEnoughDataHasBeenAddedException e) {
+                    stringBuilder.append("No data for " + boatClass + " " + legType + "\n");
+               }
+                
+            }
+            for (double trueWindAngle = -177.5; trueWindAngle < 180; trueWindAngle = trueWindAngle + 5) {
+                try {
+                    PolynomialFunction speedForTWAFunction = polarDataService.getSpeedRegressionFunction(boatClass, trueWindAngle);
+                    stringBuilder.append("Speed for TWA: " + boatClass + " " + trueWindAngle + ": " + speedForTWAFunction.toString() + "\n");
+                } catch (NotEnoughDataHasBeenAddedException e) {
+                    stringBuilder.append("No data for " + boatClass + " " + trueWindAngle + "\n");
+                }
+            }
+            stringBuilder.append("\n\n");
+        }
+
+        responseBuilder = Response.ok(stringBuilder.toString(), MediaType.TEXT_PLAIN);
         return responseBuilder.build();
     }
     

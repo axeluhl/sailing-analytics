@@ -5,13 +5,14 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RaceLogWindFixEventSerializer extends BaseRaceLogEventSerializer {
     
     public static final String VALUE_CLASS = RaceLogWindFixEvent.class.getSimpleName();
     public static final String FIELD_WIND = "wind";
+    public static final String FIELD_MAGNETIC = "magnetic";
     
     JsonSerializer<Wind> windSerializer;
 
@@ -30,6 +31,7 @@ public class RaceLogWindFixEventSerializer extends BaseRaceLogEventSerializer {
         RaceLogWindFixEvent event = (RaceLogWindFixEvent) object;
         JSONObject result = super.serialize(event);
         result.put(FIELD_WIND, windSerializer.serialize(event.getWindFix()));
+        result.put(FIELD_MAGNETIC, Boolean.valueOf(event.isMagnetic()));
         return result;
     }
 

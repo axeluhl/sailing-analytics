@@ -60,9 +60,10 @@ public class WidgetCarousel extends Composite {
     /**
      * slick slider property: infiniteScrolling
      */
-    private boolean infiniteScrolling = false;
+    private boolean infiniteScrolling = true;
 
     private final String uniqueId;
+    private boolean showArrows = true;
 
     private LinkedList<Widget> items = new LinkedList<Widget>();
 
@@ -73,24 +74,38 @@ public class WidgetCarousel extends Composite {
         initWidget(ourUiBinder.createAndBindUi(this));
         uniqueId = Document.get().createUniqueId();
         sliderMainUi.addStyleName(uniqueId);
+    }
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
         init();
     }
 
     public void onAfterChange() {
-
         for (Iterator<Widget> iterator = items.iterator(); iterator.hasNext();) {
             Widget widget = (Widget) iterator.next();
             final Element parent = widget.getElement();
-            if (parent != null && parent.getClassName().contains("slick-active")) {
-                if (iterator.hasNext()) {
-                    Widget nextOne = iterator.next();
-                    if (nextOne instanceof LazyLoadable) {
-                        LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
+
+            if (parent != null) {
+                if (parent.getClassName().contains("slick-active")) {
+                    if (iterator.hasNext()) {
+                        Widget nextOne = iterator.next();
+                        if (nextOne instanceof LazyLoadable) {
+                            LazyLoadable lazyLoadable = (LazyLoadable) nextOne;
+                            lazyLoadable.doInitializeLazyComponents();
+                        }
+                    }
+                    int previousIdx = items.indexOf(widget) - 1 < 0 ? items.size() - 1 : items.indexOf(widget) - 1;
+                    Widget previousOne = items.get(previousIdx);
+
+                    if (previousOne instanceof LazyLoadable) {
+                        LazyLoadable lazyLoadable = (LazyLoadable) previousOne;
                         lazyLoadable.doInitializeLazyComponents();
-                    } else {
                     }
                     return;
                 }
+
             }
         }
     }
@@ -103,27 +118,38 @@ public class WidgetCarousel extends Composite {
     native void setupSlider(WidgetCarousel sliderReference) /*-{
 
 	$wnd
-		.$(document)
-		.ready(
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.on(
+			'afterChange',
 			function() {
-			    $wnd
-				    .$(
-					    '.'
-						    + (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
-				    .slick(
-					    {
-						dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
-						infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
-						swipeToSlide : false,
-						arrows : true,
-						responsive : false,
-						onAfterChange : function() {
-						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-						},
-						onInit : function() {
-						    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
-						}
-					    });
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+			});
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.on(
+			'init',
+			function() {
+			    sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::onAfterChange()();
+			});
+
+	$wnd
+		.$(
+			'.'
+				+ (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::uniqueId))
+		.slick(
+			{
+			    dots : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showDots),
+			    infinite : (sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::infiniteScrolling),
+			    swipeToSlide : false,
+			    responsive : false,
+			    arrows : sliderReference.@com.sap.sse.gwt.client.controls.carousel.WidgetCarousel::showArrows,
+			    prevArrow : "<div class='slick-prev'/>",
+			    nextArrow : "<div class='slick-next'/>"
+
 			});
 
     }-*/;
@@ -151,6 +177,15 @@ public class WidgetCarousel extends Composite {
      */
     public void setInfiniteScrolling(boolean infiniteScrolling) {
         this.infiniteScrolling = infiniteScrolling;
+    }
+
+    /**
+     * Disable/ enable left/right arrows
+     * 
+     * @param showArrows
+     */
+    public void setShowArrows(boolean showArrows) {
+        this.showArrows = showArrows;
     }
 
     /**

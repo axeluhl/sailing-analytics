@@ -1,0 +1,40 @@
+<!-- Copy this file to ~/.m2/toolchains.xml and adjust according to your JRE locations to
+     give your Maven / Tycho installation knowledge of how to resolve the different
+     execution environments.
+-->
+<toolchains>
+  <!-- JDK toolchains -->
+  <toolchain>
+      <type>jdk</type>
+      <provides>
+            <version>1.6</version>
+            <id>JavaSE-1.6</id>
+            <vendor>sun</vendor>
+      </provides>
+      <configuration>
+            <jdkHome>/opt/jdk1.6.0_25/jre</jdkHome>
+      </configuration>
+  </toolchain>
+  <toolchain>
+      <type>jdk</type>
+      <provides>
+            <version>1.7</version>
+            <id>JavaSE-1.7</id>
+            <vendor>sun</vendor>
+      </provides>
+      <configuration>
+            <jdkHome>/opt/jdk1.7.0_02/jre</jdkHome>
+      </configuration>
+  </toolchain>
+  <toolchain>
+      <type>jdk</type>
+      <provides>
+            <version>1.8</version>
+            <id>JavaSE-1.8</id>
+            <vendor>sun</vendor>
+      </provides>
+      <configuration>
+            <jdkHome>/opt/jdk1.8.0_20/jre</jdkHome>
+      </configuration>
+  </toolchain>
+</toolchains>

@@ -3,7 +3,7 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import com.sap.sailing.domain.base.Timed;
+import com.sap.sse.common.Timed;
 
 public class TimedComparator implements Comparator<Timed>, Serializable {
     private static final long serialVersionUID = 1604511471599854988L;

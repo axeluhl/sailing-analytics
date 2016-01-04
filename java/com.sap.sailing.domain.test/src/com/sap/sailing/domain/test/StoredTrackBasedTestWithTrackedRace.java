@@ -10,8 +10,8 @@ import java.util.Map;
 import org.junit.Before;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;

@@ -5,6 +5,7 @@ import com.google.gwt.canvas.dom.client.ImageData;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Vector;
 
 /**
@@ -18,8 +19,8 @@ public abstract class MovingCanvasOverlay extends FullCanvasOverlay {
 
     private LatLng nw;
 
-    public MovingCanvasOverlay(MapWidget map, int zIndex) {
-        super(map, zIndex);
+    public MovingCanvasOverlay(MapWidget map, int zIndex, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
     }
     
     @Override

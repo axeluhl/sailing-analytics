@@ -16,10 +16,11 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 public class ItemToMapToDeviceSelectionPanel implements IsWidget {
-    private final CompetitorTableWrapper<SingleSelectionModel<CompetitorDTO>> competitorTable;
-    private final MarkTableWrapper<SingleSelectionModel<MarkDTO>> markTable;
+    private final CompetitorTableWrapper<RefreshableSingleSelectionModel<CompetitorDTO>> competitorTable;
+    private final MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>> markTable;
     private MappableToDevice selected;
     private final VerticalPanel mainPanel;
     private final ErrorReporter errorReporter;
@@ -31,16 +32,12 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
 
     public ItemToMapToDeviceSelectionPanel(SailingServiceAsync sailingService, StringMessages stringMessages,
             ErrorReporter errorReporter, final SelectionChangedHandler handler, MappableToDevice selected) {
-        
         this.selected = selected;
         this.errorReporter = errorReporter;
-        
-        final SingleSelectionModel<MarkDTO> markSelectionModel = new SingleSelectionModel<MarkDTO>();
-        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter,
-                new SingleSelectionModel<CompetitorDTO>(), true);
-        markTable = new MarkTableWrapper<SingleSelectionModel<MarkDTO>>(markSelectionModel, sailingService,
+        competitorTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true);
+        markTable = new MarkTableWrapper<RefreshableSingleSelectionModel<MarkDTO>>(/* multiSelection */ false, sailingService,
                 stringMessages, errorReporter);
-
+        final SingleSelectionModel<MarkDTO> markSelectionModel = markTable.getSelectionModel();
         competitorTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -53,8 +50,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
                 }
             }
         });
-
-        markTable.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        markSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 if (markSelectionModel.getSelectedSet().size() == 1) {
@@ -65,8 +61,7 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
                 }
             }
         });
-        
-        //build UI
+        // build UI
         this.mainPanel = new VerticalPanel();
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
         CaptionPanel competitorsPanel = new CaptionPanel(stringMessages.competitor());
@@ -113,10 +108,10 @@ public class ItemToMapToDeviceSelectionPanel implements IsWidget {
         };
     }
     
-    public AsyncCallback<Collection<MarkDTO>> getSetMarksCallback() {
-        return new AsyncCallback<Collection<MarkDTO>>() {
+    public AsyncCallback<Iterable<MarkDTO>> getSetMarksCallback() {
+        return new AsyncCallback<Iterable<MarkDTO>>() {
             @Override
-            public void onSuccess(Collection<MarkDTO> result) {
+            public void onSuccess(Iterable<MarkDTO> result) {
                 markTable.refresh(result);
                 select(result, markTable.getSelectionModel());
             }

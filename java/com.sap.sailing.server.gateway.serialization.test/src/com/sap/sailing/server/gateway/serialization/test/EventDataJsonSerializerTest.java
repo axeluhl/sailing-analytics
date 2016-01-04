@@ -32,6 +32,8 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJso
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public class EventDataJsonSerializerTest {
     protected final UUID expectedId = UUID.randomUUID();
@@ -55,6 +57,7 @@ public class EventDataJsonSerializerTest {
     }
     
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
+    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -70,6 +73,8 @@ public class EventDataJsonSerializerTest {
         when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         deserializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(DomainFactory.INSTANCE)), new LeaderboardGroupBaseJsonDeserializer());

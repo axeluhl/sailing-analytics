@@ -80,8 +80,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     }
 
     @Override
-    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel) {
-        super.setupAdditionalWidgetsOnPanel(panel);
+    protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid) {
+        super.setupAdditionalWidgetsOnPanel(panel, formGrid);
         VerticalPanel content = new VerticalPanel();
 
         Grid proceduresGrid = new Grid(1, 2);

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scan_qr">QR-Code scannen</string>
+    <string name="scan_hint">Der QR-Code befindet sich auf Ihrer Teilnahmebestätigung</string>
+    <string name="no_qr_code">Sie haben keinen QR-Code?</string>
+</resources>

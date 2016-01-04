@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,21 @@ public class RaceCourseDTO implements IsSerializable {
     }
 
     public RaceCourseDTO(List<WaypointDTO> waypoints) {
-        this(waypoints, null);
+        this(waypoints, getMarksFromWaypoints(waypoints));
+    }
+
+    private static List<MarkDTO> getMarksFromWaypoints(List<WaypointDTO> waypoints) {
+        final LinkedHashSet<MarkDTO> marks = new LinkedHashSet<>();
+        for (final WaypointDTO waypoint : waypoints) {
+            for (final MarkDTO m : waypoint.controlPoint.getMarks()) {
+                marks.add(m);
+            }
+        }
+        final List<MarkDTO> result = new ArrayList<>();
+        for (final MarkDTO m : marks) {
+            result.add(m);
+        }
+        return result;
     }
 
     public RaceCourseDTO(List<WaypointDTO> waypoints, List<MarkDTO> allMarks) {

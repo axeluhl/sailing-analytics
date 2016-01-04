@@ -7,6 +7,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 
 public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Competitor> {
     private static final long serialVersionUID = 1172181354320184263L;
@@ -17,6 +18,9 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     private final String newEmail;
     private final Nationality newNationality;
     private final URI newTeamImageUri;
+    private final URI newFlagImageUri;
+    private final Double timeOnTimeFactor;
+    private final Duration timeOnDistanceAllowancePerNauticalMile;
     
     /**
      * @param idAsString
@@ -25,8 +29,9 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
      *            if <code>null</code>, the competitor obtains the "NONE" nationality, usually represented by a white
      *            flag
      */
-    public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail, String newSailId,
-            Nationality newNationality, URI newTeamImageUri) {
+    public UpdateCompetitor(String idAsString, String newName, Color newDisplayColor, String newEmail,
+            String newSailId, Nationality newNationality, URI newTeamImageUri, URI newFlagImageUri,
+            Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         super();
         this.idAsString = idAsString;
         this.newName = newName;
@@ -35,6 +40,9 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
         this.newNationality = newNationality;
         this.newTeamImageUri = newTeamImageUri;
         this.newEmail = newEmail;
+        this.newFlagImageUri = newFlagImageUri;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
     }
 
     /**
@@ -49,7 +57,7 @@ public class UpdateCompetitor extends AbstractRacingEventServiceOperation<Compet
     public Competitor internalApplyTo(RacingEventService toState) throws Exception {
         Competitor result = toState.getBaseDomainFactory().getCompetitorStore()
                 .updateCompetitor(idAsString, newName, newDisplayColor, newEmail, newSailId, newNationality,
-                        newTeamImageUri);
+                        newTeamImageUri, newFlagImageUri, timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMile);
         return result;
     }
 

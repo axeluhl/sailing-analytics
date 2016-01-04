@@ -3,14 +3,16 @@ package com.sap.sailing.gwt.ui.client;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.ColorMap;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
@@ -19,28 +21,35 @@ import com.sap.sse.common.filter.FilterSet;
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     private final Set<CompetitorDTO> allCompetitors;
     
-    private final LinkedHashSet<CompetitorDTO> selectedCompetitors;
+    /**
+     * Keys are {@link CompetitorDTO#getIdAsString()} of their values
+     */
+    private final LinkedHashMap<String, CompetitorDTO> selectedCompetitors;
     
     private final Set<CompetitorSelectionChangeListener> listeners;
     
     private final boolean hasMultiSelection;
     
-    private final ColorMap<CompetitorDTO> competitorsColorMap;
-    
     private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
+    private final CompetitorColorProvider competitorColorProvider; 
+
     public CompetitorSelectionModel(boolean hasMultiSelection) {
-        this(hasMultiSelection, null);
+        this(hasMultiSelection, new CompetitorColorProviderImpl(), null);
     }
 
-    private CompetitorSelectionModel(boolean hasMultiSelection, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
+    public CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider) {
+        this(hasMultiSelection, competitorColorProvider, null);
+    }
+
+    private CompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet) {
         super();
         this.hasMultiSelection = hasMultiSelection;
+        this.competitorColorProvider = competitorColorProvider;
         this.competitorsFilterSet = competitorsFilterSet;
-        this.allCompetitors = new HashSet<CompetitorDTO>();
-        this.selectedCompetitors = new LinkedHashSet<CompetitorDTO>();
+        this.allCompetitors = new LinkedHashSet<CompetitorDTO>();
+        this.selectedCompetitors = new LinkedHashMap<>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
-        this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
     }
     
     /**
@@ -53,8 +62,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private void add(CompetitorDTO competitor, boolean notifyListeners) {
         if (competitor.getColor() != null) {
-            Color color = competitor.getColor();
-            competitorsColorMap.addBlockedColor(color);
+            competitorColorProvider.addBlockedColor(competitor.getColor());
         }
         boolean changed = allCompetitors.add(competitor);
         if (notifyListeners && changed) {
@@ -102,6 +110,9 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         if (isSelected(competitor)) {
             setSelected(competitor, false);
         }
+        if (competitor.getColor() != null) {
+            competitorColorProvider.removeBlockedColor(competitor.getColor());
+        }
         boolean changed = allCompetitors.remove(competitor);
         if (changed) {
             fireListChanged(getAllCompetitors());
@@ -110,12 +121,12 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     @Override
     public Iterable<CompetitorDTO> getSelectedCompetitors() {
-        return Collections.unmodifiableCollection(selectedCompetitors);
+        return Collections.unmodifiableCollection(selectedCompetitors.values());
     }
 
     @Override
     public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
-        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors);
+        Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors.values());
         result.retainAll(getFilteredCompetitors());
         return result;
     }
@@ -143,13 +154,13 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     public void setSelected(CompetitorDTO competitor, boolean selected, CompetitorSelectionChangeListener... listenersNotToNotify) {
         if (selected) {
-            if (allCompetitors.contains(competitor) && !selectedCompetitors.contains(competitor)) {
-                selectedCompetitors.add(competitor);
+            if (allCompetitors.contains(competitor) && !selectedCompetitors.containsKey(competitor.getIdAsString())) {
+                selectedCompetitors.put(competitor.getIdAsString(), competitor);
                 fireAddedToSelection(competitor, listenersNotToNotify);
             }
         } else {
-            if (selectedCompetitors.contains(competitor)) {
-                selectedCompetitors.remove(competitor);
+            if (selectedCompetitors.containsKey(competitor.getIdAsString())) {
+                selectedCompetitors.remove(competitor.getIdAsString());
                 fireRemovedFromSelection(competitor, listenersNotToNotify);
             }
         }
@@ -181,7 +192,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public boolean isSelected(CompetitorDTO competitor) {
-        return selectedCompetitors.contains(competitor);
+        return selectedCompetitors.containsKey(competitor.getIdAsString());
     }
 
     @Override
@@ -196,7 +207,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public void setSelection(Iterable<CompetitorDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
-        Set<CompetitorDTO> competitorsToRemoveFromSelection = new HashSet<CompetitorDTO>(selectedCompetitors);
+        Set<CompetitorDTO> competitorsToRemoveFromSelection = new HashSet<CompetitorDTO>(selectedCompetitors.values());
         for (CompetitorDTO newSelectedCompetitor : newSelection) {
             setSelected(newSelectedCompetitor, true, listenersNotToNotify);
             competitorsToRemoveFromSelection.remove(newSelectedCompetitor);
@@ -209,17 +220,32 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         boolean changed = false;
-        
-        Set<CompetitorDTO> oldCompetitorsToRemove = new HashSet<CompetitorDTO>(allCompetitors);
+        Map<String, CompetitorDTO> oldCompetitorsToRemove = new HashMap<String, CompetitorDTO>();
+        for (final CompetitorDTO c : allCompetitors) {
+            oldCompetitorsToRemove.put(c.getIdAsString(), c);
+        }
         for (CompetitorDTO newCompetitor : newCompetitors) {
+            // Search by equality, including all CompetitorDTO fields; if equal object is found, leave it in place;
+            // non-equal objects may still represent the same competitor entity; yet, replace the object to obtain the
+            // new, changed state; make sure the selection keeps unchanged regarding the selected competitor "entities";
+            // see also bug 3413 for more background.
             if (allCompetitors.contains(newCompetitor)) {
-                oldCompetitorsToRemove.remove(newCompetitor);
+                oldCompetitorsToRemove.remove(newCompetitor.getIdAsString()); // the old competitor object remains in allCompetitors; it is equal but doesn't have to be identical to newCompetitor
             } else {
-                add(newCompetitor, false);
+                boolean selected = isSelected(newCompetitor);
+                if (selected) {
+                    remove(oldCompetitorsToRemove.get(newCompetitor.getIdAsString()));
+                    oldCompetitorsToRemove.remove(newCompetitor.getIdAsString());
+                }
+                add(newCompetitor, false); // due to the equals definition of CompetitorDTOImpl that compares most fields, state changes lead to a replacement here
+                if (selected) {
+                    // restore selection for replaced element
+                    setSelected(newCompetitor, selected, listenersNotToNotify);
+                }
                 changed = true;
             }
         }
-        for (CompetitorDTO oldCompetitorToRemove : oldCompetitorsToRemove) {
+        for (CompetitorDTO oldCompetitorToRemove : oldCompetitorsToRemove.values()) {
             remove(oldCompetitorToRemove);
             changed = true;
         }
@@ -228,20 +254,15 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
             fireListChanged(getAllCompetitors(), listenersNotToNotify);
         }
     }
-    
+
     @Override
     public Color getColor(CompetitorDTO competitor) {
-        final Color result;
-        if (allCompetitors.contains(competitor)) {
-            if (competitor.getColor() != null) {
-                result = competitor.getColor();
-            } else {
-                result = competitorsColorMap.getColorByID(competitor); 
-            }
-        } else {
-            result = null;
-        }
-        return result;
+        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor) : null;
+    }
+
+    @Override
+    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
+        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor, raceIdentfier) : Color.WHITE /* safe default */;
     }
 
     @Override

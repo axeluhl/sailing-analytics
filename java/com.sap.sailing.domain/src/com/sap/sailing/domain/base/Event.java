@@ -1,10 +1,7 @@
 package com.sap.sailing.domain.base;
 
-import java.net.URL;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-import com.sap.sailing.domain.common.ImageSize;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 
 /**
@@ -49,16 +46,4 @@ public interface Event extends EventBase {
      * leaderboard groups in <code>leaderboardGroups</code>.
      */
     void setLeaderboardGroups(Iterable<LeaderboardGroup> leaderboardGroups);
-
-    /**
-     * For the images references by the image URLs in {@link #getImageURLs()}, {@link #getSponsorImageURLs()} and {@link #getLogoImageURL()}
-     * determines the image dimensions. The retrieval of the image size is started when the URL is added to this event, and the result is
-     * cached. Should the image change its size afterwards or change its availability status, this event won't notice unless the image is
-     * removed from this event and added again.<p>
-     * 
-     * Note that exceptions may result should the image be unavailable. If the image URL leads to a document that is not an image,
-     * <code>null</code> will result.
-     */
-    ImageSize getImageSize(URL imageURL) throws InterruptedException, ExecutionException;
-    
 }

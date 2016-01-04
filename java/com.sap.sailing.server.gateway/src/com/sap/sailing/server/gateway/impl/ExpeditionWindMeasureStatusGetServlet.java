@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;

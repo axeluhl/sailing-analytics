@@ -2,8 +2,8 @@ package com.sap.sailing.domain.leaderboard;
 
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.Renamable;
-import com.sap.sailing.domain.regattalike.HasRegattaLike;
+import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 
-public interface RegattaLeaderboard extends Leaderboard, Renamable, HasRegattaLike {
+public interface RegattaLeaderboard extends Renamable, LeaderboardThatHasRegattaLike {
     Regatta getRegatta();
 }

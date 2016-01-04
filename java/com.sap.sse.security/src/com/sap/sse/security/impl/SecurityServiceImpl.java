@@ -217,7 +217,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
                 if (mailService == null) {
                     logger.warning(String.format("Could not send mail to user %s: no MailService found", username));
                 } else {
-                    getMailService().sendMail(username, subject, body);
+                    getMailService().sendMail(toAddress, subject, body);
                 }
             }
         }

@@ -2,7 +2,7 @@ package com.sap.sailing.server.gateway.serialization.racelog.tracking.impl;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;

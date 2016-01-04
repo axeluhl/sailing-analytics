@@ -20,6 +20,7 @@ import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * Maintains data about a default {@link Client} that represents this application when interacting with the Igtimi
@@ -43,7 +44,7 @@ public class Activator implements BundleActivator {
     private static final String CLIENT_REDIRECT_URI_PROPERTY_NAME = "igtimi.client.redirecturi";
     private final Future<IgtimiConnectionFactoryImpl> connectionFactory;
     private final Future<IgtimiWindTrackerFactory> windTrackerFactory;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryWithPriority(Thread.NORM_PRIORITY, /* daemon */ true));
 
     public Activator() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
         logger.info(getClass().getName()+" constructor");

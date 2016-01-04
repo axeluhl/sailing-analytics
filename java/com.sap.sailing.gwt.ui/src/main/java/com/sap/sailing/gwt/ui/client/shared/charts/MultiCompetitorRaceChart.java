@@ -3,18 +3,18 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * MultiCompetitorRaceChart is a GWT panel that can show competitor data (e.g. current speed over ground, windward distance to
@@ -33,12 +33,12 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
     private boolean hasOverallLeaderboard;
     
     public MultiCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_OVERALL_LEADER, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
+        super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
+                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {

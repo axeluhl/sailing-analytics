@@ -29,12 +29,12 @@ public class CompoundResourceBundleStringMessages implements ResourceBundleStrin
         this.stringMessages = new HashSet<>(stringMessages);
     }
     
-    public void addStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.add(stringMessages);
+    public boolean addStringMessages(ResourceBundleStringMessages stringMessages) {
+        return this.stringMessages.add(stringMessages);
     }
     
-    public void removeStringMessages(ResourceBundleStringMessages stringMessages) {
-        this.stringMessages.remove(stringMessages);
+    public boolean removeStringMessages(ResourceBundleStringMessages stringMessages) {
+        return this.stringMessages.remove(stringMessages);
     }
     
     @Override
@@ -83,12 +83,12 @@ public class CompoundResourceBundleStringMessages implements ResourceBundleStrin
         
         if (bestMessage.equals(message)) {
             LOGGER.log(Level.INFO, "The resources " + bestMessageResourceBaseName + 
-                                   " and " + messageResourceBaseName + " contain the same message for the key '" +
-                                    messageKey + "'");
+                                   " and " + messageResourceBaseName + " contain the same message '" + bestMessage +
+                                   "' for the key '" + messageKey + "'");
         } else {
             LOGGER.log(Level.INFO, "The resources " + bestMessageResourceBaseName + 
-                                   " and " + messageResourceBaseName + " contain different messages for the key '" +
-                                    messageKey + "'");
+                                   " and " + messageResourceBaseName + " contain different messages '" + bestMessage +
+                                   "' and '" + message + "' for the key '" + messageKey + "'");
         }
     }
 

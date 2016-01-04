@@ -86,4 +86,9 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         }
         return null;
     }
+
+    @Override
+    public String getOptionalSampleURL() {
+        return null;
+    }
 }

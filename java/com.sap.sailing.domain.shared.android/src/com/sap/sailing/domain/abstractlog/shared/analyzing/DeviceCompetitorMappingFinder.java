@@ -21,7 +21,6 @@ public class DeviceCompetitorMappingFinder<LogT extends AbstractLog<EventT, Visi
         public LogAnalyzer<Map<Competitor, List<DeviceMapping<Competitor>>>> createAnalyzer(AbstractLog<?, ?> log) {
             return new DeviceCompetitorMappingFinder(log);
         }
-        
     }
     
     public DeviceCompetitorMappingFinder(LogT log) {

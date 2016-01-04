@@ -11,12 +11,9 @@ import com.sap.sse.common.Util;
 public class HSVColor extends AbstractColor {
     private static final long serialVersionUID = 7602013229606352246L;
 
-    protected float hue;
-    protected float saturation;
-    protected float brightness;
-
-    HSVColor() {
-    } // for GWT serializability
+    private final float hue;
+    private final float saturation;
+    private final float brightness;
 
     public HSVColor(float hue, float saturation, float brightness) {
         this.hue = ensureValidRange(hue, 360.0f);

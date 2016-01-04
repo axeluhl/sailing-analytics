@@ -60,7 +60,7 @@ public class PrematureOperationReceiptTest extends AbstractServerReplicationTest
         }
         replicator.setSuspended(false);
         synchronized (replicator) {
-            while (!replicator.isQueueEmpty()) {
+            while (!replicator.isQueueEmptyOrStopped()) {
                 replicator.wait();
             }
         }

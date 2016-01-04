@@ -14,14 +14,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.simulator.impl.SimulatorUtils;
 
 @SuppressWarnings("restriction")
 public class RacingEventPersistence {
@@ -48,12 +47,14 @@ public class RacingEventPersistence {
 
         service = new RacingEventServiceImpl();
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
+        @SuppressWarnings("unused")
         URL paramURL = new URL(paramURLStr);
+        @SuppressWarnings("unused")
         URI liveURI = new URI(liveURIStr);
+        @SuppressWarnings("unused")
         URI storedURI = new URI(storedURIStr);
 
-        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null, null,
-                60000);
+        //raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null, null, 60000);
 
         System.out.println("Done loading race.");
 

@@ -17,12 +17,13 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Big Data - Numbers|wiki/big-data-numbers]]
   * [[Sailing Domain Algorithms|wiki/sailing-domain-algorithms]]
   * [[Inventory|wiki/inventar-liste]]
-  * [[RaceLog tracking|wiki/racelog-tracking]]
+  * [[RaceLog / Smartphone tracking|wiki/racelog-tracking]]
   * [[Racecommittee App|wiki/racecommittee-app]]
   * [[Tracking App|wiki/tracking-app]]
   * [[Web Services API|wiki/sailing-webservices]]
   * [[Theses (Bachelor, Master, ...)|wiki/theses]]
   * [[Google Analytics (Web Page Tracking)|wiki/ganalytics]]
+  * [[Polars|wiki/Polars]]
 * Production Environment
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
@@ -31,6 +32,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
+  * [[Log File Analysis|wiki/log-file-analysis]]
 * Information for Developers
   * [[OnBoarding Information|wiki/onboarding]]
   * [[Cook Book|wiki/cook-book]]
@@ -39,6 +41,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[UI Tests with Selenium|wiki/selenium-ui-tests]]
   * [[Profiling|wiki/profiling]]
   * [[Typical Development Scenarios|wiki/typical-development-scenarios]]
+  * [[Data Mining Architecture|wiki/data-mining-architecture]]
+  * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
   * [[Configure Races on Server|wiki/typical-development-scenarios]]
@@ -54,14 +58,20 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Create boat graphics for the 2D race viewer|wiki/boatGraphicsSVG]]
   * [[Create clickable UI prototypes with Axure|wiki/ui-clickable-prototypes]]
   * [[Uploading Media Content|wiki/uploading-media-content]]
+* Information for Event Managers
+  * [[Set up local network with replication server|wiki/event-network-with-replica]]
+  * [[Operating Igtimi WindBots/windbot-operations]]
+  * [[Linking Race Videos|wiki/linking-race-videos]]
+  * [[Import official results|wiki/results-import]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
   * [[Information about Extreme Sailing Series|wiki/extreme-sailing-series]]
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
-* Event Content Management
-  * [[Link Race Videos|wiki/linking-race-videos]]
+  * [[Kieler Woche event page|wiki/kieler-woche-2015]]
+* Lean DI Support
+  * [[Setting up internal Jenkins on SAP Monsoon|wiki/setting-up-jenkins-on-sap-monsoon]]
 
 ### Internal services (not related to wiki but useful)
 
@@ -70,7 +80,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
 * [Maven Repository Browser](http://maven.sapsailing.com/maven/) (see [[how to setup repository for Android builds|wiki/racecommittee-app-environment]])
 * [Main Sailing Website](http://www.sapsailing.com)
 * [Visitor Statistics](http://analysis.sapsailing.com/)
-* [Traffic and CPU for app01](http://mrtg.sapsailing.com/)
 
 ### TracTrac Workshop in Kopenhagen
 

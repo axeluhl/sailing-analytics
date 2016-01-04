@@ -1,9 +1,9 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 

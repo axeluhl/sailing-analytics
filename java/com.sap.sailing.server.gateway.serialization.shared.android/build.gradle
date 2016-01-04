@@ -1,0 +1,15 @@
+apply plugin: "java"
+
+sourceSets {
+    main {
+        java.srcDirs = ["src"]
+    }
+}
+
+dependencies {
+    /* local dependencies */
+    compile project(":java:com.sap.sailing.domain.common")
+    compile project(":java:com.sap.sailing.domain.shared.android")
+    compile project(":java:com.sap.sse.common")
+    compile project(":java:org.json.simple")
+}

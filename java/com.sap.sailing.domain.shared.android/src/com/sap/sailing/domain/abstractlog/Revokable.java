@@ -11,7 +11,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
  * the event-iterators of the {@code RaceLog} ({@link RaceLog#getUnrevokedEvents()},
  * {@link RaceLog#getUnrevokedEventsDescending()}).
  * <p>
- * The event {@code r} can only successufully revoke {@code e}, if {@code r}'s priority is higher
+ * The event {@code r} can only successfully revoke {@code e}, if {@code r}'s priority is higher
  * (author prio, timepoint), and if {@code e} is of an event type that implements {@code Revokable}.
  * @author Fredrik Teschke
  *

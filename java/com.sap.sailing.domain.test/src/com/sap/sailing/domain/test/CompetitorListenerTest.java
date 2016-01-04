@@ -7,6 +7,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import com.sap.sailing.domain.base.WithNationality;
 import com.sap.sailing.domain.base.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.RGBColor;
 
 /**
@@ -45,10 +48,22 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     private Color newColor;
     private DynamicCompetitor competitor;
     private DomainFactoryImpl baseDomainFactory;
+    private boolean emailChanged;
+    private String oldEmail;
+    private String newEmail;
+    private boolean flagImageChanged;
+    private URI oldFlagImageURL;
+    private URI newFlagImageURL;
+    private boolean timeOnTimeFactorChanged;
+    private Double oldTimeOnTimeFactor;
+    private Double newTimeOnTimeFactor;
+    private boolean timeOnDistanceAllowancePerNauticalMileChanged;
+    private Duration oldTimeOnDistanceAllowancePerNauticalMile;
+    private Duration newTimeOnDistanceAllowancePerNauticalMile;
     
     @Before
     public void setUp() {
-        baseDomainFactory = new DomainFactoryImpl();
+        baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         competitor = TrackBasedTest.createCompetitor("Hasso");
         nationalityChanged = false;
         whatChangedNationality = null;
@@ -63,6 +78,18 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         colorChanged = false;
         oldColor = null;
         newColor = null;
+        emailChanged = false;
+        oldEmail = null;
+        newEmail = null;
+        flagImageChanged = false;
+        oldFlagImageURL = null;
+        newFlagImageURL = null;
+        timeOnTimeFactorChanged = false;
+        oldTimeOnTimeFactor = null;
+        newTimeOnTimeFactor = null;
+        timeOnDistanceAllowancePerNauticalMileChanged = false;
+        oldTimeOnDistanceAllowancePerNauticalMile = null;
+        newTimeOnDistanceAllowancePerNauticalMile = null;
         listener = new CompetitorChangeListener() {
             private static final long serialVersionUID = 4581029778988240209L;
 
@@ -97,7 +124,32 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
 
             @Override
             public void emailChanged(String oldEmail, String newEmail) {
-                //TODO
+                emailChanged = true;
+                CompetitorListenerTest.this.oldEmail = oldEmail;
+                CompetitorListenerTest.this.newEmail = newEmail;
+            }
+
+            @Override
+            public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
+                flagImageChanged = true;
+                CompetitorListenerTest.this.oldFlagImageURL = oldFlagImageURL;
+                CompetitorListenerTest.this.newFlagImageURL = newFlagImageURL;
+            }
+
+            @Override
+            public void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor) {
+                timeOnTimeFactorChanged = true;
+                CompetitorListenerTest.this.oldTimeOnTimeFactor = oldTimeOnTimeFactor;
+                CompetitorListenerTest.this.newTimeOnTimeFactor = newTimeOnTimeFactor;
+            }
+
+            @Override
+            public void timeOnDistanceAllowancePerNauticalMileChanged(
+                    Duration oldTimeOnDistanceAllowancePerNauticalMile,
+                    Duration newTimeOnDistanceAllowancePerNauticalMile) {
+                timeOnDistanceAllowancePerNauticalMileChanged = true;
+                CompetitorListenerTest.this.oldTimeOnDistanceAllowancePerNauticalMile = oldTimeOnDistanceAllowancePerNauticalMile;
+                CompetitorListenerTest.this.newTimeOnDistanceAllowancePerNauticalMile = newTimeOnDistanceAllowancePerNauticalMile;
             }
         };
         competitor.addCompetitorChangeListener(listener);
@@ -116,6 +168,22 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     }
     
     @Test
+    public void testChangeTimeOnTimeFactor() {
+        competitor.setTimeOnTimeFactor(1.209);
+        assertTrue(timeOnTimeFactorChanged);
+        assertNull(oldTimeOnTimeFactor);
+        assertEquals(1.209, newTimeOnTimeFactor, 0.00000001);
+    }
+    
+    @Test
+    public void testChangeTimeOnDistanceAllowancePerNauticalMile() {
+        competitor.setTimeOnDistanceAllowancePerNauticalMile(Duration.ONE_HOUR);
+        assertTrue(timeOnDistanceAllowancePerNauticalMileChanged);
+        assertNull(oldTimeOnDistanceAllowancePerNauticalMile);
+        assertEquals(Duration.ONE_HOUR.asMillis(), newTimeOnDistanceAllowancePerNauticalMile.asMillis());
+    }
+    
+    @Test
     public void testSimpleCompetitorListenerPatternForName() {
         competitor.setName("Dr. Hasso Plattner");
         assertTrue(nameChanged);
@@ -124,6 +192,22 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
         assertFalse(sailIdChanged);
         assertFalse(colorChanged);
         assertFalse(nationalityChanged);
+    }
+
+    @Test
+    public void testFlagChange() throws URISyntaxException {
+        competitor.setFlagImage(new URI("http://www.something.de/pic.png"));
+        assertTrue(flagImageChanged);
+        assertNull(oldFlagImageURL);
+        assertEquals(new URI("http://www.something.de/pic.png"), newFlagImageURL);
+    }
+
+    @Test
+    public void testEmailChange() throws URISyntaxException {
+        competitor.setEmail("hasso.plattner@sap.com");
+        assertTrue(emailChanged);
+        assertNull(oldEmail);
+        assertEquals("hasso.plattner@sap.com", newEmail);
     }
 
     @Test
@@ -167,7 +251,7 @@ public class CompetitorListenerTest extends AbstractSerializationTest {
     
     @Test
     public void testCompetitorSerializationLosesAllExternalListeners() throws ClassNotFoundException, IOException {
-        DomainFactory baseDomainFactory = new DomainFactoryImpl();
+        DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         DynamicCompetitor clonedCompetitor = cloneBySerialization(competitor, baseDomainFactory);
         clonedCompetitor.setName("Dr. Hasso Plattner");
         clonedCompetitor.getBoat().setSailId("POR 40");

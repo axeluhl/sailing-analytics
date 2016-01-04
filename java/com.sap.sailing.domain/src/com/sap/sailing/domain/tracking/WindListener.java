@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.common.Wind;
+
 
 
 public interface WindListener {

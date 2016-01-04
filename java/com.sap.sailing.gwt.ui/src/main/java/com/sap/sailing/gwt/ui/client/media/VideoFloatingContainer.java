@@ -61,8 +61,9 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
         dialogBox.show();
 
         int absoluteTop = popupPositionProvider.getYPositionUiObject().getAbsoluteTop();
-        int posY = absoluteTop -300;
+        int posY = absoluteTop - 300;
         dialogBox.setPopupPosition(5, posY);
+        dialogBox.setPixelSize(videoPlayer.getDefaultWidth(), videoPlayer.getDefaultHeight());
     }
 
     @Override

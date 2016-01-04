@@ -2,27 +2,24 @@ package com.sap.sse.datamining.factories;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.impl.ProcessorQuery;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
 import com.sap.sse.datamining.impl.components.ParallelByDimensionGroupingProcessor;
 import com.sap.sse.datamining.impl.components.ParallelGroupedElementsValueExtractionProcessor;
 import com.sap.sse.datamining.impl.components.ParallelMultiDimensionsValueNestingGroupingProcessor;
 import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDataCollectingAsSetProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataAverageAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataMedianAggregationProcessor;
-import com.sap.sse.datamining.impl.components.aggregators.ParallelGroupedDoubleDataSumAggregationProcessor;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.components.AggregatorType;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 public class ProcessorFactory {
@@ -33,42 +30,20 @@ public class ProcessorFactory {
         this.executor = executor;
     }
     
-    /**
-     * Creates a aggregation processor of the given aggregator type, with the given ProcessorQuery as result receiver.
-     */
-    public <ResultType> Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> createAggregationProcessor(ProcessorQuery<ResultType, ?> query, AggregatorType aggregatorType, Class<ResultType> resultType) {
-        Collection<Processor<Map<GroupKey, ResultType>, ?>> resultReceivers = new ArrayList<>();
+    public <ExtractedType, AggregatedType> Processor<GroupedDataEntry<ExtractedType>, Map<GroupKey, AggregatedType>>
+                                           createAggregationProcessor(ProcessorQuery<AggregatedType, ?> query,
+                                                                      AggregationProcessorDefinition<ExtractedType, AggregatedType> aggregatorDefinition) {
+        Collection<Processor<Map<GroupKey, AggregatedType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(query.getResultReceiver());
-        return createAggregationProcessor(resultReceivers, aggregatorType, resultType);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <ResultType> Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>> createAggregationProcessor(Collection<Processor<Map<GroupKey, ResultType>, ?>> resultReceivers, AggregatorType aggregatorType, Class<ResultType> resultType) {
-        if (Double.class.equals(resultType) || double.class.equals(resultType)) {
-            Collection<Processor<Map<GroupKey, Double>, ?>> specificResultReceivers = (Collection<Processor<Map<GroupKey, Double>, ?>>)(Collection<?>) resultReceivers;
-
-            switch (aggregatorType) {
-            case Average:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataAverageAggregationProcessor(executor, specificResultReceivers);
-            case Median:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataMedianAggregationProcessor(executor, specificResultReceivers);
-            case Sum:
-                return (Processor<GroupedDataEntry<ResultType>, Map<GroupKey, ResultType>>)(Processor<?, ?>) new ParallelGroupedDoubleDataSumAggregationProcessor(executor, specificResultReceivers);
-            default:
-                throw new IllegalArgumentException("No aggregation processor implemented for the aggregation type '"
-                        + aggregatorType + "'");
-            }
-        }
-        throw new IllegalArgumentException("No aggregation processor implemented for the result type '"
-                + resultType + "'");
+        return aggregatorDefinition.construct(executor, resultReceivers);
     }
     
     /**
      * Creates a collecting processor with the given ProcessorQuery as result receiver, that stores all received grouped
      * data in a Set.
      */
-    public Processor<GroupedDataEntry<Object>, Map<GroupKey, Set<Object>>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<Set<Object>, ?> query) {
-        Collection<Processor<Map<GroupKey, Set<Object>>, ?>> resultReceivers = new ArrayList<>();
+    public Processor<GroupedDataEntry<Object>, Map<GroupKey, HashSet<Object>>> createGroupedDataCollectingAsSetProcessor(ProcessorQuery<HashSet<Object>, ?> query) {
+        Collection<Processor<Map<GroupKey, HashSet<Object>>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(query.getResultReceiver());
         return new ParallelGroupedDataCollectingAsSetProcessor<>(executor, resultReceivers);
     }
@@ -76,34 +51,37 @@ public class ProcessorFactory {
     /**
      * Creates an extraction processor with the given aggregation processor as result receiver.
      */
-    public <ElementType, ResultType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ResultType>> createExtractionProcessor(
-            Processor<GroupedDataEntry<ResultType>, ?> aggregationProcessor, Function<ResultType> extractionFunction, ParameterProvider parameterProvider) {
-        Collection<Processor<GroupedDataEntry<ResultType>, ?>> resultReceivers = new ArrayList<>();
+    public <ElementType, ExtractedType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ExtractedType>> createExtractionProcessor(
+            Processor<GroupedDataEntry<ExtractedType>, ?> aggregationProcessor, Function<ExtractedType> extractionFunction, ParameterProvider parameterProvider) {
+        Collection<Processor<GroupedDataEntry<ExtractedType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(aggregationProcessor);
         return createExtractionProcessor(resultReceivers, extractionFunction, parameterProvider);
     }
 
-    public <ElementType, ResultType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ResultType>> createExtractionProcessor(
-            Collection<Processor<GroupedDataEntry<ResultType>, ?>> resultReceivers, Function<ResultType> extractionFunction, ParameterProvider parameterProvider) {
-        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, ResultType>(executor,
+    public <ElementType, ExtractedType> Processor<GroupedDataEntry<ElementType>, GroupedDataEntry<ExtractedType>> createExtractionProcessor(
+            Collection<Processor<GroupedDataEntry<ExtractedType>, ?>> resultReceivers, Function<ExtractedType> extractionFunction, ParameterProvider parameterProvider) {
+        return new ParallelGroupedElementsValueExtractionProcessor<ElementType, ExtractedType>(executor,
                 resultReceivers, extractionFunction, parameterProvider);
     }
 
     /**
      * Creates a grouping processor with the given extraction processor as result receiver.
      */
-    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Processor<GroupedDataEntry<DataType>, ?> extractionProcessor,  Iterable<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider) {
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Processor<GroupedDataEntry<DataType>, ?> extractionProcessor,
+            Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
         Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(extractionProcessor);
-        return createGroupingProcessor(dataType, resultReceivers, dimensionsToGroupByWithParameterProvider);
+        return createGroupingProcessor(dataType, resultReceivers, parameterizedDimensions);
     }
 
-    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, Iterable<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider) {
-        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, dimensionsToGroupByWithParameterProvider);
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessor(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
+            Iterable<ParameterizedFunction<?>> parameterizedDimensions) {
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<>(dataType, executor, resultReceivers, parameterizedDimensions);
     }
 
-    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessorWithParameter(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers, List<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider) {
-        return new ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>(dataType, executor, resultReceivers, dimensionsToGroupByWithParameterProvider);
+    public <DataType> Processor<DataType, GroupedDataEntry<DataType>> createGroupingProcessorWithParameter(Class<DataType> dataType, Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
+            List<ParameterizedFunction<?>> parameterizedDimensions) {
+        return new ParallelMultiDimensionsValueNestingGroupingProcessor<DataType>(dataType, executor, resultReceivers, parameterizedDimensions);
     }
 
     /**
@@ -111,18 +89,18 @@ public class ProcessorFactory {
      */
     @SuppressWarnings("unchecked")
     public <DataType> Collection<Processor<DataType, GroupedDataEntry<DataType>>> createGroupingExtractorsForDimensions(Class<DataType> dataType,
-            Processor<GroupedDataEntry<Object>, ?> valueCollector, Iterable<Pair<Function<?>, ParameterProvider>> dimensionsToGroupByWithParameterProvider,
+            Processor<GroupedDataEntry<Object>, ?> valueCollector, Iterable<ParameterizedFunction<?>> parameterizedDimensions,
             ResourceBundleStringMessages stringMessages, Locale locale) {
         Collection<Processor<GroupedDataEntry<Object>, ?>> extractionResultReceivers = new ArrayList<>();
         extractionResultReceivers.add(valueCollector);
 
         Collection<Processor<DataType, GroupedDataEntry<DataType>>> groupingExtractors = new ArrayList<>();
-        for (Pair<Function<?>, ParameterProvider> dimensionWithParameterProvider : dimensionsToGroupByWithParameterProvider) {
-            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = createExtractionProcessor(extractionResultReceivers, (Function<Object>) dimensionWithParameterProvider.getA(), dimensionWithParameterProvider.getB());
+        for (ParameterizedFunction<?> parameterizedDimension : parameterizedDimensions) {
+            Processor<GroupedDataEntry<DataType>, GroupedDataEntry<Object>> dimensionValueExtractor = createExtractionProcessor(extractionResultReceivers, (Function<Object>) parameterizedDimension.getFunction(), parameterizedDimension.getParameterProvider());
             Collection<Processor<GroupedDataEntry<DataType>, ?>> groupingResultReceivers = new ArrayList<>();
             groupingResultReceivers.add(dimensionValueExtractor);
             
-            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, executor, groupingResultReceivers, dimensionWithParameterProvider.getA(), stringMessages, locale);
+            Processor<DataType, GroupedDataEntry<DataType>> byDimensionGrouper = new ParallelByDimensionGroupingProcessor<>(dataType, executor, groupingResultReceivers, parameterizedDimension, stringMessages, locale);
             groupingExtractors.add(byDimensionGrouper);
         }
         return groupingExtractors;

@@ -5,10 +5,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.simulator.Grid;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.TimedPosition;

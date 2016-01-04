@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
@@ -53,6 +54,8 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     
     private static final int LOG_EVERY_SO_MANY_MESSAGES = 100;
     
+    private static final long CONNECTION_TIMEOUT_IN_MILLIS = 5000;
+    
     public WebSocketConnectionManager(IgtimiConnectionFactoryImpl connectionFactory, Iterable<String> deviceSerialNumbers, Account account) throws Exception {
         this.timer = new Timer("Timer for WebSocketConnectionManager for units "+deviceSerialNumbers+" and account "+account);
         this.deviceIds = deviceSerialNumbers;
@@ -60,7 +63,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         this.fixFactory = new FixFactory();
         this.connectionFactory = connectionFactory;
         this.listeners = new ConcurrentHashMap<>();
-        client = new WebSocketClient();
+        client = new WebSocketClient(new SslContextFactory());
         configurationMessage = connectionFactory.getWebSocketConfigurationMessage(account, deviceSerialNumbers);
         request = new ClientUpgradeRequest();
         reconnect();
@@ -152,6 +155,11 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         listeners.put(listener, listener);
     }
 
+    @Override
+    public void removeListener(BulkFixReceiver listener) {
+        listeners.remove(listener);
+    }
+
     private void notifyListeners(List<Fix> fixes) {
         for (BulkFixReceiver listener : listeners.keySet()) {
             try {
@@ -222,15 +230,15 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         IOException lastException = null;
         for (URI uri : connectionFactory.getWebsocketServers()) {
             try {
-                if (uri.getScheme().equals("ws")) {
-                    // as Jetty 9.0.4 currently doesn't seem to support wss, explicitly
-                    // look for ws connectivity
+                if (uri.getScheme().equals("ws") || uri.getScheme().equals("wss")) {
                     logger.log(Level.INFO, "Trying to connect to " + uri + " for " + this);
                     client.start();
                     client.connect(this, uri, request);
-                    logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
-                    lastException = null;
-                    break; // successfully connected
+                    if (waitForConnection(CONNECTION_TIMEOUT_IN_MILLIS)) {
+                        logger.log(Level.INFO, "Successfully connected to " + uri + " for " + this);
+                        lastException = null;
+                        break; // successfully connected
+                    }
                 }
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Couldn't connect to "+uri+" for "+this, e);

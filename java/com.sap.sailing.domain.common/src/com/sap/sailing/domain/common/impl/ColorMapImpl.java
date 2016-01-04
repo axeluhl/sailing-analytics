@@ -29,17 +29,16 @@ public class ColorMapImpl<T> implements ColorMap<T> {
     private List<HSVColor> blockedColors;
     
     public ColorMapImpl() {
-        baseColors = new HSVColor[10];
+        baseColors = new HSVColor[9];
         baseColors[0] = new HSVColor(0.0f, 1.0f, 1.0f); // Red
         baseColors[1] = new HSVColor(30.0f, 1.0f, 1.0f); // Orange
         baseColors[2] = new HSVColor(45.f, 1.0f, 1.0f);
         baseColors[3] = new HSVColor(120.0f, 1.0f, 0.8f); // Green
         baseColors[4] = new HSVColor(200.0f, 1.0f, 1.0f); // Cyan
-        baseColors[5] = new HSVColor(240.0f, 1.0f, 1.0f); // Blue
+        baseColors[5] = new HSVColor(285.0f, 1.0f, 1.0f); 
         baseColors[6] = new HSVColor(270.0f, 1.0f, 1.0f); // Pink
-        baseColors[7] = new HSVColor(285.0f, 1.0f, 1.0f); 
-        baseColors[8] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
-        baseColors[9] = new HSVColor(330.0f, 1.0f, 1.0f); 
+        baseColors[7] = new HSVColor(300.0f, 1.0f, 1.0f); // Magenta
+        baseColors[8] = new HSVColor(330.0f, 1.0f, 1.0f); 
 
         idColor = new HashMap<T, Color>();
         blockedColors = new ArrayList<HSVColor>();

@@ -10,6 +10,7 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -92,6 +93,8 @@ public interface MongoObjectFactory {
      * Removes the event named <code>eventName</code> from the database.
      */
     void removeEvent(Serializable id);
+
+    void storeServerConfiguration(SailingServerConfiguration serverConfiguration);
 
     /**
      * Stores a registered sailing server 

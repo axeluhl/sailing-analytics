@@ -1,0 +1,65 @@
+@require 'theme';
+
+.wind_bot_component{
+	position: absolute;
+	height: 100%;
+	width:  100%;
+	z-index: 5;
+}
+
+.name_panel {
+	height: 45pt;
+	line-height: 45pt;
+	vertical-align: middle;
+	font-size: 14pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+	background-color: white;
+}
+
+.live_average_container {
+	position: absolute;
+	border: none;
+	border-radius: 0pt;
+	background-color: white;
+	top: 45pt;
+	bottom: 65%;
+}
+
+.left {
+	left: 0pt;
+	right: 50%;
+}
+
+.right {
+	left: 50%;
+	right: 0pt;
+}
+
+.windchart_container {
+	position: absolute;
+	border: none;
+	border-radius: 0pt;
+	background-color: white;
+	top: 35%;
+	bottom: 0pt;
+}
+
+.windchart{
+		position: absolute;
+	left: 0pt;
+	right: 0pt;
+	top: 0pt;
+	bottom: 0pt;
+}
+
+.compass_container{
+	position: absolute;
+	height: 45pt;
+	width: 45pt;
+	top: 5pt;
+	right: 5pt;
+}

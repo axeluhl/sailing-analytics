@@ -41,13 +41,13 @@ public class TeamJsonDeserializer implements JsonDeserializer<DynamicTeam> {
         }
         
         String imageURIAsString = (String) object.get(TeamJsonSerializer.FIELD_IMAGE_URI);
-        if (imageURIAsString != null){
-        	try {
-        		URI imageURI = URI.create(imageURIAsString);
-        		return new TeamImpl(name, sailors, coach, imageURI);
-        	} catch (IllegalArgumentException e){
-        		logger.warning("Illegal team image URI "+e.getMessage());
-        	}
+        if (imageURIAsString != null) {
+            try {
+                URI imageURI = URI.create(imageURIAsString);
+                return new TeamImpl(name, sailors, coach, imageURI);
+            } catch (IllegalArgumentException e) {
+                logger.warning("Illegal team image URI " + e.getMessage());
+            }
         }
         
         return new TeamImpl(name, sailors, coach);

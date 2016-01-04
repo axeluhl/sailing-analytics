@@ -1,8 +1,10 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import android.os.Bundle;
-
-import com.sap.sailing.android.shared.ui.activities.SystemInformationActivityHelper;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class SystemInformationActivity extends BaseActivity {
     private SystemInformationActivityHelper helper;
@@ -10,13 +12,41 @@ public class SystemInformationActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ThemeHelper.setTheme(this);
+
         helper = new SystemInformationActivityHelper(this, preferences.getDeviceIdentifier());
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
     }
-    
+
+    @Override
+    protected int getOptionsMenuResId() {
+        return 0;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            finish();
+            return true;
+
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
     @Override
     protected void updateSendingServiceInformation() {
         helper.updateSendingServiceInformation();
         super.updateSendingServiceInformation();
     }
-
 }

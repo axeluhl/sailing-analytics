@@ -6,4 +6,5 @@
   <source path='shared/dto'/>
   <source path='shared/impl'/>
   <source path='shared/impl/dto'/>
+  <source path='shared/util'/>
 </module>

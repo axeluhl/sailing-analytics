@@ -1,17 +1,16 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.DoubleTriple;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.impl.HasConfidenceImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableSpeedWithBearing;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.scalablevalue.IsScalable;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 public class SpeedWithBearingWithConfidenceImpl<RelativeTo> extends
-        HasConfidenceImpl<Util.Triple<Speed, Double, Double>, SpeedWithBearing, RelativeTo> implements
-        SpeedWithBearingWithConfidence<RelativeTo>, IsScalable<Util.Triple<Speed, Double, Double>, SpeedWithBearing> {
+        HasConfidenceImpl<DoubleTriple, SpeedWithBearing, RelativeTo> implements
+        SpeedWithBearingWithConfidence<RelativeTo>, IsScalable<DoubleTriple, SpeedWithBearing> {
     private static final long serialVersionUID = -4811576094614673625L;
 
     public SpeedWithBearingWithConfidenceImpl(SpeedWithBearing speedWithBearing, double confidence, RelativeTo relativeTo) {
@@ -24,7 +23,7 @@ public class SpeedWithBearingWithConfidenceImpl<RelativeTo> extends
      * angle.
      */
     @Override
-    public ScalableValue<Util.Triple<Speed, Double, Double>, SpeedWithBearing> getScalableValue() {
+    public ScalableValue<DoubleTriple, SpeedWithBearing> getScalableValue() {
         return new ScalableSpeedWithBearing(getObject());
     }
 }

@@ -3,10 +3,19 @@ package com.sap.sailing.simulator.impl;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PathGenerator;
 import com.sap.sailing.simulator.SimulationParameters;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PathGeneratorBase implements PathGenerator {
-
+    // maximum duration of one path generation
+    private final static long MAX_DURATION_OF_PATH_GENERATION_MILLIS = 40 * 1000; // 40 seconds
+    
     protected SimulationParameters parameters;
+    protected final Duration algorithmMaxDuration = new MillisecondsDurationImpl(MAX_DURATION_OF_PATH_GENERATION_MILLIS); 
+    protected TimePoint algorithmStartTime;
+    protected boolean algorithmTimedOut = false;
 
     public PathGeneratorBase() {
         this.parameters = null;
@@ -27,12 +36,24 @@ public class PathGeneratorBase implements PathGenerator {
     }
 
     @Override
-    public Path getPath() {
+    public Path getPath() throws SparseSimulationDataException {
         return null;
     }
 
     @Override
-    public Path getPathEvenTimed(long stepMilliseconds) {
+    public boolean isTimedOut() {
+        // check for time-out
+        TimePoint now = MillisecondsTimePoint.now();
+        if (this.algorithmStartTime.until(now).compareTo(algorithmMaxDuration) <= 0) {
+            this.algorithmTimedOut = false;
+        } else {
+            this.algorithmTimedOut = true;
+        }
+        return this.algorithmTimedOut;
+    }
+
+    @Override
+    public Path getPathEvenTimed(long stepMilliseconds) throws SparseSimulationDataException {
 
         Path path = this.getPath();
 

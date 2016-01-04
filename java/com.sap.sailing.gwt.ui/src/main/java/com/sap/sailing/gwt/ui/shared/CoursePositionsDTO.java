@@ -1,17 +1,20 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class CoursePositionsDTO implements IsSerializable {
-    public List<PositionDTO> waypointPositions;
-    public List<PositionDTO> startMarkPositions;
-    public List<PositionDTO> finishMarkPositions;
+    public RaceCourseDTO course;
+    public List<Position> waypointPositions;
     public Set<MarkDTO> marks;
+    
+    public int totalLegsCount;
+    public int currentLegNumber;
     
     /**
      * <code>null</code> if the start waypoint does not have exactly two marks with valid positions; in this case,
@@ -32,4 +35,32 @@ public class CoursePositionsDTO implements IsSerializable {
     public NauticalSide finishLineAdvantageousSide;
     public Double finishLineAdvantageInMeters;
     public Double finishLineLengthInMeters;
+
+    public WaypointDTO getEndWaypointForLegNumber(int legNumber) {
+        WaypointDTO result = null;
+        if(legNumber > 0 && legNumber <= totalLegsCount && course != null && course.waypoints != null) {
+            result = course.waypoints.get(legNumber);
+        }
+        return result;
+    }
+
+    public List<Position> getStartMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(0).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
+
+    public List<Position> getFinishMarkPositions() {
+        final List<Position> result = new ArrayList<>();
+        if (course != null && course.waypoints != null && !course.waypoints.isEmpty()) {
+            for (final MarkDTO mark : course.waypoints.get(course.waypoints.size()-1).controlPoint.getMarks()) {
+                result.add(mark.position);
+            }
+        }
+        return result;
+    }
 }

@@ -111,7 +111,6 @@ extends Track<EventT>, WithID {
     
     /**
      * Get a {@link NavigableSet} of unrevoked events regardless of the {@code pass}.
-     * @return
      */
     NavigableSet<EventT> getUnrevokedEventsDescending();
 

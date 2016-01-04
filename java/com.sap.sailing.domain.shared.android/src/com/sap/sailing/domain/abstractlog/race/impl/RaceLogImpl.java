@@ -7,7 +7,6 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.AbstractLogImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.impl.PartialNavigableSetView;
@@ -40,7 +39,7 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
 
     @Override
     public int getCurrentPassId() {
-        //return pass id of last event, as pass is the top-level sorting criterion in RaceLogeventComparator
+        //return pass id of last event, as pass is the top-level sorting criterion in RaceLogEventComparator
         if (! getUnrevokedEvents().isEmpty()) {
             return getUnrevokedEvents().last().getPassId();
         } else {
@@ -55,7 +54,7 @@ public class RaceLogImpl extends AbstractLogImpl<RaceLogEvent, RaceLogEventVisit
     
     @Override
     protected RaceLogEvent createRevokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke, String reason) {
-        return RaceLogEventFactory.INSTANCE.createRevokeEvent(author, getCurrentPassId(), toRevoke, reason);
+        return new RaceLogRevokeEventImpl(author, getCurrentPassId(), toRevoke, reason);
     }
 
     @Override

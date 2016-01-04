@@ -42,7 +42,7 @@ public class LeaderboardEntryDTO implements Serializable {
     
     public boolean discarded;
     
-    public Double windwardDistanceToOverallLeaderInMeters;
+    public Double windwardDistanceToCompetitorFarthestAheadInMeters;
     
     public Double averageAbsoluteCrossTrackErrorInMeters;
     
@@ -77,6 +77,41 @@ public class LeaderboardEntryDTO implements Serializable {
      * than one fix, this field tells the average duration between two fixes on the competitor's track.
      */
     public Duration averageSamplingInterval;
+    
+    /**
+     * The time gap to the competitor leading the race; for one-design races this is the time the competitor is expected
+     * to need to reach the leader's (windward) position (if in the same leg) or the difference between the time at
+     * which the competitor is expected to arrive at the next mark and the time when the leader had passed that mark.
+     * <p>
+     * 
+     * For handicap ranking, things are more complicated. All competitors are projected to the boat farthest ahead (the
+     * "fastest" boat), using their average VMG in the current leg, and if the fastest boat is no longer in the same
+     * leg, using the same handicapped performance as the fastest boat for subsequent legs. This gives an actual arrival
+     * time at the fastest boat's current (windward) position, and the corrected time can be computed for all
+     * competitors, using the same total windward distance traveled (namely that leading up to the fastest boat's
+     * current position). This enables sorting the competitors by these corrected times, yielding a "leader" of the
+     * race. This field then describes the actual duration that this competitor would have had to be earlier where she
+     * is now in order to rank equal in corrected time with the leader at the fastest boat's current position.
+     * <p>
+     * 
+     * Note that for handicap ranking, this metric can differ from the leg-specific
+     * {@link LegEntryDTO#gapToLeaderInSeconds} even for the current leg because the leg's gap metric only considers the
+     * race up to the leg's end, regardless of where the leading and fastest boat are.
+     */
+    public Duration gapToLeaderInOwnTime;
+
+    /**
+     * The corrected time spent in the race; usually based on the current time and distance, calculated by the {@link RankingMetric}.
+     * For one-design classes this equals the time spent in the race.
+     */
+    public Duration calculatedTime;
+    
+    /**
+     * The corrections applied to the time and distance sailed when the competitor would have reached the
+     * competitor farthest ahead, based on average VMG on the current leg and equal performance to the boat
+     * farthest ahead for all subsequent legs.
+     */
+    public Duration calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead;
 
     /**
      * If <code>null</code>, no leg details are known yet, the race is not being tracked or the details
@@ -104,6 +139,12 @@ public class LeaderboardEntryDTO implements Serializable {
         int result = 1;
         result = prime * result
                 + ((averageAbsoluteCrossTrackErrorInMeters == null) ? 0 : averageAbsoluteCrossTrackErrorInMeters.hashCode());
+        result = prime * result
+                + ((gapToLeaderInOwnTime == null) ? 0 : gapToLeaderInOwnTime.hashCode());
+        result = prime * result
+                + ((calculatedTime == null) ? 0 : calculatedTime.hashCode());
+        result = prime * result
+                + ((calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) ? 0 : calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.hashCode());
         result = prime * result
                 + ((averageSignedCrossTrackErrorInMeters == null) ? 0 : averageSignedCrossTrackErrorInMeters.hashCode());
         result = prime * result + (discarded ? 1231 : 1237);
@@ -138,7 +179,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
         result = prime
                 * result
-                + ((windwardDistanceToOverallLeaderInMeters == null) ? 0 : windwardDistanceToOverallLeaderInMeters
+                + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0 : windwardDistanceToCompetitorFarthestAheadInMeters
                         .hashCode());
         return result;
     }
@@ -152,6 +193,21 @@ public class LeaderboardEntryDTO implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         LeaderboardEntryDTO other = (LeaderboardEntryDTO) obj;
+        if (gapToLeaderInOwnTime == null) {
+            if (other.gapToLeaderInOwnTime != null)
+                return false;
+        } else if (!gapToLeaderInOwnTime.equals(other.gapToLeaderInOwnTime))
+            return false;
+        if (calculatedTime == null) {
+            if (other.calculatedTime != null)
+                return false;
+        } else if (!calculatedTime.equals(other.calculatedTime))
+            return false;
+        if (calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead == null) {
+            if (other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead != null)
+                return false;
+        } else if (!calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead.equals(other.calculatedTimeAtEstimatedArrivalAtCompetitorFarthestAhead))
+            return false;
         if (averageAbsoluteCrossTrackErrorInMeters == null) {
             if (other.averageAbsoluteCrossTrackErrorInMeters != null)
                 return false;
@@ -241,10 +297,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!totalPoints.equals(other.totalPoints))
             return false;
-        if (windwardDistanceToOverallLeaderInMeters == null) {
-            if (other.windwardDistanceToOverallLeaderInMeters != null)
+        if (windwardDistanceToCompetitorFarthestAheadInMeters == null) {
+            if (other.windwardDistanceToCompetitorFarthestAheadInMeters != null)
                 return false;
-        } else if (!windwardDistanceToOverallLeaderInMeters.equals(other.windwardDistanceToOverallLeaderInMeters))
+        } else if (!windwardDistanceToCompetitorFarthestAheadInMeters.equals(other.windwardDistanceToCompetitorFarthestAheadInMeters))
             return false;
         return true;
     }

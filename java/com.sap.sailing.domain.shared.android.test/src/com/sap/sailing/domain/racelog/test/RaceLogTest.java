@@ -23,12 +23,12 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -40,8 +40,8 @@ public class RaceLogTest {
     private static class MockRaceLogEventForSorting extends RaceLogEventImpl {
         public MockRaceLogEventForSorting(long createdAtMillis) {
             super(new MillisecondsTimePoint(createdAtMillis),
-                    /* author */ new LogEventAuthorImpl("Dummy Author", /* priority */ 0),
-                    MillisecondsTimePoint.now(), /* ID */ UUID.randomUUID(), /* pInvolvedBoats */ null, /* pass ID */ 1);
+                    MillisecondsTimePoint.now(),
+                    /* author */ new LogEventAuthorImpl("Dummy Author", /* priority */ 0), /* ID */ UUID.randomUUID(), /* pInvolvedBoats */ null, /* pass ID */ 1);
         }
 
         private static final long serialVersionUID = 4928452859543831451L;
@@ -432,15 +432,15 @@ public class RaceLogTest {
         RaceLog raceLog = new RaceLogImpl("RaceLogTest", "test-identifier");
         UUID client1Id = UUID.randomUUID();
         UUID client2Id = UUID.randomUUID();
-        final MillisecondsTimePoint now = MillisecondsTimePoint.now();
-        RaceLogStartTimeEvent startTimeEvent1 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now, author, 1, now.plus(1));
+        final TimePoint now = MillisecondsTimePoint.now();
+        RaceLogStartTimeEvent startTimeEvent1 = new RaceLogStartTimeEventImpl(now, author, 1, now.plus(1));
         Iterable<RaceLogEvent> empty = raceLog.add(startTimeEvent1, client1Id);
         assertTrue(Util.isEmpty(empty));
-        RaceLogStartTimeEvent startTimeEvent2 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(2), author, 1, now.plus(3));
+        RaceLogStartTimeEvent startTimeEvent2 = new RaceLogStartTimeEventImpl(now.plus(2), author, 1, now.plus(3));
         Iterable<RaceLogEvent> nonEmpty = raceLog.add(startTimeEvent2, client2Id);
         assertEquals(1, Util.size(nonEmpty));
         assertSame(startTimeEvent1, nonEmpty.iterator().next());
-        RaceLogStartTimeEvent startTimeEvent3 = RaceLogEventFactory.INSTANCE.createStartTimeEvent(now.plus(4), author, 1, now.plus(5));
+        RaceLogStartTimeEvent startTimeEvent3 = new RaceLogStartTimeEventImpl(now.plus(4), author, 1, now.plus(5));
         Iterable<RaceLogEvent> nonEmpty2 = raceLog.add(startTimeEvent3, client1Id);
         assertEquals(1, Util.size(nonEmpty2));
         assertSame(startTimeEvent2, nonEmpty2.iterator().next());

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
@@ -16,17 +16,32 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorTemplate
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 
-public class RaceTableWrapper<S extends SelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
+public class RaceTableWrapper<S extends RefreshableSelectionModel<RaceColumnDTOAndFleetDTOWithNameBasedEquality>>
 extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     private String selectedLeaderboardName;
 
     public RaceTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter errorReporter, S selectionModel) {
-        super(sailingService, stringMessages, errorReporter, selectionModel, false);
-        
+            ErrorReporter errorReporter, boolean multiSelection) {
+        super(sailingService, stringMessages, errorReporter, multiSelection, /* enablePager */ false,
+                new EntityIdentityComparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
+                    RaceColumnDTOAndFleetDTOWithNameBasedEquality dto2) {
+                return dto1.getA().getName().toString().equals(dto2.getA().getName().toString()) &&
+                        dto1.getB().getName().toString().equals(dto2.getB().getName().toString());
+            }
+
+            @Override
+            public int hashCode(RaceColumnDTOAndFleetDTOWithNameBasedEquality t) {
+                return t.getA().getName().toString().concat(t.getB().getName().toString()).hashCode();
+            }
+        });
         Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml> raceNameColumn =
                 new Column<RaceColumnDTOAndFleetDTOWithNameBasedEquality, SafeHtml>(new AnchorCell()) {
             @Override
@@ -46,14 +61,26 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
                 }
             }
         };
-        
+        raceNameColumn.setSortable(true);
+        getColumnSortHandler().setComparator(raceNameColumn, new Comparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public int compare(RaceColumnDTOAndFleetDTOWithNameBasedEquality o1, RaceColumnDTOAndFleetDTOWithNameBasedEquality o2) {
+                return new NaturalComparator().compare(o1.getA().getName(), o2.getA().getName());
+            }
+        });
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> fleetNameColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
             public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality object) {
                 return object.getB().getName();
             }
         };
-
+        fleetNameColumn.setSortable(true);
+        getColumnSortHandler().setComparator(fleetNameColumn, new Comparator<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
+            @Override
+            public int compare(RaceColumnDTOAndFleetDTOWithNameBasedEquality o1, RaceColumnDTOAndFleetDTOWithNameBasedEquality o2) {
+                return new NaturalComparator().compare(o1.getB().getName(), o2.getB().getName());
+            }
+        });
         table.addColumn(raceNameColumn, stringMessages.race());
         table.addColumn(fleetNameColumn, stringMessages.fleet());
     }

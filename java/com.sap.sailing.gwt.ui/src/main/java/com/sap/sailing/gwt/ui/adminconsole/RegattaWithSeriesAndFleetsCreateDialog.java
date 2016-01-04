@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -17,7 +18,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 
 public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAndFleetsDialog {
     protected static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
+    
     protected static class RegattaParameterValidator implements Validator<RegattaDTO> {
         private StringMessages stringMessages;
         private ArrayList<RegattaDTO> existingRegattas;
@@ -69,7 +70,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 List<SeriesDTO> seriesToValidate = regattaToValidate.series;
                 int index = 0;
                 boolean seriesNameNotEmpty = true;
-
                 for (SeriesDTO series : seriesToValidate) {
                     seriesNameNotEmpty = series.getName() != null && series.getName().length() > 0;
                     if (!seriesNameNotEmpty) {
@@ -77,10 +77,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                     }
                     index++;
                 }
-
                 int index2 = 0;
                 boolean seriesUnique = true;
-
                 HashSet<String> setToFindDuplicates = new HashSet<String>();
                 for (SeriesDTO series : seriesToValidate) {
                     if (!setToFindDuplicates.add(series.getName())) {
@@ -89,7 +87,6 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                     }
                     index2++;
                 }
-
                 if (!seriesNameNotEmpty) {
                     errorMessage = stringMessages.series() + " " + (index + 1) + ": "
                             + stringMessages.pleaseEnterAName();
@@ -97,11 +94,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                     errorMessage = stringMessages.series() + " " + (index2 + 1) + ": "
                             + stringMessages.seriesWithThisNameAlreadyExists();
                 }
-
             }
             return errorMessage;
         }
-
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
@@ -116,9 +111,10 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     @Override
-    protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel) {
-        super.setupAdditionalWidgetsOnPanel(panel);
-        TabPanel tabPanel = new TabPanel();
+    protected void setupAdditionalWidgetsOnPanel(final VerticalPanel panel, Grid formGrid) {
+        super.setupAdditionalWidgetsOnPanel(panel, formGrid);
+        insertRankingMetricTabPanel(formGrid);
+        final TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");
         tabPanel.add(getSeriesEditor(), stringMessages.series());
         tabPanel.selectTab(0);
@@ -134,6 +130,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO dto = super.getResult();
+        setRankingMetrics(dto);
         return dto;
     }
 

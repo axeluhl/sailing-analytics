@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 import javax.servlet.ServletContext;
 import javax.ws.rs.core.Context;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -17,9 +18,29 @@ import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.DateParser;
+import com.sun.jersey.api.core.ResourceContext;
 
 public abstract class AbstractSailingServerResource {
-    @Context ServletContext servletContext; 
+    @Context ServletContext servletContext;
+    @Context ResourceContext resourceContext;
+    
+    protected ServletContext getServletContext() {
+        return servletContext;
+    }
+    
+    protected ResourceContext getResourceContext() {
+        return resourceContext;
+    }
+    
+    protected <T> T getService(Class<T> clazz) {
+        BundleContext context = (BundleContext) servletContext
+                .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
+        ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);
+        tracker.open();
+        T service = tracker.getService();
+        tracker.close();
+        return service;
+    }
 
     public RacingEventService getService() {
         @SuppressWarnings("unchecked")
@@ -33,13 +54,8 @@ public abstract class AbstractSailingServerResource {
 
     protected RaceDefinition findRaceByName(Regatta regatta, String raceName) {
         RaceDefinition result = null;
-        if(regatta != null) {
-            for (RaceDefinition race : regatta.getAllRaces()) {
-                if (race.getName().equals(raceName)) {
-                    result = race;
-                    break;
-                }
-            }
+        if (regatta != null) {
+            result = regatta.getRaceByName(raceName);
         }
         return result;
     }
@@ -60,8 +76,8 @@ public abstract class AbstractSailingServerResource {
         TrackedRace trackedRace = null;
         if (regatta != null && race != null) {
             DynamicTrackedRegatta trackedRegatta = getService().getTrackedRegatta(regatta);
-            if(trackedRegatta != null) {
-                trackedRace = trackedRegatta.getTrackedRace(race);
+            if (trackedRegatta != null) {
+                trackedRace = trackedRegatta.getExistingTrackedRace(race);
             }
         }
         return trackedRace;

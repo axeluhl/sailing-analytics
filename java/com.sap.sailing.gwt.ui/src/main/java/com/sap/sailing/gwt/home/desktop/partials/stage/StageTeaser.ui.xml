@@ -1,0 +1,30 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui" 
+		xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials">
+	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.stage.StageResources" />
+	<g:HTMLPanel styleName="{local_res.css.stageteaser} {local_res.css.swiperslide}">
+		<div class="{local_res.css.stageteaser_background}">
+			<div ui:field="teaserImage" class="{local_res.css.stageteaser_background_image}" />
+		</div>
+		<div class="{local_res.css.stageteaser_content}">
+			<header class="{local_res.css.stageteaser_content_header}">
+				<p class="{local_res.css.stageteaser_content_header_subtitle}">
+					<span ui:field="subtitle" />
+				</p>
+				<h2 class="{local_res.css.stageteaser_content_header_title}">
+					<span ui:field="title" />
+				</h2>
+				<div class="{local_res.css.stageteaser_content_header_countdown} {local_res.css.countdown}">
+					<sp:countdowntimer.CountdownTimer ui:field="countdownTimerUi" />
+				</div>
+			</header>
+		</div>
+		<div ui:field="bandCount" data-bandcount="" class="{local_res.css.stageteaser_content_band}">
+			<div class="{res.mediaCss.grid}">
+				<g:HTMLPanel ui:field="stageTeaserBandsPanel" />
+			</div>
+		</div>
+	</g:HTMLPanel>
+</ui:UiBinder>

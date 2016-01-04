@@ -17,6 +17,9 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.mockito.Mockito.mock;
+
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
@@ -30,13 +33,13 @@ public class SwissTimingRaceConfigurationTest {
     @Test
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
         InputStream inputStream = getClass().getResourceAsStream(JSON_URL);
-        List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).parseJSONObject(inputStream , JSON_URL);
+        List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).parseJSONObject(inputStream , JSON_URL);
         Map<String, SwissTimingRaceConfig> configsById = new HashMap<String, SwissTimingRaceConfig>();
         for (SwissTimingReplayRace race : races) {
             URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, race.getRaceId()));
             URLConnection connection = configFileURL.openConnection();
             InputStream configDataStream = connection.getInputStream();
-            SwissTimingRaceConfig raceConfig = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
+            SwissTimingRaceConfig raceConfig = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
             configsById.put(race.getRaceId(), raceConfig);
         }
     }
@@ -46,7 +49,7 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "446483"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
         assertNull(config_446483.event_name);
@@ -63,7 +66,7 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "6260"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
         assertEquals("London 2012 Olympic Games", config_446483.event_name);

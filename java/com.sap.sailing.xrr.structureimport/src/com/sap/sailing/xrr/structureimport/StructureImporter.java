@@ -3,6 +3,7 @@ package com.sap.sailing.xrr.structureimport;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
@@ -97,7 +99,7 @@ public class StructureImporter {
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
                     baseDomainFactory.getOrCreateBoatClass(((Division) event.getRaceOrDivisionOrRegattaSeriesResult()
                             .get(0)).getTitle()), startDate, endDate, getSeries(buildStructure), false,
-                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null);
+                    this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
@@ -202,11 +204,13 @@ public class StructureImporter {
                     String name = person.getGivenName() + " " + person.getFamilyName();
                     Color color = null;
                     String email = null;
+                    URI flagImage = null;
                     Nationality nationality = (person.getNOC() == null) ? null : getNationality(person.getNOC()
                             .toString());
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
-                            UUID.fromString(idAsString), name, color, email, boatAndTeam.getTeam(), boatAndTeam.getBoat()));
+                            UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat(),
+                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
                 } else {
                     break;
                 }

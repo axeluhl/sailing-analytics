@@ -1,3 +1,40 @@
+/**
+ * The grid styles
+ */
+.grid,
+.stackenblochen {
+  display: block;
+  width: 100%;
+  max-width: 80rem;
+  list-style: none;
+  margin: 0 auto;
+  zoom: 1;
+}
+.grid:before,
+.stackenblochen:before,
+.grid:after,
+.stackenblochen:after {
+  content: "";
+  display: table;
+}
+.grid:after,
+.stackenblochen:after {
+  clear: both;
+}
+.grid *,
+.stackenblochen * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.grid .grid,
+.stackenblochen .grid,
+.grid .stackenblochen,
+.stackenblochen .stackenblochen {
+  width: auto;
+  max-width: none;
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
 .column,
 .columns {
   float: left;
@@ -89,17 +126,47 @@
 .hideonsmall {
   display: none !important;
 }
+table.showonsmall {
+  display: table !important;
+}
+tr.showonsmall {
+  display: table-row !important;
+}
+td.showonsmall,
+th.showonsmall {
+  display: table-cell !important;
+}
 .showonmedium {
   display: none !important;
 }
 .hideonmedium {
   display: inherit !important;
 }
+table.hideonmedium {
+  display: table !important;
+}
+tr.hideonmedium {
+  display: table-row !important;
+}
+td.hideonmedium,
+th.hideonmedium {
+  display: table-cell !important;
+}
 .showonlarge {
   display: none !important;
 }
 .hideonlarge {
   display: inherit !important;
+}
+table.hideonlarge {
+  display: table !important;
+}
+tr.hideonlarge {
+  display: table-row !important;
+}
+td.hideonlarge,
+th.hideonlarge {
+  display: table-cell !important;
 }
 .column.smallcentered,
 .columns.smallcentered {
@@ -113,115 +180,7 @@
   margin-right: 0;
   float: left !important;
 }
-
-.largecentered {
-}
-.largeuncentered {
-}
-.mediumcentered {
-}
-.mediumuncentered {
-}
-
-.medium1 {
-}
-.medium2 {
-}
-.medium3 {
-}
-.medium4 {
-}
-.medium5 {
-}
-.medium6 {
-}
-.medium7 {
-}
-.medium8 {
-}
-.medium9 {
-}
-.medium10 {
-}
-.medium11 {
-}
-.medium12 {
-}
-.mediumoffset0 {
-}
-.mediumoffset1 {
-}
-.mediumoffset2 {
-}
-.mediumoffset3 {
-}
-.mediumoffset4 {
-}
-.mediumoffset5 {
-}
-.mediumoffset6 {
-}
-.mediumoffset7 {
-}
-.mediumoffset8 {
-}
-.mediumoffset9 {
-}
-.mediumoffset10 {
-}
-.mediumoffset11 {
-}
-
-.large1 {
-}
-.large2 {
-}
-.large3 {
-}
-.large4 {
-}
-.large5 {
-}
-.large6 {
-}
-.large7 {
-}
-.large8 {
-}
-.large9 {
-}
-.large10 {
-}
-.large11 {
-}
-.large12 {
-}
-.largeoffset0 {
-}
-.largeoffset1 {
-}
-.largeoffset2 {
-}
-.largeoffset3 {
-}
-.largeoffset4 {
-}
-.largeoffset5 {
-}
-.largeoffset6 {
-}
-.largeoffset7 {
-}
-.largeoffset8 {
-}
-.largeoffset9 {
-}
-.largeoffset10 {
-}
-.largeoffset11 {
-}
-
-@media (min-width: 25em) {
+@media (min-width: 45em) {
   .medium1 {
     width: 8.3333333333333%;
   }
@@ -300,17 +259,47 @@
   .hideonsmall {
     display: inherit !important;
   }
+  table.hideonsmall {
+    display: table !important;
+  }
+  tr.hideonsmall {
+    display: table-row !important;
+  }
+  td.hideonsmall,
+  th.hideonsmall {
+    display: table-cell !important;
+  }
   .showonmedium {
     display: inherit !important;
   }
   .hideonmedium {
     display: none !important;
   }
+  table.showonmedium {
+    display: table !important;
+  }
+  tr.showonmedium {
+    display: table-row !important;
+  }
+  td.showonmedium,
+  th.showonmedium {
+    display: table-cell !important;
+  }
   .showonlarge {
     display: none !important;
   }
   .hideonlarge {
     display: inherit !important;
+  }
+  table.hideonlarge {
+    display: table !important;
+  }
+  tr.hideonlarge {
+    display: table-row !important;
+  }
+  td.hideonlarge,
+  th.hideonlarge {
+    display: table-cell !important;
   }
   .column.mediumcentered,
   .columns.mediumcentered {
@@ -325,7 +314,7 @@
     float: left !important;
   }
 }
-@media (min-width: 50em) {
+@media (min-width: 61em) {
   .large1 {
     width: 8.3333333333333%;
   }
@@ -404,17 +393,47 @@
   .hideonsmall {
     display: inherit !important;
   }
+  table.hideonsmall {
+    display: table !important;
+  }
+  tr.hideonsmall {
+    display: table-row !important;
+  }
+  td.hideonsmall,
+  th.hideonsmall {
+    display: table-cell !important;
+  }
   .showonmedium {
     display: none !important;
   }
   .hideonmedium {
     display: inherit !important;
   }
+  table.hideonmedium {
+    display: table !important;
+  }
+  tr.hideonmedium {
+    display: table-row !important;
+  }
+  td.hideonmedium,
+  th.hideonmedium {
+    display: table-cell !important;
+  }
   .showonlarge {
     display: inherit !important;
   }
   .hideonlarge {
     display: none !important;
+  }
+  table.showonlarge {
+    display: table !important;
+  }
+  tr.showonlarge {
+    display: table-row !important;
+  }
+  td.showonlarge,
+  th.showonlarge {
+    display: table-cell !important;
   }
   .column.largecentered,
   .columns.largecentered {

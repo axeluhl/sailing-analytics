@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -119,6 +120,15 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
     public boolean hasSplitFleetContiguousScoring() {
         return getSeries().hasSplitFleetContiguousScoring();
     }
-    
-    
+
+    @Override
+    public RaceExecutionOrderProvider getRaceExecutionOrderProvider() {
+        final RaceExecutionOrderProvider result;
+        if (getRegatta() != null) {
+            result = getRegatta().getRaceExecutionOrderProvider();
+        } else {
+            result = null;
+        }
+        return result;
+    }
 }

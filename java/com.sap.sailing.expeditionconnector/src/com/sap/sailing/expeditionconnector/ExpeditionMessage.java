@@ -4,8 +4,8 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.udpconnector.UDPMessage;
 import com.sap.sse.common.TimePoint;
 

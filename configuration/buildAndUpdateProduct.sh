@@ -134,7 +134,7 @@ if [ $# -eq 0 ]; then
     echo "local-deploy: performs deployment of one or more bundles into a local directory"
     echo "Example: $0 -n com.sap.sailing.www -s /home/user/myserver local-deploy"
     echo ""
-    echo "remote-deploy: performs hot deployment of the java code to a remote server"
+    echo "remote-deploy: deploys the last build results to a remote server and optionally re-starts it"
     echo "Example: $0 -s dev -w trac@sapsailing.com remote-deploy"
     echo ""
     echo "clean: cleans all code and GWT files"
@@ -190,15 +190,20 @@ if [[ $@ == "" ]]; then
 	exit 2
 fi
 
+rm $START_DIR/build.log
 
 if [[ "$@" == "clean" ]]; then
+    ./gradlew clean
+    if [[ $? != 0 ]]; then
+        exit 100
+    fi
     cd $PROJECT_HOME/java
     rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
     rm -rf com.sap.sse.security.ui/com.sap.sse.security.ui.*
     cd $PROJECT_HOME
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean"
     echo "Maven version used: `mvn --version`"
-    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean 2>&1 | tee $START_DIR/build.log
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean 2>&1 | tee -a $START_DIR/build.log
     MVN_EXIT_CODE=${PIPESTATUS[0]}
     echo "Maven exit code is $MVN_EXIT_CODE"
     exit 0
@@ -232,6 +237,7 @@ if [[ "$@" == "release" ]]; then
     fi
 
     mkdir -p $PROJECT_HOME/dist
+    rm -rf $PROJECT_HOME/dist/*
     mkdir -p $PROJECT_HOME/build
 
     RELEASE_NOTES="Release $VERSION_INFO\n$RELEASE_NOTES"
@@ -532,8 +538,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             echo "INFO: Activating proxy profile"
             extra="$extra -P no-debug.with-proxy"
             MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
+	    ANDROID_OPTIONS="--proxy-host proxy --proxy-port 8080"
         else
             extra="$extra -P no-debug.without-proxy"
+	    ANDROID_OPTIONS=""
         fi
 
 	cd $PROJECT_HOME/java
@@ -569,7 +577,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    #build local p2 repo
 	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
-	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee $START_DIR/build.log)
+	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
 	    echo "Maven exit code is $MVN_EXIT_CODE"
@@ -611,14 +619,77 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
+        ANDROID="$ANDROID_HOME/tools/android"
+	    if [ \! -x "$ANDROID" ]; then
+	        ANDROID="$ANDROID_HOME/tools/android.bat"
+	    fi
 
-        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        RC_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/build.gradle | cut -d "=" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
         extra="$extra -Drc-app-version=$RC_APP_VERSION"
 
-        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
+        TRACKING_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/build.gradle | cut -d "=" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
         extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
+
+        BUOY_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/build.gradle | cut -d "=" -f 2`
+        echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
+        extra="$extra -Dbuoy-app-version=$BUOY_APP_VERSION"
+
+        NOW=$(date +"%s")
+        BUILD_TOOLS=22.0.1
+        TARGET_API=22
+        TEST_API=18
+        ANDROID_ABI=armeabi-v7a
+        AVD_NAME="androidTest-${NOW}"
+        echo "Updating Android SDK (tools)..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (platform-tools)..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter platform-tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
+        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
+        ./gradlew clean build -xtest | tee -a $START_DIR/build.log
+        if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            exit 100
+        fi
+        if [ $testing -eq 1 ]; then
+            echo "Starting JUnit tests..."
+            ./gradlew test | tee -a $START_DIR/build.log
+            if [[ ${PIPESTATUS[0]} != 0 ]]; then
+                exit 103
+            fi
+            # TODO find a way that the emulator test is stable in hudson
+            # adb emu kill
+            # echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
+            # echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter sys-img-${ANDROID_ABI}-android-${TEST_API} --no-ui --force --all > /dev/null
+            # echo no | "$ANDROID" create avd --name ${AVD_NAME} --target android-${TEST_API} --abi ${ANDROID_ABI} --force -p ${START_DIR}/emulator
+            # echo "Starting emulator..." | tee -a $START_DIR/build.log
+            # emulator -avd ${AVD_NAME} -no-skin -no-audio -no-window &
+            # echo "Waiting for startup..." | tee -a $START_DIR/build.log
+            # adb wait-for-device
+            # sleep 60
+            # $PROJECT_HOME/configuration/androidWaitForEmulator.sh
+            # if [[ $? != 0 ]]; then
+            #     adb emu kill
+            #     "$ANDROID" delete avd --name ${AVD_NAME}
+            #     exit 102
+            # fi
+            # adb shell input keyevent 82 &
+            # ./gradlew deviceCheck connectedCheck | tee -a $START_DIR/build.log
+            # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            #   adb emu kill
+            #   "$ANDROID" delete avd --name ${AVD_NAME}
+            #   exit 101
+            # fi
+            # adb emu kill
+            # "$ANDROID" delete avd --name ${AVD_NAME}
+        fi
     else
         echo "INFO: Deactivating mobile modules"
         extra="$extra -P !with-mobile"
@@ -635,7 +706,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
     echo "Maven version used: `mvn --version`"
-    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee $START_DIR/build.log
+    mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
     # now get the exit status from mvn, and not that of tee which is what $? contains now
     MVN_EXIT_CODE=${PIPESTATUS[0]}
     echo "Maven exit code is $MVN_EXIT_CODE"

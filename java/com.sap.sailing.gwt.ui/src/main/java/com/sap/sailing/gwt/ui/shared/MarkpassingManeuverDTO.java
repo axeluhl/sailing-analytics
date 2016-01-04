@@ -4,8 +4,8 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NauticalSide;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class MarkpassingManeuverDTO extends ManeuverDTO {
@@ -13,7 +13,7 @@ public class MarkpassingManeuverDTO extends ManeuverDTO {
 
     MarkpassingManeuverDTO() {}
 
-    public MarkpassingManeuverDTO(ManeuverType type, Tack newTack, PositionDTO position, Date timepoint,
+    public MarkpassingManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint,
             SpeedWithBearingDTO speedWithBearingBefore, SpeedWithBearingDTO speedWithBearingAfter,
             double directionChangeInDegrees, Double maneuverLossInMeters, NauticalSide side) {
         super(type, newTack, position, timepoint, speedWithBearingBefore, speedWithBearingAfter, directionChangeInDegrees,

@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sse.common.TimePoint;
 
 public class AbortTypeSelectionDialog extends RaceDialogFragment {
     private ImageButton apFlag;
@@ -66,7 +67,7 @@ public class AbortTypeSelectionDialog extends RaceDialogFragment {
     }
 
     @Override
-    public void notifyTick() {
+    public void notifyTick(TimePoint now) {
         
     }
 }

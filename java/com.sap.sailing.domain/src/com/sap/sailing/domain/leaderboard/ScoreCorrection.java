@@ -100,6 +100,14 @@ public interface ScoreCorrection extends Serializable {
     boolean hasCorrectionFor(RaceColumn raceInLeaderboard);
     
     /**
+     * Similar to {@link #hasCorrectionFor(RaceColumn)}, but returns <code>true</code> only if score corrections are found
+     * for any competitor who in <code>raceInLeaderboard</code> is not in a tracked race and hence the fleet assignment
+     * cannot be determined. This is helpful, e.g., for progress detection. If score corrections are present for such
+     * untracked competitors then all untracked fleets need to be assumed as finished.
+     */
+    boolean hasCorrectionForNonTrackedFleet(RaceColumn raceInLeaderboard);
+    
+    /**
      * @return all race columns for which this score corrections object has at least one correction; note that this
      *         object may hold corrections also for competitors that are not currently returned by
      *         {@link Leaderboard#getCompetitors()}, e.g., because one or more tracked races are not currently attached

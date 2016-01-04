@@ -14,11 +14,10 @@ import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialog;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
 
@@ -107,12 +106,14 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             }
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
-                    false, /* showRegattaRank */ true);
+                    false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
             leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
                 settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), raceList, 
                 /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
                 /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), stringMessages);
+                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+                settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn(),
+                stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {

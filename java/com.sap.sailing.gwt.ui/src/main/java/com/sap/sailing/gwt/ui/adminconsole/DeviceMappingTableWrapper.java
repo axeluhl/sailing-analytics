@@ -11,15 +11,16 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
-public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, SingleSelectionModel<DeviceMappingDTO>> {
+public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, RefreshableSingleSelectionModel<DeviceMappingDTO>> {
     static interface FilterChangedHandler {
         void onFilterChanged(List<DeviceMappingDTO> filteredList);
     }
@@ -30,8 +31,18 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
 
     public DeviceMappingTableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages,
             ErrorReporter errorReporter) {
-        super(sailingService, stringMessages, errorReporter, new SingleSelectionModel<DeviceMappingDTO>(), true);
-        
+        super(sailingService, stringMessages, errorReporter, /* multiSelection */ false, /* enablePager */ true,
+                new EntityIdentityComparator<DeviceMappingDTO>() {
+                    @Override
+                    public boolean representSameEntity(DeviceMappingDTO dto1, DeviceMappingDTO dto2) {
+                        return dto1.deviceIdentifier.deviceId.equals(dto2.deviceIdentifier.deviceId) &&
+                                dto1.mappedTo.getIdAsString().equals(dto2.mappedTo.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(DeviceMappingDTO t) {
+                        return t.deviceIdentifier.deviceId.concat(t.mappedTo.getIdAsString()).hashCode();
+                    }
+                });
         showPingMappingsCb = new CheckBox(stringMessages.showPingMarkMappings());
         showPingMappingsCb.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
@@ -40,12 +51,9 @@ public class DeviceMappingTableWrapper extends TableWrapper<DeviceMappingDTO, Si
             }
         });
         mainPanel.insert(showPingMappingsCb, 0);
-        
         table.setWidth("1000px", true);
         table.addStyleName("wrap-cols");
-        
-        ListHandler<DeviceMappingDTO> listHandler = new ListHandler<DeviceMappingDTO>(dataProvider.getList());
-        
+        ListHandler<DeviceMappingDTO> listHandler = getColumnSortHandler();
         TextColumn<DeviceMappingDTO> itemTypeCol = new TextColumn<DeviceMappingDTO>() {
             @Override
             public String getValue(DeviceMappingDTO mapping) {

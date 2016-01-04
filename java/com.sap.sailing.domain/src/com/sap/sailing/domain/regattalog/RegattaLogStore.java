@@ -12,4 +12,9 @@ public interface RegattaLogStore {
      * from the cache.
      */
     void removeRegattaLog(RegattaLikeIdentifier regattaLikeId);
+    
+    /**
+     * Adds the mongo listener to the regatta log and adds regatta log to cache.
+     */
+    void addImportedRegattaLog(RegattaLog regattaLog, RegattaLikeIdentifier identifier);
 }

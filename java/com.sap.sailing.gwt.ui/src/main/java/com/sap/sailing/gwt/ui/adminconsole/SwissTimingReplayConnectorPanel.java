@@ -30,18 +30,18 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 /**
@@ -64,7 +64,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
 
     public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), stringMessages);
+        super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
         availableSwissTimingRaces = new ArrayList<SwissTimingReplayRaceDTO>();
         previousConfigurationsComboBox = new ListBox();
@@ -190,12 +190,22 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingReplayRaceDTO>() {});
+        raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
+        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
+                new EntityIdentityComparator<SwissTimingReplayRaceDTO>() {
+                    @Override
+                    public boolean representSameEntity(SwissTimingReplayRaceDTO dto1, SwissTimingReplayRaceDTO dto2) {
+                        return dto1.race_id.equals(dto2.race_id);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingReplayRaceDTO t) {
+                        return t.race_id.hashCode();
+                    }
+                }, raceList) {
+        });
 
         racesHorizontalPanel.add(raceTable);
         racesHorizontalPanel.add(trackPanel);
-
-        raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), raceNameColumn, boatClassNamesColumn, raceStartTrackingColumn);
         raceTable.addColumnSortHandler(columnSortHandler);
@@ -224,11 +234,11 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         declinationCheckbox.setValue(true);
         trackPanel.add(declinationCheckbox);
         
-        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
-        simulateWithStartTimeNow.setWordWrap(false);
-        simulateWithStartTimeNow.setValue(false);
-        trackPanel.add(simulateWithStartTimeNow);
-        
+        final CheckBox useInternalMarkPassingAlgorithmCheckbox = new CheckBox(stringMessages.useInternalAlgorithm());
+        useInternalMarkPassingAlgorithmCheckbox.setWordWrap(false);
+        useInternalMarkPassingAlgorithmCheckbox.setValue(Boolean.FALSE);
+        trackPanel.add(useInternalMarkPassingAlgorithmCheckbox);
+
         trackedRacesPanel.add(trackedRacesListComposite);
 
         HorizontalPanel racesButtonPanel = new HorizontalPanel();
@@ -240,7 +250,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         btnTrack.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(), simulateWithStartTimeNow.getValue());
+                trackSelectedRaces(trackWindCheckbox.getValue(), declinationCheckbox.getValue(),
+                        useInternalMarkPassingAlgorithmCheckbox.getValue());
             }
         });
 
@@ -337,7 +348,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         });
     }
 
-    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, final boolean simulateWithStartTimeNow) {
+    private void trackSelectedRaces(boolean trackWind, boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) {
         RegattaDTO selectedRegatta = getSelectedRegatta();
         RegattaIdentifier regattaIdentifier = null;
         if (selectedRegatta != null) {
@@ -353,7 +364,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         }
         if (checkBoatClassOK(selectedRegatta, selectedRaces)) {
             sailingService.replaySwissTimingRace(regattaIdentifier, selectedRaces, trackWind, correctWindByDeclination,
-                simulateWithStartTimeNow, new AsyncCallback<Void>() {
+                useInternalMarkPassingAlgorithm, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error trying to register races " + selectedRaces

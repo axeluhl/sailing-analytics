@@ -2,9 +2,9 @@ package com.sap.sailing.domain.common;
 
 import java.io.Serializable;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.datamining.shared.Unit;
-import com.sap.sse.datamining.shared.annotations.Statistic;
+import com.sap.sse.datamining.annotations.Statistic;
 
 /**
  * A speed, convertible in various units of measure. Can be negative.
@@ -47,12 +47,22 @@ public interface Speed extends Comparable<Speed>, Serializable {
         }
         
         @Override
+        public Duration getDuration(Distance distance) {
+            throw new ArithmeticException("Cannot determine duration for any distance with zero speed");
+        }
+
+        @Override
         public String toString() {
             return "0kn";
         }
+
+        @Override
+        public double getStatuteMilesPerHour() {
+            return 0;
+        }
     };
     
-    @Statistic(messageKey="InKnots", resultDecimals=2, resultUnit=Unit.Knots)
+    @Statistic(messageKey="", resultDecimals=2)
     double getKnots();
 
     double getMetersPerSecond();
@@ -60,6 +70,8 @@ public interface Speed extends Comparable<Speed>, Serializable {
     double getKilometersPerHour();
     
     double getBeaufort();
+    
+    double getStatuteMilesPerHour();
 
     /**
      * Traveling at this speed starting at time <code>from</code> until time </code>to</code>, how far have we traveled?
@@ -67,5 +79,10 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * amount then so will the resulting distance.
      */
     Distance travel(TimePoint from, TimePoint to);
-    
+
+    /**
+     * The duration it takes to travel the <code>distance</code> specified on a great circle (the "straight
+     * line" on a sphere) with this speed.
+     */
+    Duration getDuration(Distance distance);
 }

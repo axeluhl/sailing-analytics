@@ -54,4 +54,14 @@ public interface RaceLogEventVisitor {
     public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event);
 
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation);
+    
+    public void visit(RaceLogFixedMarkPassingEvent event);
+    
+    public void visit(RaceLogSuppressedMarkPassingsEvent event);
+    
+    public void visit(RaceLogDependentStartTimeEvent event);
+    
+    public void visit(RaceLogStartOfTrackingEvent event);
+    
+    public void visit(RaceLogEndOfTrackingEvent event);
 }

@@ -79,7 +79,9 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     TimePoint getIndividualRecallDisplayedTime();
 
     /**
-     * Gets the time the individual recall flag was removed (or <code>null</code>).
+     * Gets the time the individual recall flag was or shall be removed (or <code>null</code> if it hasn't been set or no
+     * race start time is known). When the flag is currently set, the removal time can either be specified by an explicit
+     * race log event or is automatically triggered four minutes after the race start time.
      */
     TimePoint getIndividualRecallRemovalTime();
 

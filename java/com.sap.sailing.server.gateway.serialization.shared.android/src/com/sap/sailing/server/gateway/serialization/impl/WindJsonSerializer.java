@@ -3,7 +3,7 @@ package com.sap.sailing.server.gateway.serialization.impl;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.tracking.Wind;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class WindJsonSerializer implements JsonSerializer<Wind> {

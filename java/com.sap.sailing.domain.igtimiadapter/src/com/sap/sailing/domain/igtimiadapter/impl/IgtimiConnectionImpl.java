@@ -277,7 +277,8 @@ public class IgtimiConnectionImpl implements IgtimiConnection {
         TimePoint endOfWindow = new MillisecondsTimePoint(0);
         for (DynamicTrackedRace trackedRace : trackedRaces) {
             startOfWindow = Collections.min(Arrays.asList(startOfWindow, IgtimiWindTracker.getReceivingStartTime(trackedRace)));
-            endOfWindow = Collections.max(Arrays.asList(endOfWindow, IgtimiWindTracker.getReceivingEndTime(trackedRace)));
+            final TimePoint receivingEndTime = IgtimiWindTracker.getReceivingEndTime(trackedRace);
+            endOfWindow = Collections.max(Arrays.asList(endOfWindow, receivingEndTime==null?MillisecondsTimePoint.now():receivingEndTime));
         }
         Iterable<DataAccessWindow> daws = getDataAccessWindows(Permission.read, startOfWindow, endOfWindow, /* find all deviceSerialNumbers for window */ null);
         logger.info("Found "+Util.size(daws)+" data access windows. Analyzing which ones contain wind data...");

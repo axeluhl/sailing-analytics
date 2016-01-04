@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -46,6 +48,19 @@ public class Helpers {
                     fieldName, childObject.toString()));
         }
         return (JSONArray) childObject;
+    }
+
+    public static URL getURLField(JSONObject parent, String fieldName) {
+        URL result = null;
+        String urlAsString = (String) parent.get(fieldName);
+        if (urlAsString != null) {
+            try {
+                result = new URL(urlAsString);
+            } catch (MalformedURLException e) {
+                logger.severe("Error deserializing URL " + urlAsString);
+            }
+        }
+        return result;
     }
 
     public static Serializable tryUuidConversion(Serializable serializableId) {

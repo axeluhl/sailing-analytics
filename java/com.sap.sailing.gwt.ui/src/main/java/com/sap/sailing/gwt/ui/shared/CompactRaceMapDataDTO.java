@@ -2,13 +2,17 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sse.common.Util;
 
 /**
  * A compact representation of a {@link RaceMapDataDTO} that represents competitors by their ID only instead of a
@@ -21,35 +25,47 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
  * 
  */
 public class CompactRaceMapDataDTO implements IsSerializable {
-    private Map<String, List<GPSFixDTO>> boatPositionsByCompetitorIdAsString;
+    private CompactBoatPositionsDTO boatPositionsByCompetitorIdAsString;
+
     private CoursePositionsDTO coursePositions;
     private List<SidelineDTO> courseSidelines;
     private List<CompactQuickRankDTO> quickRanks;
+    private LinkedHashMap<String, Integer> competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber;
+    private long simulationResultVersion;
+    
+    /**
+     * <code>null</code> if the client's request contained an equal MD5 as the race's competitors {@link RaceDefinition#getCompetitorMD5() produce};
+     * otherwise, the set of competitor IDs, {@link Object#toString() converted to strings}, in no particular order.
+     */
+    private HashSet<String> raceCompetitorIdsAsStrings;
     
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
-           List<SidelineDTO> courseSidelines, List<QuickRankDTO> quickRanks) {
-        this.boatPositionsByCompetitorIdAsString = new HashMap<String, List<GPSFixDTO>>();
-        for (Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : boatPositions.entrySet()) {
-            this.boatPositionsByCompetitorIdAsString.put(e.getKey().getIdAsString(), e.getValue());
-        }
-        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : quickRanks.size());
+           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings) {
+        this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
+        this.raceCompetitorIdsAsStrings = raceCompetitorIdsAsStrings;
+        this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : Util.size(quickRanks.getQuickRanks()));
+        this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber = new LinkedHashMap<>();
+        Map<String, Integer> competitorIdAsStringToOneBasedLegNumber = new HashMap<>();
         if (quickRanks != null) {
-            for (QuickRankDTO quickRank : quickRanks) {
+            for (QuickRankDTO quickRank : quickRanks.getQuickRanks()) {
                 this.quickRanks.add(new CompactQuickRankDTO(quickRank.competitor.getIdAsString(), quickRank.rank,
                         quickRank.legNumberOneBased));
+                competitorIdAsStringToOneBasedLegNumber.put(quickRank.competitor.getIdAsString(), quickRank.legNumberOneBased);
+            }
+            for (CompetitorDTO competitorInOrderOfWindwardDistanceTraveled : quickRanks.getCompetitorsInOrderOfWindwardDistanceTraveledFarthestFirst()) {
+                this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.put(
+                        competitorInOrderOfWindwardDistanceTraveled.getIdAsString(),
+                        competitorIdAsStringToOneBasedLegNumber.get(competitorInOrderOfWindwardDistanceTraveled.getIdAsString()));
             }
         }
         this.courseSidelines = courseSidelines;
         this.coursePositions = coursePositions;
+        this.simulationResultVersion = simulationResultVersion;
     }
     
-    public RaceMapDataDTO getRaceMapDataDTO(Iterable<CompetitorDTO> competitors) {
-        Map<String, CompetitorDTO> competitorsByIdAsString = new HashMap<String, CompetitorDTO>();
-        for (CompetitorDTO competitor : competitors) {
-            competitorsByIdAsString.put(competitor.getIdAsString(), competitor);
-        }
+    public RaceMapDataDTO getRaceMapDataDTO(Map<String, CompetitorDTO> competitorsByIdAsString) {
         RaceMapDataDTO result = new RaceMapDataDTO();
         result.quickRanks = new LinkedHashMap<CompetitorDTO, QuickRankDTO>(this.quickRanks.size());
         for (CompactQuickRankDTO compactQuickRank : this.quickRanks) {
@@ -60,14 +76,16 @@ public class CompactRaceMapDataDTO implements IsSerializable {
         }
         result.courseSidelines = courseSidelines;
         result.coursePositions = coursePositions;
-        result.boatPositions = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
-        for (Map.Entry<String, List<GPSFixDTO>> e : boatPositionsByCompetitorIdAsString.entrySet()) {
-            final CompetitorDTO competitor = competitorsByIdAsString.get(e.getKey());
-            if (competitor != null) {
-                // maybe null in case the competitor was added, e.g., by unsuppressing, while this call was underway
-                result.boatPositions.put(competitor, e.getValue());
+        result.boatPositions = boatPositionsByCompetitorIdAsString.getBoatPositionsForCompetitors(competitorsByIdAsString);
+        result.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber = new LinkedHashMap<>();
+        for (Entry<String, Integer> i : competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber.entrySet()) {
+            CompetitorDTO c = competitorsByIdAsString.get(i.getKey());
+            if (c != null) {
+                result.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber.put(c, i.getValue());
             }
         }
+        result.simulationResultVersion = simulationResultVersion;
+        result.raceCompetitorIdsAsStrings = this.raceCompetitorIdsAsStrings;
         return result;
     }
 }

@@ -9,18 +9,18 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.Wind;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
@@ -56,7 +56,7 @@ public class RaceLogWindFixEventSerializerTest {
 
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createWindFixEvent(now, author, 0, createWindFix());
+        event = new RaceLogWindFixEventImpl(now, author, 0, createWindFix(), /* isMagnetic */ false);
     }
 
     @Test

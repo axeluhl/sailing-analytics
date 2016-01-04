@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +11,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 
 public class CompetitorImpl implements DynamicCompetitor {
@@ -21,14 +23,20 @@ public class CompetitorImpl implements DynamicCompetitor {
     private Color color;
     private transient Set<CompetitorChangeListener> listeners;
     private String email;
+    private URI flagImage;
+    private Double timeOnTimeFactor;
+    private Duration timeOnDistanceAllowancePerNauticalMile;
     
-    public CompetitorImpl(Serializable id, String name, Color color, String email, DynamicTeam team, DynamicBoat boat) {
+    public CompetitorImpl(Serializable id, String name, Color color, String email, URI flagImage, DynamicTeam team, DynamicBoat boat, Double timeOnTimeFactor, Duration timeOnDistanceAllowancePerNauticalMile) {
         this.id = id;
         this.name = name;
         this.team = team;
         this.boat = boat;
         this.color = color;
         this.email = email;
+        this.flagImage = flagImage;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
         this.listeners = new HashSet<CompetitorChangeListener>();
     }
     
@@ -75,7 +83,9 @@ public class CompetitorImpl implements DynamicCompetitor {
 
     @Override
     public Competitor resolve(SharedDomainFactory domainFactory) {
-        Competitor result = domainFactory.getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getTeam(), getBoat());
+        Competitor result = domainFactory
+                .getOrCreateCompetitor(getId(), getName(), getColor(), getEmail(), getFlagImage(), getTeam(),
+                        getBoat(), getTimeOnTimeFactor(), getTimeOnDistanceAllowancePerNauticalMile());
         return result;
     }
 
@@ -134,4 +144,53 @@ public class CompetitorImpl implements DynamicCompetitor {
     public boolean hasEmail(){
         return email != null && !email.isEmpty();
     }
+
+    @Override
+    public URI getFlagImage() {
+        return flagImage;
+    }
+
+    @Override
+    public void setFlagImage(URI flagImage) {
+        final URI oldFlagImage = this.flagImage;
+        this.flagImage = flagImage;
+        if (!Util.equalsWithNull(oldFlagImage, flagImage)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.flagImageChanged(oldFlagImage, flagImage);
+            }
+        }
+    }
+
+    @Override
+    public Double getTimeOnTimeFactor() {
+        return timeOnTimeFactor;
+    }
+
+    @Override
+    public Duration getTimeOnDistanceAllowancePerNauticalMile() {
+        return timeOnDistanceAllowancePerNauticalMile;
+    }
+
+    @Override
+    public void setTimeOnTimeFactor(Double timeOnTimeFactor) {
+        Double oldTimeOnTimeFactor = this.timeOnTimeFactor;
+        this.timeOnTimeFactor = timeOnTimeFactor;
+        if (!Util.equalsWithNull(oldTimeOnTimeFactor, timeOnTimeFactor)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.timeOnTimeFactorChanged(oldTimeOnTimeFactor, timeOnTimeFactor);
+            }
+        }
+    }
+
+    @Override
+    public void setTimeOnDistanceAllowancePerNauticalMile(Duration timeOnDistanceAllowancePerNauticalMile) {
+        Duration oldTimeOnDistanceAllowancePerNauticalMile = this.timeOnDistanceAllowancePerNauticalMile;
+        this.timeOnDistanceAllowancePerNauticalMile = timeOnDistanceAllowancePerNauticalMile;
+        if (!Util.equalsWithNull(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile)) {
+            for (CompetitorChangeListener listener : getListeners()) {
+                listener.timeOnDistanceAllowancePerNauticalMileChanged(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile);
+            }
+        }
+    }
+
 }

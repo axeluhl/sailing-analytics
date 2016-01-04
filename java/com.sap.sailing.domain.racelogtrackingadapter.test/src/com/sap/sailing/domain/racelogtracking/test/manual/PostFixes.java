@@ -15,16 +15,16 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiJsonHandler;
 import com.sap.sailing.domain.racelogtracking.test.AbstractJsonOverHttpTest;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceAndSessionIdentifierWithGPSFixesSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DeviceIdentifierJsonSerializer;
-import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingNmeaDTOJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSerializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -33,7 +33,7 @@ public class PostFixes extends AbstractJsonOverHttpTest {
 
     private final DeviceAndSessionIdentifierWithGPSFixesSerializer<SmartphoneImeiIdentifier, GPSFixMoving> fixSerializer =
             new DeviceAndSessionIdentifierWithGPSFixesSerializer<>(DeviceIdentifierJsonSerializer.create(
-                    new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE), new GPSFixMovingNmeaDTOJsonSerializer());
+                    new SmartphoneImeiJsonHandler(), SmartphoneImeiIdentifier.TYPE), new GPSFixMovingJsonSerializer());
 
             private void recordFix(GPSFixMoving... fix) throws IOException {
                 String request = fixSerializer.serialize(

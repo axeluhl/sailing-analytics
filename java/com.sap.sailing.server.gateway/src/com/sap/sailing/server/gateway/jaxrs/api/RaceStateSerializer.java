@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastFlagsFinder;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
@@ -23,6 +24,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Fleet>> {
+    private final RaceLogResolver raceLogResolver;
+
+    public RaceStateSerializer(RaceLogResolver raceLogResolver) {
+        this.raceLogResolver = raceLogResolver;
+    }
+
     @Override
     public JSONObject serialize(Pair<RaceColumn, Fleet> raceColumnAndFleet) {
         RaceColumn raceColumn = raceColumnAndFleet.getA();
@@ -36,7 +43,7 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         result.put("trackedRaceId", raceIdentifier != null ? raceIdentifier.toString() : null);
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(raceLogResolver, raceLog);
             RaceLogRaceStatus status = state.getStatus();
             TimePoint startTime = state.getStartTime();
             TimePoint finishedTime = state.getFinishedTime();
@@ -78,11 +85,10 @@ public class RaceStateSerializer implements JsonSerializer<Pair<RaceColumn, Flee
         boolean result = false;
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         if (raceLog != null && !raceLog.isEmpty()) {
-            TimePoint startTime = new StartTimeFinder(raceLog).analyze();
+            TimePoint startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
             RaceLogFlagEvent abortingFlagEvent = new AbortingFlagFinder(raceLog).analyze();
             TimePoint abortingTime = abortingFlagEvent != null ? abortingFlagEvent.getLogicalTimePoint() : null;
-            
             result = RaceStateOfSameDayHelper.isRaceStateOfSameDay(startTime, finishedTime, abortingTime, dayToCheck);
         }
         return result;

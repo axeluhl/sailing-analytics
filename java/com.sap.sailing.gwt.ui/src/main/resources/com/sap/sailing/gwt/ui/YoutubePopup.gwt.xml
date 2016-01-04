@@ -4,14 +4,14 @@
 	<inherits name="com.google.gwt.user.User" />
 
 	<!-- Other module inherits -->
-	<inherits name="com.sap.sailing.gwt.ui.EmulatedJRE" />
+	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<!-- Highcharts API -->
-	<inherits name="org.moxieapps.gwt.highcharts.Highcharts" />
+	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
 	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
 	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
 	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />

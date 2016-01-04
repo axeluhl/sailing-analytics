@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -14,20 +13,33 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
+public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
+
+    /**
+     * When a marker update is required but min/max are not yet initialized, this flag is set. If later
+     * {@link #setMinMax(Date, Date, boolean)} is invoked and this flag is set, a {@link #redrawAllMarkers(RaceTimesInfoDTO)}
+     * will be issued and the flag is cleared.
+     */
+    private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible);
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport,
+            RegattaAndRaceIdentifier selectedRaceIdentifier) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
+        selectedRace = selectedRaceIdentifier;
+        if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
+            raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
+        }
     }
     
     /**
@@ -38,7 +50,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         String result = null;
         RaceTimesInfoDTO selectedRaceTimes = raceTimesInfoProvider.getRaceTimesInfo(selectedRace);
         if (selectedRaceTimes.startOfRace != null) {
-            if(time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
+            if (time.before(selectedRaceTimes.startOfRace) || time.equals(selectedRaceTimes.startOfRace)) {
                 long timeToStartInMs = selectedRaceTimes.startOfRace.getTime() - time.getTime();
                 result = timeToStartInMs < 1000 ? stringMessages.start() : stringMessages.timeToStart(DateAndTimeFormatterUtil.formatElapsedTime(timeToStartInMs));
             } else {
@@ -105,7 +117,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 // maybe show a special state for this like "Race did not start yet"
             }
         }
-        lastRaceTimesInfo = raceTimesInfo;
+        lastRaceTimesInfo = raceTimesInfo; // TODO bug 3122: when not redrawn yet because min/max not initialized yet, further redraw is disabled by this.
     } 
     
     @Override
@@ -142,16 +154,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     }
     
     @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRace = selectedRaces.iterator().next();
-            if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
-                raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
-            }
-        }
-    }
-    
-    @Override
     public void playStateChanged(PlayStates playState, PlayModes playMode) {
         super.playStateChanged(playState, playMode);
         switch (playMode) {
@@ -181,6 +183,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
     }
     
+    @Override
+    public void setMinMax(Date min, Date max, boolean fireEvent) {
+        super.setMinMax(min, max, fireEvent);
+        if (redrawAllMarkersPendingForMinMaxBeingInitialized && timeSlider.isMinMaxInitialized()) {
+            redrawAllMarkers(lastRaceTimesInfo);
+            redrawAllMarkersPendingForMinMaxBeingInitialized = false;
+        }
+    }
+
     /**
      * When in {@link PlayModes#Replay} mode, tries to put the {@link #timer} to the time point when the last leg was
      * finished first. If this time point is not (yet?) known, tries to put the {@link #timer} to the
@@ -211,15 +222,17 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
     }
 
+    /**
+     * Expected to be called before {@link #lastRaceTimesInfo} has been updated to <code>newRaceTimesInfo</code>
+     */
     private void updateLegMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         boolean requiresMarkerUpdate = true;
-        
         // updating the sliderbar markers requires a lot of time, therefore we need to do this only if required
-        if(lastRaceTimesInfo != null  && lastRaceTimesInfo.markPassingTimes.size() == newRaceTimesInfo.markPassingTimes.size()) {
+        if (lastRaceTimesInfo != null && lastRaceTimesInfo.markPassingTimes.size() == newRaceTimesInfo.markPassingTimes.size()) {
             requiresMarkerUpdate = false;
             int numberOfLegs = newRaceTimesInfo.markPassingTimes.size();
-            for(int i = 0; i < numberOfLegs; i++) {
-                if(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate != lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate) {
+            for (int i = 0; i < numberOfLegs; i++) {
+                if (!Util.equalsWithNull(newRaceTimesInfo.markPassingTimes.get(i).firstPassingDate, lastRaceTimesInfo.markPassingTimes.get(i).firstPassingDate)) {
                     requiresMarkerUpdate = true;
                     break;
                 }
@@ -237,26 +250,30 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 requiresMarkerUpdate = true;
             }
         }
-        if (requiresMarkerUpdate && timeSlider.isMinMaxInitialized()) {
-            redrawAllMarkers(newRaceTimesInfo);
+        if (requiresMarkerUpdate) {
+            if (timeSlider.isMinMaxInitialized()) { // TODO bug 3122 later, the lastRaceTimesInfo will be updated even if not redrawn because min/max not initialized
+                redrawAllMarkers(newRaceTimesInfo);
+            } else {
+                redrawAllMarkersPendingForMinMaxBeingInitialized = true;
+            }
         }
     }
     
     private void redrawAllMarkers(RaceTimesInfoDTO newRaceTimesInfo) {
         List<MarkPassingTimesDTO> markPassingTimes = newRaceTimesInfo.getMarkPassingTimes();
         timeSlider.clearMarkers();
-        if(newRaceTimesInfo.startOfRace != null) {
+        if (newRaceTimesInfo.startOfRace != null) {
             long markerTime = newRaceTimesInfo.startOfRace.getTime();
-            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+            if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("S", new Double(markerTime));
             }
         }
         int markPassingCounter = 1;
         for (MarkPassingTimesDTO markPassingTimesDTO: markPassingTimes) {
             // ignore the start mark passing
-            if(markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
+            if (markPassingCounter > 1 && markPassingTimesDTO.firstPassingDate != null) {
                 long markerTime = markPassingTimesDTO.firstPassingDate.getTime();
-                if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+                if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                     timeSlider.addMarker(markPassingTimesDTO.getName(), new Double(markerTime));
                 }
             }
@@ -264,7 +281,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         }
         if (newRaceTimesInfo.endOfRace != null) {
             long markerTime = newRaceTimesInfo.endOfRace.getTime();
-            if(!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
+            if (!timeSlider.isZoomed() || (timeSlider.isZoomed() && markerTime > timeSlider.getMinValue() && markerTime < timeSlider.getMaxValue())) {
                 timeSlider.addMarker("E", new Double(markerTime));
             }
         }

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaRegistry;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
+import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.common.RaceIdentifier;
@@ -29,6 +30,7 @@ import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindTrack;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Offers methods to load domain objects from a Mongo DB
@@ -97,7 +99,7 @@ public interface DomainObjectFactory {
 
     Event loadEvent(String name);
 
-    Iterable<Event> loadAllEvents();
+    Iterable<Pair<Event, Boolean>> loadAllEvents();
     
     /**
      * The {@link MongoObjectFactory#storeEvent(Event)} method stores events and their links to leaderboard groups.
@@ -107,6 +109,8 @@ public interface DomainObjectFactory {
      * have finished loading. This method implements this step of loading and establishing the links.
      */
     void loadLeaderboardGroupLinksForEvents(EventResolver eventResolver, LeaderboardGroupResolver leaderboardGroupResolver);
+
+    SailingServerConfiguration loadServerConfiguration();
 
     Iterable<RemoteSailingServerReference> loadAllRemoteSailingServerReferences();
     

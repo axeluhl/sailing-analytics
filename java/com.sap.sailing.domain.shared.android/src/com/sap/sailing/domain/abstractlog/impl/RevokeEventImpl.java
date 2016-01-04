@@ -18,14 +18,14 @@ public abstract class RevokeEventImpl<VisitorT> extends AbstractLogEventImpl<Vis
     private final String revokedEventShortInfo;
     
     public RevokeEventImpl(AbstractLogEventAuthor author, AbstractLogEvent<?> toRevoke, String reason) {
-        this(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(),
+        this(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(),
                 toRevoke.getId(), toRevoke.getClass().getName(), toRevoke.getShortInfo(), reason);
     }
     
-    public RevokeEventImpl(TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint,
+    public RevokeEventImpl(TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author,
             Serializable pId, Serializable revokedEventId, String revokedEventType,
             String revokedEventShortInfo, String reason) {
-        super(createdAt, author, logicalTimePoint, pId);
+        super(createdAt, logicalTimePoint, author, pId);
         this.revokedEventId = revokedEventId;
         this.reason = reason;
         this.revokedEventType = revokedEventType;

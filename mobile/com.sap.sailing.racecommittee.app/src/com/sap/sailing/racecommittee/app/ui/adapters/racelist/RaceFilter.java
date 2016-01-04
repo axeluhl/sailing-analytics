@@ -7,7 +7,7 @@ import java.util.List;
 import android.widget.Filter;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.ui.fragments.lists.ManagedRaceListFragment.FilterMode;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.FilterMode;
 
 /**
  * Filters races by status.
@@ -37,7 +37,7 @@ public class RaceFilter extends Filter {
 
     protected static FilterResults createResults(Collection<RaceListDataType> result) {
         FilterResults results = new FilterResults();
-        results.values = new ArrayList<RaceListDataType>(result);
+        results.values = new ArrayList<>(result);
         results.count = result.size();
         return results;
     }
@@ -58,7 +58,7 @@ public class RaceFilter extends Filter {
                 RaceListDataTypeHeader headerItem = (RaceListDataTypeHeader) item;
                 filteredItems.add(headerItem);
                 
-                // new run for both types!
+                // new run for all types!
                 currentUnscheduledItem = null;
                 currentFinishedItem = null;
             } else if (item instanceof RaceListDataTypeRace) {
@@ -76,7 +76,7 @@ public class RaceFilter extends Filter {
                     currentUnscheduledItem = null;
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     filteredItems.add(raceItem);
-                    // new run for both types!
+                    // new run for all types!
                     currentUnscheduledItem = null;
                     currentFinishedItem = null;
                 }

@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +18,6 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
 import com.sap.sailing.domain.leaderboard.ScoreCorrectionListener;
@@ -88,6 +88,17 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
         public void isSuppressedChanged(Competitor competitor, boolean newIsSuppressed) {
             getScoreCorrection().notifyListenersAboutIsSuppressedChange(competitor, newIsSuppressed);
         }
+
+        @Override
+        public void timePointOfLastCorrectionsValidityChanged(TimePoint oldTimePointOfLastCorrectionsValidity,
+                TimePoint newTimePointOfLastCorrectionsValidity) {
+            getScoreCorrection().notifyListenersAboutLastCorrectionsValidityChanged(oldTimePointOfLastCorrectionsValidity, newTimePointOfLastCorrectionsValidity);
+        }
+
+        @Override
+        public void commentChanged(String oldComment, String newComment) {
+            getScoreCorrection().notifyListenersAboutCommentChanged(oldComment, newComment);
+        }
     }
     
     public AbstractMetaLeaderboard(String name, ScoringScheme scoringScheme,
@@ -138,12 +149,23 @@ public abstract class AbstractMetaLeaderboard extends AbstractSimpleLeaderboardI
     }
 
     @Override
+    public Iterable<Competitor> getAllCompetitors(RaceColumn raceColumn, Fleet fleet) {
+        final Iterable<Competitor> result;
+        if (fleet == metaFleet && Util.contains(getRaceColumns(), raceColumn)) {
+            result = ((MetaLeaderboardColumn) raceColumn).getAllCompetitors();
+        } else {
+            result = Collections.emptySet();
+        }
+        return result;
+    }
+
+    @Override
     public Fleet getFleet(String fleetName) {
         return fleetName.equals(metaFleet.getName()) ? metaFleet : null;
     }
 
     @Override
-    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) throws NoWindException {
+    public int getTrackedRank(Competitor competitor, RaceColumn race, TimePoint timePoint) {
         final List<Competitor> competitorsFromBestToWorst = ((MetaLeaderboardColumn) race).getLeaderboard().getCompetitorsFromBestToWorst(timePoint);
         Util.removeAll(getSuppressedCompetitors(), competitorsFromBestToWorst);
         return competitorsFromBestToWorst.indexOf(competitor)+1;

@@ -27,10 +27,23 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public Double getScoreForRank(RaceColumn raceColumn, Competitor competitor, int rank, Callable<Integer> numberOfCompetitorsInRaceFetcher, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher) {
-        final int effectiveRank;
+    public Double getScoreForRank(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, int rank,
+            Callable<Integer> numberOfCompetitorsInRaceFetcher,
+            NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
         final Double result;
-        int competitorFleetOrdering;
+        final int effectiveRank = getEffectiveRank(raceColumn, competitor, rank);
+        result = effectiveRank == 0 ? null : (double) effectiveRank;
+        return result;
+    }
+
+    /**
+     * Considers contiguous scoring for split-fleet columns, finding out in which fleet the <code>competitor</code> races
+     * in the <code>raceColumn</code> and figuring out how many competitors race in better fleets. For non-contiguous
+     * scoring, the effective rank equals the <code>rank</code> in the competitor's fleet.
+     */
+    protected int getEffectiveRank(RaceColumn raceColumn, Competitor competitor, int rank) {
+        final int competitorFleetOrdering;
+        final int effectiveRank;
         if (rank == 0) {
             effectiveRank = 0;
         } else if (raceColumn.hasSplitFleetContiguousScoring() && (competitorFleetOrdering=raceColumn.getFleetOfCompetitor(competitor).getOrdering()) != 0) {
@@ -39,8 +52,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
         } else {
             effectiveRank = rank;
         }
-        result = effectiveRank == 0 ? null : (double) effectiveRank;
-        return result;
+        return effectiveRank;
     }
 
     @Override
@@ -61,7 +73,7 @@ public class LowPoint extends AbstractScoringSchemeImpl {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint at) {
+    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         return true;
     }
 

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.GateStartConfiguration;
+import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -42,7 +43,13 @@ public interface RegattaConfiguration extends Serializable, Cloneable {
      * @return <code>null</code> if there is no configuration.
      */
     ESSConfiguration getESSConfiguration();
-    
+
+    /**
+     * Gets the configuration for league races.
+     * @return <code>null</code> if there is no configuration.
+     */
+    LeagueConfiguration getLeagueConfiguration();
+
     /**
      * Gets the configuration for Basic races.
      * @return <code>null</code> if there is no configuration.

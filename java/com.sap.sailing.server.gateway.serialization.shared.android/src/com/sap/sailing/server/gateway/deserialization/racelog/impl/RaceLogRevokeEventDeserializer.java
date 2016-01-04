@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
@@ -28,7 +29,7 @@ public class RaceLogRevokeEventDeserializer extends BaseRaceLogEventDeserializer
         String revokedEventShortInfo = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REVOKED_EVENT_SHORT_INFO);
         String reason = (String) object.get(RaceLogRevokeEventSerializer.FIELD_REASON);
     	
-        return factory.createRevokeEvent(createdAt, author, timePoint, id, passId, revokedEventId,
+        return new RaceLogRevokeEventImpl(createdAt, timePoint, author, id, passId, revokedEventId,
                 revokedEventType, revokedEventShortInfo, reason);
     }
 }

@@ -11,14 +11,13 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.simulator.impl.SimulatorUtils;
 
 @SuppressWarnings("restriction")
 public class RaceDataAccessEval {
@@ -26,10 +25,14 @@ public class RaceDataAccessEval {
     private static final Logger logger = Logger.getLogger(RaceDataAccessEval.class.getName());
     protected static final boolean tractracTunnel = Boolean.valueOf(System.getProperty("tractrac.tunnel", "false"));
     protected static final String tractracTunnelHost = System.getProperty("tractrac.tunnel.host", "localhost");
+    @SuppressWarnings("unused")
     private static URL paramUrl;
+    @SuppressWarnings("unused")
     private static URI liveUri;
+    @SuppressWarnings("unused")
     private static URI storedUri;
     private static RacingEventServiceImpl service;
+    @SuppressWarnings("unused")
     private static TracTracAdapterFactory tracTracAdapterFactory;
     private static RaceHandle raceHandle;
     public boolean storedend = false;
@@ -102,8 +105,7 @@ public class RaceDataAccessEval {
         service = new RacingEventServiceImpl();
         tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         logger.info("Calling service.addTracTracRace");
-        raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null, null,
-                60000);
+        raceHandle = null; //SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramUrl, liveUri, storedUri, null, null, 60000);
         logger.info("Calling raceHandle.getRaces(): " + raceHandle);
         RaceDefinition race = raceHandle.getRace(); // wait for RaceDefinition to be completely wired in Regatta
         logger.info("Obtained race: " + race);

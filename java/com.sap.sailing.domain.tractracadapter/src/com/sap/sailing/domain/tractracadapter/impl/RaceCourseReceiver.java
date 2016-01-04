@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
@@ -16,7 +18,6 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -25,6 +26,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -60,14 +62,18 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
     private final String tracTracPassword;
     private final IRace tractracRace;
     private final IControlRouteChangeListener listener;
+    private final boolean useInternalMarkPassingAlgorithm;
+    private final RaceLogResolver raceLogResolver;
     
     public RaceCourseReceiver(DomainFactory domainFactory, DynamicTrackedRegatta trackedRegatta, IEvent tractracEvent,
             IRace tractracRace, WindStore windStore, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             long delayToLiveInMillis, long millisecondsOverWhichToAverageWind, Simulator simulator,
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
-            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber) {
+            IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
+            RaceLogResolver raceLogResolver) {
         super(domainFactory, tractracEvent, trackedRegatta, simulator, eventSubscriber, raceSubscriber);
         this.tractracRace = tractracRace;
+        this.raceLogResolver = raceLogResolver;
         this.millisecondsOverWhichToAverageWind = millisecondsOverWhichToAverageWind;
         this.delayToLiveInMillis = delayToLiveInMillis;
         if (simulator == null) {
@@ -79,6 +85,7 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         this.tracTracUpdateURI = courseDesignUpdateURI;
         this.tracTracUsername = tracTracUsername;
         this.tracTracPassword = tracTracPassword;
+        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
         listener = new IControlRouteChangeListener() {
             @Override
             public void gotRouteChange(IControlRoute controlRoute, long timeStamp) {
@@ -112,11 +119,11 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             routeControlPoints.add(ttControlPointsForAllOriginalEventControlPoints.get(cp));
         }
         Map<Integer, PassingInstruction> courseWaypointPassingInstructions = getDomainFactory().getMetadataParser().parsePassingInstructionData(routeMetadataString, routeControlPoints);
-        List<com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
-        int i = 1;
+        final List<Pair<TracTracControlPoint, PassingInstruction>> ttControlPoints = new ArrayList<>();
+        int i = 0;
         for (IControl cp : event.getA().getControls()) {
-            PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : null;
-            ttControlPoints.add(new com.sap.sse.common.Util.Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
+            PassingInstruction passingInstructions = courseWaypointPassingInstructions.containsKey(i) ? courseWaypointPassingInstructions.get(i) : PassingInstruction.None;
+            ttControlPoints.add(new Pair<TracTracControlPoint, PassingInstruction>(ttControlPointsForAllOriginalEventControlPoints.get(cp), passingInstructions));
             i++;
         }
 
@@ -150,11 +157,12 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
             logger.log(Level.INFO, "Received course for non-existing race "+tractracRace.getName()+". Creating RaceDefinition.");
             // create race definition and add to event
             com.sap.sse.common.Util.Pair<Iterable<Competitor>, BoatClass> competitorsAndDominantBoatClass = getDomainFactory().getCompetitorsAndDominantBoatClass(tractracRace);
+            Map<Competitor, Boat> competitorBoats = getDomainFactory().getBoatsInfoForCompetitors(tractracRace, competitorsAndDominantBoatClass.getB());
             trackedRace = getDomainFactory().getOrCreateRaceDefinitionAndTrackedRace(
                     getTrackedRegatta(), tractracRace.getId(), tractracRace.getName(), competitorsAndDominantBoatClass.getA(),
-                    competitorsAndDominantBoatClass.getB(), course, sidelines, windStore, delayToLiveInMillis,
+                    competitorsAndDominantBoatClass.getB(), competitorBoats, course, sidelines, windStore, delayToLiveInMillis,
                     millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, tracTracUpdateURI,
-                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword);
+                    getTracTracEvent().getId(), tracTracUsername, tracTracPassword, useInternalMarkPassingAlgorithm, raceLogResolver);
             needToUpdateRaceTimes = true;
             if (getSimulator() != null) {
                 getSimulator().setTrackedRace(trackedRace);
@@ -219,11 +227,8 @@ public class RaceCourseReceiver extends AbstractReceiverWithQueue<IControlRoute,
         DynamicTrackedRace trackedRace = getTrackedRegatta().createTrackedRace(race, sidelines,
                 windStore, EmptyGPSFixStore.INSTANCE, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
-                raceDefinitionSetToUpdate);
+                raceDefinitionSetToUpdate, useInternalMarkPassingAlgorithm, raceLogResolver);
         getDomainFactory().addTracTracUpdateHandlers(tracTracUpdateURI, getTracTracEvent().getId(), tracTracUsername, tracTracPassword, race, trackedRace);
-        if (!Activator.getInstance().isUseTracTracMarkPassings()) {
-            new MarkPassingCalculator(trackedRace, true);
-        }
         return trackedRace;
     }
 

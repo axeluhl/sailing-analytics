@@ -3,7 +3,7 @@ package com.sap.sailing.server.trackfiles.impl;
 import slash.common.type.CompactCalendar;
 import slash.navigation.gpx.GpxPosition;
 
-import com.sap.sailing.domain.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 
 public enum GPSFixToGpxPosition implements WaypointCreator<GPSFix> {
     INSTANCE;

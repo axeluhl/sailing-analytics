@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -33,15 +31,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -50,7 +46,10 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -61,12 +60,11 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  */
 public class EventListComposite extends Composite implements EventsRefresher, LeaderboardGroupsDisplayer {
     private final SailingServiceAsync sailingService;
-    private final EventSelectionProvider eventSelectionProvider;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
     private CellTable<EventDTO> eventTable;
-    private MultiSelectionModel<EventDTO> eventSelectionModel;
+    private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     private ListDataProvider<EventDTO> eventListDataProvider;
     private List<EventDTO> allEvents;
     private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
@@ -86,7 +84,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     interface AnchorTemplates extends SafeHtmlTemplates {
-        @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
+        @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
         SafeHtml cell(String url, String displayName);
     }
 
@@ -94,10 +92,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public EventListComposite(final SailingServiceAsync sailingService, final EventSelectionProvider eventSelectionProvider,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    @SuppressWarnings("unchecked")
+    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
-        this.eventSelectionProvider = eventSelectionProvider;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         availableLeaderboardGroups = Collections.emptyList();
@@ -135,7 +132,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
-                    removeEvents(eventSelectionModel.getSelectedSet());
+                    removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -144,28 +141,17 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventListDataProvider = new ListDataProvider<EventDTO>();
         eventTable = createEventTable();
         eventTable.ensureDebugId("EventsCellTable");
+        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         eventTable.setVisible(false);
 
-        @SuppressWarnings("unchecked")
-        MultiSelectionModel<EventDTO> multiSelectionModel = (MultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
-        eventSelectionModel = multiSelectionModel;
-
-        eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                final boolean somethingSelected = !eventSelectionModel.getSelectedSet().isEmpty();
+                final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
                 removeEventsButton.setEnabled(somethingSelected);
-                
-                List<EventDTO> selectedEvents = getSelectedEvents();
-                List<UUID> selectedEventUUIDs = new ArrayList<UUID>();
-                for (EventDTO selectedEvent : selectedEvents) {
-                    selectedEventUUIDs.add(selectedEvent.id);
-                }
-                EventListComposite.this.eventSelectionProvider.setSelection(selectedEventUUIDs);
             }
         });
         
-        panel.add(eventTable);
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()), allEvents,
                 eventTable, eventListDataProvider) {
             @Override
@@ -182,7 +168,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return result;
             }
         };
-        eventControlsPanel.add(filterTextbox);
+        panel.add(filterTextbox);
+        panel.add(eventTable);
         
         noEventsLabel = new Label("No events defined yet.");
         noEventsLabel.ensureDebugId("NoRegattasLabel");
@@ -195,22 +182,23 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private CellTable<EventDTO> createEventTable() {
-        CellTable<EventDTO> table = new CellTable<EventDTO>(/* pageSize */10000, tableRes);
+        FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
-        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
-            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
-            @Override
-            protected ListDataProvider<EventDTO> getListDataProvider() {
-                return eventListDataProvider;
-            }
-
-            @Override
-            public Boolean getValue(EventDTO row) {
-                return eventTable.getSelectionModel().isSelected(row);
-            }
-        };
+        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
+                },eventListDataProvider,table);
         
         AnchorCell anchorCell = new AnchorCell();
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
@@ -218,9 +206,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public SafeHtml getValue(EventDTO event) {
                 String link = "";
                 if(event != null && event.id != null){
-                    Map<String, String> eventLinkParameters = new HashMap<String, String>();
-                    eventLinkParameters.put("navigationTab", "Regattas");
-                    link = EntryPointLinkFactory.createEventLink(eventLinkParameters, event.id.toString());
+                    link = EntryPointLinkFactory.createEventPlaceLink(event.id.toString(), new HashMap<String, String>());
                 }
                 return ANCHORTEMPLATE.cell(link, event.getName());
             }
@@ -286,12 +272,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return builder.toSafeHtml();
             }
         };
-
-        TextColumn<EventDTO> imageURLsColumn = new TextColumn<EventDTO>() {
+        
+        TextColumn<EventDTO> imagesColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
                 String result = "";
-                int imageCount = Util.size(event.getImageURLs());
+                int imageCount = Util.size(event.getImages());
                 if(imageCount > 0) {
                     result = imageCount + " image(s)";
                 }
@@ -299,25 +285,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
 
-        TextColumn<EventDTO> videoURLsColumn = new TextColumn<EventDTO>() {
+        TextColumn<EventDTO> videosColumn = new TextColumn<EventDTO>() {
             @Override
             public String getValue(EventDTO event) {
                 String result = "";
-                int videoCount = Util.size(event.getVideoURLs());
+                int videoCount = Util.size(event.getVideos());
                 if(videoCount > 0) {
                     result = videoCount + " video(s)";
-                }
-                return result;
-            }
-        };
-
-        TextColumn<EventDTO> sponsorImageURLsColumn = new TextColumn<EventDTO>() {
-            @Override
-            public String getValue(EventDTO event) {
-                String result = "";
-                int sponsorImageCount = Util.size(event.getSponsorImageURLs());
-                if(sponsorImageCount > 0) {
-                    result = sponsorImageCount + " sponsor image(s)";
                 }
                 return result;
             }
@@ -361,9 +335,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         isPublicColumn.setSortable(true);
         startEndDateColumn.setSortable(true);
         courseAreasColumn.setSortable(true);
-        imageURLsColumn.setSortable(true);
-        videoURLsColumn.setSortable(true);
-        sponsorImageURLsColumn.setSortable(true);
         leaderboardGroupsColumn.setSortable(true);
 
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
@@ -373,9 +344,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(isPublicColumn, stringMessages.isPublic());
         table.addColumn(courseAreasColumn, stringMessages.courseAreas());
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
-        table.addColumn(imageURLsColumn, stringMessages.imageURLs());
-        table.addColumn(videoURLsColumn, stringMessages.videoURLs());
-        table.addColumn(sponsorImageURLsColumn, stringMessages.sponsorImageURLs());
+        table.addColumn(imagesColumn, stringMessages.images());
+        table.addColumn(videosColumn, stringMessages.videos());
         table.addColumn(associatedRegattasColumn, stringMessages.regattas());
         table.addColumn(eventActionColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
@@ -466,7 +436,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), existingLeaderboardGroups,
-                stringMessages, new DialogCallback<EventDTO>() {
+                sailingService, stringMessages, new DialogCallback<EventDTO>() {
             @Override
             public void cancel() {
             }
@@ -485,7 +455,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),  
-                existingLeaderboardGroups, stringMessages,
+                existingLeaderboardGroups, sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
             @Override
             public void cancel() {
@@ -501,17 +471,17 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private void updateEvent(final EventDTO oldEvent, final EventDTO updatedEvent) {
         Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent, updatedEvent);
-        List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
-        List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
-        List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
+        final List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
+        final List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
+        final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
         for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
             updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
         }
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.getDescription(),
                 updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
                 updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
-                updatedEvent.getOfficialWebsiteURL(), updatedEvent.getLogoImageURL(),
-                updatedEvent.getImageURLs(), updatedEvent.getVideoURLs(), updatedEvent.getSponsorImageURLs(),
+                updatedEvent.getOfficialWebsiteURL(), updatedEvent.getSailorsInfoWebsiteURL(),
+                updatedEvent.getImages(), updatedEvent.getVideos(),
                 new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
@@ -521,51 +491,53 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void onSuccess(EventDTO result) {
                 fillEvents();
-                if (!oldEvent.getName().equals(updatedEvent.getName())) {
-                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
-                        @Override
-                        public void onSuccess(Void result) {
-                            fillEvents();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
-                        }
-                    });
+                final String[] namesOfCourseAreasToAdd = new String[courseAreasToAdd.size()];
+                int i=0;
+                for (CourseAreaDTO courseAreaToAdd : courseAreasToAdd) {
+                    namesOfCourseAreasToAdd[i++] = courseAreaToAdd.getName();
                 }
+                sailingService.createCourseAreas(oldEvent.id, namesOfCourseAreasToAdd, new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
+                                + ": " + t.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        final UUID[] idsOfCourseAreasToRemove = new UUID[courseAreasToRemove.size()];
+                        int j=0;
+                        for (CourseAreaDTO courseAreaToRemove : courseAreasToRemove) {
+                            idsOfCourseAreasToRemove[j++] = courseAreaToRemove.id;
+                        }
+                        sailingService.removeCourseAreas(oldEvent.id, idsOfCourseAreasToRemove, new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable t) {
+                                errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
+                                        + ": " + t.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                fillEvents();
+                                if (!oldEvent.getName().equals(updatedEvent.getName())) {
+                                    sailingService.renameEvent(oldEvent.id, updatedEvent.getName(), new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable t) {
+                                            errorReporter.reportError("Error trying to rename sailing event " + oldEvent.getName() + ": " + t.getMessage());
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
             }
         });
-        for (CourseAreaDTO courseArea : courseAreasToAdd) {
-            sailingService.createCourseArea(oldEvent.id, courseArea.getName(), new AsyncCallback<Void>() {
-
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to add course area to sailing event " + oldEvent.getName()
-                            + ": " + t.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    fillEvents();
-                }
-
-            });
-        }
-        for (CourseAreaDTO courseArea : courseAreasToRemove) {
-            sailingService.removeCourseArea(oldEvent.id, courseArea.id, new AsyncCallback<Void>() {
-                @Override
-                public void onFailure(Throwable t) {
-                    errorReporter.reportError("Error trying to remove course area from sailing event " + oldEvent.getName()
-                            + ": " + t.getMessage());
-                }
-
-                @Override
-                public void onSuccess(Void result) {
-                    fillEvents();
-                }
-            });
-        }
     }
 
     private Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
@@ -582,9 +554,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getImageURLs(),
-                newEvent.getVideoURLs(), newEvent.getSponsorImageURLs(), newEvent.getLogoImageURL(),
-                newEvent.getOfficialWebsiteURL(), new AsyncCallback<EventDTO>() {
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getSailorsInfoWebsiteURL(),
+                newEvent.getImages(), newEvent.getVideos(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());
@@ -619,20 +590,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     eventTable.setVisible(true);
                     noEventsLabel.setVisible(false);
                 }
-                
-                Set<UUID> selectedEventUUIDs = new HashSet<>();
-                for (EventDTO selectedEvent : eventSelectionModel.getSelectedSet()) {
-                    selectedEventUUIDs.add(selectedEvent.id);
-                }
-                eventSelectionModel.clear();
                 allEvents.clear();
                 allEvents.addAll(events);
                 filterTextbox.updateAll(allEvents);
-                for (EventDTO e : allEvents) {
-                    if (selectedEventUUIDs.contains(e.id)) {
-                        eventSelectionModel.setSelected(e, true);
-                    }
-                }
             }
         });
     }
@@ -641,15 +601,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         return allEvents;
     }
     
-    private List<EventDTO> getSelectedEvents() {
-        List<EventDTO> result = new ArrayList<EventDTO>();
-        if (eventListDataProvider != null) {
-            for (EventDTO Event : eventListDataProvider.getList()) {
-                if (eventSelectionModel.isSelected(Event)) {
-                    result.add(Event);
-                }
-            }
-        }
-        return result;
+    public RefreshableMultiSelectionModel<EventDTO> getRefreshableMultiSelectionModel() {
+        return refreshableEventSelectionModel;
     }
 }

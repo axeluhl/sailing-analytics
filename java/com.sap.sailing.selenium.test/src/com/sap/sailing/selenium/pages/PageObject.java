@@ -44,7 +44,7 @@ import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
  *   D049941
  */
 public class PageObject {
-    public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 60;
+    public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
     

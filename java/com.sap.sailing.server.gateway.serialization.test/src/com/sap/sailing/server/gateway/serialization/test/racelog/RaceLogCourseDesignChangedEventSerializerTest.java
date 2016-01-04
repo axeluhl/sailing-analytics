@@ -13,7 +13,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -63,7 +63,7 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
                         factory), new GateDeserializer(factory, new MarkDeserializer(factory))))));
         now = MillisecondsTimePoint.now();
 
-        event = RaceLogEventFactory.INSTANCE.createCourseDesignChangedEvent(now, author, 0, createCourseData());
+        event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, createCourseData());
     }
 
     @Test

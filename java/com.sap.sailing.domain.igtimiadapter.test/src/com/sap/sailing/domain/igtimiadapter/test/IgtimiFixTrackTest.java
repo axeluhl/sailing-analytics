@@ -16,14 +16,14 @@ import java.util.logging.Logger;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.igtimiadapter.DataAccessWindow;
 import com.sap.sailing.domain.igtimiadapter.Permission;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.datatypes.Type;
 import com.sap.sailing.domain.tracking.DynamicTrack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.Track;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;

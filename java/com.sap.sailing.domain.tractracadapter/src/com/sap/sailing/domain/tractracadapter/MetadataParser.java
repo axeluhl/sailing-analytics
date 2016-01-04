@@ -7,6 +7,8 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -53,4 +55,10 @@ public interface MetadataParser {
     Map<String, Iterable<TracTracControlPoint>> parseSidelinesFromRaceMetadata(String raceMetadataString,
             Iterable<? extends TracTracControlPoint> controlPoints);
 
+    /**
+     * Parses the boat name, boad id and the boat color for a competitor (entry) of a race.
+     * @param competitor
+     * @return a Triple containing the boat name, boat id and boat color or null if no metadata is availalble
+     */
+    Util.Triple<String, String, String> parseCompetitorBoat(IRaceCompetitor competitor);
 }

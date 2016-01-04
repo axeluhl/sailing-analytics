@@ -1,5 +1,8 @@
 package com.sap.sse.gwt.client.controls.listedit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -82,6 +85,9 @@ public class StringListEditorComposite extends ListEditorComposite<String> {
             for (String suggestValue : suggestValues) {
                 inputOracle.add(suggestValue);
             }
+            List<String> defaultSuggestions = new ArrayList<>();
+            Util.addAll(suggestValues, defaultSuggestions);
+            this.inputOracle.setDefaultSuggestionsFromText(defaultSuggestions);
         }
         
         @Override

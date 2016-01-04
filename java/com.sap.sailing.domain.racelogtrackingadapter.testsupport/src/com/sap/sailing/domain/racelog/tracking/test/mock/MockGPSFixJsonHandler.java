@@ -2,8 +2,8 @@ package com.sap.sailing.domain.racelog.tracking.test.mock;
 
 import org.json.simple.JSONObject;
 
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixMovingJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.GPSFixMovingJsonSerializer;

@@ -2,10 +2,9 @@ package com.sap.sse.datamining.impl.components;
 
 import java.util.Locale;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
+import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.shared.AdditionalResultData;
-import com.sap.sse.datamining.shared.Unit;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
@@ -13,8 +12,7 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * For general information see {@link AdditionalResultDataBuilder}.<br />
  * Conflict resolving strategy:
  * <ul>
- *      <li>Builds the sum of all given retrieved/filtered data amounts</li>
- *      <li>Other values are overwritten</li>
+ *      <li>Old values will be overwritten from the new ones</li>
  * </ul>
  */
 public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder {
@@ -22,7 +20,6 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     private int retrievedDataAmount;
     private Function<?> extractionFunction;
     private String aggregationNameMessageKey;
-    private Unit unit;
     private int resultDecimals;
     
     /**
@@ -30,13 +27,13 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
      */
     public OverwritingResultDataBuilder() {
         retrievedDataAmount = 0;
-        unit = Unit.None;
         resultDecimals = 0;
     }
 
     @Override
     public AdditionalResultData build(long calculationTimeInNanos, ResourceBundleStringMessages stringMessages, Locale locale) {
-        return new AdditionalResultDataImpl(retrievedDataAmount, buildResultSignifier(stringMessages, locale), unit, resultDecimals, calculationTimeInNanos);
+        String resultSignifier = buildResultSignifier(stringMessages, locale);
+        return new AdditionalResultDataImpl(retrievedDataAmount, resultSignifier, resultDecimals, calculationTimeInNanos);
     }
 
     private String buildResultSignifier(ResourceBundleStringMessages stringMessages, Locale locale) {
@@ -62,8 +59,12 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public void setExtractionFunction(Function<?> extractionFunction) {
         this.extractionFunction = extractionFunction;
-        unit = extractionFunction.getResultUnit();
-        resultDecimals = extractionFunction.getResultDecimals();
+        setResultDecimals(extractionFunction.getResultDecimals());
+    }
+    
+    @Override
+    public void setResultDecimals(int resultDecimals) {
+        this.resultDecimals = resultDecimals;
     }
 
     @Override

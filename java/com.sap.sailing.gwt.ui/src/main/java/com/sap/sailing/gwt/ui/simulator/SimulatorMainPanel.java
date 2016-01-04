@@ -47,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.SimulatorServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.IdentityCoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.BoatClassDTOsAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.PolarDiagramDTOAndNotificationMessage;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -228,12 +229,12 @@ public class SimulatorMainPanel extends SimplePanel {
         return NumberFormat.getFormat("0.0").format(value);
     }
 
-    public SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter, int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate,
-            char mode, char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows, boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
-        super();
-
+    SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
+            int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate, char mode,
+            char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows,
+            boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
+       super();
         this.macroWeather = streamletPars.macroWeather;
-        
         this.simulatorSvc = svc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -308,26 +309,41 @@ public class SimulatorMainPanel extends SimplePanel {
         timer.setTime(windParams.getStartTime().getTime());
         int secondsTimeStep = (int) windParams.getTimeStep().asSeconds();
         timer.setPlaySpeedFactor(secondsTimeStep);
-        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false);
-
+        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false,
+                /* isScreenLargeEnoughToOfferChartSupport: no wind or competitor chart is shown; use full horizontal
+                 * extension of time panel */ false);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
-
-        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars, timer, timePanel,
-                windParams, busyIndicator, mode, this, showMapControls);
+        simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars,
+                timer, timePanel, windParams, busyIndicator, mode, this, showMapControls,
+                new IdentityCoordinateSystem());
         simulatorMap.setSize("100%", "100%");
-
         this.rightPanel.add(this.simulatorMap);
-        
         createOptionsPanelTop();
         createOptionsPanel();
-
         fullTimePanel = this.createTimePanel();
 
+        final Button toggleButton = timePanel.getAdvancedToggleButton();
+        toggleButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                boolean advancedModeShown = timePanel.toggleAdvancedMode();
+                if (advancedModeShown) {
+                    mainPanel.setWidgetSize(fullTimePanel, 96);
+                    toggleButton.removeStyleDependentName("Closed");
+                    toggleButton.addStyleDependentName("Open");
+                } else {
+                    mainPanel.setWidgetSize(fullTimePanel, 67);
+                    toggleButton.addStyleDependentName("Closed");
+                    toggleButton.removeStyleDependentName("Open");
+                }
+            }
+        });
+        
         mainPanel = new DockLayoutPanel(Unit.PX);
         
         mainPanel.setSize("100%", "100%");        
         mainPanel.addWest(leftPanel, 470);
-        mainPanel.addSouth(fullTimePanel, 90);
+        mainPanel.addSouth(fullTimePanel, 67);
         mainPanel.setWidgetHidden(fullTimePanel, true);
         
         createMapOptionsPanel(); // add map-options to mainPanel-North
@@ -339,21 +355,21 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public native void setMapInstance(Object mapInstance) /*-{
-    	$wnd.swarmMap = mapInstance;
+	$wnd.swarmMap = mapInstance;
     }-*/;
     
     public native void setCanvasProjectionInstance(Object instance) /*-{
-		$wnd.swarmCanvasProjection = instance;
-	}-*/;
+	$wnd.swarmCanvasProjection = instance;
+    }-*/;
 
     public native void startStreamlets() /*-{
-   	if ($wnd.swarmAnimator) {
-    		$wnd.swarmUpdData = true;
-    		$wnd.updateStreamlets($wnd.swarmUpdData);
-    	} else {
-			$wnd.initStreamlets($wnd.swarmMap);
-    	}
-	}-*/;
+	if ($wnd.swarmAnimator) {
+	    $wnd.swarmUpdData = true;
+	    $wnd.updateStreamlets($wnd.swarmUpdData);
+	} else {
+	    $wnd.initStreamlets($wnd.swarmMap);
+	}
+    }-*/;
 
     public void setDefaultTimeSettings() {
         Date defaultNow = new Date();

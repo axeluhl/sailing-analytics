@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class WindFieldDTO implements IsSerializable {
 
@@ -11,8 +11,8 @@ public class WindFieldDTO implements IsSerializable {
     public double curBearing;
     
     public static class WindData implements IsSerializable {
-        public PositionDTO rcStart;
-        public PositionDTO rcEnd;
+        public Position rcStart;
+        public Position rcEnd;
         public int resX;
         public int resY;
         public int borderX;

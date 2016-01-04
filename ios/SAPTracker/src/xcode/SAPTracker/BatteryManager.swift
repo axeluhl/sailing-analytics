@@ -1,0 +1,58 @@
+//
+//  BatterySavingController.swift
+//  SAPTracker
+//
+//  Created by computing on 07/11/14.
+//  Copyright (c) 2014 com.sap.sailing. All rights reserved.
+//
+
+import Foundation
+
+/* Needs to be sublass of NSObject for receiving NSNotifications */
+class BatteryManager: NSObject {
+
+    /* NSUserDefaultsKey */
+    private let BatterySavingDefaultsKey = "BatterySaving"
+    
+    /* Reference to device needed for reading battery level */
+    private let device = UIDevice.currentDevice()
+    
+    /* Minimum battery level for sending data is 20% */
+    private let minBatteryLevel: Float = 0.2
+
+    /* User preference for saving battery */
+    var batterySavingPreference: Bool {
+        get {
+            let preferences = NSUserDefaults.standardUserDefaults()
+            return preferences.boolForKey(BatterySavingDefaultsKey)
+        }
+        set {
+            let preferences = NSUserDefaults.standardUserDefaults()
+            preferences.setBool(newValue, forKey: BatterySavingDefaultsKey)
+            preferences.synchronize()
+        }
+    }
+
+    /* Is battery saving on? */
+    var batterySaving: Bool {
+        get {
+            return batterySavingPreference || device.batteryLevel < minBatteryLevel && (device.batteryState == UIDeviceBatteryState.Unplugged || device.batteryState == UIDeviceBatteryState.Unknown)
+        }
+    }
+
+    /* Singleton */
+    class var sharedManager: BatteryManager {
+        struct Singleton {
+            static let sharedManager = BatteryManager()
+        }
+        return Singleton.sharedManager
+    }
+    
+    /* Register for battery events */
+    override init() {
+        super.init()
+        
+        // register for battery events
+        device.batteryMonitoringEnabled = true;
+    }
+ }

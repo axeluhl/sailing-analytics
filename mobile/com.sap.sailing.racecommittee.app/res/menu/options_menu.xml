@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/options_menu_reload"
-          android:icon="@drawable/ic_menu_info_details"
-          android:title="@string/options_menu_reload"
-          android:showAsAction="" />
-    <item android:id="@+id/options_menu_settings"
-          android:icon="@drawable/settings_grey"
-          android:title="@string/options_menu_settings"
-          android:showAsAction="" />
-    <item android:id="@+id/options_menu_info"
-          android:icon="@drawable/ic_menu_info_details"
-          android:title="@string/options_menu_info"
-          android:showAsAction="" />
+
+    <item
+        android:id="@+id/options_menu_reset"
+        android:title="@string/reset_race"/>
+
+    <item
+        android:id="@+id/options_menu_settings"
+        android:title="@string/options_menu_settings"/>
+
+    <item
+        android:id="@+id/options_menu_info"
+        android:title="@string/options_menu_info"/>
 </menu>

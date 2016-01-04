@@ -1,13 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 
 public class SimulatorWindDTO implements IsSerializable {
     public Boolean isTurn;
     public Double trueWindSpeedInKnots;
     public Double trueWindBearingDeg;
-    public PositionDTO position;
+    public Position position;
     public Long timepoint;
 
     public SimulatorWindDTO() {
@@ -18,7 +19,7 @@ public class SimulatorWindDTO implements IsSerializable {
         this.timepoint = 0L;
     }
 
-    public SimulatorWindDTO(PositionDTO position, double windSpeedKn, double windBearingDeg, long timepointMsec) {
+    public SimulatorWindDTO(Position position, double windSpeedKn, double windBearingDeg, long timepointMsec) {
         this.position = position;
         this.trueWindBearingDeg = windBearingDeg;
         this.trueWindSpeedInKnots = windSpeedKn;
@@ -27,7 +28,7 @@ public class SimulatorWindDTO implements IsSerializable {
     }
 
     public SimulatorWindDTO(double latDeg, double lngDeg, double windSpeedKn, double windBearingDeg, long timepointMsec) {
-        this.position = new PositionDTO(latDeg, lngDeg);
+        this.position = new DegreePosition(latDeg, lngDeg);
         this.trueWindBearingDeg = windBearingDeg;
         this.trueWindSpeedInKnots = windSpeedKn;
         this.timepoint = timepointMsec;
@@ -35,7 +36,7 @@ public class SimulatorWindDTO implements IsSerializable {
     }
 
     public SimulatorWindDTO(double latDeg, double lngDeg, double windSpeedKn, double windBearingDeg, long timepointMsec, boolean isTurn) {
-        this.position = new PositionDTO(latDeg, lngDeg);
+        this.position = new DegreePosition(latDeg, lngDeg);
         this.trueWindBearingDeg = windBearingDeg;
         this.trueWindSpeedInKnots = windSpeedKn;
         this.timepoint = timepointMsec;

@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.shared;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,4 +13,7 @@ public class RaceMapDataDTO implements IsSerializable {
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
     public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
+    public LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
+    public long simulationResultVersion;
+    public HashSet<String> raceCompetitorIdsAsStrings;
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.components.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.IconResources;
 

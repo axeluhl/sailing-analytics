@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?sap_gray_black_30">
+
+        <include
+            android:id="@+id/toolbar_layout"
+            layout="@layout/toolbar"/>
+
+        <Button
+            android:id="@+id/system_information_persistence_clear"
+            style="?buttonSolidSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp"
+            android:text="@string/persistence_waiting_clear_events"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/system_information_persistence_clear"
+            android:layout_below="@id/toolbar_layout"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/system_information_application_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/application_information"
+                android:textAppearance="?textNormal"/>
+
+            <TextView
+                android:id="@+id/system_information_application_identifier_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="@string/application_identifier"
+                android:textAppearance="?textSmall"/>
+
+            <TextView
+                android:id="@+id/system_information_application_identifier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textXSmall"
+                tools:text="N10"/>
+
+            <TextView
+                android:id="@+id/system_information_application_version_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="@string/application_version"
+                android:textAppearance="?textSmall"/>
+
+            <TextView
+                android:id="@+id/system_information_application_version"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textXSmall"
+                tools:text="7 - Laser.debug (Code 7)"/>
+
+            <TextView
+                android:id="@+id/system_information_application_compile_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="@string/application_compile_information"
+                android:textAppearance="?textSmall"/>
+
+            <TextView
+                android:id="@+id/system_information_application_compile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textXSmall"
+                tools:text="branch (UTC-Time)"/>
+
+            <TextView
+                android:id="@+id/system_information_application_install_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="@string/application_install_date"
+                android:textAppearance="?textSmall"/>
+
+            <TextView
+                android:id="@+id/system_information_application_install"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textXSmall"
+                tools:text="01. January 2015 - 00:00"/>
+
+            <TextView
+                android:id="@+id/system_information_persistence_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:text="@string/persistence_information"
+                android:textAppearance="?textNormal"/>
+
+            <TextView
+                android:id="@+id/system_information_persistence_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:textAppearance="?textXSmall"
+                tools:text="No open\nLast send: never"/>
+
+            <TextView
+                android:id="@+id/system_information_persistence_waiting_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:text="@string/persistence_waiting_events"
+                android:textAppearance="?textSmall"/>
+
+            <ListView
+                android:id="@+id/system_information_persistence_waiting"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fadeScrollbars="false"/>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

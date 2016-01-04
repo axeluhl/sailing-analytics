@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.HashSet;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ListBox;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -30,7 +29,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     private final ListBox availableRegattasListBox;
     
     public AbstractEventManagementPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
-            ErrorReporter errorReporter, RaceSelectionProvider raceSelectionProvider, StringMessages stringMessages) {
+            ErrorReporter errorReporter, boolean actionButtonsEnabled, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
         
@@ -39,7 +38,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
         trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
-                raceSelectionProvider, stringMessages, /* multiselection */ true);
+                stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
     

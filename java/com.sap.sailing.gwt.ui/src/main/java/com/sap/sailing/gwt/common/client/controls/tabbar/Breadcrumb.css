@@ -1,0 +1,35 @@
+@CHARSET "UTF-8";
+
+.event_header__breadcrumb {
+  font-size: 15px;
+  font-size: 1rem;
+  font-size: 0.866666666666667em;
+  font-weight: 600;
+  padding: 0.666666666666667em 0;
+}
+
+.event_header__breadcrumb__item {
+  position: relative;
+  display: inline-block;
+  padding-left: 1.923076923076923em;
+  color: #666;
+}
+
+.event_header__breadcrumb__item:before {
+  content: ' ';
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAUCAYAAAC58NwRAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNS4xIE1hY2ludG9zaCIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo2OUUzNjU2OTYyN0ExMUU0OTkzRUFBMUUyRUFGQjM4NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo2OUUzNjU2QTYyN0ExMUU0OTkzRUFBMUUyRUFGQjM4NyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjY5RTM2NTY3NjI3QTExRTQ5OTNFQUExRTJFQUZCMzg3IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjY5RTM2NTY4NjI3QTExRTQ5OTNFQUExRTJFQUZCMzg3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+yfJlBgAAAK5JREFUeNpinDlz5goGBgZXIM4F4mUMBAATEDsBsRAQLwLiKGI0RADxdyBmJkYTSMM+IPYkVhMTlD5IrCYmJDZRmpjQ+CBNbvg0MWGx9Qg+TUw4/IZTExOeEIRp+oKkSZeJgTTAhk+DDRBvB2IeIP4LxIlAfJaJBMWLQRIsOBTvAmJOdMXYPI1XMboGe0KKkTXYQ92MVzFyfiBKMUzDCmIVI+eHd0AcR0gxCAAEGACmPjby/HEDIgAAAABJRU5ErkJggg==");
+  height: 100%;
+  width: 6px;
+  position: absolute;
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  left: 0.666666666666667em;
+}
+.event_header__breadcrumb__item:first-of-type {
+  padding-left: 0;
+}
+.event_header__breadcrumb__item:first-of-type:before {
+  display: none;
+}
+

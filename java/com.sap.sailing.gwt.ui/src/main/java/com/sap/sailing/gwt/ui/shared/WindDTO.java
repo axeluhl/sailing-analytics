@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.PositionDTO;
+import com.sap.sailing.domain.common.Position;
 
 public class WindDTO implements IsSerializable {
     public Double trueWindSpeedInMetersPerSecond;
@@ -12,7 +12,7 @@ public class WindDTO implements IsSerializable {
     public Double dampenedTrueWindSpeedInKnots;
     public Double dampenedTrueWindBearingDeg;
     public Double dampenedTrueWindFromDeg;
-    public PositionDTO position;
+    public Position position;
     
     /**
      * The point in time when these wind values have been measured. The value can be null in case the values are derived

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
+import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
@@ -37,7 +40,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/x-java-serialized-object")
     public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
-            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind)
+            @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
             throws UnsupportedEncodingException {
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started");
@@ -46,6 +49,9 @@ public class MasterDataResource extends AbstractSailingServerResource {
         }
         if (exportWind == null) {
             exportWind = true;
+        }
+        if (exportDeviceConfigs == null) {
+            exportDeviceConfigs = false;
         }
         logger.info(String.format("Masterdataexport gzip compression is turned %s", compress ? "on" : "off"));
         Map<String, LeaderboardGroup> allLeaderboardGroups = getService().getLeaderboardGroups();
@@ -73,9 +79,15 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 }
             }
         }
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
+        if (exportDeviceConfigs) {
+            deviceConfigurations = getAllDeviceConfigs();
+        } else {
+            deviceConfigurations = new HashMap<>();
+        }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
                 getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-                .getAllMediaTracks(), exportWind);
+                .getAllMediaTracks(), getService().getGPSFixStore(), exportWind, deviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
             streamingOutput= new CompressingStreamingOutput(masterData, competitorIds, startTime);
@@ -92,6 +104,11 @@ public class MasterDataResource extends AbstractSailingServerResource {
         return builtResponse;
     }
     
+    private Map<DeviceConfigurationMatcher, DeviceConfiguration> getAllDeviceConfigs() {
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> configs = getService().getAllDeviceConfigurations();
+        return configs;
+    }
+
     private abstract class AbstractStreamingOutput implements StreamingOutput {
         private final TopLevelMasterData masterData;
         private final List<Serializable> competitorIds;

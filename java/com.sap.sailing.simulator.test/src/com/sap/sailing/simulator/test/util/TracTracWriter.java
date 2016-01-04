@@ -15,7 +15,6 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
 import com.sap.sailing.domain.tractracadapter.impl.TracTracAdapterFactoryImpl;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
-import com.sap.sailing.simulator.impl.SimulatorUtils;
 
 @SuppressWarnings("restriction")
 public class TracTracWriter {
@@ -30,19 +29,23 @@ public class TracTracWriter {
 
     }
 
+    @SuppressWarnings("null")
     public void write() throws Exception {
         RacingEventServiceImpl service = new RacingEventServiceImpl();
+        @SuppressWarnings("unused")
         final TracTracAdapterFactory tracTracAdapterFactory = new TracTracAdapterFactoryImpl();
         System.setProperty("mongo.port", "10200");
         System.setProperty("http.proxyHost", "proxy.wdf.sap.corp");
         System.setProperty("http.proxyPort", "8080");
+        @SuppressWarnings("unused")
         URI liveURI = new URI("tcp://10.18.22.156:1520");
+        @SuppressWarnings("unused")
         URI storedURI = new URI("tcp://10.18.22.156:1521");
 
         for (String paramURLStr : sources) {
+            @SuppressWarnings("unused")
             URL paramURL = new URL(paramURLStr);
-            RaceHandle raceHandle = SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI,
-                    null, null, 60000);
+            RaceHandle raceHandle = null; //SimulatorUtils.loadRace(service, tracTracAdapterFactory, paramURL, liveURI, storedURI, null, null, 60000);
             String regatta = raceHandle.getRegatta().getName();
             RaceDefinition r = raceHandle.getRace();
             List<TrackedRace> racesList = new ArrayList<TrackedRace>();

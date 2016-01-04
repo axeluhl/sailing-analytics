@@ -14,6 +14,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.util.impl.ApproximateTime;
 
 /**
  * Caches wind information across a short duration of a few seconds, based on position and time point. A separate timer
@@ -49,7 +50,8 @@ public class ShortTimeWindCache {
         public void run() {
             long oldestToKeep = System.currentTimeMillis() - preserveHowManyMilliseconds;
             Pair<Long, Triple<Position, TimePoint, Set<WindSource>>> next;
-            while ((next = order.pollFirst()) != null && next.getA() < oldestToKeep) {
+            while ((next = order.peekFirst()) != null && next.getA() < oldestToKeep) {
+                order.pollFirst();
                 cache.remove(next.getB());
             }
             synchronized (order) {
@@ -71,16 +73,19 @@ public class ShortTimeWindCache {
     
     private void add(Triple<Position, TimePoint, Set<WindSource>> key, WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind) {
         cache.put(key, wind);
-        boolean orderEmpty = order.isEmpty();
         synchronized (order) {
-            order.add(new Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>(System.currentTimeMillis(), key));
-            if (orderEmpty) {
-                ensureTimerIsRunning();
+            final long timestamp;
+            if (preserveHowManyMilliseconds > 1000) {
+                timestamp = ApproximateTime.approximateNow().asMillis();
+            } else {
+                timestamp = System.currentTimeMillis();
             }
+            order.add(new Pair<Long, Triple<Position, TimePoint, Set<WindSource>>>(timestamp, key));
+            ensureTimerIsRunning();
         }
     }
     
-    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
+    protected WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> getWindWithConfidence(Position p,
             TimePoint at, Set<WindSource> windSourcesToExclude) {
         WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> wind;
         final Triple<Position, TimePoint, Set<WindSource>> key = new Triple<Position, TimePoint, Set<WindSource>>(p, at, windSourcesToExclude);
@@ -105,7 +110,7 @@ public class ShortTimeWindCache {
      */
     private void ensureTimerIsRunning() {
         if (timer == null) {
-            timer = new Timer(getClass().getSimpleName()+" for "+trackedRace.getRace().getName());
+            timer = new Timer(getClass().getSimpleName()+" for "+trackedRace.getRace().getName(), /* isDaemon */ true);
             timer.scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds, preserveHowManyMilliseconds);
         }
     }

@@ -27,8 +27,8 @@ public class MarkGridAdapter extends ArrayAdapter<Mark> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (convertView == null) {
-            LayoutInflater li = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
-            view = li.inflate(R.layout.welter_grid_mark_cell, null);
+            LayoutInflater inflater = (LayoutInflater) (getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+            view = inflater.inflate(R.layout.welter_grid_mark_cell, parent, false);
         }
 
         Mark mark = getItem(position);

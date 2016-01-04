@@ -12,8 +12,10 @@ public enum Flags {
     GOLF,
     HOTEL,
     INDIA,
+    INDIA_ZULU, // the flag combination of I+Z flown at the same time
     NOVEMBER,
     PAPA,
+    UNIFORM,
     XRAY,
     ZULU,
     FIRSTSUBSTITUTE,

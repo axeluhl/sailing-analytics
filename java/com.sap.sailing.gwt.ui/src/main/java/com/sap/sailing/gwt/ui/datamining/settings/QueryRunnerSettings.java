@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.datamining.settings;
 
-public class QueryRunnerSettings {
+import com.sap.sse.common.settings.AbstractSettings;
+
+public class QueryRunnerSettings extends AbstractSettings {
     
     private boolean runAutomatically;
     
     public QueryRunnerSettings() {
-        this(true);
+        this(false);
     }
 
     public QueryRunnerSettings(boolean runAutomatically) {

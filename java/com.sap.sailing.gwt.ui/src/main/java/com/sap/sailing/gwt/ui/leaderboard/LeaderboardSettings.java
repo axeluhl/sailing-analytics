@@ -3,8 +3,17 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sse.common.settings.AbstractSettings;
 
-public class LeaderboardSettings {
+/**
+ * Settings for the {@link LeaderboardPanel} component. If you change here, please also visit
+ * {@link LeaderboardSettingsDialogComponent} to make the setting editable, and edit {@link LeaderboardUrlSettings}
+ * for URL generation and parsing.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class LeaderboardSettings extends AbstractSettings {
     public static final String PARAM_LEADERBOARD_GROUP_NAME = "leaderboardGroupName";
     public static final String PARAM_EMBEDDED = "embedded";
     public static final String PARAM_HIDE_TOOLBAR = "hideToolbar";
@@ -85,6 +94,9 @@ public class LeaderboardSettings {
      */
     private final boolean showAddedScores;
     
+    private final boolean showCompetitorSailIdColumn;
+    private final boolean showCompetitorFullNameColumn;
+    
     /**
      * Show a column with total number of races completed
      */
@@ -98,7 +110,8 @@ public class LeaderboardSettings {
             List<String> namesOfRaceColumnsToShow, List<String> namesOfRacesToShow, Integer numberOfLastRacesToShow,
             boolean autoExpandPreSelectedRace, Long delayBetweenAutoAdvancesInMilliseconds, String nameOfRaceToSort,
             boolean sortAscending, boolean updateUponPlayStateChange, RaceColumnSelectionStrategies activeRaceColumnSelectionStrategy,
-            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor) {
+            boolean showAddedScores, boolean showOverallColumnWithNumberOfRacesCompletedPerCompetitor,
+            boolean showCompetitorSailIdColumn, boolean showCompetitorFullNameColumn) {
         if (namesOfRacesToShow != null && namesOfRaceColumnsToShow != null) {
             throw new IllegalArgumentException("You can identify races either only by their race or by their column names, not both");
         }
@@ -116,6 +129,8 @@ public class LeaderboardSettings {
         this.sortAscending = sortAscending;
         this.updateUponPlayStateChange = updateUponPlayStateChange;
         this.showAddedScores = showAddedScores;
+        this.showCompetitorSailIdColumn = showCompetitorSailIdColumn;
+        this.showCompetitorFullNameColumn = showCompetitorFullNameColumn;
         this.showOverallColumnWithNumberOfRacesCompletedPerCompetitor = showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
     }
   
@@ -197,5 +212,13 @@ public class LeaderboardSettings {
     
     public boolean isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor() {
         return showOverallColumnWithNumberOfRacesCompletedPerCompetitor;
+    }
+    
+    public boolean isShowCompetitorSailIdColumn() {
+        return showCompetitorSailIdColumn;
+    }
+    
+    public boolean isShowCompetitorFullNameColumn() {
+        return showCompetitorFullNameColumn;
     }
 }

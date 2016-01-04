@@ -74,7 +74,9 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             }
             regattaDefinesDiscardsLabel.setVisible(true);
         } else {
-            discardThresholdBoxes.getWidget().setVisible(true);
+            if (discardThresholdBoxes != null) {
+                discardThresholdBoxes.getWidget().setVisible(true);
+            }
             regattaDefinesDiscardsLabel.setVisible(false);
         }
     }

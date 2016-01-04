@@ -1,0 +1,60 @@
+apply plugin: 'com.android.library'
+
+android {
+    buildToolsVersion rootProject.ext.buildTools
+    compileSdkVersion rootProject.ext.compileSdk
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdk
+        targetSdkVersion rootProject.ext.targetSdk
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile "AndroidManifest.xml"
+            java.srcDirs = ["src"]
+            res.srcDirs = ["res"]
+        }
+
+        test {
+            java.srcDirs = ["tests-jvm/src"]
+        }
+    }
+
+    signingConfigs {
+        stg_debug {
+            keyAlias 'stg_debug'
+            keyPassword 'stg_debug'
+            storeFile file('../android-keystore/STG-debug.jks')
+            storePassword 'stg_debug'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.stg_debug
+        }
+    }
+}
+
+dependencies {
+    /* support libraries */
+    compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
+
+    /* local dependencies */
+    compile project(':java:com.sap.sailing.domain.common')
+    compile project(':java:com.sap.sailing.domain.shared.android')
+    compile project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
+    compile project(':java:com.sap.sse.common')
+    compile project(':java:org.json.simple')
+
+    /* Google Play Services */
+    compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+
+    /* all local jar-libs */
+    compile fileTree(dir: "libs", include: ["*.jar"])
+
+    /* JVM tests */
+    testCompile "junit:junit:${rootProject.ext.junit}"
+    testCompile "org.mockito:mockito-core:${rootProject.ext.mockito}"
+}

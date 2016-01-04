@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.junit.Before;
 
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -26,6 +28,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
@@ -34,7 +37,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sailing.domain.tractracadapter.Receiver;
@@ -84,7 +86,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
     
     @Before
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
-        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+        domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         // keep superclass implementation from automatically setting up for a Weymouth event and force subclasses
         // to select a race
     }
@@ -113,8 +115,8 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         for (Receiver r : domainFactory.getUpdateReceivers(trackedRegatta, getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */0l, /* simulator */null, createRaceDefinitionSet(),
                 /* trackedRegattaRegistry */null,
-                /* courseDesignUpdateURI */null, /* tracTracUsername */null, null, /* tracTracPassword */
-                getEventSubscriber(), getRaceSubscriber(), receiverTypes)) {
+                mock(RaceLogResolver.class), /* courseDesignUpdateURI */null, /* tracTracUsername */null, /* tracTracPassword */
+                null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, receiverTypes)) {
             receivers.add(r);
         }
         getRaceSubscriber().subscribeConnectionStatus(new IConnectionStatusListener() {
@@ -217,7 +219,7 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
             throws FileNotFoundException, MalformedURLException, URISyntaxException, SubscriberInitializationException, CreateModelException {
         super.setUp(paramUrl, liveUri, storedUri);
         if (domainFactory == null) {
-            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl());
+            domainFactory = new DomainFactoryImpl(new com.sap.sailing.domain.base.impl.DomainFactoryImpl((srlid)->null));
         }
         domainEvent = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 getTracTracRace(), /* trackedRegattaRegistry */ null);

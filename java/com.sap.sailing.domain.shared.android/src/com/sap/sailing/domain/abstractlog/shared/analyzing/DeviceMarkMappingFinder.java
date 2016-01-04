@@ -21,7 +21,6 @@ public class DeviceMarkMappingFinder<LogT extends AbstractLog<EventT, VisitorT>,
         public LogAnalyzer<Map<Mark, List<DeviceMapping<Mark>>>> createAnalyzer(AbstractLog<?, ?> log) {
             return new DeviceMarkMappingFinder(log);
         }
-
     }
 
     public DeviceMarkMappingFinder(LogT log) {

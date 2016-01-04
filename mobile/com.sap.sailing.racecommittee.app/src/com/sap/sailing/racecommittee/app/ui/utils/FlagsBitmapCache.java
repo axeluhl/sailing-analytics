@@ -8,9 +8,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Pair;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.android.shared.logging.ExLog;
 
 public class FlagsBitmapCache {
 
@@ -82,6 +82,9 @@ public class FlagsBitmapCache {
         case INDIA:            
             resourceId = R.drawable.india_flag_mini;
             break;
+        case INDIA_ZULU:
+            resourceId = R.drawable.india_zulu_flag_mini;
+            break;
         case JURY:            
             resourceId = R.drawable.jury_flag_mini;
             break;
@@ -93,6 +96,9 @@ public class FlagsBitmapCache {
             break;
         case PAPA:            
             resourceId = R.drawable.papa_flag_mini;
+            break;
+        case UNIFORM:            
+            resourceId = R.drawable.uniform_flag_mini;
             break;
         case XRAY:            
             resourceId = R.drawable.xray_flag;

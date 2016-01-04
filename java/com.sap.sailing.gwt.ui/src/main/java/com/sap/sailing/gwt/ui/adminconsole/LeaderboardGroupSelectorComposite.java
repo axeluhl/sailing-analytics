@@ -31,10 +31,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.impl.NaturalComparator;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class LeaderboardGroupSelectorComposite extends Composite implements HasValueChangeHandlers<Iterable<LeaderboardGroupDTO>> {

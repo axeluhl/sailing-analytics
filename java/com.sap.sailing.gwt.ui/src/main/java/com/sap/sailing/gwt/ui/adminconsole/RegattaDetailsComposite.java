@@ -19,6 +19,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -28,9 +29,11 @@ import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -52,6 +55,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label endDate;
     private final Label boatClassName;
     private final Label scoringSystem;
+    private final Label rankingMetric;
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
     private final Label configuration;
@@ -73,7 +77,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 9;
+        int rows = 10;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -87,6 +91,7 @@ public class RegattaDetailsComposite extends Composite {
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
+        rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
@@ -289,14 +294,16 @@ public class RegattaDetailsComposite extends Composite {
         final boolean seriesNameChanged = !series.getName().equals(seriesDescriptor.getSeriesName());
         final RegattaIdentifier regattaIdentifier = new RegattaName(regatta.getName());
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
-        final List<String> raceColumnsToAdd = new ArrayList<String>();
-        final List<String> raceColumnsToRemove = new ArrayList<String>();
+        final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
+        final List<String> raceColumnsToRemove = new ArrayList<>();
         
         // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
+        int insertIndex = 0;
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
             if (!existingRaceColumns.contains(newRaceColumn)) {
-                raceColumnsToAdd.add(newRaceColumn.getName());
+                raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), insertIndex));
             }
+            insertIndex++;
         }
         for (RaceColumnDTO existingRaceColumn : existingRaceColumns) {
             if (!newRaceColumns.contains(existingRaceColumn)) {
@@ -314,32 +321,32 @@ public class RegattaDetailsComposite extends Composite {
             racesToRemove.append(raceColumnToRemove);
         }
         if (raceColumnsToRemove.isEmpty() || Window.confirm(stringMessages.reallyRemoveRace(racesToRemove.toString()))) {
-            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnsToAdd,
-                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to add race columns " + raceColumnsToAdd
-                                    + " to series " + series.getName() + ": " + caught.getMessage());
-
-                        }
-
-                        @Override
-                        public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
-                            regattaRefresher.fillRegattas();
-                        }
-                    });
-
+            // first remove:
             sailingService.removeRaceColumnsFromSeries(regattaIdentifier, series.getName(), raceColumnsToRemove,
                     new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error trying to remove race columns " + raceColumnsToAdd
+                            errorReporter.reportError("Error trying to remove race columns " + raceColumnNamesToAddWithInsertIndex
                                     + " from series " + series.getName() + ": " + caught.getMessage());
                         }
 
                         @Override
                         public void onSuccess(Void v) {
-                            regattaRefresher.fillRegattas();
+                            // when successfully removed, insert:
+                            sailingService.addRaceColumnsToSeries(regattaIdentifier, series.getName(), raceColumnNamesToAddWithInsertIndex,
+                                    new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
+                                                    + " to series " + series.getName() + ": " + caught.getMessage());
+
+                                        }
+
+                                        @Override
+                                        public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                                            regattaRefresher.fillRegattas();
+                                        }
+                                    });
                         }
                     });
             if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
@@ -382,8 +389,11 @@ public class RegattaDetailsComposite extends Composite {
                 configuration.setText(stringMessages.none());
             }
             ScoringSchemeType scoringScheme = regatta.scoringScheme;
-            String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);               
+            String scoringSystemText = scoringScheme == null ? "" : ScoringSchemeTypeFormatter.format(scoringScheme, stringMessages);
             scoringSystem.setText(scoringSystemText);
+            RankingMetrics rankingMetricType = regatta.rankingMetricType;
+            String rankingMetricText = rankingMetricType == null ? "" : RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages);
+            rankingMetric.setText(rankingMetricText);
             seriesListDataProvider.getList().clear();
             seriesListDataProvider.getList().addAll(regatta.series);
         } 

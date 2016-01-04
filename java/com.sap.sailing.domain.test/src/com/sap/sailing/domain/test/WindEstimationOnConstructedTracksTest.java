@@ -24,24 +24,24 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.CombinedWindTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl;
-import com.sap.sailing.domain.tracking.impl.WindImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -137,7 +137,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testCombinedWindTrack() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
         setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
@@ -149,7 +149,9 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Wind combinedWindDirection = combinedTrack.getAveragedWind(/* position */ null, now);
         // The course layout makes a wind estimation around 7deg. The confidence of the cluster based wind estimation is a lot
         // higher that that of the course layout wind (currently at approximately 10E-13), we will end up quite near 180 deg.
-        assertEquals(180.0, combinedWindDirection.getBearing().getDegrees(), 0.2);
+        // Update 04/24/15: Since polar data service is not available here, the confidence will not be as good as it once was.
+        // So we have quite a big delta in the assert
+        assertEquals(180.0, combinedWindDirection.getBearing().getDegrees(), 0.9);
     }
 
     /**
@@ -251,7 +253,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForSimpleTracks() throws NoWindException {
         initRace(2, new int[] { 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         Wind estimatedWindDirection = getTrackedRace().getEstimatedWindDirection(now);
@@ -261,7 +263,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForSimpleTracksWithOneAncientFixToBeSuppressedByLowConfidence() throws NoWindException {
         initRace(3, new int[] { 1, 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         setBearingForCompetitor(competitors.get(2), new MillisecondsTimePoint(0), 100); // this shouldn't disturb the estimation because it's too old
@@ -273,7 +275,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     public void testWindEstimationForSimpleTracksWithOneFixNearMarkPassingToBeSuppressedByLowConfidence() throws NoWindException {
         TimePoint markPassingTimePoint = new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime());
         initRace(3, new int[] { 1, 1, 1 }, markPassingTimePoint);
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 50);
         setBearingForCompetitor(competitors.get(2), markPassingTimePoint, 100); // this shouldn't disturb the estimation because it's too old
@@ -284,7 +286,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForTwoBoatsOnSameTack() throws NoWindException {
         initRace(2, new int[] { 1, 1 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 330); // on the same tack, should give no read-out
         Wind nullWind = getTrackedRace().getEstimatedWindDirection(now);
@@ -296,7 +298,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForFourBoatsOnSameTack() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 330); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
@@ -310,7 +312,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForFourBoatsWithUpwindOnSameTack() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 320);
         setBearingForCompetitor(competitors.get(1), now, 330); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);
@@ -322,7 +324,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
     @Test
     public void testWindEstimationForFourBoats() throws NoWindException {
         initRace(4, new int[] { 1, 1, 2, 2 }, new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
-        MillisecondsTimePoint now = MillisecondsTimePoint.now();
+        TimePoint now = MillisecondsTimePoint.now();
         setBearingForCompetitor(competitors.get(0), now, 315);
         setBearingForCompetitor(competitors.get(1), now, 45); // on the same tack, should give no read-out
         setBearingForCompetitor(competitors.get(2), now, 135);

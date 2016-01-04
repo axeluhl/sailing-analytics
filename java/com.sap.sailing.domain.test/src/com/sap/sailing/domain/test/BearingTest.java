@@ -217,4 +217,10 @@ public class BearingTest {
         assertEquals(270, average.getDegrees(), 0.00000001);
     }
     
+    @Test
+    public void testDoubleModulo() {
+        final double angle1 = 12.34;
+        final double angle2 = 362.45;
+        assertEquals(14.79, (angle1 + angle2) % 360., 0.00000000001);
+    }
 }

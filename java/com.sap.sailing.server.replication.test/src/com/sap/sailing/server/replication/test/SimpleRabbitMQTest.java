@@ -61,6 +61,7 @@ public class SimpleRabbitMQTest {
         new Thread(consumer2).start();
         String message = "Hello World!";
         channel.basicPublish(EXCHANGE_NAME, /* queue name */ "", null, message.getBytes());
+        Thread.sleep(1000);
         consumer1.waitUntilReceived(1000);
         consumer2.waitUntilReceived(1000);
         assertEquals(message, received.get(consumer1));

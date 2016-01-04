@@ -1,6 +1,7 @@
 package java.util;
 
 import java.io.Serializable;
+import java.util.Random;
 
 /**
  * <p><b>Do not use!</b></p>
@@ -9,13 +10,43 @@ import java.io.Serializable;
  */
 public class UUID implements Serializable, Comparable<UUID> {
     private static final long serialVersionUID = -3096287568577694784L;
+    
+    private static final Random numberGenerator = new Random();
 
-	public static UUID fromString(String value) {
+    public static UUID fromString(String value) {
         return new UUID(value);
     }
     
     public static UUID randomUUID() {
-        throw new UnsupportedOperationException("Not supported for emulation");
+        //Creating a random byte array, analog to java.util.UUID.randomUUID()
+        byte[] randomBytes = new byte[16];
+        numberGenerator.nextBytes(randomBytes);
+        randomBytes[6]  &= 0x0f;  /* clear version        */
+        randomBytes[6]  |= 0x40;  /* set to version 4     */
+        randomBytes[8]  &= 0x3f;  /* clear variant        */
+        randomBytes[8]  |= 0x80;  /* set to IETF variant  */
+
+        //Converting the byte array to two longs, analog to the constructor
+        //UUID(byte[] data) of java.util.UUID
+        long mostSigBits = 0;
+        long leastSigBits = 0;
+        for (int i=0; i<8; i++)
+            mostSigBits = (mostSigBits << 8) | (randomBytes[i] & 0xff);
+        for (int i=8; i<16; i++)
+            leastSigBits = (leastSigBits << 8) | (randomBytes[i] & 0xff);
+        
+        //Converting the two longs to a String, analog to java.util.UUID.toString()
+        return new UUID((digits(mostSigBits >> 32, 8) + "-" +
+                         digits(mostSigBits >> 16, 4) + "-" +
+                         digits(mostSigBits, 4) + "-" +
+                         digits(leastSigBits >> 48, 4) + "-" +
+                         digits(leastSigBits, 12)));
+    }
+
+    /** Returns val represented by the specified number of hex digits. */
+    private static String digits(long val, int digits) {
+        long hi = 1L << (digits * 4);
+        return Long.toHexString(hi | (val & (hi - 1))).substring(1);
     }
     
     private String uuidAsString;

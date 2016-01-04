@@ -6,10 +6,10 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.base.Timed;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -256,6 +256,22 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         assertReadLock();
         Iterator<FixType> result = (Iterator<FixType>) getInternalFixes().tailSet(
                 getDummyFix(startingAt), inclusive).iterator();
+        return result;
+    }
+
+    @Override
+    public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean startingAtInclusive, TimePoint endingAt,
+            boolean endingAtInclusive) {
+        assertReadLock();
+        NavigableSet<FixType> set = getInternalFixes();
+        if (startingAt != null && endingAt != null) {
+            set = set.subSet(getDummyFix(startingAt), startingAtInclusive, getDummyFix(endingAt), endingAtInclusive);
+        } else if (endingAt != null) {
+            set = set.headSet(getDummyFix(endingAt), endingAtInclusive);
+        } else  if (startingAt != null) {
+            set = set.tailSet(getDummyFix(startingAt), startingAtInclusive);
+        }
+        Iterator<FixType> result = set.iterator();
         return result;
     }
 

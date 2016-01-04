@@ -1,8 +1,11 @@
 package com.sap.sse.datamining.components;
 
-import com.sap.sse.datamining.AdditionalResultDataBuilder;
-
 public interface Processor<InputType, ResultType> {
+    
+    /**
+     * @return <code>true</code>, if the processor accepts new elements to process.
+     */
+    public boolean canProcessElements();
 
     /**
      * Processes the given element and forwards the result.
@@ -21,18 +24,22 @@ public interface Processor<InputType, ResultType> {
     void onFailure(Throwable failure);
 
     /**
-     * Tells this Processor, that there won't be data incoming anymore.<br />
-     * The called Processor will finish his work and call <code>finish()</code> on all subsequent processors.
+     * Tells this Processor, that there won't be any input anymore. This has the effect, that
+     * this Processor won't process new input ({@link #canProcessElements()} will return <code>false</code>
+     * after this method has been called).<br>
+     * The called Processor will finish its work and call <code>finish()</code> on all subsequent processors.
      * 
      * @throws InterruptedException
      */
     public void finish() throws InterruptedException;
+    public boolean isFinished();
 
     /**
      * Aborts the processing immediately. The result will be <code>null</code>, incomplete or undefined.<br />
      * To shut down the process cleanly use {@link #finish()}.
      */
     public void abort();
+    public boolean isAborted();
     
     public Class<InputType> getInputType();
     

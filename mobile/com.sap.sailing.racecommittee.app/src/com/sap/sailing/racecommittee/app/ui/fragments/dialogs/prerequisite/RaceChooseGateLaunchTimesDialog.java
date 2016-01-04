@@ -60,7 +60,8 @@ public class RaceChooseGateLaunchTimesDialog extends PrerequisiteRaceDialog<Gate
                             60 * 1000 * golfDownTime));
                     dismiss();
                 } catch (NumberFormatException e) {
-                    Toast.makeText(getActivity(), "Please enter a valid number", Toast.LENGTH_LONG).show();
+                    String toastText = getString(R.string.please_enter_valid_number);
+                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                 }
             }
         });

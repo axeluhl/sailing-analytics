@@ -13,7 +13,7 @@ public class URLEncoder {
     
     private URLEncoder() { }
 
-    private final static char[] charsToReplace = { '\'', '(', ')', '"', '[', ']', '{', '}', '<', '>', '|' };
+    private final static char[] charsToReplace = { '\'', '(', ')', '"', '[', ']', '{', '}', '<', '>', '|', '+' };
     
     public static String encode(String url) {
         String nearlyEncoded = URL.encode(url);

@@ -2,41 +2,127 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
-import com.sap.sse.datamining.shared.QueryDefinitionDTO;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
+public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> implements QueryDefinitionProvider<SettingsType> {
 
     private final StringMessages stringMessages;
-    private final SailingServiceAsync sailingService;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
 
+    private final Timer dataminingComponentsChangedTimer;
+    private final int timerDelayInMillis = 30 * 1000;
+    private Date componentsChangedTimepoint;
+    private final DialogBox componentsChangedDialog;
+    
     private boolean blockChangeNotification;
     private final Set<QueryDefinitionChangedListener> listeners;
 
-    public AbstractQueryDefinitionProvider(StringMessages stringMessages, SailingServiceAsync sailingService,
-            DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
+    public AbstractQueryDefinitionProvider(StringMessages stringMessages, DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter) {
         this.stringMessages = stringMessages;
-        this.sailingService = sailingService;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        
+        dataminingComponentsChangedTimer = new Timer() {
+            @Override
+            public void run() {
+                getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
+                                + caught.getMessage());
+                        dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
+                    }
+                    @Override
+                    public void onSuccess(Date componentsChangedTimepoint) {
+                        if (componentsChangedTimepoint.after(AbstractQueryDefinitionProvider.this.componentsChangedTimepoint)) {
+                            AbstractQueryDefinitionProvider.this.componentsChangedTimepoint = componentsChangedTimepoint;
+                            componentsChangedDialog.center();
+                        }
+                        dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
+                    }
+                });
+            }
+        };
+        componentsChangedDialog = createComponentsChangedDialog();
 
         blockChangeNotification = false;
         listeners = new HashSet<QueryDefinitionChangedListener>();
+        
+        getDataMiningService().getComponentsChangedTimepoint(new AsyncCallback<Date>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                AbstractQueryDefinitionProvider.this.errorReporter.reportError("Error fetching components changed timepoint from the server: "
+                        + caught.getMessage());
+            }
+            @Override
+            public void onSuccess(Date componentsChangedTimepoint) {
+                AbstractQueryDefinitionProvider.this.componentsChangedTimepoint = componentsChangedTimepoint;
+                dataminingComponentsChangedTimer.schedule(timerDelayInMillis);
+            }
+        });
     }
     
+    private DialogBox createComponentsChangedDialog() {
+        DialogBox componentsChangedDialog = new DialogBox(false, true);
+        componentsChangedDialog.setAnimationEnabled(true);
+        componentsChangedDialog.setText(getStringMessages().dataMiningComponentsHaveBeenUpdated());
+        
+        VerticalPanel contentPanel = new VerticalPanel();
+        contentPanel.setSpacing(5);
+        contentPanel.add(new HTML(new SafeHtmlBuilder().appendEscapedLines(getStringMessages().dataMiningComponentsNeedReloadDialogMessage()).toSafeHtml()));
+        
+        HorizontalPanel buttonPanel = new HorizontalPanel();
+        buttonPanel.setSpacing(5);
+        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+        contentPanel.add(buttonPanel);
+        
+        Button reloadButton = new Button(getStringMessages().reload());
+        reloadButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                AbstractQueryDefinitionProvider.this.componentsChangedDialog.hide();
+                reloadComponents();
+            }
+        });
+        buttonPanel.add(reloadButton);
+        
+        Button closeButton = new Button(getStringMessages().close());
+        closeButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                AbstractQueryDefinitionProvider.this.componentsChangedDialog.hide();
+            }
+        });
+        buttonPanel.add(closeButton);
+        
+        componentsChangedDialog.setWidget(contentPanel);
+        return componentsChangedDialog;
+    }
+
     @Override
-    public Iterable<String> validateQueryDefinition(QueryDefinitionDTO queryDefinition) {
+    public Iterable<String> validateQueryDefinition(StatisticQueryDefinitionDTO queryDefinition) {
         Collection<String> errorMessages = new ArrayList<String>();
         
         if (queryDefinition != null) {
@@ -48,12 +134,16 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
             if (statisticError != null && !statisticError.isEmpty()) {
                 errorMessages.add(statisticError);
             }
+            String retrieverChainError = validateDataRetrieverChain(queryDefinition);
+            if (retrieverChainError != null && !retrieverChainError.isEmpty()) {
+                errorMessages.add(retrieverChainError);
+            }
         }
         
         return errorMessages;
     }
 
-    private String validateGrouper(QueryDefinitionDTO queryDefinition) {
+    private String validateGrouper(StatisticQueryDefinitionDTO queryDefinition) {
         for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
             if (dimension != null) {
                 return null;
@@ -62,8 +152,12 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         return stringMessages.noDimensionToGroupBySelectedError();
     }
 
-    private String validateStatisticAndAggregator(QueryDefinitionDTO queryDefinition) {
-        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorType() == null ? stringMessages.noStatisticSelectedError() : null;
+    private String validateStatisticAndAggregator(StatisticQueryDefinitionDTO queryDefinition) {
+        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorDefinition() == null ? stringMessages.noStatisticSelectedError() : null;
+    }
+
+    private String validateDataRetrieverChain(StatisticQueryDefinitionDTO queryDefinition) {
+        return queryDefinition.getDataRetrieverChainDefinition() == null ? stringMessages.noDataRetrieverChainDefinitonSelectedError() : null;
     }
 
     @Override
@@ -82,7 +176,7 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
-            QueryDefinitionDTO queryDefinition = getQueryDefinition();
+            StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
             if (isQueryDefinitionConsistent(queryDefinition)) {
                 for (QueryDefinitionChangedListener listener : listeners) {
                     listener.queryDefinitionChanged(queryDefinition);
@@ -91,11 +185,11 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
         }
     }
 
-    private boolean isQueryDefinitionConsistent(QueryDefinitionDTO queryDefinition) {
+    private boolean isQueryDefinitionConsistent(StatisticQueryDefinitionDTO queryDefinition) {
         if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is selected
             String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
             
-            if (queryDefinition.getDataRetrieverChainDefinition() == null || 
+            if (queryDefinition.getDataRetrieverChainDefinition() != null && 
                 !sourceTypeName.equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
                 return false;
             }
@@ -112,10 +206,6 @@ public abstract class AbstractQueryDefinitionProvider implements QueryDefinition
 
     protected StringMessages getStringMessages() {
         return stringMessages;
-    }
-
-    protected SailingServiceAsync getSailingService() {
-        return sailingService;
     }
     
     protected DataMiningServiceAsync getDataMiningService() {

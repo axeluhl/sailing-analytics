@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.net.URI;
+
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
@@ -8,6 +10,7 @@ import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.Color;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 
@@ -81,6 +84,21 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             @Override
             public boolean hasEmail() {
                 return false;
+            }
+
+            @Override
+            public URI getFlagImage() {
+                return null;
+            }
+
+            @Override
+            public Double getTimeOnTimeFactor() {
+                return null;
+            }
+
+            @Override
+            public Duration getTimeOnDistanceAllowancePerNauticalMile() {
+                return null;
             }
         };
     }

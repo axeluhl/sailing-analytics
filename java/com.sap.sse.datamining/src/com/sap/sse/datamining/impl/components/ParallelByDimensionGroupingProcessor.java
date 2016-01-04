@@ -5,14 +5,14 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.datamining.components.Processor;
-import com.sap.sse.datamining.factories.FunctionDTOFactory;
+import com.sap.sse.datamining.factories.DataMiningDTOFactory;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.functions.ParameterProvider;
+import com.sap.sse.datamining.functions.ParameterizedFunction;
 import com.sap.sse.datamining.shared.GroupKey;
-import com.sap.sse.datamining.shared.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 
 /**
@@ -26,29 +26,33 @@ public class ParallelByDimensionGroupingProcessor<DataType> extends
     private final ResourceBundleStringMessages stringMessages;
     private final Locale locale;
 
-    private final FunctionDTOFactory functionDTOFactory;
-    
+    private final DataMiningDTOFactory dtoFactory;
+
+
+    /**
+     * @throws IllegalArgumentException if the given function isn't a dimension.
+     */
     public ParallelByDimensionGroupingProcessor(Class<DataType> dataType,
                                                 ExecutorService executor,
                                                 Collection<Processor<GroupedDataEntry<DataType>, ?>> resultReceivers,
-                                                Function<?> dimension,
+                                                ParameterizedFunction<?> parameterizedDimension,
                                                 ResourceBundleStringMessages stringMessages, Locale locale) {
-        super(dataType, executor, resultReceivers, asIterable(dimension));
+        super(dataType, executor, resultReceivers, asIterable(parameterizedDimension));
         this.stringMessages = stringMessages;
         this.locale = locale;
         
-        functionDTOFactory = new FunctionDTOFactory();
+        dtoFactory = new DataMiningDTOFactory();
     }
 
-    private static Iterable<Pair<Function<?>, ParameterProvider>> asIterable(Function<?> dimension) {
-        Collection<Pair<Function<?>, ParameterProvider>> collection = new ArrayList<>();
-        collection.add(new Pair<Function<?>, ParameterProvider>(dimension, ParameterProvider.NULL));
+    private static Iterable<ParameterizedFunction<?>> asIterable(ParameterizedFunction<?> parameterizedDimension) {
+        Collection<ParameterizedFunction<?>> collection = new ArrayList<>();
+        collection.add(parameterizedDimension);
         return collection;
     }
 
     @Override
     protected GroupKey createGroupKeyFor(DataType input, Function<?> dimension, ParameterProvider parameterProvider) {
-        return new GenericGroupKey<FunctionDTO>(functionDTOFactory.createFunctionDTO(dimension, stringMessages, locale));
+        return new GenericGroupKey<FunctionDTO>(dtoFactory.createFunctionDTO(dimension, stringMessages, locale));
     }
 
 }

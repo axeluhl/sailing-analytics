@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="preference_data_refresh_interval_seconds_key" translatable="false">data_refresh_interval_millis</string>
+    <integer name="preference_data_refresh_interval_seconds_default">120</integer>
+    <string name="check_in_url_key" translatable="false">check_in_url</string>
+</resources>

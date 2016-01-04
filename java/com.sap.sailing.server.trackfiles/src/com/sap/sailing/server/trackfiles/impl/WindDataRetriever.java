@@ -6,13 +6,13 @@ import java.util.Collections;
 
 import slash.navigation.gpx.GpxRoute;
 
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.trackfiles.TrackFilesFormat;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 
 public class WindDataRetriever extends AbstractDataRetriever {
 

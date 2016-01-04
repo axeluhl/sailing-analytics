@@ -1,0 +1,37 @@
+.eventheader_sharing {
+  text-align: right;
+  padding: 1.333333333333333em 0;
+}
+.eventheader_sharing_item {
+  display: inline-block;
+  height: 2.666666666666667em;
+  width: 2.666666666666667em;
+  margin-left: 0.333333333333333em;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-radius: 5px;
+}
+.eventheader_sharing_itememail {
+  background-color: #f0ab00;
+  background-image: url("images/home/email-icon.png");
+}
+.eventheader_sharing_itememail:hover,
+.eventheader_sharing_itememail:focus {
+  background-color: #d89a00;
+}
+.eventheader_sharing_itemtwitter {
+  background-color: #32b5e2;
+  background-image: url("images/home/twitter-icon.png");
+}
+.eventheader_sharing_itemtwitter:hover,
+.eventheader_sharing_itemtwitter:focus {
+  background-color: #1faada;
+}
+.eventheader_sharing_itemfacebook {
+  background-color: #3b5998;
+  background-image: url("images/home/facebook-icon.png");
+}
+.eventheader_sharing_itemfacebook:hover,
+.eventheader_sharing_itemfacebook:focus {
+  background-color: #355089;
+}

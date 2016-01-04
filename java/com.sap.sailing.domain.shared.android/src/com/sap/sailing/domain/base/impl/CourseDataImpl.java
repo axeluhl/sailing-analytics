@@ -23,7 +23,6 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     @Override
     public List<Leg> getLegs() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -49,7 +48,7 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
     public int getIndexOfWaypoint(Waypoint waypoint) {
         return this.waypoints.indexOf(waypoint);
     }
-
+    
     @Override
     public Waypoint getFirstWaypoint() {
         return this.waypoints.get(0);
@@ -72,7 +71,6 @@ public class CourseDataImpl extends NamedImpl implements CourseBase {
 
     @Override
     public Leg getFirstLeg() {
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -6,9 +6,13 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -17,6 +21,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
@@ -39,7 +44,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * 
  */
 public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
-    public static final String LODA_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
+    public static final String LOAD_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
     private static final int WIND_FETCH_INTERVAL_IN_MILLIS = 10000;
@@ -55,14 +60,16 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private final StringMessages stringMessages;
     private final AsyncActionsExecutor asyncActionsExecutor;
     private final Scheduler scheduler;
+    private Canvas streamletLegend;
+    private boolean firstColoring = true;
     
     private long latitudeCount;
     private double latitudeSum;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
             RegattaAndRaceIdentifier raceIdentifier, SailingServiceAsync sailingService,
-            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages) {
-        super(map, zIndex);
+            AsyncActionsExecutor asyncActionsExecutor, StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.scheduler = Scheduler.get();
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.stringMessages = stringMessages;
@@ -73,9 +80,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         windInfoForRace.windSourcesToExclude = new HashSet<>();
         windInfoForRace.windTrackInfoByWindSource = new HashMap<>();
         updateAverageLatitudeDeg(windInfoForRace);
-        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis);
+        this.windField = new WindInfoForRaceVectorField(windInfoForRace, /* frames per second */ 1000.0/animationIntervalMillis, coordinateSystem);
         this.timer = timer;
         getCanvas().getElement().setId("swarm-display");
+        createStreamletLegend(map);
     }
 
     public double getAverageLatitudeDeg() {
@@ -86,13 +94,81 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
                 if (wind.position != null) {
-                    latitudeSum += wind.position.latDeg;
+                    latitudeSum += wind.position.getLatDeg();
                     latitudeCount++;
                 }
             }
         }
         if (latitudeCount > 0) {
             windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
+        }
+    }
+    
+    private void createStreamletLegend(MapWidget map) {
+        streamletLegend = Canvas.createIfSupported();
+        streamletLegend.addStyleName("MapStreamletLegend");
+        //streamletLegend.setTitle(stringMessages.simulationLegendTooltip());
+        /*streamletLegend.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                int clickPixelY = event.getRelativeY(streamletLegend.getElement());
+                int legendRow = clickPixelY / ((int) rectHeight);
+                int pathRow = legendRow - (racePath!=null ? 1 : 0);
+                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
+                visiblePaths[pathRow] = !visiblePaths[pathRow];
+                clearCanvas();
+                drawPaths();
+            }
+        });*/
+        map.setControls(ControlPosition.LEFT_BOTTOM, streamletLegend);
+        int canvasWidth = 500;
+        int canvasHeight = 60;
+        streamletLegend.getParent().addStyleName("MapStreamletLegendParentDiv");
+        streamletLegend.setWidth(String.valueOf(canvasWidth));
+        streamletLegend.setHeight(String.valueOf(canvasHeight));
+        streamletLegend.setCoordinateSpaceWidth(canvasWidth);
+        streamletLegend.setCoordinateSpaceHeight(canvasHeight);    }
+
+    private void drawLegend() {
+        double x, y;
+        x=100;
+        y=16;
+        double w = 1;
+        double h = 20;
+        int maxIdx = 300;
+        Context2d context2d = streamletLegend.getContext2d();
+        context2d.setFillStyle("rgba(0,0,0,.3)");
+        context2d.setLineWidth(1.0);
+        context2d.beginPath();
+        context2d.fillRect(x-7.0, y-16.0, w*maxIdx+15.0, 56.0);
+        context2d.closePath();
+        context2d.stroke();
+        context2d.setFillStyle("white");
+        String label = "Wind Speed in Knots";
+        TextMetrics txtmet;
+        txtmet = context2d.measureText(label);
+        context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);
+        for(int idx=0; idx <= maxIdx; idx++) {
+            //double speed = idx * 24.0 / maxIdx;
+            double speed = 4.0 + idx * 16.0 / maxIdx;
+            context2d.setFillStyle(windField.getColor(speed));
+            context2d.beginPath();
+            context2d.fillRect(x + idx*w, y, w, h);
+            context2d.closePath();
+            context2d.stroke();
+            if (Math.abs(speed % 2.0) < (12.0/maxIdx)) {
+                context2d.setStrokeStyle("white");
+                context2d.setLineWidth(1.0);
+                context2d.beginPath();
+                context2d.moveTo(x + idx*w, y + h);
+                context2d.lineTo(x + idx*w, y + h + 7.0);
+                context2d.closePath();
+                context2d.stroke();
+                context2d.setFillStyle("white");
+                label = ""+Math.round(speed);
+                txtmet = context2d.measureText(label);
+                context2d.fillText(label, x + idx*w - txtmet.getWidth()/2.0, y + h + 8.0 + 8.0);
+            }
         }
     }
 
@@ -176,7 +252,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         }
         GetWindInfoAction getWind = new GetWindInfoAction(sailingService, raceIdentifier, timeOfLastFixOfSource,
                 /* endOfTime */ null, RESOLUTION_IN_MILLIS, windSourceTypeNames, /* onlyUpToNewestEvent */ true);
-        asyncActionsExecutor.execute(getWind, LODA_WIND_STREAMLET_DATA_CATEGORY,
+        asyncActionsExecutor.execute(getWind, LOAD_WIND_STREAMLET_DATA_CATEGORY,
                 new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -190,16 +266,18 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                         // confidences
                         for (Entry<WindSource, WindTrackInfoDTO> e : result.windTrackInfoByWindSource.entrySet()) {
                             WindTrackInfoDTO windTrackForSource = windInfoForRace.windTrackInfoByWindSource.get(e.getKey());
+                            final WindTrackInfoDTO resultWindTrackInfoDTO = result.windTrackInfoByWindSource.get(e.getKey());
+                            windTrackForSource.resolutionOutsideOfWhichNoFixWillBeReturned = resultWindTrackInfoDTO.resolutionOutsideOfWhichNoFixWillBeReturned;
                             if (windTrackForSource.windFixes == null) {
-                                windTrackForSource.windFixes = result.windTrackInfoByWindSource.get(e.getKey()).windFixes;
+                                windTrackForSource.windFixes = resultWindTrackInfoDTO.windFixes;
                             } else {
-                                windTrackForSource.windFixes.addAll(result.windTrackInfoByWindSource.get(e.getKey()).windFixes);
+                                windTrackForSource.windFixes.addAll(resultWindTrackInfoDTO.windFixes);
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence > windTrackForSource.maxWindConfidence) {
-                                windTrackForSource.maxWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).maxWindConfidence;
+                            if (resultWindTrackInfoDTO.maxWindConfidence > windTrackForSource.maxWindConfidence) {
+                                windTrackForSource.maxWindConfidence = resultWindTrackInfoDTO.maxWindConfidence;
                             }
-                            if (result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence < windTrackForSource.minWindConfidence) {
-                                windTrackForSource.minWindConfidence = result.windTrackInfoByWindSource.get(e.getKey()).minWindConfidence;
+                            if (resultWindTrackInfoDTO.minWindConfidence < windTrackForSource.minWindConfidence) {
+                                windTrackForSource.minWindConfidence = resultWindTrackInfoDTO.minWindConfidence;
                             }
                         }
                     }
@@ -215,15 +293,30 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
             if (isVisible) {
+                if (this.windField.getColors()) {
+                    this.streamletLegend.setVisible(true);
+                }
                 this.startStreamlets();
                 this.visible = isVisible;
             } else {
+                if (this.windField.getColors()) {
+                    this.streamletLegend.setVisible(false);
+                }
                 this.stopStreamlets();
                 this.visible = isVisible;
             }
         }
     }
 
+    public void setColors(boolean isColored) {
+        this.windField.setColors(isColored);
+        if ((isColored) && (firstColoring)) {
+            firstColoring = false;
+            this.drawLegend();
+        }
+        this.streamletLegend.setVisible(isColored);
+    }
+    
     @Override
     public void removeFromMap() {
         this.setVisible(false);

@@ -5,10 +5,7 @@ Bundle-SymbolicName: com.sap.sailing.server.gateway
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sailing.polars,
- com.sap.sailing.polars.regression,
- com.sap.sailing.polars.windestimation,
- com.sap.sailing.server,
+Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.operationaltransformation,
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
@@ -24,6 +21,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.persistence,
  com.sap.sse.mongodb,
+ com.sap.sailing.domain.racelogtrackingadapter,
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  javax.servlet;bundle-version="2.6.0",
  com.sap.sailing.domain.common,
@@ -48,12 +46,18 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.shared.android,
  com.sap.sse.filestorage,
- com.sun.jersey.contribs.jersey-multipart;bundle-version="1.17.1",
+ com.sun.jersey.contribs.jersey-multipart;bundle-version="1.17.0",
  com.sap.sse.security,
+ org.apache.commons.math;bundle-version="2.1.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.ehcache;bundle-version="1.2.3",
- com.sap.sse.security.common
+ org.jvnet.mimepull;bundle-version="1.9.4",
+ com.sap.sse.security.common,
+ com.sap.sailing.polars,
+ com.sap.sse.datamining;bundle-version="1.0.0",
+ com.sap.sse.datamining.shared;bundle-version="1.0.0",
+ com.sap.sailing.datamining
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

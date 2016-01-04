@@ -6,7 +6,7 @@ public class DegreePosition extends AbstractPosition {
     private static final long serialVersionUID = 2060676561122615530L;
     private final double lat;
     private final double lng;
-
+    
     public DegreePosition(double lat, double lng) {
         this.lat = lat;
         this.lng = lng;

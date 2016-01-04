@@ -14,16 +14,16 @@ import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.GPSFix;
 import com.sap.sailing.domain.tracking.LineDetails;
-import com.sap.sailing.domain.tracking.impl.GPSFixImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class LineAnalysisTest extends TrackBasedTest {
-    private MillisecondsTimePoint now;
+    private TimePoint now;
     private DynamicTrackedRace trackedRace;
 
     @Before

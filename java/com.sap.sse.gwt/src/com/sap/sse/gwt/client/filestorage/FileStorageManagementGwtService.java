@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.filestorage;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -20,7 +21,7 @@ public interface FileStorageManagementGwtService extends RemoteService {
     /**
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime
      */
-    FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws NoCorrespondingServiceRegisteredException;
+    FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws NoCorrespondingServiceRegisteredException, IOException;
 
     /**
      * @throws NoCorrespondingServiceRegisteredException service may have disappeared from registry in the meantime

@@ -4,8 +4,8 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sse.datamining.shared.annotations.Connector;
-import com.sap.sse.datamining.shared.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface HasMarkPassingContext {
     

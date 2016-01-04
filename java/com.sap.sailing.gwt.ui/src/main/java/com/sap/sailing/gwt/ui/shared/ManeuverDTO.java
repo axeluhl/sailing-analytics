@@ -7,8 +7,8 @@ import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class ManeuverDTO implements IsSerializable {
@@ -16,7 +16,7 @@ public class ManeuverDTO implements IsSerializable {
     
     public Tack newTack;
     
-    public PositionDTO position;
+    public Position position;
     
     public Date timepoint;
     
@@ -30,7 +30,7 @@ public class ManeuverDTO implements IsSerializable {
 
     public ManeuverDTO() {}
     
-    public ManeuverDTO(ManeuverType type, Tack newTack, PositionDTO position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
+    public ManeuverDTO(ManeuverType type, Tack newTack, Position position, Date timepoint, SpeedWithBearingDTO speedWithBearingBefore,
             SpeedWithBearingDTO speedWithBearingAfter, double directionChangeInDegrees, Double maneuverLossInMeters) {
         super();
         this.type = type;

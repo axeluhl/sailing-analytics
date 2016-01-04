@@ -28,6 +28,6 @@ public interface LoadClient<T> {
      * @param isCached
      *            <code>true</code> if returned data is cached data.
      */
-    public void onLoadSucceded(T data, boolean isCached);
+    public void onLoadSucceeded(T data, boolean isCached);
 
 }

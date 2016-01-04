@@ -65,11 +65,10 @@ public class BoatOverlay extends CanvasOverlayV3 {
      */
     private Double boatDrawingAngle;
 
-    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color) {
-        super(map, zIndex);
+    public BoatOverlay(final MapWidget map, int zIndex, final CompetitorDTO competitorDTO, Color color, CoordinateSystem coordinateSystem) {
+        super(map, zIndex, coordinateSystem);
         this.boatClass = competitorDTO.getBoatClass();
         this.color = color;
-
         boatScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         boatVectorGraphics = BoatClassVectorGraphicsResolver.resolveBoatClassVectorGraphics(boatClass.getName());
     }
@@ -101,7 +100,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 lastScale = boatSizeScaleFactor;
                 lastColor = color;
             }
-            LatLng latLngPosition = LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg);
+            LatLng latLngPosition = coordinateSystem.toLatLng(boatFix.position);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
             setCanvasPosition(boatPositionInPx.getX() - getCanvas().getCoordinateSpaceWidth() / 2,
                     boatPositionInPx.getY() - getCanvas().getCoordinateSpaceHeight() / 2);
@@ -110,7 +109,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (speedWithBearing == null) {
                 speedWithBearing = new SpeedWithBearingDTO(0, 0);
             }
-            updateBoatDrawingAngle(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE);
+            updateBoatDrawingAngle(coordinateSystem.mapDegreeBearing(speedWithBearing.bearingInDegrees - ORIGINAL_BOAT_IMAGE_ROTATIION_ANGLE));
             setCanvasRotation(boatDrawingAngle);
         }
     }
@@ -128,7 +127,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     /**
-     * Updates {@link #boatDrawingAngle} to that the CSS transition from the old {@link #boatDrawingAngle} to
+     * Updates {@link #boatDrawingAngle} so that the CSS transition from the old {@link #boatDrawingAngle} to
      * <code>newBoatDrawingAngle</code> is minimal.
      */
     private void updateBoatDrawingAngle(double newBoatDrawingAngle) {
@@ -155,8 +154,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     public Util.Pair<Double, Size> getBoatScaleAndSize(BoatClassDTO boatClass) {
         // the minimum boat length is related to the hull of the boat, not the overall length 
         double minBoatHullLengthInPx = boatVectorGraphics.getMinHullLengthInPx();
-        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection,
-                LatLng.newInstance(boatFix.position.latDeg, boatFix.position.lngDeg), boatClass.getHullLengthInMeters());
+        double boatHullLengthInPixel = calculateDistanceAlongX(mapProjection, boatFix.position, boatClass.getHullLengthInMeters());
         if (boatHullLengthInPixel < minBoatHullLengthInPx) {
             boatHullLengthInPixel = minBoatHullLengthInPx;
         }

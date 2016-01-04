@@ -8,7 +8,7 @@
     <g:HTMLPanel>
 <!-- A box with a sponsoring and solution teaser-->
 <div class="{res.mainCss.mainsection} {local_res.css.mainsponsors}">
-  <div class="{res.mainCss.grid}">
+  <div class="{res.mediaCss.grid}">
     <div class="{res.mediaCss.small6} {res.mediaCss.columns}">
       <h3>Solutions</h3>
       <figure><!--<g:Image resource="{local_res.solutionTeaserImage}" altText="Solutions" />-->

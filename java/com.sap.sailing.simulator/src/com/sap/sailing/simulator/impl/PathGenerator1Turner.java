@@ -8,8 +8,8 @@ import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.SimulationParameters;
@@ -65,6 +65,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
 
     @Override
     public Path getPath() {
+        this.algorithmStartTime = MillisecondsTimePoint.now();
 
         WindFieldGenerator windField = simulationParameters.getWindField();
         PolarDiagram polarDiagram = simulationParameters.getBoatPolarDiagram();
@@ -140,8 +141,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
             path = new LinkedList<TimedPositionWithSpeed>();
             path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, null));
 
+            if (this.isTimedOut()) {
+                break;
+            }
+            
             int stepLeft = 0;
-            while ((stepLeft < step) && (!targetFound)) {
+            while ((stepLeft < step) && (!targetFound) && (!this.isTimedOut())) {
 
                 SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
                 //System.out.println("Wind: " + currentWind.getKnots() + "kn, " + currentWind.getBearing().getDegrees() + "deg");
@@ -187,7 +192,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
             currentTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
 
             int stepRight = 0;
-            while ((stepRight < (stepMax - step)) && (!targetFound)) {
+            while ((stepRight < (stepMax - step)) && (!targetFound) && (!this.isTimedOut())) {
 
             	SpeedWithBearing currentWind = windField.getWind(new TimedPositionImpl(currentTime, currentPosition));
             	polarDiagram.setWind(currentWind);
@@ -253,7 +258,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
         // paths[0] = new PathImpl(xpath1,windField);
         // paths[1] = new PathImpl(xpath2, windField);
         PathImpl[] paths = new PathImpl[1];
-        paths[0] = new PathImpl(allminpath, windField);
+        paths[0] = new PathImpl(allminpath, windField, this.algorithmTimedOut);
         char side;
         if (leftSide) {
             side = 'L';
@@ -315,8 +320,12 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     		path = new LinkedList<TimedPositionWithSpeed>();
     		path.addLast(new TimedPositionWithSpeedImpl(currentTime, currentPosition, currSpeed));
 
+                if (this.isTimedOut()) {
+                    break;
+                }
+
     		int stepLeft = 0;
-    		while ((stepLeft < step) && (!targetFound)) {
+    		while ((stepLeft < step) && (!targetFound) && (!this.isTimedOut())) {
 
     			// System.out.println("stepLeft = " + stepLeft + " targetFound = " + targetFound);
 
@@ -357,7 +366,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     		currentTime = new MillisecondsTimePoint(currentTime.asMillis() + turnloss);
 
     		int stepRight = 0;
-    		while ((stepRight < (stepMax - step)) && (!targetFound)) {
+    		while ((stepRight < (stepMax - step)) && (!targetFound) && (!this.isTimedOut())) {
 
     			// System.out.println("stepRight = " + stepLeft + " targetFound = " + targetFound);
 
@@ -405,7 +414,7 @@ public class PathGenerator1Turner extends PathGeneratorBase {
     	}
 
     	PathImpl[] paths = new PathImpl[1];
-    	paths[0] = new PathImpl(allminpath, windField);
+    	paths[0] = new PathImpl(allminpath, windField, this.algorithmTimedOut);
     	this.result = new result1Turn(paths, (leftSide ? 'L' : 'R'), stepOfOverallMinimumDistance);
 
     	TimedPositionWithSpeed oneTurnerPoint = allminpath.get(stepOfOverallMinimumDistance);

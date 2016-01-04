@@ -7,13 +7,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.deckmanadapter.DeckmanAdapter;
 import com.sap.sailing.domain.deckmanadapter.Record;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 
 public class DeckmanGPSFixImporter implements GPSFixImporter {
 

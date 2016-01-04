@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-
 import android.os.Bundle;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;

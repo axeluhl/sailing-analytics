@@ -18,10 +18,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
-import com.sap.sailing.gwt.ui.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class WindChartSettingsDialogComponent implements SettingsDialogComponent<WindChartSettings> {
     private final WindChartSettings initialSettings;

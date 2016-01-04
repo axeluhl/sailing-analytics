@@ -17,7 +17,9 @@ import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.MetadataParser;
 import com.sap.sailing.domain.tractracadapter.TracTracControlPoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
+import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
 /**
  * TracTrac objects can be augmented by what TracTrac calls a "DataSheet." These optional data sheets can provide
@@ -82,10 +84,11 @@ public class MetadataParserImpl implements MetadataParser {
      * Parses the route metadata for additional course information
      * The 'passing side' for each course waypoint is encoded like this...
      * <pre>
-     *  Seq.1=GATE
-     *  Seq.2=PORT
-     *  Seq.3=GATE
-     *  Seq.4=STARBOARD
+     *  Seq.0=LINE
+     *  Seq.1=PORT
+     *  Seq.2=GATE
+     *  Seq.3=STARBOARD
+     *  Seq.4=LINE
      * </pre>
      */
     @Override
@@ -93,16 +96,15 @@ public class MetadataParserImpl implements MetadataParser {
         Map<Integer, PassingInstruction> result = new HashMap<Integer, PassingInstruction>();
         if (routeMetadataString != null) {
             Map<String, String> routeMetadata = parseMetadata(routeMetadataString);
-            int i = 1;
-            for (TracTracControlPoint controlPoint : controlPoints) {
+            int start = routeMetadata.containsKey("Seq." + 0) ? 0 : 1;
+            for (int i = start; i < start + Util.size(controlPoints); i++) {
                 String seqValue = routeMetadata.get("Seq." + i);
-                if (!controlPoint.getHasTwoPoints() && seqValue != null) {
+                if (seqValue != null) {
                     final PassingInstruction passingInstructions = PassingInstruction.valueOfIgnoringCase(seqValue);
                     if (passingInstructions != null) {
-                        result.put(i, passingInstructions);
+                        result.put(i - start, passingInstructions);
                     }
                 }
-                i++;
             }
         }
         return result;
@@ -203,5 +205,29 @@ public class MetadataParserImpl implements MetadataParser {
         }
         return result;
     }
-    
+
+    @Override
+    public Util.Triple<String, String, String> parseCompetitorBoat(IRaceCompetitor competitor) {
+        Util.Triple<String, String, String> result = null;
+        String parsedBoatName = null;
+        String parsedBoatId = null;
+        String parsedColor = null;
+        String raceCompetitorMetadataString = competitor.getMetadata() != null ? competitor.getMetadata().getText() : null;
+        if (raceCompetitorMetadataString != null) {
+            Map<String, String> competitorMetadata = parseMetadata(raceCompetitorMetadataString);
+            for (Entry<String, String> entry : competitorMetadata.entrySet()) {
+                if (entry.getKey().startsWith("boatName")) {
+                    parsedBoatName = entry.getValue();
+                } else if (entry.getKey().startsWith("boatId")) {
+                    parsedBoatId = entry.getValue();
+                } else if (entry.getKey().startsWith("boatColor")) {
+                    parsedColor = entry.getValue();
+                }
+            }
+            if (parsedBoatName != null && parsedBoatId != null && parsedColor != null) {
+                result = new Util.Triple<String, String, String>(parsedBoatName, parsedBoatId, parsedColor);
+            }
+        }
+        return result;
+    }
 }

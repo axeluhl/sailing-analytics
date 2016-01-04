@@ -3,13 +3,13 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -17,10 +17,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class GateCreationDialog extends DataEntryDialog<GateDTO> {    
-    private final MarkTableWrapper<MultiSelectionModel<MarkDTO>> marksWrapper;
+    private final MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>> marksWrapper;
     private final TextBox name;
     private final StringMessages stringMessages;
     
@@ -38,17 +39,12 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
                         }
                         return null;
                     }
-
                 }, /* animationEnabled */ false, callback);
-        
         this.stringMessages = stringMessages;
-        
         name = createTextBox("");
-        
-        marksWrapper = new MarkTableWrapper<MultiSelectionModel<MarkDTO>>(
-                new MultiSelectionModel<MarkDTO>(), sailingService, stringMessages, errorReporter);
+        marksWrapper = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
+                /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         marksWrapper.getDataProvider().getList().addAll(marks);
-        
         marksWrapper.getSelectionModel().addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
@@ -66,23 +62,19 @@ public class GateCreationDialog extends DataEntryDialog<GateDTO> {
             Iterator<MarkDTO> i = marksWrapper.getSelectionModel().getSelectedSet().iterator();
             MarkDTO first = i.next();
             MarkDTO second = i.next();
-            controlPoint = new GateDTO(/* generate UUID on the server */ null, name.getText(), first, second);
+            controlPoint = new GateDTO(UUID.randomUUID().toString(), name.getText(), first, second);
         }
-        
         return controlPoint;
     }
 
     @Override
     protected Widget getAdditionalWidget() {
         Grid grid = new Grid(2,1);
-        
         HorizontalPanel nameRow = new HorizontalPanel();
         nameRow.add(new Label(stringMessages.name()));
         nameRow.add(name);
         grid.setWidget(0, 0, nameRow);
-        
         grid.setWidget(1, 0, marksWrapper);
-        
         return grid;
     }
 }

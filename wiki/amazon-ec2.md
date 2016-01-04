@@ -21,7 +21,6 @@ You may need to select "All generations" instead of "Current generation" to see 
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
-MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_NAME=MYSPECIFICEVENT
@@ -48,6 +47,10 @@ MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
 
+#### Setting up a new image (AMI) from scratch (more or less)
+
+See [here](/wiki/creating-ec2-image-from-scratch)
+
 #### Receiving wind from Expedition
 
 - To receive and forward wind with an Expedition connector, log into webserver as user trac and switch to $HOME/servers/udpmirror. Start the mirror and forward it to the instance you want. In order to receive wind through the Igtimi connector, this step is not required as the wind data is received directly from the Igtimi server.
@@ -72,7 +75,7 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
-REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
@@ -127,7 +130,7 @@ In addition to having a password and MFA set for one user one can activate "Acce
 
 The architecture is divided into logical tiers. These are represented by firewall configurations (Security Groups) that can be associated to Instances. Each tier can contain one or more instances. The following image depicts the parts of the architecture.
 
-<img src="/wiki/images/amazon/EC2Architecture.JPG" width="100%" height="100%"/>
+<img src="/wiki/images/amazon/EC2Architecture.jpg" width="100%" height="100%"/>
 
 ### Tiers
 

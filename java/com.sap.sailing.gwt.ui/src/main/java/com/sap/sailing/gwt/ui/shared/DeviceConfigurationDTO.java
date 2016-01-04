@@ -22,10 +22,14 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public static class ESSConfigurationDTO extends RacingProcedureConfigurationDTO {
             
         }
-        
+
+        public static class LeagueConfigurationDTO extends RacingProcedureConfigurationDTO {
+            
+        }
+
         public static class RacingProcedureConfigurationDTO implements IsSerializable {
             public Flags classFlag;
-            public Boolean hasInidividualRecall;
+            public Boolean hasIndividualRecall;
         }
         public RacingProcedureType defaultRacingProcedureType;
         public CourseDesignerMode defaultCourseDesignerMode;
@@ -34,6 +38,7 @@ public class DeviceConfigurationDTO implements IsSerializable {
         public GateStartConfigurationDTO gateStartConfiguration;
         public ESSConfigurationDTO essConfiguration;
         public RacingProcedureConfigurationDTO basicConfiguration;
+        public LeagueConfigurationDTO leagueConfiguration;
     }
 
     public List<String> allowedCourseAreaNames;

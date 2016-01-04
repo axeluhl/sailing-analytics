@@ -19,21 +19,24 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.tracking.GPSFix;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
@@ -77,6 +80,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     private static final long serialVersionUID = -4397496421917807499L;
 
     private static final SpeedWithBearing defaultSpeedWithBearing = new KnotSpeedWithBearingImpl(0, new DegreeBearingImpl(0));
+    
+    private static Duration RESOLUTION = Duration.ONE_SECOND;
 
     private final EstimatedWindFixesAsNavigableSet virtualInternalRawFixes;
 
@@ -585,6 +590,17 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
      */
     private class CacheInvalidationRaceChangeListener extends AbstractRaceChangeListener implements Serializable {
         private static final long serialVersionUID = -6623310087193133466L;
+        
+        private boolean suspended;
+        
+        public CacheInvalidationRaceChangeListener() {
+            if (getTrackedRace().getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
+                suspended = true;
+                clearCache();
+            } else {
+                suspended = false;
+            }
+        }
 
         @Override
         protected void defaultAction() {
@@ -593,7 +609,9 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         
         @Override
         public void windDataReceived(Wind wind, WindSource windSource) {
-            invalidateForNewWind(wind, windSource);
+            if (!suspended) {
+                invalidateForNewWind(wind, windSource);
+            }
         }
 
         @Override
@@ -613,10 +631,8 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         private void invalidateForNewWind(Wind wind, WindSource windSource) {
             WindTrack windTrack = getTrackedRace().getOrCreateWindTrack(windSource);
             // check what the next fixes before and after the one affected are; if they are further than the
-            // averagingInterval
-            // away, extend the invalidation interval accordingly because the entire span up to the next fix may be
-            // influenced
-            // by adding/removing a fix in a sparsely occupied track. See
+            // averagingInterval away, extend the invalidation interval accordingly because the entire span up
+            // to the next fix may be influenced by adding/removing a fix in a sparsely occupied track. See
             // WindTrackImpl.getAveragedWindUnsynchronized(Position p, TimePoint at)
             long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageWind();
             final TimePoint timePoint = wind.getTimePoint();
@@ -651,48 +667,61 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
 
         @Override
         public void windDataRemoved(Wind wind, WindSource windSource) {
-            invalidateForNewWind(wind, windSource);
+            if (!suspended) {
+                invalidateForNewWind(wind, windSource);
+            }
         }
 
         @Override
         public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
-                    .getTimePoint().asMillis() - averagingInterval));
-            TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
-            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            if (!suspended) {
+                long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+                WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(fix
+                        .getTimePoint().asMillis() - averagingInterval));
+                TimePoint endOfInvalidation = new MillisecondsTimePoint(fix.getTimePoint().asMillis() + averagingInterval);
+                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            }
         }
 
         @Override
-        public void statusChanged(TrackedRaceStatus newStatus) {
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                    suspended = false;
+                }
+            } else if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                suspended = true;
+                clearCache();
+            }
             // This virtual wind track's cache can cope with an empty cache after the LOADING phase and populates the
-            // cache
-            // upon request. Invalidation happens also during the LOADING phase, preserving the cache's invariant.
+            // cache upon request. Invalidation during the LOADING phase happens by clearing the entire cache.
         }
 
         @Override
         public void markPassingReceived(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings,
                 Iterable<MarkPassing> markPassings) {
-            long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
-            WindWithConfidence<TimePoint> startOfInvalidation;
-            TimePoint endOfInvalidation;
-            for (MarkPassing markPassing : markPassings) {
-                MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
-                if (oldMarkPassing != markPassing) {
-                    if (oldMarkPassing == null) {
-                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
-                                .getTimePoint().asMillis() - averagingInterval));
-                        endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
-                                + averagingInterval);
-                    } else {
-                        TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(),
-                                markPassing.getTimePoint() };
-                        Arrays.sort(interval);
-                        startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(
-                                interval[0].asMillis() - averagingInterval));
-                        endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+            if (!suspended) {
+                long averagingInterval = getTrackedRace().getMillisecondsOverWhichToAverageSpeed();
+                WindWithConfidence<TimePoint> startOfInvalidation;
+                TimePoint endOfInvalidation;
+                for (MarkPassing markPassing : markPassings) {
+                    MarkPassing oldMarkPassing = oldMarkPassings.get(markPassing.getWaypoint());
+                    if (oldMarkPassing != markPassing) {
+                        if (oldMarkPassing == null) {
+                            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(markPassing
+                                    .getTimePoint().asMillis() - averagingInterval));
+                            endOfInvalidation = new MillisecondsTimePoint(markPassing.getTimePoint().asMillis()
+                                    + averagingInterval);
+                        } else {
+                            TimePoint[] interval = new TimePoint[] { oldMarkPassing.getTimePoint(),
+                                    markPassing.getTimePoint() };
+                            Arrays.sort(interval);
+                            startOfInvalidation = getDummyFixWithConfidence(new MillisecondsTimePoint(
+                                    interval[0].asMillis() - averagingInterval));
+                            endOfInvalidation = new MillisecondsTimePoint(interval[1].asMillis() + averagingInterval);
+                        }
+                        scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
                     }
-                    scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
                 }
             }
         }
@@ -700,14 +729,15 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         @Override
         public void markPositionChanged(GPSFix fix, Mark mark, boolean firstInTrack) {
             assert fix != null && fix.getTimePoint() != null;
-            // A mark position change can mean a leg type change. The interval over which the wind estimation is
-            // affected
-            // depends on how the GPS track computes the estimated mark position. Ask it:
-            Util.Pair<TimePoint, TimePoint> interval = getTrackedRace().getOrCreateTrack(mark)
-                    .getEstimatedPositionTimePeriodAffectedBy(fix);
-            WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.getA());
-            TimePoint endOfInvalidation = interval.getB();
-            scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            if (!suspended) {
+                // A mark position change can mean a leg type change. The interval over which the wind estimation is
+                // affected
+                // depends on how the GPS track computes the estimated mark position. Ask it:
+                TimeRange interval = getTrackedRace().getOrCreateTrack(mark).getEstimatedPositionTimePeriodAffectedBy(fix);
+                WindWithConfidence<TimePoint> startOfInvalidation = getDummyFixWithConfidence(interval.from());
+                TimePoint endOfInvalidation = interval.to();
+                scheduleCacheRefresh(startOfInvalidation, endOfInvalidation);
+            }
         }
     }
 
@@ -788,7 +818,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
          */
         private EstimatedWindFixesAsNavigableSet(TrackedRace trackedRace,
                 TimePoint from, TimePoint to) {
-            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, /* resolution in milliseconds */ 1000l);
+            super(TrackBasedEstimationWindTrackImpl.this, trackedRace, from, to, RESOLUTION.asMillis());
         }
 
         @Override
@@ -815,4 +845,10 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
     public void windDataReceived(WindImpl wind, WindSource realWindSource) {
         listener.windDataReceived(wind, realWindSource);
     }
+
+    @Override
+    public Duration getResolutionOutsideOfWhichNoFixWillBeReturned() {
+        return RESOLUTION;
+    }
+
 }

@@ -23,12 +23,12 @@ import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.impl.WindSourceWithAdditionalID;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sailing.server.gateway.expeditionimport.WindImportServlet.WindImportResult.RaceEntry;
 

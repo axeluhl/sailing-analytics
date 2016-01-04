@@ -1,9 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.TrackBasedEstimationWindTrackImpl.EstimatedWindFixesAsNavigableSet;
 import com.sap.sse.common.TimePoint;

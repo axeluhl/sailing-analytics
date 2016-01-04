@@ -5,6 +5,8 @@ import com.google.gwt.canvas.dom.client.Context2d.TextAlign;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
+import com.sap.sailing.domain.common.impl.DegreePosition;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
 
@@ -19,12 +21,12 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     private double raceBearing = 0.0;
     private double diffBearing = 0.0;
 
-    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, final SimulatorMap simulatorMap) {
+    public RegattaAreaCanvasOverlay(MapWidget map, int zIndex, char event, final SimulatorMap simulatorMap, CoordinateSystem coordinateSystem) {
 
-    	super(map, zIndex);
+    	super(map, zIndex, coordinateSystem);
 
     	this.simulatorMap = simulatorMap;
-        this.venue = VenueDescriptorFactory.createVenue(event);
+        this.venue = VenueDescriptorFactory.createVenue(event, coordinateSystem);
         this.currentCourseArea = this.venue.getDefaultCourseArea();        
 
     }
@@ -66,16 +68,13 @@ public class RegattaAreaCanvasOverlay extends FullCanvasOverlay {
     }
 
     protected void drawRegattaAreas() {
-
-        LatLng cPos = LatLng.newInstance(54.4344, 10.19659167);
+        LatLng cPos = coordinateSystem.toLatLng(new DegreePosition(54.4344, 10.19659167));
         Point centerPoint = mapProjection.fromLatLngToDivPixel(cPos);
         Point borderPoint = mapProjection.fromLatLngToDivPixel(this.getEdgePoint(cPos, 0.015));
         double pxStroke = Math.pow(2.0, (getMap().getZoom() - 10.0) / 2.0);
-
         final Context2d context2d = canvas.getContext2d();
         context2d.setLineWidth(3);
         context2d.setStrokeStyle("Black");
-
         for (CourseAreaDescriptor courseArea : venue.getCourseAreas()) {
             centerPoint = mapProjection.fromLatLngToDivPixel(courseArea.getCenterPos());
             borderPoint = mapProjection.fromLatLngToDivPixel(courseArea.getEdgePos());

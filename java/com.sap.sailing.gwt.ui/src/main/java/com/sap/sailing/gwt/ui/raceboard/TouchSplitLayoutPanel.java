@@ -41,9 +41,9 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.gwt.ui.client.shared.components.Component;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.player.TimeListener;
+import com.sap.sse.gwt.client.shared.components.Component;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets. These splitters have draggers
@@ -613,7 +613,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         if (lastVerticalSplitter != null) {
             Panel panel = createToggleButtonPanel(allVerticalSplitters,
                     "gwt-SplitLayoutPanel-NorthSouthToggleButton-Panel", "gwt-SplitLayoutPanel-NorthSouthToggleButton",
-                    cm, additionalVerticalButtonsAndStyles);
+                    cm, additionalVerticalButtonsAndStyles); // TODO additional buttons will only be displayed if at least one vertical splitter is... on purpose?
             lastVerticalSplitter.addToogleButtons(panel);
             lastVerticalSplitter.setVisible(true);
             lastVerticalSplitter.setDraggerVisible(false);
@@ -621,7 +621,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
         ensureVerticalToggleButtonPosition();
         if (lastHorizontalSplitter != null) {
             Panel horizontalButtonsPanel = createToggleButtonPanel(allHorizontalSplitters,
-                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, null);
+                    "gwt-SplitLayoutPanel-EastToggleButton-Panel", "gwt-SplitLayoutPanel-EastToggleButton", cm, /* additional buttons and styles */ null);
             panelForHorizontalButtons.add(horizontalButtonsPanel);
             lastHorizontalSplitter.setVisible(false);
             lastHorizontalSplitter.setDraggerVisible(false);
@@ -839,6 +839,24 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 splitter.getToggleButton().removeStyleDependentName("Closed-"+associatedComponentToWidget.getDependentCssClassName());
                 splitter.getToggleButton().addStyleDependentName("Open");
                 splitter.getToggleButton().addStyleDependentName("Open-"+associatedComponentToWidget.getDependentCssClassName());
+            }
+        }
+    }
+    
+    /**
+     * Sets the size of the given {@link Widget} if it is {@link Widget#isVisible() visible}. Otherwise, the given size
+     * will be persisted as the widgets {@link LayoutData#oldSize old size}.
+     * 
+     * @param widget the {@link Widget} to resize
+     * @param size the new size
+     */
+    public void setWidgetSize(Widget widget, int size) {
+        final Splitter splitter = getAssociatedSplitter(widget);
+        if (splitter != null) {
+            if (widget.isVisible()) {
+                splitter.setAssociatedWidgetSize(size, /* defer */false);
+            } else {
+                ((LayoutData) widget.getLayoutData()).oldSize = size;
             }
         }
     }

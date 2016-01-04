@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:baselineAligned="false"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
-    android:gravity="center_horizontal|center_vertical">
-    
-    <GridView 
+    android:baselineAligned="false"
+    android:gravity="center_horizontal|center_vertical"
+    android:orientation="vertical">
+
+    <GridView
+        android:id="@+id/race_choose_startmode_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/race_choose_startmode_container"
-        android:padding="16dp">
-        
-    </GridView>
-
+        android:padding="16dp" />
 </LinearLayout>

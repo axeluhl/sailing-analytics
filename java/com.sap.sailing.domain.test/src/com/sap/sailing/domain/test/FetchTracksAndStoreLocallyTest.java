@@ -11,16 +11,16 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
-import com.sap.sailing.domain.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;

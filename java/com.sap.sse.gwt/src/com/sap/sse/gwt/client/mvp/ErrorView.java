@@ -1,7 +1,7 @@
 package com.sap.sse.gwt.client.mvp;
 
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.IsWidget;
 
-public interface ErrorView {
-    Widget asWidget();
+public interface ErrorView extends IsWidget {
+
 }

@@ -7,9 +7,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.dto.PositionDTO;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
-import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.RadianPosition;
 import com.sap.sailing.gwt.ui.shared.SimulatorUISelectionDTO;
@@ -127,13 +125,11 @@ public class SimulatorServiceUtils {
         return result;
     }
 
-    public static List<Position> getIntermediatePoints2(List<PositionDTO> points, double stepSizeMeters) {
-        List<Position> newPoints = new ArrayList<Position>();
-
-        for (PositionDTO point : points) {
-            newPoints.add(new DegreePosition(point.latDeg, point.lngDeg));
+    public static List<Position> getIntermediatePoints2(List<Position> points, double stepSizeMeters) {
+        List<Position> newPoints = new ArrayList<>();
+        for (Position point : points) {
+            newPoints.add(point);
         }
-
         return SimulatorServiceUtils.getIntermediatePoints(newPoints, stepSizeMeters);
     }
 
@@ -314,11 +310,11 @@ public class SimulatorServiceUtils {
         return new RadianPosition(lat2, lon2);
     }
 
-    public static double getSign(PositionDTO p1, PositionDTO p2, PositionDTO p3) {
-        return (p1.latDeg - p3.latDeg) * (p2.lngDeg - p3.lngDeg) - (p2.latDeg - p3.latDeg) * (p1.lngDeg - p3.lngDeg);
+    public static double getSign(Position p1, Position p2, Position p3) {
+        return (p1.getLatDeg() - p3.getLatDeg()) * (p2.getLngDeg() - p3.getLngDeg()) - (p2.getLatDeg() - p3.getLatDeg()) * (p1.getLngDeg() - p3.getLngDeg());
     }
 
-    public static boolean isPointInsideTriangle(PositionDTO point, PositionDTO corner1, PositionDTO corner2, PositionDTO corner3) {
+    public static boolean isPointInsideTriangle(Position point, Position corner1, Position corner2, Position corner3) {
 
         boolean b1, b2, b3;
 
@@ -420,30 +416,15 @@ public class SimulatorServiceUtils {
     }
 
     public static SimulatorWindDTO toSimulatorWindDTO(TimedPositionWithSpeed point) {
-
         Position position = point.getPosition();
         SpeedWithBearing windSpeedWithBearing = point.getSpeed();
         TimePoint timePoint = point.getTimePoint();
-
         double latDeg = position.getLatDeg();
         double lngDeg = position.getLngDeg();
         double windSpeedKn = windSpeedWithBearing.getKnots();
         double windBearingDeg = windSpeedWithBearing.getBearing().getDegrees();
         long timepointMsec = timePoint.asMillis();
-
         return new SimulatorWindDTO(latDeg, lngDeg, windSpeedKn, windBearingDeg, timepointMsec);
-    }
-
-    public static PositionDTO toPositionDTO(Position position) {
-        return new PositionDTO(position.getLatDeg(), position.getLngDeg());
-    }
-
-    public static Position toPosition(PositionDTO positionDTO) {
-        return new DegreePosition(positionDTO.latDeg, positionDTO.lngDeg);
-    }
-
-    public static boolean equals(Position position, PositionDTO positonDTO) {
-        return (position.getLatDeg() == positonDTO.latDeg && position.getLngDeg() == positonDTO.lngDeg);
     }
 
     public static SimulatorUISelection toSimulatorUISelection(SimulatorUISelectionDTO selection) {

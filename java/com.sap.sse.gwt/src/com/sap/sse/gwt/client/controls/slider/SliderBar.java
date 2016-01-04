@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.sap.sse.common.Util;
 
 /**
  * A widget that allows the user to select a value within a range of possible values using a sliding bar that responds
@@ -704,9 +705,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMaxValue(Double maxValue, boolean fireEvent) {
-        this.maxValue = maxValue;
-        drawTickLabels();
-        resetCurrentValue(fireEvent);
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            onMinMaxValueChanged(fireEvent);
+        }
     }
 
     /**
@@ -716,8 +718,40 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      *            the current value
      */
     public void setMinValue(Double minValue, boolean fireEvent) {
-        this.minValue = minValue;
-        drawTickLabels();
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+    
+    /**
+     * Set the minimum and maximum value
+     * 
+     * @param minValue
+     *            the current value for min
+     * @param maxValue
+     *            the current valuefor max
+     */
+    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        boolean changed = false;
+        if (!Util.equalsWithNull(minValue, this.minValue)) {
+            this.minValue = minValue;
+            changed = true;
+        }
+        if (!Util.equalsWithNull(maxValue, this.maxValue)) {
+            this.maxValue = maxValue;
+            changed = true;
+        }
+        if (changed) {
+            onMinMaxValueChanged(fireEvent);
+        }
+    }
+    
+    /**
+     * Handle value changes of min and/or max value
+     */
+    protected void onMinMaxValueChanged(boolean fireEvent) {
+        redraw();
         resetCurrentValue(fireEvent);
     }
 
@@ -1016,8 +1050,8 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                 }
 
                 // Hide unused markers
-                for (int i = (numMarkers + 1); i < markerElements.size(); i++) {
-                    tickElements.get(i).getStyle().setDisplay(Display.NONE);
+                for (int i = numMarkers; i < markerElements.size(); i++) {
+                    markerElements.get(i).getStyle().setDisplay(Display.NONE);
                 }
             } else { // Hide all markers
                 for (Element elem : markerElements) {
@@ -1037,6 +1071,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
             int lineWidth = lineElement.getOffsetWidth();
             if (numMarkers > 0) {
                 Element lastMarkerLabel = null;
+                Marker lastMarker = null;
                 int lastMarkerLabelOffsetLeft = 0;
                 // Create the labels or make them visible
                 for (int i = 0; i < numMarkers; i++) {
@@ -1048,13 +1083,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = DOM.createDiv();
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
-                        if (enabled) {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
-                        } else {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
-                        }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
+                    }
+                    if (enabled) {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel");
+                    } else {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
                     }
 
                     // Set the marker label text
@@ -1076,9 +1111,9 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
 
                     // hide last marker label if it is too close to the one just created
                     if (lastMarkerLabelOffsetLeft > 0 && (labelLeftOffset-lastMarkerLabelOffsetLeft) <= 20) {
-                        if (lastMarkerLabel != null) {
+                        if (lastMarkerLabel != null && lastMarker != null) {
                             lastMarkerLabel.setPropertyString("className", "gwt-SliderBar-markerlabel-tooClose");
-                            lastMarkerLabel.setPropertyString("innerHTML", "M"); // no space for more
+                            lastMarkerLabel.setPropertyString("innerHTML", lastMarker.name); // no space for more
                             int currentMarkerOffsetLeft = labelLeftOffset;
                             try {
                                 currentMarkerOffsetLeft = Integer.parseInt(markerElements.get(i).getStyle().getLeft().replace("px", ""));
@@ -1088,6 +1123,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                             lastMarkerLabel.getStyle().setLeft(currentMarkerOffsetLeft-8, Unit.PX);
                         }
                     }
+                    lastMarker = marker;
                     lastMarkerLabel = label;
                     lastMarkerLabelOffsetLeft = labelLeftOffset;
                 }

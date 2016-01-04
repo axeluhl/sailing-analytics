@@ -22,70 +22,15 @@
 }
 
 .highcharts-container {
-	position: absulute;
-	top: 0pt;
-	bottom: 0pt;
-	left: 0pt;
-	right: 0pt;
-}
-
-.bottomnotification {
 	position: absolute !important;
-	opacity: 0.9;
-	background-color: #F0AB00;
-	height: 0pt;
-	line-height: 0pt;
-	width: 100%;
-	bottom: 0pt;
-	text-align: center;
-	font-weight: bold;
-	font-size: 15pt;
-	line-height: 30pt;
-	color: black;
-	font-family: "Arial";
-	z-index: 2;
+	width: 100% !important;
+	height: 100% !important;
 }
 
-.bottomnotificationshow {
-	-webkit-transition: all 700ms cubic-bezier(0.480, 0, 0.000, 1);
-	/* older webkit */
-	-webkit-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 2.650);
-	-moz-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 2.650);
-	-o-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 2.650);
-	transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 2.650);
-	/* custom */
-	height: 30pt;
-	line-height: 30pt;
-}
-
-.bottomnotificationhidden {
-	-webkit-transition: all 700ms cubic-bezier(0.480, 0, 0.000, 1);
-	/* older webkit */
-	-webkit-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 1.650);
-	-moz-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 1.650);
-	-o-transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 1.650);
-	transition: all 700ms cubic-bezier(0.480, -0.035, 0.000, 1.650);
-	/* custom */
-	height: 0pt;
-	line-height: 0pt;
-}
-
-.competitorEditButton {
+.eventLogo {
 	position: absolute;
-	height: 23.5pt;
-	width: 23.5pt;
-	right: 10pt;
-	top: 17.5pt;
-}
-
-.competitorLabel{
-	position: absolute;
-	width: 200pt;
-	height: 23.5pt;
-	margin-top: 17.5pt;
-	right: 43.5pt;
-	font-size: 12pt;
-	font-color: black;
-	text-align: right;
-	line-height: 23.5pt;
+	right: 12.5px;
+	bottom: 10px;
+	height: 22.5pt;
+	z-index: 1;
 }

@@ -41,15 +41,15 @@ public class CompetitorWithID implements Competitor {
         return id;
     }
 
-	@Override
-	public String toString() {
-		return "CompetitorWithID [boatID=" + boatID + ", threeLetterIOCCode="
-				+ threeLetterIOCCode + ", name=" + name + ", id=" + id + "]";
-	}
+    @Override
+    public String toString() {
+        return "CompetitorWithID [boatID=" + boatID + ", threeLetterIOCCode=" + threeLetterIOCCode + ", name=" + name
+                + ", id=" + id + "]";
+    }
 
-	@Override
-	public List<CrewMember> getCrew() {
-		return crew;
-	}
+    @Override
+    public List<CrewMember> getCrew() {
+        return crew;
+    }
 
 }

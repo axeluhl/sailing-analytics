@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.abstractlog;
 
+
 /**
  * Analyzer to perform a query over a given AbstractLog. Each subclass defines its <code>ResultType</code>.
  * 

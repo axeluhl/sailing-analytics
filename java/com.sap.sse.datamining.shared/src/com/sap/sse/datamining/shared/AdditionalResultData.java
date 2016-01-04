@@ -10,8 +10,6 @@ public interface AdditionalResultData extends Serializable {
 
     public String getResultSignifier();
 
-    public Unit getUnit();
-
     public int getValueDecimals();
 
 }

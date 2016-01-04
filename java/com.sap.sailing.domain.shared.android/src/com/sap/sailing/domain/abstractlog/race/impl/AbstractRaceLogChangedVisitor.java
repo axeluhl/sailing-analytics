@@ -2,10 +2,13 @@ package com.sap.sailing.domain.abstractlog.race.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -13,8 +16,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogPathfinderEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogProtestStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
@@ -130,5 +135,30 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent additionalScoringInformation) {
         notifyListenerAboutEventAdded(additionalScoringInformation);
+    }
+    
+    @Override
+    public void visit(RaceLogFixedMarkPassingEvent fixedMarkPassingEvent) {
+        notifyListenerAboutEventAdded(fixedMarkPassingEvent);
+    }
+    
+    @Override
+    public void visit(RaceLogSuppressedMarkPassingsEvent event) {
+        notifyListenerAboutEventAdded(event);        
+    }
+    
+    @Override
+    public void visit(RaceLogDependentStartTimeEvent event) {
+        notifyListenerAboutEventAdded(event);        
+    }
+    
+    @Override
+    public void visit(RaceLogStartOfTrackingEvent event) {
+        notifyListenerAboutEventAdded(event);
+    }
+    
+    @Override
+    public void visit(RaceLogEndOfTrackingEvent event) {
+        notifyListenerAboutEventAdded(event);
     }
 }

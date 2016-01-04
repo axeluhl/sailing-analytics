@@ -49,7 +49,7 @@ public class FileLoggingTask implements Runnable {
             Format format = new SimpleDateFormat(logFileDateFormat, Locale.US);
             logFileName = String.format(template, format.format(new Date()));
 
-            File loggingDirectory = FileHandlerUtils.getExternalApplicationFolder(context);
+            File loggingDirectory = FileHandlerUtils.getExternalCacheFolder(context);
             logFile = new File(loggingDirectory, logFileName);
 
             if (prepareFile(logFile)) {

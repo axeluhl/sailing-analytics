@@ -32,7 +32,7 @@ public class TestLeaderboardEditing extends AbstractSeleniumTest {
     private static final TrackableRaceDescriptor TRACKABLE_RACE = new TrackableRaceDescriptor(
             BMW_CUP_REGATTA, BMW_CUP_RACE_8, BMW_CUP_BOAT_CLASS);
     private static final TrackedRaceDescriptor TRACKED_RACE = new TrackedRaceDescriptor(
-            BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")", BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
+            (BMW_CUP_REGATTA + " (" + BMW_CUP_BOAT_CLASS + ")").replace('/',  '_'), BMW_CUP_BOAT_CLASS, BMW_CUP_RACE_8);
     private static final RaceDescriptor RACE_COLUMN = new RaceDescriptor("R1", "Default", false, false, 0.0);
     
     @Override

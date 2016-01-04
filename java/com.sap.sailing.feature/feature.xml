@@ -24,13 +24,11 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
       <import plugin="com.googlecode.java-diff-utils" version="1.3.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.osgi" version="3.10.1" match="greaterOrEqual"/>
       <import plugin="javax.servlet" version="3.1.0" match="greaterOrEqual"/>
-      <import plugin="com.mongodb.driver" version="2.6.2" match="greaterOrEqual"/>
-      <import plugin="com.google.gwt.osgi" version="2.6.1" match="greaterOrEqual"/>
+      <import plugin="org.mongodb.mongo-java-driver" version="2.13.0" match="greaterOrEqual"/>
+      <import plugin="com.google.gwt.osgi" version="2.7.0" match="greaterOrEqual"/>
       <import plugin="org.json.simple" version="1.1.0" match="greaterOrEqual"/>
-      <import plugin="org.moxieapps.gwt.highcharts" version="1.1.4" match="greaterOrEqual"/>
-      <import plugin="org.apache.geronimo.specs.geronimo-jms_1.1_spec"/>
+      <import plugin="org.moxieapps.gwt.highcharts" version="1.6.0" match="greaterOrEqual"/>
       <import plugin="com.rabbitmq.client"/>
-      <import plugin="org.apache.geronimo.specs.geronimo-j2ee-management_1.1_spec"/>
    </requires>
 
    <plugin
@@ -49,6 +47,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.domain"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.news"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -77,13 +82,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.server.gateway"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.sap.sailing.server.gateway.ess40"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -333,14 +331,14 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sse.datamining.shared"
+         id="com.sap.sse.datamining.annotations"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.sap.sse.gateway"
+         id="com.sap.sse.datamining.shared"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -425,6 +423,41 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.dashboards.gwt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.datamining"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.datamining.shared"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sse.threadmanager"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.polars"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.polars.datamining"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sailing.domain.tractracadapter.LoadingQueueDoneCallBack;
 import com.sap.sailing.domain.tractracadapter.Receiver;
 import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.route.IControl;
@@ -72,6 +73,10 @@ public class PositionConversionTest extends AbstractTracTracLiveTest {
                         }
                     }
                 });
+            }
+
+            @Override
+            public void callBackWhenLoadingQueueIsDone(LoadingQueueDoneCallBack callback) {
             }
         };
         addListenersForStoredDataAndStartController(Collections.singleton(receiver));

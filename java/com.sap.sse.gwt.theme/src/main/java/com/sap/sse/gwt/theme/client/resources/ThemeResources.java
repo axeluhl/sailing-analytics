@@ -14,12 +14,15 @@ public interface ThemeResources extends ClientBundle {
     MediaCss mediaCss();
 
     public interface MainCss extends CssResource{
+        String mobile();
+        String desktop();
         String wrapper();
         String navbar();
         String navbar_button();
         String navbar_buttonhidden();
         String navbar_buttonactive();
         String button();
+        String buttontextonly();
         String buttonsmall();
         String buttonstrong();
         String buttoninactive();
@@ -41,10 +44,30 @@ public interface ThemeResources extends ClientBundle {
         String lightbox_overlay();
         String lightbox_content();
         String lightbox_close();
+        String spacer();
+        String spacersmall();
+        String spacermediumsmall();
+        String spacermedium();
+        String spacermediumbig();
+        String spacerbig();
+        String spacermargin();
+        String spacermargintopsmall();
+        String spacermargintopmediumsmall();
+        String spacermargintopmedium();
+        String spacermargintopmediumbig();
+        String spacermargintopbig();
+        String spacermarginbottomsmall();
+        String spacermarginbottommediumsmall();
+        String spacermarginbottommedium();
+        String spacermarginbottommediumbig();
+        String spacermarginbottombig();
+        String spacermarginonlyonsmall();
+        String spacermarginonlyonlarge();
         String stickyheader();
         String slideto();
         String slidetonav();
         String slidetoactive();
+        String fleetcorner();
     }
 
     public interface MediaCss extends CssResource{
