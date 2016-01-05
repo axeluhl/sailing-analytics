@@ -34,11 +34,11 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -74,10 +74,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     // raceboard related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
+    private final LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective; 
+    private final ProxyRaceBoardPerspective raceboardPerspective;
     private final LeaderboardPerspectiveSettings leaderboardPerspectiveSettings;
-    private final CompositeSettings leaderboardComponentsSettings;
     private final RaceBoardPerspectiveSettings raceboardPerspectiveSettings;
-    private final CompositeSettings raceboardComponentsSettings;
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     private Widget currentContentWidget;
@@ -87,8 +87,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView,
-            Pair<RaceBoardPerspectiveSettings, CompositeSettings> allRaceboardSettings,
-            Pair<LeaderboardPerspectiveSettings, CompositeSettings> allLeaderboardSettings) {
+            LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective, 
+            ProxyRaceBoardPerspective raceboardPerspective) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -97,10 +97,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         this.userAgent = userAgent;
         this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
-        this.raceboardPerspectiveSettings = allRaceboardSettings.getA();
-        this.raceboardComponentsSettings = allRaceboardSettings.getB();
-        this.leaderboardPerspectiveSettings = allLeaderboardSettings.getA();
-        this.leaderboardComponentsSettings = allLeaderboardSettings.getB();
+        this.leaderboardWithHeaderPerspective = leaderboardWithHeaderPerspective;
+        this.raceboardPerspective = raceboardPerspective;
+        this.raceboardPerspectiveSettings = raceboardPerspective.getSettings();
+        this.leaderboardPerspectiveSettings = leaderboardWithHeaderPerspective.getSettings();
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         leaderboard = null;
@@ -126,9 +126,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         });
     }
     
-    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, boolean showRaceDetails) {
+    private LeaderboardPanel createLeaderboardPanel(String leaderboardName, LeaderboardSettings leaderboardSettings, boolean showRaceDetails) {
         CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        LeaderboardSettings leaderboardSettings = leaderboardComponentsSettings.getSettingsForType(LeaderboardSettings.class);
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, true,
                 /* preSelectedRace */null, selectionModel, leaderboardTimer, /*leaderboardGroupName*/ "", leaderboardName,
@@ -179,7 +178,10 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             SAPHeader sapHeader = new SAPHeader(TextMessages.INSTANCE.leaderboard() +  ": " + autoPlayerConfiguration.getLeaderboardName(), withFullscreenButton);
             playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
 
-            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
+            CompositeSettings leaderboardComponentsSettings = leaderboardWithHeaderPerspective.getSettingsOfComponents();
+            LeaderboardSettings leaderboardSettings = leaderboardComponentsSettings.getSettingsForType(LeaderboardSettings.class);
+
+            LeaderboardPanel leaderboardPanel = createLeaderboardPanel(autoPlayerConfiguration.getLeaderboardName(), leaderboardSettings, showRaceDetails);
             OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
             leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
             
@@ -289,7 +291,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                     leaderboardTimer.pause();
                     raceboardTimer.setPlayMode(PlayModes.Live);
                     
-                    raceBoardPanel.setSettingsOfComponents(raceboardComponentsSettings);
+                    raceBoardPanel.setSettingsOfComponents(raceboardPerspective.getSettingsOfComponents());
                     
                     isInitialScreen = false;
                 }

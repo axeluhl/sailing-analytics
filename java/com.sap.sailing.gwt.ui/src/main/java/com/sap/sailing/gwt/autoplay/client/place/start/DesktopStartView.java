@@ -27,19 +27,17 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
+import com.sap.sailing.gwt.autoplay.client.place.player.LeaderboardWithHeaderPerspective;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
-import com.sap.sailing.gwt.ui.leaderboard.ProxyLeaderboardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -70,7 +68,7 @@ public class DesktopStartView extends Composite implements StartView {
     private final EventBus eventBus;
     private final List<EventDTO> events;
     
-    private ProxyLeaderboardPerspective leaderboardPerspective;
+    private LeaderboardWithHeaderPerspective leaderboardPerspective;
     private ProxyRaceBoardPerspective raceboardPerspective;
     
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
@@ -120,7 +118,7 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
-        leaderboardPerspective = new ProxyLeaderboardPerspective(new LeaderboardPerspectiveSettings(), leaderboard);
+        leaderboardPerspective = new LeaderboardWithHeaderPerspective(new LeaderboardPerspectiveSettings(), leaderboard, StringMessages.INSTANCE);
         raceboardPerspective = new ProxyRaceBoardPerspective(new RaceBoardPerspectiveSettings(), leaderboard);
         
         perspectiveSettings.clear();
@@ -228,14 +226,14 @@ public class DesktopStartView extends Composite implements StartView {
         EventDTO selectedEvent = getSelectedEvent();
         String selectedLeaderboardName = getSelectedLeaderboardName();
         
-        Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveSettings = new Util.Pair<>(raceboardPerspective.getSettings(), 
-                raceboardPerspective.getSettingsOfComponents());
-        Pair<LeaderboardPerspectiveSettings, CompositeSettings> leaderboardPerspectiveSettings = new Util.Pair<>(leaderboardPerspective.getSettings(), 
-                leaderboardPerspective.getSettingsOfComponents());
+//        Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveAndSettings = new Util.Pair<>(raceboardPerspective.getSettings(), 
+//                raceboardPerspective.getSettingsOfComponents());
+//        Pair<LeaderboardPerspectiveSettings, CompositeSettings> leaderboardPerspectiveAndSettings = new Util.Pair<>(leaderboardPerspective.getSettings(), 
+//                leaderboardPerspective.getSettingsOfComponents());
         
         if(selectedEvent != null && selectedLeaderboardName != null) {
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
-                    startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), leaderboardPerspectiveSettings, raceboardPerspectiveSettings);
+                    startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), leaderboardPerspective, raceboardPerspective);
         }
     }
 

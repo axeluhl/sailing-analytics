@@ -12,8 +12,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
+import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SAPHeader extends Composite {
+public class SAPHeader extends Composite implements Component<AbstractSettings> {
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 
     interface SAPHeaderUiBinder extends UiBinder<Widget, SAPHeader> {
@@ -45,4 +48,39 @@ public class SAPHeader extends Composite {
    void startFullScreenClicked(ClickEvent e) {
        FullscreenUtil.requestFullscreen();
    }
+
+    @Override
+    public String getLocalizedShortName() {
+        return "Header";
+    }
+    
+    @Override
+    public Widget getEntryWidget() {
+        return this;
+    }
+    
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+    
+    @Override
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+        return null;
+    }
+    
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
+    
+    @Override
+    public void updateSettings(AbstractSettings newSettings) {
+        // no-op
+    }
+    
+    @Override
+    public String getDependentCssClassName() {
+        return "";
+    }
 }

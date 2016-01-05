@@ -19,17 +19,17 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentLifec
  */
 public abstract class AbstractPerspectiveComposite<SettingsType extends Settings> extends Composite implements Perspective<SettingsType> {
 
-    protected final List<ComponentLifecycle<?,?,?>> components;
+    protected final List<ComponentLifecycle<?,?,?>> componentLifecycles;
     
     public AbstractPerspectiveComposite() {
-        components = new ArrayList<ComponentLifecycle<?,?,?>>();
+        componentLifecycles = new ArrayList<ComponentLifecycle<?,?,?>>();
     }
     
     @Override 
     public CompositeSettings getSettingsOfComponents() {
         Collection<ComponentLifecycleAndSettingsPair<?>> settings = new HashSet<>();
-        for (ComponentLifecycle<?,?,?> component : components) {
-            ComponentLifecycleAndSettingsPair<?> componentAndSettings = getComponentLifecycleAndSettings(component);
+        for (ComponentLifecycle<?,?,?> componentLifecycle : componentLifecycles) {
+            ComponentLifecycleAndSettingsPair<?> componentAndSettings = getComponentLifecycleAndSettings(componentLifecycle);
             if (componentAndSettings != null) {
                 settings.add(componentAndSettings);
             }
@@ -64,7 +64,7 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
     
     @Override
     public Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles() {
-        return components;
+        return componentLifecycles;
     }
 
     @Override

@@ -2,16 +2,13 @@ package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
+import com.sap.sailing.gwt.ui.raceboard.ProxyRaceBoardPerspective;
 
 public class PlayerPlace extends AbstractBasePlace {
     private final AutoPlayerConfiguration playerConfiguration;
     
-    private final Pair<LeaderboardPerspectiveSettings, CompositeSettings> leaderboardPerspectiveSettings;
-    private final Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveSettings;
+    private final LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective; 
+    private final ProxyRaceBoardPerspective raceboardPerspective;
     
     public PlayerPlace(String url) {
         super(url);
@@ -22,31 +19,23 @@ public class PlayerPlace extends AbstractBasePlace {
         Integer timeToSwitchBeforeRaceStartInSeconds = Integer.valueOf(getParameter(AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START));
         
         this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
-        this.leaderboardPerspectiveSettings = null;
-        this.raceboardPerspectiveSettings = null;
+        this.leaderboardWithHeaderPerspective = null;
+        this.raceboardPerspective = null;
     }
 
-    public PlayerPlace(AutoPlayerConfiguration playerConfiguration, Pair<LeaderboardPerspectiveSettings, CompositeSettings> leaderboardPerspectiveSettings,
-            Pair<RaceBoardPerspectiveSettings, CompositeSettings> raceboardPerspectiveSettings) {
+    public PlayerPlace(AutoPlayerConfiguration playerConfiguration, LeaderboardWithHeaderPerspective leaderboardWithHeaderPerspective, 
+            ProxyRaceBoardPerspective raceboardPerspective) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
                AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
         this.playerConfiguration = playerConfiguration;
-        this.leaderboardPerspectiveSettings = leaderboardPerspectiveSettings;
-        this.raceboardPerspectiveSettings = raceboardPerspectiveSettings;
+        this.leaderboardWithHeaderPerspective = leaderboardWithHeaderPerspective;
+        this.raceboardPerspective = raceboardPerspective;
     }
 
     public AutoPlayerConfiguration getConfiguration() {
         return this.playerConfiguration;
-    }
-
-    public Pair<LeaderboardPerspectiveSettings, CompositeSettings> getLeaderboardPerspectiveSettings() {
-        return leaderboardPerspectiveSettings;
-    }
-
-    public Pair<RaceBoardPerspectiveSettings, CompositeSettings> getRaceboardPerspectiveSettings() {
-        return raceboardPerspectiveSettings;
     }
 
     public static class Tokenizer implements PlaceTokenizer<PlayerPlace> {
@@ -59,5 +48,13 @@ public class PlayerPlace extends AbstractBasePlace {
         public PlayerPlace getPlace(String url) {
             return new PlayerPlace(url);
         }
+    }
+
+    public LeaderboardWithHeaderPerspective getLeaderboardWithHeaderPerspective() {
+        return leaderboardWithHeaderPerspective;
+    }
+
+    public ProxyRaceBoardPerspective getRaceboardPerspective() {
+        return raceboardPerspective;
     }
 }

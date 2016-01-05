@@ -112,12 +112,11 @@ import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.IsEmbeddableComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -126,8 +125,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSettings> implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-        IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider {
+public class LeaderboardPanel extends SimplePanel implements Component<LeaderboardSettings>, TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
+    IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -1856,7 +1855,7 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
-        initWidget(mainPanel);
+        setWidget(mainPanel);
         mainPanel.setWidget(contentPanel);
         this.setTitle(stringMessages.leaderboard());
         if (timer.isInitialized()) {
@@ -3297,16 +3296,5 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
                 listener.onBusyStateChange(isBusy);
             }
         }
-    }
-
-    @Override
-    public void setSettingsOfComponents(CompositeSettings settingsOfComponents) {
-        LeaderboardSettings leaderboardSettings = settingsOfComponents.getSettingsForType(LeaderboardSettings.class);
-        updateSettings(leaderboardSettings);
-    }
-
-    @Override
-    public String getPerspectiveName() {
-        return stringMessages.leaderboard();
     }
 }

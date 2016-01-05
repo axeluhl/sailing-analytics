@@ -1,24 +1,30 @@
-package com.sap.sailing.gwt.ui.leaderboard;
+package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.AbstractPerspective;
+import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 
 /**
- * A proxy perspective containing a proxy component for the LeaderboardPanel
+ * A perspective managing a header with a single leaderboard filling the rest of the screen.
  * @author Frank
  *
  */
-public class ProxyLeaderboardPerspective extends AbstractPerspective<LeaderboardPerspectiveSettings> {
-    private LeaderboardPerspectiveSettings perspectiveSettings;
+public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardPerspectiveSettings> {
+    private LeaderboardPerspectiveSettings settings;
     
-    public ProxyLeaderboardPerspective(LeaderboardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard) {
+    public LeaderboardWithHeaderPerspective(LeaderboardPerspectiveSettings perspectiveSettings, AbstractLeaderboardDTO leaderboard,
+            StringMessages stringMessages) {
         super();
-        this.perspectiveSettings = perspectiveSettings;
-        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, StringMessages.INSTANCE));
+        this.settings = perspectiveSettings;
+        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
+        componentLifecycles.add(new SAPHeaderLifecycle());
     }
 
     @Override
@@ -52,17 +58,17 @@ public class ProxyLeaderboardPerspective extends AbstractPerspective<Leaderboard
 
     @Override
     public SettingsDialogComponent<LeaderboardPerspectiveSettings> getSettingsDialogComponent() {
-        return new LeaderboardPerspectiveSettingsDialogComponent(perspectiveSettings, StringMessages.INSTANCE);
+        return new LeaderboardPerspectiveSettingsDialogComponent(settings, StringMessages.INSTANCE);
     }
 
     @Override
     public LeaderboardPerspectiveSettings getSettings() {
-        return perspectiveSettings;
+        return settings;
     }
 
     @Override
     public void updateSettings(LeaderboardPerspectiveSettings newSettings) {
-        this.perspectiveSettings = newSettings;
+        this.settings = newSettings;
     }
 
     @Override
