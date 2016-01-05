@@ -235,9 +235,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
             if (result != null && result.isDependentStartTime()) {
                 SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
-                ManagedRace tmp = DataManager.create(getContext()).getDataStore().getRace(identifier);
+                ManagedRace depending_race = DataManager.create(getContext()).getDataStore().getRace(identifier);
                 depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
-                    .getRaceName(tmp, " / ")));
+                    .getShortRaceName(depending_race, " / ", race.getRace())));
                 depends_on.setVisibility(View.VISIBLE);
             }
         }

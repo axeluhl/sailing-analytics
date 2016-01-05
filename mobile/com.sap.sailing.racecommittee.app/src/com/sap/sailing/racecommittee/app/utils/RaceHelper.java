@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -30,6 +31,43 @@ public class RaceHelper {
             raceName += getSeriesName(race.getSeries(), delimiter);
             raceName += getFleetName(race.getFleet(), delimiter);
             raceName += delimiter + race.getRaceName();
+        }
+
+        return raceName;
+    }
+
+    public static String getShortRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
+        if (TextUtils.isEmpty(delimiter)) {
+            delimiter = " - ";
+        }
+
+        String raceName = "";
+        if (race != null) {
+            boolean diffFound = false;
+
+            String groupName = getRaceGroupName(race);
+            String seriesName = getSeriesName(race.getSeries(), delimiter);
+            String fleetName = getFleetName(race.getFleet(), delimiter);
+
+            if (!groupName.equals(getRaceGroupName(race2))) {
+                diffFound = true;
+                raceName = groupName;
+            }
+
+            if (diffFound || !seriesName.equals(getSeriesName(race2.getSeries(), delimiter))) {
+                diffFound = true;
+                raceName += seriesName;
+            }
+
+            if (diffFound || !fleetName.equals(getFleetName(race2.getFleet(), delimiter))) {
+                raceName += fleetName;
+            }
+
+            raceName += delimiter + race.getRaceName();
+
+            if (raceName.substring(0, delimiter.length()).equals(delimiter)) {
+                raceName = raceName.substring(delimiter.length());
+            }
         }
 
         return raceName;
