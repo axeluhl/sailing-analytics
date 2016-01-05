@@ -45,6 +45,7 @@
     <dimen name="default_margin">@dimen/default_padding</dimen>
     <dimen name="default_margin_twice">@dimen/default_padding_twice</dimen>
 
+    <dimen name="logout_padding">5dp</dimen>
     <dimen name="lock_margin">2dp</dimen>
     <dimen name="race_flag_margin">50dp</dimen>
 

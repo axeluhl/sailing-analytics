@@ -120,7 +120,7 @@
 
     <style name="AppTheme.Dark.Round">
         <item name="android:background">@drawable/round_button</item>
-        <item name="android:padding">10dp</item>
+        <item name="android:padding">@dimen/logout_padding</item>
     </style>
 
     <!-- custom styles -->
