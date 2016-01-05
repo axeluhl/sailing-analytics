@@ -29,32 +29,26 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  */
 public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
         implements RefreshableSelectionModel<T> {
-    private final EntityIdentityComparator<T> comp;
+    final EntityIdentityComparator<T> comp;
     private boolean dontcheckSelectionState = false;
     private final ListDataProvider<T> listDataProvider;
 
     /**
      * @param comp
-     *            {@link EntityIdentityComparator} to compare the identity of the objects
+     *            {@link EntityIdentityComparator} to compare the identity of the objects; if not <code>null</code>, this will
+     *            also be used to determine the selection "keys" using a {@link ProvidesKey} implementation based on this
+     *            comparator.
      * @param listDataProvider
      *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
      *            display on {@link ListDataProvider}
      */
-    public RefreshableMultiSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        this(/* keyProvider */ null, comp, listDataProvider);
-    }
-
-    /**
-     * @param keyProvider
-     *            {@link ProvidesKey} for the super class constructor
-     * @param comp
-     *            {@link EntityIdentityComparator} to compare the identity of the objects
-     * @param listDataProvider
-     *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
-     *            display on {@link ListDataProvider}
-     */
-    public RefreshableMultiSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        super(keyProvider);
+    public RefreshableMultiSelectionModel(final EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
+        super(/* keyProvider */ comp == null ? null : new ProvidesKey<T>() {
+            @Override
+            public Object getKey(T item) {
+                return new EntityIdentityWrapper<T>(item, comp);
+            }
+        });
         this.comp = comp;
         this.listDataProvider = listDataProvider;
         this.listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
@@ -100,43 +94,6 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
     }
 
     /**
-     * Wraps an object such that its {@link #equals(Object)} and {@link #hashCode()} implementations are based on the
-     * {@link RefreshableMultiSelectionModel#comp} comparator's
-     * {@link EntityIdentityComparator#representSameEntity(Object, Object)} and
-     * {@link EntityIdentityComparator#hashCode(Object)} methods, respectively.
-     * 
-     * @author Axel Uhl (D043530)
-     *
-     * @param <T>
-     */
-    private class EntityIdentityWrapper {
-        private final T t;
-        
-        public EntityIdentityWrapper(T t) {
-            super();
-            this.t = t;
-        }
-
-        @Override
-        public int hashCode() {
-            return comp.hashCode(t);
-        }
-        
-        private T getT() {
-            return t;
-        }
-
-        @SuppressWarnings("unchecked") // need to cast to generic type argument T
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof RefreshableMultiSelectionModel<?>.EntityIdentityWrapper)) {
-                throw new ClassCastException("Can only compare EntityIdentityWrapper with other objects of same class");
-            }
-            return comp.representSameEntity(t, ((EntityIdentityWrapper) obj).getT());
-        }
-    }
-    
-    /**
      * Refreshes the {@link RefreshableMultiSelectionModel} with the <code>newObjects</code>.All objects from the
      * current selection that {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same
      * entity} as an object from <code>newObjects</code> will be reselected. All others are de-selected. That means a
@@ -164,15 +121,18 @@ public class RefreshableMultiSelectionModel<T> extends MultiSelectionModel<T>
                     clear();
                     if (comp == null) {
                         for (T it : newObjects) {
-                            setSelected(it, selectedSet.contains(it));
+                            final boolean selected = selectedSet.contains(it);
+                            if (selected) {
+                                setSelected(it, true);
+                            }
                         }
                     } else {
-                        final Map<EntityIdentityWrapper, T> wrappedNewObjects = new HashMap<>();
+                        final Map<EntityIdentityWrapper<T>, T> wrappedNewObjects = new HashMap<>();
                         for (T it : newObjects) {
-                            wrappedNewObjects.put(new EntityIdentityWrapper(it), it);
+                            wrappedNewObjects.put(new EntityIdentityWrapper<T>(it, comp), it);
                         }
                         for (final T selected : selectedSet) {
-                            T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper(selected));
+                            T newSelectedElement = wrappedNewObjects.remove(new EntityIdentityWrapper<T>(selected, comp));
                             if (newSelectedElement != null) {
                                 setSelected(newSelectedElement, true);
                             }

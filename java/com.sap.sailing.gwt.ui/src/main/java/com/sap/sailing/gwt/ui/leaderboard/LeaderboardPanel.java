@@ -1637,30 +1637,15 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
          */
         @Override
         public void addedToSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor), true);
-/*            final LeaderboardRowDTO row = getRow(competitor);
-            if (row != null) {
-                redrawRow(row);
-            }*/
+            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), true);
         }
-/*
-        private void redrawRow(final LeaderboardRowDTO row) {
-            final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
-            synchronized (leaderboardDataList) {
-                redrawRow(row, leaderboardDataList);
-            }
-        }
-*/
+
         /**
          * Ensure that the checkbox is redrawn when the competitor selection changes
          */
         @Override
         public void removedFromSelection(CompetitorDTO competitor) {
-            getSelectionModel().setSelected(getRow(competitor), false);
-/*            final LeaderboardRowDTO row = getRow(competitor);
-            if (row != null) {
-                redrawRow(row);
-            }*/
+            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), false);
         }
 
         @Override
@@ -3139,10 +3124,10 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
         return stringMessages.leaderboard();
     }
 
-    private LeaderboardRowDTO getRow(CompetitorDTO competitor) {
+    private LeaderboardRowDTO getRow(String competitorIdAsString) {
         synchronized (getData().getList()) {
             for (LeaderboardRowDTO row : getData().getList()) {
-                if (row.competitor.equals(competitor)) {
+                if (row.competitor.getIdAsString().equals(competitorIdAsString)) {
                     return row;
                 }
             }
@@ -3152,7 +3137,7 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        LeaderboardRowDTO row = getRow(competitor);
+        LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, true);
         }
@@ -3160,7 +3145,7 @@ public class LeaderboardPanel extends AbstractPerspectiveComposite<LeaderboardSe
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        LeaderboardRowDTO row = getRow(competitor);
+        LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
         }
