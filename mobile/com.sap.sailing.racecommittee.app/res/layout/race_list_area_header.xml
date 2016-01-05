@@ -21,7 +21,7 @@
         android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
         android:background="?attr/black"
-        android:layout_toStartOf="@id/protest_image"/>
+        android:layout_toLeftOf="@id/protest_image"/>
 
     <ImageView
         android:id="@+id/bottom_line"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/navigation_drawer_left_padding"
-        android:layout_toStartOf="@id/delimiter_line"
+        android:layout_toLeftOf="@id/delimiter_line"
         android:orientation="vertical">
 
         <TextView
@@ -50,8 +50,8 @@
             android:id="@+id/fleet_series"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
+            android:maxLines="2"
             android:textAppearance="?attr/textSmall"
-            tools:text="Day 1 - Yellow"/>
+            tools:text="Day 1\nYellow"/>
     </LinearLayout>
 </RelativeLayout>
