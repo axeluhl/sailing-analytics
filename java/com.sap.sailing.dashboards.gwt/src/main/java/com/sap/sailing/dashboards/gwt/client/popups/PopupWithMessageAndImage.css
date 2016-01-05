@@ -61,7 +61,7 @@
 	padding: 0px;
 	margin-top: 5pt;
 	margin-left: 0px;
-	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-family: DASHBOARD_FONT_FAMILY;
 }
 
 .popup_button:active {
@@ -77,7 +77,7 @@
 	font-weight: bold;
 	font-size: 15px;
 	color: grey;
-	font-family: 'Open Sans', Arial, Verdana, sans-serif;
+	font-family: DASHBOARD_FONT_FAMILY;
 }
 
 .blurred {

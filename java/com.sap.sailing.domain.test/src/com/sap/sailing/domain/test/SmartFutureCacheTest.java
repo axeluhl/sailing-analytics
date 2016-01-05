@@ -53,15 +53,19 @@ public class SmartFutureCacheTest {
     @Test
     public void testExceptionInComputeCacheUpdate() {
         final boolean[] throwException = new boolean[1];
-        throwException[0] = true;
+        synchronized (this) { // make sure that other threads see this after the synchronized block has completed
+            throwException[0] = true;
+        }
         SmartFutureCache<String, String, EmptyUpdateInterval> sfc = new SmartFutureCache<String, String, SmartFutureCache.EmptyUpdateInterval>(
                 new SmartFutureCache.AbstractCacheUpdater<String, String, SmartFutureCache.EmptyUpdateInterval>() {
                     @Override
                     public String computeCacheUpdate(String key, EmptyUpdateInterval updateInterval) {
-                        if (throwException[0]) {
-                            throw new NullPointerException("Humba");
-                        } else {
-                            return "Humba";
+                        synchronized (SmartFutureCacheTest.this) { // make sure we see the latest change to throwException
+                            if (throwException[0]) {
+                                throw new NullPointerException("Humba");
+                            } else {
+                                return "Humba";
+                            }
                         }
                     }
                 }, "SmartFutureCacheTest.testExceptionInComputeCacheUpdate");

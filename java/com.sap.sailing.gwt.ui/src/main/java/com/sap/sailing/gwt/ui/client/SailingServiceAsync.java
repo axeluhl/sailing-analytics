@@ -37,6 +37,7 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
+import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
@@ -78,6 +79,7 @@ import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -114,10 +116,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param liveURI
      *            may be <code>null</code> or the empty string in which case the server will use the
      *            {@link TracTracRaceRecordDTO#liveURI} from the <code>rr</code> race record.
-     * @param simulateWithStartTimeNow
-     *            if <code>true</code>, the connector will adjust the time stamps of all events received such that the
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if not <code>null</code>, the connector will adjust the time stamps of all events received such that the
      *            first mark passing for the first waypoint will be set to "now." It will delay the forwarding of all
-     *            events received such that they seem to be sent in "real-time." So, more or less the time points
+     *            events received such that they seem to be sent in "real-time" plus the <code>offsetToStartTimeOfSimulatedRace</code>. So, more or less the time points
      *            attached to the events sent to the receivers will again approximate the wall time.
      * @param useInternalMarkPassingAlgorithm
      *            whether or not to ignore the TracTrac-provided mark passings; if <code>true</code>, a separate mark
@@ -128,7 +130,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void trackWithTracTrac(RegattaIdentifier regattaToAddTo, Iterable<TracTracRaceRecordDTO> rrs, String liveURI,
             String storedURI, String courseDesignUpdateURI, boolean trackWind, boolean correctWindByDeclination,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
             String tracTracPassword, AsyncCallback<Void> callback);
 
     void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs,
@@ -362,10 +364,20 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param date
      *            use <code>null</code> to indicate "live" in which case the server live time stamp for the race
      *            identified by <code>raceIdentifier</code> will be used, considering that race's delay.
+     * @param md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID
+     *            used to decide whether the client requires an update to the race's competitor set. If the server
+     *            has the same MD5 hash for the race's competitors, no competitor set is transmitted to the client.
+     *            Otherwise, the full race competitor ID's as strings are sent to the client again for update.
      */
     void getRaceMapData(RegattaAndRaceIdentifier raceIdentifier, Date date,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
-            boolean extrapolate, LegIdentifier simulationLegIdentifier, AsyncCallback<CompactRaceMapDataDTO> callback);
+            boolean extrapolate, LegIdentifier simulationLegIdentifier,
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+            AsyncCallback<CompactRaceMapDataDTO> callback);
+
+    void getBoatPositions(RegattaAndRaceIdentifier raceIdentifier, Map<String, Date> fromPerCompetitorIdAsString,
+            Map<String, Date> toPerCompetitorIdAsString, boolean extrapolate,
+            AsyncCallback<CompactBoatPositionsDTO> callback);
 
     void getReplicaInfo(AsyncCallback<ReplicationStateDTO> callback);
 
@@ -752,4 +764,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
+
 }

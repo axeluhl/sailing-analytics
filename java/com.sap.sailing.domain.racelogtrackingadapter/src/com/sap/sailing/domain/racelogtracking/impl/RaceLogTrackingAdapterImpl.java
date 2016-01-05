@@ -91,6 +91,12 @@ import com.sap.sse.util.impl.NonGwtUrlHelper;
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     private static final Logger logger = Logger.getLogger(RaceLogTrackingAdapterImpl.class.getName());
 
+    /**
+     * The URL prefix that the iOS app will recognize as a deep link and pass anything after this prefix on
+     * to the app for analysis
+     */
+    private static final String IOS_DEEP_LINK_PREFIX = "comsapsailingtracker://";
+
     private final DomainFactory domainFactory;
     private final long delayToLiveInMillis;
 
@@ -407,10 +413,13 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
         BodyPart messageTextPart = new MimeBodyPart();
         String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
-                + "<img src=\"cid:image\" title=\"%s\"><br/>" + "<a href=\"%s\">%s</a>",
+                + "<img src=\"cid:image\" title=\"%s\"><br/><b>%s</b>: <a href=\"%s\">%s</a><br/><b>%s</b>: <a href=\"%s\">%s</a>",
                 RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), invitee, url, url,
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
+                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), invitee,
+                url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "iOSUsers"),
+                IOS_DEEP_LINK_PREFIX+url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"),
+                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "androidUsers"),
+                url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
 
         try {
             messageTextPart.setContent(htmlText, "text/html");

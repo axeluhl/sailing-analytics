@@ -15,7 +15,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.view.client.SelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -24,14 +23,26 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
-public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
+public class CompetitorTableWrapper<S extends RefreshableSelectionModel<CompetitorDTO>> extends TableWrapper<CompetitorDTO, S> {
     private final LabeledAbstractFilterablePanel<CompetitorDTO> filterField;
     
     public CompetitorTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager) {
-        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager);
+        super(sailingService, stringMessages, errorReporter, multiSelection, enablePager,
+                new EntityIdentityComparator<CompetitorDTO>() {
+                    @Override
+                    public boolean representSameEntity(CompetitorDTO dto1, CompetitorDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(CompetitorDTO t) {
+                        return t.getIdAsString().hashCode();
+                    }
+                });
         ListHandler<CompetitorDTO> competitorColumnListHandler = getColumnSortHandler();
         
         // competitors table
@@ -209,6 +220,7 @@ public class CompetitorTableWrapper<S extends SelectionModel<CompetitorDTO>> ext
         table.addColumn(imageColumn, stringMessages.image());
         table.addColumn(competitorEMailColumn, stringMessages.email());
         table.addColumn(competitorIdColumn, stringMessages.id());
+        table.ensureDebugId("CompetitorsTable");
     }
     
     public Iterable<CompetitorDTO> getAllCompetitors() {
