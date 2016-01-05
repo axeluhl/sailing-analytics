@@ -257,7 +257,7 @@ public class TrackedRacesListPO extends PageArea {
         }
     }
     
-    private CellTablePO<DataEntryPO> getTrackedRacesTable() {
+    public CellTablePO<DataEntryPO> getTrackedRacesTable() {
 //        if(!this.trackedRacesTable.isDisplayed()) {
 //            return null;
 //        }

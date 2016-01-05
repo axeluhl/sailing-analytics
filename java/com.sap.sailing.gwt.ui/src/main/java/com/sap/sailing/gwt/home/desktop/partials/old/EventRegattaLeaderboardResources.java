@@ -30,6 +30,7 @@ public interface EventRegattaLeaderboardResources extends ClientBundle {
         String regattaleaderboard_meta_update_type();
         String regattaleaderboard_meta_scoring_timestamp();
         String regattaleaderboard_meta_update_timestamp();
+        String regattaleaderboard_meta_busyindicator();
         String regattaleaderboard_meta_scoring_text();
         String regattaleaderboard_meta_update_text();
         String regattaleaderboard_meta_reload();

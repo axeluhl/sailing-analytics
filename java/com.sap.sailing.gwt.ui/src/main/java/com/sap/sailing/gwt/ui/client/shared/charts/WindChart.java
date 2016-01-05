@@ -44,8 +44,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.WindSourceTypeFormatter;
@@ -84,14 +82,14 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     private final ColorMapImpl<WindSource> colorMap;
 
     /**
-     * @param raceSelectionProvider
+     * @param selectedRaceIdentifier
      *            if <code>null</code>, this chart won't update its contents automatically upon race selection change;
      *            otherwise, whenever the selection changes, the wind data of the race selected now is loaded from the
      *            server and displayed in this chart. If no race is selected, the chart is cleared. The caller of this
      *            constructor must ensure to trigger {@link RaceSelectionChangeListener#onRaceSelectionChange(List)} at
      *            least once to ensure that this chart sets its {@link AbstractRaceChart#selectedRaceIdentifier} field.
      */
-    public WindChart(SailingServiceAsync sailingService, RaceSelectionProvider raceSelectionProvider, Timer timer,
+    public WindChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
@@ -190,7 +188,15 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                  .getXAxis().setAxisTitle(null);
         }
         setSize("100%", "100%");
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        this.selectedRaceIdentifier = selectedRaceIdentifier;
+        if (selectedRaceIdentifier != null) {
+            clearCacheAndReload();
+            if (isVisible()) {
+                updateVisibleSeries();
+            }
+        } else {
+            clearChart();
+        }
     }
     
     @Override
@@ -495,23 +501,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     
     private void clearChart() {
         chart.removeAllSeries();
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRaceIdentifier = selectedRaces.iterator().next();
-        } else {
-            selectedRaceIdentifier = null;
-        }
-        
-        if(selectedRaceIdentifier != null) {
-            clearCacheAndReload();
-            if(isVisible())
-                updateVisibleSeries();
-        } else {
-            clearChart();
-        }
     }
 
     /**

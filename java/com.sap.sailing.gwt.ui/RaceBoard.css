@@ -6,6 +6,13 @@
       height: 0;
       clear: both;
       visibility: hidden;
+      
+      RegattaRaceInformation-Header
+      RaceName-Label
+      RaceSeriesAndFleet-Label
+      
+      RegattaAndRaceTime-Header???
+      RegattaName-Anchor
 */
 
 
@@ -86,6 +93,14 @@ table {
 .TrueNorthIndicatorPanelParentDiv {
 	padding-top: 10px;
 	padding-left: 10px;
+}
+.CombinedWindPanelParentDiv.indentsmall,
+.TrueNorthIndicatorPanelParentDiv.indentsmall {
+	padding-left: 30px;
+}
+.CombinedWindPanelParentDiv.indentbig,
+.TrueNorthIndicatorPanelParentDiv.indentbig {
+	padding-left: 45px;
 }
 
 .MapSimulationLegendParentDiv {
@@ -573,7 +588,8 @@ img.openColumn {
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png),
 		url(images/arrows_top_black_small.png);
 	background-repeat: no-repeat, no-repeat;
-	background-position: 4% 50%, 96% 50%
+	background-position: 4% 50%, 96% 50%;
+	background-position: 5px center, calc(100% - 6px) center;
 }
 
 .gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
@@ -582,7 +598,8 @@ img.openColumn {
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png),
 		url(images/arrows_bottom_black_small.png);
 	background-repeat: no-repeat, no-repeat;
-	background-position: 4% 50%, 96% 50%
+	background-position: 4% 50%, 96% 50%;
+	background-position: 5px center, calc(100% - 6px) center;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media,
@@ -662,6 +679,32 @@ img.openColumn {
 .RegattaAndRaceTime-Header .RaceTime-Label {
 	font-size: 15px;
 	margin-top: 5px;
+}
+
+.compactHeader .RegattaRaceInformation-Header {
+    left: 110px;
+}
+.compactHeader .RegattaRaceInformation-Header .RaceName-Label {
+    display: block;
+    font-size: 16px;
+    padding: 2px 0;
+}
+.compactHeader .RegattaRaceInformation-Header .RaceSeriesAndFleet-Label {
+    display: block;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+.compactHeader .RegattaAndRaceTime-Header {
+    top: 11px;
+}
+.compactHeader .RegattaAndRaceTime-Header .RegattaName-Anchor {
+    width: 115px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    padding: 2px 0 2px 20px;
+    background-position: 4px -1px;
 }
 
 .VideoPopup-Close-Button {

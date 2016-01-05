@@ -8,7 +8,8 @@ public class BusyViewImpl extends Composite implements BusyView {
 
     public BusyViewImpl() {
         BusyViewResources.INSTANCE.css().ensureInjected();
-        initWidget(new SimpleBusyIndicator(true, 1.0f, "", BusyViewResources.INSTANCE.css().busy()));
+        SimpleBusyIndicator busyIndicator = new SimpleBusyIndicator(true, 1.0f);
+        busyIndicator.setImageStyleClass(BusyViewResources.INSTANCE.css().busy());
+        initWidget(busyIndicator);
     }
-
 }

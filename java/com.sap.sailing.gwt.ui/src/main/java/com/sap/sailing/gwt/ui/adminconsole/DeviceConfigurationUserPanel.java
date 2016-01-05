@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import com.sap.sailing.gwt.ui.adminconsole.DeviceConfigurationDetailComposite.DeviceConfigurationCloneListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -18,9 +17,9 @@ public class DeviceConfigurationUserPanel extends DeviceConfigurationPanel {
     }
     
     @Override
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, 
+    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService, 
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationUserListComposite(sailingService, selectionProvider, errorReporter, stringMessages);
+        return new DeviceConfigurationUserListComposite(sailingService, errorReporter, stringMessages);
     }
     
     @Override

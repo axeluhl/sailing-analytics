@@ -43,4 +43,6 @@ public interface Course extends CourseBase {
     void update(Iterable<Util.Pair<ControlPoint, PassingInstruction>> newControlPoints, DomainFactory baseDomainFactory) throws PatchFailedException;
     
     int getNumberOfWaypoints();
+
+    Leg getLeg(int zeroBasedIndexOfWaypoint);
 }
