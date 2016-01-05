@@ -21,9 +21,7 @@ public class RaceHelper {
     }
 
     public static String getRaceName(@Nullable ManagedRace race, @Nullable String delimiter) {
-        if (TextUtils.isEmpty(delimiter)) {
-            delimiter = " - ";
-        }
+        delimiter = getDefaultDelimiter(delimiter);
 
         String raceName = "";
         if (race != null) {
@@ -36,37 +34,39 @@ public class RaceHelper {
         return raceName;
     }
 
-    public static String getShortRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
-        if (TextUtils.isEmpty(delimiter)) {
-            delimiter = " - ";
-        }
+    public static String getShortReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
+        delimiter = getDefaultDelimiter(delimiter);
 
         String raceName = "";
         if (race != null) {
-            boolean diffFound = false;
+            int maxElements = 3;
+
+            raceName += race.getRaceName();
 
             String groupName = getRaceGroupName(race);
             String seriesName = getSeriesName(race.getSeries(), delimiter);
             String fleetName = getFleetName(race.getFleet(), delimiter);
 
-            if (!groupName.equals(getRaceGroupName(race2))) {
-                diffFound = true;
-                raceName = groupName;
+            if (groupName.equals(getRaceGroupName(race2))) {
+                maxElements -= 1;
             }
 
-            if (diffFound || !seriesName.equals(getSeriesName(race2.getSeries(), delimiter))) {
-                diffFound = true;
-                raceName += seriesName;
+            if (maxElements == 2 && seriesName.equals(getSeriesName(race2.getSeries(), delimiter))) {
+                maxElements -= 1;
             }
 
-            if (diffFound || !fleetName.equals(getFleetName(race2.getFleet(), delimiter))) {
+            if (maxElements == 1 && fleetName.equals(getFleetName(race2.getFleet(), delimiter))) {
+                maxElements -= 1;
+            }
+
+            if (maxElements >= 1) {
                 raceName += fleetName;
             }
-
-            raceName += delimiter + race.getRaceName();
-
-            if (raceName.substring(0, delimiter.length()).equals(delimiter)) {
-                raceName = raceName.substring(delimiter.length());
+            if (maxElements >= 2) {
+                raceName += seriesName;
+            }
+            if (maxElements >= 3) {
+                raceName += groupName;
             }
         }
 
@@ -108,9 +108,7 @@ public class RaceHelper {
     }
 
     public static String getFleetSeries(@Nullable Fleet fleet, @Nullable SeriesBase series, @Nullable String delimiter) {
-        if (TextUtils.isEmpty(delimiter)) {
-            delimiter = " - ";
-        }
+        delimiter = getDefaultDelimiter(delimiter);
 
         String fleetSeries = "";
         fleetSeries += getFleetName(fleet, "");
@@ -127,9 +125,7 @@ public class RaceHelper {
     }
 
     public static String getSeriesName(@Nullable SeriesBase series, @Nullable String delimiter) {
-        if (delimiter == null) {
-            delimiter = " - ";
-        }
+        delimiter = getDefaultDelimiter(delimiter);
 
         String seriesName = "";
         if (series != null && !LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
@@ -144,9 +140,7 @@ public class RaceHelper {
     }
 
     public static String getFleetName(@Nullable Fleet fleet, @Nullable String delimiter) {
-        if (delimiter == null) {
-            delimiter = " - ";
-        }
+        delimiter = getDefaultDelimiter(delimiter);
 
         String fleetName = "";
         if (fleet != null && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
@@ -166,5 +160,9 @@ public class RaceHelper {
             timing = context.getString(R.string.gate_time_schedule_short, launchTime);
         }
         return timing;
+    }
+
+    private static String getDefaultDelimiter(String delimiter) {
+        return delimiter == null ? " - " : delimiter;
     }
 }
