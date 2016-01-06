@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:showIn="@layout/race_finished_buttons_ver">
 
     <LinearLayout
         android:id="@+id/voice"
@@ -18,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/finished_recording"
-            android:textAppearance="?attr/textPanelHeader"/>
+            android:textAppearance="?attr/textPanelHeader" />
 
         <ImageView
             android:id="@+id/voice_lock"
@@ -29,7 +30,7 @@
             android:src="?attr/lock_outline"
             android:tint="?attr/sap_light_gray"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
     </LinearLayout>
 
     <RelativeLayout
@@ -45,6 +46,6 @@
             android:drawableTop="?attr/hearing"
             android:gravity="center_horizontal"
             android:text="@string/finished_replay"
-            android:textAppearance="?attr/textPanelCaption"/>
+            android:textAppearance="?attr/textPanelCaption" />
     </RelativeLayout>
 </merge>

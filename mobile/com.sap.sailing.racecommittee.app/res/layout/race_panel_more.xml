@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -8,9 +7,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/start_mode"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -19,54 +19,67 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <ImageView
-                android:id="@+id/start_mode_marker"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/thin_line"
-                android:layout_alignParentBottom="true"
-                android:src="?attr/marker"/>
-
-            <TextView
-                android:id="@+id/start_mode_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding"
-                android:text="@string/start_mode"
-                android:textAppearance="?attr/textPanelHeader"/>
-
             <RelativeLayout
+                android:id="@+id/start_mode_layer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/start_mode_header">
+                android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/start_mode_flag"
-                    android:layout_width="@dimen/side_button_imageSize"
-                    android:layout_height="@dimen/side_button_imageSize"
+                    android:id="@+id/start_mode_marker"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/thin_line"
+                    android:layout_alignParentBottom="true"
+                    android:src="?attr/marker" />
+
+                <TextView
+                    android:id="@+id/start_mode_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_centerInParent="true"
-                    tools:src="@drawable/flag_papa_64dp"/>
+                    android:layout_marginTop="@dimen/side_padding"
+                    android:text="@string/start_mode"
+                    android:textAppearance="?attr/textPanelHeader" />
 
-                <ImageView
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/start_mode_header">
+
+                    <ImageView
+                        android:id="@+id/start_mode_flag"
+                        android:layout_width="@dimen/side_button_imageSize"
+                        android:layout_height="@dimen/side_button_imageSize"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerInParent="true"
+                        tools:src="@drawable/flag_papa_64dp" />
+                </RelativeLayout>
+
+                <FrameLayout
                     android:id="@+id/start_mode_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="?attr/corner"
-                    android:visibility="gone"
-                    tools:visibility="visible"
                     android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"/>
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lock_background"
+                    android:padding="@dimen/panel_lock_padding"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="?attr/lock_outline" />
+                </FrameLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/thin_line"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:src="?attr/black" />
             </RelativeLayout>
+        </FrameLayout>
 
-            <ImageView
-                android:layout_width="@dimen/thin_line"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:src="?attr/black"/>
-        </RelativeLayout>
-
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/gate_pathfinder"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -75,54 +88,67 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <ImageView
-                android:id="@+id/gate_pathfinder_marker"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/thin_line"
-                android:layout_alignParentBottom="true"
-                android:src="?attr/marker"/>
-
-            <TextView
-                android:id="@+id/gate_pathfinder_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding"
-                android:text="@string/gate_start_pathfinder"
-                android:textAppearance="?attr/textPanelHeader"/>
-
             <RelativeLayout
+                android:id="@+id/gate_pathfinder_layer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/gate_pathfinder_header">
-
-                <TextView
-                    android:id="@+id/gate_pathfinder_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:textAppearance="?attr/textPanelCaption"
-                    tools:text="SAD123"/>
+                android:layout_height="match_parent">
 
                 <ImageView
+                    android:id="@+id/gate_pathfinder_marker"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/thin_line"
+                    android:layout_alignParentBottom="true"
+                    android:src="?attr/marker" />
+
+                <TextView
+                    android:id="@+id/gate_pathfinder_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/side_padding"
+                    android:text="@string/gate_start_pathfinder"
+                    android:textAppearance="?attr/textPanelHeader" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/gate_pathfinder_header">
+
+                    <TextView
+                        android:id="@+id/gate_pathfinder_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:textAppearance="?attr/textPanelCaption"
+                        tools:text="SAD123" />
+                </RelativeLayout>
+
+                <FrameLayout
                     android:id="@+id/gate_pathfinder_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="?attr/corner"
-                    android:visibility="gone"
-                    tools:visibility="visible"
                     android:layout_alignParentRight="true"
-                    android:layout_alignParentBottom="true"/>
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lock_background"
+                    android:padding="@dimen/panel_lock_padding"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="?attr/lock_outline" />
+                </FrameLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/thin_line"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:src="?attr/black" />
             </RelativeLayout>
+        </FrameLayout>
 
-            <ImageView
-                android:layout_width="@dimen/thin_line"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:src="?attr/black"/>
-        </RelativeLayout>
-
-        <RelativeLayout
+        <FrameLayout
             android:id="@+id/gate_timing"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -131,58 +157,71 @@
             android:visibility="gone"
             tools:visibility="visible">
 
-            <ImageView
-                android:id="@+id/gate_timing_marker"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/thin_line"
-                android:layout_alignParentBottom="true"
-                android:src="?attr/marker"/>
-
-            <TextView
-                android:id="@+id/gate_timing_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="@dimen/side_padding"
-                android:text="@string/gate_start_timing"
-                android:textAppearance="?attr/textPanelHeader"/>
-
             <RelativeLayout
+                android:id="@+id/gate_timing_layer"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/gate_timing_header">
-
-                <TextView
-                    android:id="@+id/gate_timing_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:gravity="center"
-                    android:textAppearance="?attr/textPanelCaption"
-                    tools:text="4 + 3 = 7 Minuten"/>
+                android:layout_height="match_parent">
 
                 <ImageView
+                    android:id="@+id/gate_timing_marker"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/thin_line"
+                    android:layout_alignParentBottom="true"
+                    android:src="?attr/marker" />
+
+                <TextView
+                    android:id="@+id/gate_timing_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/side_padding"
+                    android:text="@string/gate_start_timing"
+                    android:textAppearance="?attr/textPanelHeader" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/gate_timing_header">
+
+                    <TextView
+                        android:id="@+id/gate_timing_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:textAppearance="?attr/textPanelCaption"
+                        tools:text="4 + 3 = 7 Minuten" />
+                </RelativeLayout>
+
+                <FrameLayout
                     android:id="@+id/gate_timing_lock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="?attr/corner"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/lock_background"
+                    android:padding="@dimen/panel_lock_padding"
                     android:visibility="gone"
-                    tools:visibility="visible"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"/>
-            </RelativeLayout>
+                    tools:visibility="visible">
 
-            <ImageView
-                android:layout_width="@dimen/thin_line"
-                android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
-                android:src="?attr/black"/>
-        </RelativeLayout>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="?attr/lock_outline" />
+                </FrameLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/thin_line"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentRight="true"
+                    android:src="?attr/black" />
+            </RelativeLayout>
+        </FrameLayout>
     </LinearLayout>
 
     <View
         android:id="@+id/top_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
-        android:background="?attr/black"/>
+        android:background="?attr/black" />
 </RelativeLayout>

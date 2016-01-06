@@ -13,6 +13,7 @@
 
     <dimen name="panel_button_header_size">20sp</dimen>
     <dimen name="panel_button_caption_size">18sp</dimen>
+    <dimen name="panel_lock_padding">5dp</dimen>
 
     <!-- race state dependent -->
     <!-- login -->

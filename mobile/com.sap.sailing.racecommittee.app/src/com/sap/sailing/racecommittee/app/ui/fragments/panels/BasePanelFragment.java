@@ -1,8 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -10,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.annotation.IntDef;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
@@ -20,11 +18,15 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public abstract class BasePanelFragment extends RaceFragment {
 
     @IntDef({LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface MarkerLevel {}
+    public @interface MarkerLevel {
+    }
 
     /**
      * Marker level is unknown, due to an error
@@ -123,9 +125,16 @@ public abstract class BasePanelFragment extends RaceFragment {
         return retValue;
     }
 
-    protected void changeVisibility(View view, int visibility) {
+    protected void changeVisibility(@Nullable View view, @Nullable View layer, int visibility) {
         if (view != null) {
             view.setVisibility(visibility);
+        }
+        if (layer != null) {
+            if (visibility != View.VISIBLE) {
+                layer.setAlpha(1f);
+            } else {
+                layer.setAlpha(0.5f);
+            }
         }
     }
 
@@ -140,7 +149,6 @@ public abstract class BasePanelFragment extends RaceFragment {
                 }
             }
         }
-
     }
 
     protected void replaceFragment(RaceFragment fragment) {

@@ -43,21 +43,25 @@ public class SetupPanelFragment extends BasePanelFragment {
     private View mStartProcedure;
     private View mStartProcedureLock;
     private TextView mStartProcedureValue;
+    private View mStartProcedureLayer;
 
     // Start Procedure More Toggle
     private View mStartProcedureMore;
     private View mStartProcedureMoreLock;
     private FrameLayout mExtraLayout;
+    private View mStartProcedureMoreLayer;
 
     // Course Toggle
     private View mCourse;
     private View mCourseLock;
     private TextView mCourseValue;
+    private View mCourseLayer;
 
     // Wind Toggle
     private View mWind;
     private View mWindLock;
     private TextView mWindValue;
+    private View mWindLayer;
 
     public SetupPanelFragment() {
         mReceiver = new IntentReceiver();
@@ -82,12 +86,14 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
         mStartProcedureLock = ViewHelper.get(layout, R.id.start_procedure_lock);
         mStartProcedureValue = ViewHelper.get(layout, R.id.start_procedure_value);
+        mStartProcedureLayer = ViewHelper.get(layout, R.id.start_procedure_layer);
 
         mStartProcedureMore = ViewHelper.get(layout, R.id.start_procedure_more);
         if (mStartProcedureMore != null) {
             mStartProcedureMore.setOnClickListener(new StartProcedureMoreClick());
         }
         mStartProcedureMoreLock = ViewHelper.get(layout, R.id.start_procedure_more_lock);
+        mStartProcedureMoreLayer = ViewHelper.get(layout, R.id.start_procedure_more_layer);
 
         mCourse = ViewHelper.get(layout, R.id.course);
         if (mCourse != null) {
@@ -95,6 +101,7 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
         mCourseLock = ViewHelper.get(layout, R.id.course_lock);
         mCourseValue = ViewHelper.get(layout, R.id.course_value);
+        mCourseLayer = ViewHelper.get(layout, R.id.course_layer);
 
         mWind = ViewHelper.get(layout, R.id.wind);
         if (mWind != null) {
@@ -102,6 +109,7 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
         mWindLock = ViewHelper.get(layout, R.id.wind_lock);
         mWindValue = ViewHelper.get(layout, R.id.wind_value);
+        mWindLayer = ViewHelper.get(layout, R.id.wind_layer);
 
         return layout;
     }
@@ -154,7 +162,7 @@ public class SetupPanelFragment extends BasePanelFragment {
 
             if (mStartProcedureMore != null) {
                 if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure || getRaceState()
-                    .getRacingProcedure() instanceof GateStartRacingProcedure) {
+                        .getRacingProcedure() instanceof GateStartRacingProcedure) {
                     mStartProcedureMore.setVisibility(View.VISIBLE);
                 } else {
                     mStartProcedureMore.setVisibility(View.GONE);
@@ -172,57 +180,60 @@ public class SetupPanelFragment extends BasePanelFragment {
     private void checkStatus() {
         switch (getRace().getStatus()) {
             case UNSCHEDULED:
-                changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
                 break;
 
             case PRESCHEDULED:
-                changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
                 break;
 
             case SCHEDULED:
-                changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
                 break;
 
             case STARTPHASE:
-                changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
                 break;
 
             case RUNNING:
-                changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
+
                 uncheckMarker(mStartProcedure);
                 uncheckMarker(mStartProcedureMore);
                 break;
 
             case FINISHING:
-                changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.VISIBLE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.VISIBLE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.VISIBLE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
+
                 uncheckMarker(mStartProcedure);
                 uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourseLock);
                 break;
 
             case FINISHED:
-                changeVisibility(mStartProcedureLock, View.GONE);
-                changeVisibility(mStartProcedureMoreLock, View.GONE);
-                changeVisibility(mCourseLock, View.GONE);
-                changeVisibility(mWindLock, View.GONE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.GONE);
+                changeVisibility(mStartProcedureMoreLock, mStartProcedureMoreLayer, View.GONE);
+                changeVisibility(mCourseLock, mCourseLayer, View.GONE);
+                changeVisibility(mWindLock, mWindLayer, View.GONE);
+
                 uncheckMarker(mStartProcedure);
                 uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourse);
@@ -230,9 +241,10 @@ public class SetupPanelFragment extends BasePanelFragment {
                 break;
 
             default:
-                changeVisibility(mStartProcedureLock, View.VISIBLE);
-                changeVisibility(mCourseLock, View.VISIBLE);
-                changeVisibility(mWindLock, View.VISIBLE);
+                changeVisibility(mStartProcedureLock, mStartProcedureLayer, View.VISIBLE);
+                changeVisibility(mCourseLock, mCourseLayer, View.VISIBLE);
+                changeVisibility(mWindLock, mWindLayer, View.VISIBLE);
+
                 uncheckMarker(mStartProcedure);
                 uncheckMarker(mStartProcedureMore);
                 uncheckMarker(mCourse);

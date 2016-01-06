@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:showIn="@layout/race_panel_flags_ver">
 
     <RelativeLayout
+        android:id="@+id/abandon_flags_layer"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true">
 
         <LinearLayout
@@ -23,7 +25,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="?attr/flags_abandon"/>
+                    android:src="?attr/flags_abandon" />
             </RelativeLayout>
 
             <TextView
@@ -31,17 +33,24 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/flags_abandon"
-                android:textAppearance="?attr/textPanelCaption"/>
+                android:textAppearance="?attr/textPanelCaption" />
         </LinearLayout>
 
-        <ImageView
+        <FrameLayout
             android:id="@+id/abandon_flags_lock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:src="?attr/corner"
+            android:layout_alignParentTop="true"
+            android:background="@color/lock_background"
+            android:padding="@dimen/panel_lock_padding"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="?attr/lock_outline" />
+        </FrameLayout>
     </RelativeLayout>
 </merge>

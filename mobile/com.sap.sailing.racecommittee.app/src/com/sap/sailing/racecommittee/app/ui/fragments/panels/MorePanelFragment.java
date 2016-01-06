@@ -41,16 +41,19 @@ public class MorePanelFragment extends BasePanelFragment {
     private View mStartMode;
     private View mStartModeLock;
     private ImageView mStartModeFlag;
+    private View mStartModeLayer;
 
     // Gate Start PathFinder
     private View mGatePathfinder;
     private View mGatePathfinderLock;
     private TextView mGatePathfinderValue;
+    private View mGatePathfinderLayer;
 
     // Gate Start Timing
     private View mGateTiming;
     private View mGateTimingLock;
     private TextView mGateTimingValue;
+    private View mGateTimingLayer;
 
     public MorePanelFragment() {
         mReceiver = new IntentReceiver();
@@ -75,6 +78,7 @@ public class MorePanelFragment extends BasePanelFragment {
         }
         mStartModeLock = ViewHelper.get(layout, R.id.start_mode_lock);
         mStartModeFlag = ViewHelper.get(layout, R.id.start_mode_flag);
+        mStartModeLayer = ViewHelper.get(layout, R.id.start_mode_layer);
 
         mGatePathfinder = ViewHelper.get(layout, R.id.gate_pathfinder);
         if (mGatePathfinder != null) {
@@ -82,6 +86,7 @@ public class MorePanelFragment extends BasePanelFragment {
         }
         mGatePathfinderLock = ViewHelper.get(layout, R.id.gate_pathfinder_lock);
         mGatePathfinderValue = ViewHelper.get(layout, R.id.gate_pathfinder_value);
+        mGatePathfinderLayer = ViewHelper.get(layout, R.id.gate_pathfinder_layer);
 
         mGateTiming = ViewHelper.get(layout, R.id.gate_timing);
         if (mGateTiming != null) {
@@ -89,6 +94,7 @@ public class MorePanelFragment extends BasePanelFragment {
         }
         mGateTimingLock = ViewHelper.get(layout, R.id.gate_timing_lock);
         mGateTimingValue = ViewHelper.get(layout, R.id.gate_timing_value);
+        mGateTimingLayer = ViewHelper.get(layout, R.id.gate_timing_layer);
 
         View view = ViewHelper.get(layout, R.id.top_line);
         if (view != null && AppUtils.with(getActivity()).isPort()) {
@@ -131,7 +137,7 @@ public class MorePanelFragment extends BasePanelFragment {
             if (mStartMode != null && mStartModeFlag != null) {
                 mStartMode.setVisibility(View.VISIBLE);
                 mStartModeFlag.setImageDrawable(FlagsResources
-                    .getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
+                        .getFlagDrawable(getActivity(), typedProcedure.getStartModeFlag().name(), getResources().getInteger(R.integer.flag_size)));
             }
         }
 
@@ -152,54 +158,58 @@ public class MorePanelFragment extends BasePanelFragment {
     private void checkStatus() {
         switch (getRace().getStatus()) {
             case UNSCHEDULED:
-                changeVisibility(mStartModeLock, View.GONE);
-                changeVisibility(mGatePathfinderLock, View.GONE);
-                changeVisibility(mGateTimingLock, View.GONE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.GONE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.GONE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.GONE);
                 break;
 
             case PRESCHEDULED:
-                changeVisibility(mStartModeLock, View.GONE);
-                changeVisibility(mGatePathfinderLock, View.GONE);
-                changeVisibility(mGateTimingLock, View.GONE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.GONE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.GONE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.GONE);
                 break;
 
             case SCHEDULED:
-                changeVisibility(mStartModeLock, View.GONE);
-                changeVisibility(mGatePathfinderLock, View.GONE);
-                changeVisibility(mGateTimingLock, View.GONE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.GONE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.GONE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.GONE);
                 break;
 
             case STARTPHASE:
-                changeVisibility(mStartModeLock, View.VISIBLE);
-                changeVisibility(mGatePathfinderLock, View.VISIBLE);
-                changeVisibility(mGateTimingLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.VISIBLE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.VISIBLE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.VISIBLE);
                 break;
 
             case RUNNING:
-                changeVisibility(mStartModeLock, View.VISIBLE);
-                changeVisibility(mGatePathfinderLock, View.VISIBLE);
-                changeVisibility(mGateTimingLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.VISIBLE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.VISIBLE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.VISIBLE);
+
                 uncheckMarker(mStartMode);
                 break;
 
             case FINISHING:
-                changeVisibility(mStartModeLock, View.VISIBLE);
-                changeVisibility(mGatePathfinderLock, View.VISIBLE);
-                changeVisibility(mGateTimingLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.VISIBLE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.VISIBLE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.VISIBLE);
+
                 uncheckMarker(mStartMode);
                 break;
 
             case FINISHED:
-                changeVisibility(mStartModeLock, View.GONE);
-                changeVisibility(mGatePathfinderLock, View.GONE);
-                changeVisibility(mGateTimingLock, View.GONE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.GONE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.GONE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.GONE);
+
                 uncheckMarker(mStartMode);
                 break;
 
             default:
-                changeVisibility(mStartModeLock, View.VISIBLE);
-                changeVisibility(mGatePathfinderLock, View.VISIBLE);
-                changeVisibility(mGateTimingLock, View.VISIBLE);
+                changeVisibility(mStartModeLock, mStartModeLayer, View.VISIBLE);
+                changeVisibility(mGatePathfinderLock, mGatePathfinderLayer, View.VISIBLE);
+                changeVisibility(mGateTimingLock, mGateTimingLayer, View.VISIBLE);
+
                 uncheckMarker(mStartMode);
                 break;
         }
