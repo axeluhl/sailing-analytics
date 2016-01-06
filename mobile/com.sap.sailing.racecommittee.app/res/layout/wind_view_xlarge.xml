@@ -218,14 +218,12 @@
                     android:text="@string/not_available"
                     android:textAppearance="?attr/textSmall"/>
 
-                <TextView
+                <com.sap.sailing.racecommittee.app.ui.views.AccuracyView
                     android:id="@+id/accuracy_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="4"
-                    android:layout_row="3"
-                    android:textAppearance="?attr/textSmall"
-                    tools:text="ca 5m"/>
+                    android:layout_row="3"/>
 
                 <TextView
                     android:id="@+id/accuracy_timestamp"

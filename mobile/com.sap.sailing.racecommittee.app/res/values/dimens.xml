@@ -62,7 +62,7 @@
 
     <dimen name="wind_hide_button_right_margin">76dp</dimen>
     <dimen name="wind_hide_button_top_margin">20dp</dimen>
-    <dimen name="wind_input_width">150dp</dimen>
+    <dimen name="wind_input_width">60dp</dimen>
 
     <dimen name="panel_button_caption_size">14sp</dimen>
     <dimen name="panel_button_header_size">16sp</dimen>

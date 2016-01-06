@@ -1,17 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.ColorRes;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.InputFilter;
 import android.view.LayoutInflater;
@@ -45,6 +40,7 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
+import com.sap.sailing.racecommittee.app.ui.views.AccuracyView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
@@ -55,9 +51,12 @@ import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+
 public class WindFragment extends BaseFragment
-    implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
-    OnRaceUpdatedListener {
+        implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
+        OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static long FIVE_SEC = 5000;
@@ -73,14 +72,14 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-//    private View mWindOn;
+    //    private View mWindOn;
 //    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
     private NumberPicker mWindSpeed;
     private TextView mLatitude;
     private TextView mLongitude;
-    private TextView mAccuracy;
+    private AccuracyView mAccuracy;
     private TextView mAccuracyTimestamp;
     private EditText mWindInputDirection;
     private EditText mWindInputSpeed;
@@ -109,8 +108,9 @@ public class WindFragment extends BaseFragment
      */
     private String[] generateNumbers() {
         ArrayList<String> numbers = new ArrayList<>();
+        String kn = getString(R.string.wind_kn);
         for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
-            numbers.add(String.format("%.1f %s", i, getString(R.string.wind_kn)));
+            numbers.add(String.format("%.1f ", i) + kn);
         }
         return numbers.toArray(new String[numbers.size()]);
     }
@@ -149,11 +149,11 @@ public class WindFragment extends BaseFragment
         mAccuracyTimestamp = ViewHelper.get(layout, R.id.accuracy_timestamp);
         mWindInputDirection = ViewHelper.get(layout, R.id.wind_input_direction);
         if (mWindInputDirection != null) {
-            mWindInputDirection.setFilters(new InputFilter[] { new RangeInputFilter(0, 360) });
+            mWindInputDirection.setFilters(new InputFilter[]{new RangeInputFilter(0, 360)});
         }
         mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
         if (mWindInputSpeed != null) {
-            mWindInputSpeed.setFilters(new InputFilter[] { new RangeInputFilter(0, MAX_KTS) });
+            mWindInputSpeed.setFilters(new InputFilter[]{new RangeInputFilter(0, MAX_KTS)});
             mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
         }
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
@@ -171,8 +171,8 @@ public class WindFragment extends BaseFragment
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
             mHeaderWindSensor
-                .setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
-                    .getKnots()));
+                    .setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+                            .getKnots()));
         }
 
         setupButtons();
@@ -198,8 +198,10 @@ public class WindFragment extends BaseFragment
         int redColor = R.color.sap_red;
         setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
         setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
-        setTextAndColor(mAccuracy, getString(R.string.not_available), redColor);
         setTextAndColor(mAccuracyTimestamp, null, whiteColor);
+        if (mAccuracy != null) {
+            mAccuracy.setAccuracy(-1);
+        }
 
         mSetData.setEnabled(false);
         if (mCurrentLocation != null) {
@@ -209,17 +211,13 @@ public class WindFragment extends BaseFragment
             long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
             setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
             setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
-            setTextAndColor(mAccuracy, getString(R.string.accuracy_value, mCurrentLocation.getAccuracy()), whiteColor);
             setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
-                .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
-
-//            mSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
-            mSetData.setEnabled(true);
-
-            // highlight accuracy problem if location is invalid
+                    .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
             if (mAccuracy != null) {
-                mAccuracy.setTextColor(mSetData.isEnabled() ? whiteColor : Color.RED);
+                mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
             }
+
+            mSetData.setEnabled(true);
         }
     }
 
@@ -320,7 +318,7 @@ public class WindFragment extends BaseFragment
             String numbers[] = generateNumbers();
             ViewHelper.disableSave(mWindSpeed);
             ThemeHelper.setPickerColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
+                    .getColor(getActivity(), R.attr.sap_yellow_1));
             mWindSpeed.setMaxValue(numbers.length - 1);
             mWindSpeed.setMinValue(0);
             mWindSpeed.setWrapSelectorWheel(false);
