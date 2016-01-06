@@ -132,16 +132,16 @@ public class RaceSummaryFragment extends BaseFragment {
             mFinishStartTime.setText(mDateFormat.format(finishingTime.getTime()));
         }
         if (mFinishStartDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishingTime() != null) {
-            mFinishStartDuration.setText(TimeUtils.calcDuration(startTime, finishingTime));
+            mFinishStartDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishEndTime != null && getRaceState().getFinishedTime() != null) {
             mFinishEndTime.setText(mDateFormat.format(finishedTime.getTime()));
         }
         if (mFinishEndDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishedTime() != null) {
-            mFinishEndDuration.setText(TimeUtils.calcDuration(startTime, finishedTime));
+            mFinishEndDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() -  startTime.getTimeInMillis()));
         }
         if (mFinishDuration != null) {
-            mFinishDuration.setText(TimeUtils.calcDuration(finishingTime, finishedTime));
+            mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
         }
 
         if (mRegionWind != null) {

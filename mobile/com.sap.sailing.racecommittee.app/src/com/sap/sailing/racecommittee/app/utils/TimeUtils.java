@@ -6,6 +6,7 @@ import java.util.TimeZone;
 
 import android.content.Context;
 import android.os.Build;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.NumberPicker;
@@ -80,7 +81,7 @@ public class TimeUtils {
     }
 
     /**
-     * Formats milliseconds to a string like: 01h23'45"
+     * Formats milliseconds to a string like: 01h 23'45"
      */
     public static String formatTimeAgo(Context context, long milliseconds) {
         Calendar time = Calendar.getInstance();

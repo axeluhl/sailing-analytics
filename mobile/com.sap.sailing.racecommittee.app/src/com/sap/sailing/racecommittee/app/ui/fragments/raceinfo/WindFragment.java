@@ -223,7 +223,7 @@ public class WindFragment extends BaseFragment
         }
     }
 
-    private void setTextAndColor(TextView textView, String text, @ColorRes int color) {
+    private void setTextAndColor(TextView textView, String text, int color) {
         if (textView != null) {
             textView.setText(text);
             textView.setTextColor(color);
