@@ -115,7 +115,7 @@
                         android:paddingRight="@dimen/default_padding_half"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:00:00"/>
 
                     <TextView
                         android:id="@+id/start_countdown"
@@ -127,7 +127,7 @@
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
                         android:visibility="visible"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:01:00"/>
 
                     <Button
                         android:id="@+id/minute_dec"
@@ -139,7 +139,7 @@
                         android:paddingLeft="@dimen/default_padding_half"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:02:00"/>
                 </LinearLayout>
             </RelativeLayout>
 

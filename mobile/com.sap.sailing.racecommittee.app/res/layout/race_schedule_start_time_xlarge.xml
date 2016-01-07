@@ -88,7 +88,7 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/buttonBar"
@@ -113,7 +113,7 @@
                         android:paddingRight="@dimen/default_padding_half"
                         android:textAppearance="?attr/textLarge"
                         android:textColor="?attr/white"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:00:00"/>
 
                     <TextView
                         android:id="@+id/start_countdown"
@@ -124,7 +124,7 @@
                         android:layout_marginRight="@dimen/default_margin"
                         android:textAppearance="?attr/textXLarge"
                         android:visibility="visible"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:01:00"/>
 
                     <Button
                         android:id="@+id/minute_dec"
@@ -136,7 +136,7 @@
                         android:paddingLeft="@dimen/default_padding_half"
                         android:textAppearance="?attr/textLarge"
                         android:textColor="?attr/white"
-                        tools:text="@string/race_start_time_in"/>
+                        tools:text="1:02:00"/>
                 </LinearLayout>
             </RelativeLayout>
 
@@ -207,7 +207,7 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <LinearLayout
                 android:id="@+id/relative_input"
