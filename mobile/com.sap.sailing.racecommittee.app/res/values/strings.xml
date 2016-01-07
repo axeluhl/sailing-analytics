@@ -11,10 +11,10 @@
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
     <string name="course_design_number_waypoints">Course has %s waypoints</string>
-    <string name="service_info">SAP Race Committee Service</string>
+    <string name="service_info">SAP Sailing Race Manager Service</string>
     <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
     <string name="service_text_num_races">Currently monitoring %d races.</string>
-    <string name="app_name">SAP Race Committee Cockpit</string>
+    <string name="app_name">SAP Sailing Race Manager</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Restart</string>
     <string name="choose">Choose</string>
@@ -294,7 +294,7 @@
     <string name="wind">Wind</string>
     <string name="loading_events_succeded">Events loaded.</string>
 
-    <string name="login_text">Welcome to SAP Sailing\nRace Committee App</string>
+    <string name="login_text">Welcome to\nSAP Sailing Race Manager</string>
     <string name="login_sub_text">Please select a regatta</string>
     <string name="sign_up">Sign Me Up</string>
     <string name="wind_display">dd</string>

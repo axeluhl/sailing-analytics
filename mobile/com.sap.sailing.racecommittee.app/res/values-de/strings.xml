@@ -3,10 +3,8 @@
 
     <string name="running_on_course">(Kurs %s)</string>
     <string name="course_design_number_waypoints">Kurs hat %s Wegpunkte</string>
-    <string name="service_info">SAP Race Committee Service</string>
     <string name="service_text_no_races">Warte auf Rennen&#8230;</string>
     <string name="service_text_num_races">Aktuell %d Rennen verwaltet.</string>
-    <string name="app_name">SAP Race Committee Cockpit</string>
     <string name="set_time">Start</string>
     <string name="reset_time">Startzeit ändern</string>
     <string name="choose">Setzen</string>
@@ -272,7 +270,7 @@
     <string name="confirm_start_time">Startzeit Bestätigen</string>
     <string name="confirm_start_mode">Startmodus Bestätigen</string>
     <string name="login_sub_text">Bitte wählen Sie eine Regatta aus</string>
-    <string name="login_text">Willkommen in der SAP Sailing\nRace Committee App</string>
+    <string name="login_text">Willkommen beim\nSAP Sailing Race Manager</string>
     <string name="nav_drawer_close">Navigation-Drawer schließen</string>
     <string name="nav_drawer_open">Navigation-Drawer öffnen</string>
     <string name="sign_up">Anmelden</string>
