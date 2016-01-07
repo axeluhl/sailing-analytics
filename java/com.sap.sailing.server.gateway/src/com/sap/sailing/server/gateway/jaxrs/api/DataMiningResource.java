@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
@@ -60,7 +61,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
     }
 
     private Response getBadQueryDefinitionErrorResponse(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
-        return Response.status(Status.BAD_REQUEST).entity("Couldn't create a query for definition '" + queryDefinitionDTO + "'.")
+        return Response.status(Status.BAD_REQUEST).entity("Couldn't create a query for definition '" + StringEscapeUtils.escapeHtml(queryDefinitionDTO.toString()) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
