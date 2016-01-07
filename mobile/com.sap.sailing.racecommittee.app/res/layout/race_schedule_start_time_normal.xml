@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -26,13 +25,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="?attr/chevron_left_24dp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textAppearance="?attr/textHeader"/>
+                android:textAppearance="?attr/textHeader" />
         </LinearLayout>
 
         <View
@@ -40,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="?attr/black"/>
+            android:background="?attr/black" />
     </RelativeLayout>
 
     <LinearLayout
@@ -59,11 +58,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
+            android:layout_marginRight="5dp"
             android:layout_weight="1"
             android:text="@string/dependent_races_absolute"
             android:textAllCaps="true"
             android:textColor="?attr/sap_yellow_1"
-            android:textSize="@dimen/textSize_20"/>
+            android:textSize="@dimen/textSize_20" />
 
         <Button
             android:id="@+id/relative"
@@ -71,11 +71,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"
+            android:layout_marginLeft="5dp"
             android:layout_weight="1"
             android:text="@string/dependent_races_relative"
             android:textAllCaps="true"
             android:textColor="?attr/sap_light_gray"
-            android:textSize="@dimen/textSize_20"/>
+            android:textSize="@dimen/textSize_20" />
     </LinearLayout>
 
     <FrameLayout
@@ -115,7 +116,7 @@
                         android:paddingRight="@dimen/default_padding_half"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
-                        tools:text="1:00:00"/>
+                        tools:text="1:00:00" />
 
                     <TextView
                         android:id="@+id/start_countdown"
@@ -127,7 +128,7 @@
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
                         android:visibility="visible"
-                        tools:text="1:01:00"/>
+                        tools:text="1:01:00" />
 
                     <Button
                         android:id="@+id/minute_dec"
@@ -139,7 +140,7 @@
                         android:paddingLeft="@dimen/default_padding_half"
                         android:textColor="?attr/white"
                         android:textSize="@dimen/textSize_20"
-                        tools:text="1:02:00"/>
+                        tools:text="1:02:00" />
                 </LinearLayout>
             </RelativeLayout>
 
@@ -161,14 +162,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:descendantFocusability="blocksDescendants"/>
+                        android:descendantFocusability="blocksDescendants" />
 
                     <include
                         android:id="@+id/start_time_picker"
                         layout="@layout/time_picker"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"/>
+                        android:layout_gravity="center_vertical" />
                 </LinearLayout>
 
             </RelativeLayout>
@@ -184,7 +185,7 @@
                 android:layout_marginTop="@dimen/side_padding"
                 android:maxWidth="400dp"
                 android:text="@string/race_set_time"
-                android:textSize="@dimen/textSize_18"/>
+                android:textSize="@dimen/textSize_18" />
 
             <TextView
                 android:id="@+id/debug_time"
@@ -194,7 +195,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:visibility="gone"
-                tools:text="12:12:12"/>
+                tools:text="12:12:12" />
 
         </RelativeLayout>
 
@@ -226,7 +227,7 @@
                         android:layout_marginLeft="@dimen/default_margin"
                         android:layout_marginTop="@dimen/default_margin"
                         android:scaleX="@integer/picker_scale"
-                        android:scaleY="@integer/picker_scale"/>
+                        android:scaleY="@integer/picker_scale" />
 
                     <LinearLayout
                         android:id="@+id/relative_spinner_area"
@@ -245,7 +246,7 @@
                             android:layout_marginTop="@dimen/default_margin_half"
                             android:background="?attr/spinner_background"
                             android:dropDownWidth="wrap_content"
-                            android:spinnerMode="dropdown"/>
+                            android:spinnerMode="dropdown" />
 
                         <Spinner
                             android:id="@+id/dependent_fleet"
@@ -256,7 +257,7 @@
                             android:dropDownWidth="wrap_content"
                             android:spinnerMode="dropdown"
                             android:visibility="gone"
-                            tools:visibility="visible"/>
+                            tools:visibility="visible" />
 
                         <Spinner
                             android:id="@+id/dependent_racegroup"
@@ -265,7 +266,7 @@
                             android:layout_marginTop="@dimen/default_margin_half"
                             android:background="?attr/spinner_background"
                             android:dropDownWidth="wrap_content"
-                            android:spinnerMode="dropdown"/>
+                            android:spinnerMode="dropdown" />
                     </LinearLayout>
 
                     <TextView
@@ -276,7 +277,7 @@
                         android:layout_alignParentTop="true"
                         android:paddingLeft="@dimen/spinner_padding"
                         android:text="@string/minutes_after"
-                        android:textAppearance="?attr/textSmall"/>
+                        android:textAppearance="?attr/textSmall" />
                 </RelativeLayout>
             </RelativeLayout>
 
@@ -291,7 +292,7 @@
                 android:layout_marginTop="@dimen/side_padding"
                 android:maxWidth="400dp"
                 android:text="@string/race_set_time"
-                android:textSize="@dimen/textSize_18"/>
+                android:textSize="@dimen/textSize_18" />
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>
