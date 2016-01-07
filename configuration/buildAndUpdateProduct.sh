@@ -637,7 +637,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         extra="$extra -Dbuoy-app-version=$BUOY_APP_VERSION"
 
         NOW=$(date +"%s")
-        BUILD_TOOLS=22.0.1
+        BUILD_TOOLS=23.0.2
         TARGET_API=22
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
