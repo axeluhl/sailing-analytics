@@ -207,7 +207,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         if (mRaceId != null && mStartTimeDiff != null) {
             ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(mRaceId);
-            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(), RaceHelper.getRaceName(race, " / "));
+            mStartTimeString = getString(R.string.minutes_after_long, mStartTimeDiff.asMinutes(), RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
         }
 
         Runnable runnable = new Runnable() {
