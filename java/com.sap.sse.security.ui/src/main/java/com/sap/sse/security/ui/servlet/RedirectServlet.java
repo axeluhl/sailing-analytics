@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gwt.safehtml.shared.UriUtils;
+
 public class RedirectServlet extends HttpServlet {
     
     private static final Logger logger = Logger.getLogger(RedirectServlet.class.getName());
@@ -57,7 +59,7 @@ public class RedirectServlet extends HttpServlet {
     
     private void doHiddenRedirect(HttpServletResponse resp, String target) throws IOException{
         String html = "<html><head><script type='text/javascript'>";
-        html += "window.location = '" + target +"';";
+        html += "window.location = '" + UriUtils.fromString(target) +"';";
         html +="</script></head><body></body></html>";
         resp.setContentType("text/html");
         resp.getWriter().append(html);
