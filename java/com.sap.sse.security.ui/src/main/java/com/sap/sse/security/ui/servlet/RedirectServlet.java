@@ -97,12 +97,12 @@ public class RedirectServlet extends HttpServlet {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-        if (host.contains("local")){
+        if (host.startsWith("localhost")) {
             host = "127.0.0.1";
         }
         String link = "http://" + host + ":" + port + baseLink;
         int i = 1;
-        for(Entry<String, String> entry: parameters.entrySet()) {
+        for (Entry<String, String> entry : parameters.entrySet()) {
             link += i == 1 ? "?" : "&";
             link += entry.getKey() + "=" + entry.getValue();
             i++;
@@ -115,7 +115,7 @@ public class RedirectServlet extends HttpServlet {
             link += i == 1 ? "?" : "&";
             link += "locale=" + localeParam;
         }
-        logger.info("Redirecting from " + req.getRequestURL().toString() +" to: " + link);
+        logger.info("Redirecting from " + req.getRequestURL().toString() + " to: " + link);
         return link;
     }
 }
