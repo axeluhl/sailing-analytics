@@ -57,7 +57,7 @@ public class AccuracyView extends LinearLayout {
                 setColor(mSegment01, R.color.accuracy_green);
                 setColor(mSegment02, R.color.accuracy_green);
                 setColor(mSegment03, R.color.accuracy_green);
-            } else if (accuracy <= 30) {
+            } else if (accuracy <= 100) {
                 setColor(mSegment01, R.color.accuracy_yellow);
                 setColor(mSegment02, R.color.accuracy_yellow);
                 setColor(mSegment03, R.color.accuracy_yellow_light);
