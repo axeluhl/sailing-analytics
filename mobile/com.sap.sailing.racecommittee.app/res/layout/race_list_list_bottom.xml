@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/race_list_view"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/race_list_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/header"
@@ -22,7 +22,7 @@
             android:text="@string/races_current"
             android:textColor="?attr/sap_yellow_1"
             android:textSize="@dimen/textSize_20"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/races_all"
@@ -35,7 +35,7 @@
             android:text="@string/races_all"
             android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_20"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
     <RelativeLayout
@@ -49,13 +49,14 @@
             android:layout_height="match_parent"
             android:divider="@null"
             android:dividerHeight="0dp"
-            tools:listitem="@layout/race_list_area_item"/>
+            tools:listheader="@layout/race_list_area_header"
+            tools:listitem="@layout/race_list_area_item" />
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </RelativeLayout>
 </RelativeLayout>
