@@ -90,6 +90,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private IntentReceiver mReceiver;
     private boolean mUpdateList = true;
     private ArrayList<RaceListDataType> mViewItems;
+    private View mProgress;
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
@@ -235,6 +236,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mReceiver = new IntentReceiver();
         mListView = (ListView) view.findViewById(R.id.listView);
         mListView.setOnScrollListener(this);
+
+        mProgress = view.findViewById(R.id.progress);
 
         mCurrentRacesButton = (Button) view.findViewById(R.id.races_current);
         if (mCurrentRacesButton != null) {
@@ -502,6 +505,18 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             }
         }
         return false;
+    }
+
+    public void showSpinner(boolean visible) {
+        if (mProgress != null) {
+            if (visible) {
+                mProgress.setVisibility(View.VISIBLE);
+                mUpdateList = false;
+            } else {
+                mProgress.setVisibility(View.GONE);
+                mUpdateList = true;
+            }
+        }
     }
 
     public enum FilterMode {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    android:id="@+id/race_list_view"
+<RelativeLayout android:id="@+id/race_list_view"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:id="@+id/header"
@@ -48,7 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@null"
-            android:dividerHeight="0dp"/>
+            android:dividerHeight="0dp"
+            tools:listitem="@layout/race_list_area_item"/>
 
         <ProgressBar
             android:id="@+id/progress"

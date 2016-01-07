@@ -360,12 +360,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             }
         }
 
-        View progress = findViewById(R.id.progress);
-        if (progress != null) {
+        if (mRaceList != null) {
             if (visible) {
-                progress.setVisibility(View.VISIBLE);
+                mRaceList.showSpinner(true);
             } else {
-                progress.setVisibility(View.GONE);
+                mRaceList.showSpinner(false);
             }
         }
     }
