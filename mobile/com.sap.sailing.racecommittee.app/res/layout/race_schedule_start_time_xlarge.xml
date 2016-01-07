@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -26,13 +25,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:src="?attr/chevron_left_24dp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/set_time"
-                android:textAppearance="?attr/textHeader"/>
+                android:textAppearance="?attr/textHeader" />
         </LinearLayout>
 
         <View
@@ -40,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thick_line"
             android:layout_alignParentBottom="true"
-            android:background="?attr/black"/>
+            android:background="?attr/black" />
     </RelativeLayout>
 
     <LinearLayout
@@ -62,7 +61,7 @@
             android:text="@string/dependent_races_absolute"
             android:textAllCaps="true"
             android:textColor="?attr/sap_yellow_1"
-            android:textSize="@dimen/textSize_26"/>
+            android:textSize="@dimen/textSize_26" />
 
         <Button
             android:id="@+id/relative"
@@ -73,7 +72,7 @@
             android:text="@string/dependent_races_relative"
             android:textAllCaps="true"
             android:textColor="?attr/sap_light_gray"
-            android:textSize="@dimen/textSize_26"/>
+            android:textSize="@dimen/textSize_26" />
     </LinearLayout>
 
     <FrameLayout
@@ -88,7 +87,7 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/buttonBar"
@@ -113,7 +112,7 @@
                         android:paddingRight="@dimen/default_padding_half"
                         android:textAppearance="?attr/textLarge"
                         android:textColor="?attr/white"
-                        tools:text="1:00:00"/>
+                        tools:text="1:00:00" />
 
                     <TextView
                         android:id="@+id/start_countdown"
@@ -124,7 +123,7 @@
                         android:layout_marginRight="@dimen/default_margin"
                         android:textAppearance="?attr/textXLarge"
                         android:visibility="visible"
-                        tools:text="1:01:00"/>
+                        tools:text="1:01:00" />
 
                     <Button
                         android:id="@+id/minute_dec"
@@ -136,17 +135,15 @@
                         android:paddingLeft="@dimen/default_padding_half"
                         android:textAppearance="?attr/textLarge"
                         android:textColor="?attr/white"
-                        tools:text="1:02:00"/>
+                        tools:text="1:02:00" />
                 </LinearLayout>
             </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/set_start_time"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_below="@id/buttonBar">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true">
 
                 <Button
                     android:id="@+id/set_start_time_absolute"
@@ -154,16 +151,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_marginRight="@dimen/default_margin_twice"
-                    android:maxWidth="200dp"
-                    android:text="@string/race_set_time"/>
+                    android:layout_margin="@dimen/default_margin_twice"
+                    android:text="@string/race_set_time" />
             </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/buttonBar"
-                android:layout_toLeftOf="@id/set_start_time">
+                android:layout_above="@+id/set_start_time"
+                android:layout_below="@id/buttonBar">
 
                 <LinearLayout
                     android:id="@+id/start_picker"
@@ -178,14 +174,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:descendantFocusability="blocksDescendants"/>
+                        android:descendantFocusability="blocksDescendants" />
 
                     <include
                         android:id="@+id/start_time_picker"
                         layout="@layout/time_picker"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"/>
+                        android:layout_gravity="center_vertical" />
                 </LinearLayout>
             </RelativeLayout>
 
@@ -198,7 +194,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:visibility="gone"
-                tools:text="12:12:12"/>
+                tools:text="12:12:12" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -207,77 +203,88 @@
             android:layout_height="match_parent"
             android:background="?attr/sap_gray_black_30"
             android:visibility="gone"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
-            <LinearLayout
-                android:id="@+id/relative_input"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/set_start_time_2"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true">
+                android:layout_alignParentBottom="true">
 
-                <NumberPicker
-                    android:id="@+id/time_offset"
+                <Button
+                    android:id="@+id/set_start_time_relative"
+                    style="?attr/buttonSolidSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="@dimen/default_margin"
-                    android:scaleX="@integer/picker_scale"
-                    android:scaleY="@integer/picker_scale"/>
+                    android:layout_centerInParent="true"
+                    android:layout_margin="@dimen/default_margin_twice"
+                    android:text="@string/race_set_time" />
+            </RelativeLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:padding="@dimen/default_padding_half"
-                    android:text="@string/minutes_after"
-                    android:textAppearance="?attr/textLarge"/>
+            <RelativeLayout
+                android:layout_above="@id/set_start_time_2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <LinearLayout
-                    android:layout_width="@dimen/unscheduled_spinner_width"
+                    android:id="@+id/relative_input"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
+                    android:layout_centerInParent="true">
 
-                    <Spinner
-                        android:id="@+id/dependent_leaderboard"
-                        android:layout_width="match_parent"
+                    <NumberPicker
+                        android:id="@+id/time_offset"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="?attr/spinner_background"
-                        android:dropDownWidth="wrap_content"
-                        android:spinnerMode="dropdown"/>
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="@dimen/default_margin"
+                        android:scaleX="@integer/picker_scale"
+                        android:scaleY="@integer/picker_scale" />
 
-                    <Spinner
-                        android:id="@+id/dependent_fleet"
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?attr/spinner_background"
-                        android:dropDownWidth="wrap_content"
-                        android:spinnerMode="dropdown"
-                        android:visibility="gone"
-                        tools:visibility="visible"/>
+                        android:layout_gravity="center_vertical"
+                        android:padding="@dimen/default_padding_half"
+                        android:text="@string/minutes_after"
+                        android:textAppearance="?attr/textLarge" />
 
-                    <Spinner
-                        android:id="@+id/dependent_racegroup"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="@dimen/unscheduled_spinner_width"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/default_margin_half"
-                        android:background="?attr/spinner_background"
-                        android:dropDownWidth="wrap_content"
-                        android:spinnerMode="dropdown"/>
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <Spinner
+                            android:id="@+id/dependent_leaderboard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/spinner_background"
+                            android:dropDownWidth="wrap_content"
+                            android:spinnerMode="dropdown" />
+
+                        <Spinner
+                            android:id="@+id/dependent_fleet"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/default_margin_half"
+                            android:background="?attr/spinner_background"
+                            android:dropDownWidth="wrap_content"
+                            android:spinnerMode="dropdown"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                        <Spinner
+                            android:id="@+id/dependent_racegroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/default_margin_half"
+                            android:background="?attr/spinner_background"
+                            android:dropDownWidth="wrap_content"
+                            android:spinnerMode="dropdown" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/set_start_time_relative"
-                style="?attr/buttonSolidSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/relative_input"
-                android:layout_centerInParent="true"
-                android:layout_marginTop="@dimen/default_margin_half"
-                android:maxWidth="200dp"
-                android:text="@string/race_set_time"/>
+            </RelativeLayout>
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>
