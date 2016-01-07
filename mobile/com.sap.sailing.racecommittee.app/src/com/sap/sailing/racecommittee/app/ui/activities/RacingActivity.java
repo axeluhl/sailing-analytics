@@ -372,7 +372,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     private void setupActionBar(ManagedRace race) {
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(RaceHelper.getRaceName(race, " / "));
+            getSupportActionBar().setTitle(RaceHelper.getReverseRaceName(race, " / "));
         }
     }
 

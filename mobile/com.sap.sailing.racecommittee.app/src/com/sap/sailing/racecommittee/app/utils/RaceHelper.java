@@ -34,6 +34,24 @@ public class RaceHelper {
         return raceName;
     }
 
+    public static String getReverseRaceName(@Nullable ManagedRace race) {
+        return getReverseRaceName(race, null);
+    }
+
+    public static String getReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter) {
+        delimiter = getDefaultDelimiter(delimiter);
+
+        String raceName = "";
+        if (race != null) {
+            raceName += race.getRaceName();
+            raceName += getFleetName(race.getFleet(), delimiter);
+            raceName += getSeriesName(race.getSeries(), delimiter);
+            raceName += delimiter + getRaceGroupName(race);
+        }
+
+        return raceName;
+    }
+
     public static String getShortReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
         delimiter = getDefaultDelimiter(delimiter);
 
