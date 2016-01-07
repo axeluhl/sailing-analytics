@@ -68,8 +68,8 @@
                     tools:visibility="visible">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="@dimen/side_button_lockSize"
+                        android:layout_height="@dimen/side_button_lockSize"
                         android:src="?attr/lock_outline" />
                 </FrameLayout>
 
@@ -137,8 +137,8 @@
                     tools:visibility="visible">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="@dimen/side_button_lockSize"
+                        android:layout_height="@dimen/side_button_lockSize"
                         android:src="?attr/lock_outline" />
                 </FrameLayout>
 
@@ -205,8 +205,8 @@
                     tools:visibility="visible">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="@dimen/side_button_lockSize"
+                        android:layout_height="@dimen/side_button_lockSize"
                         android:src="?attr/lock_outline" />
                 </FrameLayout>
             </RelativeLayout>
