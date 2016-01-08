@@ -1,5 +1,10 @@
 package com.sap.sailing.android.tracking.app.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -14,16 +19,13 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import android.util.Log;
 
 /**
  * Todo: Use this class?
  */
 public class ImageController {
+    private static final String TAG = ImageController.class.getName();
 
     public static String getRealPathFromURI(ContentResolver contentResolver, Uri contentUri) {
         String res = null;
@@ -382,7 +384,7 @@ public class ImageController {
                 InputStream inputStream = contentResolver.openInputStream(uri);
                 BitmapFactory.decodeStream(inputStream, null, options);
             } catch (IOException e) {
-
+                Log.e(TAG, "Error trying to read image from "+uri, e);
             }
         } else {
             BitmapFactory.decodeFile(filename, options);
@@ -399,7 +401,7 @@ public class ImageController {
                 InputStream inputStream = contentResolver.openInputStream(uri);
                 bitmap = BitmapFactory.decodeStream(inputStream, null, options);
             } catch (IOException e) {
-
+                Log.e(TAG, "Error trying to read image from "+uri, e);
             }
         } else {
             bitmap = BitmapFactory.decodeFile(filename, options);
@@ -435,7 +437,7 @@ public class ImageController {
                     bitmap = rotatedBitmap;
                 }
             } catch (IOException e) {
-
+                Log.e(TAG, "Error trying to determine orientation for image "+filename+" loaded from "+uri, e);
             }
         }
         return bitmap;
