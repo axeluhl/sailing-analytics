@@ -1,5 +1,6 @@
 package com.sap.sailing.android.shared.util;
 
+import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,7 +37,7 @@ public class EulaHelper {
     }
 
 
-    public static void showEulaDialog(final Context context, int theme) {
+    public static void showEulaDialog(final Context context, @StyleRes int theme) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context, theme);
         builder.setTitle(R.string.eula_title);
         builder.setMessage(getSpannableMessage(context));
