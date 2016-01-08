@@ -10,7 +10,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
-import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
 
