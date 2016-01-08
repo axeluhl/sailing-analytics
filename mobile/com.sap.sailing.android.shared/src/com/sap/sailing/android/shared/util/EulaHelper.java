@@ -1,6 +1,6 @@
 package com.sap.sailing.android.shared.util;
 
-import android.app.AlertDialog;
+import android.support.v7.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,8 +35,9 @@ public class EulaHelper {
         ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    public static void showEulaDialog(final Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+    public static void showEulaDialog(final Context context, int theme) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, theme);
         builder.setTitle(R.string.eula_title);
         builder.setMessage(getSpannableMessage(context));
         builder.setCancelable(false);

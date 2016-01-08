@@ -30,7 +30,7 @@ public class StartActivity extends AbstractStartActivity {
     protected void onResume() {
         super.onResume();
         if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showEulaDialog(this);
+            EulaHelper.showEulaDialog(this, R.style.Base_Theme_AppCompat_Dialog_Alert);
         }
     }
 

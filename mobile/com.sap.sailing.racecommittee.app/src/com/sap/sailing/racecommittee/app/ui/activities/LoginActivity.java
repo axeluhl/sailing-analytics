@@ -356,7 +356,7 @@ public class LoginActivity extends BaseActivity
         }
 
         if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showEulaDialog(this);
+            EulaHelper.showEulaDialog(this, R.style.AppTheme_AlertDialog);
         }
     }
 
