@@ -7,12 +7,15 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
+import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdaterChecker.AutoUpdaterState;
 import com.sap.sse.common.Util;
 
 public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pair<Integer, String>> {
+    private final static String TAG = AutoUpdaterVersionDownloader.class.getName();
 
     public AutoUpdaterVersionDownloader(AutoUpdaterState state, Context context) {
         super(state, context);
@@ -29,11 +32,13 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pai
                 return parseVersionFile(contents);
             }
         } catch (Exception e) {
+            Log.e(TAG, "Exception while trying to read version file", e);
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
+                    Log.e(TAG, "Exception while trying to close version file stream", e);
                 }
             }
         }
@@ -50,6 +55,7 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pai
                 Integer code = Integer.parseInt(versionCode);
                 return new Util.Pair<Integer, String>(code, apkFileName);
             } catch (NumberFormatException e) {
+                Log.e(TAG, "Exception while trying to parse version "+versionCode+" from version file", e);
             }
         }
         return null;
