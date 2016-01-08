@@ -80,6 +80,7 @@ public enum BoatClassMasterdata {
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
+    GC_32 ("GC 32", false, 10.0, 6.00, BoatHullType.CATAMARAN, true, "GC32", "GC-32"),
     
     // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
     ORC ("ORC", true, 13.83, 3.91, BoatHullType.MONOHULL, true),

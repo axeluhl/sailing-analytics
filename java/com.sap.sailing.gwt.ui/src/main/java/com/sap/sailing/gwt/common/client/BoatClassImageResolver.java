@@ -90,6 +90,7 @@ public class BoatClassImageResolver {
         boatClassIconsMap.put(BoatClassMasterdata.TORNADO.getDisplayName(), imageResources.TornadoIcon());
         boatClassIconsMap.put(BoatClassMasterdata.TRIAS.getDisplayName(), imageResources.TriasIcon());
         boatClassIconsMap.put(BoatClassMasterdata.X_99.getDisplayName(), imageResources.X99Icon());
+        boatClassIconsMap.put(BoatClassMasterdata.GC_32.getDisplayName(), imageResources.GC32Icon());
     }
 
     public static ImageResource getBoatClassIconResource(String displayName) {
