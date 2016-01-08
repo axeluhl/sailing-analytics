@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
@@ -139,7 +140,7 @@ public class EventDetailsComposite extends Composite  {
             regattaOverviewURLParameters.put("event", event.id.toString());
             String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
             eventOverviewURL.setText(regattaOverviewLink);
-            eventOverviewURL.setHref(regattaOverviewLink);
+            eventOverviewURL.setHref(UriUtils.fromString(regattaOverviewLink));
      
             List<String> courseAreaNames = new ArrayList<>();
             if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {

@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -160,7 +161,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(String result) {
-                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), result); 
+                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), UriUtils.fromString(result).asString()); 
                 controlsPanel.add(addIgtimiUserLink);
             }
         });

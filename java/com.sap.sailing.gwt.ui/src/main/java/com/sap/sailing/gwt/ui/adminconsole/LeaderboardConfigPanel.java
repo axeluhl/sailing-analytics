@@ -46,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
@@ -53,7 +54,6 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -136,11 +136,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + object.name
-                        + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + (object.displayName != null ? "&displayName="+object.displayName : "")
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                Map<String, String> leaderboardUrlParams = new HashMap<>();
+                leaderboardUrlParams.put("name", object.name);
+                if (showRaceDetails) {
+                    leaderboardUrlParams.put(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, "true");
+                }
+                if (object.displayName != null) {
+                    leaderboardUrlParams.put("displayName", object.displayName);
+                }
+                String link = EntryPointLinkFactory.createLeaderboardLink(leaderboardUrlParams);
                 return ANCHORTEMPLATE.cell(link, object.name);
             }
 
@@ -307,9 +311,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
-                    String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
+                    Map<String, String> leaderboardEditingParams = new HashMap<>();
+                    leaderboardEditingParams.put("name", leaderboardDTO.name);
+                    String leaderboardEditingUrl = EntryPointLinkFactory.createLeaderboardEditingLink(leaderboardEditingParams);
+                    Window.open(leaderboardEditingUrl, "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
                             errorReporter, new DialogCallback<List<CompetitorDTO>>() {
