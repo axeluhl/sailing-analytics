@@ -54,7 +54,7 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pai
                 Integer code = Integer.parseInt(versionCode);
                 return new Util.Pair<Integer, String>(code, apkFileName);
             } catch (NumberFormatException e) {
-                Log.e(TAG, "Exception while trying to parse version "+versionCode+" from version file", e);
+                Log.e(TAG, "Exception while trying to parse version from version file");
             }
         }
         return null;
