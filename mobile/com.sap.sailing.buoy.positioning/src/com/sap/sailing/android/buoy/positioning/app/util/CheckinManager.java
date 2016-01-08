@@ -77,6 +77,7 @@ public class CheckinManager {
     }
 
     private URLData extractRequestParametersFromUri(Uri uri, String scheme) {
+        assert uri != null;
         URLData urlData = new URLData();
         urlData.uriStr = uri.toString();
         urlData.server = scheme + "://" + uri.getHost();
