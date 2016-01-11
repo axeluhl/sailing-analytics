@@ -9,10 +9,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import android.content.Context;
-import android.util.Log;
 
 public class HttpJsonPostRequest extends HttpRequest {
-    private final static String TAG = HttpJsonPostRequest.class.getName();
     public final static String ContentType = "application/json;charset=UTF-8";
 
     private String requestBody;
@@ -38,13 +36,7 @@ public class HttpJsonPostRequest extends HttpRequest {
         try {
             sendBody(outputStream);
         } finally {
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "Exception trying to close HTTP stream", e);
-                }
-            }
+            safeClose(outputStream);
         }
         return new BufferedInputStream(connection.getInputStream());
     }
