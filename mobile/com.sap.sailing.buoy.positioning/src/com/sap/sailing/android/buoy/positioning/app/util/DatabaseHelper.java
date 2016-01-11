@@ -131,7 +131,7 @@ public class DatabaseHelper {
         }
 
         int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
-        int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
+        int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
         int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
 
         if (BuildConfig.DEBUG) {
@@ -234,7 +234,7 @@ public class DatabaseHelper {
     public boolean markLeaderboardCombnationAvailable(Context context, String checkinDigest) {
 
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
-                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
 
         int count = lc.getCount();
 
