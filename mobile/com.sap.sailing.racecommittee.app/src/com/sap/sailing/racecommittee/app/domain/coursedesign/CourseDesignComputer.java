@@ -1,9 +1,13 @@
 package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
+import android.util.Log;
+
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 
 public class CourseDesignComputer {
+    private static final String TAG = CourseDesignComputer.class.getName();
+    
     private Position startBoatPosition;
     private Double windSpeed;
     private Bearing windDirection;
@@ -86,10 +90,9 @@ public class CourseDesignComputer {
                 computedCourseDesign = courseLayout.getCourseDesignFactoryClass().newInstance()
                         .createCourseDesign(startBoatPosition, windSpeed, windDirection, boatClass, courseLayout, numberOfRounds, targetTime);
             } catch (InstantiationException e) {
-                
-                e.printStackTrace();
+                Log.e(TAG, "Exception trying compute course design", e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Exception trying compute course design", e);
             }
         } else
             throw new IllegalStateException("At least one mandatory parameter was not set in the computer!");
