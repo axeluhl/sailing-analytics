@@ -3483,8 +3483,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws Exception {
-        URL imageURL = new URL(imageUrlAsString);
-        Pair<Integer, Integer> imageDimensions = MediaUtils.getImageDimensions(imageURL);
+        final Pair<Integer, Integer> imageDimensions;
+        if (imageUrlAsString != null && !imageUrlAsString.isEmpty()) {
+            URL imageURL = new URL(imageUrlAsString);
+            imageDimensions = MediaUtils.getImageDimensions(imageURL);
+        } else {
+            imageDimensions = null;
+        }
         return imageDimensions;
     }
     

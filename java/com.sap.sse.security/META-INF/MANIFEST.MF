@@ -18,7 +18,6 @@ Import-Package: com.sap.sse.util,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: javax.servlet;bundle-version="2.5.0",
- com.google.gwt.osgi,
  slf4j.api;bundle-version="1.6.4",
  org.json.simple,
  com.sun.jersey,

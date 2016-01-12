@@ -409,7 +409,7 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl implements 
         addListenersForStoredDataAndStartController(receivers);
     }
 
-    private URI checkForCachedStoredData(URI storedURI){
+    private URI checkForCachedStoredData(URI storedURI) {
         final String CACHE_DIR_PROPERTY = "tractrac.mtb.cache.dir";
         if (System.getProperty(CACHE_DIR_PROPERTY) != null) {
             final String directory = System.getProperty(CACHE_DIR_PROPERTY);
