@@ -261,7 +261,7 @@ public class DatabaseHelper {
      *
      * @param checkinDigest
      *            SHA-256 digest of QR-code string
-     * @return
+     * @return combination available or not
      */
     public boolean eventLeaderboardCompetitorCombnationAvailable(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();

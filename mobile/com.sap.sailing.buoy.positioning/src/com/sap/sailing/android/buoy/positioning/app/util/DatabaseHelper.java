@@ -157,7 +157,6 @@ public class DatabaseHelper {
      * @param leaderboard leaderboard to be stored
      * @param checkinURL the checkin url to be stored
      * @param pings the list of mark pings to be stored
-     * @return success or failure
      * @throws GeneralDatabaseHelperException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
