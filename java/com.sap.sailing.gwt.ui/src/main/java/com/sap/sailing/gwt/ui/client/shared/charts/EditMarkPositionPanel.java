@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.moxieapps.gwt.highcharts.client.StockChart;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
@@ -14,16 +17,22 @@ import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
-import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
 
-public class EditMarkPositionPanel  extends AbsolutePanel implements Component<AbstractSettings> {
+public class EditMarkPositionPanel  extends AbstractRaceStockChart implements Component<AbstractSettings> {
     private final RaceMap raceMap;
     
     private Map<String, CourseMarkOverlay> courseMarkOverlays;
@@ -36,14 +45,17 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
     
     private boolean visible;
     
-    public EditMarkPositionPanel(final RaceMap raceMap, final StringMessages stringMessages) {
-        
+    public EditMarkPositionPanel(final RaceMap raceMap, final StringMessages stringMessages, SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, 
+            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.raceMap = raceMap;
         courseMarkHandlers = new HashSet<>();
         selectedMarks = new HashSet<>();
         mapListeners = new HashSet<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         setVisible(false);
+        
+        chart = new StockChart();
     }
     
     public void setVisible(boolean visible) {
@@ -144,4 +156,14 @@ public class EditMarkPositionPanel  extends AbsolutePanel implements Component<A
         }));
     }
 
+    @Override
+    protected Button createSettingsButton() {
+        Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        return settingsButton;
+    }
+    
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        // TODO Auto-generated method stub
+    }
 }
