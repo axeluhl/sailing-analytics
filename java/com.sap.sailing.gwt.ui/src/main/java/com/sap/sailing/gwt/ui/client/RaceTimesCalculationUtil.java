@@ -15,34 +15,32 @@ public class RaceTimesCalculationUtil {
         Date liveTimePoint = timer.getLiveTimePointAsDate();
         switch (timer.getPlayMode()) {
         case Live:
-            if(raceTimesInfo.startOfRace != null) {
+            if (raceTimesInfo.startOfRace != null) {
                 // we have a race start time
-                if(raceTimesInfo.startOfRace.after(liveTimePoint)) {
+                if (raceTimesInfo.startOfRace.after(liveTimePoint)) {
                     // race start is in the future
                     long extensionTime = calculateRaceExtensionTime(liveTimePoint, raceTimesInfo.startOfRace);
                     min = new Date(liveTimePoint.getTime() - extensionTime);
-                    max = raceTimesInfo.startOfRace;
+                    max = raceTimesInfo.startOfRace; // TODO Jonas: should we add some margin to this to avoid the start marker to be squeezed into the right border?
                 } else {
                     // race start was in the past
                     long extensionTime = calculateRaceExtensionTime(raceTimesInfo.startOfRace, liveTimePoint);
                     min = new Date(raceTimesInfo.startOfRace.getTime() - extensionTime);
-                    max = liveTimePoint;
+                    max = liveTimePoint; // TODO Jonas: what about the margin here?
                 }
             } else {
                 // we have NO race start time
                 min = raceTimesInfo.startOfTracking;
-                max = liveTimePoint;
+                max = liveTimePoint; // TODO Jonas: what about the margin here?
             }
             break;
         case Replay:
             long extensionTime = calculateRaceExtensionTime(raceTimesInfo.startOfRace, raceTimesInfo.endOfRace);
-            
             if (raceTimesInfo.startOfRace != null) {
                 min = new Date(raceTimesInfo.startOfRace.getTime() - extensionTime);
             } else if (raceTimesInfo.startOfTracking != null) {
                 min = raceTimesInfo.startOfTracking;
             }
-            
             if (raceTimesInfo.endOfRace != null) {
                 max = new Date(raceTimesInfo.endOfRace.getTime() + extensionTime);
             } else if (raceTimesInfo.newestTrackingEvent != null) {
@@ -55,7 +53,6 @@ public class RaceTimesCalculationUtil {
             }
             break;
         }
-        
         return new Util.Pair<Date, Date>(min, max);
     }
     
@@ -66,7 +63,7 @@ public class RaceTimesCalculationUtil {
         
         long minExtensionTime = 60 * 1000; // 1 minute
         long maxExtensionTime = 10 * 60 * 1000; // 10 minutes
-        double extensionTimeFactor = 0.1; // 10 percent of the overall race length
+        double extensionTimeFactor = 0.1; // 10 percent of the interval length
         long extensionTime = (long) ((endTime.getTime() - startTime.getTime()) * extensionTimeFactor);
         
         return extensionTime < minExtensionTime ? minExtensionTime : extensionTime > maxExtensionTime ? maxExtensionTime : extensionTime;

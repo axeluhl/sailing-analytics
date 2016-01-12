@@ -140,17 +140,21 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         redrawAllMarkers(lastRaceTimesInfo);
     }
 
+    /**
+     * If and only if the {@link #selectedRace}'s timing is described by the {@link #raceTimesInfoProvider} and
+     * according to the timing the current live time point is after the start of tracking or at least after three
+     * minutes before the race, and the current live time point is not after the end of tracking then live mode will be
+     * made possible (<code>true</code> will be returned).
+     */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long eventTimeoutTolerance = 60 * 1000; // 60s
         long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
         long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
-                lastRaceTimesInfo.newestTrackingEvent != null &&
-                liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
-                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
+                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance)) &&
+                (lastRaceTimesInfo.endOfTracking == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfTracking.getTime());
     }
     
     @Override
