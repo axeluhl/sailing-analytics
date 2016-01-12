@@ -45,7 +45,11 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String newEmail = "ernie2@sesame-street.com";
         final String password = "BertMyFriend";
         final String validationBaseURL = "http://me.to.back.com";
+        final String fullName = "Ernie's Full Name";
+        final String company = "Ernie's Company";
         User user = master.createSimpleUser(username, email, password, validationBaseURL);
+        user.setFullName(fullName);
+        user.setCompany(company);
         final String emailValidationSecretAfterCreation = user.getValidationSecret();
         master.updateSimpleUserEmail(username, newEmail, validationBaseURL);
         final String emailValidationSecretAfterChangingEmail = user.getValidationSecret();
@@ -60,6 +64,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         assertEquals(username, replicatedErnie.getName());
         assertEquals(newEmail, replicatedErnie.getEmail());
         assertEquals(emailValidationSecretAfterChangingEmail, replicatedErnie.getValidationSecret());
+        assertEquals(fullName, replicatedErnie.getFullName());
+        assertEquals(company, replicatedErnie.getCompany());
     }
 
     @Test

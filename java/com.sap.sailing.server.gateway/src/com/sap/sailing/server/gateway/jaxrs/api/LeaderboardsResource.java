@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.http.HTTPException;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -116,15 +117,14 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     @Path("{name}")
     public Response getLeaderboard(@PathParam("name") String leaderboardName,
             @DefaultValue("Live") @QueryParam("resultState") ResultStates resultState,
-            @DefaultValue("true") @QueryParam("useCache") boolean useCache,
-            @DefaultValue("1000") @QueryParam("maxCompetitorsCount") int maxCompetitorsCount) {
+            @QueryParam("maxCompetitorsCount") Integer maxCompetitorsCount) {
         Response response;
 
         TimePoint requestTimePoint = MillisecondsTimePoint.now();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             try {
@@ -516,11 +516,11 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
         if (competitor == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + competitorIdAsString + "'.")
+                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else if (leaderboard == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
@@ -540,7 +540,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         final Set<Mark> marks;
@@ -568,14 +568,15 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             if (raceColumn == null) {
                 return Response
                         .status(Status.NOT_FOUND)
-                        .entity("Could not find a race column '" + raceColumnName + "' in leaderboard '"
-                                + leaderboardName + "'.").type(MediaType.TEXT_PLAIN).build();
+                        .entity("Could not find a race column '" + StringEscapeUtils.escapeHtml(raceColumnName) + "' in leaderboard '"
+                                + StringEscapeUtils.escapeHtml(leaderboardName) + "'.").type(MediaType.TEXT_PLAIN).build();
             } else if (fleetName != null) {
                 Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet == null) {
                     return Response
                             .status(Status.NOT_FOUND)
-                            .entity("Could not find fleet '" + fleetName + "' in leaderboard '" + leaderboardName
+                            .entity("Could not find fleet '" + StringEscapeUtils.escapeHtml(fleetName) + "' in leaderboard '" +
+                                    StringEscapeUtils.escapeHtml(leaderboardName)
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
                     marks = getMarksForFleet(raceColumn, fleet);
@@ -642,7 +643,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + leaderboardName + "'.")
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
@@ -651,13 +652,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             regattaLog = ((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
         } else {
             return Response.status(Status.BAD_REQUEST)
-                    .entity("Leaderboard '" + leaderboardName + "' does not have an attached RegattaLog.")
+                    .entity("Leaderboard '" + StringEscapeUtils.escapeHtml(leaderboardName) + "' does not have an attached RegattaLog.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
         Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markId);
         if (mark == null) {
-            return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + markId + "'.")
+            return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         TimePoint now = MillisecondsTimePoint.now();

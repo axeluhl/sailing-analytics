@@ -13,7 +13,10 @@ import com.sap.sailing.domain.common.impl.ColorMapImpl;
 import com.sap.sse.common.Color;
 
 public class CompetitorColorProviderImpl implements CompetitorColorProvider {
-    private final ColorMap<CompetitorDTO> competitorsColorMap;
+    /**
+     * Uses the {@link CompetitorDTO#getIdAsString()} as the ID for the color map
+     */
+    private final ColorMap<String> competitorsColorMap;
     private final Map<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>> competitorsBoatColorsPerRace;
     
     public CompetitorColorProviderImpl() {
@@ -22,7 +25,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
 
     public CompetitorColorProviderImpl(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-        this.competitorsColorMap = new ColorMapImpl<CompetitorDTO>();
+        this.competitorsColorMap = new ColorMapImpl<>();
         this.competitorsBoatColorsPerRace = new HashMap<RegattaAndRaceIdentifier, Map<CompetitorDTO, Color>>();
         if (raceIdentifier != null) {
             for (Entry<CompetitorDTO, BoatDTO> competitorAndBoat : competitorsAndTheirBoats.entrySet()) {
@@ -61,7 +64,7 @@ public class CompetitorColorProviderImpl implements CompetitorColorProvider {
         }
         // fallback
         if (result == null) {
-            result = competitorsColorMap.getColorByID(competitor);
+            result = competitorsColorMap.getColorByID(competitor.getIdAsString());
         }
         return result;
     }

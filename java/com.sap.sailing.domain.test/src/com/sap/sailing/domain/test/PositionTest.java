@@ -21,6 +21,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PositionTest {
     @Test
+    public void testDistanceAcrossDateline() {
+        Position p1 = new DegreePosition(0, 179);
+        Position p2 = new DegreePosition(0, -179);
+        assertEquals(120., p1.getDistance(p2).getNauticalMiles(), 0.1);
+        assertEquals(120., p2.getDistance(p1).getNauticalMiles(), 0.1);
+    }
+    
+    @Test
     public void testEqualityBetweenCompactAndVerbosePosition() {
         Position p1 = new DegreePosition(49.2, 008.3);
         CompactGPSFixImpl compactFix = new CompactGPSFixImpl(p1, MillisecondsTimePoint.now());
