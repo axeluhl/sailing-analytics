@@ -88,7 +88,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // timer will only accept this update if the delay hasn't been updated explicitly
             timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
-                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
+                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null || raceTimesInfo.endOfTracking != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
