@@ -164,6 +164,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
     
     @Override
+    public void updateUserProperties(final String username, String fullName, String company) throws UserManagementException {
+        final Subject subject = SecurityUtils.getSubject();
+        // the signed-in subject has role ADMIN or is changing own user
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            getSecurityService().updateUserProperties(username, fullName, company);
+        } else {
+            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        }
+    }
+    
+    @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
         final Subject subject = SecurityUtils.getSubject();
         if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {

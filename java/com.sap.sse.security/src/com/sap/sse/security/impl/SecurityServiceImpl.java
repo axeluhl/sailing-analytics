@@ -391,6 +391,21 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
     }
 
     @Override
+    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        updateUserProperties(user, fullName, company);
+    }
+
+    private void updateUserProperties(User user, String fullName, String company) {
+        user.setFullName(fullName);
+        user.setCompany(company);
+        apply(s->s.internalStoreUser(user));
+    }
+
+    @Override
     public boolean checkPassword(String username, String password) throws UserManagementException {
         final User user = store.getUserByName(username);
         if (user == null) {
