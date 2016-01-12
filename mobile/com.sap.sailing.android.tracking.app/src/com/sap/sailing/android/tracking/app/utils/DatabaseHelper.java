@@ -17,6 +17,7 @@ import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Event;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.EventLeaderboardCompetitorJoined;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.Leaderboard;
 import com.sap.sailing.android.tracking.app.provider.AnalyticsContract.CheckinUri;
+import com.sap.sailing.android.tracking.app.provider.AnalyticsDatabase;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
@@ -75,17 +76,20 @@ public class DatabaseHelper {
         EventInfo result = new EventInfo();
 
         ContentResolver cr = context.getContentResolver();
-        String projectionStr = "events._id ,leaderboards.leaderboard_name, events.event_id,"
-                + " events.event_name, competitors.competitor_id";
+        String projectionStr = AnalyticsDatabase.Tables.EVENTS + "." + Event._ID + ","
+            + AnalyticsDatabase.Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_NAME + ","
+            + AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_ID + ","
+            + AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_NAME + ","
+            + AnalyticsDatabase.Tables.COMPETITORS + "." + Competitor.COMPETITOR_ID;
         String[] projection = projectionStr.split(",");
         Cursor cursor = cr.query(EventLeaderboardCompetitorJoined.CONTENT_URI, projection,
-            "events." + Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+            AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (cursor != null) {
             if (cursor.moveToFirst()) {
-                result.name = cursor.getString(cursor.getColumnIndex("event_name"));
-                result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-                result.competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-                result.id = cursor.getString(cursor.getColumnIndex("event_id"));
+                result.name = cursor.getString(cursor.getColumnIndex(Event.EVENT_NAME));
+                result.leaderboardName = cursor.getString(cursor.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
+                result.competitorId = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_ID));
+                result.id = cursor.getString(cursor.getColumnIndex(Event.EVENT_ID));
             }
 
             cursor.close();
@@ -265,7 +269,9 @@ public class DatabaseHelper {
      */
     public boolean eventLeaderboardCompetitorCombnationAvailable(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
-        String sel = "leaderboards.leaderboard_checkin_digest = ? AND competitors.competitor_checkin_digest = ? AND events.event_checkin_digest = ?";
+        String sel = AnalyticsDatabase.Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ? "
+            + "AND " + AnalyticsDatabase.Tables.COMPETITORS + "." + Competitor.COMPETITOR_CHECKIN_DIGEST + " = ? "
+            + "AND " + AnalyticsDatabase.Tables.EVENTS + "." + Event.EVENT_CHECKIN_DIGEST + " = ?";
         Cursor cursor = cr.query(AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI, null, sel, new String[] { checkinDigest,
             checkinDigest, checkinDigest }, null);
         int count = 0;
