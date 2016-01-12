@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Cookies;
@@ -317,7 +318,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         logger.log(Level.INFO, "Adding Startanalysis Card");
         if (displaysCards == false) {
             displaysCards = true;
-            header.getElement().setInnerHTML("Start " + startAnalysisDTO.raceName);
+            header.getElement().setInnerHTML("Start " + SafeHtmlUtils.fromString(startAnalysisDTO.raceName));
         }
         if (numberOfStartAnalysisCards > 0) {
             rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.right());

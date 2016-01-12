@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -331,7 +332,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
-                    Window.open("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name, "", null);
+                    Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.name);

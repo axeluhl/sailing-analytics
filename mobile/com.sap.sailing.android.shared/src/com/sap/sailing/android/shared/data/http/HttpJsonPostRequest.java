@@ -32,11 +32,12 @@ public class HttpJsonPostRequest extends HttpRequest {
 
         connection.setRequestProperty("Content-Type", ContentType);
         connection.setRequestProperty("Accept", ContentType);
-
         OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
-        sendBody(outputStream);
-        outputStream.close();
-
+        try {
+            sendBody(outputStream);
+        } finally {
+            safeClose(outputStream);
+        }
         return new BufferedInputStream(connection.getInputStream());
     }
 

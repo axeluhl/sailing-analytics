@@ -183,7 +183,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         User user = new User(name, email, accounts);
-        logger.info("Creating user: " + user);
+        logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }
