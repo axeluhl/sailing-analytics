@@ -4,7 +4,7 @@ import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class AuthorizedContentDecorator extends Composite {

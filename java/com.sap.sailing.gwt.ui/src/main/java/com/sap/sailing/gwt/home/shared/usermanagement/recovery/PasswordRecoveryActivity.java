@@ -8,23 +8,22 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class PasswordRecoveryActivity<CF extends ClientFactoryWithUserManagementService & ClientFactory> extends AbstractActivity implements PasswordRecoveryView.Presenter {
+public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {
 
-    private final CF clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final PasswordRecoveryView view = new PasswordRecoveryViewImpl();
     private final PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav;
 
-    public PasswordRecoveryActivity(PasswordRecoveryPlace place, CF clientFactory,
+    public PasswordRecoveryActivity(PasswordRecoveryPlace place, UserManagementClientFactory clientFactory,
             PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.passwordResetPlaceNav = passwordResetPlaceNav;

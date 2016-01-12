@@ -4,15 +4,16 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class ConfirmationActivity extends AbstractActivity implements ConfirmationView.Presenter {
     private final ConfirmationPlace place;
-    private final ConfirmationClientFactory clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
 
-    public ConfirmationActivity(ConfirmationPlace place, ConfirmationClientFactory clientFactory) {
+    public ConfirmationActivity(ConfirmationPlace place, UserManagementClientFactory clientFactory) {
         this.place = place;
         this.clientFactory = clientFactory;
     }

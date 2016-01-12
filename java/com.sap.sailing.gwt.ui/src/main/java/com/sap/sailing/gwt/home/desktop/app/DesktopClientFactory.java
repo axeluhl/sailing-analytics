@@ -10,18 +10,15 @@ import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringClientFactor
 import com.sap.sailing.gwt.home.desktop.places.start.StartClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 
 public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
         EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory,
         SearchResultClientFactory, WhatsNewClientFactory, SeriesClientFactory, UserProfileClientFactory,
-        ErrorClientFactory, ClientFactoryWithUserManagementContext, ClientFactoryWithUserManagementService,
-        ConfirmationClientFactory, PasswordResetClientFactory {
+        ErrorClientFactory, UserManagementClientFactory, PasswordResetClientFactory {
 
     DesktopPlacesNavigator getHomePlacesNavigator();
 

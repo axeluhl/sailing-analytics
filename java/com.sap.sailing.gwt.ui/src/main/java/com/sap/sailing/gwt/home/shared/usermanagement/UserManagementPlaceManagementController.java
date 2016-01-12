@@ -7,15 +7,13 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivity;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
@@ -25,18 +23,15 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryP
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
 
-public class UserManagementPlaceManagementController
-        <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
-        extends WrappedPlaceManagementController {
+public class UserManagementPlaceManagementController extends WrappedPlaceManagementController {
 
-    public UserManagementPlaceManagementController(CF clientFactory,
+    public UserManagementPlaceManagementController(UserManagementClientFactory clientFactory,
             PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
             PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
             PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
             UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration<CF>(clientFactory, createConfirmationNavigation, passwordResetPlaceNav, userProfileNavigation, userManagementView));
+        super(new Configuration(clientFactory, createConfirmationNavigation, passwordResetPlaceNav, userProfileNavigation, userManagementView));
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -45,17 +40,16 @@ public class UserManagementPlaceManagementController
         });
     }
     
-    private static class Configuration
-            <CF extends ClientFactory & ClientFactoryWithUserManagementContext & ClientFactoryWithUserManagementService & ConfirmationClientFactory>
-            implements PlaceManagementConfiguration {
-        private final CF clientFactory;
+    private static class Configuration implements PlaceManagementConfiguration {
+        private final UserManagementClientFactory clientFactory;
         private final PlaceNavigation<ConfirmationPlace> createConfirmationNavigation;
         private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
         private final PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav;
 
-        public Configuration(CF clientFactory, PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
+        public Configuration(UserManagementClientFactory clientFactory,
+                PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
                 PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
                 PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
                 UserManagementView userManagementView) {
@@ -92,9 +86,10 @@ public class UserManagementPlaceManagementController
                 return new CreateAccountActivity((CreateAccountPlace) placeToUse, clientFactory,
                         createConfirmationNavigation, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity<CF>((PasswordRecoveryPlace) placeToUse, clientFactory, passwordResetPlaceNav, placeController);
+                return new PasswordRecoveryActivity((PasswordRecoveryPlace) placeToUse, clientFactory,
+                        passwordResetPlaceNav, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity<CF>((LoggedInUserInfoPlace) placeToUse, clientFactory,
+                return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, clientFactory,
                         userProfileNavigation, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
                 return new ConfirmationActivity((ConfirmationPlace) placeToUse, clientFactory);

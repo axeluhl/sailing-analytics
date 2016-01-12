@@ -5,24 +5,21 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementContext;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
-public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWithUserManagementService & ClientFactoryWithUserManagementContext>
-        extends AbstractActivity implements LoggedInUserInfoView.Presenter {
+public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
-    private final CF clientFactory;
+    private final UserManagementClientFactory clientFactory;
     private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
     private final PlaceController placeController;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, CF clientFactory,
+    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, UserManagementClientFactory clientFactory,
             PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.userProfileNavigation = userProfileNavigation;
@@ -58,12 +55,12 @@ public class LoggedInUserInfoActivity<CF extends ClientFactory & ClientFactoryWi
         clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                clientFactory.resetUserManagementContext();
+                clientFactory.didLogout();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                clientFactory.resetUserManagementContext();
+                clientFactory.didLogout();
             }
         });
     }

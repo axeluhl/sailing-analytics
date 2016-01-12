@@ -19,8 +19,6 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNew
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
@@ -34,6 +32,8 @@ import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -75,7 +75,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         });
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
+        this.userManagementWizardController = new UserManagementPlaceManagementController(
                 this, getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                 getHomePlacesNavigator().getPasswordResetNavigation(),
                 getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
@@ -160,7 +160,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     @Override
-    public void resetUserManagementContext() {
+    public void didLogout() {
         uCtx = new UserManagementContextImpl();
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementRequestEvent());

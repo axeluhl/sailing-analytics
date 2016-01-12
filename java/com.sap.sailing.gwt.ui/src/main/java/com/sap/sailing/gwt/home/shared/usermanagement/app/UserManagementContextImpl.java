@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.app;
+package com.sap.sailing.gwt.home.shared.usermanagement.app;
 
 import java.util.ArrayList;
 
