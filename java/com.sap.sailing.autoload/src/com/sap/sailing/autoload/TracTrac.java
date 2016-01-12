@@ -94,8 +94,8 @@ public class TracTrac {
                                 new MillisecondsTimePoint(record.getTrackingStartTime().asMillis()),
                                 new MillisecondsTimePoint(record.getTrackingEndTime().asMillis()),
                                 raceLogStore, regattaLogStore,
-                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* simulateWithStartTimeNow */
-                                false, /*useTracTracMarkPassings*/ false,
+                                RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, /* offsetToStartTimeOfSimulatedRace */
+                                null, /*useTracTracMarkPassings*/ false,
                                 /* tracTracUsername */"", /* tracTracPassword */"", record.getRaceStatus(),
                                 record.getRaceVisibility());
                     } else {

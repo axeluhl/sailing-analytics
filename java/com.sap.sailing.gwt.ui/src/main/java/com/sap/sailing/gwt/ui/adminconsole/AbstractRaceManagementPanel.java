@@ -1,20 +1,21 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.RaceDTO;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel implements RaceSelectionChangeListener {
+public abstract class AbstractRaceManagementPanel extends AbstractEventManagementPanel {
     protected RegattaAndRaceIdentifier singleSelectedRace;
     
     protected RaceDTO selectedRaceDTO;
@@ -27,22 +28,39 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     
     public AbstractRaceManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, boolean actionButtonsEnabled, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), actionButtonsEnabled, stringMessages);
-
+        super(sailingService, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        
         mainPanel.add(trackedRacesListComposite);
-
-        trackedRacesListComposite.addRaceSelectionChangeListener(this);
-        
+        trackedRacesListComposite.getSelectionModel().addSelectionChangeHandler(new Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                Set<RaceDTO> selectedRaces = trackedRacesListComposite.getSelectionModel().getSelectedSet();
+                if (selectedRaces.size() == 1) {
+                    singleSelectedRace = selectedRaces.iterator().next().getRaceIdentifier();
+                    selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
+                    selectedCaptionRacePanel.setVisible(true);
+                    for (RegattaDTO regatta : getAvailableRegattas()) {
+                        for (RaceDTO race : regatta.races) {
+                            if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
+                                AbstractRaceManagementPanel.this.selectedRaceDTO = race;
+                                refreshSelectedRaceData();
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    selectedCaptionRacePanel.setCaptionText("");
+                    singleSelectedRace = null;
+                    selectedCaptionRacePanel.setVisible(false);
+                }
+            }
+        });
         singleSelectedRace = null;
-        
         selectedCaptionRacePanel = new CaptionPanel(stringMessages.race());
         selectedCaptionRacePanel.setWidth("100%");
         mainPanel.add(selectedCaptionRacePanel);
-
         selectedRaceContentPanel = new VerticalPanel();
         selectedRaceContentPanel.setWidth("100%");
         selectedCaptionRacePanel.setContentWidget(selectedRaceContentPanel);
@@ -50,26 +68,4 @@ public abstract class AbstractRaceManagementPanel extends AbstractEventManagemen
     }
 
     abstract void refreshSelectedRaceData();
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces.size() == 1) {
-            singleSelectedRace = selectedRaces.get(0);
-            selectedCaptionRacePanel.setCaptionText(singleSelectedRace.getRaceName());
-            selectedCaptionRacePanel.setVisible(true);
-            for (RegattaDTO regatta : getAvailableRegattas()) {
-                for (RaceDTO race : regatta.races) {
-                    if (race != null && race.getRaceIdentifier().equals(singleSelectedRace)) {
-                        this.selectedRaceDTO = race;
-                        refreshSelectedRaceData();
-                        break;
-                    }
-                }
-            }
-        } else {
-            selectedCaptionRacePanel.setCaptionText("");
-            singleSelectedRace = null;
-            selectedCaptionRacePanel.setVisible(false);
-        }
-    }
 }

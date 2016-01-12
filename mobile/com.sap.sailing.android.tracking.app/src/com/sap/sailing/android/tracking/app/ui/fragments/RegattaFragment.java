@@ -430,7 +430,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    ExLog.w(RegattaFragment.this.getActivity(), TAG, "Interrupted sleep");
                 }
             }
         }

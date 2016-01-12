@@ -30,10 +30,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -43,6 +41,8 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 /**
@@ -66,7 +66,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
 
     public SwissTimingEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringConstants) {
-        super(sailingService, regattaRefresher, errorReporter, new RaceSelectionModel(), true, stringConstants);
+        super(sailingService, regattaRefresher, errorReporter, true, stringConstants);
         this.errorReporter = errorReporter;
 
         VerticalPanel mainPanel = new VerticalPanel();
@@ -225,7 +225,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         declinationCheckbox.setValue(true);
         trackableRacesPanel.add(declinationCheckbox);
         
-        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateWithStartTimeNow());
+        final CheckBox simulateWithStartTimeNow = new CheckBox(stringMessages.simulateAsLiveRace());
         simulateWithStartTimeNow.setWordWrap(false);
         simulateWithStartTimeNow.setValue(false);
         trackableRacesPanel.add(simulateWithStartTimeNow);
@@ -262,11 +262,21 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.addColumn(genderColumn, "Gender");
         raceTable.addColumn(raceStartTimeColumn, stringConstants.startTime());
         raceTable.setWidth("300px");
-        raceTable.setSelectionModel(new MultiSelectionModel<SwissTimingRaceRecordDTO>() {});
+        raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
+        raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingRaceRecordDTO>(
+                new EntityIdentityComparator<SwissTimingRaceRecordDTO>() {
+                    @Override
+                    public boolean representSameEntity(SwissTimingRaceRecordDTO dto1, SwissTimingRaceRecordDTO dto2) {
+                        return dto1.raceId.equals(dto2.raceId);
+                    }
+                    @Override
+                    public int hashCode(SwissTimingRaceRecordDTO t) {
+                        return t.raceId.hashCode();
+                    }
+                }, raceList) {
+        });
 
         trackableRacesPanel.add(raceTable);
-
-        raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         raceList.addDataDisplay(raceTable);
         Handler columnSortHandler = getRaceTableColumnSortHandler(raceList.getList(), regattaNameColumn, seriesNameColumn,
         		raceNameColumn, raceStartTimeColumn, raceIdColumn, boatClassColumn, genderColumn, raceStatusColumn);

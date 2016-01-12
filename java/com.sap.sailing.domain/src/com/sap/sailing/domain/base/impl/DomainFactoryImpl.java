@@ -257,51 +257,58 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         double radiusCalculationFactor = 10.0;
         Placemark startBest = null;
         Placemark finishBest = null;
+        Position startPosition = null;
 
         // Get start postition
-        Iterator<Mark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
-        Position startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
-        if (startPosition != null) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                if (startNearest != null) {
-                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                    double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best start place
-                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                            new Placemark.ByPopulationDistanceRatio(startPosition));
-                }
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (org.json.simple.parser.ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            }
-        }
-
-        // Get finish position
-        Iterator<Mark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
-        Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
-        if (startPosition != null && finishPosition != null) {
-            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                finishBest = startBest;
-            } else {
+        final Waypoint firstWaypoint = race.getRace().getCourse().getFirstWaypoint();
+        if (firstWaypoint != null) {
+            Iterator<Mark> startMarks = firstWaypoint.getMarks().iterator();
+            GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
+            startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
+            if (startPosition != null) {
                 try {
                     // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+                    if (startNearest != null) {
+                        Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                        double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best start place
+                        startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                                new Placemark.ByPopulationDistanceRatio(startPosition));
+                    }
                 } catch (IOException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
                 } catch (org.json.simple.parser.ParseException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                }
+            }
+        }
+
+        // Get finish position
+        final Waypoint lastWaypoint = race.getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            Iterator<Mark> finishMarks = firstWaypoint.getMarks().iterator();
+            GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
+            Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
+            if (startPosition != null && finishPosition != null) {
+                if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                    finishBest = startBest;
+                } else {
+                    try {
+                        // Get distance to nearest placemark and calculate the search radius
+                        Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                        Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                        double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best finish place
+                        finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                                new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    } catch (IOException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    } catch (org.json.simple.parser.ParseException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    }
                 }
             }
         }

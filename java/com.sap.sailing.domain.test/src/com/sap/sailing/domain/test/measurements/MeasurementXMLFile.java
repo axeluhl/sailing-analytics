@@ -15,7 +15,15 @@ import com.sap.sse.common.Util;
  * &lt;measurement&gt; tags embedded which list named values for use by the Hudson/Jenkins Measurements Plot plug-in.
  * The output is written to the <code>bin/surefire-reports/</code> directory by the {@link #write()} method, but only if
  * a <code>bin/</code> directory exists as subdirectory of the current working directory. The <code>surefire-reports</code>
- * subdirectory will be created if it doesn't exist.
+ * subdirectory will be created if it doesn't exist.<p>
+ * 
+ * Use this class as in the following example:
+ * <pre>
+ *       MeasurementXMLFile performanceReport = new MeasurementXMLFile(this.getClass());
+ *       MeasurementCase performanceReportCase = performanceReport.addCase(getClass().getSimpleName());
+ *       performanceReportCase.addMeasurement(new Measurement("This is a measurement name", 12345); // 12345 is the value to be recorded
+ *       performanceReport.write();
+ * </pre>
  * 
  * @author Axel Uhl (D043530)
  * 
