@@ -348,7 +348,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                     RacingActivity.this.startService(registerIntent);
                 }
             }
-        }).run();
+        }).start();
     }
 
     public void setProgressSpinnerVisibility(boolean visible) {

@@ -92,7 +92,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * @param deviceMappingData
      */
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
-        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(),
+        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(),
                 checkinData.checkinDigest)) {
             try {
                 DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),

@@ -58,31 +58,13 @@ public class DatabaseHelper {
         int result = 0;
 
         ContentResolver cr = context.getContentResolver();
-        Cursor cursor = cr.query(Event.CONTENT_URI, null, Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"",
-                null, null);
+        Cursor cursor = cr.query(Event.CONTENT_URI, null, Event.EVENT_CHECKIN_DIGEST + " = ?",
+                new String[] { checkinDigest }, null);
         cursor.moveToFirst();
         result = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
         cursor.close();
         return result;
     }
-
-    // public EventInfo getEventInfoWithLeaderboard(Context context, String eventId) {
-    // EventInfo result = new EventInfo();
-    //
-    // ContentResolver cr = context.getContentResolver();
-    // String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name";
-    // String[] projection = projectionStr.split(",");
-    // Cursor cursor = cr.query(LeaderboardsEventsJoined.CONTENT_URI, projection, "events.event_id = \"" + eventId +
-    // "\"", null, null);
-    // if (cursor.moveToFirst())
-    // {
-    // result.name = cursor.getString(cursor.getColumnIndex("event_name"));
-    // result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-    // }
-    //
-    // cursor.close();
-    // return result;
-    // }
 
     public EventInfo getEventInfoWithLeaderboardAndCompetitor(Context context, String checkinDigest) {
         EventInfo result = new EventInfo();
@@ -92,7 +74,7 @@ public class DatabaseHelper {
                 + " events.event_name, competitors.competitor_id";
         String[] projection = projectionStr.split(",");
         Cursor cursor = cr.query(EventLeaderboardCompetitorJoined.CONTENT_URI, projection, "events."
-                + Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                + Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (cursor.moveToFirst()) {
             result.name = cursor.getString(cursor.getColumnIndex("event_name"));
             result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
@@ -104,32 +86,12 @@ public class DatabaseHelper {
         return result;
     }
 
-    // public EventInfo getEventInfoWithLeaderboardAndCompetitor(Context context, String eventId) {
-    // EventInfo result = new EventInfo();
-    //
-    // ContentResolver cr = context.getContentResolver();
-    // String projectionStr = "events._id,leaderboards.leaderboard_name,events.event_name, competitors.competitor_id";
-    // String[] projection = projectionStr.split(",");
-    // Cursor cursor = cr.query(EventLeaderboardCompetitorJoined.CONTENT_URI, projection, "events.event_id = \"" +
-    // eventId + "\"", null, null);
-    // if (cursor.moveToFirst())
-    // {
-    // result.name = cursor.getString(cursor.getColumnIndex("event_name"));
-    // result.leaderboardName = cursor.getString(cursor.getColumnIndex("leaderboard_name"));
-    // result.competitorId = cursor.getString(cursor.getColumnIndex("competitor_id"));
-    // }
-    //
-    // cursor.close();
-    // return result;
-    // }
-    //
-
     public EventInfo getEventInfo(Context context, String checkinDigest) {
         EventInfo event = new EventInfo();
         event.checkinDigest = checkinDigest;
 
         Cursor cursor = context.getContentResolver().query(Event.CONTENT_URI, null,
-                Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
 
         if (cursor.moveToFirst()) {
             event.name = cursor.getString(cursor.getColumnIndex(Event.EVENT_NAME));
@@ -145,30 +107,12 @@ public class DatabaseHelper {
         return event;
     }
 
-    // public CompetitorInfo getCompetitor(Context context, String competitorId)
-    // {
-    // CompetitorInfo competitor = new CompetitorInfo();
-    // competitor.id = competitorId;
-    //
-    // Cursor cursor = context.getContentResolver().query(Competitor.CONTENT_URI, null, "competitor_id = \"" +
-    // competitorId + "\"", null, null);
-    // if (cursor.moveToFirst()) {
-    // competitor.name = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
-    // competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
-    // competitor.sailId = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_SAIL_ID));
-    // competitor.rowId = cursor.getInt(cursor.getColumnIndex(BaseColumns._ID));
-    // }
-    //
-    // cursor.close();
-    // return competitor;
-    // }
-
     public CompetitorInfo getCompetitor(Context context, String checkinDigest) {
         CompetitorInfo competitor = new CompetitorInfo();
         competitor.checkinDigest = checkinDigest;
 
         Cursor cursor = context.getContentResolver().query(Competitor.CONTENT_URI, null,
-                Competitor.COMPETITOR_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Competitor.COMPETITOR_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (cursor.moveToFirst()) {
             competitor.name = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_DISPLAY_NAME));
             competitor.countryCode = cursor.getString(cursor.getColumnIndex(Competitor.COMPETITOR_COUNTRY_CODE));
@@ -181,29 +125,12 @@ public class DatabaseHelper {
         return competitor;
     }
 
-    // public LeaderboardInfo getLeaderboard(Context context, String leaderboardName)
-    // {
-    // LeaderboardInfo leaderboard = new LeaderboardInfo();
-    // leaderboard.name = leaderboardName;
-    //
-    // Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null, "leaderboard_name = \"" +
-    // leaderboardName + "\"", null, null);
-    // if (lc.moveToFirst()) {
-    // leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
-    // leaderboard.checkinDigest = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
-    // }
-    //
-    // lc.close();
-    //
-    // return leaderboard;
-    // }
-
     public LeaderboardInfo getLeaderboard(Context context, String checkinDigest) {
         LeaderboardInfo leaderboard = new LeaderboardInfo();
         leaderboard.checkinDigest = checkinDigest;
 
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
-                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (lc.moveToFirst()) {
             leaderboard.rowId = lc.getInt(lc.getColumnIndex(BaseColumns._ID));
             leaderboard.name = lc.getString(lc.getColumnIndex(Leaderboard.LEADERBOARD_NAME));
@@ -219,7 +146,7 @@ public class DatabaseHelper {
         checkinUrlInfo.checkinDigest = checkinDigest;
 
         Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
-                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null, null);
+                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc.moveToFirst()) {
             checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
             checkinUrlInfo.urlString = uc.getString(uc.getColumnIndex(CheckinUri.CHECKIN_URI_VALUE));
@@ -230,34 +157,13 @@ public class DatabaseHelper {
         return checkinUrlInfo;
     }
 
-    // public void deleteRegattaFromDatabase(Context context, String eventId, String competitorId, String
-    // leaderboardName)
-    // {
-    // ContentResolver cr = context.getContentResolver();
-    //
-    // int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_ID + " = \"" + eventId + "\"", null);
-    // int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_ID + " = \"" + competitorId + "\"", null);
-    // int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_NAME + " = \"" + leaderboardName + "\"",
-    // null);
-    //
-    // if (BuildConfig.DEBUG)
-    // {
-    // ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
-    // ExLog.i(context, TAG, "Checkout, number of competitors deleted: " + d2);
-    // ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d3);
-    // }
-    // }
-
     public void deleteRegattaFromDatabase(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
 
-        int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = \"" + checkinDigest + "\"", null);
-        int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = \"" + checkinDigest
-                + "\"", null);
-        int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = \"" + checkinDigest
-                + "\"", null);
-        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = \"" + checkinDigest
-                + "\"", null);
+        int d1 = cr.delete(Event.CONTENT_URI, Event.EVENT_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d2 = cr.delete(Competitor.CONTENT_URI, Competitor.COMPETITOR_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d3 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
 
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of events deleted: " + d1);
@@ -344,21 +250,14 @@ public class DatabaseHelper {
      *
      * @param checkinDigest
      *            SHA-256 digest of QR-code string
-     * @param leaderboardName
-     * @param competitorId
      * @return
      */
-    public boolean eventLeaderboardCompetitorCombnationAvailable(Context context, String checkinDigest) {
-
+    public boolean eventLeaderboardCompetitorCombinationAvailable(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
-        String sel = "leaderboards.leaderboard_checkin_digest = \"" + checkinDigest
-                + "\" AND competitors.competitor_checkin_digest = \"" + checkinDigest
-                + "\" AND events.event_checkin_digest = \"" + checkinDigest + "\"";
-
-        Cursor cursor = cr.query(AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI, null, sel, null, null);
-
+        String sel = "leaderboards.leaderboard_checkin_digest = ? AND competitors.competitor_checkin_digest = ? AND events.event_checkin_digest = ?";
+        Cursor cursor = cr.query(AnalyticsContract.EventLeaderboardCompetitorJoined.CONTENT_URI, null, sel,
+                new String[] { checkinDigest, checkinDigest, checkinDigest }, null);
         int count = cursor.getCount();
-
         cursor.close();
         return count == 0;
     }

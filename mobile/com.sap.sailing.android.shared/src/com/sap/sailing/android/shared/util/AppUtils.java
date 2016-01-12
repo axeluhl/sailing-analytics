@@ -64,7 +64,7 @@ public class AppUtils {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Error trying to read build info", e);
                 }
             }
         }

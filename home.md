@@ -52,6 +52,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Working with GWT Super Dev Mode|wiki/super-dev-mode]]
   * [[Mobile Development|wiki/mobile-development]]
   * [[Security|wiki/security]]
+  * [[Fortify Security Scans|wiki/fortify]]
   * [[Java De(Serialization) and Circular Dependencies|wiki/java-de-serialization-and-circular-dependencies]]
 * Information for Webdesigners
   * [[Layout repository|wiki/webdesign]]
