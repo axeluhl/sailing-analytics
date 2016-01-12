@@ -152,12 +152,13 @@ public class DatabaseHelper {
     /**
      * When checking in, store info on the event, the competitor and the leaderboard in the database.
      *
-     * @param context
-     * @param leaderboard
+     * @param context android context
+     * @param markList the list of marks to be stored
+     * @param leaderboard leaderboard to be stored
+     * @param checkinURL the checkin url to be stored
+     * @param pings the list of mark pings to be stored
      * @return success or failure
      * @throws GeneralDatabaseHelperException
-     * @throws OperationApplicationException
-     * @throws RemoteException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
             CheckinUrlInfo checkinURL, List<MarkPingInfo> pings) throws GeneralDatabaseHelperException {
@@ -239,7 +240,7 @@ public class DatabaseHelper {
 
     }
 
-    public boolean markLeaderboardCombnationAvailable(Context context, String checkinDigest) {
+    public boolean markLeaderboardCombinationAvailable(Context context, String checkinDigest) {
 
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
             Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);

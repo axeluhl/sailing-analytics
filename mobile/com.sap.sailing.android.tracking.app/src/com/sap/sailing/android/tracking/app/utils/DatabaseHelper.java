@@ -190,14 +190,12 @@ public class DatabaseHelper {
     /**
      * When checking in, store info on the event, the competitor and the leaderboard in the database.
      *
-     * @param context
-     * @param event
-     * @param competitor
-     * @param leaderboard
+     * @param context android context
+     * @param event event to be stored
+     * @param competitor competitor to be stored
+     * @param leaderboard leaderboard to be stored
      * @return success or failure
      * @throws GeneralDatabaseHelperException
-     * @throws OperationApplicationException
-     * @throws RemoteException
      */
     public void storeCheckinRow(Context context, EventInfo event, CompetitorInfo competitor,
             LeaderboardInfo leaderboard, CheckinUrlInfo checkinURL) throws GeneralDatabaseHelperException {
@@ -213,7 +211,7 @@ public class DatabaseHelper {
 
         // now insert event
 
-        ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> opList = new ArrayList<>();
 
         ContentValues cev = new ContentValues();
         cev.put(Event.EVENT_ID, event.id);
