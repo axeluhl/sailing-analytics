@@ -203,13 +203,13 @@ public class FixesAndTails {
      *            longer tail itself), such that the second request that uses the <em>same</em> map will be considered
      *            having an overlap now, not leading to a replacement of the previous update originating from the same
      *            request.
-     * @return 
      * 
-     * @return a {@link Runnable} for each competitor that the caller must invoke before starting to create or update
-     *         the key competitor's tail. The object returned may be a no-op, but it may also clear an existing tail if
-     *         necessary. The reason why this is not executed immediately is that there may be a transition-based delay
-     *         with which the tails are updated. In this case we would be producing severe flicker. By delaying the
-     *         command to the point when the update is applied should avoid such flicker.
+     * @return a {@link Runnable} for each competitor from <code>fixesForCompetitors</code>' key set that the caller
+     *         must invoke before starting to create or update the key competitor's tail. The object returned may be a
+     *         no-op, but it may also clear an existing tail if necessary. The reason why this is not executed
+     *         immediately is that there may be a transition-based delay with which the tails are updated. In this case
+     *         we would be producing severe flicker. By delaying the command to the point when the update is applied we
+     *         should avoid such flicker.
      */
     protected Map<CompetitorDTO, Runnable> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
@@ -397,8 +397,7 @@ public class FixesAndTails {
                 }
                 int vertexCount = tail.getPath().getLength();
                 final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
-                int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix
-                        .get(competitorDTO);
+                int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
                 // remove fixes before what is now to be the beginning of the polyline:
                 while (indexOfFirstShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfFirstShownFix).timepoint.before(from)) {
@@ -417,8 +416,7 @@ public class FixesAndTails {
                     vertexCount++;
                 }
                 // now adjust the polyline's tail: remove excess vertices that are after "to"
-                int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix
-                        .get(competitorDTO);
+                int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
                 while (indexOfLastShownFix != -1 && vertexCount > 0
                         && fixesForCompetitor.get(indexOfLastShownFix).timepoint.after(to)) {
                     if (vertexCount-1 == 0 || (indexOfLastShownFix-1 >= 0 && !fixesForCompetitor.get(indexOfLastShownFix-1).timepoint.after(to))) {

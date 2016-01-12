@@ -36,26 +36,18 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
      *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
      *            display on {@link ListDataProvider}
      */
-    public RefreshableSingleSelectionModel(EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        this(/* keyProvider */ null, comp, listDataProvider);
-    }
-    
-    /**
-     * @param keyProvider
-     *            {@link ProvidesKey} for the super class constructor
-     * @param comp
-     *            {@link EntityIdentityComparator} to compare the identity of the objects
-     * @param listDataProvider
-     *            {@link ListDataProvider} to add this {@link RefreshableSingleSelectionModel selectionmodel} as an
-     *            display on {@link ListDataProvider}
-     */
-    public RefreshableSingleSelectionModel(ProvidesKey<T> keyProvider, EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
-        super(keyProvider);
+    public RefreshableSingleSelectionModel(final EntityIdentityComparator<T> comp, ListDataProvider<T> listDataProvider) {
+        super(comp == null ? null : new ProvidesKey<T>() {
+                    @Override
+                    public Object getKey(T item) {
+                        return new EntityIdentityWrapper<T>(item, comp);
+                    }
+                });
         this.comp = comp;
         this.listDataProvider = listDataProvider;
         this.listDataProvider.addDataDisplay(new HasDataAdapter<T>(this, listDataProvider));
     }
-
+    
     /**
      * @return the {@link EntityIdentityComparator} for the {@link RefreshableSingleSelectionModel}. If the
      *         {@link EntityIdentityComparator} is not set this method will return <code>null</code>.

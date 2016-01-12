@@ -2,12 +2,14 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sse.common.Util;
@@ -31,11 +33,18 @@ public class CompactRaceMapDataDTO implements IsSerializable {
     private LinkedHashMap<String, Integer> competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber;
     private long simulationResultVersion;
     
+    /**
+     * <code>null</code> if the client's request contained an equal MD5 as the race's competitors {@link RaceDefinition#getCompetitorMD5() produce};
+     * otherwise, the set of competitor IDs, {@link Object#toString() converted to strings}, in no particular order.
+     */
+    private HashSet<String> raceCompetitorIdsAsStrings;
+    
     CompactRaceMapDataDTO() {}
 
     public CompactRaceMapDataDTO(Map<CompetitorDTO, List<GPSFixDTO>> boatPositions, CoursePositionsDTO coursePositions,
-           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion) {
+           List<SidelineDTO> courseSidelines, QuickRanksDTO quickRanks, long simulationResultVersion, HashSet<String> raceCompetitorIdsAsStrings) {
         this.boatPositionsByCompetitorIdAsString = new CompactBoatPositionsDTO(boatPositions);
+        this.raceCompetitorIdsAsStrings = raceCompetitorIdsAsStrings;
         this.quickRanks = new ArrayList<CompactQuickRankDTO>(quickRanks == null ? 0 : Util.size(quickRanks.getQuickRanks()));
         this.competitorsInOrderOfWindwardDistanceTraveledFarthestFirstIdAsStringAndOneBasedLegNumber = new LinkedHashMap<>();
         Map<String, Integer> competitorIdAsStringToOneBasedLegNumber = new HashMap<>();
@@ -76,6 +85,7 @@ public class CompactRaceMapDataDTO implements IsSerializable {
             }
         }
         result.simulationResultVersion = simulationResultVersion;
+        result.raceCompetitorIdsAsStrings = this.raceCompetitorIdsAsStrings;
         return result;
     }
 }

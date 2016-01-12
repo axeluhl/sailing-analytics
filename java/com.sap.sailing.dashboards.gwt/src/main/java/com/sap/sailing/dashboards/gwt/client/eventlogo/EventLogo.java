@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Image;
@@ -33,7 +34,7 @@ public class EventLogo extends Image {
                     if (event != null) {
                         final ImageDTO logo = event.getLogoImage();
                         if (logo != null) {
-                            eventLogo.getElement().setAttribute("src", logo.getSourceRef());
+                            eventLogo.getElement().setAttribute("src", UriUtils.fromString(logo.getSourceRef()).asString());
                         } else {
                             eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
                         }

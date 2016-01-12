@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -61,7 +62,8 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
         Response response;
         LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByName(leaderboardGroupName);
         if (leaderboardGroup == null) {
-            response = Response.status(Status.NOT_FOUND).entity("Could not find a leaderboard group with name '"+leaderboardGroupName+"'.").type(MediaType.TEXT_PLAIN).build();
+            response = Response.status(Status.NOT_FOUND).entity("Could not find a leaderboard group with name '"+
+                    StringEscapeUtils.escapeHtml(leaderboardGroupName)+"'.").type(MediaType.TEXT_PLAIN).build();
         } else {
             TimePoint timePoint = MillisecondsTimePoint.now();
             JSONObject jsonLeaderboardGroup = new JSONObject();
