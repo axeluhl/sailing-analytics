@@ -692,12 +692,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                     } catch (ConcurrentModificationException e) {
                         // getSeries() returns a live collection, and Series.getRaceColumns() does so, too.
                         // In the unlikely event of a modification is applied to either of these structures while
-                        // iterating, an exception
-                        // will be thrown. We catch and log it here and try again.
-                        logger.log(
-                                Level.INFO,
-                                "Got a ConcurrentModificationException while trying to update the RaceExecutionOrderCache",
-                                e);
+                        // iterating, an exception will be thrown. We catch and log it here and try again.
+                        logger.log(Level.INFO,
+                                "Got a ConcurrentModificationException while trying to update the RaceExecutionOrderCache", e);
                         concurrentlyModified = true;
                     }
                 } while (concurrentlyModified);
