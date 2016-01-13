@@ -380,7 +380,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
     
     @Override
-    public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) {
+    public void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException {
         RaceLog raceLog = getRaceLog(fleet);
         List<RaceLogEvent> events = new AllEventsOfTypeFinder<>(raceLog, true, RaceLogUseCompetitorsFromRaceLogEvent.class).analyze();
         for (RaceLogEvent event : events) {
@@ -391,11 +391,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 raceLog.unlockAfterRead();
             }
             if (event != null) {
-                try {
-                    raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event, "revoke triggered by GWT user action");
-                } catch (NotRevokableException e) {
-                    logger.warning("Event could not be revoked");
-                } 
+                raceLog.revokeEvent(raceLogEventAuthorForRaceColumn, event, "revoke triggered by GWT user action");
             }
         }
     }
