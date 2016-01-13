@@ -123,8 +123,7 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     @Override
     public Iterable<Competitor> getCompetitorsRegisteredInRacelog(final Fleet fleet) {
         RaceLog raceLog = getRaceLog(fleet);
-
-        if (raceLog == null){
+        if (raceLog == null) {
             return Collections.emptySet();
         } else {
             RaceLogRegisteredCompetitorsAnalyzer analyzer = new RaceLogRegisteredCompetitorsAnalyzer(raceLog);
@@ -135,8 +134,7 @@ public abstract class SimpleAbstractRaceColumn implements RaceColumn {
     @Override
     public boolean isCompetitorRegistrationInRacelogEnabled(final Fleet fleet) {
         RaceLog raceLog = getRaceLog(fleet);
-
-        if (raceLog == null){
+        if (raceLog == null) {
             return false;
         } else {
             RaceLogUsesOwnCompetitorsAnalyzer analyzer = new RaceLogUsesOwnCompetitorsAnalyzer(raceLog);
