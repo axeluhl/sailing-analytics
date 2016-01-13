@@ -17,10 +17,12 @@ public class SessionUtils {
     public static final String SESSION_AUTH_PROVIDER = "GWTOAuthLoginDemo_auth_provider";
     public static final String SOCIAL_USER = "Social_User";
     
+    public static final String SESSION_EXPIRED_MESSAGE = "Session has expired";
+    
     public static void saveRequestTokenToSession(Token requestToken) throws Exception {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new Exception(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new Exception(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss == null) { sss = new ServersideSession();
@@ -33,7 +35,7 @@ public class SessionUtils {
     public static void saveStateToSession(String state) throws Exception {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new Exception(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new Exception(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss == null) { sss = new ServersideSession();
@@ -45,7 +47,7 @@ public class SessionUtils {
     public static String getProtectedResourceUrlFromSession() throws OAuthException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new OAuthException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new OAuthException(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss != null) return sss.getProtectedResourceUrl();
@@ -58,7 +60,7 @@ public class SessionUtils {
     public static String getStateFromSession() throws Exception {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new Exception(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new Exception(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss != null) return sss.getState();
@@ -71,7 +73,7 @@ public class SessionUtils {
     public static String getSessionIdFromSession() throws OAuthException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new OAuthException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new OAuthException(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss != null) return sss.getSessionId();
@@ -84,7 +86,7 @@ public class SessionUtils {
     public static Token getAccessTokenFromSession() throws OAuthException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new OAuthException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new OAuthException(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss != null) { return sss.getAccessToken(); } return
@@ -97,7 +99,7 @@ public class SessionUtils {
     public static int getAuthProviderFromSession() throws OAuthException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new OAuthException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new OAuthException(SESSION_EXPIRED_MESSAGE);
         }
         /*
          * ServersideSession sss = getServersideSession(); if (sss != null) return sss.getAuthProvider();
@@ -116,7 +118,7 @@ public class SessionUtils {
     public static void saveSessionIdToSession(String sessionId) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         session.setAttribute(SESSION_ID, sessionId);
     }
@@ -124,7 +126,7 @@ public class SessionUtils {
     public static void saveProtectedResourceUrlToSession(String url) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         session.setAttribute(SESSION_PROTECTED_URL, url);
     }
@@ -132,7 +134,7 @@ public class SessionUtils {
     public static void saveAuthProviderToSession(int authProvider) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         session.setAttribute(SESSION_AUTH_PROVIDER, authProvider);
     }
@@ -140,7 +142,7 @@ public class SessionUtils {
     public static void saveAccessTokenToSession(Token accessToken) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         session.setAttribute(SESSION_ACCESS_TOKEN, accessToken);
     }
@@ -148,7 +150,7 @@ public class SessionUtils {
     public static void saveYahooGuidToSession(String guid) throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         session.setAttribute(SESSION_YAHOO_GUID, guid);
     }
@@ -156,7 +158,7 @@ public class SessionUtils {
     public static String getYahooGuidFromSession() throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         return (String) session.getAttribute(SESSION_YAHOO_GUID);
     }
@@ -164,7 +166,7 @@ public class SessionUtils {
     public static Token getRequestTokenFromSession() throws AuthenticationException {
         Session session = SecurityUtils.getSubject().getSession();
         if (session == null) {
-            throw new AuthenticationException(ClientUtils.SESSION_EXPIRED_MESSAGE);
+            throw new AuthenticationException(SESSION_EXPIRED_MESSAGE);
         }
         return (Token) session.getAttribute(SESSION_REQUEST_TOKEN);
     }

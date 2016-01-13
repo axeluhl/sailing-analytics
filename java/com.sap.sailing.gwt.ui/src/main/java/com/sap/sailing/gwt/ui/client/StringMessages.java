@@ -325,7 +325,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -505,6 +505,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String regattaIsLive(String regattaName);
+    String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
@@ -1109,6 +1111,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String timeZone();
     String eventOfficialWebsiteURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();

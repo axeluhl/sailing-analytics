@@ -526,7 +526,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             try {
                 in = new java.net.URL(downloadUrl).openStream();
                 imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
-                if (!imageFile.exists()){
+                if (!imageFile.exists()) {
                     imageFile.createNewFile();
                 }
                 outputStream = new FileOutputStream(imageFile);
@@ -539,7 +539,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 outputStream.close();
                 in.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download image file " + imageFile);
             } finally {
                 if (in != null) {
                     safeClose(in);
@@ -582,7 +582,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 InputStream in = new java.net.URL(downloadUrl).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl+": "+e.getMessage());
             }
             return mIcon11;
         }

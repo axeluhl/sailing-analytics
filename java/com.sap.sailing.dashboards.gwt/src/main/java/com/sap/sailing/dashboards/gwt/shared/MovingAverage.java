@@ -5,10 +5,10 @@ package com.sap.sailing.dashboards.gwt.shared;
 
 
 /**
- * Used to calculate the average value for a certain amount of renewing values.
- * The amount of values is defined by {@link #NUMBER_OF_VALUES_AVERAGE_CALCULATED}.
+ * Used to calculate the average value for a defined amount of renewing values.
+ * The amount of values saved is defined by {@link #NUMBER_OF_VALUES_AVERAGE_CALCULATED}.
  * It uses a doubleEnededQueue to delete old values, when the queue reached the size 
- * of {@link #NUMBER_OF_FIEXES_AVERAGE_CALCULATED} and populate it with new ones.
+ * of {@link #NUMBER_OF_FIEXES_AVERAGE_CALCULATED} and populates it with new ones.
  * 
  * @author Alexander Ries
  *
