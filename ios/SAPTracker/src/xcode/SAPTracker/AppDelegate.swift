@@ -47,7 +47,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let rootViewController = self.window!.rootViewController as! UINavigationController
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)
-        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": url.absoluteString])
+        var urlString = url.absoluteString
+        let appPrefix : String = "comsapsailingtracker://"
+        urlString = urlString.hasPrefix(appPrefix) ? urlString.substringFromIndex(appPrefix.endIndex) : urlString
+        let httpPrefix : String = "http//"
+        urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substringFromIndex(httpPrefix.endIndex) : urlString
+        let httpsPrefix : String = "https//"
+        urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substringFromIndex(httpsPrefix.endIndex) : urlString
+        let notification = NSNotification(name: NotificationType.openUrl, object: self, userInfo:["url": urlString])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
         return true
     }
