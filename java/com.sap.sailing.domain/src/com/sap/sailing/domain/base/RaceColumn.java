@@ -255,13 +255,13 @@ public interface RaceColumn extends Named {
     /**
      * Provides the combined set of marks from all {@link #getTrackedRace(Fleet) tracked races attached to this
      * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
-     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} or {@link RegattaLog} {@link #getRegattaLog()} attached to 
+     * respective {@link #getRaceLog(Fleet) race log} or {@link #getRegattaLog()} attached to 
      * this column for that fleet.
      */
     Iterable<Mark> getAllMarks();
 
     /**
-     * Same as {@link #getAllCompetitors()}, but restricted to the single race identified by the <code>fleet</code> parameter.
+     * Same as {@link #getAllMarks()}, but restricted to the single race identified by the <code>fleet</code> parameter.
      */
     Iterable<Mark> getAllMarks(Fleet fleet);
 

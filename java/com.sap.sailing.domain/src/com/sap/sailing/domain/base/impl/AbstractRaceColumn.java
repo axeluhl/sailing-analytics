@@ -341,18 +341,22 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public Iterable<Mark> getAllMarks() {
-        Set<Mark> result = new HashSet<>();
+        final Set<Mark> result = new HashSet<>();
+        // if the marks from the regatta log are to be used because a slot has no TrackedRace attached,
+        // those regatta log marks only need to be added to the result once
+        boolean regattaLogMarksAlreadyAdded = false;
         for (Fleet fleet : getFleets()) {
             TrackedRace trackedRace = getTrackedRace(fleet);
             if (trackedRace != null) {
                 for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                     Util.addAll(waypoint.getMarks(), result);
                 }
-            } else {
+            } else if (!regattaLogMarksAlreadyAdded) {
                 // if no tracked race is found, use marks from regatta log
                 RegattaLog regattaLog = getRegattaLog();
                 Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
                 result.addAll(viaRegattaLog);
+                regattaLogMarksAlreadyAdded = true;
             }
         }
         return result;
