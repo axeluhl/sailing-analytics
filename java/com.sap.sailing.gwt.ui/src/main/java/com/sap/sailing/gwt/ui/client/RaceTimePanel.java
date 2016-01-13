@@ -148,13 +148,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
         long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
                 ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance)) &&
-                (lastRaceTimesInfo.endOfTracking == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfTracking.getTime());
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START)) &&
+                ((lastRaceTimesInfo.endOfTracking == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfTracking.getTime()) &&
+                 (lastRaceTimesInfo.endOfRace == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END));
     }
     
     @Override
