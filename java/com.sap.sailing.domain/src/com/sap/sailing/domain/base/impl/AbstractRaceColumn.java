@@ -258,8 +258,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 // race exists, its competitors set takes precedence over what's in the race log. Usually,
                 // the tracked race will have the same competitors as those in the race log, or more because
                 // those from the regatta log are added to the tracked race as well.
-                RegattaLog regattaLog = getRegattaLog();
-                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), regattaLog).analyze();
+                Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
                 result.addAll(viaRaceLog);
             }
         }
@@ -278,9 +277,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
-            RegattaLog regattaLog = getRegattaLog();
-            //FIXME: soon to be removed, as RaceLogDefineMarkEvent is deprecated
-            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), regattaLog).analyze();
+            Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
             result = viaRaceLog;
         }
         return result;

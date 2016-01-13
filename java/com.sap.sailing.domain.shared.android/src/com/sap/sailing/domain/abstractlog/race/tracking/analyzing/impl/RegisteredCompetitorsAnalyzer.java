@@ -9,16 +9,17 @@ import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnaly
 import com.sap.sailing.domain.base.Competitor;
 
 /**
- * Used to find competitors of a race. Checks whether the competitors for the given race are registered on the RaceLog
- * via {@link RaceLogUsesOwnCompetitorsAnalyzer} or on the RegattaLog and fetches the competitors appropriately.
+ * Used to find competitors of a race based on {@link RaceLog} and {@link RegattaLog} contents. Checks whether the
+ * competitors for the given race are registered on the RaceLog via {@link RaceLogUsesOwnCompetitorsAnalyzer} or on the
+ * RegattaLog and fetches the competitors appropriately.
  * 
- * Should not be used. Instead get the competitor set from the RaceColumn, which automatically checks wether a 
- * tracked race is present, which has precedence over the Race/RegattaLog
+ * Should not be used by clients directly. Instead, get the competitor set from the {@code RaceColumn}, using either one
+ * of {@code getAllCompetitors()} and {@code getAllCompetitors(Fleet)}. Those methods automatically check whether a
+ * tracked race is present, which takes precedence over the Race/RegattaLog.
  * 
- * @author D056848
+ * @author Jan Bross (D056848)
  *
  */
-
 public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competitor>> {
     private RegattaLog regattaLog;
 
@@ -29,12 +30,14 @@ public class RegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Competito
 
     @Override
     protected Set<Competitor> performAnalysis() {
-        if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()){
-            //get Events from RaceLog
-            return new CompetitorsInLogAnalyzer<>(getLog()).analyze();
+        final Set<Competitor> result;
+        if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()) {
+            // get Events from RaceLog
+            result = new CompetitorsInLogAnalyzer<>(getLog()).analyze();
         } else {
-            //get Events from RegattaLog
-            return new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
+            // get Events from RegattaLog
+            result = new CompetitorsInLogAnalyzer<>(regattaLog).analyze();
         }
+        return result;
     }
 }

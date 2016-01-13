@@ -242,8 +242,9 @@ public interface RaceColumn extends Named {
     /**
      * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this
      * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
-     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} attached to this column for that fleet or registered
-     * through the {@link #getRegattaLog() regatta log}.
+     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} attached to this column for that fleet (if this is
+     * {@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabled) or registered through the {@link #getRegattaLog()
+     * regatta log}.
      */
     Iterable<Competitor> getAllCompetitors();
 
@@ -278,22 +279,25 @@ public interface RaceColumn extends Named {
 
     /**
      * Checks whether competitor registration on RaceLog is enabled.
-     * @param fleet
-     * @return boolean if competitor registration on the RaceLog is enabled, false in case this column belongs to a {@link MetaLeaderboard} 
+     * 
+     * @return boolean if competitor registration on the RaceLog is enabled, false in case this column belongs to a
+     *         {@link MetaLeaderboard}
+     *         
+     * @see #enableCompetitorRegistrationOnRaceLog(Fleet)
+     * @see #disableCompetitorRegistrationOnRaceLog(Fleet)
      */
     boolean isCompetitorRegistrationInRacelogEnabled(Fleet fleet);
 
     /**
-     * Activates competitor registration on the race column's race log associated to the passed fleet. 
+     * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
+     * 
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
-     * @param fleetByName
      */
     void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
     
     /**
      * Disables competitor registration on the race column's race log associated to the passed fleet.
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
-     * @param fleetByName
      */
     void disableCompetitorRegistrationOnRaceLog(Fleet fleet);
     
