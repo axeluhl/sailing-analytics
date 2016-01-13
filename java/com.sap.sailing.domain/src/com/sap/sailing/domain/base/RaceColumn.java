@@ -291,13 +291,21 @@ public interface RaceColumn extends Named {
 
     /**
      * Activates competitor registration on the race column's race log associated to the passed fleet. As a result,
+     * competitor registrations that were added to the race log before this was disabled by
+     * {@link #disableCompetitorRegistrationOnRaceLog(Fleet)} will again be honored.<p>
      * 
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
     void enableCompetitorRegistrationOnRaceLog(Fleet fleet);
     
     /**
-     * Disables competitor registration on the race column's race log associated to the passed fleet.
+     * Disables competitor registration on the race column's race log associated to the passed fleet. Performs nothing
+     * in case this column belongs to a {@link MetaLeaderboard}. If there are already competitor registrations on the
+     * race log, those will not be removed from the log but they will be ignored, and the regatta log's competitor
+     * registrations will be used instead. Re-{@link #enableCompetitorRegistrationOnRaceLog(Fleet) enabling} competitor
+     * registrations in the race log will cause such existing registrations to be honored again.
+     * <p>
+     * 
      * Performs nothing in case this column belongs to a {@link MetaLeaderboard}.
      */
     void disableCompetitorRegistrationOnRaceLog(Fleet fleet) throws NotRevokableException;
@@ -306,8 +314,8 @@ public interface RaceColumn extends Named {
      * Registers a competitor on the the race column's race log associated to the passed fleet.
      * 
      * @throws CompetitorRegistrationOnRaceLogDisabledException
-     *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
-     *             {@link MetaLeaderboard}
+     *             thrown if competitor registration is {@link #disableCompetitorRegistrationOnRaceLog(Fleet) disabled}
+     *             on racelog as well as if RaceColumn belongs to a {@link MetaLeaderboard}
      */
     void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 

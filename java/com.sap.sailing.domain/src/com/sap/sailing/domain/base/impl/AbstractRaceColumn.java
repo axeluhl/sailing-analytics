@@ -280,14 +280,13 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (!isCompetitorRegistrationInRacelogEnabled(fleet)){
+        if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException();
         }
-
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
         int passId = raceLog.getCurrentPassId();
-        for (Competitor competitor: competitors){
+        for (Competitor competitor : competitors) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
                     UUID.randomUUID(), passId, competitor));
         }
@@ -302,13 +301,11 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     @Override
     public void deRegisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        if (!isCompetitorRegistrationInRacelogEnabled(fleet)){
+        if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException();
         }
-        
         HashSet<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
-        
         RaceLog raceLog = getRaceLog(fleet);
         for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
             if (event instanceof RegisterCompetitorEvent) {
