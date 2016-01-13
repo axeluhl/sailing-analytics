@@ -349,7 +349,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                     Util.addAll(waypoint.getMarks(), result);
                 }
             } else {
-                // if no tracked race is found, use marks regatta log
+                // if no tracked race is found, use marks from regatta log
                 RegattaLog regattaLog = getRegattaLog();
                 Collection<Mark> viaRegattaLog = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
                 result.addAll(viaRegattaLog);

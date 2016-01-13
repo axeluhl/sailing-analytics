@@ -48,8 +48,9 @@ public interface RaceColumn extends Named {
     RaceLog getRaceLog(Fleet fleet);
     
     /**
-     * Gets the regatta log associated with race column's race and the passed fleet. Note that the result may be <code>null</code>
-     * particularly for columns in a {@link MetaLeaderboard}.
+     * Gets the regatta log associated with the regatta-like structure (either a regatta if this is a
+     * {@link RaceColumnInSeries} or a flexible leaderboard). Note that the result may be <code>null</code> particularly
+     * for columns in a {@link MetaLeaderboard}.
      * 
      * @return the regatta log or <code>null</code> in case this column belongs to a {@link MetaLeaderboard}
      */
@@ -241,8 +242,8 @@ public interface RaceColumn extends Named {
     /**
      * Provides the combined set of competitors from all {@link #getTrackedRace(Fleet) tracked races attached to this
      * column} or, in case a fleet does not have a tracked race attached, the competitors registered through the
-     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} or {@link RegattaLog} {@link #getRegattaLog()} attached to 
-     * this column for that fleet.
+     * respective {@link RaceLog} {@link #getRaceLog(Fleet)} attached to this column for that fleet or registered
+     * through the {@link #getRegattaLog() regatta log}.
      */
     Iterable<Competitor> getAllCompetitors();
 
