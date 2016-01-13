@@ -2,8 +2,6 @@ package com.sap.sailing.android.tracking.app.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -15,18 +13,14 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 
 /**
  * Todo: Use this class?
  */
 public class ImageController {
-    private static final String TAG = ImageController.class.getName();
-
     public static String getRealPathFromURI(ContentResolver contentResolver, Uri contentUri) {
         String res = null;
         String[] proj = { MediaStore.Images.Media.DATA };
@@ -371,76 +365,6 @@ public class ImageController {
             }
         }
         return inSampleSize;
-    }
-
-    public static Bitmap decodeSampledBitmapFromFile(ContentResolver contentResolver, Uri uri, String filename,
-            int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        if (filename == null) {
-            try {
-                InputStream inputStream = contentResolver.openInputStream(uri);
-                BitmapFactory.decodeStream(inputStream, null, options);
-            } catch (IOException e) {
-                Log.e(TAG, "Error trying to read image from "+uri, e);
-            }
-        } else {
-            BitmapFactory.decodeFile(filename, options);
-
-        }
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        Bitmap bitmap = null;
-        if (filename == null) {
-            try {
-                InputStream inputStream = contentResolver.openInputStream(uri);
-                bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-            } catch (IOException e) {
-                Log.e(TAG, "Error trying to read image from "+uri, e);
-            }
-        } else {
-            bitmap = BitmapFactory.decodeFile(filename, options);
-        }
-
-        // check orientation
-        if (bitmap != null && filename != null) {
-            try {
-                ExifInterface exif = new ExifInterface(filename);
-                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-                int angle = 0;
-
-                switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    angle = -90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    angle = -180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    angle = -270;
-                    break;
-
-                default:
-                    break;
-                }
-                if (angle != 0) {
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(90);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
-                            matrix, true);
-                    bitmap.recycle();
-                    bitmap = rotatedBitmap;
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Error trying to determine orientation for image "+filename+" loaded from "+uri, e);
-            }
-        }
-        return bitmap;
     }
 
     // -----------------------------------------------------------------------

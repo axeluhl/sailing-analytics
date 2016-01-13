@@ -130,7 +130,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         if (competitor == null) {
             logger.log(Level.INFO, "Could not find competitor to store image for: " + StringEscapeUtils.escapeHtml(competitorId));
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
+                    .entity("Could not find competitor with id " +
+                            StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
         }
 
         String fileExtension = "";
