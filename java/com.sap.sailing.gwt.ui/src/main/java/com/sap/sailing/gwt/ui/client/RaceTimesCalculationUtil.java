@@ -9,6 +9,7 @@ import com.sap.sse.gwt.client.player.Timer;
 public class RaceTimesCalculationUtil {
     public static final long MIN_TIME_BEFORE_RACE_START = 5 * 60 * 1000; // 5 minutes
     private static final long MIN_TIME_AFTER_RACE_START = 5 * 60 * 1000; // 5 minutes
+    private static final long TIME_AFTER_LIVE = 5 * 60 * 1000; // 5 minutes
     public static final long MAX_TIME_AFTER_RACE_END = 5 * 60 * 1000; // 5 minutes
 
     public static Util.Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
@@ -27,12 +28,12 @@ public class RaceTimesCalculationUtil {
                 } else {
                     // race start was in the past
                     min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
-                    max = new Date(liveTimePoint.getTime());
+                    max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
                 }
             } else {
                 // we have NO race start time
                 min = raceTimesInfo.startOfTracking;
-                max = liveTimePoint;
+                max = new Date(liveTimePoint.getTime() + TIME_AFTER_LIVE);
             }
             break;
         case Replay:
