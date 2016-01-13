@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -16,12 +16,15 @@ public class RaceLogRegisteredCompetitorsAnalyzer extends RaceLogAnalyzer<Set<Co
 
     @Override
     protected Set<Competitor> performAnalysis() {
+        final Set<Competitor> result;
         if (new RaceLogUsesOwnCompetitorsAnalyzer(getLog()).analyze()){
-            //get Events from RaceLog
-            return new CompetitorsInLogAnalyzer<>(getLog()).analyze();
+            // get Events from RaceLog
+            result = new CompetitorsInLogAnalyzer<>(getLog()).analyze();
         } else {
-            //get Events from RegattaLog
-            return new HashSet<Competitor>();
+            // as we're explicitly only trying to find those registrations in the RaceLog, we won't
+            // return anything from the regatta log.
+            result = Collections.emptySet();
         }
+        return result;
     }
 }
