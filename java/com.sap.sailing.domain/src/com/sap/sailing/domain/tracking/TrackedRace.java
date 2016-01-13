@@ -10,6 +10,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -867,7 +868,9 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
 
     /**
      * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
-     * definition events in all attached race and regatta logs.
+     * definition events in all attached race and regatta logs. Note that usually a device mapping should
+     * exist for a mark only if that mark is also defined by a {@link RegattaLogDefineMarkEvent}, so for
+     * this standard case, adding the marks from the device mark mappings would be redundant.
      */
     default Iterable<Mark> getMarksFromRaceAndLogs() {
         return getMarks();

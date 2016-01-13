@@ -362,6 +362,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
             final CourseBase courseBase = courseDesginFinder.analyze();
             if (courseBase != null) {
+                // TODO why do we collect the marks from the course definition here but not in getAllMarks()?
                 courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));
             } else {
                 Util.addAll(new RegattaLogDefinedMarkAnalyzer(getRegattaLog()).analyze(), result);
