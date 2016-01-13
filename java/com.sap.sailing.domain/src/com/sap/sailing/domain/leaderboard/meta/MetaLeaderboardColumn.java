@@ -260,13 +260,13 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public void deRegisterCompetitor(Competitor competitors, Fleet fleet)
+    public void deregisterCompetitor(Competitor competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
     }
 
     @Override
-    public void deRegisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         throw new CompetitorRegistrationOnRaceLogDisabledException();
     }

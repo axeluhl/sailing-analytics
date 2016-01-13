@@ -335,7 +335,7 @@ public interface RaceColumn extends Named {
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
      */
-    void deRegisterCompetitor(Competitor competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void deregisterCompetitor(Competitor competitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 
     /**
      * Deregisters competitors on the the race column's race log associated to the passed fleet.
@@ -344,5 +344,5 @@ public interface RaceColumn extends Named {
      *             thrown if competitor registration is disabled on racelog as well as if RaceColumn belongs to a
      *             {@link MetaLeaderboard}
      */
-    void deRegisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+    void deregisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
 }

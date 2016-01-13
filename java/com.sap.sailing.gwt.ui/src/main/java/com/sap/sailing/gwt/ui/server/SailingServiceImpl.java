@@ -5093,7 +5093,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Util.addAll(competitorsToRemove, competitorSetToRemove);
         filterDuplicates(competitorsToRegister, competitorSetToRemove);
         
-        raceColumn.deRegisterCompetitors(competitorSetToRemove, fleet);
+        raceColumn.deregisterCompetitors(competitorSetToRemove, fleet);
         raceColumn.registerCompetitors(competitorsToRegister, fleet);
     }
     

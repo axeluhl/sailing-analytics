@@ -291,13 +291,13 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
     
     @Override
-    public void deRegisterCompetitor(Competitor competitor, Fleet fleet)
+    public void deregisterCompetitor(Competitor competitor, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
-        deRegisterCompetitors(Collections.singleton(competitor), fleet);
+        deregisterCompetitors(Collections.singleton(competitor), fleet);
     }
     
     @Override
-    public void deRegisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException();
