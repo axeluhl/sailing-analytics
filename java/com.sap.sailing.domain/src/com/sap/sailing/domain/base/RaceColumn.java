@@ -263,7 +263,7 @@ public interface RaceColumn extends Named {
     /**
      * Same as {@link #getAllMarks()}, but restricted to the single race identified by the <code>fleet</code> parameter.
      */
-    Iterable<Mark> getAllMarks(Fleet fleet);
+    Iterable<Mark> getMarks(Fleet fleet);
 
     /**
      * Returns the competitor set registered in the race column's race log associated to the passed fleet. 

@@ -242,7 +242,7 @@ public class MetaLeaderboardColumn extends SimpleAbstractRaceColumn implements R
     }
 
     @Override
-    public Iterable<Mark> getAllMarks(Fleet fleet) {
+    public Iterable<Mark> getMarks(Fleet fleet) {
         TrackedRace trackedRace = getTrackedRace(fleet);
         return trackedRace.getMarks();
     }

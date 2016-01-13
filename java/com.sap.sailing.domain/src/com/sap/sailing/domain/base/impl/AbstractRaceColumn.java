@@ -363,9 +363,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
 
     @Override
-    public Iterable<Mark> getAllMarks(Fleet fleet) {
-        Set<Mark> result = new HashSet<>();
-        TrackedRace trackedRace = getTrackedRace(fleet);
+    public Iterable<Mark> getMarks(Fleet fleet) {
+        final Set<Mark> result = new HashSet<>();
+        final TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
             for (Waypoint waypoint : trackedRace.getRace().getCourse().getWaypoints()) {
                 Util.addAll(waypoint.getMarks(), result);
@@ -373,10 +373,9 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
         } else {
             // if no tracked race is found, use marks from race course if present in racelog
             // if not the marks defined in the regatta log 
-            
             LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
-            CourseBase courseBase = courseDesginFinder.analyze();
-            if (courseBase != null){
+            final CourseBase courseBase = courseDesginFinder.analyze();
+            if (courseBase != null) {
                 courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));
             } else {
                 Util.addAll(new RegattaLogDefinedMarkAnalyzer(getRegattaLog()).analyze(), result);

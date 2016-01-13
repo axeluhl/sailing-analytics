@@ -578,7 +578,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                                     StringEscapeUtils.escapeHtml(leaderboardName)
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    Util.addAll(raceColumn.getAllMarks(fleet), marks);
+                    Util.addAll(raceColumn.getMarks(fleet), marks);
                 }
             } else {
                 // Return all marks for a certain race column
