@@ -32,5 +32,4 @@ out/
 .gradle
 local.properties
 git.xml
-build.info
 mobile/github-advrecyclerview_lib/bin
