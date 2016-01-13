@@ -45,7 +45,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Typical Data Mining Scenarios|wiki/typical-data-mining-scenarios]]
   * [[Load Tests|wiki/server-load-tests]]
   * [[Server Replication|wiki/server-replication]]
-  * [[Configure Races on Server|wiki/typical-development-scenarios]]
+  * [[Configure Races on Server|wiki/configure-races-on-server]]
   * [[Development Environment|wiki/development-environment]]
   * [[Working with GWT UI Binder|wiki/gwt-ui-binder]]
   * [[Working with GWT Locally|wiki/local-gwt]]

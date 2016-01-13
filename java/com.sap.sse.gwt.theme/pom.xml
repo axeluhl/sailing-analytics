@@ -8,7 +8,7 @@
 		<groupId>com.sap.sailing</groupId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>com.sap.sse.security.ui</artifactId>
+	<artifactId>com.sap.sse.gwt.theme</artifactId>
 	<packaging>eclipse-plugin</packaging>
 	<dependencies>
 		<dependency>
@@ -34,19 +34,7 @@
 			<version>${project.version}</version>
 			<classifier>sources</classifier>
 		</dependency>
-		<dependency>
-			<groupId>com.sap.sailing</groupId>
-			<artifactId>com.sap.sse.security</artifactId>
-			<version>${project.version}</version>
-			<classifier>sources</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.sap.sailing</groupId>
-			<artifactId>com.sap.sse.security.common</artifactId>
-			<version>${project.version}</version>
-			<classifier>sources</classifier>
-		</dependency>
-			</dependencies>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -71,20 +59,14 @@
 					<!-- GWT version detected from dependencyManagement -->
 					<execution>
 						<configuration>
+							<extraJvmArgs>-Dgwt.persistentunitcache=false</extraJvmArgs>
 							<!-- <userAgents>chrome</userAgents> -->
 							<modules>
-								<module>com.sap.sse.security.ui.UserManagement</module>
-								<module>com.sap.sse.security.ui.Login</module>
-								<module>com.sap.sse.security.ui.OAuthLogin</module>
-								<module>com.sap.sse.security.ui.LoginPanel</module>
-								<module>com.sap.sse.security.ui.Register</module>
-								<module>com.sap.sse.security.ui.EditProfile</module>
-								<module>com.sap.sse.security.ui.EmailValidation</module>
+								<module>com.sap.sse.gwt.theme.SSETheme</module>
 							</modules>
 							<gen>${basedir}/.generated</gen>
+							<localWorkers>7</localWorkers>
 							<webappDirectory>${basedir}</webappDirectory>
-							<warSourceDirectory>${basedir}/src/main/resources
-							</warSourceDirectory>
 						</configuration>
 						<goals>
 							<goal>compile</goal>
