@@ -26,8 +26,7 @@ public class RaceTimesCalculationUtil {
                     max = new Date(raceTimesInfo.startOfRace.getTime() + MIN_TIME_AFTER_RACE_START);
                 } else {
                     // race start was in the past
-                    long extensionTime = calculateRaceExtensionTime(raceTimesInfo.startOfRace, liveTimePoint);
-                    min = new Date(raceTimesInfo.startOfRace.getTime() - extensionTime);
+                    min = new Date(raceTimesInfo.startOfRace.getTime() - MIN_TIME_BEFORE_RACE_START);
                     max = new Date(liveTimePoint.getTime());
                 }
             } else {
@@ -56,18 +55,4 @@ public class RaceTimesCalculationUtil {
         }
         return new Util.Pair<Date, Date>(min, max);
     }
-    
-    private static long calculateRaceExtensionTime(Date startTime, Date endTime) {
-        if (startTime == null || endTime == null) {
-            return 5 * 60 * 1000; //5 minutes
-        }
-        
-        long minExtensionTime = 60 * 1000; // 1 minute
-        long maxExtensionTime = 10 * 60 * 1000; // 10 minutes
-        double extensionTimeFactor = 0.1; // 10 percent of the interval length
-        long extensionTime = (long) ((endTime.getTime() - startTime.getTime()) * extensionTimeFactor);
-        
-        return extensionTime < minExtensionTime ? minExtensionTime : extensionTime > maxExtensionTime ? maxExtensionTime : extensionTime;
-    }
-
 }
