@@ -3298,6 +3298,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
+    public void attachRaceLog(RaceLog raceLog) {
+        synchronized (TrackedRaceImpl.this) {
+            attachedRaceLogs.put(raceLog.getId(), raceLog);
+            notifyAll();
+        }
+    }
+
+    @Override
     public void attachRaceExecutionProvider(RaceExecutionOrderProvider raceExecutionOrderProvider) {
         if (raceExecutionOrderProvider != null && !attachedRaceExecutionOrderProviders.containsKey(raceExecutionOrderProvider)) {
             attachedRaceExecutionOrderProviders.put(raceExecutionOrderProvider, raceExecutionOrderProvider);
