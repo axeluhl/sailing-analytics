@@ -315,6 +315,15 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         return result;
     }
 
+    /**
+     * Adjusts the contents of {@link #markMappings} according to the device mappings for marks found in the regatta
+     * log. Afterwards, the start end end of tracking is {@link #updateStartAndEndOfTracking() updated}.
+     * 
+     * @param loadIfNotCovered
+     *            If <code>true</code>, for additional time ranges added compared to the previous contents of
+     *            {@link #markMappings}, their fixes are loaded from the {@link #gpsFixStore}.
+     * @throws DoesNotHaveRegattaLogException
+     */
     private void updateMarkMappings(boolean loadIfNotCovered) throws DoesNotHaveRegattaLogException {
         assert trackedRace != null;
         // TODO remove fixes, if mappings have been removed
@@ -386,7 +395,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     /**
      * Adjusts the {@link #competitorMappings} map according to the competitor registrations for the race managed by
      * this tracked, either from the regatta log or the race log. Then, the {@link TrackedRace}'s start and end of
-     * tracking time frame is updated from the mapping intervals.
+     * tracking time frame is {@link #updateStartAndEndOfTracking() updated} from the mapping intervals.
      * 
      * @param loadIfNotCovered
      *            if <code>true</code>, the GPS fixes for the mappings will be loaded based on a comparison of the
