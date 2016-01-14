@@ -346,7 +346,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     RacingActivity.this.startService(registerIntent);
                 }
             }
-        }).run();
+        }).start();
     }
 
     public void setProgressSpinnerVisibility(boolean visible) {
