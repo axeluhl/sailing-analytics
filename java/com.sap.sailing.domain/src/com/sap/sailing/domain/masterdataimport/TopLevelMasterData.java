@@ -157,20 +157,12 @@ public class TopLevelMasterData implements Serializable {
     }
 
     private boolean isMarkMappingEvent(RegattaLogDeviceMappingEvent<?> mappingEvent) {
-        boolean isMarkMappingEvent = false;
-        if (mappingEvent instanceof RegattaLogDeviceMarkMappingEvent) {
-            isMarkMappingEvent = true;
-        }
-        return isMarkMappingEvent;
+        return mappingEvent instanceof RegattaLogDeviceMarkMappingEvent;
     }
 
     /**
      * Workaround to look for the events connected to RegattaLeadeboards. There should be a proper connection between
      * regatta and event soon. TODO
-     * 
-     * @param groupsToExport
-     * @param allEvents
-     * @return
      */
     private Map<LeaderboardGroup, Set<Event>> createEventMap(Set<LeaderboardGroup> groupsToExport,
             Iterable<Event> allEvents) {
@@ -193,7 +185,6 @@ public class TopLevelMasterData implements Serializable {
                     }
                 }
             }
-
         }
         return eventsForLeaderboardGroup;
     }
