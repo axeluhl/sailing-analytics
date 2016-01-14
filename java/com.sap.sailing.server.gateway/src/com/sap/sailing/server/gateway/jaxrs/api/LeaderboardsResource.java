@@ -381,7 +381,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        TimePoint now = MillisecondsTimePoint.now();
+        final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
@@ -414,7 +414,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
         event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedTo, device,
-                from, null);
+                from, /* to */ null);
         hasRegattaLike.getRegattaLike().getRegattaLog().add(event);
         logger.fine("Successfully checked in competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();
@@ -439,21 +439,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     @Path("{name}/device_mappings/end")
     public Response postCheckout(String json, @PathParam("name") String leaderboardName) {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-
         if (!leaderboardIsValid(leaderboard)) {
             logger.warning("Leaderboard does not exist or does not hold a RegattaLog");
             return Response.status(Status.INTERNAL_SERVER_ERROR)
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
         }
-
         IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
-
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
-
-        TimePoint now = MillisecondsTimePoint.now();
-
+        final TimePoint now = MillisecondsTimePoint.now();
         logger.fine("Post issued to " + this.getClass().getName());
         Object requestBody;
         JSONObject requestObject;
@@ -465,40 +460,32 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         logger.fine("JSON requestObject is: " + requestObject.toString());
         Long toMillis = (Long) requestObject.get("toMillis");
         String competitorId = (String) requestObject.get("competitorId");
         String deviceUuid = (String) requestObject.get("deviceUuid");
         TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
-
         if (toMillis == null || deviceUuid == null || closingTimePoint == null) {
             logger.warning("Invalid JSON body in request");
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         Competitor mappedTo = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
         if (mappedTo == null) {
             logger.warning("No competitor found for id " + competitorId);
             return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
-        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo,
-                deviceUuid);
+        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
-
         if (deviceMappingEventId == null) {
             logger.warning("No corresponding open competitor to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
                     .entity("No corresponding open competitor to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
                 author, deviceMappingEventId, closingTimePoint);
-
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out competitor " + mappedTo.getName());
         return Response.status(Status.OK).build();

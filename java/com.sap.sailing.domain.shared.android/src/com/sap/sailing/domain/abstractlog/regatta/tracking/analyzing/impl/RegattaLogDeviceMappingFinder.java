@@ -76,11 +76,9 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID> extends Regatta
                 closingEvents.put(closingEvent.getDeviceMappingEventId(), closingEvent);
             }
         }
-
         for (ItemT item : events.keySet()) {
             mappings.put(item, closeOpenRanges(events.get(item), item, closingEvents));
         }
-
         return mappings;
     }
     
