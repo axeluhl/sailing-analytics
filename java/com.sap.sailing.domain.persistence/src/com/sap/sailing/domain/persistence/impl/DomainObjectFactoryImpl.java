@@ -1724,7 +1724,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         //have to load complete mark, as no order is guaranteed for loading of racelog events
         Mark mappedTo = loadMark((DBObject) dbObject.get(FieldNames.MARK.name()));
-        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, FieldNames.RACE_LOG_FROM, FieldNames.REGATTA_LOG_TO, FieldNames.RACE_LOG_TO);
+        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
+        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
+        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
         final TimePoint from = times.getA();
         final TimePoint to = times.getB();
         final RegattaLogDeviceMarkMappingEventImpl result = new RegattaLogDeviceMarkMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
@@ -1785,7 +1789,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
                 (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
-        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, FieldNames.RACE_LOG_FROM, FieldNames.REGATTA_LOG_TO, FieldNames.RACE_LOG_TO);
+        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
+        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
+        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
         final TimePoint from = times.getA();
         final TimePoint to = times.getB();
         final boolean needsMigration = times.getC();
