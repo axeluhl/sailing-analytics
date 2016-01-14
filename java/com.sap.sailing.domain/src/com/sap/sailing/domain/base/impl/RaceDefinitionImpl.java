@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.base.impl;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
+import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
@@ -27,6 +30,7 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     private final Map<Serializable, Boat> competitorBoats;
     private final BoatClass boatClass;
     private final Serializable id;
+    private final RaceCompetitorIdsAsStringWithMD5Hash raceCompetitorsMD5Hash;
 
     public RaceDefinitionImpl(String name, Course course, BoatClass boatClass, Iterable<? extends Competitor> competitors) {
         this(name, course, boatClass, competitors, Collections.emptyMap());
@@ -49,9 +53,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
         this.competitors = new HashSet<>();
         this.competitorsById = new LinkedHashMap<>();
         this.competitorBoats = new HashMap<>();
+        final Set<String> idsOfCompetitorsAsString = new HashSet<>();
         for (Competitor competitor : competitors) {
             Competitor competitorWithEqualID = competitorsById.put(competitor.getId(), competitor);
             this.competitors.add(competitor);
+            idsOfCompetitorsAsString.add(competitor.getId().toString());
             if (competitorWithEqualID != null && competitorWithEqualID != competitor) {
                 throw new IllegalArgumentException("Two distinct competitors with equal ID "+competitor.getId()+" are not allowed within the single race "+name);
             }
@@ -64,6 +70,11 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
                 logger.warning("Trying to set boat "+competitorAndBoat.getValue()+" for competitor "+competitorAndBoat.getKey()+
                         " which is not part of race "+getName()+"'s set of competitors");
             }
+        }
+        try {
+            raceCompetitorsMD5Hash = new RaceCompetitorIdsAsStringWithMD5Hash(idsOfCompetitorsAsString);
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RuntimeException("Internal error: issue with UTF8 or MD5 for encoding competitor IDs as MD5 hash", e);
         }
         this.boatClass = boatClass;
         this.id = id;
@@ -78,10 +89,15 @@ public class RaceDefinitionImpl extends NamedImpl implements RaceDefinition {
     public Course getCourse() {
         return course;
     }
-
+    
     @Override
     public Iterable<Competitor> getCompetitors() {
         return Collections.unmodifiableSet(competitors);
+    }
+    
+    @Override
+    public byte[] getCompetitorMD5() {
+        return raceCompetitorsMD5Hash.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID();
     }
 
     @Override

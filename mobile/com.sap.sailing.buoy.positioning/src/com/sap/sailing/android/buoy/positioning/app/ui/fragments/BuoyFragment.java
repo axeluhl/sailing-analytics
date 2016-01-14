@@ -304,7 +304,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Log.d(TAG, "Action: " + action);
-            if(action.equals(getString(R.string.database_changed))) {
+            if (action.equals(getString(R.string.database_changed))) {
                 positioningActivity.loadDataFromDatabase();
                 setUpTextUI(lastKnownLocation);
                 updateMap();

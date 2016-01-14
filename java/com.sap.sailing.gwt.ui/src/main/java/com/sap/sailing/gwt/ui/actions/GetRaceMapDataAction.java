@@ -16,14 +16,17 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
     private final Map<String, CompetitorDTO> competitorsByIdAsString;
     private final Date date;
     private final LegIdentifier simulationLegIdentifier;
+    private final byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
     
     public GetRaceMapDataAction(SailingServiceAsync sailingService, Map<String, CompetitorDTO> competitorsByIdAsString,
             RegattaAndRaceIdentifier raceIdentifier, Date date, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier) {
+            Map<CompetitorDTO, Date> to, boolean extrapolate, LegIdentifier simulationLegIdentifier,
+            byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID) {
         super(sailingService, raceIdentifier, from, to, extrapolate);
         this.competitorsByIdAsString = competitorsByIdAsString;
         this.date = date;
         this.simulationLegIdentifier = simulationLegIdentifier;
+        this.md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID = md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID;
     }
     
     @Override
@@ -37,7 +40,8 @@ public class GetRaceMapDataAction extends AbstractGetMapRelatedDataAction<RaceMa
             toByCompetitorIdAsString.put(toEntry.getKey().getIdAsString(), toEntry.getValue());
         }
         getSailingService().getRaceMapData(getRaceIdentifier(), date, fromByCompetitorIdAsString, toByCompetitorIdAsString,
-                isExtrapolate(), simulationLegIdentifier, new AsyncCallback<CompactRaceMapDataDTO>() {
+                isExtrapolate(), simulationLegIdentifier, md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
+                new AsyncCallback<CompactRaceMapDataDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         callback.onFailure(caught);
