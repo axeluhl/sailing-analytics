@@ -2,10 +2,8 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -148,11 +146,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            if (sizeOf(raceColumn.getAllCompetitors(fleet)) > 0){
+            if (!Util.isEmpty(raceColumn.getAllCompetitors(fleet))) {
                 boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors(fleet));
-            } else if (sizeOf(raceColumn.getAllCompetitors()) > 0){
+            } else if (!Util.isEmpty(raceColumn.getAllCompetitors())) {
                 boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
-            } else if (sizeOf(leaderboard.getAllCompetitors()) > 0){
+            } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
                 boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
             } else {
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
@@ -176,21 +174,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         raceLog.add(event);
     }
     
-    private int sizeOf(Iterable<Competitor> values) {
-        if (values instanceof Collection<?>) {
-            return ((Collection<?>)values).size();
-        } else {
-            Iterator<Competitor> it = values.iterator();
-            int sum = 0;
-            while (it.hasNext()) {
-              it.next();
-              sum++;
-            }
-            return sum;
-        }
-    }
-    
-    //implemented somewhere in domainFactory? 
+    // implemented somewhere in domainFactory? 
     private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
         HashMap<BoatClass, Integer> occurenceCount = new HashMap<>();
         for (Competitor competitor : allCompetitors) {
