@@ -140,7 +140,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
-
         BoatClass boatClass = null;
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
@@ -155,20 +154,15 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             } else {
                 throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
             }
-            
         }
-
         if (raceName == null) {
             raceName = leaderboard.getName() + " " + raceColumn.getName() + " " + fleet.getName();
         }
-
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
-
         if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
             throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
         }
-
         RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
                 service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
         raceLog.add(event);
@@ -201,10 +195,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException {
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
-                try {
-                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
-                } catch (NotDenotableForRaceLogTrackingException e) {
-                }
+                denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
             }
         }
     }
