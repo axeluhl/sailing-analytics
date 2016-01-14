@@ -37,19 +37,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/make_new_course"
-                android:textAppearance="?attr/textNormal"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/course_design_assets"
                 android:textAppearance="?attr/textNormal"
                 android:textStyle="bold"/>
         </LinearLayout>
@@ -113,22 +103,9 @@
                 android:layout_height="fill_parent"
                 android:layout_gravity="left"
                 android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:verticalSpacing="5dp"/>
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/assets"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:columnWidth="100dp"
-                android:gravity="center"
-                android:horizontalSpacing="10dp"
-                android:numColumns="auto_fit"
-                android:stretchMode="columnWidth"
-                android:verticalSpacing="10dp"/>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

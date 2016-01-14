@@ -1,10 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
@@ -15,7 +11,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -51,37 +46,37 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.ElementLongClick;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.EventListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseMarksDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
-import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener, SelectionAdapter.ItemClick {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
+public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.LongClick, CourseElementAdapter.EventListener, SelectionAdapter.ItemClick, CourseElementAdapter.ItemClick {
+
+    private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
-    private ReadonlyDataManager mDataManager;
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
     private ArrayList<SelectionItem> mItems;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
-    private RecyclerView mMarkGrid;
     private CourseElementAdapter mHistoryAdapter;
     private SelectionAdapter mAdapter;
-    private RecyclerView.Adapter<CourseElementAdapter.ViewHolder> mCourseAdapter;
-    private CourseMarkAdapter mMarkAdapter;
+    private RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> mCourseAdapter;
     private ArrayList<RelativeLayout> mLayouts;
     private TextView mHeaderCaption;
+    private CourseMarksDialogFragment mMarksDialog;
     private int mId;
 
     public CourseFragmentMarks() {
@@ -133,7 +128,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
                 Runnable newRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        showCourseLayout(R.id.course_new, R.string.new_course);
+                        showCourseLayout(R.id.course_layout, R.string.new_course);
                     }
                 };
                 SelectionItem newCourse = new SelectionItem(getString(R.string.new_course), null, null, newRunnable);
@@ -174,15 +169,16 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
             CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
-            adapter.setListener(this);
+            adapter.setLongClickListener(this);
+            adapter.setItemClickListener(this);
             adapter.setEventListener(this);
 
             @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
+            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
             mCourseAdapter = dragAdapter;
 
             @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
+            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
             mCourseAdapter = swipeManager;
 
             mCurrentCourse.setLayoutManager(layoutManager);
@@ -191,31 +187,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat
-                    .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
+                        .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
             }
 
             mGuardManager.attachRecyclerView(mCurrentCourse);
             mSwipeManager.attachRecyclerView(mCurrentCourse);
             mDragDropManager.attachRecyclerView(mCurrentCourse);
-        }
-
-        RelativeLayout courseNew = ViewHelper.get(layout, R.id.course_new);
-        if (courseNew != null) {
-            mLayouts.add(courseNew);
-        }
-
-        mMarkGrid = (RecyclerView) layout.findViewById(R.id.assets);
-        if (mMarkGrid != null) {
-            GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
-            int padding = getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line);
-            int strokeWidth = getActivity().getResources().getDimensionPixelSize(R.dimen.thin_line);
-            int color = ThemeHelper.getColor(getActivity(), R.attr.sap_gray_white_20);
-            mMarkGrid.setLayoutManager(layoutManager);
-            mMarkGrid.addItemDecoration(new ItemStrokeDecoration(padding, strokeWidth, color));
-
-            mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()));
-            mMarkAdapter.setListener(this);
-            mMarkGrid.setAdapter(mMarkAdapter);
         }
 
         return layout;
@@ -241,7 +218,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
         if (getView() != null) {
             if (mHistory.isEmpty()) {
-                showCourseLayout(R.id.course_new, R.string.new_course);
+                showCourseLayout(R.id.course_layout, R.string.new_course);
             } else {
                 showCourseLayout(R.id.selection, 0);
             }
@@ -334,11 +311,6 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mCurrentCourse = null;
         }
 
-        if (mMarkGrid != null) {
-            mMarkGrid.setAdapter(null);
-            mMarkGrid = null;
-        }
-
         if (mCourseAdapter != null) {
             WrapperAdapterUtils.releaseAll(mCourseAdapter);
             mCourseAdapter = null;
@@ -347,26 +319,20 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         super.onDestroy();
     }
 
-    private void fillCourseElement() {
-        mElements.clear();
-        mElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
-        mCourseAdapter.notifyDataSetChanged();
-    }
-
     private void loadMarks() {
         Loader<?> marksLoader = getLoaderManager()
-            .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    String toastText = getString(R.string.marks_w_placeholder);
-                    Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG).show();
-                }
+                .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        String toastText = getString(R.string.marks_w_placeholder);
+                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG).show();
+                    }
 
-                @Override
-                public void onLoadSucceeded(Collection<Mark> data, boolean isCached) {
-                    onLoadMarksSucceeded(data);
-                }
-            }));
+                    @Override
+                    public void onLoadSucceeded(Collection<Mark> data, boolean isCached) {
+                        onLoadMarksSucceeded(data);
+                    }
+                }));
         marksLoader.forceLoad();
     }
 
@@ -374,7 +340,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mMarks.clear();
         mMarks.addAll(data);
         Collections.sort(mMarks, new NaturalNamedComparator());
-        mMarkAdapter.notifyDataSetChanged();
+    }
+
+    private void fillCourseElement() {
+        mElements.clear();
+        mElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
+        mCourseAdapter.notifyDataSetChanged();
     }
 
     protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
@@ -405,34 +376,68 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     }
 
     @Override
-    public void onItemLongClick(CourseListDataElementWithIdImpl element) {
-        createPassingInstructionDialog(element);
-        mCourseAdapter.notifyDataSetChanged();
+    public void onItemLongClick(int type, CourseListDataElementWithIdImpl element) {
+        switch (type) {
+            case CourseElementAdapter.TOUCH_TYPE_AREA:
+                createPassingInstructionDialog(element);
+                mCourseAdapter.notifyDataSetChanged();
+                break;
+
+            default:
+                showMarkDialog(type, element);
+        }
     }
 
     @Override
-    public void onItemClick(Mark mark) {
-        if (mElements.isEmpty()) {
-            addNewCourseElementToList(mark);
-        } else {
-            CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
-            if (twoMarksCourseElement != null) {
-                twoMarksCourseElement.setRightMark(mark);
-                mCourseAdapter.notifyDataSetChanged();
-                if (mLayouts.size() != 0) {
-                    showCourseLayout(R.id.course_layout, R.string.layout_course);
+    public void onAddItemClick() {
+        showMarkDialog(CourseElementAdapter.TOUCH_TYPE_AREA, null);
+    }
+
+    private void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
+        FragmentManager manager = getFragmentManager();
+        mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
+        mMarksDialog.setListener(this);
+        mMarksDialog.show(manager, "course_marks");
+    }
+
+    @Override
+    public void onItemClick(Mark mark, int type, CourseListDataElementWithIdImpl element) {
+        switch (type) {
+            case CourseElementAdapter.TOUCH_LEFT_AREA:
+                element.setLeftMark(mark);
+                break;
+
+            case CourseElementAdapter.TOUCH_RIGHT_AREA:
+                element.setRightMark(mark);
+                break;
+
+            default:
+                if (mElements.isEmpty()) {
+                    addNewCourseElementToList(mark);
+                } else {
+                    CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
+                    if (twoMarksCourseElement != null) {
+                        twoMarksCourseElement.setRightMark(mark);
+                        if (mLayouts.size() != 0) {
+                            showCourseLayout(R.id.course_layout, R.string.layout_course);
+                        }
+                    } else {
+                        addNewCourseElementToList(mark);
+                    }
                 }
-            } else {
-                addNewCourseElementToList(mark);
-            }
+                break;
+        }
+        mCourseAdapter.notifyDataSetChanged();
+        if (mMarksDialog.isVisible()) {
+            mMarksDialog.dismiss();
         }
     }
 
     private CourseListDataElement getFirstTwoMarksCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : mElements) {
             if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
-                && courseElement.getRightMark() == null) {
+                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
+                    && courseElement.getRightMark() == null) {
                 return courseElement;
             }
         }
@@ -463,6 +468,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
     protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement, PassingInstruction pickedDirection) {
         courseElement.setPassingInstructions(pickedDirection);
+        if (!PassingInstruction.Gate.equals(pickedDirection) && !PassingInstruction.Line.equals(pickedDirection)) {
+            courseElement.setRightMark(null);
+        }
         if (!mElements.contains(courseElement)) {
             mElements.add(courseElement);
         }
@@ -521,12 +529,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
         for (CourseListDataElement courseElement : mElements) {
             if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
+                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
                 if (courseElement.getRightMark() != null) {
                     String cpwtmName =
-                        "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
+                            "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement
-                        .getRightMark(), cpwtmName);
+                            .getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
 
                     waypoints.add(waypoint);
@@ -597,16 +605,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
                     showCourseLayout(R.id.selection, 0);
                     break;
 
-                case R.id.course_new:
+                case R.id.course_layout:
                     if (mHistory.isEmpty()) {
                         super.goHome();
                     } else {
                         showCourseLayout(R.id.selection, 0);
                     }
-                    break;
-
-                case R.id.course_layout:
-                    showCourseLayout(R.id.course_new, R.string.new_course);
                     break;
 
                 default:
@@ -625,9 +629,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         }
     }
 
-    private
-    @IdRes
-    int getCurrentFrame() {
+    private int getCurrentFrame() {
         int id = 0;
         for (View layout : mLayouts) {
             if (layout.getVisibility() == View.VISIBLE) {
@@ -641,7 +643,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     private void setHeaderCaption(@StringRes int id) {
         if (mHeaderCaption != null) {
             if (id != 0) {
-                mHeaderCaption.setText(String.format("%s - %s", getString(R.string.course), getString(id)));
+                String course = getString(R.string.course);
+                mHeaderCaption.setText(String.format("%s - %s", course, getString(id)));
             } else {
                 mHeaderCaption.setText(getString(R.string.course));
             }

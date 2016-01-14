@@ -120,7 +120,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace()));
+                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace(), getActivity()));
             }
         };
         SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, runnable);

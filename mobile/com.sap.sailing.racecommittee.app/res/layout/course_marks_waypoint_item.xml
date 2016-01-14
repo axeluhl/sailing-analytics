@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -34,7 +33,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/markImage"
                     android:gravity="center"
-                    tools:src="@drawable/buoy_shadow"/>
+                    tools:src="@drawable/buoy_shadow" />
 
                 <TextView
                     android:id="@+id/column_left_text"
@@ -46,22 +45,21 @@
                     android:textAppearance="?attr/textXXSmall"
                     android:textColor="?attr/white"
                     android:textIsSelectable="false"
-                    tools:text="Pin End"/>
+                    tools:text="Pin End" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/rounding_direction"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="center"
-                android:layout_weight="2"
                 android:background="@drawable/circle"
                 android:gravity="center"
                 android:singleLine="true"
                 android:textAppearance="?attr/textSmall"
                 android:textColor="?attr/white"
                 android:textIsSelectable="false"
-                tools:text="G"/>
+                tools:text="G" />
 
             <LinearLayout
                 android:id="@+id/column_right"
@@ -78,7 +76,8 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/markImage"
                     android:gravity="center"
-                    tools:src="@drawable/buoy_shadow"/>
+                    android:visibility="gone"
+                    tools:src="@drawable/buoy_shadow" />
 
                 <TextView
                     android:id="@+id/column_right_text"
@@ -90,7 +89,14 @@
                     android:textAppearance="?attr/textXXSmall"
                     android:textColor="?attr/white"
                     android:textIsSelectable="false"
-                    tools:text="Startboat"/>
+                    android:visibility="gone"
+                    tools:text="Startboat" />
+
+                <ImageView
+                    android:id="@+id/add_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_add_42dp" />
             </LinearLayout>
 
             <RelativeLayout
@@ -104,13 +110,13 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:background="@drawable/dragster"
-                    android:contentDescription="@string/drag_handle_description"/>
+                    android:contentDescription="@string/drag_handle_description" />
             </RelativeLayout>
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
-            android:background="?attr/sap_gray_white_20"/>
+            android:background="?attr/sap_gray_white_20" />
     </LinearLayout>
 </FrameLayout>

@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
@@ -12,7 +13,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 
 public abstract class CourseFragment extends BaseFragment {
 
-    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, ManagedRace race) {
+    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, ManagedRace race, Context context) {
         CourseDesignerMode mode = race.getState().getConfiguration().getDefaultCourseDesignerMode();
 
         RaceFragment fragment;

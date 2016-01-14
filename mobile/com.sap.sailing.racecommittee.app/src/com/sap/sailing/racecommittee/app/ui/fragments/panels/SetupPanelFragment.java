@@ -473,7 +473,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace()));
+                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace(), getActivity()));
                     break;
 
                 default:
