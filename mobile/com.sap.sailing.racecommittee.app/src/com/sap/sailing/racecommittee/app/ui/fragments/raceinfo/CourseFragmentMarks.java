@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -128,10 +129,10 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 Runnable newRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        showCourseLayout(R.id.course_layout, R.string.new_course);
+                        showCourseLayout(R.id.course_layout, R.string.layout_course);
                     }
                 };
-                SelectionItem newCourse = new SelectionItem(getString(R.string.new_course), null, null, newRunnable);
+                SelectionItem newCourse = new SelectionItem(getString(R.string.layout_course), null, null, newRunnable);
                 mItems.add(newCourse);
             }
         }
@@ -218,7 +219,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
         if (getView() != null) {
             if (mHistory.isEmpty()) {
-                showCourseLayout(R.id.course_layout, R.string.new_course);
+                showCourseLayout(R.id.course_layout, R.string.layout_course);
             } else {
                 showCourseLayout(R.id.selection, 0);
             }
@@ -577,7 +578,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                 break;
 
             case START_MODE_PLANNED:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
         }
     }

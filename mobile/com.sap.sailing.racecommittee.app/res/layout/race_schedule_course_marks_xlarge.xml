@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <include
         android:id="@+id/header"
-        layout="@layout/race_schedule_course_header"/>
+        layout="@layout/race_schedule_course_header" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -31,7 +30,7 @@
                 android:gravity="center"
                 android:text="@string/previous_course"
                 android:textAppearance="?attr/textNormal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="0dp"
@@ -41,43 +40,49 @@
                 android:gravity="center"
                 android:text="@string/make_new_course"
                 android:textAppearance="?attr/textNormal"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/bottom_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:orientation="horizontal"
             android:paddingBottom="@dimen/side_padding"
             android:paddingLeft="@dimen/side_padding"
             android:paddingRight="@dimen/side_padding"
             android:paddingTop="@dimen/side_padding">
 
-            <Button
-                android:id="@+id/publishCourse"
-                style="?attr/buttonSolidNormal"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:text="@string/publish"/>
+                android:layout_centerInParent="true"
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/unpublishCourse"
-                style="?attr/buttonSolidNormal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:text="@string/unpublish"/>
+                <Button
+                    android:id="@+id/publishCourse"
+                    style="?attr/buttonSolidNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/publish" />
 
-            <Button
-                android:id="@+id/takeHistoryCourse"
-                style="?attr/buttonSolidNormal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/take_previous"/>
-        </LinearLayout>
+                <Button
+                    android:id="@+id/unpublishCourse"
+                    style="?attr/buttonSolidNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    android:text="@string/unpublish" />
+
+                <Button
+                    android:id="@+id/takeHistoryCourse"
+                    style="?attr/buttonSolidNormal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/take_previous" />
+            </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -95,7 +100,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"/>
+                android:gravity="center" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/new_course"
@@ -105,7 +110,7 @@
                 android:layout_marginLeft="@dimen/default_margin"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:verticalSpacing="5dp"/>
+                android:verticalSpacing="5dp" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
