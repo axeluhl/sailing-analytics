@@ -45,7 +45,7 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID> extends Regatta
         return mapping instanceof RegattaLogDeviceMappingEvent;
     }
 
-    protected DeviceMapping<ItemT> getMapping(DeviceIdentifier device, ItemT item,
+    protected DeviceMapping<ItemT> createMapping(DeviceIdentifier device, ItemT item,
             TimePoint from, TimePoint to, Serializable originalEventId) {
         return new DeviceMappingImpl<ItemT>(item, device, new TimeRangeImpl(from, to),
                 Collections.singletonList(originalEventId));
@@ -87,18 +87,19 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID> extends Regatta
     private List<DeviceMapping<ItemT>> closeOpenRanges(List<RegattaLogDeviceMappingEvent<ItemT>> events, ItemT item,
             Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents) {
         List<DeviceMapping<ItemT>> result = new ArrayList<DeviceMapping<ItemT>>();
-        
-        for (RegattaLogDeviceMappingEvent<ItemT> event : events) {            
+        for (RegattaLogDeviceMappingEvent<ItemT> event : events) {
             TimePoint from = event.getFrom();
             TimePoint to = event.getTo();
-            TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ?
-                    closingEvents.get(event.getId()).getClosingTimePoint() : null;
-            if (from == null) logger.severe("No start time set for DeviceMappingEvent with ID: "+event.getId());
-            if (to == null) to = closingTimePoint;
-            
-            result.add(getMapping(event.getDevice(), item, from, to, event.getId()));
+            TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
+                    .getClosingTimePoint() : null;
+            if (from == null) {
+                logger.severe("No start time set for DeviceMappingEvent with ID: " + event.getId());
+            }
+            if (to == null) {
+                to = closingTimePoint;
+            }
+            result.add(createMapping(event.getDevice(), item, from, to, event.getId()));
         }
-        
         return result;
     }
 }
