@@ -2,6 +2,7 @@ package com.sap.sailing.domain.regattalike;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 
@@ -17,7 +18,21 @@ public interface HasRegattaLike {
     
     RaceLog getRacelog(String raceColumnName, String fleetName);
     
+    /**
+     * Determines the competitors registered in the regatta log. Note that this is not necessarily the complete set of
+     * competitors participating in this "regatta." For that, use {@link #getAllCompetitors()}.
+     */
     Iterable<Competitor> getCompetitorsRegisteredInRegattaLog();
+    
+    /**
+     * Determines the combined set of all competitors from all race columns that this object's {@link IsRegattaLike}
+     * has.
+     * 
+     * @see #getRegattaLike()
+     * @see IsRegattaLike#getRaceColumnByName(String)
+     * @see RaceColumn#getAllCompetitors()
+     */
+    Iterable<Competitor> getAllCompetitors();
     
     void registerCompetitor(Competitor competitor);
     void registerCompetitors(Iterable<Competitor> competitor);

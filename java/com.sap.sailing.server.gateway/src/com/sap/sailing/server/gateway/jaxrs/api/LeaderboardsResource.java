@@ -400,15 +400,15 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         Competitor mappedTo = domainFactory.getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
         if (mappedTo == null) {
             logger.warning("No competitor found for id " + competitorId);
-            return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+            return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
-        Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getCompetitorsRegisteredInRegattaLog();
+        Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitors();
         if (!registered.contains(mappedTo)) {
             logger.warning("Competitor found but not registered on a race of " + leaderboardName);
             return Response.status(Status.BAD_REQUEST)
-                    .entity("Competitor found but not registered on a race of " + leaderboardName)
+                    .entity("Competitor found but not registered on a race of " + StringEscapeUtils.escapeHtml(leaderboardName))
                     .type(MediaType.TEXT_PLAIN).build();
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
