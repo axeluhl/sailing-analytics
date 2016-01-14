@@ -727,6 +727,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<Pair<TimePoint, TimePoint>> callback);
 
+    /**
+     * Copies one race's competitor set to other races.
+     * @param fromTriple
+     *            leaderboard name, race column name, and fleet name identifying the race from which to copy the
+     *            competitors
+     * @param toTriples leaderboard name, race column name, and fleet name identifying the races to which to copy the
+     *            competitors
+     */
     void copyCompetitorsToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 

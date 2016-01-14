@@ -5298,18 +5298,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Set<com.sap.sse.common.Util.Triple<String, String, String>> toTriples) throws NotFoundException {
         RaceColumn raceColumn = getRaceColumn(fromTriple.getA(), fromTriple.getB());
         Iterable<Competitor> competitorsToCopy = raceColumn.getAllCompetitors(getFleetByName(raceColumn, fromTriple.getC()));
-        
         for (com.sap.sse.common.Util.Triple<String, String, String> toTriple : toTriples) {
-            RaceColumn toRaceColumn = getRaceColumn(toTriple.getA(), toTriple.getB());
+            final RaceColumn toRaceColumn = getRaceColumn(toTriple.getA(), toTriple.getB());
+            final Fleet toFleet = getFleetByName(toRaceColumn, toTriple.getC());
             try {
-                toRaceColumn.registerCompetitors(competitorsToCopy, getFleetByName(toRaceColumn, toTriple.getC()));
-            } catch (CompetitorRegistrationOnRaceLogDisabledException e){
-                toRaceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(toRaceColumn, toTriple.getC()));
-                try {
+                if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
+                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                } else {
+                    toRaceColumn.enableCompetitorRegistrationOnRaceLog(getFleetByName(toRaceColumn, toTriple.getC()));
                     toRaceColumn.registerCompetitors(competitorsToCopy, getFleetByName(toRaceColumn, toTriple.getC()));
-                } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
-                    //cannot happen
                 }
+            } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
+                // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
+                logger.log(Level.WARNING, "Internal error: race column "+toRaceColumn.getName()+" does not accept competitor registration although it should", e1);
             }
         }
     }

@@ -15,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
- * Obtains flees and medal information from the {@link Series} to which it is connected at construction time.
+ * Obtains fleets and medal information from the {@link Series} to which it is connected at construction time.
  * 
  * @author Axel Uhl (D043530)
  *
