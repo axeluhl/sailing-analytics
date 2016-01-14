@@ -11,7 +11,7 @@
         android:id="@+id/timer_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/side_padding"
+        android:layout_marginTop="@dimen/header_margin_top"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="?attr/white"

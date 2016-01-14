@@ -166,7 +166,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     }
 
     protected void viewPanel(@MOVE_VALUES int direction) {
-        if (mDots.size() == 0) {
+        if (mDots.size() == 0 || mPanels.size() == 0) {
             return;
         }
 

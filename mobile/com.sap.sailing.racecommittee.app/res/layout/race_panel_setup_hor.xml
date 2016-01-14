@@ -35,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/side_padding"
+                    android:layout_marginTop="@dimen/header_margin_top"
                     android:text="@string/start_procedure"
                     android:textAppearance="?attr/textPanelHeader" />
 
@@ -106,7 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/side_padding"
+                    android:layout_marginTop="@dimen/header_margin_top"
                     android:text="@string/course"
                     android:textAppearance="?attr/textPanelHeader" />
 
@@ -176,7 +176,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/side_padding"
+                    android:layout_marginTop="@dimen/header_margin_top"
                     android:text="@string/wind"
                     android:textAppearance="?attr/textPanelHeader" />
 

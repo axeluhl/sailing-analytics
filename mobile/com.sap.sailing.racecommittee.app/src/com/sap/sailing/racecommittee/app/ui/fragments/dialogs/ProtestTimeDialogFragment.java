@@ -96,15 +96,11 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
             mPanels = new ArrayList<>();
 
             ImageView dot;
-            dot = ViewHelper.get(layout, R.id.panel_1);
+            dot = ViewHelper.get(layout, R.id.dot_1);
             if (dot != null) {
                 mDots.add(dot);
             }
-            dot = ViewHelper.get(layout, R.id.panel_2);
-            if (dot != null) {
-                mDots.add(dot);
-            }
-            dot = ViewHelper.get(layout, R.id.panel_3);
+            dot = ViewHelper.get(layout, R.id.dot_2);
             if (dot != null) {
                 mDots.add(dot);
             }

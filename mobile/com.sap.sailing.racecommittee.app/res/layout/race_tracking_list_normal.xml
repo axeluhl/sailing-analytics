@@ -110,14 +110,14 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/panel_1"
+                    android:id="@+id/dot_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
                     tools:src="@drawable/ic_dot"/>
 
                 <ImageView
-                    android:id="@+id/panel_2"
+                    android:id="@+id/dot_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:src="@drawable/ic_dot"/>

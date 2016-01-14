@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
@@ -28,16 +29,17 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
     public BaseRaceInfoRaceFragment() {
         mRaceStateChangedListener = new RaceStateChangedListener();
         mProcedureListener = new ProcedureChangedListener();
-
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_setup);
         replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_flags);
-        replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_time);
+        if (AppUtils.with(getActivity()).is10inch() &&  AppUtils.with(getActivity()).isLand()) {
+            replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_setup);
+            replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_time);
+        }
     }
 
     @Override

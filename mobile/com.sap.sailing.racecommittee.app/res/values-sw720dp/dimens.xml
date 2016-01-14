@@ -58,6 +58,8 @@
 	<dimen name="management_text_normal">@dimen/textSize_26</dimen>
 	<dimen name="management_text_small">@dimen/textSize_22</dimen>
 
+	<dimen name="header_margin_top">@dimen/side_padding</dimen>
+
 	<!-- race state dependent -->
 	<!-- unscheduled -->
 	<dimen name="unscheduled_header_line">@dimen/thick_line</dimen>

@@ -85,6 +85,8 @@
     <dimen name="management_text_normal">@dimen/textSize_20</dimen>
     <dimen name="management_text_small">@dimen/textSize_18</dimen>
 
+    <dimen name="header_margin_top">13dp</dimen>
+
     <!-- race state dependent -->
     <!-- login -->
     <dimen name="login_text_size_small">@dimen/textSize_18</dimen>

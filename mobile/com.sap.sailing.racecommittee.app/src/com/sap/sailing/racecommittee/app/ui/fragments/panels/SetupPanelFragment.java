@@ -410,35 +410,37 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         private void toggleFragment() {
             sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            if (mExtraLayout != null) {
-                switch (toggleMarker(container, markerId)) {
-                    case LEVEL_NORMAL:
-                        mExtraLayout.setVisibility(View.GONE);
-                        transaction.remove(getFragmentManager().findFragmentById(R.id.race_panel_extra));
-                        break;
+            if (getView() != null && getView().findViewById(R.id.race_panel_extra) != null) {
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                if (mExtraLayout != null) {
+                    switch (toggleMarker(container, markerId)) {
+                        case LEVEL_NORMAL:
+                            mExtraLayout.setVisibility(View.GONE);
+                            transaction.remove(getFragmentManager().findFragmentById(R.id.race_panel_extra));
+                            break;
 
-                    case LEVEL_TOGGLED:
-                        int multiplier = 1;
-                        if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
-                            multiplier = 2;
-                        }
-                        int height = container.getMeasuredHeight() + getResources().getDimensionPixelSize(R.dimen.thin_line);
-                        int width = container.getMeasuredWidth() * multiplier;
-                        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
-                        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                        params.addRule(RelativeLayout.RIGHT_OF, R.id.race_panel_setup);
-                        mExtraLayout.setLayoutParams(params);
-                        mExtraLayout.setVisibility(View.VISIBLE);
-                        transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));
-                        break;
+                        case LEVEL_TOGGLED:
+                            int multiplier = 1;
+                            if (getRaceState().getRacingProcedure() instanceof GateStartRacingProcedure) {
+                                multiplier = 2;
+                            }
+                            int height = container.getMeasuredHeight() + getResources().getDimensionPixelSize(R.dimen.thin_line);
+                            int width = container.getMeasuredWidth() * multiplier;
+                            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(width, height);
+                            params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                            params.addRule(RelativeLayout.RIGHT_OF, R.id.race_panel_setup);
+                            mExtraLayout.setLayoutParams(params);
+                            mExtraLayout.setVisibility(View.VISIBLE);
+                            transaction.replace(R.id.race_panel_extra, MorePanelFragment.newInstance(getArguments()));
+                            break;
 
-                    default:
-                        ExLog.i(getActivity(), TAG, "Unknown return value");
-                        break;
+                        default:
+                            ExLog.i(getActivity(), TAG, "Unknown return value");
+                            break;
+                    }
                 }
+                transaction.commit();
             }
-            transaction.commit();
             disableToggle(container, markerId);
         }
     }
