@@ -250,31 +250,37 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
             for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    final TimePoint from = mapping.getTimeRange().from();
-                    if (from != null && mapping.getTimeRange().from().before(earliestMappingStart)) {
-                        earliestMappingStart = mapping.getTimeRange().from();
-                    }
-                    final TimePoint to = mapping.getTimeRange().to();
-                    if (to != null && mapping.getTimeRange().to().after(latestMappingEnd)) {
-                        latestMappingEnd = mapping.getTimeRange().to();
-                    }
+                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
+                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
                 }
             }
             for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    final TimePoint from = mapping.getTimeRange().from();
-                    if (from != null && from.before(earliestMappingStart)) {
-                        earliestMappingStart = mapping.getTimeRange().from();
-                    }
-                    final TimePoint to = mapping.getTimeRange().to();
-                    if (to != null && to.after(latestMappingEnd)) {
-                        latestMappingEnd = mapping.getTimeRange().to();
-                    }
+                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
+                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
                 }
             }
-            trackedRace.setStartOfTrackingReceived(earliestMappingStart);
-            trackedRace.setEndOfTrackingReceived(latestMappingEnd);
+            trackedRace.setStartOfTrackingReceived(earliestMappingStart == null ? TimePoint.BeginningOfTime : earliestMappingStart);
+            trackedRace.setEndOfTrackingReceived(latestMappingEnd == null ? TimePoint.EndOfTime : latestMappingEnd);
         }
+    }
+
+    private TimePoint getUpdatedEarliestMappingStart(TimePoint earliestMappingStart, final TimePoint from) {
+        if (from == null) {
+            earliestMappingStart = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
+        } else if (earliestMappingStart != null && from.before(earliestMappingStart)) {
+            earliestMappingStart = from;
+        }
+        return earliestMappingStart;
+    }
+
+    private TimePoint getUpdatedLatestMappingEnd(TimePoint latestMappingEnd, final TimePoint to) {
+        if (to == null) {
+            latestMappingEnd = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
+        } else if (latestMappingEnd != null && to.after(latestMappingEnd)) {
+            latestMappingEnd = to;
+        }
+        return latestMappingEnd;
     }
 
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
@@ -379,7 +385,8 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
     /**
      * Adjusts the {@link #competitorMappings} map according to the competitor registrations for the race managed by
-     * this tracked, either from the regatta log or the race log.
+     * this tracked, either from the regatta log or the race log. Then, the {@link TrackedRace}'s start and end of
+     * tracking time frame is updated from the mapping intervals.
      * 
      * @param loadIfNotCovered
      *            if <code>true</code>, the GPS fixes for the mappings will be loaded based on a comparison of the
