@@ -54,6 +54,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -72,6 +73,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -258,6 +260,26 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     toRaceLog.add(newCourseEvent);
                 }
 
+            }
+        }
+    }
+
+    @Override
+    public void copyCompetitors(final RaceColumn fromRaceColumn, final Fleet fromFleet, final Iterable<Pair<RaceColumn, Fleet>> toRaces) {
+        Iterable<Competitor> competitorsToCopy = fromRaceColumn.getAllCompetitors(fromFleet);
+        for (Pair<RaceColumn, Fleet> toRace : toRaces) {
+            final RaceColumn toRaceColumn = toRace.getA();
+            final Fleet toFleet = toRace.getB();
+            try {
+                if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
+                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                } else {
+                    toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
+                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                }
+            } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
+                // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
+                logger.log(Level.WARNING, "Internal error: race column "+toRaceColumn.getName()+" does not accept competitor registration although it should", e1);
             }
         }
     }

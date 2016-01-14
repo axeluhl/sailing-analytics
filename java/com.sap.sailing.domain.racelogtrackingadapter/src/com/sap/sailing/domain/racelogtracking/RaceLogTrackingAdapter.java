@@ -25,6 +25,7 @@ import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 
 public interface RaceLogTrackingAdapter {
@@ -101,4 +102,6 @@ public interface RaceLogTrackingAdapter {
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service);
+
+    void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);
 }
