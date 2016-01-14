@@ -16,7 +16,7 @@
         <item name="drawerArrowStyle">@style/AppTheme.Light.Widget.DrawerArrowStyle</item>
         <item name="editText">@style/AppTheme.Light.EditText</item>
         <item name="android:editTextColor">?white</item>
-        <item name="android:dialogTheme">@style/AppTheme.AlertDialog</item>
+        <item name="android:dialogTheme">@style/AppTheme.Dialog</item>
         <item name="android:alertDialogTheme">@style/AppTheme.Light.SettingsAlertDialog</item>
 
         <!-- style attributes for popup menu -->

@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.dialogs;
 
+import java.util.ArrayList;
+
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -15,8 +18,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdap
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sailing.racecommittee.app.ui.views.decoration.ItemStrokeDecoration;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
 
 public class CourseMarksDialogFragment extends DialogFragment {
 
@@ -43,9 +44,15 @@ public class CourseMarksDialogFragment extends DialogFragment {
     }
 
     @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.setTitle(R.string.course_design_assets);
+        return dialog;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.course_marks_fragment, container, false);
-
         mMarkGrid = (RecyclerView) layout.findViewById(R.id.assets);
         if (mMarkGrid != null) {
             if (getArguments() != null) {
@@ -57,7 +64,8 @@ public class CourseMarksDialogFragment extends DialogFragment {
                 mMarkGrid.setLayoutManager(layoutManager);
                 mMarkGrid.addItemDecoration(new ItemStrokeDecoration(padding, strokeWidth, color));
 
-                mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()), getArguments().getInt(TYPE), (CourseListDataElementWithIdImpl) getArguments().getSerializable(ELEMENT));
+                mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance(getActivity()), getArguments()
+                    .getInt(TYPE), (CourseListDataElementWithIdImpl) getArguments().getSerializable(ELEMENT));
                 mMarkAdapter.setListener(mListener);
                 mMarkGrid.setAdapter(mMarkAdapter);
             }
