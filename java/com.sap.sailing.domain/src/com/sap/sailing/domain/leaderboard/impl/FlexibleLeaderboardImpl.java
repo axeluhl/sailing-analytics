@@ -38,11 +38,19 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 
 /**
- * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be observed regarding
- * the columns belonging to the same regatta or even boat class.<p>
+ * A leaderboard implementation that allows users to flexibly configure which columns exist. No constraints need to be
+ * observed regarding the columns belonging to the same regatta or even boat class.
+ * <p>
  * 
- * The flexible leaderboard listens as {@link RaceColumnListener} on all its {@link RaceColumn}s and forwards all events to
- * all {@link RaceColumnListener}s subscribed with this leaderboard.
+ * The flexible leaderboard listens as {@link RaceColumnListener} on all its {@link RaceColumn}s and forwards all events
+ * to all {@link RaceColumnListener}s subscribed with this leaderboard.
+ * <p>
+ * 
+ * This class also implements the {@link IsRegattaLike} interface, emulating several aspects that otherwise would be
+ * found on a {@link Regatta} that is modeled properly with its series and fleets. In particular, the
+ * {@link IsRegattaLike} interface requires this leaderboard to provide a {@link RegattaLog} and to grant access to its
+ * {@link RaceColumn}s by name. A {@link BaseRegattaLikeImpl} is used as a delegate to implement the {@link IsRegattaLike}
+ * interface.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -97,7 +105,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
      * Deserialization has to be maintained in lock-step with {@link #writeObject(ObjectOutputStream) serialization}.
      * When de-serializing, a possibly remote {@link #raceLogStore} is ignored because it is transient. Instead, an
      * {@link EmptyRaceLogStore} is used for the de-serialized instance. A new {@link RaceLogInformation} is
-     * assembled for this empty race log and applied to all columns. 
+     * assembled for this empty race log store and applied to all columns. 
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();

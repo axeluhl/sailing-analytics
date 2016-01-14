@@ -36,7 +36,11 @@ import com.sap.sse.common.Util.Pair;
  * <li>a race column is added or removed</li>
  * <li>a tracked race is linked to or unlinked from any of the race columns</li>
  * <li>the racelog is marked as providing it's own competitors via the {@link RaceLogUseCompetitorsFromRaceLogEvent}</li>
+ * <li>the racelog is marked as no longer providing it's own competitors by revoking an event of type {@link RaceLogUseCompetitorsFromRaceLogEvent}</li>
  * </ul>
+ * 
+ * Note that objects of this type are not serializable. Classes using such objects shall not assign them to non-transient
+ * fields if they want to be serializable themselves.
  * 
  * @author Axel Uhl (d043530)
  *
@@ -101,8 +105,10 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             @Override
             public void visit(RaceLogRevokeEvent event) {
                 try {
-                    if (RaceLogRegisterCompetitorEvent.class
-                            .isAssignableFrom(Class.forName(event.getRevokedEventType()))) {
+                    final Class<?> revokedEventClass = Class.forName(event.getRevokedEventType());
+                    // 
+                    if (RaceLogRegisterCompetitorEvent.class.isAssignableFrom(revokedEventClass) ||
+                            RaceLogUseCompetitorsFromRaceLogEvent.class.isAssignableFrom(revokedEventClass)) {
                         invalidateAllCompetitorsCaches();
                     }
                 } catch (ClassNotFoundException e) {

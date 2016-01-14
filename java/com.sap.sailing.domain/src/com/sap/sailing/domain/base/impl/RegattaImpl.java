@@ -74,6 +74,15 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.NamedImpl;
 
+/**
+ * A regatta with series with race columns and fleets, a scoring scheme and various other data, many of which are relevant
+ * for scoring. A regatta has a single boat class. It implements the {@link IsRegattaLike} interface and for this uses a
+ * delegate pattern with the {@link BaseRegattaLikeImpl} which it shares with {@link FlexibleLeaderboardImpl}. That
+ * delegate provides the {@link RegattaLog} for this regatta.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ */
 public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListener {
 
     /**
