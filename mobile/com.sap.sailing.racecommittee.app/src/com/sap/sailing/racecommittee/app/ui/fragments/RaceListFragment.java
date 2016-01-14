@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -482,15 +481,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 races.add(new RaceListDataTypeRace(race, fleet));
             }
         }
-        Collections.sort(races, new RaceListDataTypeRaceComparator());
         return races;
-    }
-
-    private static class RaceListDataTypeRaceComparator implements Comparator<RaceListDataTypeRace> {
-        @Override
-        public int compare(RaceListDataTypeRace lhs, RaceListDataTypeRace rhs) {
-            return lhs.getRaceName().compareTo(rhs.getRaceName());
-        }
     }
 
     public void setupOn(Collection<ManagedRace> races) {
