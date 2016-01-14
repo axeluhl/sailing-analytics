@@ -248,29 +248,30 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         if (trackingTimesFromRaceLog == null) {
             TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
             TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
-    
             for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
+                    final TimePoint from = mapping.getTimeRange().from();
+                    if (from != null && mapping.getTimeRange().from().before(earliestMappingStart)) {
                         earliestMappingStart = mapping.getTimeRange().from();
                     }
-                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
+                    final TimePoint to = mapping.getTimeRange().to();
+                    if (to != null && mapping.getTimeRange().to().after(latestMappingEnd)) {
                         latestMappingEnd = mapping.getTimeRange().to();
                     }
                 }
             }
-    
             for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
                 for (DeviceMapping<?> mapping : list) {
-                    if (mapping.getTimeRange().from().before(earliestMappingStart)) {
+                    final TimePoint from = mapping.getTimeRange().from();
+                    if (from != null && from.before(earliestMappingStart)) {
                         earliestMappingStart = mapping.getTimeRange().from();
                     }
-                    if (mapping.getTimeRange().to().after(latestMappingEnd)) {
+                    final TimePoint to = mapping.getTimeRange().to();
+                    if (to != null && to.after(latestMappingEnd)) {
                         latestMappingEnd = mapping.getTimeRange().to();
                     }
                 }
             }
-    
             trackedRace.setStartOfTrackingReceived(earliestMappingStart);
             trackedRace.setEndOfTrackingReceived(latestMappingEnd);
         }
@@ -376,6 +377,16 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         }
     }
 
+    /**
+     * Adjusts the {@link #competitorMappings} map according to the competitor registrations for the race managed by
+     * this tracked, either from the regatta log or the race log.
+     * 
+     * @param loadIfNotCovered
+     *            if <code>true</code>, the GPS fixes for the mappings will be loaded based on a comparison of the
+     *            previous mappings from {@link #competitorMappings} and the new mappings.
+     * 
+     * @throws DoesNotHaveRegattaLogException
+     */
     private void updateCompetitorMappings(boolean loadIfNotCovered) throws DoesNotHaveRegattaLogException {
         // TODO remove fixes, if mappings have been removed
 
