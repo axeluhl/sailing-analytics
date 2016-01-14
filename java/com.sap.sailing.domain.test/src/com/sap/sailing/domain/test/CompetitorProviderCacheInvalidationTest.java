@@ -166,7 +166,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
     }
 
     @Test
-    public void testSimpleCompetitorListOnOneRaceLogAndRegattaLogInFlexibleLeaderboard() {
+    public void testSimpleCompetitorListOnOneRaceLogAndRegattaLogInFlexibleLeaderboard() throws NotRevokableException {
         flexibleLeaderboard.addRaceColumn("R1", /* medalRace */ false);
         RegattaLog regattaLog = flexibleLeaderboard.getRegattaLog();
         for (Competitor c : compLists[0]) {
@@ -175,20 +175,32 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         RaceLog raceLog = flexibleLeaderboard.getRacelog("R1", LeaderboardNameConstants.DEFAULT_FLEET_NAME);
         final LogEventAuthorImpl author = new LogEventAuthorImpl("Me", 0);
         int passId = 1;
-        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(), passId));
+        final RaceLogUseCompetitorsFromRaceLogEventImpl usesCompetitorsFromRaceLogEvent = new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(), passId);
+        raceLog.add(usesCompetitorsFromRaceLogEvent);
         for (Competitor c : compLists[1]) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
         }
         //expected are only the competitors in the RaceLog, because only one RaceColumn is
-        //registered, which has the competitors registered in the RaceLog. 
-        Set<Competitor> expected = new HashSet<>(compLists[1]);
+        //registered, which has the competitors registered in the RaceLog.
+        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[1]));
+        // Now we revoke that the race log provides the competitors for R1; the competitors should then
+        // snap back to those competitors taken from the regatta log for both, the rentire leaderboard
+        // as well as for the race column
+        raceLog.revokeEvent(author, usesCompetitorsFromRaceLogEvent);
+        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[0]));
+        // And now re-introduce per-race competitors and validate again that the cache adjusts properly:
+        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID.randomUUID(), passId));
+        assertRegattaAndRaceCompetitors(new HashSet<>(compLists[1]));
+    }
+
+    private void assertRegattaAndRaceCompetitors(Set<Competitor> expected) {
         Set<Competitor> actual = new HashSet<>();
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(), actual);
         assertEquals(expected, actual);
         Set<Competitor> actualForRace = new HashSet<>();
         
         //For the race only the competitors registered on RaceLog as RaceLogUseCompetitorsFromRaceLogEvent is present
-        Set<Competitor> expectedForRace = new HashSet<>(compLists[1]);
+        Set<Competitor> expectedForRace = new HashSet<>(expected);
         Util.addAll(competitorProviderFlexibleLeaderboard.getAllCompetitors(
                 flexibleLeaderboard.getRaceColumnByName("R1"),
                 flexibleLeaderboard.getFleet(LeaderboardNameConstants.DEFAULT_FLEET_NAME)), actualForRace);
