@@ -152,11 +152,12 @@
                     android:text="@string/persistence_waiting_events"
                     android:textAppearance="?attr/textSmall"/>
 
-                <ListView
+                <TextView
                     android:id="@+id/system_information_persistence_waiting"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:fadeScrollbars="false"/>
+                    android:paddingTop="8dp"
+                    android:textAppearance="?attr/textSmall"/>
             </LinearLayout>
         </ScrollView>
 

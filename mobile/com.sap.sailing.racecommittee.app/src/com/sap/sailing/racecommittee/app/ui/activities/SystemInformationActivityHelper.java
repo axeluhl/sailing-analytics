@@ -1,14 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
+import java.util.List;
 
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,16 +37,22 @@ public class SystemInformationActivityHelper {
      */
     public void updateSendingServiceInformation() {
         TextView statusView = (TextView) activity.findViewById(R.id.system_information_persistence_status);
-        ListView waitingView = (ListView) activity.findViewById(R.id.system_information_persistence_waiting);
+        TextView waitingView = (TextView) activity.findViewById(R.id.system_information_persistence_waiting);
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
-            String statusText = activity.getString(R.string.events_waiting_to_be_sent);
             String never = activity.getString(R.string.never);
-            statusView.setText(String.format(statusText, activity.sendingService.getDelayedIntentsCount(),
-                lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            waitingView.setAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,
-                activity.sendingService.getDelayedIntentsContent()));
+            List<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            String waitingEvents = "";
+            int waitingEventsSize = delayedIntentsContent.size();
+            for (int index = 0; index < waitingEventsSize; index++) {
+                waitingEvents += delayedIntentsContent.get(index);
+                if (!(index == waitingEventsSize - 1)) {
+                    waitingEvents += "\n";
+                }
+            }
+            waitingView.setText(waitingEvents);
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }
