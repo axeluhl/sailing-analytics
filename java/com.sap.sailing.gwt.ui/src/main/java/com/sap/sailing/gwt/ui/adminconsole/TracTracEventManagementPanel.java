@@ -258,8 +258,9 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         // Regatta
         Label regattaForTrackingLabel = new Label(stringMessages.regattaUsedForTheTrackedRace());
         regattaForTrackingLabel.setWordWrap(false);
-        layoutTable.setWidget(0, 0, regattaForTrackingLabel);
-        layoutTable.setWidget(0, 1, getAvailableRegattasListBox());
+        int row = 0;
+        layoutTable.setWidget(row, 0, regattaForTrackingLabel);
+        layoutTable.setWidget(row, 1, getAvailableRegattasListBox());
 
         // Track settings (wind)
         Label trackSettingsLabel = new Label(stringMessages.trackSettings() + ":");
@@ -304,12 +305,12 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         ignoreTracTracMarkPassingsCheckbox.setWordWrap(false);
         ignoreTracTracMarkPassingsCheckbox.setValue(Boolean.FALSE);
         
-        layoutTable.setWidget(1, 0, trackSettingsLabel);
-        layoutTable.setWidget(1, 1, trackWindCheckBox);
-        layoutTable.setWidget(2, 1, correctWindCheckBox);
-        layoutTable.setWidget(3, 1, simulateAsLiveRacePanel);
-        layoutTable.setWidget(4, 1, simulateWithOffsetPanel);
-        layoutTable.setWidget(5, 1, ignoreTracTracMarkPassingsCheckbox);
+        layoutTable.setWidget(++row, 0, trackSettingsLabel);
+        layoutTable.setWidget(row, 1, trackWindCheckBox);
+        layoutTable.setWidget(++row, 1, correctWindCheckBox);
+        layoutTable.setWidget(++row, 1, simulateAsLiveRacePanel);
+        layoutTable.setWidget(++row, 1, simulateWithOffsetPanel);
+        layoutTable.setWidget(++row, 1, ignoreTracTracMarkPassingsCheckbox);
         
         // Filter
         Label racesFilterLabel = new Label(stringMessages.filterRacesByName() + ":");
@@ -331,8 +332,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         };
         racesFilterablePanel.getTextBox().ensureDebugId("TrackableRacesFilterTextBox");
-        layoutTable.setWidget(6, 0, racesFilterLabel);
-        layoutTable.setWidget(6, 1, racesFilterablePanel);
+        layoutTable.setWidget(++row, 0, racesFilterLabel);
+        layoutTable.setWidget(row, 1, racesFilterablePanel);
 
         // Races
         TextColumn<TracTracRaceRecordDTO> regattaNameColumn = new TextColumn<TracTracRaceRecordDTO>() {
@@ -404,8 +405,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         racesTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
         racesTable.setWidth("100%");
         raceList.addDataDisplay(racesTable);
-        layoutTable.setWidget(6, 0, racesTable);
-        cellFormatter.setColSpan(6, 0, 2);
+        layoutTable.setWidget(++row, 0, racesTable);
+        cellFormatter.setColSpan(row, 0, 2);
         Button startTrackingButton = new Button(stringMessages.startTracking());
         startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.addClickHandler(new ClickHandler() {
@@ -419,7 +420,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         offsetToStartTimeOfSimulatedRace, ignoreTracTracMarkPassingsCheckbox.getValue());
             }
         });
-        layoutTable.setWidget(7, 1, startTrackingButton);
+        layoutTable.setWidget(++row, 1, startTrackingButton);
         trackableRacesPanel.setContentWidget(layoutTable);
         return trackableRacesPanel;
     }
