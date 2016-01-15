@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
 
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -55,7 +57,57 @@ public class EditMarkPositionPanel  extends AbstractRaceStockChart implements Co
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         setVisible(false);
         
-        chart = new StockChart();
+        chart = new StockChart()
+            .setChartTitleText("Test")
+            .setMarginRight(10);
+        Series series = chart.createSeries()
+            .addPoint(40)
+            .addPoint(35)
+            .addPoint(60);
+        chart.addSeries(series);
+        setWidget(chart);
+            /*.setZoomType(BaseChart.ZoomType.X)
+            .setMarginLeft(65)
+            .setMarginRight(65)
+            .setWidth100()
+            .setHeight100()
+            .setBorderWidth(0)
+            .setBorderRadius(0)
+            .setBackgroundColor(new Color("#FFFFFF"))
+            .setPlotBackgroundColor("#f8f8f8")
+            .setPlotBorderWidth(0)
+            .setCredits(new Credits().setEnabled(false))
+            .setChartTitle(new ChartTitle().setText("Mark Fixes"))
+            .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
+            .setLinePlotOptions(new LinePlotOptions().setLineWidth(0).setMarker(
+                    new Marker().setEnabled(true).setRadius(4)).setShadow(false));
+        
+        chart.getXAxis().setType(Axis.Type.DATE_TIME)
+                .setMaxZoom(60 * 1000) // 1 minute
+        .setAxisTitleText(stringMessages.time());
+        chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
+            @Override
+            public String format(AxisLabelsData axisLabelsData) {
+                return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
+            }
+        }));
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
+        setSize("100%", "100%");
+        Series newSeries = chart
+                .createSeries()
+                .setType(Series.Type.LINE)
+                .setName("Test")
+                .setYAxis(0)
+                .setPlotOptions(new LinePlotOptions().setSelected(true));
+        Point[] points = new Point[3];
+        points[0] = new Point(1, 0);
+        points[1] = new Point(2, 0);
+        points[2] = new Point(5, 0);
+        newSeries.setPoints(points);
+        chart.addSeries(newSeries, true, false);
+        setWidget(chart);
+        chart.setSizeToMatchContainer();
+        chart.redraw();*/
     }
     
     public void setVisible(boolean visible) {

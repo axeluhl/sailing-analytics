@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import java.util.Date;
 import java.util.Iterator;
 
+import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
