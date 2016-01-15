@@ -15,7 +15,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
     public RegattaLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
+        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass, /* validator */ null);
     }
 
     @Override

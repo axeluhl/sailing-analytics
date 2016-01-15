@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,15 +20,52 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     private String fleetName;
     private String raceColumnName;
     private CheckBox competitorRegistrationInRaceLogCheckBox;
+    
+    private static class Validator implements com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator<Set<CompetitorDTO>> {
+        private CheckBox competitorRegistrationInRaceLogCheckBox;
+        private final StringMessages stringMessages;
+        
+        public Validator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+        @Override
+        public String getErrorMessage(Set<CompetitorDTO> valueToValidate) {
+            final String result;
+            if (getCompetitorRegistrationInRaceLogCheckBox() != null && !getCompetitorRegistrationInRaceLogCheckBox().getValue()) {
+                result = stringMessages.competitorRegistrationsOnRaceDisabled();
+            } else {
+                result = null;
+            }
+            return result;
+        }
+        
+        public CheckBox getCompetitorRegistrationInRaceLogCheckBox() {
+            return competitorRegistrationInRaceLogCheckBox;
+        }
+
+        public void setCompetitorRegistrationInRaceLogCheckBox(CheckBox competitorRegistrationInRaceLogCheckBox) {
+            this.competitorRegistrationInRaceLogCheckBox = competitorRegistrationInRaceLogCheckBox;
+        }
+    }
 
     public RaceLogCompetitorRegistrationDialog(String boatClass, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean editable, String leaderboardName,
             String raceColumnName, String fleetName,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback) {
-        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass);
+        this(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass,
+                raceColumnName, fleetName, new Validator(stringMessages));
+    }
+    
+    public RaceLogCompetitorRegistrationDialog(SailingServiceAsync sailingService, StringMessages stringMessages,
+            ErrorReporter errorReporter, boolean editable,
+            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<Set<CompetitorDTO>> callback,
+            String leaderboardName, String boatClass, String raceColumnName, String fleetName, Validator validator) {
+        super(sailingService, stringMessages, errorReporter, editable, callback, leaderboardName, boatClass, validator);
         this.raceColumnName = raceColumnName;
         this.fleetName = fleetName;
         competitorRegistrationInRaceLogCheckBox = new CheckBox(stringMessages.registerCompetitorsOnRace());
+        validator.setCompetitorRegistrationInRaceLogCheckBox(competitorRegistrationInRaceLogCheckBox);
         setupCompetitorRegistationsOnRaceCheckbox();
     }
 
@@ -162,7 +199,7 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
         if (competitorRegistrationInRaceLogCheckBox.getValue()) {
             return super.getResult();
         } else {
-            return new HashSet<CompetitorDTO>();
+            return Collections.emptySet();
         }
     }
 }
