@@ -22,8 +22,6 @@ import javax.mail.util.ByteArrayDataSource;
 import org.osgi.framework.ServiceReference;
 
 import com.google.zxing.WriterException;
-import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -36,7 +34,6 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTra
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -62,7 +59,6 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -259,32 +255,18 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         }
     }
 
-    @FunctionalInterface
-    private static interface DeviceMarkMappingEventFactory<VisitorT, EventT extends AbstractLogEvent<VisitorT>> {
-        EventT createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint);
-    }
-
-    private <VisitorT, EventT extends AbstractLogEvent<VisitorT>, LogT extends AbstractLog<EventT, VisitorT>> void pingMark(
-            LogT log, Mark mark, GPSFix gpsFix, RacingEventService service,
-            DeviceMarkMappingEventFactory<VisitorT, EventT> factory, DeviceIdentifier device) {
-        TimePoint time = gpsFix.getTimePoint();
-        EventT mapping = factory.createDeviceMarkMapping(device, time);
+    @Override
+    public void pingMark(RegattaLog log, Mark mark, GPSFix gpsFix, RacingEventService service) {
+        final PingDeviceIdentifierImpl device = new PingDeviceIdentifierImpl();
+        final TimePoint timePoint = gpsFix.getTimePoint();
+        final RegattaLogEvent mapping = new RegattaLogDeviceMarkMappingEventImpl(timePoint,
+                timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, device, timePoint, timePoint);
         log.add(mapping);
         try {
             service.getGPSFixStore().storeFix(device, gpsFix);
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not ping mark " + mark);
         }
-    }
-
-    @Override
-    public void pingMark(RegattaLog regattaLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
-        DeviceMarkMappingEventFactory<RegattaLogEventVisitor, RegattaLogEvent> regattaLogEventFactory =
-                (DeviceIdentifier dev, TimePoint timePoint) -> new RegattaLogDeviceMarkMappingEventImpl(timePoint,
-                timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, dev, timePoint, timePoint);
-        pingMark(regattaLog, mark, gpsFix, service,
-                regattaLogEventFactory,
-                new PingDeviceIdentifierImpl());
     }
 
     @Override
