@@ -1459,4 +1459,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
     String showOnlyCompetitorsOfLog();
+    String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
 }

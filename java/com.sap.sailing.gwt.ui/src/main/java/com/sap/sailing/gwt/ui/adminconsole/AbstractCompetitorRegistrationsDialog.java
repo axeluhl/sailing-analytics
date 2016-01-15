@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -128,7 +129,11 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         showOnlyCompetitorsOfLogCheckBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refreshCompetitors(); // FIXME this will cancel all uncommitted changes; at least a warning must be displayed to the user
+                if (Window.confirm(stringMessages.confirmLosingCompetitorEditsWhenTogglingLogBasedView())) {
+                    refreshCompetitors();
+                } else {
+                    showOnlyCompetitorsOfLogCheckBox.setValue(!showOnlyCompetitorsOfLogCheckBox.getValue());
+                }
             }
         });
         mainPanel.add(showOnlyCompetitorsOfLogCheckBox);
