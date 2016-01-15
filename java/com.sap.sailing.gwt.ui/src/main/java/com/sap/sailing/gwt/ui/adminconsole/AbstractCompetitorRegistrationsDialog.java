@@ -80,19 +80,16 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 openEditCompetitorDialog();
             }
         });
-
         final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
         inviteCompetitorsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 Set<CompetitorDTO> competitors = registeredCompetitorsTable.getSelectionModel().getSelectedSet();
-
                 CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
                         errorReporter);
                 helper.inviteCompetitors(competitors, leaderboardName);
             }
         });
-
         HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
         CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
         CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
@@ -125,31 +122,22 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         competitorRegistrationPanel.add(movePanel);
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
-
-        
         buttonPanel.add(addCompetitorButton);
         buttonPanel.add(editCompetitorButton);
         buttonPanel.add(inviteCompetitorsButton);
         mainPanel.add(buttonPanel);
-        
         showOnlyCompetitorsOfLogCheckBox = new CheckBox(stringMessages.showOnlyCompetitorsOfLog());
         showOnlyCompetitorsOfLogCheckBox.setValue(false);
-        
         showOnlyCompetitorsOfLogCheckBox.addClickHandler(new ClickHandler() {
-            
             @Override
             public void onClick(ClickEvent event) {
                 refreshCompetitors();
             }
         });
-        
         mainPanel.add(showOnlyCompetitorsOfLogCheckBox);
-        
         addAdditionalWidgets(mainPanel);
         mainPanel.add(competitorRegistrationPanel);
-
         refreshCompetitors();
-        
         return mainPanel;
     }
 
@@ -197,7 +185,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 }, boatClass).show();
     }
     
-    public boolean showOnlyCompetitorsOfLog(){
+    protected boolean showOnlyCompetitorsOfLog(){
         return showOnlyCompetitorsOfLogCheckBox.getValue();
     }
 
