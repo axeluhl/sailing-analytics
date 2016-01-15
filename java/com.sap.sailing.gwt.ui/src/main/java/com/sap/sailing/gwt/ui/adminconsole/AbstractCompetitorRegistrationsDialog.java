@@ -143,17 +143,9 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
     public abstract void addAdditionalWidgets(FlowPanel mainPanel);
 
-    void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Collection<CompetitorDTO> toMove) {
-        if (!toMove.isEmpty()) {
-            List<CompetitorDTO> newFromList = new ArrayList<>();
-            Util.addAll(from.getFilterField().getAll(), newFromList);
-            newFromList.removeAll(toMove);
-            from.getFilterField().updateAll(newFromList);
-            List<CompetitorDTO> newToList = new ArrayList<>();
-            Util.addAll(to.getDataProvider().getList(), newToList);
-            newToList.addAll(toMove);
-            to.getFilterField().updateAll(newToList);
-        }
+    void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorDTO> toMove) {
+        from.getFilterField().removeAll(toMove);
+        to.getFilterField().addAll(toMove);
     }
 
     private void moveSelected(CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> from,

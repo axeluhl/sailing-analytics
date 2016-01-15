@@ -106,8 +106,21 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         filter();
     }
     
+    /**
+     * Removes an object and applies the search filter.
+     */
+    public void remove(T object) {
+        all.remove(object);
+        filter();
+    }
+    
     public void addAll(Iterable<T> objects) {
         Util.addAll(objects, all);
+        filter();
+    }
+    
+    public void removeAll(Iterable<T> objects) {
+        Util.removeAll(objects, all);
         filter();
     }
     
