@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -226,8 +227,20 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     }
 
     protected abstract void setRegisteredCompetitors();
-    protected abstract void setRegisterableCompetitorsAndRegisteredCompetitors();
     
+    private void setRegisterableCompetitorsAndRegisteredCompetitors() {
+        allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
+            @Override
+            public void onSuccess(Iterable<CompetitorDTO> result) {
+                setRegisteredCompetitors();
+            }
+    
+            @Override
+            public void onFailure(Throwable reason) {
+            }
+        });
+    }
+
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
@@ -248,4 +261,5 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         Util.addAll(registeredCompetitorsTable.getAllCompetitors(), registeredCompetitors);
         return registeredCompetitors;
     }
+
 }

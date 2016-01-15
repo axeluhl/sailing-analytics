@@ -166,7 +166,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
             provider.addRaceColumnListener(raceColumnListener);
-            // consider {@link RegattaLog} competitor changes
+            // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
             provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
             allCompetitorsCache = result;
         }
@@ -189,7 +189,7 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
             // listeners set
             raceColumn.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
             provider.addRaceColumnListener(raceColumnListener);
-            // consider {@link RegattaLog} competitor changes
+            // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
             provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
             result = resultSet;
             allCompetitorsCacheByRace.put(key, result);

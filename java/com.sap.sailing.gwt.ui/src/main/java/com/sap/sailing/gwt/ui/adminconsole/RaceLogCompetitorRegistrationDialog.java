@@ -158,42 +158,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     @Override
-    protected void setRegisterableCompetitorsAndRegisteredCompetitors() {
-        if (showOnlyCompetitorsOfLog()) {
-            sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
-                    new AsyncCallback<Collection<CompetitorDTO>>() {
-                        @Override
-                        public void onSuccess(Collection<CompetitorDTO> competitors) {
-                            allCompetitorsTable.refreshCompetitorList(competitors);
-                            setRegisteredCompetitors();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable reason) {
-                            errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
-                                    + reason.getMessage());
-                        }
-                    });
-
-        } else {
-            sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
-                    new AsyncCallback<Collection<CompetitorDTO>>() {
-                        @Override
-                        public void onSuccess(Collection<CompetitorDTO> competitors) {
-                            allCompetitorsTable.refreshCompetitorList(competitors);
-                            setRegisteredCompetitors();
-                        }
-
-                        @Override
-                        public void onFailure(Throwable reason) {
-                            errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
-                                    + reason.getMessage());
-                        }
-                    });
-        }
-    }
-
-    @Override
     protected Set<CompetitorDTO> getResult() {
         if (competitorRegistrationInRaceLogCheckBox.getValue()) {
             return super.getResult();
