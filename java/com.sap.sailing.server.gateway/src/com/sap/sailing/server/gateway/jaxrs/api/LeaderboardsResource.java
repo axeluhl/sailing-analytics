@@ -59,7 +59,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -584,7 +583,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     private final MarkJsonSerializerWithPosition markWithPositionSerializer = new MarkJsonSerializerWithPosition(
             markSerializer, new FlatGPSFixJsonSerializer());
     private final FlatGPSFixJsonDeserializer fixDeserializer = new FlatGPSFixJsonDeserializer();
-    private final FlatGPSFixJsonSerializer fixSerializer = new FlatGPSFixJsonSerializer();
 
     /**
      * Mockito requires this to be public in order to be able to mock it :-(
@@ -596,10 +594,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
     /**
      * Expects one GPS Fix in the format understood by {@link #fixDeserializer} in the POST message body, parses that fix,
      * adds the fix to the {@link RacingEventService#getGPSFixStore() GPSFixStore} and creates mappings for each fix in the RegattaLog.
-     * If the mark's position for the current server time can be determined from the {@link TrackedRace}s attached to the leaderboard,
-     * that position is returned, serialized by {@link #fixSerializer}. Note that with this is may be possible that there is currently
-     * no {@link TrackedRace} accepting the ping fix, hence causing no result to be returned, or a position from another
-     * {@link TrackedRace}, e.g., from the past, that has not accepted the ping fix.
      */
     @POST
     @Path("{leaderboardName}/marks/{markId}/gps_fixes")
@@ -627,7 +621,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        final TimePoint now = MillisecondsTimePoint.now();
         // grab the position as found in TrackedRaces attached to the leaderboard
         final GPSFix fix;
         try {
@@ -642,14 +635,6 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
         adapter.pingMark(regattaLog, mark, fix, service);
-
-        final Position lastKnownPosition = service.getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
-        if (lastKnownPosition != null) {
-            final JSONObject lastKnownFixJson = fixSerializer.serialize(new GPSFixImpl(lastKnownPosition, now));
-            final String fixJson = lastKnownFixJson.toJSONString();
-            return Response.ok(fixJson, MediaType.APPLICATION_JSON).build();
-        } else {
-            return Response.ok().build();
-        }
+        return Response.ok().build();
     }
 }
