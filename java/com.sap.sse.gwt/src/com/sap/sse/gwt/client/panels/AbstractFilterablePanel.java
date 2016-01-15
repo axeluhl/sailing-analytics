@@ -119,6 +119,16 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         filter();
     }
     
+    /**
+     * Would better be called {@code clear()}, but {@link #clear} is already the method inherited from {@link Panel}...
+     * This method removes all entries from this filterable panel. The effect is the same as invoking
+     * <code>removeAll(all)</code> with <code>all</code> being a copy of what you get when calling {@link #getAll()}.
+     */
+    public void removeAll() {
+        all.clear();
+        filter();
+    }
+    
     public void removeAll(Iterable<T> objects) {
         Util.removeAll(objects, all);
         filter();

@@ -215,8 +215,8 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     }
 
     protected void refreshCompetitors() {
-        registeredCompetitorsTable.getDataProvider().getList().clear();
-        allCompetitorsTable.getDataProvider().getList().clear();
+        registeredCompetitorsTable.getFilterField().removeAll();
+        allCompetitorsTable.getFilterField().removeAll();
         setRegisterableCompetitorsAndRegisteredCompetitors();
     }
 
