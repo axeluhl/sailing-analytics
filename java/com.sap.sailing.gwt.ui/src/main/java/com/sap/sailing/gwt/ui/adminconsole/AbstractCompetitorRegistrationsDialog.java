@@ -131,7 +131,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         showOnlyCompetitorsOfLogCheckBox.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                refreshCompetitors();
+                refreshCompetitors(); // FIXME this will cancel all uncommitted changes; at least a warning must be displayed to the user
             }
         });
         mainPanel.add(showOnlyCompetitorsOfLogCheckBox);

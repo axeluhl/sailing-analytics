@@ -244,18 +244,22 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
      */
     public void refreshCompetitorList(String leaderboardName, final Callback<Iterable<CompetitorDTO>,
             Throwable> callback) {
-        if(leaderboardName != null) {
+        if (leaderboardName != null) {
             sailingService.getCompetitorsOfLeaderboard(leaderboardName, new AsyncCallback<Iterable<CompetitorDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) callback.onFailure(caught);
+                    if (callback != null) {
+                        callback.onFailure(caught);
+                    }
                 }
 
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     refreshCompetitorList(result);
-                    if (callback != null) callback.onSuccess(result);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
                 }
             });
         } else {
@@ -263,14 +267,18 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Remote Procedure Call getCompetitors() - Failure: " + caught.getMessage());
-                    if (callback != null) callback.onFailure(caught);
+                    if (callback != null) {
+                        callback.onFailure(caught);
+                    }
                 }
 
                 @Override
                 public void onSuccess(Iterable<CompetitorDTO> result) {
                     getFilteredCompetitors(result);
                     refreshCompetitorList(result);
-                    if (callback != null) callback.onSuccess(result);
+                    if (callback != null) {
+                        callback.onSuccess(result);
+                    }
                 }
             });
         }
