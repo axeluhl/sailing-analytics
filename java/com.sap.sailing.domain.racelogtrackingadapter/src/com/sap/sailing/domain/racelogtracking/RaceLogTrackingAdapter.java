@@ -76,7 +76,8 @@ public interface RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException;
 
     /**
-     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
+     * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that time point
+     * in the {@code regattaLogToAddTo}, mapping the virtual device to the {@code mark}.
      */
     void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
 
