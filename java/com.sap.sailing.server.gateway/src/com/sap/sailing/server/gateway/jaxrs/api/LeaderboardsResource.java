@@ -454,9 +454,9 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         logger.fine("JSON requestObject is: " + requestObject.toString());
-        Long toMillis = (Long) requestObject.get("toMillis");
-        String competitorId = (String) requestObject.get("competitorId");
-        String deviceUuid = (String) requestObject.get("deviceUuid");
+        Long toMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_TO_MILLIS);
+        String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         TimePoint closingTimePoint = new MillisecondsTimePoint(toMillis);
         if (toMillis == null || deviceUuid == null || closingTimePoint == null) {
             logger.warning("Invalid JSON body in request");
