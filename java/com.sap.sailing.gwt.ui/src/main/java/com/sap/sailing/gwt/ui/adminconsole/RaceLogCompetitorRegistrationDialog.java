@@ -179,7 +179,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                                 }
                                             });
                                 }
-                                validate();
                             }
 
                             @Override

@@ -83,13 +83,13 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         assertOneFixPerMapping(mappingsForMark);
         }
         {
-        // now produce a second ping; this should produce two fixes for the mark: one repeating the last known
-        // position, and another one with the new position.
+        // now produce a second ping; this should produce also only one fix; no additional artificial fixes are
+        // created (anymore; they used to be before bug2851)
         Response response = resource.pingMark(PING2_MARK_JSON, leaderboard.getName(), mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
         Map<Mark, List<DeviceMapping<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze();
         List<DeviceMapping<Mark>> mappingsForMark = mappings.get(mark);
-        assertThat("Assert an additional mapping was created for the second ping", mappingsForMark.size(), equalTo(3));
+        assertThat("Assert no additional mapping was created for the second ping", mappingsForMark.size(), equalTo(2));
         assertOneFixPerMapping(mappingsForMark);
         }
     }
