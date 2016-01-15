@@ -6,9 +6,21 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Axis;
+import org.moxieapps.gwt.highcharts.client.BaseChart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
+import org.moxieapps.gwt.highcharts.client.ChartTitle;
+import org.moxieapps.gwt.highcharts.client.Color;
+import org.moxieapps.gwt.highcharts.client.Credits;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
+import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.StockChart;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
+import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
+import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
+import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
@@ -58,15 +70,7 @@ public class EditMarkPositionPanel  extends AbstractRaceStockChart implements Co
         setVisible(false);
         
         chart = new StockChart()
-            .setChartTitleText("Test")
-            .setMarginRight(10);
-        Series series = chart.createSeries()
-            .addPoint(40)
-            .addPoint(35)
-            .addPoint(60);
-        chart.addSeries(series);
-        setWidget(chart);
-            /*.setZoomType(BaseChart.ZoomType.X)
+            .setZoomType(BaseChart.ZoomType.X)
             .setMarginLeft(65)
             .setMarginRight(65)
             .setWidth100()
@@ -107,7 +111,7 @@ public class EditMarkPositionPanel  extends AbstractRaceStockChart implements Co
         chart.addSeries(newSeries, true, false);
         setWidget(chart);
         chart.setSizeToMatchContainer();
-        chart.redraw();*/
+        chart.redraw();
     }
     
     public void setVisible(boolean visible) {
