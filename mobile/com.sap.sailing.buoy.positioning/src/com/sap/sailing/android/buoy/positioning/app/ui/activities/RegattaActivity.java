@@ -15,12 +15,12 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
@@ -37,14 +37,13 @@ public class RegattaActivity extends AbstractRegattaActivity {
     private final String TAG = RegattaActivity.class.getName();
     private String checkinUrl;
 
-    private AppPreferences prefs;
     private MessageSendingService messageSendingService;
     private boolean messageSendingServiceBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = new AppPreferences(this);
+        AppPreferences prefs = new AppPreferences(this);
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
@@ -76,7 +75,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
         RegattaFragment regattaFragment = new RegattaFragment();
         replaceFragment(R.id.content_frame, regattaFragment);
 
-        startMarkerService();
+        MarkerUtils.withContext(this).startMarkerService(checkinUrl);
     }
 
     @Override
@@ -110,8 +109,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     protected void onDestroy() {
-        Intent intent = new Intent(this, MarkerService.class);
-        stopService(intent);
+        MarkerUtils.withContext(this).stopMarkerService();
         super.onDestroy();
     }
 
@@ -168,12 +166,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
-    }
-
-    private void startMarkerService() {
-        Intent intent = new Intent(this, MarkerService.class);
-        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
-        startService(intent);
     }
 
     private void checkOut(){
