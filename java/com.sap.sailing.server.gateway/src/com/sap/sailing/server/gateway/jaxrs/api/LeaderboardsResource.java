@@ -47,7 +47,6 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
@@ -59,7 +58,6 @@ import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -73,8 +71,6 @@ import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
-import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
@@ -83,8 +79,6 @@ import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -599,28 +593,27 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         return getService(RaceLogTrackingAdapterFactory.class).getAdapter(getService().getBaseDomainFactory());
     }
 
+    /**
+     * Expects one GPS Fix in the format understood by {@link #fixDeserializer} in the POST message body, parses that fix,
+     * adds the fix to the {@link RacingEventService#getGPSFixStore() GPSFixStore} and creates mappings for each fix in the RegattaLog.
+     * If the mark's position for the current server time can be determined from the {@link TrackedRace}s attached to the leaderboard,
+     * that position is returned, serialized by {@link #fixSerializer}. Note that with this is may be possible that there is currently
+     * no {@link TrackedRace} accepting the ping fix, hence causing no result to be returned, or a position from another
+     * {@link TrackedRace}, e.g., from the past, that has not accepted the ping fix.
+     */
     @POST
     @Path("{leaderboardName}/marks/{markId}/gps_fixes")
     @Consumes(MediaType.APPLICATION_JSON)
-    /**
-     * Add the fixes to the GPSFixStore and create mappings for each fix in the RegattaLog.
-     * @param json
-     * @param leaderboardName
-     * @param markId
-     * @return
-     * @throws HTTPException
-     */
     public Response pingMark(String json, @PathParam("leaderboardName") String leaderboardName,
             @PathParam("markId") String markId) throws HTTPException {
         logger.fine("Post issued to " + this.getClass().getName());
-
+        final RacingEventService service = getService();
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return Response.status(Status.NOT_FOUND)
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
         RegattaLog regattaLog = null;
         if (leaderboard instanceof HasRegattaLike) {
             regattaLog = ((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog();
@@ -629,15 +622,14 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .entity("Leaderboard '" + StringEscapeUtils.escapeHtml(leaderboardName) + "' does not have an attached RegattaLog.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
-        Mark mark = getService().getBaseDomainFactory().getExistingMarkByIdAsString(markId);
+        final Mark mark = service.getBaseDomainFactory().getExistingMarkByIdAsString(markId);
         if (mark == null) {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        TimePoint now = MillisecondsTimePoint.now();
-        Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
-        GPSFix fix = null;
+        final TimePoint now = MillisecondsTimePoint.now();
+        // grab the position as found in TrackedRaces attached to the leaderboard
+        final GPSFix fix;
         try {
             Object requestBody = JSONValue.parseWithException(json);
             JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -648,35 +640,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
-        RacingEventService service = getService();
-        try {
-            if (lastKnownPosition == null) {
-                // Look into GPSFixStore
-                DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-                getService().getGPSFixStore().loadMarkTrack(loadedTrack, regattaLog, mark);
-                lastKnownPosition = loadedTrack.getEstimatedPosition(now, /* extrapolate */ false);
-            }
+        final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
+        adapter.pingMark(regattaLog, mark, fix, service);
 
-            if (lastKnownPosition != null) {
-                // ping again to avoid interpolation, avoid filtering by paying attention to maxSpeedForSmoothing
-                final Distance distance = lastKnownPosition.getDistance(fix.getPosition());
-                final Duration minDuration = GPSFixTrackImpl.getDefaultMaxSpeedForSmoothing().getDuration(distance);
-                final GPSFix repeatedFixAvoidingCreepingMark = new GPSFixImpl(lastKnownPosition, fix.getTimePoint()
-                        .minus(minDuration));
-                adapter.pingMark(regattaLog, mark, repeatedFixAvoidingCreepingMark, service);
-            }
-            adapter.pingMark(regattaLog, mark, fix, service);
-            logger.log(Level.INFO, "Pinged mark " + mark.getName());
-        } catch (NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not ping mark " + mark.getName());
-        } catch (TransformationException e) {
-            logger.log(Level.WARNING, "Could not ping mark " + mark.getName());
-        }
-
+        final Position lastKnownPosition = service.getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
         if (lastKnownPosition != null) {
-            JSONObject lastKnownFixJson = fixSerializer.serialize(new GPSFixImpl(lastKnownPosition, now));
-            String fixJson = lastKnownFixJson.toJSONString();
+            final JSONObject lastKnownFixJson = fixSerializer.serialize(new GPSFixImpl(lastKnownPosition, now));
+            final String fixJson = lastKnownFixJson.toJSONString();
             return Response.ok(fixJson, MediaType.APPLICATION_JSON).build();
         } else {
             return Response.ok().build();

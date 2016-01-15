@@ -1062,7 +1062,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // If no spanning track is found, the fix closest to the time point requested is used instead
         GPSFix nonSpanningFallback = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            final GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
             if (trackCandidate != null) {
                 if (spansTimePoint(trackCandidate, timePoint)) {
                     track = trackCandidate;
