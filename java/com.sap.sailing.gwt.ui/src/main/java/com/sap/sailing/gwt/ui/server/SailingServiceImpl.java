@@ -5149,7 +5149,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private MarkDTO convertToMarkDTO(LeaderboardThatHasRegattaLike leaderboard, Mark mark) {
         final TimePoint now = MillisecondsTimePoint.now();
-        final Position lastPos = getService().getMarkPosition(mark, leaderboard, now, null);
+        final Position lastPos = getService().getMarkPosition(mark, leaderboard, now);
         return convertToMarkDTO(mark, lastPos);
     }
     
@@ -5265,7 +5265,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToRaceCourseDTO(lastPublishedCourse, new MarkPositionFinder() {
             @Override
             public Position find(Mark mark, TimePoint at) {
-                return getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName), at, raceLog);
+                return getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) getService().getLeaderboardByName(leaderboardName), at);
             }
         }, /* timePoint */ MillisecondsTimePoint.now());
     }

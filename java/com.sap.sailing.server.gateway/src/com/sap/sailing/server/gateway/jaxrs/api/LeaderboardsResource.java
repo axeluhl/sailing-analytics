@@ -578,8 +578,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         for (Mark mark : marks) {
             final TimePoint now = MillisecondsTimePoint.now();
             Position lastKnownPosition = getService().getMarkPosition(mark,
-                    (LeaderboardThatHasRegattaLike) leaderboard, now,
-                    /* raceLog==null means use all race logs */null);
+                    (LeaderboardThatHasRegattaLike) leaderboard, now);
             array.add(markWithPositionSerializer.serialize(new Pair<>(mark, lastKnownPosition)));
         }
         JSONObject result = new JSONObject();
@@ -637,9 +636,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         }
         TimePoint now = MillisecondsTimePoint.now();
-        Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard,
-                now,
-                /* raceLog==null means use all race logs */null);
+        Position lastKnownPosition = getService().getMarkPosition(mark, (LeaderboardThatHasRegattaLike) leaderboard, now);
         GPSFix fix = null;
         try {
             Object requestBody = JSONValue.parseWithException(json);

@@ -1057,7 +1057,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint) {
         GPSFixTrack<Mark, GPSFix> track = null;
         // If no spanning track is found, the fix closest to the time point requested is used instead
         GPSFix nonSpanningFallback = null;
@@ -1072,9 +1072,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-        
-        Position result; 
-        if (track != null){
+        final Position result; 
+        if (track != null) {
             result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
         } else {
             result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
