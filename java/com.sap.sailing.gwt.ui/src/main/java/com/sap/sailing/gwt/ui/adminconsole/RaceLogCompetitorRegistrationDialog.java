@@ -179,10 +179,12 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                                                 }
                                             });
                                 }
+                                validate();
                             }
 
                             @Override
                             public void cancel() {
+                                competitorRegistrationInRaceLogCheckBox.setValue(!competitorRegistrationInRaceLogCheckBox.getValue());
                             }
                         }) {
                     @Override

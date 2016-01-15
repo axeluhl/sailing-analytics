@@ -246,6 +246,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         unregisterBtn.setEnabled(false);
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
+        validate();
     }
     
     public void activateRegistrationButtons(){
@@ -253,6 +254,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         unregisterBtn.setEnabled(true);
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
+        validate();
     }
 
     @Override
