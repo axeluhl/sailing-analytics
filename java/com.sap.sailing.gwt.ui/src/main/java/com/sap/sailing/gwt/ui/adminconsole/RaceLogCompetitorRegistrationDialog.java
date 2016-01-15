@@ -90,12 +90,10 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                     }
                 });
         competitorRegistrationInRaceLogCheckBox.addClickHandler(new ClickHandler() {
-
             @Override
             public void onClick(ClickEvent event) {
-                String title;
-                String message;
-
+                final String title;
+                final String message;
                 if (competitorRegistrationInRaceLogCheckBox.getValue()) {
                     title = stringMessages.doYouWantToRegisterCompetitorsDirectlyOnTheRace();
                     message = stringMessages.warningDirectCompetitorRegistration();
@@ -103,7 +101,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                     title = stringMessages.doYouWantToDisableCompetitorsRegistrationsOnTheRace();
                     message = stringMessages.warningRegattaCompetitorRegistration();
                 }
-
                 new DataEntryDialog<Void>(title, message, stringMessages.ok(), stringMessages.cancel(), null, false,
                         new DialogCallback<Void>() {
                             @Override
@@ -161,11 +158,10 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
     }
 
     @Override
-    protected void setRegisterableCompetitors() {
+    protected void setRegisterableCompetitorsAndRegisteredCompetitors() {
         if (showOnlyCompetitorsOfLog()) {
             sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
                     new AsyncCallback<Collection<CompetitorDTO>>() {
-
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> competitors) {
                             allCompetitorsTable.refreshCompetitorList(competitors);
@@ -177,13 +173,11 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                             errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
                                     + reason.getMessage());
                         }
-
                     });
 
         } else {
             sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
                     new AsyncCallback<Collection<CompetitorDTO>>() {
-
                         @Override
                         public void onSuccess(Collection<CompetitorDTO> competitors) {
                             allCompetitorsTable.refreshCompetitorList(competitors);
@@ -195,7 +189,6 @@ public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegis
                             errorReporter.reportError("Could not fetch competitor registrations in regattalog : "
                                     + reason.getMessage());
                         }
-
                     });
         }
     }

@@ -228,11 +228,11 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     protected void refreshCompetitors() {
         registeredCompetitorsTable.getDataProvider().getList().clear();
         allCompetitorsTable.getDataProvider().getList().clear();
-        setRegisterableCompetitors();
+        setRegisterableCompetitorsAndRegisteredCompetitors();
     }
 
     protected abstract void setRegisteredCompetitors();
-    protected abstract void setRegisterableCompetitors();
+    protected abstract void setRegisterableCompetitorsAndRegisteredCompetitors();
     
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);

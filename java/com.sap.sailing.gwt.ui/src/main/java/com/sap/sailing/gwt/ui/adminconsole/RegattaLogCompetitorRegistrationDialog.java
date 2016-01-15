@@ -50,7 +50,6 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
                                     + reason.getMessage());
                         }
                     });
-
         }
     }
 
@@ -59,7 +58,7 @@ public class RegattaLogCompetitorRegistrationDialog extends AbstractCompetitorRe
     }
 
     @Override
-    protected void setRegisterableCompetitors() {
+    protected void setRegisterableCompetitorsAndRegisteredCompetitors() {
         allCompetitorsTable.refreshCompetitorList(null, new Callback<Iterable<CompetitorDTO>, Throwable>() {
             @Override
             public void onSuccess(Iterable<CompetitorDTO> result) {
