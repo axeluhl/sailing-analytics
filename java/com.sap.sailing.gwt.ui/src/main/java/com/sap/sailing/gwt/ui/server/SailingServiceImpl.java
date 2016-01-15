@@ -5939,22 +5939,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Collection<CompetitorDTO> getCompetitorRegistrationsInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException, NotFoundException {
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
-        
         if (! (leaderboard instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
         }
         HasRegattaLike regattaLikeLeaderboard = ((HasRegattaLike) leaderboard);
-        
         return convertToCompetitorDTOs(regattaLikeLeaderboard.getCompetitorsRegisteredInRegattaLog());
     }
     
     @Override
     public Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException {
-        
         RaceColumn raceColumn = getRaceColumn(leaderboardName, raceColumnName);
         Fleet fleet = getFleetByName(raceColumn, fleetName);
-        
         return convertToCompetitorDTOs(raceColumn.getCompetitorsRegisteredInRacelog(fleet));
     }
 
@@ -5971,7 +5967,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (fleet == null){
             throw new NotFoundException("fleet with name "+fleetName+" not found");
         }
-        
         return fleet;
     }
     
@@ -5980,7 +5975,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboard == null){
             throw new NotFoundException("Leaderboard with name "+leaderboardName+" not found");
         }
-        
         return leaderboard;
     }
     
@@ -5989,12 +5983,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboard == null){
             throw new NotFoundException("leaderboard with name "+leaderboardName+" not found");
         } 
-        
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null){
             throw new NotFoundException("raceColumn with name "+raceColumnName+" not found");
         }
-        
         return raceColumn;
     }
 
@@ -6021,12 +6013,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (MarkDTO markDTO : marksToRemove) {
             markIds.add(markDTO.getIdAsString());
         }
-        
         RaceLog raceLogToIgnore = getRaceLog(leaderboardName, raceColumnName, fleetName);
         HashSet<String> racesContainingMarksToDeleteInCourse = new HashSet<String>();
-        
         boolean marksAreUsedInOtherRaceLogs = false;
-        
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
@@ -6046,12 +6035,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
             }
         }         
-        
         StringBuilder racesInCollision = new StringBuilder();
         for (String raceName : racesContainingMarksToDeleteInCourse) {
             racesInCollision.append(raceName+", ");
         }
-        
         return new Pair<Boolean, String>(marksAreUsedInOtherRaceLogs, 
                 racesInCollision.substring(0, Math.max(0, racesInCollision.length()-2)));
     }
