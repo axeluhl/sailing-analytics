@@ -76,11 +76,11 @@ public class AppPreferences {
 
     protected final SharedPreferences preferences;
     protected AppPreferences(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     public AppPreferences(Context context, String preferenceName) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
     }
 

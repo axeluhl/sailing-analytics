@@ -72,7 +72,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private static final String RACE = "race";
 
     private static final int RacesLoaderId = 2;
-    private static ProgressBar mProgressSpinner;
+    private ProgressBar mProgressSpinner;
 
     private IntentReceiver mReceiver;
     private ReadonlyDataManager dataManager;
