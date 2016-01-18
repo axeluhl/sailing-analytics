@@ -2,7 +2,6 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
@@ -12,13 +11,10 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *
  */
 public interface Perspective<SettingsType extends Settings> extends Component<SettingsType>  {
-    Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles();
     
     CompositeSettings getSettingsOfComponents();
     
     void updateSettingsOfComponents(CompositeSettings settingsOfComponents);
-
-    void setSettingsOfComponents(CompositeSettings settingsOfComponents);
 
     String getPerspectiveName();
 }

@@ -11,14 +11,13 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
-public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManagerComponent, /*MediaPlayerLifecycle.MediaPlayerManagerConstructorArgs, */MediaPlayerSettings, MediaPlayerSettingsDialogComponent> {
-    private final StringMessages stringMessages;
+public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManagerComponent, MediaPlayerSettings, MediaPlayerSettingsDialogComponent,   
+    MediaPlayerLifecycle.MediaPlayerManagerConstructorArgs> {
     
-    private MediaPlayerManagerComponent component;
+    private final StringMessages stringMessages;
     
     public MediaPlayerLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.component = null;
     }
 
     @Override
@@ -36,28 +35,11 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManag
         return new MediaPlayerSettings(settings.isAutoSelectMedia());
     }
 
-    public MediaPlayerManagerComponent createComponent(MediaPlayerManagerConstructorArgs contructorArgs) {
-        this.component = contructorArgs.getCreatedComponent();
-        return this.component;
+    @Override
+    public MediaPlayerManagerComponent createComponent(MediaPlayerManagerConstructorArgs contructorArgs, MediaPlayerSettings settings) {
+        return contructorArgs.createComponent(settings);
     }
     
-    public static class MediaPlayerManagerConstructorArgs implements ComponentConstructorArgs<MediaPlayerManagerComponent, MediaPlayerSettings> {
-        private final MediaPlayerManagerComponent component; 
-
-        public MediaPlayerManagerConstructorArgs(RegattaAndRaceIdentifier selectedRaceIdentifier,
-                RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
-                UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
-                UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
-            component = new MediaPlayerManagerComponent(selectedRaceIdentifier,
-                    raceTimesInfoProvider, raceTimer, mediaService,
-                    userService, stringMessages, errorReporter,
-                    userAgent, popupPositionProvider, settings);
-        }
-        public MediaPlayerManagerComponent getCreatedComponent() {
-            return component;
-        }
-    }
-
     @Override
     public String getLocalizedShortName() {
         return stringMessages.videoComponentShortName();
@@ -67,9 +49,45 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManag
     public boolean hasSettings() {
         return true;
     }
-
-    @Override
-    public MediaPlayerManagerComponent getComponent() {
-        return component;
+    
+    public class MediaPlayerManagerConstructorArgs implements ComponentConstructorArgs<MediaPlayerManagerComponent, MediaPlayerSettings> {
+        private final RegattaAndRaceIdentifier selectedRaceIdentifier;
+        private final RaceTimesInfoProvider raceTimesInfoProvider;
+        private final Timer raceTimer;
+        private final MediaServiceAsync mediaService;
+        private final UserService userService;
+        private final StringMessages stringMessages;
+        private final ErrorReporter errorReporter;
+        private final UserAgentDetails userAgent;
+        private final PopupPositionProvider popupPositionProvider;
+        private final MediaPlayerSettings settings;
+        
+        public MediaPlayerManagerConstructorArgs(RegattaAndRaceIdentifier selectedRaceIdentifier,
+                RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
+                UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
+                UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+            this.selectedRaceIdentifier = selectedRaceIdentifier;
+            this.raceTimesInfoProvider = raceTimesInfoProvider;
+            this.raceTimer = raceTimer;
+            this.mediaService = mediaService;
+            this.userService = userService;
+            this.stringMessages = stringMessages;
+            this.errorReporter = errorReporter;
+            this.userAgent = userAgent;
+            this.popupPositionProvider = popupPositionProvider;
+            this.settings = settings;
+        }
+        
+        @Override
+        public MediaPlayerManagerComponent createComponent(MediaPlayerSettings newSettings) {
+            MediaPlayerManagerComponent mediaPlayerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier,
+                    raceTimesInfoProvider, raceTimer, mediaService,
+                    userService, stringMessages, errorReporter,
+                    userAgent, popupPositionProvider, settings);
+            if (newSettings != null) {
+                mediaPlayerComponent.updateSettings(newSettings);
+            }
+            return mediaPlayerComponent;
+        }
     }
 }

@@ -2,30 +2,29 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 /**
  * A component, that contains a collection of settings components in a tabbed panel.
  *  
- * @author Axel Uhl (d043530), Lennart Hensler (D054527)
+ * @author Frank (c5163874)
  */
-public class CompositeTabbedSettingsComponent implements Component<CompositeSettings> {
+public class CompositeLifecycleTabbedSettingsComponent implements Component<CompositeLifecycleSettings> {
     
-    private final Iterable<Component<?>> components;
+    private final Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles;
     private final String title;
     
-    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components) {
-        this(components, null);
+    public CompositeLifecycleTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles) {
+        this(componentLifecycles, null);
     }
 
-    public CompositeTabbedSettingsComponent(Iterable<Component<?>> components, String title) {
-        this.components = components;
+    public CompositeLifecycleTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles, String title) {
+        this.componentLifecycles = componentLifecycles;
         this.title = title;
     }
 
     @Override
     public boolean hasSettings() {
-        for (Component<?> component : components) {
+        for (ComponentLifecycle<?,?,?,?> component : componentLifecycles) {
             if (component.hasSettings()) {
                 return true;
             }
@@ -34,24 +33,24 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
     }
 
     @Override
-    public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
-        return new CompositeTabbedSettingsDialogComponent(components);
+    public SettingsDialogComponent<CompositeLifecycleSettings> getSettingsDialogComponent() {
+        return new CompositeLifecycleTabbedSettingsDialogComponent(componentLifecycles);
     }
 
     @Override
-    public CompositeSettings getSettings() {
+    public CompositeLifecycleSettings getSettings() {
         return null;
     }
  
     @Override
-    public void updateSettings(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+    public void updateSettings(CompositeLifecycleSettings newSettings) {
+        for (ComponentLifecycleAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
             updateSettings(componentAndSettings);
         }
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
-        componentAndSettings.getA().updateSettings(componentAndSettings.getB());
+    private <SettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings) {
+//        componentLifecycleAndSettings.getA().updateSettings(componentLifecycleAndSettings.getB());
     }
 
     @Override
@@ -61,7 +60,7 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
         } else {
             StringBuilder result = new StringBuilder();
             boolean first = true;
-            for (Component<?> component : components) {
+            for (ComponentLifecycle<?,?,?,?> component : componentLifecycles) {
                 if (first) {
                     first = false;
                 } else {

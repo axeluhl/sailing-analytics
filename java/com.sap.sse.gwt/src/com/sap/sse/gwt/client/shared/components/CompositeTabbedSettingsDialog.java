@@ -10,12 +10,13 @@ import com.sap.sse.gwt.client.StringMessages;
  *
  */
 public class CompositeTabbedSettingsDialog extends SettingsDialog<CompositeSettings> {
+    
+    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<Component<?>> components) {
+        this(stringConstants, components, null);
+    }
 
-    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<ComponentLifecycle<?,?,?>> components, final String title) {
+    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<Component<?>> components, final String title) {
         super(new CompositeTabbedSettingsComponent(components, title), stringConstants);
     }
-
-    public CompositeTabbedSettingsDialog(StringMessages stringConstants, final Iterable<ComponentLifecycle<?,?,?>> components, final String title, DialogCallback<CompositeSettings> callback) {
-        super(new CompositeTabbedSettingsComponent(components, title), stringConstants, callback);
-    }
+    
 }

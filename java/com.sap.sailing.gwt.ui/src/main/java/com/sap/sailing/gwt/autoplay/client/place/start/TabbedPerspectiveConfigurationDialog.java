@@ -1,21 +1,21 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialog;
-import com.sap.sse.gwt.client.shared.perspective.Perspective;
+import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeLifecycleTabbedSettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
 
 /**
  * @author Frank
  *
  */
-public class TabbedPerspectiveConfigurationDialog extends CompositeTabbedSettingsDialog {
+public class TabbedPerspectiveConfigurationDialog extends CompositeLifecycleTabbedSettingsDialog {
 
-    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, Perspective<?> perspective) {
+    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?,?> perspective) {
         super(stringConstants, perspective.getComponentLifecycles(), perspective.getPerspectiveName());
     }
 
-    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, Perspective<?> perspective, DialogCallback<CompositeSettings> callback) {
+    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?,?> perspective, DialogCallback<CompositeLifecycleSettings> callback) {
         super(stringConstants, perspective.getComponentLifecycles(), perspective.getPerspectiveName(), callback);
     }
 }

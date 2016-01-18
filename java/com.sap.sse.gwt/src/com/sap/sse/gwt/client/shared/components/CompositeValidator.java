@@ -5,16 +5,16 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentLifecycleAndSettingsPair;
-import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent.ComponentLifecycleAndDialogComponent;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
     
-    private final Map<ComponentLifecycle<?,?,?>, Validator<?>> validatorsMappedByComponent;
+    private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
 
-    public CompositeValidator(Iterable<ComponentLifecycleAndDialogComponent<?>> componentsAndDialogComponents) {
+    public CompositeValidator(Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         validatorsMappedByComponent = new HashMap<>();
-        for (ComponentLifecycleAndDialogComponent<?> component : componentsAndDialogComponents) {
+        for (ComponentAndDialogComponent<?> component : componentsAndDialogComponents) {
             validatorsMappedByComponent.put(component.getA(), component.getB().getValidator());
         }
     }
@@ -22,7 +22,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (ComponentLifecycleAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponentLifecycle()) {
+        for (ComponentAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -31,12 +31,12 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(ComponentLifecycleAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponentLifecycle());
+        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getA());
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(componentAndSettings.getSettings());
+            errorMessage = validator.getErrorMessage(componentAndSettings.getB());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
                 errorMessage += "; ";
             }

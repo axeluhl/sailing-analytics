@@ -47,14 +47,12 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -68,7 +66,6 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
@@ -509,18 +506,18 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         return "Race Viewer";
     }
 
-    @Override
-    public void setSettingsOfComponents(CompositeSettings settingsOfComponents) {
-        RaceMapSettings raceMapSettings = settingsOfComponents.getSettingsForType(RaceMapSettings.class);
-        raceMap.updateSettings(raceMapSettings);
-        LeaderboardSettings leaderboardSettings = settingsOfComponents.getSettingsForType(LeaderboardSettings.class);
-        leaderboardPanel.updateSettings(leaderboardSettings);
-        WindChartSettings windChartSettings = settingsOfComponents.getSettingsForType(WindChartSettings.class);
-        windChart.updateSettings(windChartSettings);
-        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settingsOfComponents.getSettingsForType(MultiCompetitorRaceChartSettings.class);
-        competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-        MediaPlayerSettings mediaPlayerSettings = settingsOfComponents.getSettingsForType(MediaPlayerSettings.class);
-        mediaPlayerManagerComponent.updateSettings(mediaPlayerSettings);
-    }
+//    @Override
+//    public void setSettingsOfComponents(CompositeLifecycleSettings settingsOfComponents) {
+//        RaceMapSettings raceMapSettings = settingsOfComponents.getSettingsForType(RaceMapSettings.class);
+//        raceMap.updateSettings(raceMapSettings);
+//        LeaderboardSettings leaderboardSettings = settingsOfComponents.getSettingsForType(LeaderboardSettings.class);
+//        leaderboardPanel.updateSettings(leaderboardSettings);
+//        WindChartSettings windChartSettings = settingsOfComponents.getSettingsForType(WindChartSettings.class);
+//        windChart.updateSettings(windChartSettings);
+//        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settingsOfComponents.getSettingsForType(MultiCompetitorRaceChartSettings.class);
+//        competitorChart.updateSettings(multiCompetitorRaceChartSettings);
+//        MediaPlayerSettings mediaPlayerSettings = settingsOfComponents.getSettingsForType(MediaPlayerSettings.class);
+//        mediaPlayerManagerComponent.updateSettings(mediaPlayerSettings);
+//    }
 }
 

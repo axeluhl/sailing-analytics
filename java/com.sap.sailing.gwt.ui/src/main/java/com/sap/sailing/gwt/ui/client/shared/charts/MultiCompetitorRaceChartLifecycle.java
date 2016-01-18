@@ -2,25 +2,20 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent> {
+public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChart,
+    MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
     private final StringMessages stringMessages;
-    private MultiCompetitorRaceChart component;
     
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.component = null;
     }
 
     @Override
     public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
         return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, true);
-    }
-
-    @Override
-    public MultiCompetitorRaceChart getComponent() {
-        return component;
     }
 
     @Override
@@ -44,4 +39,22 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     public boolean hasSettings() {
         return true;
     }
+
+    @Override
+    public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartConstructorArgs ComponentConstructorArgs,
+            MultiCompetitorRaceChartSettings settings) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public class MultiCompetitorRaceChartConstructorArgs implements ComponentConstructorArgs<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings> {
+        public MultiCompetitorRaceChartConstructorArgs() {
+        }
+        
+        @Override
+        public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartSettings newSettings) {
+            return null;
+        }
+    }
+
 }

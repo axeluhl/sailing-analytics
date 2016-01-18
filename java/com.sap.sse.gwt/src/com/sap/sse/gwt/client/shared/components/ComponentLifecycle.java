@@ -7,17 +7,17 @@ import com.sap.sse.common.settings.Settings;
  *
  * @param <C> the component type
  * @param <S> the settings type
- * @param <W> the settings dialog component type
+ * @param <SDC> the settings dialog component type
  */
-public interface ComponentLifecycle<C extends Component<S>, S extends Settings, SDC extends SettingsDialogComponent<S>> {
+public interface ComponentLifecycle<C extends Component<S>, S extends Settings, SDC extends SettingsDialogComponent<S>, CCA extends ComponentConstructorArgs<C, S>> {
 
     SDC getSettingsDialogComponent(S settings);
-
-    C getComponent();
 
     S createDefaultSettings();
 
     S cloneSettings(S settings);
+    
+    C createComponent(CCA ComponentConstructorArgs, S settings);
     
     /**
      * @return the display name of the component
