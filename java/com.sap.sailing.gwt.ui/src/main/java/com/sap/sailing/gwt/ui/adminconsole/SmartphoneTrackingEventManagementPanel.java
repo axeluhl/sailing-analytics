@@ -569,8 +569,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final String result;
         RegattaDTO regatta = null;
         if (getSelectedLeaderboard().regattaName != null) {
-        if (allRegattas != null) {
-            for (RegattaDTO i : allRegattas) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
                     if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
                         regatta = i;
                         break;
