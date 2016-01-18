@@ -5103,13 +5103,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         hasRegattaLike.registerCompetitors(competitorsToRegister);
     }
 
-    private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister,
-            HashSet<Competitor> competitorSetToRemove) {
-        
+    private HashSet<Competitor> filterDuplicates(Set<Competitor> competitorsToRegister, HashSet<Competitor> competitorSetToRemove) {
         for (Iterator<Competitor> iterator = competitorSetToRemove.iterator(); iterator.hasNext();) {
             Competitor competitor = iterator.next();
-            if (competitorsToRegister.contains(competitor)){
-                competitorsToRegister.remove(competitor);
+            if (competitorsToRegister.remove(competitor)) {
                 iterator.remove();
             }
         }
