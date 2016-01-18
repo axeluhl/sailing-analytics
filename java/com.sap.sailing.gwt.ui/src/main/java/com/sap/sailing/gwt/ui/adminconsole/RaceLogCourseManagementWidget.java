@@ -126,12 +126,11 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
     @Override
     protected void markSelectionChanged() {
         Set<MarkDTO> marksToRemove = marks.getSelectionModel().getSelectedSet();
-      
         sailingService.checkIfMarksAreUsedInOtherRaceLogs(leaderboardName, raceColumnName, fleetName, marksToRemove,
                 new AsyncCallback<Pair<Boolean, String>>() {
                     @Override
-                    public void onSuccess(Pair<Boolean, String>result) {
-                        if (result.getA()){
+                    public void onSuccess(Pair<Boolean, String> result) {
+                        if (result.getA()) {
                             removeMark.setEnabled(false);
                             removeMark.setTitle(stringMessages.removalOfMarkDisabledMayBeUsedInRaces(result.getB()));
                         } else {
