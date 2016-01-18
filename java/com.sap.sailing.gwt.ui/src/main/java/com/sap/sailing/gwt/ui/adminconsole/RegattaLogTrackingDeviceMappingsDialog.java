@@ -47,11 +47,11 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     public static final int CHART_WIDTH = 500;
     public static final String SERIES_COLOR = "#fcb913";
     
-    protected ErrorReporter errorReporter;
-    protected SailingServiceAsync sailingService;
-    protected StringMessages stringMessages;
-    protected List<DeviceMappingDTO> mappings = new ArrayList<DeviceMappingDTO>();
-    protected DeviceMappingTableWrapper deviceMappingTable;
+    private final  ErrorReporter errorReporter;
+    private final SailingServiceAsync sailingService;
+    private final StringMessages stringMessages;
+    private List<DeviceMappingDTO> mappings = new ArrayList<>();
+    private DeviceMappingTableWrapper deviceMappingTable;
     
     private Point[] data;
     
@@ -72,7 +72,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     @Override
     protected Widget getAdditionalWidget() {
         FlowPanel mainPanel = new FlowPanel();
-        
         HorizontalPanel buttonPanel = new HorizontalPanel();
         Button addMappingButton = new Button(stringMessages.add());
         addMappingButton.addClickHandler(new ClickHandler() {
@@ -82,7 +81,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             }
         });
         buttonPanel.add(addMappingButton);
-        
         Button importBtn = new Button(stringMessages.importFixes());
         importBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -94,7 +92,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         mainPanel.add(buttonPanel);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
-        
         deviceMappingTable.addFilterChangedHandler(new FilterChangedHandler() {
             @Override
             public void onFilterChanged(List<DeviceMappingDTO> filteredList) {
@@ -133,26 +130,21 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 return true;
             }
         }).setColor(SERIES_COLOR));
-        
         Highcharts.setOptions(
                 new Highcharts.Options().setGlobal(
                         new Global()
                         .setUseUTC(false)
                         ));
-        
         chart.getXAxis().setOption("labels/enabled", false)
         .setGridLineWidth(0)
         .setMinorGridLineWidth(0);
-        
         chart.getYAxis()
         .setAxisTitle(new AxisTitle().setText(stringMessages.time()))
         .setType(Axis.Type.DATE_TIME)
         .setGridLineWidth(0)
         .setMinorGridLineWidth(0);
-
         chart.setWidth(CHART_WIDTH + "px");
         chart.setHeight("400px");
-        
         chart.setToolTip(new ToolTip().setFormatter(new ToolTipFormatter() {
             @Override
             public String format(ToolTipData toolTipData) {
@@ -179,7 +171,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         for (DeviceMappingDTO mapping : mappings) {
             updateExtremes(mapping);
         }
-        
         data = new Point[mappings.size()];
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
@@ -187,34 +178,35 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
         long yMin = earliestMillis - extension;
         long yMax = latestMillis + extension;
-        
         int i = 0;
         for (DeviceMappingDTO mapping : mappings) {
             JSONObject userData = new JSONObject();
             userData.put(FIELD_INDEX, userData);
-            
             long from = mapping.from == null ? yMin - range : mapping.from.getTime();
             long to = mapping.to == null ? yMax + range : mapping.to.getTime();
-            
             data[i] = new Point(i, from, to);
-            
             i++;
         }
-        
         chart.removeAllSeries(false);
-        
         chart.addSeries(chart.createSeries()
                 .setName(stringMessages.deviceMappings())
                 .setPoints(data));
-        
         chart.getYAxis().setExtremes(yMin, yMax);
     }
     
     private void updateExtremes(DeviceMappingDTO mapping) {
-        if (mapping.from != null && earliest.after(mapping.from)) earliest = mapping.from;
-        if (mapping.to != null && latest.before(mapping.to)) latest = mapping.to;
-        if (mapping.to != null && earliest.after(mapping.to)) earliest = mapping.to;
-        if (mapping.from != null && latest.before(mapping.from)) latest = mapping.from;
+        if (mapping.from != null && earliest.after(mapping.from)) {
+            earliest = mapping.from;
+        }
+        if (mapping.to != null && latest.before(mapping.to)) {
+            latest = mapping.to;
+        }
+        if (mapping.to != null && earliest.after(mapping.to)) {
+            earliest = mapping.to;
+        }
+        if (mapping.from != null && latest.before(mapping.from)) {
+            latest = mapping.from;
+        }
     }
     
     private void addMapping() {
