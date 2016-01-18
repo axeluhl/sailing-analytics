@@ -62,7 +62,6 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -90,10 +89,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.util.ClearStateTestSupport;
 
-public class SecurityServiceImpl extends RemoteServiceServlet implements ReplicableSecurityService, ClearStateTestSupport {
-
-    private static final long serialVersionUID = -3490163216601311858L;
-
+public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
     private static final Logger logger = Logger.getLogger(SecurityServiceImpl.class.getName());
 
     private CachingSecurityManager securityManager;
@@ -387,6 +383,21 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements Replica
         account.setSalt(salt);
         account.setSaltedPassword(hashedPasswordBase64);
         user.passwordWasReset();
+        apply(s->s.internalStoreUser(user));
+    }
+
+    @Override
+    public void updateUserProperties(String username, String fullName, String company) throws UserManagementException {
+        final User user = store.getUserByName(username);
+        if (user == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        updateUserProperties(user, fullName, company);
+    }
+
+    private void updateUserProperties(User user, String fullName, String company) {
+        user.setFullName(fullName);
+        user.setCompany(company);
         apply(s->s.internalStoreUser(user));
     }
 
