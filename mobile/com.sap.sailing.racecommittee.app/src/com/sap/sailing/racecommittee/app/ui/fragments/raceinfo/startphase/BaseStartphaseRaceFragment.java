@@ -16,6 +16,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceF
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
@@ -50,22 +51,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         ViewPager pager = ViewHelper.get(getView(), R.id.panels_pager);
         if (pager != null) {
             pager.setAdapter(new PanelsAdapter(getFragmentManager(), getArguments()));
-            pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                    markDot(position);
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
+            pager.addOnPageChangeListener(new ViewPagerChangeListener(this));
             markDot(0);
         }
     }
@@ -85,5 +71,32 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
         int tint = ThemeHelper.getColor(getActivity(), R.attr.black);
         Drawable drawable = BitmapHelper.getTintedDrawable(getActivity(), R.drawable.ic_dot, tint);
         mDots.get(position).setImageDrawable(drawable);
+    }
+
+    private static class ViewPagerChangeListener implements ViewPager.OnPageChangeListener {
+
+        private WeakReference<BaseStartphaseRaceFragment> reference;
+
+        public ViewPagerChangeListener(BaseStartphaseRaceFragment fragment) {
+            reference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            BaseStartphaseRaceFragment fragment = reference.get();
+            if (fragment != null) {
+                fragment.markDot(position);
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
     }
 }
