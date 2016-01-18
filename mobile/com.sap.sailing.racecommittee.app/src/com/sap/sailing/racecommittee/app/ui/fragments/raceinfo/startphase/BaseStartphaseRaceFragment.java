@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -23,9 +22,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
-
-    private ViewPager mPager;
-    private PanelsAdapter mAdapter;
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
@@ -48,15 +44,16 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             mDots.add(dot);
         }
 
-        mPager = ViewHelper.get(layout, R.id.panels_pager);
-        if (mPager != null) {
+        ViewPager pager = ViewHelper.get(layout, R.id.panels_pager);
+        if (pager != null) {
+            PanelsAdapter adapter;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                mAdapter = new PanelsAdapter(getChildFragmentManager(), getArguments());
+                adapter = new PanelsAdapter(getChildFragmentManager(), getArguments());
             } else {
-                mAdapter = new PanelsAdapter(getFragmentManager(), getArguments());
+                adapter = new PanelsAdapter(getFragmentManager(), getArguments());
             }
-            mPager.setAdapter(mAdapter);
-            mPager.addOnPageChangeListener(new ViewPagerChangeListener(this));
+            pager.setAdapter(adapter);
+            pager.addOnPageChangeListener(new ViewPagerChangeListener(this));
             markDot(0);
         }
 
