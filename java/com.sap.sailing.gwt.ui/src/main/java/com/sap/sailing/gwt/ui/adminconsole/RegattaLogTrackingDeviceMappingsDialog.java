@@ -106,13 +106,13 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 chart.getSeries()[0].getPoints()[i].select(true, false);
             }
         });
-        ImagesBarColumn<DeviceMappingDTO, RaceLogTrackingDeviceMappingsImagesBarCell> actionCol =
+        final ImagesBarColumn<DeviceMappingDTO, RaceLogTrackingDeviceMappingsImagesBarCell> actionCol =
                 new ImagesBarColumn<DeviceMappingDTO, RaceLogTrackingDeviceMappingsImagesBarCell>(
                 new RaceLogTrackingDeviceMappingsImagesBarCell(stringMessages));
         actionCol.setFieldUpdater(getActionColFieldUpdater());
         deviceMappingTable.getTable().addColumn(actionCol, stringMessages.actions());
         
-        HorizontalPanel deviceMappingPannel = new HorizontalPanel();
+        final HorizontalPanel deviceMappingPannel = new HorizontalPanel();
         mainPanel.add(deviceMappingPannel);
         
         chart = new Chart()
@@ -120,7 +120,6 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         .setChartTitleText(stringMessages.deviceMappings())
         .setLegend(new Legend().setEnabled(false))
         .setInverted(true);
-        
         chart.setSeriesPlotOptions(new SeriesPlotOptions().setPointMouseOverEventHandler(new PointMouseOverEventHandler() {
             @Override
             public boolean onMouseOver(PointMouseOverEvent pointMouseOverEvent) {
@@ -175,7 +174,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
         long range = latestMillis - earliestMillis;
-        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
+        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS); // TODO bug 3426: open intervals dominate the chart too badly
         long yMin = earliestMillis - extension;
         long yMax = latestMillis + extension;
         int i = 0;
