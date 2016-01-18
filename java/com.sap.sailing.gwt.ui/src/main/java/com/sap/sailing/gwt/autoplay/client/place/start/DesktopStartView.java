@@ -74,12 +74,6 @@ public class DesktopStartView extends Composite implements StartView {
 
     private ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
     private ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings; 
-//    
-//    private LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle;
-//    private RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle;
-//
-//    private LeaderboardPerspectiveSettings leaderboardPerspectiveSettings;
-//    private RaceBoardPerspectiveSettings raceboardPerspectiveSettings;
     
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
     private final Map<PerspectiveLifecycle<?,?,?,?>, Settings> perspectiveSettings;
