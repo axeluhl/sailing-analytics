@@ -1,6 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.startphase;
 
+import android.annotation.TargetApi;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.ImageView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.RaceApplication;
 import com.sap.sailing.racecommittee.app.ui.adapters.PanelsAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseRaceInfoRaceFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -21,6 +24,10 @@ import java.util.ArrayList;
 
 public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
 
+    private ViewPager mPager;
+    private PanelsAdapter mAdapter;
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_main, container, false);
@@ -41,19 +48,19 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             mDots.add(dot);
         }
 
-        return layout;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        ViewPager pager = ViewHelper.get(getView(), R.id.panels_pager);
-        if (pager != null) {
-            pager.setAdapter(new PanelsAdapter(getFragmentManager(), getArguments()));
-            pager.addOnPageChangeListener(new ViewPagerChangeListener(this));
+        mPager = ViewHelper.get(layout, R.id.panels_pager);
+        if (mPager != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mAdapter = new PanelsAdapter(getChildFragmentManager(), getArguments());
+            } else {
+                mAdapter = new PanelsAdapter(getFragmentManager(), getArguments());
+            }
+            mPager.setAdapter(mAdapter);
+            mPager.addOnPageChangeListener(new ViewPagerChangeListener(this));
             markDot(0);
         }
+
+        return layout;
     }
 
     @Override
