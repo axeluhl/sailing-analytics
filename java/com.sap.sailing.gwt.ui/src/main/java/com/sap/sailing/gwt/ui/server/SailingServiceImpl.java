@@ -5125,7 +5125,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     /**
-     * Also finds the last position of the marks, if set by pinging them
+     * Also finds the last position of the marks if set by pinging them as long as currently a {@link TrackedRace} exists
+     * whose tracking interval spans the current time. If at least a non-spanning {@link TrackedRace} can be found in the
+     * scope of the <code>leaderboard</code>, the time-wise closest position fix for the mark will be used as its position.
+     * If the mark has been pinged through the {@link RegattaLog} but no {@link TrackedRace} exists that has loaded that ping,
+     * the ping won't be visible to this API.
      */
     private MarkDTO convertToMarkDTO(LeaderboardThatHasRegattaLike leaderboard, Mark mark) {
         final TimePoint now = MillisecondsTimePoint.now();
