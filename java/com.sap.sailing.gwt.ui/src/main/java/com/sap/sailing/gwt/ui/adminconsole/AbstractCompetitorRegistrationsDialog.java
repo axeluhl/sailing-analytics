@@ -62,9 +62,9 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
     @Override
     protected Widget getAdditionalWidget() {
-        FlowPanel mainPanel = new FlowPanel();
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        Button addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
+        final FlowPanel mainPanel = new FlowPanel();
+        final HorizontalPanel buttonPanel = new HorizontalPanel();
+        final Button addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -72,7 +72,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
             }
         });
 
-        Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
+        final Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
         editCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -89,9 +89,9 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
                 helper.inviteCompetitors(competitors, leaderboardName);
             }
         });
-        HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
-        CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
-        CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
+        final HorizontalPanel competitorRegistrationPanel = new HorizontalPanel();
+        final CaptionPanel allCompetitorsPanel = new CaptionPanel(stringMessages.competitorPool());
+        final CaptionPanel registeredCompetitorsPanel = new CaptionPanel(stringMessages.registeredCompetitors());
         allCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */
                 true, /* enablePager */true);
         registeredCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */

@@ -2,14 +2,13 @@ package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -136,7 +135,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
-        BoatClass boatClass = null;
+        final BoatClass boatClass;
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
@@ -164,26 +163,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         raceLog.add(event);
     }
     
-    // implemented somewhere in domainFactory? 
     private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
-        HashMap<BoatClass, Integer> occurenceCount = new HashMap<>();
-        for (Competitor competitor : allCompetitors) {
-            BoatClass boatclass = competitor.getBoat().getBoatClass();
-            if (occurenceCount.containsKey(boatclass) ) {
-                int value = occurenceCount.get(boatclass);
-                occurenceCount.put(boatclass, value + 1);
-            } else {
-                occurenceCount.put(boatclass, 1);
-            }
-        }
-
-        Entry<BoatClass, Integer> mostFrequentEntry = occurenceCount.entrySet().iterator().next();
-        for (Entry<BoatClass, Integer> entry : occurenceCount.entrySet()) {
-            if (mostFrequentEntry.getValue() < entry.getValue()){
-                mostFrequentEntry = entry;
-            }
-        }
-        return mostFrequentEntry.getKey();
+        return Util.getDominantObject(()->StreamSupport.stream(allCompetitors.spliterator(), /* parallel */ false).map(c->c.getBoat().getBoatClass()).iterator());
     }
 
     @Override
