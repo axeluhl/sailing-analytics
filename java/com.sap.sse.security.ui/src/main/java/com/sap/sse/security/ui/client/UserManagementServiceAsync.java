@@ -27,6 +27,8 @@ public interface UserManagementServiceAsync {
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL, AsyncCallback<Void> callback);
 
+    void updateUserProperties(String username, String fullName, String company, AsyncCallback<Void> callback);
+
     void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
 
     void setRolesForUser(String username, Iterable<String> roles, AsyncCallback<SuccessInfo> callback);
