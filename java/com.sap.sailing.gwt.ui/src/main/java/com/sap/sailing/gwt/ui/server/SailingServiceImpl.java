@@ -5993,7 +5993,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                if (!raceLog.equals(raceLogToIgnore)){
+                if (raceLog != raceLogToIgnore) {
                     LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
                     CourseBase course = finder.analyze();
                     for (Waypoint waypoint: course.getWaypoints()){
