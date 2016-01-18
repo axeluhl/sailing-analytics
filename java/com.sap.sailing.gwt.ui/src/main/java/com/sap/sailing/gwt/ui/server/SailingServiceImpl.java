@@ -5823,21 +5823,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     @Override
     public Iterable<MarkDTO> getMarksInRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException {
-        Leaderboard l = getService().getLeaderboardByName(leaderboardName);
+        final Leaderboard l = getService().getLeaderboardByName(leaderboardName);
         if (! (l instanceof HasRegattaLike)) {
             throw new DoesNotHaveRegattaLogException();
         }
-        LeaderboardThatHasRegattaLike leaderboard = (LeaderboardThatHasRegattaLike) l;
-        RegattaLog regattaLog = ((HasRegattaLike) l).getRegattaLike().getRegattaLog();
-        
-        Set<MarkDTO> markDTOs = new HashSet<>();
-        
-        List<RegattaLogEvent> markEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
+        final LeaderboardThatHasRegattaLike leaderboard = (LeaderboardThatHasRegattaLike) l;
+        final RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
+        final Set<MarkDTO> markDTOs = new HashSet<>();
+        final List<RegattaLogEvent> markEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogDefineMarkEvent.class).analyze();
         for (RegattaLogEvent regattaLogEvent : markEvents) {
-            RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) regattaLogEvent;
+            final RegattaLogDefineMarkEvent defineMarkEvent = (RegattaLogDefineMarkEvent) regattaLogEvent;
             markDTOs.add(convertToMarkDTO(leaderboard, defineMarkEvent.getMark()));
         }
-        
         return markDTOs;
     }
 
@@ -5854,23 +5851,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName) {
         List<AbstractLog<?, ?>> result = new ArrayList<>();
-        
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
             return null;
         }
-        
         if (leaderboard instanceof HasRegattaLike) {
             result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
         }
-        
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 result.add(raceLog);
             }
         }
-        
         return result;
     }   
 
