@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.start;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -76,7 +74,6 @@ public class DesktopStartView extends Composite implements StartView {
     private ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings; 
     
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
-    private final Map<PerspectiveLifecycle<?,?,?,?>, Settings> perspectiveSettings;
     
     public DesktopStartView(PlaceNavigator navigator, EventBus eventBus) {
         super();
@@ -91,8 +88,6 @@ public class DesktopStartView extends Composite implements StartView {
         leaderboardSelectionBox.setMultipleSelect(false);
         localeSelectionBox = new ListBox();
         localeSelectionBox.setMultipleSelect(false);
-
-        perspectiveSettings = new HashMap<>();
         
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
@@ -128,7 +123,6 @@ public class DesktopStartView extends Composite implements StartView {
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
         RaceBoardPerspectiveSettings raceboardPerspectiveSettings = raceboardPerspectiveLifecycle.createDefaultSettings(); 
         
-        perspectiveSettings.clear();
         leaderboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveSettings);
         raceboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveSettings);
     }
