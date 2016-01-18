@@ -2435,34 +2435,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO, raceColumn instanceof MetaLeaderboardColumn);
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
+                final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                final RaceLogTrackingState raceLogTrackingState = raceLog == null ? RaceLogTrackingState.NOT_A_RACELOG_TRACKED_RACE :
                     new RaceLogTrackingStateAnalyzer(raceLog).analyze();
-                boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
-                
-                boolean competitorRegistrationsExist;
-                competitorRegistrationsExist = raceLog == null ? false : sizeOf(raceColumn.getAllCompetitors(fleet)) > 0 ;
-
-                RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
+                final boolean raceLogTrackerExists = raceLog == null ? false : getService().getRaceTrackerById(raceLog.getId()) != null;
+                final boolean competitorRegistrationsExist = raceLog == null ? false : !Util.isEmpty(raceColumn.getAllCompetitors(fleet));
+                final RaceLogTrackingInfoDTO raceLogTrackingInfo = new RaceLogTrackingInfoDTO(raceLogTrackerExists,
                         competitorRegistrationsExist, raceLogTrackingState);
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
             }
         }
         return leaderboardDTO;
-    }
-
-    private int sizeOf(Iterable<Competitor> values) {
-        if (values instanceof Collection<?>) {
-            return ((Collection<?>)values).size();
-        } else {
-            Iterator<Competitor> it = values.iterator();
-            int sum = 0;
-            while (it.hasNext()) {
-              it.next();
-              sum++;
-            }
-            return sum;
-        }
     }
 
     @Override
