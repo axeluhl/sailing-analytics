@@ -5997,7 +5997,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
                     CourseBase course = finder.analyze();
                     for (Waypoint waypoint: course.getWaypoints()) {
-                        for (Mark mark : waypoint.getMarks()){
+                        for (Mark mark : waypoint.getMarks()) {
                             if (markIds.contains(mark.getId().toString())) {
                                 racesContainingMarksToDeleteInCourse.add(raceColumn.getName()+"/"+fleet.getName());
                                 marksAreUsedInOtherRaceLogs = true;
