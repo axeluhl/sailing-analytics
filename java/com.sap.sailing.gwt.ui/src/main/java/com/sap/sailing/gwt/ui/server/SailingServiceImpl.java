@@ -5850,18 +5850,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @return
      */
     private List<AbstractLog<?, ?>> getLogHierarchy(String leaderboardName) {
-        List<AbstractLog<?, ?>> result = new ArrayList<>();
+        final List<AbstractLog<?, ?>> result;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            return null;
-        }
-        if (leaderboard instanceof HasRegattaLike) {
-            result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
-        }
-        for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-            for (Fleet fleet : raceColumn.getFleets()) {
-                RaceLog raceLog = raceColumn.getRaceLog(fleet);
-                result.add(raceLog);
+            result = null;
+        } else {
+            result = new ArrayList<>();
+            if (leaderboard instanceof HasRegattaLike) {
+                result.add(((HasRegattaLike) leaderboard).getRegattaLike().getRegattaLog());
+            }
+            for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                for (Fleet fleet : raceColumn.getFleets()) {
+                    RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                    result.add(raceLog);
+                }
             }
         }
         return result;
@@ -5869,15 +5871,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     public boolean doesRegattaLogContainCompetitors(String leaderboardName) throws DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
-        
-        List<RegattaLogEvent> comeptitorRegistrationEvents = new AllEventsOfTypeFinder<>(regattaLog, /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class)
-                .analyze();
-        
-        if (comeptitorRegistrationEvents.isEmpty()){
-            return false;
-        } else {
-            return true;
-        }
+        List<RegattaLogEvent> comeptitorRegistrationEvents = new AllEventsOfTypeFinder<>(regattaLog,
+                /* only unrevoked */ true, RegattaLogRegisterCompetitorEvent.class).analyze();
+        return !comeptitorRegistrationEvents.isEmpty();
     }
 
     @Override
