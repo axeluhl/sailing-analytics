@@ -133,7 +133,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
                     public void onSuccess(Pair<Boolean, String>result) {
                         if (result.getA()){
                             removeMark.setEnabled(false);
-                            removeMark.setTitle("Removal deavticated, marks are used in races: "+result.getB());
+                            removeMark.setTitle(stringMessages.removalOfMarkDisabledMayBeUsedInRaces(result.getB()));
                         } else {
                             removeMark.setEnabled(true);
                             removeMark.setTitle("");
