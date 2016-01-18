@@ -131,9 +131,6 @@ public class DesktopStartView extends Composite implements StartView {
         perspectiveSettings.clear();
         leaderboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveSettings);
         raceboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveSettings);
-//        
-//        perspectiveSettings.put(leaderboardPerspectiveLifecycle, leaderboardPerspectiveSettings);
-//        perspectiveSettings.put(raceboardPerspectiveLifecycle, raceboardPerspectiveSettings);
     }
 
     private <C extends Perspective<S>, S extends Settings> void openPerspectiveSettingsDialog(final ComponentLifecycleAndSettings<S> perspectiveLifecycleAndSettings) {
