@@ -586,7 +586,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     new AsyncCallback<Iterable<CompetitorDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            GWT.log("Error while searching BoatClass.");
+                            GWT.log("Error while searching boat class");
                             showWithBoatClass.showWithBoatClass(null);
                         }
                         

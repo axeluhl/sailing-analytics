@@ -146,7 +146,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
 
     public abstract void addAdditionalWidgets(FlowPanel mainPanel);
 
-    void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorDTO> toMove) {
+    protected void move(CompetitorTableWrapper<?> from, CompetitorTableWrapper<?> to, Iterable<CompetitorDTO> toMove) {
         from.getFilterField().removeAll(toMove);
         to.getFilterField().addAll(toMove);
     }
