@@ -3,7 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.fragments;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -453,8 +452,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
-    private static TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
-        TreeMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new TreeMap<>(new SeriesBaseComparator());
+    private static LinkedHashMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
+        LinkedHashMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new LinkedHashMap<>();
         for (RaceGroupSeriesFleet key : raceGroupSeriesFleets) {
             SeriesBase series = key.getSeries();
             List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
@@ -465,13 +464,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             seriesWithFleets.put(series, fleets);
         }
         return seriesWithFleets;
-    }
-
-    private static class SeriesBaseComparator implements Comparator<SeriesBase> {
-        @Override
-        public int compare(SeriesBase lhs, SeriesBase rhs) {
-            return lhs.getName().compareTo(rhs.getName());
-        }
     }
 
     private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
