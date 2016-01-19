@@ -41,7 +41,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     private Context mContext;
     private List<CourseListDataElementWithIdImpl> mElements;
     private MarkImageHelper mImageHelper;
-    private LongClick mLongClickListener;
     private ItemClick mItemClickListener;
     private EventListener mEventListener;
 
@@ -164,10 +163,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     public void setItemClickListener(ItemClick listener) {
         mItemClickListener = listener;
-    }
-
-    public void setLongClickListener(LongClick listener) {
-        mLongClickListener = listener;
     }
 
     public void setEventListener(EventListener listener) {
@@ -305,10 +300,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     public interface ItemClick {
         void onAddItemClick();
-    }
 
-    public interface LongClick {
-        void onItemLongClick(int type, CourseListDataElementWithIdImpl element);
+        void onItemEditClick(int type, CourseListDataElementWithIdImpl element);
     }
 
     public interface EventListener {
@@ -334,7 +327,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
     }
 
-    public class ItemViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener, View.OnClickListener {
+    public class ItemViewHolder extends BaseDraggableSwipeViewHolder implements View.OnClickListener {
 
         public ViewGroup container;
         public View dragHandle;
@@ -363,13 +356,13 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
             if (mEditable) {
                 if (leftColumn != null) {
-                    leftColumn.setOnLongClickListener(this);
+                    leftColumn.setOnClickListener(this);
                 }
                 if (roundingDirection != null) {
-                    roundingDirection.setOnLongClickListener(this);
+                    roundingDirection.setOnClickListener(this);
                 }
                 if (rightColumn != null) {
-                    rightColumn.setOnLongClickListener(this);
+                    rightColumn.setOnClickListener(this);
                 }
                 if (addItem != null) {
                     addItem.setOnClickListener(this);
@@ -378,32 +371,26 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
 
         @Override
-        public boolean onLongClick(View v) {
-            if (mLongClickListener != null) {
+        public void onClick(View v) {
+            if (mItemClickListener != null) {
                 switch (v.getId()) {
                     case R.id.column_left:
-                        mLongClickListener.onItemLongClick(TOUCH_LEFT_AREA, mElements.get(getAdapterPosition()));
+                        mItemClickListener.onItemEditClick(TOUCH_LEFT_AREA, mElements.get(getAdapterPosition()));
                         break;
 
                     case R.id.column_right:
                         if (addItem.getVisibility() == View.GONE) {
-                            mLongClickListener.onItemLongClick(TOUCH_RIGHT_AREA, mElements.get(getAdapterPosition()));
+                            mItemClickListener.onItemEditClick(TOUCH_RIGHT_AREA, mElements.get(getAdapterPosition()));
                         }
                         break;
 
+                    case R.id.rounding_direction:
+                        mItemClickListener.onItemEditClick(TOUCH_TYPE_AREA, mElements.get(getAdapterPosition()));
+                        break;
+
                     default:
-                        mLongClickListener.onItemLongClick(TOUCH_TYPE_AREA, mElements.get(getAdapterPosition()));
+                        mItemClickListener.onAddItemClick();
                 }
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (mItemClickListener != null) {
-                mItemClickListener.onAddItemClick();
             }
         }
 

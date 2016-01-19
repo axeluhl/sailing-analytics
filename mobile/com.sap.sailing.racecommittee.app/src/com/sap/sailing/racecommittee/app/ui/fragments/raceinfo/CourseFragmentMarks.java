@@ -60,7 +60,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.LongClick, CourseElementAdapter.EventListener, SelectionAdapter.ItemClick, CourseElementAdapter.ItemClick {
+public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, SelectionAdapter.ItemClick, CourseElementAdapter.ItemClick {
 
     private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
@@ -170,7 +170,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
             CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
-            adapter.setLongClickListener(this);
             adapter.setItemClickListener(this);
             adapter.setEventListener(this);
 
@@ -377,7 +376,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     @Override
-    public void onItemLongClick(int type, CourseListDataElementWithIdImpl element) {
+    public void onItemEditClick(int type, CourseListDataElementWithIdImpl element) {
         switch (type) {
             case CourseElementAdapter.TOUCH_TYPE_AREA:
                 createPassingInstructionDialog(element);
