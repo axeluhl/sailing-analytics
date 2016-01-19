@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -60,7 +59,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -85,7 +83,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private FilterMode mFilterMode;
     private ListView mListView;
     private LinkedHashMap<String, ManagedRace> mManagedRacesById;
-    private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
+    private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
     private boolean mUpdateList = true;
@@ -111,7 +109,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
         mManagedRacesById = new LinkedHashMap<>();
-        mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
+        mRacesByGroup = new LinkedHashMap<>();
         mViewItems = new ArrayList<>();
     }
 
@@ -426,7 +424,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mViewItems.clear();
 
         // 3. Group active fleets from tree by series
-        Map<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = getFleetsGroupedBySeries(mRacesByGroup.navigableKeySet());
+        Map<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = getFleetsGroupedBySeries(mRacesByGroup.keySet());
 
         // 4. Create view elements from series with fleets
         for (SeriesBase series : seriesWithFleets.keySet()) {
@@ -466,7 +464,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         return seriesWithFleets;
     }
 
-    private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
+    private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
         List<RaceListDataTypeRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet fleet : fleets) {
             for (ManagedRace race : racesByGroup.get(fleet)) {
