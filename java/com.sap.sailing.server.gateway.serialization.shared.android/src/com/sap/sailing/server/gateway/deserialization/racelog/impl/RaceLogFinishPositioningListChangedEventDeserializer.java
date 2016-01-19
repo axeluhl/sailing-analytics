@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
 import com.sap.sailing.domain.base.Competitor;
@@ -18,7 +19,6 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningListChangedEventSerializer;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 public class RaceLogFinishPositioningListChangedEventDeserializer extends BaseRaceLogEventDeserializer {
     
@@ -41,15 +41,13 @@ public class RaceLogFinishPositioningListChangedEventDeserializer extends BaseRa
         
         for (Object object : jsonPositionedCompetitors) {
             JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
-            
             Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_ID);
             competitorId = Helpers.tryUuidConversion(competitorId);
             String competitorName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_COMPETITOR_NAME);
-            
             String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningListChangedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
-            
-            Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Util.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
+            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
+                    competitorId, competitorName, /* rank */ 1, maxPointsReason, /* score */ null, /* finishingTime */ null, /* comment */ null);
             positionedCompetitors.add(positionedCompetitor);
         }
         
