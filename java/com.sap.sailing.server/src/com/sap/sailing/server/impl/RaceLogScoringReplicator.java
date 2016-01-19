@@ -138,9 +138,9 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
                 if (positionedCompetitor.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
                     try {
                         resetMaxPointsReasonIfNecessary(leaderboard, raceColumn, timePoint, competitor);
-                        int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positioningList, positionedCompetitor);
+                        int rankByRaceCommittee = getRankInPositioningListByRaceCommittee(positionedCompetitor);
                         correctScoreInLeaderboard(leaderboard, raceColumn, timePoint, numberOfCompetitorsInRace, 
-                                competitor, rankByRaceCommittee);
+                                competitor, rankByRaceCommittee, positionedCompetitor.getScore());
                     } catch (NoWindException ex) {
                         ex.printStackTrace();
                     }
@@ -166,22 +166,23 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
         return scoreHasBeenCorrected;
     }
 
-    private boolean correctScoreInLeaderboard(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
+    private void correctScoreInLeaderboard(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint,
             final int numberOfCompetitorsInRace, 
-            Competitor competitor, int rankByRaceCommittee) throws NoWindException {
-        boolean scoreHasBeenCorrected = false;
-        Double scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
+            Competitor competitor, int rankByRaceCommittee, Double optionalExplicitScore) throws NoWindException {
+        final Double scoreByRaceCommittee;
+        if (optionalExplicitScore == null) {
+            scoreByRaceCommittee = leaderboard.getScoringScheme().getScoreForRank(leaderboard, raceColumn, competitor,
                 rankByRaceCommittee, new Callable<Integer>() {
                     @Override
                     public Integer call() {
                         return numberOfCompetitorsInRace;
                     }
                 }, leaderboard.getNumberOfCompetitorsInLeaderboardFetcher(), timePoint);
-        
+        } else {
+            scoreByRaceCommittee = optionalExplicitScore;
+        }
         // Do ALWAYS apply score corrections from race committee
         applyScoreCorrectionOperation(leaderboard, raceColumn, competitor, scoreByRaceCommittee, timePoint);
-        scoreHasBeenCorrected = true;
-        return scoreHasBeenCorrected;
     }
 
     private boolean resetMaxPointsReasonIfNecessary(Leaderboard leaderboard, RaceColumn raceColumn, TimePoint timePoint, Competitor competitor) {
@@ -209,13 +210,16 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
 
     /**
-     * The positioning list contains a list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be entered by the 
-     * Race Committee. The rank of a competitor according to the Race Committee is represented by the position in the given positioningList
-     * @param positioningList The list containing the competitors. The rank is represented by the position of a competitor in the list
-     * @param positionedCompetitor the competitor whose rank shall be determined
+     * The positioning list contains a list of competitors sorted by the positioning order when finishing. Additionally
+     * a MaxPointsReason might be entered by the Race Committee. The rank of a competitor according to the Race
+     * Committee used to be represented by the position in the list in earlier versions; now it is made explicit in the
+     * {@link CompetitorResult#getOneBasedRank()} attribute. 
+     * @param positionedCompetitor
+     *            the competitor whose rank shall be determined
+     * 
      * @return the (one-based) rank of the given positionedCompetitor
      */
-    private int getRankInPositioningListByRaceCommittee(CompetitorResults positioningList, CompetitorResult positionedCompetitor) {
+    private int getRankInPositioningListByRaceCommittee(CompetitorResult positionedCompetitor) {
         return positionedCompetitor.getOneBasedRank();
     }
 
