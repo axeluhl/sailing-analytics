@@ -56,7 +56,9 @@ public class CourseMarksDialogFragment extends DialogFragment {
         mMarkGrid = (RecyclerView) layout.findViewById(R.id.assets);
         if (mMarkGrid != null) {
             if (getArguments() != null) {
-                mMarks = (ArrayList<Mark>) getArguments().getSerializable(MARKS);
+                @SuppressWarnings("unchecked")
+                final ArrayList<Mark> markList = (ArrayList<Mark>) getArguments().getSerializable(MARKS);
+                mMarks = markList;
                 GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
                 int padding = getActivity().getResources().getDimensionPixelSize(R.dimen.obesity_line);
                 int strokeWidth = getActivity().getResources().getDimensionPixelSize(R.dimen.thin_line);

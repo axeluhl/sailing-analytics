@@ -79,10 +79,10 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
     private static class ViewPagerChangeListener implements ViewPager.OnPageChangeListener {
 
-        private WeakReference<BaseStartphaseRaceFragment> reference;
+        private WeakReference<BaseStartphaseRaceFragment<?>> reference;
 
-        public ViewPagerChangeListener(BaseStartphaseRaceFragment fragment) {
-            reference = new WeakReference<>(fragment);
+        public ViewPagerChangeListener(BaseStartphaseRaceFragment<?> fragment) {
+            reference = new WeakReference<BaseStartphaseRaceFragment<?>>(fragment);
         }
 
         @Override
@@ -92,7 +92,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
 
         @Override
         public void onPageSelected(int position) {
-            BaseStartphaseRaceFragment fragment = reference.get();
+            BaseStartphaseRaceFragment<?> fragment = reference.get();
             if (fragment != null) {
                 fragment.markDot(position);
             }

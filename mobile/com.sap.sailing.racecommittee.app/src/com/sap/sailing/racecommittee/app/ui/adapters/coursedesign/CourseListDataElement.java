@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import java.io.Serializable;
 
 public class CourseListDataElement implements Serializable {
-
+    private static final long serialVersionUID = 1616392719102126054L;
     private Mark leftMark;
     private Mark rightMark;
     private PassingInstruction passingInstructions;

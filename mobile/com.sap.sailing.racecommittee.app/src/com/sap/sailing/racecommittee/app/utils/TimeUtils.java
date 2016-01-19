@@ -6,7 +6,6 @@ import java.util.TimeZone;
 
 import android.content.Context;
 import android.os.Build;
-import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.NumberPicker;
