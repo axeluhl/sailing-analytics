@@ -34,7 +34,7 @@ ext {
     support = "22.2.1"
     play_services = "7.3.0"
 
-    license_dialog = "1.7.0"
+    license_dialog = "1.8.0"
 
     // testing - jvm
     junit = "4.12"
