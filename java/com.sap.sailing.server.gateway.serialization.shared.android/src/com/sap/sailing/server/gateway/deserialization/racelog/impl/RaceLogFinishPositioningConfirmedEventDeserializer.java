@@ -1,69 +1,23 @@
 package com.sap.sailing.server.gateway.deserialization.racelog.impl;
 
 import java.io.Serializable;
-import java.util.List;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.MaxPointsReason;
-import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogFinishPositioningConfirmedEventSerializer;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceLogFinishPositioningConfirmedEventDeserializer extends BaseRaceLogEventDeserializer {
+public class RaceLogFinishPositioningConfirmedEventDeserializer extends RaceLogFinishPositioningEventDeserializer {
     
     public RaceLogFinishPositioningConfirmedEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
-    @Override
-    protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId, List<Competitor> competitors)
-            throws JsonDeserializationException {
-        
-        JSONArray jsonPositionedCompetitors = Helpers.getNestedArraySafe(object, RaceLogFinishPositioningConfirmedEventSerializer.FIELD_POSITIONED_COMPETITORS);
-        CompetitorResults positionedCompetitors = deserializePositionedCompetitors(jsonPositionedCompetitors);
-
+    protected RaceLogFinishPositioningConfirmedEventImpl createRaceLogFinishPositioningEvent(Serializable id,
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint timePoint, int passId,
+            CompetitorResults positionedCompetitors) {
         return new RaceLogFinishPositioningConfirmedEventImpl(createdAt, timePoint, author, id, passId, positionedCompetitors);
     }
-    
-    private CompetitorResults deserializePositionedCompetitors(JSONArray jsonPositionedCompetitors) throws JsonDeserializationException {
-        CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
-        int rankCounter = 1;
-        for (Object object : jsonPositionedCompetitors) {
-            JSONObject jsonPositionedCompetitor = Helpers.toJSONObjectSafe(object);
-            Serializable competitorId = (Serializable) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_ID);
-            competitorId = Helpers.tryUuidConversion(competitorId);
-            final String competitorDisplayName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_NAME);
-            final String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
-            final MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
-            /*
-                jsonPositionedCompetitor.put(FIELD_SCORE, positionedCompetitor.getScore());
-                jsonPositionedCompetitor.put(FIELD_COMMENT, positionedCompetitor.getComment());
-                jsonPositionedCompetitor.put(FIELD_RANK, positionedCompetitor.getRank());
-                jsonPositionedCompetitor.put(FIELD_FINISHING_TIME_POINT_AS_MILLIS, positionedCompetitor.getFinishingTime() == null ? null : positionedCompetitor.getFinishingTime().asMillis());
-             */
-            final Integer rank = (Integer) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_RANK);
-            final Double score = (Double) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE);
-            final Long finishingTimePointAsMillis = (Long) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_FINISHING_TIME_POINT_AS_MILLIS);
-            final TimePoint finishingTime = finishingTimePointAsMillis == null ? null : new MillisecondsTimePoint(finishingTimePointAsMillis);
-            final String comment = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMMENT);
-            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment);
-            rankCounter++;
-            positionedCompetitors.add(positionedCompetitor);
-        }
-        return positionedCompetitors;
-    }
-
 }
