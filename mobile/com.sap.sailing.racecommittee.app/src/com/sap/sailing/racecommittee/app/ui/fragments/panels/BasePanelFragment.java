@@ -23,11 +23,6 @@ import java.lang.annotation.RetentionPolicy;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
-    @IntDef({LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface MarkerLevel {
-    }
-
     /**
      * Marker level is unknown, due to an error
      */

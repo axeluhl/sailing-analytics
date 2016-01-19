@@ -44,7 +44,7 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             mDots.add(dot);
         }
 
-        ViewPager pager = ViewHelper.get(layout, R.id.panels_pager);
+        final ViewPager pager = ViewHelper.get(layout, R.id.panels_pager);
         if (pager != null) {
             PanelsAdapter adapter;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -56,6 +56,33 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             pager.addOnPageChangeListener(new ViewPagerChangeListener(this));
             markDot(0);
         }
+
+        ImageView nav_prev = ViewHelper.get(layout, R.id.nav_prev);
+        if (nav_prev != null) {
+            nav_prev.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    viewPanel(MOVE_DOWN);
+                    if (pager != null) {
+                        pager.setCurrentItem(mActivePage);
+                    }
+                }
+            });
+        }
+
+        ImageView nav_next = ViewHelper.get(layout, R.id.nav_next);
+        if (nav_next != null) {
+            nav_next.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    viewPanel(MOVE_UP);
+                    if (pager != null) {
+                        pager.setCurrentItem(mActivePage);
+                    }
+                }
+            });
+        }
+
 
         return layout;
     }

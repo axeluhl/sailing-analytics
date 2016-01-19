@@ -41,6 +41,22 @@
         android:layout_below="@id/panels_pager"
         android:background="?attr/sap_gray">
 
+        <ImageView
+            android:id="@+id/nav_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="?attr/button_prev"/>
+
+        <ImageView
+            android:id="@+id/nav_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="?attr/button_next"/>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
