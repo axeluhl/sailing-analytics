@@ -108,6 +108,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
                     @Override
                     public void onSuccess(Void result) {
                         Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
                     }
                 });
     }
