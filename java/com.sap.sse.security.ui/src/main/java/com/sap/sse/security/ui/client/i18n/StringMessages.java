@@ -63,6 +63,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editEmail();
     String errorUpdatingEmail(String message);
     String successfullyUpdatedEmail(String username, String email);
+    String errorUpdatingUserProperties(String message);
+    String successfullyUpdatedUserProperties(String username);
     String forgotPassword();
     String errorDuringPasswordReset(String message);
     String cannotResetPasswordWithoutValidatedEmail(String username);
