@@ -13,8 +13,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class CreateAccountViewImpl extends Composite implements CreateAccountView {
     
@@ -31,6 +33,9 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @UiField Anchor signInUi;
     
     @UiField DivElement formErrorUi;
+    
+    @UiField(provided = true)
+    UserManagementSharedResources res = SharedResources.INSTANCE;
 
     private Presenter presenter;
     
