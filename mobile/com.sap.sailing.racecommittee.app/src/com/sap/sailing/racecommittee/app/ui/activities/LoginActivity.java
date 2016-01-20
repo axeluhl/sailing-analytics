@@ -164,6 +164,7 @@ public class LoginActivity extends BaseActivity
         intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
         startActivity(intent);
+        finish();
     }
 
     private Serializable selectEvent(EventBase event) {
