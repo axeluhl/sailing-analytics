@@ -82,7 +82,9 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         super.onStop();
         
         ExLog.i(this, TAG, "unbindSendingService");
-        sendingService.setMessageSendingServiceLogger(null);
+        if (sendingService != null) {
+            sendingService.setMessageSendingServiceLogger(null);
+        }
         unbindService(sendingServiceConnection);
         boundSendingService = false;
     }
