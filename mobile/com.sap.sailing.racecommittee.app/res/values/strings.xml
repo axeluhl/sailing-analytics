@@ -476,5 +476,6 @@
     <string name="prev_course">Previous Course</string>
     <string name="layout_course">Course Layout</string>
     <string name="wind_degree">°</string>
+    <string name="add_waypoint">Press plus to add waypoint</string>
 
 </resources>

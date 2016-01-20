@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <include
         android:id="@+id/header"
-        layout="@layout/race_schedule_course_header"/>
+        layout="@layout/race_schedule_course_header" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -25,7 +24,7 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/chooser"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -53,7 +52,7 @@
                     android:paddingLeft="@dimen/side_padding"
                     android:paddingRight="@dimen/side_padding"
                     android:text="@string/take_previous_short"
-                    android:textSize="@dimen/textSize_18"/>
+                    android:textSize="@dimen/textSize_18" />
             </FrameLayout>
 
             <android.support.v7.widget.RecyclerView
@@ -61,8 +60,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@id/load_prev"
-                android:layout_margin="@dimen/side_padding"
-                android:gravity="center"/>
+                android:layout_marginLeft="@dimen/side_padding"
+                android:layout_marginRight="@dimen/side_padding"
+                android:gravity="center" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -94,7 +94,7 @@
                         android:layout_height="@dimen/default_button_height"
                         android:layout_marginBottom="@dimen/side_padding"
                         android:text="@string/publish"
-                        android:textSize="@dimen/textSize_18"/>
+                        android:textSize="@dimen/textSize_18" />
 
                     <Button
                         android:id="@+id/unpublishCourse"
@@ -102,7 +102,7 @@
                         android:layout_width="@dimen/default_button_width"
                         android:layout_height="@dimen/default_button_height"
                         android:text="@string/unpublish"
-                        android:textSize="@dimen/textSize_18"/>
+                        android:textSize="@dimen/textSize_18" />
                 </LinearLayout>
             </FrameLayout>
 
@@ -110,7 +110,9 @@
                 android:id="@+id/new_course"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/bottom_bar"/>
+                android:layout_above="@id/bottom_bar"
+                android:layout_marginLeft="@dimen/side_padding"
+                android:layout_marginRight="@dimen/side_padding" />
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>

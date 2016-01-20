@@ -450,5 +450,6 @@
     <string name="prev_course">Vorheriger Kurs</string>
     <string name="layout_course">Kurs Layout</string>
     <string name="wind_degree">°</string>
+    <string name="add_waypoint">Wegpunkt hinzufügen</string>
 
 </resources>

@@ -10,7 +10,7 @@
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="4">
+        android:layout_weight="1">
 
         <ImageView
             android:id="@+id/add_item"
@@ -20,16 +20,17 @@
             android:layout_gravity="center_horizontal" />
     </FrameLayout>
 
-    <Space
-        android:layout_width="50dp"
-        android:layout_height="wrap_content" />
-
-    <Space
+    <TextView
+        android:id="@+id/hint_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="4" />
+        android:text="@string/add_waypoint"
+        android:textAppearance="?attr/textXSmall"
+        android:textColor="?attr/white"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"/>
 
     <Space
-        android:layout_width="42dp"
+        android:layout_width="92dp"
         android:layout_height="wrap_content" />
 </LinearLayout>
