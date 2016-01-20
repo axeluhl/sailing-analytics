@@ -9,8 +9,10 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     
@@ -25,6 +27,10 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
 
     @UiField Anchor userProfileUi;
     @UiField Anchor signOutUi;
+    
+    @UiField(provided = true)
+    UserManagementSharedResources res = SharedResources.INSTANCE;
+    
     private Presenter presenter;
     
     public LoggedInUserInfoViewImpl() {

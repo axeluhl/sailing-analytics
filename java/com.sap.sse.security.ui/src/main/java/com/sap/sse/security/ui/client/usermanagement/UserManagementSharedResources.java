@@ -8,6 +8,8 @@ public interface UserManagementSharedResources {
     UserManagementMediaCss mediaCss();
     
     public interface UserManagementMainCss {
+        String button();
+        String buttonprimaryoutlined();
     }
 
     public interface UserManagementMediaCss {
