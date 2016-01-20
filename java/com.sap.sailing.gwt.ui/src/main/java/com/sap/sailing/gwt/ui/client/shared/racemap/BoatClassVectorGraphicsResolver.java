@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.gwt.ui.shared.racemap.BoatClassVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.DinghyWithSpinnakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.Extreme40VectorGraphics;
+import com.sap.sailing.gwt.ui.shared.racemap.GC32VectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.KeelBoatWithGennakerVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.LaserVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.SmallMultihullVectorGraphics;
@@ -32,6 +33,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata._29ER, BoatClassMasterdata._18Footer);
         BoatClassVectorGraphics extreme40 = new Extreme40VectorGraphics(BoatClassMasterdata.EXTREME_40,
                 BoatClassMasterdata.D_35);
+        BoatClassVectorGraphics gc32 = new GC32VectorGraphics(BoatClassMasterdata.GC_32);
         BoatClassVectorGraphics smallMultihull = new SmallMultihullVectorGraphics(BoatClassMasterdata.NACRA_17,
                 BoatClassMasterdata.F_16, BoatClassMasterdata.F_18, BoatClassMasterdata.HOBIE_WILD_CAT,
                 BoatClassMasterdata.HOBIE_TIGER, BoatClassMasterdata.A_CAT, BoatClassMasterdata.TORNADO,
@@ -48,7 +50,7 @@ public class BoatClassVectorGraphicsResolver {
                 BoatClassMasterdata.TRIAS);
 
         defaultBoatVectorGraphics = dinghyWithSpinnaker; // TODO see bug 2571; this should be a slup-rigged icon working for 470, 505, J/70 etc.
-        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker}) {
+        for (BoatClassVectorGraphics g : new BoatClassVectorGraphics[] { laser, _49er, extreme40, smallMultihull, keelBoatWithGennaker, dinghyWithSpinnaker, gc32}) {
             for (BoatClassMasterdata b : g.getCompatibleBoatClasses()) {
                 compatibleBoatVectorGraphicsMap.put(b, g);
             }
