@@ -22,12 +22,14 @@ public class UserDetails extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
     
     public interface Presenter {
-        void handleSaveChangesRequest(String email);
+        void handleSaveChangesRequest(String fullName, String company);
+        void handleEmailChangeRequest(String email);
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }
     
     @UiField InputElement usernameUi;
     @UiField InputElement nameUi;
+    @UiField InputElement companyUi;
     @UiField TextBox emailUi;
     @UiField PasswordTextBox oldPasswordUi;
     @UiField PasswordTextBox newPasswordUi;
@@ -47,8 +49,9 @@ public class UserDetails extends Composite {
 
     public void setUserManagementContext(UserManagementContext userManagementContext) {
         UserDTO currentUser = userManagementContext.getCurrentUser();
-        nameUi.setValue(currentUser.getName());
         usernameUi.setValue(currentUser.getName());
+        nameUi.setValue(currentUser.getFullName());
+        companyUi.setValue(currentUser.getCompany());
         emailUi.setValue(currentUser.getEmail());
         oldPasswordUi.setValue("");
         newPasswordUi.setValue("");
@@ -61,7 +64,12 @@ public class UserDetails extends Composite {
     
     @UiHandler("saveChangesUi")
     void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(emailUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue());
+    }
+    
+    @UiHandler("changeEmailUi")
+    void onChangeEmailClicked(ClickEvent event) {
+        presenter.handleEmailChangeRequest(emailUi.getValue());
     }
     
     @UiHandler("changePasswordUi")
