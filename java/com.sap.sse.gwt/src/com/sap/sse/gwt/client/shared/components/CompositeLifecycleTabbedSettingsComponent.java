@@ -10,31 +10,26 @@ import com.sap.sse.common.settings.Settings;
  */
 public class CompositeLifecycleTabbedSettingsComponent implements Component<CompositeLifecycleSettings> {
     
-    private final Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles;
+    private final CompositeLifecycleSettings compositeLifecycleSettings;
     private final String title;
     
-    public CompositeLifecycleTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles) {
-        this(componentLifecycles, null);
+    public CompositeLifecycleTabbedSettingsComponent(CompositeLifecycleSettings compositeLifecycleSettings) {
+        this(compositeLifecycleSettings, null);
     }
 
-    public CompositeLifecycleTabbedSettingsComponent(Iterable<ComponentLifecycle<?,?,?,?>> componentLifecycles, String title) {
-        this.componentLifecycles = componentLifecycles;
+    public CompositeLifecycleTabbedSettingsComponent(CompositeLifecycleSettings compositeLifecycleSettings, String title) {
+        this.compositeLifecycleSettings = compositeLifecycleSettings;
         this.title = title;
     }
 
     @Override
     public boolean hasSettings() {
-        for (ComponentLifecycle<?,?,?,?> component : componentLifecycles) {
-            if (component.hasSettings()) {
-                return true;
-            }
-        }
-        return false;
+        return compositeLifecycleSettings.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<CompositeLifecycleSettings> getSettingsDialogComponent() {
-        return new CompositeLifecycleTabbedSettingsDialogComponent(componentLifecycles);
+        return new CompositeLifecycleTabbedSettingsDialogComponent(compositeLifecycleSettings);
     }
 
     @Override
@@ -44,9 +39,9 @@ public class CompositeLifecycleTabbedSettingsComponent implements Component<Comp
  
     @Override
     public void updateSettings(CompositeLifecycleSettings newSettings) {
-        for (ComponentLifecycleAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
-            updateSettings(componentAndSettings);
-        }
+//        for (ComponentLifecycleAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
+//            updateSettings(componentAndSettings);
+//        }
     }
 
     private <SettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings) {
@@ -60,13 +55,13 @@ public class CompositeLifecycleTabbedSettingsComponent implements Component<Comp
         } else {
             StringBuilder result = new StringBuilder();
             boolean first = true;
-            for (ComponentLifecycle<?,?,?,?> component : componentLifecycles) {
+            for (ComponentLifecycleAndSettings<?> component : compositeLifecycleSettings.getSettingsPerComponentLifecycle()) {
                 if (first) {
                     first = false;
                 } else {
                     result.append(" / ");
                 }
-                result.append(component.getLocalizedShortName());
+                result.append(component.getComponentLifecycle().getLocalizedShortName());
             }
             return result.toString();
         }

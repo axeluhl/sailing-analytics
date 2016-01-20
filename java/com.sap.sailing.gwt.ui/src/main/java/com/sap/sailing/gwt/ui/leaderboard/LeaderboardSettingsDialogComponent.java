@@ -55,6 +55,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
         this.raceAllRaceColumns = allRaceColumns;
+        this.activeRaceColumnSelectionStrategy = initialSettings.getActiveRaceColumnSelectionStrategy();
         
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceColumnCheckboxes = new LinkedHashMap<RaceColumnDTO, CheckBox>();
@@ -209,7 +210,8 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         selectedRacesPanel.add(selectedRacesContent);
         
         // Attention: We need to consider that there are regattas with more than 30 races
-        int racesCount = initialSettings.getNamesOfRaceColumnsToShow().size(); // raceAllRaceColumns.size();
+//        int racesCount = raceAllRaceColumns.size();
+        int racesCount = initialSettings.getNamesOfRaceColumnsToShow().size();
         if (racesCount > 0) {
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
             explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");

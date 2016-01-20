@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -22,6 +24,21 @@ public abstract class AbstractPerspectiveLifecycle<P extends Perspective<S>, S e
     }
     
     @Override
+    public CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
+        List<ComponentLifecycleAndSettings<?>> lifecyclesAndSettings = new ArrayList<>();
+        for(ComponentLifecycle<?,?,?,?> componentLifecycle: componentLifecycles) {
+            lifecyclesAndSettings.add(createComponentLifecycleAndSettings(componentLifecycle));
+        }
+        CompositeLifecycleSettings compositeSettings = new CompositeLifecycleSettings(lifecyclesAndSettings);
+        return compositeSettings;
+    }
+
+    private <SettingsType extends Settings> ComponentLifecycleAndSettings<SettingsType> createComponentLifecycleAndSettings(ComponentLifecycle<?,SettingsType,?,?> componentLifecycle) {
+        SettingsType defaultSettings = componentLifecycle.createDefaultSettings();
+        ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings = new ComponentLifecycleAndSettings<SettingsType>(componentLifecycle, defaultSettings);
+        return componentLifecycleAndSettings;
+    }
+    
     public Iterable<ComponentLifecycle<?,?,?,?>> getComponentLifecycles() {
         return componentLifecycles;
     }

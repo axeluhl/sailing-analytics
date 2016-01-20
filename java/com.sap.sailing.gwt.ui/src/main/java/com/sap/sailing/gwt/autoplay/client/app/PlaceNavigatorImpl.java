@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.autoplay.client.place.start.StartPlace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 
 public class PlaceNavigatorImpl implements PlaceNavigator {
     private final PlaceController placeController;
@@ -25,8 +26,11 @@ public class PlaceNavigatorImpl implements PlaceNavigator {
     public void goToPlayer(
             AutoPlayerConfiguration playerConfig,
             ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveAndSettings,
-            ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveAndSettings) {
-        PlayerPlace playerPlace = new PlayerPlace(playerConfig, leaderboardPerspectiveAndSettings, raceboardPerspectiveAndSettings);
+            ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveAndSettings,
+            PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings,
+            PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings) {
+        PlayerPlace playerPlace = new PlayerPlace(playerConfig, leaderboardPerspectiveAndSettings, raceboardPerspectiveAndSettings,
+                leaderboardPerspectiveComponentLifecyclesAndSettings, raceboardPerspectiveComponentLifecyclesAndSettings);
         placeController.goTo(playerPlace); 
     }
 

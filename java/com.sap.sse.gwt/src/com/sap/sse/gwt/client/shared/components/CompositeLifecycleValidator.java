@@ -5,16 +5,16 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleTabbedSettingsDialogComponent.ComponentLifecycleAndDialogComponent;
+import com.sap.sse.gwt.client.shared.components.CompositeLifecycleTabbedSettingsDialogComponent.ComponentLifecycleWithSettingsAndDialogComponent;
 
 public class CompositeLifecycleValidator implements Validator<CompositeLifecycleSettings> {
     
-    private final Map<ComponentLifecycle<?,?,?,?>, Validator<?>> validatorsMappedByComponentLifecycle;
+    private final Map<ComponentLifecycleAndSettings<?>, Validator<?>> validatorsMappedByComponentLifecycle;
 
-    public CompositeLifecycleValidator(Iterable<ComponentLifecycleAndDialogComponent<?>> componentLifecycleAndDialogComponents) {
+    public CompositeLifecycleValidator(Iterable<ComponentLifecycleWithSettingsAndDialogComponent<?>> componentLifecycleAndDialogComponents) {
         validatorsMappedByComponentLifecycle = new HashMap<>();
-        for (ComponentLifecycleAndDialogComponent<?> component : componentLifecycleAndDialogComponents) {
-            validatorsMappedByComponentLifecycle.put(component.getA(), component.getB().getValidator());
+        for (ComponentLifecycleWithSettingsAndDialogComponent<?> component : componentLifecycleAndDialogComponents) {
+            validatorsMappedByComponentLifecycle.put(component.getComponentLifecycleAndSettings(), component.getDialogComponent().getValidator());
         }
     }
 
@@ -42,5 +42,4 @@ public class CompositeLifecycleValidator implements Validator<CompositeLifecycle
         }
         return errorMessage;
     }
-
 }

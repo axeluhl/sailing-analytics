@@ -45,6 +45,7 @@ import com.sap.sse.gwt.client.shared.components.LifecycleSettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -72,6 +73,9 @@ public class DesktopStartView extends Composite implements StartView {
 
     private ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
     private ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings; 
+
+    private PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings;
+    private PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings;
     
     private final int defaultTimeToRaceStartTimeInSeconds = 180;
     
@@ -119,10 +123,18 @@ public class DesktopStartView extends Composite implements StartView {
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
         LeaderboardPerspectiveSettings leaderboardPerspectiveSettings = leaderboardPerspectiveLifecycle.createDefaultSettings();
-
+        
+        CompositeLifecycleSettings leaderboardPerspectiveComponentsLifecyclesAndSettings = leaderboardPerspectiveLifecycle.getComponentLifecyclesAndDefaultSettings();
+        leaderboardPerspectiveComponentLifecyclesAndSettings = new PerspectiveLifecycleAndComponentSettings(leaderboardPerspectiveLifecycle,
+                leaderboardPerspectiveComponentsLifecyclesAndSettings); 
+        
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
         RaceBoardPerspectiveSettings raceboardPerspectiveSettings = raceboardPerspectiveLifecycle.createDefaultSettings(); 
-        
+
+        CompositeLifecycleSettings raceboardPerspectiveComponentsLifecyclesAndSettings = raceboardPerspectiveLifecycle.getComponentLifecyclesAndDefaultSettings();
+        raceboardPerspectiveComponentLifecyclesAndSettings = new PerspectiveLifecycleAndComponentSettings(raceboardPerspectiveLifecycle,
+                raceboardPerspectiveComponentsLifecyclesAndSettings); 
+
         leaderboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveSettings);
         raceboardPerspectiveLifecycleAndSettings = new ComponentLifecycleAndSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveSettings);
     }
@@ -142,15 +154,17 @@ public class DesktopStartView extends Composite implements StartView {
         dialog.show();
     }
     
-    private void openPerspectiveComponentSettingsDialog(final PerspectiveLifecycle<?,?,?,?> perspectiveLifecycle) {
+    private void openPerspectiveComponentSettingsDialog(final PerspectiveLifecycle<?,?,?,?> perspectiveLifecycle,
+            final PerspectiveLifecycleAndComponentSettings perspectiveComponentsLifeyclesAndSettings) {
         TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE,
-                perspectiveLifecycle, new DialogCallback<CompositeLifecycleSettings>() {
+                perspectiveLifecycle, perspectiveComponentsLifeyclesAndSettings.getSettings(), new DialogCallback<CompositeLifecycleSettings>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
                     public void ok(CompositeLifecycleSettings newSettings) {
+                        perspectiveComponentsLifeyclesAndSettings.setSettings(newSettings);
                     }
                 });
         dialog.show();
@@ -192,8 +206,8 @@ public class DesktopStartView extends Composite implements StartView {
             StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
             this.updatePerspectives(selectedLeaderboard);
 
-            createPerspectiveSettingsUI(leaderboardPerspectiveLifecycleAndSettings, leaderboardPerspectiveSettingsPanel);
-            createPerspectiveSettingsUI(raceboardPerspectiveLifecycleAndSettings, raceboardPerspectiveSettingsPanel);
+            createPerspectiveSettingsUI(leaderboardPerspectiveLifecycleAndSettings, leaderboardPerspectiveComponentLifecyclesAndSettings, leaderboardPerspectiveSettingsPanel);
+            createPerspectiveSettingsUI(raceboardPerspectiveLifecycleAndSettings, raceboardPerspectiveComponentLifecyclesAndSettings, raceboardPerspectiveSettingsPanel);
         } else {
             startAutoPlayButton.setEnabled(false);
             startAutoPlayButton.addStyleName(SharedResources.INSTANCE.mainCss().buttoninactive());
@@ -202,6 +216,7 @@ public class DesktopStartView extends Composite implements StartView {
     }
 
     private <C extends Perspective<S>, S extends Settings> void createPerspectiveSettingsUI(final ComponentLifecycleAndSettings<S> perspectiveLifecycleAndSettings,
+            final PerspectiveLifecycleAndComponentSettings perspectiveComponentsLifeyclesAndSettings,
             FlowPanel perspectiveSettingsPanel) { 
         perspectiveSettingsPanel.clear();
 
@@ -221,7 +236,8 @@ public class DesktopStartView extends Composite implements StartView {
         perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openPerspectiveComponentSettingsDialog((PerspectiveLifecycle<?, ?, ?, ?>) perspectiveLifecycleAndSettings.getComponentLifecycle());
+                openPerspectiveComponentSettingsDialog((PerspectiveLifecycle<?, ?, ?, ?>) perspectiveLifecycleAndSettings.getComponentLifecycle(),
+                        perspectiveComponentsLifeyclesAndSettings);
             }
         });
         
@@ -242,7 +258,9 @@ public class DesktopStartView extends Composite implements StartView {
         if(selectedEvent != null && selectedLeaderboardName != null) {
             navigator.goToPlayer(new AutoPlayerConfiguration(selectedEvent.id.toString(), selectedLeaderboardName,
                     startInFullscreenModeBox.getValue(), timeToRaceStartInSeconds.getValue()), 
-                    leaderboardPerspectiveLifecycleAndSettings, raceboardPerspectiveLifecycleAndSettings);
+                    leaderboardPerspectiveLifecycleAndSettings, raceboardPerspectiveLifecycleAndSettings,
+                    leaderboardPerspectiveComponentLifecyclesAndSettings,
+                    raceboardPerspectiveComponentLifecyclesAndSettings);
         }
     }
 

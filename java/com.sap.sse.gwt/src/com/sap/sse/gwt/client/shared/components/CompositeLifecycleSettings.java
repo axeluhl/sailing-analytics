@@ -12,4 +12,15 @@ public class CompositeLifecycleSettings extends AbstractSettings {
     public Iterable<ComponentLifecycleAndSettings<?>> getSettingsPerComponentLifecycle() {
         return settingsPerComponentLifecycle;
     }
+    
+    public boolean hasSettings() {
+        boolean result = false;
+        for (ComponentLifecycleAndSettings<?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
+            if (componentLifecycleAndSettings.getComponentLifecycle().hasSettings()) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }    
 }

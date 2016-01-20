@@ -5,12 +5,16 @@ import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 
 public class PlayerPlace extends AbstractBasePlace {
     private final AutoPlayerConfiguration playerConfiguration;
     
     private final ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings;
     private final ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
+    
+    private final PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings;
+    private final PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings;
     
     public PlayerPlace(String url) {
         super(url);
@@ -23,11 +27,15 @@ public class PlayerPlace extends AbstractBasePlace {
         this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
         this.leaderboardPerspectiveLifecycleAndSettings = null;
         this.raceboardPerspectiveLifecycleAndSettings = null;
+        this.leaderboardPerspectiveComponentLifecyclesAndSettings = null;
+        this.raceboardPerspectiveComponentLifecyclesAndSettings = null;
     }
 
     public PlayerPlace(AutoPlayerConfiguration playerConfiguration,
             ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings, 
-            ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings) {
+            ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings,
+            PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings,
+            PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
@@ -35,6 +43,8 @@ public class PlayerPlace extends AbstractBasePlace {
         this.playerConfiguration = playerConfiguration;
         this.leaderboardPerspectiveLifecycleAndSettings = leaderboardPerspectiveLifecycleAndSettings;
         this.raceboardPerspectiveLifecycleAndSettings = raceboardPerspectiveLifecycleAndSettings;
+        this.leaderboardPerspectiveComponentLifecyclesAndSettings = leaderboardPerspectiveComponentLifecyclesAndSettings;
+        this.raceboardPerspectiveComponentLifecyclesAndSettings = raceboardPerspectiveComponentLifecyclesAndSettings;
     }
 
     public AutoPlayerConfiguration getConfiguration() {
@@ -59,5 +69,13 @@ public class PlayerPlace extends AbstractBasePlace {
 
     public ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> getRaceboardPerspectiveLifecycleAndSettings() {
         return raceboardPerspectiveLifecycleAndSettings;
+    }
+
+    public PerspectiveLifecycleAndComponentSettings getLeaderboardPerspectiveComponentLifecyclesAndSettings() {
+        return leaderboardPerspectiveComponentLifecyclesAndSettings;
+    }
+
+    public PerspectiveLifecycleAndComponentSettings getRaceboardPerspectiveComponentLifecyclesAndSettings() {
+        return raceboardPerspectiveComponentLifecyclesAndSettings;
     }
 }
