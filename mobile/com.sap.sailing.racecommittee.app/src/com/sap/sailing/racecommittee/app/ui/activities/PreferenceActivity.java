@@ -94,8 +94,8 @@ public class PreferenceActivity extends AppCompatActivity {
             }
         }
 
-        disableStatusbarTranslucent();
-        setStatusbarColor();
+        disableStatusBarTranslucent();
+        setStatusBarColor();
         Fragment fragment = null;
         if (getIntent() != null && getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
@@ -129,7 +129,7 @@ public class PreferenceActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void disableStatusbarTranslucent() {
+    private void disableStatusBarTranslucent() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window window = getWindow();
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -137,7 +137,7 @@ public class PreferenceActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setStatusbarColor() {
+    private void setStatusBarColor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
