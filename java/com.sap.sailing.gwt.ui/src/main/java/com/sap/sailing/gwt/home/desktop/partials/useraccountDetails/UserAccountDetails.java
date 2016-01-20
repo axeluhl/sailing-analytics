@@ -22,16 +22,15 @@ public class UserAccountDetails extends Composite {
     }
     
     public interface Presenter {
-        void handleSaveChangesRequest(String email);
+        void handleSaveChangesRequest(String fullName, String company);
+        void handleEmailChangeRequest(String email);
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }
     
     @UiField DivElement editImageLinkUi;
     @UiField InputElement usernameUi;
-    @UiField
-    TextBox nameUi;
-    @UiField
-    TextBox companyUi;
+    @UiField TextBox nameUi;
+    @UiField TextBox companyUi;
     @UiField TextBox emailUi;
     @UiField PasswordTextBox oldPasswordUi;
     @UiField PasswordTextBox newPasswordUi;
@@ -56,7 +55,7 @@ public class UserAccountDetails extends Composite {
         // TODO use image from user when field is available
         editImageLinkUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
-        nameUi.setValue(currentUser.getName());
+        nameUi.setValue(currentUser.getFullName());
         companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
@@ -71,7 +70,12 @@ public class UserAccountDetails extends Composite {
     
     @UiHandler("saveChangesUi")
     void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(emailUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue());
+    }
+    
+    @UiHandler("changeEmailUi")
+    void onChangeEmailClicked(ClickEvent event) {
+        presenter.handleEmailChangeRequest(emailUi.getValue());
     }
     
     @UiHandler("changePasswordUi")

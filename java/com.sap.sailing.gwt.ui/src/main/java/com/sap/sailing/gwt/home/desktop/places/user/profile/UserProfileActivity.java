@@ -64,11 +64,27 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
                 currentView.setUserManagementContext(event.getCtx());
             }
         });
-        
     }
-    
+
     @Override
-    public void handleSaveChangesRequest(final String email) {
+    public void handleSaveChangesRequest(String fullName, String company) {
+        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        clientFactory.getUserManagementService().updateUserProperties(username, fullName, company,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
+            }
+        });
+    }
+
+    @Override
+    public void handleEmailChangeRequest(final String email) {
         final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
                 .setHash(homePlacesNavigator.getMailVerifiedConfirmationNavigation().getTargetUrl()).buildString();
