@@ -43,7 +43,8 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     }
     
     @Override
-    public void createAccount(final String username, String email, final String password, String passwordConfirmation) {
+    public void createAccount(final String username, final String fullName, final String company, String email,
+            final String password, String passwordConfirmation) {
         String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             view.setErrorMessage(errorMessage);
@@ -55,10 +56,20 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
         clientFactory.getUserManagement().createSimpleUser(username, email, password, url,
                 new AsyncCallback<UserDTO>() {
             @Override
-            public void onSuccess(UserDTO result) {
-                clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory, view, eventBus, false));
-                placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
+            public void onSuccess(final UserDTO result) {
+                clientFactory.getUserManagement().updateUserProperties(username, fullName, company, new AsyncCallback<Void>() {
+                    @Override
+                    public void onSuccess(Void noResult) {
+                        clientFactory.getUserManagement().login(result.getName(), password, 
+                                new AsyncLoginCallback(clientFactory, view, eventBus, false));
+                        placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
+                    }
+                    
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
+                    }
+                });
             }
             
             @Override

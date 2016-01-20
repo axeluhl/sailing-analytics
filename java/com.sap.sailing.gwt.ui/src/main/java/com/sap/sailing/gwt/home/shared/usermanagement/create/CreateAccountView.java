@@ -9,7 +9,8 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
     
     public interface Presenter {
         
-        void createAccount(String username, String email, String password, String passwordConfirmation);
+        void createAccount(String username, String fullName, String company, 
+                String email, String password, String passwordConfirmation);
         
         void signIn();
         

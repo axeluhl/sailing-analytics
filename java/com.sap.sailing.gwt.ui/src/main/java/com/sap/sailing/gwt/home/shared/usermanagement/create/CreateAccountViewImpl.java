@@ -27,6 +27,8 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     @UiField TextBox emailUi;
     @UiField TextBox usernameUi;
+    @UiField TextBox nameUi;
+    @UiField TextBox companyUi;
     @UiField PasswordTextBox passwordUi;
     @UiField PasswordTextBox passwordConfirmationUi;
     @UiField Anchor createAccountUi;
@@ -69,7 +71,7 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         triggerCreateAccount();
     }
     
-    @UiHandler({ "emailUi", "usernameUi", "passwordUi", "passwordConfirmationUi"})
+    @UiHandler({ "emailUi", "usernameUi", "nameUi", "companyUi", "passwordUi", "passwordConfirmationUi"})
     void onCreateAccountKeyPressed(KeyUpEvent event) {
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
             triggerCreateAccount();
@@ -83,8 +85,9 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     private void triggerCreateAccount() {
         String username = usernameUi.getValue(), email = emailUi.getValue();
+        String fullName = nameUi.getValue(), company = companyUi.getValue();
         String password = passwordUi.getValue(), passwordConfirmation = passwordConfirmationUi.getValue();
-        presenter.createAccount(username, email, password, passwordConfirmation);
+        presenter.createAccount(username, fullName, company, email, password, passwordConfirmation);
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
