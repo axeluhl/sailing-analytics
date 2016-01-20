@@ -51,6 +51,7 @@ import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
@@ -93,6 +94,8 @@ public class WindFragment extends BaseFragment
 
     private RacePositionsPoller positionPoller;
 
+    private IsTrackedReceiver mReceiver;
+
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
         Bundle args = new Bundle();
@@ -121,10 +124,6 @@ public class WindFragment extends BaseFragment
 
         // initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
-
-        //register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new IsTrackedReceiver(), filter);
     }
 
     @Override
@@ -159,6 +158,8 @@ public class WindFragment extends BaseFragment
         mContentMapShow = ViewHelper.get(layout, R.id.position_show);
         mMapWebView = ViewHelper.get(layout, R.id.web_view);
         mMapHide = ViewHelper.get(layout, R.id.position_hide);
+
+        mReceiver = new IsTrackedReceiver(mContentMapShow);
 
         return layout;
     }
@@ -389,6 +390,7 @@ public class WindFragment extends BaseFragment
         pauseApiClient();
         pausePositionPoller();
 
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
@@ -399,6 +401,10 @@ public class WindFragment extends BaseFragment
         // connect googleApiClient and register position poller
         resumeApiClient();
         resumePositionPoller();
+
+        //register receiver to be notified if race is tracked
+        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
@@ -482,12 +488,19 @@ public class WindFragment extends BaseFragment
         preferences.setWindSpeed(wind.getKnots());
     }
 
-    private class IsTrackedReceiver extends BroadcastReceiver {
+    private static class IsTrackedReceiver extends BroadcastReceiver {
+
+        private WeakReference<Button> reference;
+
+        public IsTrackedReceiver(Button button) {
+            reference = new WeakReference<>(button);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mContentMapShow != null) {
-                mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            Button button = reference.get();
+            if (button != null) {
+                button.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
             }
         }
     }
