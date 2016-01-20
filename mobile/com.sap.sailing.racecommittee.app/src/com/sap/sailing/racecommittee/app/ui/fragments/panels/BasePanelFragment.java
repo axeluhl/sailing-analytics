@@ -1,12 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
@@ -17,9 +20,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -150,13 +150,22 @@ public abstract class BasePanelFragment extends RaceFragment {
         replaceFragment(fragment, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, true));
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     protected void replaceFragment(RaceFragment fragment, @IdRes int idRes) {
         Bundle args = getRecentArguments();
         if (fragment.getArguments() != null) {
             args.putAll(fragment.getArguments());
         }
         fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(idRes, fragment).commit();
+        FragmentManager manager = getFragmentManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (getParentFragment() != null) {
+                manager = getActivity().getFragmentManager();
+            }
+        }
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(idRes, fragment);
+        transaction.commit();
     }
 
     protected void showChangeDialog(DialogInterface.OnClickListener positiveButton) {

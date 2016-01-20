@@ -83,7 +83,6 @@ public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingPro
             });
         }
 
-
         return layout;
     }
 

@@ -50,7 +50,8 @@ public class BaseFragment extends RaceFragment {
             fragment.getArguments().putAll(getArguments());
         }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(viewId, fragment).commit();
+        transaction.replace(viewId, fragment);
+        transaction.commit();
     }
 
     protected void goHome() {
