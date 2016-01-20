@@ -28,7 +28,10 @@ public class UserAccountDetails extends Composite {
     
     @UiField DivElement editImageLinkUi;
     @UiField InputElement usernameUi;
-    @UiField InputElement nameUi;
+    @UiField
+    TextBox nameUi;
+    @UiField
+    TextBox companyUi;
     @UiField TextBox emailUi;
     @UiField PasswordTextBox oldPasswordUi;
     @UiField PasswordTextBox newPasswordUi;
@@ -54,6 +57,7 @@ public class UserAccountDetails extends Composite {
         editImageLinkUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
         nameUi.setValue(currentUser.getName());
+        companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
         oldPasswordUi.setValue("");
