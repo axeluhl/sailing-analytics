@@ -17,6 +17,20 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.1.1 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 18/01/2016
+Build number: 11844
+
+ 1) Bugs
+ 
+ - The ISubscriber.stop() method never finishes due to a deadlock (it happens sometimes).
+ There is a deadlock between one of the internal threads responsible to update the progress 
+ and the thread that calls the stop method (Reported by Axel Uhl, 16/11/2015) 
+
+********************************************
 ************* TracAPI 3.1.0 ****************
 ********************************************
 This is a final version. It fixes bugs in the implementation and it adds some new features. 
