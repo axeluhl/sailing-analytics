@@ -7,10 +7,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class UserManagementViewMobile extends Composite implements UserManagementView {
     
@@ -23,6 +25,9 @@ public class UserManagementViewMobile extends Composite implements UserManagemen
     
     @UiField SectionHeaderContent sectionHeaderUi;
     private final MobileSection contentContainerUi;
+    
+    @UiField(provided = true)
+    UserManagementSharedResources res = SharedResources.INSTANCE;
 
     public UserManagementViewMobile() {
         LOCAL_CSS.ensureInjected();

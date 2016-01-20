@@ -13,8 +13,10 @@ import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
+import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class UserManagementViewDesktop extends Composite implements UserManagementView {
     
@@ -29,6 +31,9 @@ public class UserManagementViewDesktop extends Composite implements UserManageme
     
     @UiField DivElement headingUi;
     @UiField SimplePanel contentContainerUi;
+    
+    @UiField(provided = true)
+    UserManagementSharedResources res = SharedResources.INSTANCE;
 
     public UserManagementViewDesktop() {
         LOCAL_CSS.ensureInjected();
