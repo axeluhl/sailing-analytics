@@ -32,5 +32,26 @@ public class UserManagementContextImpl implements UserManagementContext {
     public UserDTO getCurrentUser() {
         return currentUser;
     }
+    
+    @Override
+    public String getUserTitle() {
+        final String fullName = currentUser.getFullName();
+        if(fullName != null && !fullName.isEmpty()) {
+            return fullName;
+        }
+        return currentUser.getName();
+    }
 
+    @Override
+    public String getUserSubtitle() {
+        final String company = currentUser.getCompany();
+        if(company != null && !company.isEmpty()) {
+            return company;
+        }
+        final String email = currentUser.getEmail();
+        if(email != null && !email.isEmpty()) {
+            return email;
+        }
+        return currentUser.getName();
+    }
 }

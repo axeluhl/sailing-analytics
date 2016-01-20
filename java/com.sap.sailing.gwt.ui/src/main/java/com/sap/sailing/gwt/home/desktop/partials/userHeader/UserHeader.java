@@ -25,9 +25,8 @@ public class UserHeader extends Composite {
     public void setUserManagementContext(UserManagementContext userManagementContext) {
         UserHeaderResources.INSTANCE.css().ensureInjected();
         imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
-        nameUi.setInnerText(userManagementContext.getCurrentUser().getName());
         
-        // TODO there is no distinction between usernam und the user's name, so we show the email instead as username
-        usernameUi.setInnerText(userManagementContext.getCurrentUser().getEmail());
+        nameUi.setInnerText(userManagementContext.getUserTitle());
+        usernameUi.setInnerText(userManagementContext.getUserSubtitle());
     }
 }

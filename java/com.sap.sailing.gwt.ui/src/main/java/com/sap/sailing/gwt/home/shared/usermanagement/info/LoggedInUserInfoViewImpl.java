@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     
@@ -33,10 +33,11 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     }
     
     @Override
-    public void setUserInfo(UserDTO user) {
+    public void setUserInfo(UserManagementContext userManagementContext) {
         userImageUi.getStyle().setBackgroundImage("url('images/home/userdefault.svg')");
-        userRealnameUi.setInnerText(user.getName());
-        userUsernameUi.setInnerText(user.getEmail());
+        
+        userRealnameUi.setInnerText(userManagementContext.getUserTitle());
+        userUsernameUi.setInnerText(userManagementContext.getUserSubtitle());
     }
     
     @UiHandler("userProfileUi")

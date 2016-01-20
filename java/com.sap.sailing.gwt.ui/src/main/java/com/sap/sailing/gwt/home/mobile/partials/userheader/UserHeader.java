@@ -36,8 +36,8 @@ public class UserHeader extends Composite {
         // TODO use image from user when field is available
         imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
-        titleUi.setInnerText(currentUser.getName());
-        subtitleUi.setInnerText(currentUser.getEmail());
+        titleUi.setInnerText(userManagementContext.getUserTitle());
+        subtitleUi.setInnerText(userManagementContext.getUserSubtitle());
     }
 
 }

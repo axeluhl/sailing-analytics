@@ -31,12 +31,12 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         final LoggedInUserInfoView view = new LoggedInUserInfoViewImpl();
         view.setPresenter(this);
         panel.setWidget(view);
-        view.setUserInfo(clientFactory.getUserManagementContext().getCurrentUser());
+        view.setUserInfo(clientFactory.getUserManagementContext());
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
                 if (event.getCtx().isLoggedIn()) {
-                    view.setUserInfo(event.getCtx().getCurrentUser());
+                    view.setUserInfo(event.getCtx());
                 } else {
                     placeController.goTo(new SignInPlace());
                 }

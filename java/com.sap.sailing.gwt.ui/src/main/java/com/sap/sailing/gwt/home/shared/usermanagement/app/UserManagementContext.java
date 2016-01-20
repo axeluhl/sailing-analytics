@@ -6,4 +6,7 @@ public interface UserManagementContext {
     boolean isLoggedIn();
 
     UserDTO getCurrentUser();
+    
+    String getUserTitle();
+    String getUserSubtitle();
 }
