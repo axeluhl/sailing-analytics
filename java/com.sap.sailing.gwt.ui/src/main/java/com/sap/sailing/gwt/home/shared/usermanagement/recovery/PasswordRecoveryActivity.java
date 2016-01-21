@@ -5,13 +5,10 @@ import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_P
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
-import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -21,13 +18,13 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final PasswordRecoveryView view = new PasswordRecoveryViewImpl();
-    private final PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav;
+    private final Callback callback;
 
     public PasswordRecoveryActivity(PasswordRecoveryPlace place, UserManagementClientFactory clientFactory,
-            PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav, PlaceController placeController) {
+            PasswordRecoveryView.Presenter.Callback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
-        this.passwordResetPlaceNav = passwordResetPlaceNav;
         this.placeController = placeController;
+        this.callback = callback;
     }
     
     @Override
@@ -38,10 +35,7 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
 
     @Override
     public void resetPassword(final String email, final String username) {
-        final String url = Window.Location.createUrlBuilder().setHash(passwordResetPlaceNav.getTargetUrl())
-                .buildString();
-        clientFactory.getUserManagement().resetPassword(username, email,
-                url, 
+        clientFactory.getUserManagement().resetPassword(username, email, callback.getPasswordResetUrl(),
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {

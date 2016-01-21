@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPresenterImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
@@ -76,10 +77,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         });
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new UserManagementPlaceManagementController(
-                this, getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
-                getHomePlacesNavigator().getPasswordResetNavigation(),
-                getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
+        this.userManagementWizardController = new UserManagementPlaceManagementController(this,
+                new UserManagementPresenterImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
+                        getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator()
+                                .getUserProfileNavigation()), userManagementDisplay, getEventBus());
         this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
             @Override
             public void onSignInSuccessful(SignInSuccessfulEvent event) {

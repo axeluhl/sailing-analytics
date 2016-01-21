@@ -6,7 +6,6 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
@@ -25,14 +24,14 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
-    private final PlaceNavigation<ConfirmationPlace> confirmationPlaceNav;
+    private final Callback callback;
     private EventBus eventBus;
 
     public CreateAccountActivity(CreateAccountPlace place, UserManagementClientFactory clientFactory,
-            PlaceNavigation<ConfirmationPlace> confirmationPlaceNav, PlaceController placeController) {
+            CreateAccountView.Presenter.Callback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
-        this.confirmationPlaceNav = confirmationPlaceNav;
         this.placeController = placeController;
+        this.callback = callback;
     }
 
     @Override
@@ -50,10 +49,8 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             view.setErrorMessage(errorMessage);
             return;
         }
-        final String url = Window.Location.createUrlBuilder().setHash(confirmationPlaceNav.getTargetUrl())
-                .buildString();
-
-        clientFactory.getUserManagement().createSimpleUser(username, email, password, url,
+        
+        clientFactory.getUserManagement().createSimpleUser(username, email, password, callback.getCreateConfirmationUrl(),
                 new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(final UserDTO result) {

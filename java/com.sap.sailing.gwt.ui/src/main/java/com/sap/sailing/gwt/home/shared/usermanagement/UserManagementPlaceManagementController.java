@@ -7,31 +7,32 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivity;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
-import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryView;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 
 public class UserManagementPlaceManagementController extends WrappedPlaceManagementController {
-
+    
+    public interface Presenter extends CreateAccountView.Presenter.Callback,
+            PasswordRecoveryView.Presenter.Callback, LoggedInUserInfoView.Presenter.Callback {
+    }
+    
     public UserManagementPlaceManagementController(UserManagementClientFactory clientFactory,
-            PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
-            PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
-            PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
-            UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration(clientFactory, createConfirmationNavigation, passwordResetPlaceNav, userProfileNavigation, userManagementView));
+            Presenter presenter, UserManagementView userManagementView, EventBus globalEventBus) {
+        super(new Configuration(clientFactory, presenter, userManagementView));
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -42,21 +43,14 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
     
     private static class Configuration implements PlaceManagementConfiguration {
         private final UserManagementClientFactory clientFactory;
-        private final PlaceNavigation<ConfirmationPlace> createConfirmationNavigation;
-        private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
+        private final Presenter presenter;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
-        private final PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav;
 
-        public Configuration(UserManagementClientFactory clientFactory,
-                PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
-                PlaceNavigation<PasswordResetPlace> passwordResetPlaceNav,
-                PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
+        public Configuration(UserManagementClientFactory clientFactory, Presenter presenter,
                 UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
-            this.createConfirmationNavigation = createConfirmationNavigation;
-            this.passwordResetPlaceNav = passwordResetPlaceNav;
-            this.userProfileNavigation = userProfileNavigation;
+            this.presenter = presenter;
             this.userManagementView = userManagementView;
         }
         
@@ -84,13 +78,13 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
                 return new SignInActivity((SignInPlace) placeToUse, clientFactory, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
                 return new CreateAccountActivity((CreateAccountPlace) placeToUse, clientFactory,
-                        createConfirmationNavigation, placeController);
+                        presenter, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity((PasswordRecoveryPlace) placeToUse, clientFactory,
-                        passwordResetPlaceNav, placeController);
+                        presenter, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, clientFactory,
-                        userProfileNavigation, placeController);
+                        presenter, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
                 return new ConfirmationActivity((ConfirmationPlace) placeToUse, clientFactory);
             }
