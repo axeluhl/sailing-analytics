@@ -3,7 +3,7 @@
 <module>
 	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
 
-	<inherits name="com.sap.sailing.gwt.dispatch.Dispatch" />
+	<inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
 	
 	<!-- Other module inherits -->
 	

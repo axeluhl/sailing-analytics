@@ -3,15 +3,15 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceCompetitionFormatDataCalculator;
 import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.dispatch.client.ListResult;
+import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 public class GetCompetitionFormatRacesAction implements
         SailingAction<ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>>>, IsClientCacheable {

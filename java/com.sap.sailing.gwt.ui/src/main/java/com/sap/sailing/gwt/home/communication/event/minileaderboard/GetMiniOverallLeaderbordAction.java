@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.communication.event.minileaderboard;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
+import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
 
 public class GetMiniOverallLeaderbordAction implements SailingAction<ResultWithTTL<GetMiniLeaderboardDTO>>, IsClientCacheable {
     private UUID seriesId;

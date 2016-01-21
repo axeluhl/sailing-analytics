@@ -3,7 +3,7 @@ package com.sap.sailing.dashboards.gwt.shared.dto;
 import java.util.List;
 
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.Result;
 
 /**
  * @author Alexander Ries (D062114)

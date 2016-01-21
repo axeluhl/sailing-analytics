@@ -13,16 +13,16 @@ import com.sap.sailing.dashboards.gwt.shared.MovingAveragesCache;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.impl.DashboardDispatchContextImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.gwt.dispatch.client.Action;
-import com.sap.sailing.gwt.dispatch.client.Result;
-import com.sap.sailing.gwt.dispatch.client.ResultWrapper;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
-import com.sap.sailing.gwt.dispatch.client.exceptions.ServerDispatchException;
-import com.sap.sailing.gwt.dispatch.client.rpcimpl.DispatchRPC;
-import com.sap.sailing.gwt.dispatch.client.rpcimpl.RequestWrapper;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.gwt.dispatch.client.Action;
+import com.sap.sse.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.ResultWrapper;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
+import com.sap.sse.gwt.dispatch.client.rpcimpl.DispatchRPC;
+import com.sap.sse.gwt.dispatch.client.rpcimpl.RequestWrapper;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DashboardDispatchRPCServletImpl extends ProxiedRemoteServiceServlet implements DispatchRPC<DashboardDispatchContext> {

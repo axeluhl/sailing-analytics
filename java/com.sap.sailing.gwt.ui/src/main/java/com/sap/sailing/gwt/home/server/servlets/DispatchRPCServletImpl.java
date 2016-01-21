@@ -7,19 +7,19 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.gwt.dispatch.client.Action;
-import com.sap.sailing.gwt.dispatch.client.Result;
-import com.sap.sailing.gwt.dispatch.client.ResultWrapper;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
-import com.sap.sailing.gwt.dispatch.client.exceptions.ServerDispatchException;
-import com.sap.sailing.gwt.dispatch.client.rpcimpl.DispatchRPC;
-import com.sap.sailing.gwt.dispatch.client.rpcimpl.RequestWrapper;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.SailingDispatchContextImpl;
 import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.gwt.dispatch.client.Action;
+import com.sap.sse.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.ResultWrapper;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
+import com.sap.sse.gwt.dispatch.client.rpcimpl.DispatchRPC;
+import com.sap.sse.gwt.dispatch.client.rpcimpl.RequestWrapper;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DispatchRPCServletImpl extends ProxiedRemoteServiceServlet implements DispatchRPC<SailingDispatchContext> {

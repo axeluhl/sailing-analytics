@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.HashSet;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.dispatch.client.DTO;
 
 public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadataDTO> {
     public enum RaceViewState {

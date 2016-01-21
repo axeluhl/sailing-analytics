@@ -7,11 +7,11 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {

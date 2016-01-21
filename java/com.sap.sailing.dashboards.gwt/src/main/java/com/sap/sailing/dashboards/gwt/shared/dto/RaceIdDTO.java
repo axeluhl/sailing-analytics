@@ -1,7 +1,7 @@
 package com.sap.sailing.dashboards.gwt.shared.dto;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.Result;
 
 /**
  * @author Alexander Ries (D062114)

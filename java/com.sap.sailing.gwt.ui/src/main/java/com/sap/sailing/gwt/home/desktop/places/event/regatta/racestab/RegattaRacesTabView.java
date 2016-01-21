@@ -17,8 +17,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.dispatch.client.DTO;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
 import com.sap.sailing.gwt.home.communication.event.GetFinishedRacesAction;
@@ -55,6 +53,8 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
 
 /**
  * Created by pgtaboada on 25.11.14.
