@@ -6,20 +6,23 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
-public class UserManagementPresenterImpl implements UserManagementPlaceManagementController.Presenter {
+public class UserManagementCallbackImpl implements UserManagementPlaceManagementController.Callback {
 
     private final String createConfirmationUrl;
     private final String passwordResetUrl;
     private final PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation;
+    private final Runnable signInSuccessfulNavigation;
 
-    public UserManagementPresenterImpl(PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
+    public UserManagementCallbackImpl(PlaceNavigation<ConfirmationPlace> createConfirmationNavigation,
             PlaceNavigation<PasswordResetPlace> passwordResetPlaceNavigation,
-            PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation) {
+            PlaceNavigation<? extends AbstractUserProfilePlace> userProfileNavigation,
+            Runnable signInSuccessfulNavigation) {
+        this.signInSuccessfulNavigation = signInSuccessfulNavigation;
         this.createConfirmationUrl = createUrl(createConfirmationNavigation);
         this.passwordResetUrl = createUrl(passwordResetPlaceNavigation);
         this.userProfileNavigation = userProfileNavigation;
     }
-    
+
     private String createUrl(PlaceNavigation<?> placeNavigation) {
         return Window.Location.createUrlBuilder().setHash(placeNavigation.getTargetUrl()).buildString();
     }
@@ -37,6 +40,11 @@ public class UserManagementPresenterImpl implements UserManagementPlaceManagemen
     @Override
     public void handleUserProfileNavigation() {
         userProfileNavigation.goToPlace();
+    }
+    
+    @Override
+    public void handleSignInSuccess() {
+        signInSuccessfulNavigation.run();
     }
 
 }

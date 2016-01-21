@@ -7,8 +7,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPresenterImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMobile;
 
@@ -24,17 +23,18 @@ public class AuthenticationActivity extends AbstractActivity {
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(userManagementView);
         WrappedPlaceManagementController userManagementController = new UserManagementPlaceManagementController(
-                clientFactory, new UserManagementPresenterImpl(clientFactory.getNavigator()
+                clientFactory, new UserManagementCallbackImpl(clientFactory.getNavigator()
                         .getMailVerifiedConfirmationNavigation(), clientFactory.getNavigator()
-                        .getPasswordResetNavigation(), clientFactory.getNavigator().getUserProfileNavigation()), 
-                        userManagementView, eventBus);
-        userManagementController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
-            @Override
-            public void onSignInSuccessful(SignInSuccessfulEvent event) {
-                History.back();
-            }
-        });
+                        .getPasswordResetNavigation(), clientFactory.getNavigator().getUserProfileNavigation(),
+                        new SignInSuccessfulNavigationMobile()), userManagementView, eventBus);
         userManagementController.start();
+    }
+    
+    private class SignInSuccessfulNavigationMobile implements Runnable {
+        @Override
+        public void run() {
+            History.back();
+        }
     }
     
 }

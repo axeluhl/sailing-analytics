@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.shared.UserManagementException;
@@ -24,19 +25,17 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
-    private final Callback callback;
-    private EventBus eventBus;
+    private final UserManagementPlaceManagementController.Callback callback;
 
     public CreateAccountActivity(CreateAccountPlace place, UserManagementClientFactory clientFactory,
-            CreateAccountView.Presenter.Callback callback, PlaceController placeController) {
+            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
-        this.placeController = placeController;
         this.callback = callback;
+        this.placeController = placeController;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        this.eventBus = eventBus;
         view.setPresenter(this);
         panel.setWidget(view);
     }
@@ -58,7 +57,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
                     @Override
                     public void onSuccess(Void noResult) {
                         clientFactory.getUserManagement().login(result.getName(), password, 
-                                new AsyncLoginCallback(clientFactory, view, eventBus, false));
+                                new AsyncLoginCallback(clientFactory, view, callback, false));
                         placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
                     }
                     

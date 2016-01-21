@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.activity.shared.Activity;
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -26,13 +24,15 @@ import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 
 public class UserManagementPlaceManagementController extends WrappedPlaceManagementController {
     
-    public interface Presenter extends CreateAccountView.Presenter.Callback,
+    public interface Callback extends CreateAccountView.Presenter.Callback,
             PasswordRecoveryView.Presenter.Callback, LoggedInUserInfoView.Presenter.Callback {
+        
+        void handleSignInSuccess();
     }
     
     public UserManagementPlaceManagementController(UserManagementClientFactory clientFactory,
-            Presenter presenter, UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration(clientFactory, presenter, userManagementView));
+            Callback callback, UserManagementView userManagementView, EventBus globalEventBus) {
+        super(new Configuration(clientFactory, callback, userManagementView));
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -43,14 +43,14 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
     
     private static class Configuration implements PlaceManagementConfiguration {
         private final UserManagementClientFactory clientFactory;
-        private final Presenter presenter;
+        private final Callback callback;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
 
-        public Configuration(UserManagementClientFactory clientFactory, Presenter presenter,
+        public Configuration(UserManagementClientFactory clientFactory, Callback callback,
                 UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
-            this.presenter = presenter;
+            this.callback = callback;
             this.userManagementView = userManagementView;
         }
         
@@ -75,16 +75,16 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
             this.updateViewHeading(placeToUse);
             
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity((SignInPlace) placeToUse, clientFactory, placeController);
+                return new SignInActivity((SignInPlace) placeToUse, clientFactory, callback, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
                 return new CreateAccountActivity((CreateAccountPlace) placeToUse, clientFactory,
-                        presenter, placeController);
+                        callback, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity((PasswordRecoveryPlace) placeToUse, clientFactory,
-                        presenter, placeController);
+                        callback, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, clientFactory,
-                        presenter, placeController);
+                        callback, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
                 return new ConfirmationActivity((ConfirmationPlace) placeToUse, clientFactory);
             }
@@ -107,26 +107,5 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         }
 
     }
-    
-    public static class SignInSuccessfulEvent extends GwtEvent<SignInSuccessfulEvent.Handler> {
-        
-        public static final Type<SignInSuccessfulEvent.Handler> TYPE = new Type<>();
-        
-        public interface Handler extends EventHandler {
-            public void onSignInSuccessful(SignInSuccessfulEvent event);
-        }
-
-        @Override
-        public Type<Handler> getAssociatedType() {
-            return TYPE;
-        }
-
-        @Override
-        protected void dispatch(Handler handler) {
-            handler.onSignInSuccessful(this);
-        }
-
-    }
-    
 
 }

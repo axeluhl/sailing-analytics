@@ -6,6 +6,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
@@ -16,17 +17,17 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final SignInView view = new SignInViewImpl();
-    private EventBus eventBus;
+    private final UserManagementPlaceManagementController.Callback callback;
     
     public SignInActivity(SignInPlace place, UserManagementClientFactory clientFactory,
-            PlaceController placeController) {
+            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.callback = callback;
     }
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        this.eventBus = eventBus;
         view.setPresenter(this);
         panel.setWidget(view);
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
@@ -42,7 +43,7 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     @Override
     public void login(String loginName, String password) {
         clientFactory.getUserManagement().login(loginName, password,
-                new AsyncLoginCallback(clientFactory, view, eventBus, true));
+                new AsyncLoginCallback(clientFactory, view, callback, true));
     }
 
     @Override

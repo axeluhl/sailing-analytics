@@ -31,8 +31,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPresenterImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
@@ -77,16 +76,16 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         });
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new UserManagementPlaceManagementController(this,
-                new UserManagementPresenterImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
-                        getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator()
-                                .getUserProfileNavigation()), userManagementDisplay, getEventBus());
-        this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
+        final Runnable signInSuccesfullNavigation = new Runnable() {
             @Override
-            public void onSignInSuccessful(SignInSuccessfulEvent event) {
+            public void run() {
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
             }
-        });
+        };
+        this.userManagementWizardController = new UserManagementPlaceManagementController(this,
+                new UserManagementCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
+                        getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
+                        getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
         getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
             @Override
             public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
