@@ -4,5 +4,5 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 
 public interface ConfirmationClientFactory extends ErrorAndBusyClientFactory {
     
-    ConfirmationView createAccountConfirmationView(String message);
+    ConfirmationView createAccountConfirmationView();
 }

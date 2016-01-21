@@ -171,8 +171,8 @@ public class MobileApplicationClientFactory extends
     }
     
     @Override
-    public ConfirmationView createAccountConfirmationView(String message) {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
+    public ConfirmationView createAccountConfirmationView() {
+        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override

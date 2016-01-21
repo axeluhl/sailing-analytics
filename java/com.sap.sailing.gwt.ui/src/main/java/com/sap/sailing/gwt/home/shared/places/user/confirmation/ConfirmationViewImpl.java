@@ -19,9 +19,13 @@ public class ConfirmationViewImpl extends Composite implements ConfirmationView 
     @UiField
     protected Element messageUi;
 
-    public ConfirmationViewImpl(String messageTitle, String message) {
+    public ConfirmationViewImpl(String messageTitle) {
         initWidget(uiBinder.createAndBindUi(this));
         messageTitleUi.setInnerText(messageTitle);
+    }
+    
+    @Override
+    public void setMessage(String message) {
         messageUi.setInnerText(message);
     }
 

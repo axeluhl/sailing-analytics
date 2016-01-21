@@ -4,6 +4,7 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
@@ -29,9 +30,10 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
@@ -82,7 +84,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
             }
         };
-        this.userManagementWizardController = new UserManagementPlaceManagementController(this,
+        this.userManagementWizardController = new UserManagementPlaceManagementController(
+                new AuthenticationClientFactoryImpl(SharedResources.INSTANCE), this,
                 new UserManagementCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
@@ -190,8 +193,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
     
     @Override
-    public ConfirmationView createAccountConfirmationView(String message) {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
+    public ConfirmationView createAccountConfirmationView() {
+        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override

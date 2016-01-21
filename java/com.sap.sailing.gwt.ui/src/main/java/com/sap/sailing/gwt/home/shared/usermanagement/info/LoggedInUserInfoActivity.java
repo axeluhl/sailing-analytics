@@ -15,10 +15,12 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
+    private final LoggedInUserInfoView view;
     private Callback callback;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoPlace place, UserManagementClientFactory clientFactory,
+    public LoggedInUserInfoActivity(LoggedInUserInfoView view, UserManagementClientFactory clientFactory,
             LoggedInUserInfoView.Presenter.Callback callback, PlaceController placeController) {
+        this.view = view;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.callback = callback;
@@ -26,7 +28,6 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
-        final LoggedInUserInfoView view = new LoggedInUserInfoViewImpl();
         view.setPresenter(this);
         panel.setWidget(view);
         view.setUserInfo(clientFactory.getUserManagementContext());

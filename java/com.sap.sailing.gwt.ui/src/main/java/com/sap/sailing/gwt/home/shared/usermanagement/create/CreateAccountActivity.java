@@ -21,14 +21,15 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
 
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
-    private final CreateAccountView view = new CreateAccountViewImpl();
+    private final CreateAccountView view;
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
     private final UserManagementPlaceManagementController.Callback callback;
 
-    public CreateAccountActivity(CreateAccountPlace place, UserManagementClientFactory clientFactory,
+    public CreateAccountActivity(CreateAccountView view, UserManagementClientFactory clientFactory,
             UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
+        this.view = view;
         this.clientFactory = clientFactory;
         this.callback = callback;
         this.placeController = placeController;

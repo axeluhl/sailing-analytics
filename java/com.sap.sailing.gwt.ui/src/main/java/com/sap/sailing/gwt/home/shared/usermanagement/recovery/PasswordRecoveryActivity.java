@@ -17,11 +17,12 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
 
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
-    private final PasswordRecoveryView view = new PasswordRecoveryViewImpl();
+    private final PasswordRecoveryView view;
     private final Callback callback;
 
-    public PasswordRecoveryActivity(PasswordRecoveryPlace place, UserManagementClientFactory clientFactory,
+    public PasswordRecoveryActivity(PasswordRecoveryView view, UserManagementClientFactory clientFactory,
             PasswordRecoveryView.Presenter.Callback callback, PlaceController placeController) {
+        this.view = view;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.callback = callback;

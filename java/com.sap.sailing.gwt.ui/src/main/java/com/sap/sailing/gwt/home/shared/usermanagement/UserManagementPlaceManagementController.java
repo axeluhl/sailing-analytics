@@ -30,9 +30,10 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         void handleSignInSuccess();
     }
     
-    public UserManagementPlaceManagementController(UserManagementClientFactory clientFactory,
-            Callback callback, UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration(clientFactory, callback, userManagementView));
+    public UserManagementPlaceManagementController(AuthenticationClientFactory authenticationClientFactory,
+            UserManagementClientFactory clientFactory, Callback callback, UserManagementView userManagementView,
+            EventBus globalEventBus) {
+        super(new Configuration(authenticationClientFactory, clientFactory, callback, userManagementView));
         globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -42,13 +43,15 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
     }
     
     private static class Configuration implements PlaceManagementConfiguration {
+        private final AuthenticationClientFactory authenticationClientFactory;
         private final UserManagementClientFactory clientFactory;
         private final Callback callback;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
 
-        public Configuration(UserManagementClientFactory clientFactory, Callback callback,
-                UserManagementView userManagementView) {
+        public Configuration(AuthenticationClientFactory authenticationClientFactory,
+                UserManagementClientFactory clientFactory, Callback callback, UserManagementView userManagementView) {
+            this.authenticationClientFactory = authenticationClientFactory;
             this.clientFactory = clientFactory;
             this.callback = callback;
             this.userManagementView = userManagementView;
@@ -75,18 +78,20 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
             this.updateViewHeading(placeToUse);
             
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity((SignInPlace) placeToUse, clientFactory, callback, placeController);
+                return new SignInActivity(authenticationClientFactory.createSignInView(), clientFactory, callback,
+                        placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity((CreateAccountPlace) placeToUse, clientFactory,
+                return new CreateAccountActivity(authenticationClientFactory.createCreateAccountView(), clientFactory,
                         callback, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity((PasswordRecoveryPlace) placeToUse, clientFactory,
-                        callback, placeController);
+                return new PasswordRecoveryActivity(authenticationClientFactory.createPasswordRecoveryView(),
+                        clientFactory, callback, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity((LoggedInUserInfoPlace) placeToUse, clientFactory,
-                        callback, placeController);
+                return new LoggedInUserInfoActivity(authenticationClientFactory.createLoggedInUserInfoView(),
+                        clientFactory, callback, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
-                return new ConfirmationActivity((ConfirmationPlace) placeToUse, clientFactory);
+                return new ConfirmationActivity((ConfirmationPlace) placeToUse,
+                        authenticationClientFactory.createConfirmationView(), clientFactory);
             }
             
             return getActivity(new SignInPlace());
