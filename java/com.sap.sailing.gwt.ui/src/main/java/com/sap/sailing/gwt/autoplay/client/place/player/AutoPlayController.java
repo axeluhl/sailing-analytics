@@ -45,6 +45,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
@@ -187,14 +188,16 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
             SAPHeader sapHeader = new SAPHeader(headerTitle, withFullscreenButton);
             playerView.getDockPanel().addNorth(sapHeader, SAP_HEADER_HEIGHT);
             
-            LeaderboardSettings leaderboardSettings = null; 
+            LeaderboardWithHeaderPerspectiveLifecycle perspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
+            CompositeLifecycleSettings componentSettings = leaderboardPerspectiveComponentLifecyclesAndSettings.getComponentSettings();
+            LeaderboardSettings leaderboardSettings = componentSettings.getSettingsOfComponentLifecycle(perspectiveLifeycle.getLeaderboardPanelLifecycle());
         
             SAPHeaderLifecycle.SAPHeaderConstructionParameters sapHeaderConstParams = createSAPHeaderConstructionParameters(headerTitle, withFullscreenButton);
             LeaderboardPanelLifecycle.LeaderboardPanelConstructionParameters leaderboardConstParams = createLeaderboardPanelConstructionParameters(leaderboardSettings, autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
 
             LeaderboardWithHeaderPerspectiveLifecycle.LeaderboardWithHeaderPerspectiveConstructorArgs perspectiveArgs = new LeaderboardWithHeaderPerspectiveLifecycle.LeaderboardWithHeaderPerspectiveConstructorArgs(sapHeaderConstParams, leaderboardConstParams);
             LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-            leaderboardPerspectiveLifeycle.createComponent(perspectiveArgs, leaderboardPerspectiveLifecycleAndSettings.getSettings());
+            LeaderboardWithHeaderPerspective createComponent = leaderboardPerspectiveLifeycle.createComponent(perspectiveArgs, leaderboardPerspectiveLifecycleAndSettings.getSettings());
 
             LeaderboardPanel leaderboardPanel = createLeaderboardPanel(autoPlayerConfiguration.getLeaderboardName(), leaderboardSettings, showRaceDetails);
             OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
@@ -237,9 +240,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
                 leaderboardName, errorReporter, StringMessages.INSTANCE, userAgent, showRaceDetails);
                 
         return new LeaderboardPanelLifecycle.LeaderboardPanelConstructionParameters(perspectiveLifeycle.getLeaderboardPanelLifecycle(), 
-                v1, null);
+                v1, leaderboardSettings);
     }
-    
     
     private void zoomContentWidget(final int headerHeight, final Widget contentWidget, final double scaleFactor) {
         if(contentWidget != null) {

@@ -4,23 +4,23 @@ import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 
 public class PerspectiveLifecycleAndComponentSettings {
     private final PerspectiveLifecycle<?, ?, ?,?> perspectiveLifecycle;
-    private CompositeLifecycleSettings settings;
+    private CompositeLifecycleSettings componentSettings;
 
     public PerspectiveLifecycleAndComponentSettings(PerspectiveLifecycle<?, ?, ?,?> perspectiveLifecycle, 
             CompositeLifecycleSettings settings) {
         this.perspectiveLifecycle = perspectiveLifecycle;
-        this.settings = settings;
+        this.componentSettings = settings;
     }
 
     public PerspectiveLifecycle<?, ?, ?,?> getPerspectiveLifecycle() {
         return perspectiveLifecycle;
     }
     
-    public CompositeLifecycleSettings getSettings() {
-        return settings;
+    public CompositeLifecycleSettings getComponentSettings() {
+        return componentSettings;
     }
     
-    public void setSettings(CompositeLifecycleSettings settings) {
-        this.settings = settings;
+    public void setComponentSettings(CompositeLifecycleSettings componentSettings) {
+        this.componentSettings = componentSettings;
     }
 }
