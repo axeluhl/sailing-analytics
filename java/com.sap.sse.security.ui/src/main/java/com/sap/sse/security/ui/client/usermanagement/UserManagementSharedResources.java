@@ -12,6 +12,10 @@ public interface UserManagementSharedResources {
         String buttonprimary();
         String buttonprimaryoutlined();
         String buttonarrowrightwhite();
+        
+        String mainsection();
+        String mainsection_header();
+        String mainsection_header_title();
     }
 
     public interface UserManagementMediaCss {
