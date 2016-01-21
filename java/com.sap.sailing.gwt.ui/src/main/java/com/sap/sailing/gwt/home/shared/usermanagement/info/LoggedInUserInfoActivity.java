@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
@@ -31,9 +31,9 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         view.setPresenter(this);
         panel.setWidget(view);
         view.setUserInfo(clientFactory.getAuthenticationManager().getAuthenticationContext());
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
                 if (event.getCtx().isLoggedIn()) {
                     view.setUserInfo(event.getCtx());
                 } else {

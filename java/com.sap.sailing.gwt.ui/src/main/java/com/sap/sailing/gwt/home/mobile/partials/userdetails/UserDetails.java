@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -47,7 +47,7 @@ public class UserDetails extends Composite {
         setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
     }
 
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         UserDTO currentUser = userManagementContext.getCurrentUser();
         usernameUi.setValue(currentUser.getName());
         nameUi.setValue(currentUser.getFullName());

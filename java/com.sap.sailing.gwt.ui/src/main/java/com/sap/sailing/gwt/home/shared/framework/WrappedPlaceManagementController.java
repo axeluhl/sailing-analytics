@@ -9,7 +9,7 @@ import com.google.web.bindery.event.shared.Event.Type;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 
 public class WrappedPlaceManagementController {
     
@@ -42,7 +42,7 @@ public class WrappedPlaceManagementController {
         return eventBus.addHandler(type, handler);
     }
 
-    public void fireEvent(UserManagementContextEvent event) {
+    public void fireEvent(AuthenticationContextEvent event) {
         eventBus.fireEvent(event);
     }
     

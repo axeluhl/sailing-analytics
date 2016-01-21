@@ -33,11 +33,11 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactor
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContextImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -53,7 +53,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WithSecurity securityProvider;
     private final WrappedPlaceManagementController userManagementWizardController;
-    private UserManagementContext uCtx = new UserManagementContextImpl();
+    private AuthenticationContext uCtx = new AuthenticationContextImpl();
     private final AuthenticationManager authenticationManager;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
@@ -74,8 +74,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                uCtx = new UserManagementContextImpl(user);
-                getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+                uCtx = new AuthenticationContextImpl(user);
+                getEventBus().fireEvent(new AuthenticationContextEvent(uCtx));
             }
         });
         

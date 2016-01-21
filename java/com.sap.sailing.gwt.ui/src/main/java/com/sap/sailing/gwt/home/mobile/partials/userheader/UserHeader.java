@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserHeader extends Composite {
@@ -29,7 +29,7 @@ public class UserHeader extends Composite {
         subtitleUi.setInnerText("jennifer@auchnichtwennduderletztemenschauferdenwaerts.looser");
     }
 
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         UserDTO currentUser = userManagementContext.getCurrentUser();
         // TODO correct message
         imageUi.setTitle("TODO picture of: " + currentUser.getName());

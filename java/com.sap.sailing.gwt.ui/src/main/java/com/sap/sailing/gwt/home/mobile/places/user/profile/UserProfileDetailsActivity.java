@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -29,9 +29,9 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         panel.setWidget(currentView);
         currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
                 currentView.setUserManagementContext(event.getCtx());
             }
         });

@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountD
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 
 /**
@@ -54,7 +54,7 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     }
 
     @Override
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         decoratorUi.setUserManagementContext(userManagementContext);
         accountDetailsUi.setUserManagementContext(userManagementContext);
     }

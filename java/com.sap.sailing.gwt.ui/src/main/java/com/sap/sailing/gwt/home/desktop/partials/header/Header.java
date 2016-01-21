@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
@@ -98,9 +98,9 @@ public class Header extends Composite {
         });
         
         if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
-            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
                 @Override
-                public void onUserChangeEvent(UserManagementContextEvent event) {
+                public void onUserChangeEvent(AuthenticationContextEvent event) {
                     usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
                 }
             });

@@ -34,9 +34,9 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
             UserManagementClientFactory clientFactory, Callback callback, UserManagementView userManagementView,
             EventBus globalEventBus) {
         super(new Configuration(authenticationClientFactory, clientFactory, callback, userManagementView));
-        globalEventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+        globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
                 UserManagementPlaceManagementController.this.fireEvent(event);
             }
         });

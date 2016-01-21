@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.NotLoggedInPresenter;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
@@ -40,6 +40,6 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
     
     void showErrorInCurrentTab(IsWidget errorView);
 
-    void setUserManagementContext(UserManagementContext userManagementContext);
+    void setUserManagementContext(AuthenticationContext userManagementContext);
     
 }

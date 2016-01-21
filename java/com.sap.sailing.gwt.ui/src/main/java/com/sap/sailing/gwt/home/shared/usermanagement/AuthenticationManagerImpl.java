@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
+import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -11,7 +11,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class AuthenticationManagerImpl implements AuthenticationManager {
     private final WithSecurity clientFactory;
-    private UserManagementContext uCtx = new UserManagementContextImpl();
+    private AuthenticationContext uCtx = new AuthenticationContextImpl();
     private final EventBus eventBus;
 
     public AuthenticationManagerImpl(final WithSecurity clientFactory, final EventBus eventBus) {
@@ -20,8 +20,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         clientFactory.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
-                uCtx = new UserManagementContextImpl(user);
-                eventBus.fireEvent(new UserManagementContextEvent(uCtx));
+                uCtx = new AuthenticationContextImpl(user);
+                eventBus.fireEvent(new AuthenticationContextEvent(uCtx));
             }
         });
         eventBus.addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
@@ -45,22 +45,22 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
 
     @Override
-    public UserManagementContext getAuthenticationContext() {
+    public AuthenticationContext getAuthenticationContext() {
         return uCtx;
     }
     
     @Override
     public void didLogout() {
-        uCtx = new UserManagementContextImpl();
+        uCtx = new AuthenticationContextImpl();
         clientFactory.getUserService().updateUser(true);
         eventBus.fireEvent(new UserManagementRequestEvent());
     }
 
     @Override
     public void didLogin(UserDTO user) {
-        uCtx = new UserManagementContextImpl(user);
+        uCtx = new AuthenticationContextImpl(user);
         clientFactory.getUserService().updateUser(true);
-        eventBus.fireEvent(new UserManagementContextEvent(uCtx));
+        eventBus.fireEvent(new AuthenticationContextEvent(uCtx));
     }
     
     @Override
