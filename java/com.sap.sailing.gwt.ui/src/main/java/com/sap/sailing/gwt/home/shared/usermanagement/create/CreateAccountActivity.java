@@ -50,23 +50,13 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             return;
         }
         
-        clientFactory.getUserManagement().createSimpleUser(username, email, password, callback.getCreateConfirmationUrl(),
-                new AsyncCallback<UserDTO>() {
+        clientFactory.getUserManagement().createSimpleUser(username, email, password, fullName, company,
+                callback.getCreateConfirmationUrl(), new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(final UserDTO result) {
-                clientFactory.getUserManagement().updateUserProperties(username, fullName, company, new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void noResult) {
-                        clientFactory.getUserManagement().login(result.getName(), password, 
-                                new AsyncLoginCallback(clientFactory, view, callback, false));
-                        placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
-                    }
-                });
+                clientFactory.getUserManagement().login(result.getName(), password, 
+                        new AsyncLoginCallback(clientFactory, view, callback, false));
+                placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
             }
             
             @Override
