@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.app;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
@@ -53,6 +54,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     private final WithSecurity securityProvider;
     private final WrappedPlaceManagementController userManagementWizardController;
     private UserManagementContext uCtx = new UserManagementContextImpl();
+    private final AuthenticationManager authenticationManager;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -76,6 +78,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
             }
         });
+        
+        authenticationManager = new AuthenticationManagerImpl(this, eventBus);
         
         final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
         final Runnable signInSuccesfullNavigation = new Runnable() {
@@ -157,39 +161,10 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     public UserManagementServiceAsync getUserManagement() {
         return securityProvider.getUserManagementService();
     }
-
-    @Override
-    public UserManagementContext getUserManagementContext() {
-        return uCtx;
-    }
     
     @Override
-    public void didLogout() {
-        uCtx = new UserManagementContextImpl();
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementRequestEvent());
-    }
-
-    @Override
-    public void didLogin(UserDTO user) {
-        uCtx = new UserManagementContextImpl(user);
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-    }
-    
-    @Override
-    public void refreshUser() {
-        getUserManagementService().getCurrentUser(new AsyncCallback<UserDTO>() {
-            @Override
-            public void onSuccess(UserDTO result) {
-                didLogin(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-            }
-        });
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
     }
     
     @Override

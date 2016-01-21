@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.mobile.app;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -23,22 +22,17 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContextImpl;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * 
@@ -51,7 +45,7 @@ public class MobileApplicationClientFactory extends
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private WithSecurity securityProvider;
-    private UserManagementContext uCtx = new UserManagementContextImpl();
+    private final AuthenticationManager authenticationManager;
 
     public MobileApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -74,31 +68,7 @@ public class MobileApplicationClientFactory extends
         super(root, eventBus, placeController);
         this.navigator = navigator;
         securityProvider = new DefaultWithSecurityImpl();
-        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                uCtx = new UserManagementContextImpl(user);
-                getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-            }
-        });
-        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
-            @Override
-            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
-                if (!event.isLogin()) {
-                    getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            didLogout();
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            didLogout();
-                        }
-                    });
-                }
-            }
-        });
+        authenticationManager = new AuthenticationManagerImpl(this, eventBus);
     }
 
     public MobilePlacesNavigator getNavigator() {
@@ -132,38 +102,10 @@ public class MobileApplicationClientFactory extends
     public ResettableNavigationPathDisplay getNavigationPathDisplay() {
         return getTopLevelView().getNavigationPathDisplay();
     }
-
-    @Override
-    public UserManagementContext getUserManagementContext() {
-        return uCtx;
-    }
     
     @Override
-    public void didLogout() {
-        uCtx = new UserManagementContextImpl();
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementRequestEvent());
-    }
-
-    @Override
-    public void didLogin(UserDTO user) {
-        uCtx = new UserManagementContextImpl(user);
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-    }
-    
-    public void refreshUser() {
-        getUserManagementService().getCurrentUser(new AsyncCallback<UserDTO>() {
-            @Override
-            public void onSuccess(UserDTO result) {
-                didLogin(result);
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-            }
-        });
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
     }
 
     @Override

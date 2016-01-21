@@ -30,7 +30,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         view.setPresenter(this);
         panel.setWidget(view);
-        view.setUserInfo(clientFactory.getUserManagementContext());
+        view.setUserInfo(clientFactory.getAuthenticationManager().getAuthenticationContext());
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -54,12 +54,12 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                clientFactory.didLogout();
+                clientFactory.getAuthenticationManager().didLogout();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                clientFactory.didLogout();
+                clientFactory.getAuthenticationManager().didLogout();
             }
         });
     }

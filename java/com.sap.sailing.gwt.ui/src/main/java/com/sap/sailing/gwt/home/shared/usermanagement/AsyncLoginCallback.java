@@ -24,7 +24,7 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     @Override
     public void onSuccess(SuccessInfo result) {
         if (result.isSuccessful()) {
-            clientFactory.didLogin(result.getUserDTO());
+            clientFactory.getAuthenticationManager().didLogin(result.getUserDTO());
             if (fireSignInSuccessfulEvent) {
                 callback.handleSignInSuccess();
             }

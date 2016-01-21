@@ -98,7 +98,7 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         }
         
         private boolean isLoggedIn() {
-            return clientFactory.getUserManagementContext().isLoggedIn();
+            return clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
         }
         
         private Place getPlaceToUse(Place requestedPlace) {

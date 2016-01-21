@@ -28,7 +28,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         panel.setWidget(currentView);
-        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
+        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
         eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(UserManagementContextEvent event) {
@@ -44,12 +44,12 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     
     @Override
     public void handleSaveChangesRequest(String fullName, String company) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         clientFactory.getUserManagementService().updateUserProperties(username, fullName, company,
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                clientFactory.refreshUser();
+                clientFactory.getAuthenticationManager().refreshUser();
                 Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
             }
             
@@ -62,7 +62,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     
     @Override
     public void handleEmailChangeRequest(final String email) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
                 .setHash(clientFactory.getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl())
                 .buildString();
@@ -82,7 +82,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Window.alert(errorMessage);
@@ -109,7 +109,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
                     @Override
                     public void onSuccess(Void result) {
                         Window.alert(i18n_sec.passwordSuccessfullyChanged());
-                        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
+                        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
                     }
                 });
     }
