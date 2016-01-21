@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementContext;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
@@ -29,11 +28,12 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     @UiField Anchor signOutUi;
     
     @UiField(provided = true)
-    UserManagementSharedResources res = SharedResources.INSTANCE;
+    final UserManagementSharedResources res;
     
     private Presenter presenter;
     
-    public LoggedInUserInfoViewImpl() {
+    public LoggedInUserInfoViewImpl(UserManagementSharedResources resources) {
+        this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }

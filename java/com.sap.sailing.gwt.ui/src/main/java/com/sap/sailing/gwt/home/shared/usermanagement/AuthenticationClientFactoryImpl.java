@@ -23,27 +23,27 @@ public class AuthenticationClientFactoryImpl implements AuthenticationClientFact
 
     @Override
     public SignInView createSignInView() {
-        return new SignInViewImpl();
+        return new SignInViewImpl(resources);
     }
 
     @Override
     public CreateAccountView createCreateAccountView() {
-        return new CreateAccountViewImpl();
+        return new CreateAccountViewImpl(resources);
     }
 
     @Override
     public PasswordRecoveryView createPasswordRecoveryView() {
-        return new PasswordRecoveryViewImpl();
+        return new PasswordRecoveryViewImpl(resources);
     }
 
     @Override
     public LoggedInUserInfoView createLoggedInUserInfoView() {
-        return new LoggedInUserInfoViewImpl();
+        return new LoggedInUserInfoViewImpl(resources);
     }
 
     @Override
     public ConfirmationView createConfirmationView() {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation());
+        return new ConfirmationViewImpl(resources, StringMessages.INSTANCE.accountConfirmation());
     }
 
 }
