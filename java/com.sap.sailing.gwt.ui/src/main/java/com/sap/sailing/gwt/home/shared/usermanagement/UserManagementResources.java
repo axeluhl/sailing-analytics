@@ -13,6 +13,7 @@ public interface UserManagementResources extends ClientBundle {
 
     public interface LocalCss extends CssResource {
         String flyover();
+        String flyover_content_wrapper();
         String flyover_content();
         String form_title();
         String form_subtitle();

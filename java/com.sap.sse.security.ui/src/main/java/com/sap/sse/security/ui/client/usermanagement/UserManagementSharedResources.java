@@ -15,9 +15,6 @@ public interface UserManagementSharedResources {
     }
 
     public interface UserManagementMediaCss {
-        String grid();
-        String column();
-        String small12();
     }
 
 }

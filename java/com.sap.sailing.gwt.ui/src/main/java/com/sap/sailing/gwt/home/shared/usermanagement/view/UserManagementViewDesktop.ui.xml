@@ -4,12 +4,10 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
-        <div class="{res.mediaCss.column} {res.mediaCss.small12}">
-            <div class="{local_res.css.flyover_content}">
-                <div class="{local_res.css.form_title}" ui:field="headingUi"></div>
-                <g:SimplePanel ui:field="contentContainerUi"/>
-            </div>
-        </div>	
+    <g:HTMLPanel addStyleNames="{local_res.css.flyover_content_wrapper}">
+        <div class="{local_res.css.flyover_content}">
+            <div class="{local_res.css.form_title}" ui:field="headingUi"></div>
+            <g:SimplePanel ui:field="contentContainerUi"/>
+        </div>
 	</g:HTMLPanel>
 </ui:UiBinder>
