@@ -7,7 +7,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class ConfirmationViewImpl extends Composite implements ConfirmationView {
@@ -21,9 +20,10 @@ public class ConfirmationViewImpl extends Composite implements ConfirmationView 
     @UiField
     protected Element messageUi;
     @UiField(provided = true)
-    UserManagementSharedResources res = SharedResources.INSTANCE;
+    final UserManagementSharedResources res;
 
-    public ConfirmationViewImpl(String messageTitle) {
+    public ConfirmationViewImpl(UserManagementSharedResources resources, String messageTitle) {
+        this.res = resources;
         initWidget(uiBinder.createAndBindUi(this));
         messageTitleUi.setInnerText(messageTitle);
     }

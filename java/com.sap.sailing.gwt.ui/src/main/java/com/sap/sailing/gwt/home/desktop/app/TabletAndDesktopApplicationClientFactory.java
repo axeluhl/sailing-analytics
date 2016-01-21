@@ -194,7 +194,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     
     @Override
     public ConfirmationView createAccountConfirmationView() {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation());
+        return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override

@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.app.ApplicationTopLevelView;
@@ -172,7 +173,7 @@ public class MobileApplicationClientFactory extends
     
     @Override
     public ConfirmationView createAccountConfirmationView() {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation());
+        return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override
