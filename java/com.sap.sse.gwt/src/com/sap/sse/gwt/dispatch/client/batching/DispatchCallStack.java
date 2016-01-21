@@ -103,12 +103,15 @@ public final class DispatchCallStack<CTX extends DispatchContext> {
 
         @Override
         public void execute() {
-            if (result == null) {
+            if (hasFailed()) {
                 call.getCallback().onFailure(exception);
             } else {
                 call.getCallback().onSuccess(result);
             }
         }
         
+        private boolean hasFailed() {
+            return exception != null;
+        }
     }
 }
