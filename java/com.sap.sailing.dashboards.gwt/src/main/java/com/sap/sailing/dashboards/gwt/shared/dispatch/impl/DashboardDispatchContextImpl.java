@@ -10,9 +10,9 @@ import com.sap.sailing.dashboards.gwt.shared.DashboardLiveRaceProvider;
 import com.sap.sailing.dashboards.gwt.shared.MovingAveragesCache;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 /**
  * @author Alexander Ries (D062114)

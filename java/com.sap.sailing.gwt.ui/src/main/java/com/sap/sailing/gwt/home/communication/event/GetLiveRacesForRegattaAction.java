@@ -4,14 +4,14 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.SortedSetResult;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.LiveRaceCalculator;
 import com.sap.sailing.gwt.home.server.EventActionUtil.CalculationWithEvent;
+import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.SortedSetResult;
+import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
 
 public class GetLiveRacesForRegattaAction implements SailingAction<ResultWithTTL<SortedSetResult<LiveRaceDTO>>>,
         IsClientCacheable {

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.communication.media;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.Result;
 
 public class MediaDTO implements Result {
     
