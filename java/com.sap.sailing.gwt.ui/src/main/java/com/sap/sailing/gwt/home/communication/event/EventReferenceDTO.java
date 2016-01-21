@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.DTO;
 
 public class EventReferenceDTO implements DTO {
     private UUID id;

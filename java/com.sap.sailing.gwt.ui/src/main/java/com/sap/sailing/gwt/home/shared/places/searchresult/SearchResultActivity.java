@@ -4,12 +4,12 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.StringsResult;
 import com.sap.sailing.gwt.home.communication.search.GetSearchResultsAction;
 import com.sap.sailing.gwt.home.communication.search.GetSearchServerNamesAction;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sse.gwt.dispatch.client.ListResult;
+import com.sap.sse.gwt.dispatch.client.StringsResult;
 
 public class SearchResultActivity extends AbstractActivity {
    
