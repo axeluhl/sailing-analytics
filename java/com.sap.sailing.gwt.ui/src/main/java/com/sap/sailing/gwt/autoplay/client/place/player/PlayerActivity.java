@@ -7,7 +7,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -41,7 +40,6 @@ public class PlayerActivity extends AbstractActivity {
 
                 PlayerView view = clientFactory.createPlayerView();
                 panel.setWidget(view.asWidget());
-                RootLayoutPanel.get().add(view.asWidget());
 
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
                         .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
