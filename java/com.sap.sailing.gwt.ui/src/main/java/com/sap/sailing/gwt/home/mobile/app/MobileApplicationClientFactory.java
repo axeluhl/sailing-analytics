@@ -150,6 +150,20 @@ public class MobileApplicationClientFactory extends
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
     }
+    
+    public void refreshUser() {
+        getUserManagementService().getCurrentUser(new AsyncCallback<UserDTO>() {
+            @Override
+            public void onSuccess(UserDTO result) {
+                didLogin(result);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+            }
+        });
+    }
 
     @Override
     public UserManagementServiceAsync getUserManagement() {

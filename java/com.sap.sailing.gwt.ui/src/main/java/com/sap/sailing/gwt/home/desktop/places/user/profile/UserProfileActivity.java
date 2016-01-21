@@ -73,6 +73,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
+                clientFactory.refreshUser();
                 Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
             }
             

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
@@ -171,6 +172,21 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         uCtx = new UserManagementContextImpl(user);
         securityProvider.getUserService().updateUser(true);
         getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
+    }
+    
+    @Override
+    public void refreshUser() {
+        getUserManagementService().getCurrentUser(new AsyncCallback<UserDTO>() {
+            @Override
+            public void onSuccess(UserDTO result) {
+                didLogin(result);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO Auto-generated method stub
+            }
+        });
     }
     
     @Override
