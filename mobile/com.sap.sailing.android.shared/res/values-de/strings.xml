@@ -36,7 +36,6 @@
     <string name="eula_title">Datenschutzbestimmungen</string>
     <string name="eula_message">Mit der Verwendung dieser App stimmen Sie den Datenschutzbestimmungen der SAP SE zu. Die Datenschutzbestimmungen finden Sie hier.</string>
     <string name="confirm">Zustimmen</string>
-    <string name="skip">Überspringen</string>
     <string name="linked_eula_message_part">hier</string>
 
     <!-- About this app -->
