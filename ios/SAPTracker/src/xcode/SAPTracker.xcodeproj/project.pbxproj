@@ -317,6 +317,8 @@
 		7FED45C81A25F5900022505F /* competitor1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C21A25F5900022505F /* competitor1.json */; };
 		7FED45CA1A25F5910022505F /* event1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C41A25F5900022505F /* event1.json */; };
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
+		C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
+		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 /* End PBXBuildFile section */
@@ -328,6 +330,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 7F83F14F19F154F000C53328;
 			remoteInfo = SAPTracker;
+		};
+		C8603D4E1C528832002B2F28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8FC739D532E373E38AFCF317DFA76500;
+			remoteInfo = TSMarkdownParser;
 		};
 		C89A171B1B6A27CF00CE6814 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -354,7 +363,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = A6D0CE1BA9EEBE59D9198973ED1466CE;
+			remoteGlobalIDString = 467DF12115DC5581D85E26096CC7D16D;
 			remoteInfo = Pods;
 		};
 /* End PBXContainerItemProxy section */
@@ -677,6 +686,7 @@
 		7FED45C21A25F5900022505F /* competitor1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = competitor1.json; sourceTree = "<group>"; };
 		7FED45C41A25F5900022505F /* event1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = event1.json; sourceTree = "<group>"; };
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
+		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
@@ -1111,6 +1121,7 @@
 		7F83F15319F154F000C53328 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				C8603D491C528832002B2F28 /* Acknowledgements.markdown */,
 				7F83F15419F154F000C53328 /* Info.plist */,
 				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
@@ -1152,6 +1163,7 @@
 				C89A171C1B6A27CF00CE6814 /* libAFNetworkActivityLogger.a */,
 				C89A171E1B6A27CF00CE6814 /* libAFNetworking.a */,
 				C8B31F7E1B68DAD500C8A809 /* libPods.a */,
+				C8603D4F1C528832002B2F28 /* libTSMarkdownParser.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1241,6 +1253,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		C8603D4F1C528832002B2F28 /* libTSMarkdownParser.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTSMarkdownParser.a;
+			remoteRef = C8603D4E1C528832002B2F28 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		C89A171C1B6A27CF00CE6814 /* libAFNetworkActivityLogger.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1269,6 +1288,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */,
 				7F14A1EC1A13B9A6001C1ECB /* SZ.png in Resources */,
 				7F14A1C91A13B9A6001C1ECB /* PE.png in Resources */,
 				7F14A1881A13B9A6001C1ECB /* IT.png in Resources */,
@@ -1598,6 +1618,7 @@
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
 				7F509AC01A69549D0043EC69 /* AcceptTermsViewController.swift in Sources */,
 				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
+				C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,

@@ -23,10 +23,6 @@ class AboutViewController: UIViewController {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func openLicenses(sender: AnyObject) {
-        
-    }
-    
     @IBAction func openEULA(sender: AnyObject) {
         let url = NSURL(string: "http://www.sap.com")!
         UIApplication.sharedApplication().openURL(url)

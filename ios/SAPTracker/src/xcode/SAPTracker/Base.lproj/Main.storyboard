@@ -1014,7 +1014,7 @@
                                             <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="openLicenses:" destination="WMr-pC-C12" eventType="touchUpInside" id="FXR-m9-IRA"/>
+                                            <segue destination="awJ-L8-hjX" kind="show" id="0cD-Vt-sEk"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -1069,6 +1069,41 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4QC-nX-XeK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1582" y="1320"/>
+        </scene>
+        <!--License View Controller-->
+        <scene sceneID="MBL-hy-9wn">
+            <objects>
+                <viewController id="awJ-L8-hjX" customClass="LicenseViewController" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="fPl-15-sxR"/>
+                        <viewControllerLayoutGuide type="bottom" id="Pqy-JO-DGY"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="2bf-uW-10v">
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="4xj-vs-c49">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Pqy-JO-DGY" firstAttribute="top" secondItem="4xj-vs-c49" secondAttribute="bottom" id="2nr-GJ-3GD"/>
+                            <constraint firstItem="4xj-vs-c49" firstAttribute="leading" secondItem="2bf-uW-10v" secondAttribute="leading" id="Gdw-ER-0IJ"/>
+                            <constraint firstAttribute="trailing" secondItem="4xj-vs-c49" secondAttribute="trailing" id="k9H-pu-VSe"/>
+                            <constraint firstItem="4xj-vs-c49" firstAttribute="top" secondItem="fPl-15-sxR" secondAttribute="bottom" id="sD8-Uf-YVw"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="licenseTextView" destination="4xj-vs-c49" id="a5c-f2-Ipi"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vvK-XG-FQT" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1582" y="2046"/>
         </scene>
         <!--Settings-->
         <scene sceneID="yOw-OU-u8M">
