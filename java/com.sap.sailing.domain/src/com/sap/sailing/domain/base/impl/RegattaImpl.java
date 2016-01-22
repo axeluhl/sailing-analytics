@@ -25,7 +25,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogCompetitorDeregistrator;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorDeregistrator;
 import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -782,7 +782,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
-        RegattaLogCompetitorDeregistrator deregisterer = new RegattaLogCompetitorDeregistrator(regattaLog, competitors, regattaLogEventAuthorForRegatta);
+        CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
         deregisterer.analyze();
     }
 }
