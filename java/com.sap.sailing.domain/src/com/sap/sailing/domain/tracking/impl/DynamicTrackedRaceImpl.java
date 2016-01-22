@@ -80,6 +80,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
     private transient Set<RaceAbortedListener> raceAbortedListeners;
 
+    /**
+     * Caches the result from {@link #getResultsFromRaceLogs}. This cache is updated in
+     * {@link #updateMarkPassingsAfterRaceLogChanges()} which must be called by
+     * {@link DynamicTrackedRaceLogListener} when the race log situation may have changed.
+     */
+    private Map<Competitor, CompetitorResult> competitorResultsFromRaceLog;
+
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -88,6 +95,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+        this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
         if (markPassingCalculator != null) {
             logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
@@ -507,14 +515,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void updateMarkPassings(Competitor competitor, final Iterable<MarkPassing> markPassings) {
-        final CompetitorResult resultFromRaceLog = getResultsFromRaceLog(competitor);
+        final CompetitorResult resultFromRaceLog = competitorResultsFromRaceLog.get(competitor);
         final Iterable<MarkPassing> markPassingsToUse = createOrUpdateFinishMarkPassingIfRequired(competitor, markPassings, resultFromRaceLog);
         updateMarkPassingsNotConsideringFinishingTimesFromRaceLog(competitor, markPassingsToUse);
     }
     
     @Override
     public void updateMarkPassingsAfterRaceLogChanges() {
-        updateFinishingTimesFromRaceLog(getResultsFromRaceLogs());
+        competitorResultsFromRaceLog = getResultsFromRaceLogs();
+        updateFinishingTimesFromRaceLog();
     }
     
     /**
@@ -589,34 +598,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return neededToCreateOrUpdateFinishMarkPassing ? copyOfMarkPassings : markPassings;
     }
 
-    /**
-     * Looks in all {@link #attachedRaceLogs attached race logs} for the last valid
-     * {@link RaceLogFinishPositioningConfirmedEvent} that has a {@link CompetitorResult} for {@code competitor}. The
-     * first one found will be returned; if none is found, <code>null</code> will be returned.
-     */
-    private CompetitorResult getResultsFromRaceLog(Competitor competitor) {
-        CompetitorResult result = null;
-        final CompetitorResults results = getResultsFromRaceLogs();
-        if (results != null) {
-            for (CompetitorResult competitorResult : results) {
-                if (getRace().getCompetitorById(competitorResult.getCompetitorId()) == competitor) {
-                    result = competitorResult;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-    
-    private CompetitorResults getResultsFromRaceLogs() {
+    private Map<Competitor, CompetitorResult> getResultsFromRaceLogs() {
+        final Map<Competitor, CompetitorResult> result = new HashMap<>();
         CompetitorResults results = null; 
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
             results = new ConfirmedFinishPositioningListFinder(raceLog).analyze();
             if (results != null) {
+                for (CompetitorResult cr : results) {
+                    result.put(getRace().getCompetitorById(cr.getCompetitorId()), cr);
+                }
                 break;
             }
         }
-        return results;
+        return result;
     }
 
     /**
@@ -732,25 +726,20 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * The {@link CompetitorResults} from the race log may optionally set a finishing time for competitors. Also,
-     * depending on how the race log has been modified (e.g., a new pass could have been started or a
-     * {@link RaceLogFinishPositioningConfirmedEvent} could have been revoked) it may be possible that a finishing
-     * time previously set from the race log now has to be reset to its original state as coming from the tracking
-     * provider. This can either mean resetting the mark passing to its {@link MarkPassing#getOriginal() original}
-     * version or removing it in case the {@link MarkPassing#getOriginal()} method delivers {@code null}, meaning
-     * that this mark passing was solely based on the race log information which now would have disappeared.
+     * The {@link CompetitorResults} from the race log as cached in {@link #competitorResultsFromRaceLog} may optionally
+     * set a finishing time for competitors. Also, depending on how the race log has been modified (e.g., a new pass
+     * could have been started or a {@link RaceLogFinishPositioningConfirmedEvent} could have been revoked) it may be
+     * possible that a finishing time previously set from the race log now has to be reset to its original state as
+     * coming from the tracking provider. This can either mean resetting the mark passing to its
+     * {@link MarkPassing#getOriginal() original} version or removing it in case the {@link MarkPassing#getOriginal()}
+     * method delivers {@code null}, meaning that this mark passing was solely based on the race log information which
+     * now would have disappeared.
      */
-    private void updateFinishingTimesFromRaceLog(CompetitorResults results) {
+    private void updateFinishingTimesFromRaceLog() {
         final Waypoint finish = getRace().getCourse().getLastWaypoint();
         if (finish != null) { // can't do anything for an empty course
-            final Map<Competitor, CompetitorResult> resultMap = new HashMap<>();
-            if (results != null) {
-                for (final CompetitorResult result : results) {
-                    resultMap.put(getRace().getCompetitorById(result.getCompetitorId()), result);
-                }
-            }
             for (final Competitor competitor : getRace().getCompetitors()) {
-                final CompetitorResult competitorResult = resultMap.get(competitor);
+                final CompetitorResult competitorResult = competitorResultsFromRaceLog.get(competitor);
                 final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
                 final Iterable<MarkPassing> markPassingsToUse;
                 lockForRead(markPassings);
