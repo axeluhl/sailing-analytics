@@ -60,7 +60,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, SelectionAdapter.ItemClick, CourseElementAdapter.ItemClick {
+public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
 
     private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
@@ -69,16 +69,13 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
-    private ArrayList<SelectionItem> mItems;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
     private CourseElementAdapter mHistoryAdapter;
-    private SelectionAdapter mAdapter;
     private RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> mCourseAdapter;
-    private ArrayList<RelativeLayout> mLayouts;
-    private TextView mHeaderCaption;
     private CourseMarksDialogFragment mMarksDialog;
     private int mId;
+    private Button mReset;
 
     public CourseFragmentMarks() {
         super();
@@ -87,7 +84,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         mHistory = new ArrayList<>();
         mElements = new ArrayList<>();
         mMarks = new ArrayList<>();
-        mLayouts = new ArrayList<>();
     }
 
     public static CourseFragmentMarks newInstance(@START_MODE_VALUES int startMode) {
@@ -102,44 +98,42 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
 
-        mHeaderCaption = ViewHelper.get(layout, R.id.header_caption);
-
-        RelativeLayout selection = ViewHelper.get(layout, R.id.selection);
-        if (selection != null) {
-            mLayouts.add(selection);
-            RecyclerView chooser = ViewHelper.get(layout, R.id.chooser);
-            if (chooser != null) {
-                mItems = new ArrayList<>();
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-                layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-                mAdapter = new SelectionAdapter(getActivity(), mItems, this);
-                chooser.setLayoutManager(layoutManager);
-                chooser.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
-                chooser.setAdapter(mAdapter);
-
-                Runnable prevRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showCourseLayout(R.id.course_prev, R.string.prev_course);
+        mReset = (Button) layout.findViewById(R.id.resetCourse);
+        if (mReset != null) {
+            mReset.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(mReset.getText());
+                    if (mReset.getTag() != null) {
+                        builder.setMessage(getString(R.string.reset_message_1));
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mElements.clear();
+                                mCourseAdapter.notifyDataSetChanged();
+                                mReset.setText(R.string.reset_state_2);
+                                mReset.setTag(null);
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.no, null);
+                    } else {
+                        builder.setMessage(getString(R.string.reset_message_2));
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (getRace().getCourseDesign() != null && !getString(R.string.unpublished_course).equals(getRace().getCourseDesign().getName())) {
+                                    fillCourseElement();
+                                } else {
+                                    copyPreviousToNewCourseDesign();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.no, null);
                     }
-                };
-                SelectionItem prevCourse = new SelectionItem(getString(R.string.prev_course), null, null, prevRunnable);
-                mItems.add(prevCourse);
-
-                Runnable newRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        showCourseLayout(R.id.course_layout, R.string.layout_course);
-                    }
-                };
-                SelectionItem newCourse = new SelectionItem(getString(R.string.layout_course), null, null, newRunnable);
-                mItems.add(newCourse);
-            }
-        }
-
-        RelativeLayout coursePrev = ViewHelper.get(layout, R.id.course_prev);
-        if (coursePrev != null) {
-            mLayouts.add(coursePrev);
+                    builder.show();
+                }
+            });
         }
 
         mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
@@ -151,10 +145,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
 
-        RelativeLayout courseLayout = ViewHelper.get(layout, R.id.course_layout);
-        if (courseLayout != null) {
-            mLayouts.add(courseLayout);
-        }
         mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
             mGuardManager = new RecyclerViewTouchActionGuardManager();
@@ -198,11 +188,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         return layout;
     }
 
-    private void showCourseLayout(@IdRes int layout, @StringRes int stringId) {
-        showLayout(layout);
-        setHeaderCaption(stringId);
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -217,63 +202,77 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         fillPreviousCourseElementsWithLastPublishedCourseDesign();
 
         if (getView() != null) {
-            if (mHistory.isEmpty()) {
-                showCourseLayout(R.id.course_layout, R.string.layout_course);
-            } else {
-                showCourseLayout(R.id.selection, 0);
+            if (getView().findViewById(R.id.course_layout) != null) {
+                if (!mHistory.isEmpty() && mElements.isEmpty()) {
+                    copyPreviousToNewCourseDesign();
+                    if (mReset != null) {
+                        mReset.setText(getString(R.string.reset_state_1));
+                        mReset.setTag(mReset);
+                    }
+                }
             }
 
             Button takePrevious = (Button) getView().findViewById(R.id.takeHistoryCourse);
-            takePrevious.setOnClickListener(new View.OnClickListener() {
+            if (takePrevious != null) {
+                takePrevious.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View arg0) {
-                    if (!mHistory.isEmpty()) {
-                        if (!mElements.isEmpty()) {
-                            createUsePreviousCourseDialog();
+                    @Override
+                    public void onClick(View arg0) {
+                        if (!mHistory.isEmpty()) {
+                            if (!mElements.isEmpty()) {
+                                createUsePreviousCourseDialog();
+                            } else {
+                                copyPreviousToNewCourseDesign();
+                            }
                         } else {
-                            copyPreviousToNewCourseDesign();
+                            String toastText = getString(R.string.error_no_course_to_copy);
+                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                         }
-                    } else {
-                        String toastText = getString(R.string.error_no_course_to_copy);
-                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                     }
-                }
-            });
+                });
+            }
 
             Button publish = (Button) getView().findViewById(R.id.publishCourse);
-            publish.setOnClickListener(new View.OnClickListener() {
+            if (publish != null) {
+                publish.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View arg0) {
-                    try {
-                        CourseBase courseData = convertCourseElementsToACourseData();
-                        sendCourseDataAndDismiss(courseData);
-                    } catch (IllegalStateException ex) {
-                        if (ex.getMessage().equals("Missing second mark")) {
-                            String toastText = getString(R.string.error_missing_second_mark);
-                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                        } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
-                            String toastText = getString(R.string.error_missing_passing_instructions);
+                    @Override
+                    public void onClick(View arg0) {
+                        try {
+                            CourseBase courseData;
+                            if (mElements.isEmpty() && getView().findViewById(R.id.course_layout) != null) {
+                                courseData = new CourseDataImpl(getString(R.string.unpublished_course));
+                            } else {
+                                courseData = convertCourseElementsToACourseData();
+                            }
+                            sendCourseDataAndDismiss(courseData);
+                        } catch (IllegalStateException ex) {
+                            if (ex.getMessage().equals("Missing second mark")) {
+                                String toastText = getString(R.string.error_missing_second_mark);
+                                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                            } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                                String toastText = getString(R.string.error_missing_passing_instructions);
+                                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (IllegalArgumentException ex) {
+                            String toastText = getString(R.string.error_no_way_point);
                             Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                         }
-
-                    } catch (IllegalArgumentException ex) {
-                        String toastText = getString(R.string.error_no_way_point);
-                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                     }
-                }
-            });
+                });
+            }
 
             Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
-            unpublish.setOnClickListener(new View.OnClickListener() {
+            if (unpublish != null) {
+                unpublish.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View arg0) {
-                    CourseBase emptyCourse = new CourseDataImpl("Unpublished course design");
-                    sendCourseDataAndDismiss(emptyCourse);
-                }
-            });
+                    @Override
+                    public void onClick(View arg0) {
+                        CourseBase emptyCourse = new CourseDataImpl(getString(R.string.unpublished_course));
+                        sendCourseDataAndDismiss(emptyCourse);
+                    }
+                });
+            }
         }
     }
 
@@ -418,9 +417,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                     CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
                     if (twoMarksCourseElement != null) {
                         twoMarksCourseElement.setRightMark(mark);
-                        if (mLayouts.size() != 0) {
-                            showCourseLayout(R.id.course_layout, R.string.layout_course);
-                        }
                     } else {
                         addNewCourseElementToList(mark);
                     }
@@ -450,6 +446,14 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         courseElement.setLeftMark(mark);
         createPassingInstructionDialog(courseElement);
         mId++;
+        setResetButton();
+    }
+
+    private void setResetButton() {
+        if (mReset != null && mReset.getTag() != null) {
+            mReset.setText(R.string.reset_state_1);
+            mReset.setTag(null);
+        }
     }
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
@@ -458,9 +462,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             public void onClick(DialogInterface dialog, int position) {
                 PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
                 onPassingInstructionPicked(courseElement, pickedDirection);
-                if (mLayouts.size() != 0) {
-                    showCourseLayout(R.id.course_layout, R.string.layout_course);
-                }
             }
         });
         builder.create().show();
@@ -488,7 +489,9 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         if (previousCourseData != null) {
             mHistory.clear();
             mHistory.addAll(convertCourseDesignToCourseElements(previousCourseData));
-            mHistoryAdapter.notifyDataSetChanged();
+            if (mHistoryAdapter != null) {
+                mHistoryAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -517,9 +520,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         mElements.clear();
         mElements.addAll(mHistory);
         mCourseAdapter.notifyDataSetChanged();
-        if (mLayouts.size() != 0) {
-            showCourseLayout(R.id.course_layout, R.string.layout_course);
-        }
     }
 
     protected CourseBase convertCourseElementsToACourseData() throws IllegalStateException, IllegalArgumentException {
@@ -584,70 +584,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     @Override
     public void onItemRemoved(int position) {
-        // do nothing - later maybe show "undo" or something
-    }
-
-    @Override
-    public void onItemClick(Runnable runnable) {
-        if (runnable != null) {
-            Handler handler = new Handler();
-            handler.post(runnable);
-        }
-    }
-
-    @Override
-    protected void goHome() {
-        if (mLayouts.size() == 0) {
-            super.goHome();
-        } else {
-            switch (getCurrentFrame()) {
-                case R.id.course_prev:
-                    showCourseLayout(R.id.selection, 0);
-                    break;
-
-                case R.id.course_layout:
-                    if (mHistory.isEmpty()) {
-                        super.goHome();
-                    } else {
-                        showCourseLayout(R.id.selection, 0);
-                    }
-                    break;
-
-                default:
-                    super.goHome();
-                    break;
-            }
-        }
-    }
-
-    private void showLayout(@IdRes int id) {
-        for (View layout : mLayouts) {
-            layout.setVisibility(View.GONE);
-            if (layout.getId() == id) {
-                layout.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    private int getCurrentFrame() {
-        int id = 0;
-        for (View layout : mLayouts) {
-            if (layout.getVisibility() == View.VISIBLE) {
-                id = layout.getId();
-                break;
-            }
-        }
-        return id;
-    }
-
-    private void setHeaderCaption(@StringRes int id) {
-        if (mHeaderCaption != null) {
-            if (id != 0) {
-                String course = getString(R.string.course);
-                mHeaderCaption.setText(String.format("%s - %s", course, getString(id)));
-            } else {
-                mHeaderCaption.setText(getString(R.string.course));
-            }
-        }
+        setResetButton();
     }
 }

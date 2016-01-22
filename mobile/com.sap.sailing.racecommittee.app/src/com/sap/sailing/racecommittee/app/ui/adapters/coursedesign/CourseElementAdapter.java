@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
@@ -278,6 +280,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public void onPerformAfterSwipeReaction(RecyclerView.ViewHolder holder, int result, int reaction) {
+        ExLog.i(mContext, TAG, "onPerformAfterSwipeReaction() called with: " + "holder = [" + holder + "], result = [" + result + "], reaction = [" + reaction + "]");
+
         int position = holder.getAdapterPosition();
         CourseListDataElementWithIdImpl element = mElements.get(position);
 
