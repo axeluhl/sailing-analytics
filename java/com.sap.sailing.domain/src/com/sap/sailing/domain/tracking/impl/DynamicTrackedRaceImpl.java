@@ -731,8 +731,16 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
-    @Override
-    public void updateFinishingTimesFromRaceLog(CompetitorResults results) {
+    /**
+     * The {@link CompetitorResults} from the race log may optionally set a finishing time for competitors. Also,
+     * depending on how the race log has been modified (e.g., a new pass could have been started or a
+     * {@link RaceLogFinishPositioningConfirmedEvent} could have been revoked) it may be possible that a finishing
+     * time previously set from the race log now has to be reset to its original state as coming from the tracking
+     * provider. This can either mean resetting the mark passing to its {@link MarkPassing#getOriginal() original}
+     * version or removing it in case the {@link MarkPassing#getOriginal()} method delivers {@code null}, meaning
+     * that this mark passing was solely based on the race log information which now would have disappeared.
+     */
+    private void updateFinishingTimesFromRaceLog(CompetitorResults results) {
         final Waypoint finish = getRace().getCourse().getLastWaypoint();
         if (finish != null) { // can't do anything for an empty course
             final Map<Competitor, CompetitorResult> resultMap = new HashMap<>();
