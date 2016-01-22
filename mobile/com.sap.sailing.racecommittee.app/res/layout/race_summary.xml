@@ -59,7 +59,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="invisible"
                     tools:visibility="visible"/>
@@ -69,11 +68,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="10"
-                    android:gravity="right"
+                    android:layout_weight="8"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="11:00:00"/>
+                    tools:text="11:00:00"
+                    android:gravity="center_horizontal" />
 
                 <View
                     android:layout_width="0dp"
@@ -102,7 +101,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="visible"/>
 
@@ -111,8 +109,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="10"
-                    android:gravity="right"
+                    android:layout_weight="8"
+                    android:gravity="center_horizontal"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
                     tools:text="11:12:18"/>
@@ -150,7 +148,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="visible"/>
 
@@ -159,11 +156,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="10"
-                    android:gravity="right"
+                    android:layout_weight="8"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="11:16:36"/>
+                    tools:text="11:16:36"
+                    android:gravity="center_horizontal" />
 
                 <TextView
                     android:id="@+id/race_finish_end_duration"
