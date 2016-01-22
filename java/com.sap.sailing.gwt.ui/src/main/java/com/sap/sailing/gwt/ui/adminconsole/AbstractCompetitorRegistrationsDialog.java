@@ -7,7 +7,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -68,17 +67,10 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openAddCompetitorDialog();
+                registeredCompetitorsTable.openEditCompetitorDialog(new CompetitorDTOImpl(), boatClass);
             }
         });
 
-        final Button editCompetitorButton = new Button(stringMessages.edit(stringMessages.competitor()));
-        editCompetitorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                openEditCompetitorDialog();
-            }
-        });
         final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
         inviteCompetitorsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -122,7 +114,6 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         competitorRegistrationPanel.setCellVerticalAlignment(movePanel, HasVerticalAlignment.ALIGN_MIDDLE);
         competitorRegistrationPanel.add(allCompetitorsPanel);
         buttonPanel.add(addCompetitorButton);
-        buttonPanel.add(editCompetitorButton);
         buttonPanel.add(inviteCompetitorsButton);
         mainPanel.add(buttonPanel);
         showOnlyCompetitorsOfLogCheckBox = new CheckBox(stringMessages.showOnlyCompetitorsOfLog());
@@ -155,69 +146,9 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
             CompetitorTableWrapper<RefreshableMultiSelectionModel<CompetitorDTO>> to) {
         move(from, to, from.getSelectionModel().getSelectedSet());
     }
-
-    private void openAddCompetitorDialog() {
-        new CompetitorEditDialog(stringMessages, new CompetitorDTOImpl(),
-                new DataEntryDialog.DialogCallback<CompetitorDTO>() {
-                    @Override
-                    public void ok(CompetitorDTO competitor) {
-                        sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
-                            }
-
-                            @Override
-                            public void onSuccess(CompetitorDTO updatedCompetitor) {
-                                registeredCompetitorsTable.getFilterField().add(updatedCompetitor);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void cancel() {
-                    }
-                }, boatClass).show();
-    }
     
     protected boolean showOnlyCompetitorsOfLog(){
         return showOnlyCompetitorsOfLogCheckBox.getValue();
-    }
-
-    private void openEditCompetitorDialog() {
-        // get currently selected competitor
-        if (registeredCompetitorsTable.getSelectionModel().getSelectedSet().size() != 1) {
-            // show some warning
-        } else {
-            final CompetitorDTO competitorToEdit = registeredCompetitorsTable.getSelectionModel().getSelectedSet()
-                    .iterator().next();
-            new CompetitorEditDialog(stringMessages, competitorToEdit,
-                    new DataEntryDialog.DialogCallback<CompetitorDTO>() {
-                        @Override
-                        public void ok(CompetitorDTO competitor) {
-                            sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    errorReporter.reportError("Error trying to add competitor: " + caught.getMessage());
-                                }
-
-                                @Override
-                                public void onSuccess(CompetitorDTO updatedCompetitor) {
-                                    int editedCompetitorIndex = registeredCompetitorsTable.getDataProvider().getList()
-                                            .indexOf(competitorToEdit);
-                                    registeredCompetitorsTable.getDataProvider().getList().remove(competitorToEdit);
-                                    registeredCompetitorsTable.getDataProvider().getList()
-                                            .add(editedCompetitorIndex, updatedCompetitor);
-                                    registeredCompetitorsTable.getDataProvider().refresh();
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void cancel() {
-                        }
-                    }, /* boatClass */null).show();
-        }
     }
 
     protected void refreshCompetitors() {
@@ -263,5 +194,4 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
         Util.addAll(registeredCompetitorsTable.getAllCompetitors(), registeredCompetitors);
         return registeredCompetitors;
     }
-
 }
