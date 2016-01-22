@@ -2,6 +2,9 @@ package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +13,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NavigableSet;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -99,18 +105,46 @@ public class MarkPassingUpdateFromRaceLogFinishPositioingListTest extends Abstra
      */
     @Test
     public void testOriginalFinishMarkPassingTime() throws ParseException, NoWindException {
+        int passId = 0;
         Competitor alinghi = getCompetitorByName("Alinghi");
         final MarkPassing alinghiOriginalFinish = getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint());
         final TimePoint alinghiOriginalFinishingTime = alinghiOriginalFinish.getTimePoint();
         assertNotNull(alinghiOriginalFinish.getTimePoint());
         final TimePoint now = MillisecondsTimePoint.now();
         final CompetitorResults alinghiFinishesNow = createCompetitorResults(new Util.Pair<>(alinghi, now));
-        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(now, author, /* pPassId */ 0, alinghiFinishesNow));
+        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(now, author, passId, alinghiFinishesNow));
         final MarkPassing alinghiCorrectedFinishMarkPassing = getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint());
         assertEquals(now, alinghiCorrectedFinishMarkPassing.getTimePoint());
-        raceLog.add(new RaceLogPassChangeEventImpl(now.plus(Duration.ONE_SECOND), author, /* pass */ 1)); // this should invalidate the previously edited result
+        raceLog.add(new RaceLogPassChangeEventImpl(now.plus(Duration.ONE_SECOND), author, ++passId)); // this should invalidate the previously edited result
         assertEquals(alinghiOriginalFinishingTime, getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint()).getTimePoint());
-        // TODO now eliminate the original finish mark passing, then set a finishing time in the race log to see how the synthetic mark passing is created and then again removed
+        List<MarkPassing> withoutLast = new ArrayList<>();
+        final NavigableSet<MarkPassing> alinghiOriginalMarkPassings = getTrackedRace().getMarkPassings(alinghi);
+        getTrackedRace().lockForRead(alinghiOriginalMarkPassings);
+        try {
+            withoutLast.addAll(alinghiOriginalMarkPassings);
+        } finally {
+            getTrackedRace().unlockAfterRead(alinghiOriginalMarkPassings);
+        }
+        withoutLast.remove(withoutLast.size()-1);
+        getTrackedRace().updateMarkPassings(alinghi, withoutLast);
+        assertNull(getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint()));
+        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(now, author, passId, alinghiFinishesNow));
+        final MarkPassing alinghiSyntheticFinish = getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint());
+        assertEquals(now, alinghiSyntheticFinish.getTimePoint());
+        assertNull(alinghiSyntheticFinish.getOriginal());
+        // advancing to the next pass is expected to remove the synthetic mark passing again
+        raceLog.add(new RaceLogPassChangeEventImpl(now.plus(Duration.ONE_HOUR), author, ++passId));
+        assertNull(getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint()));
+        raceLog.add(new RaceLogFinishPositioningConfirmedEventImpl(now, author, passId, alinghiFinishesNow));
+        final MarkPassing alinghiSyntheticFinish2 = getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint());
+        assertEquals(now, alinghiSyntheticFinish2.getTimePoint());
+        assertNull(alinghiSyntheticFinish2.getOriginal());
+        List<MarkPassing> withLastAgain = new ArrayList<>(withoutLast);
+        withLastAgain.add(alinghiOriginalFinish);
+        getTrackedRace().updateMarkPassings(alinghi, withLastAgain);
+        final MarkPassing alinghiNoLongerSynthetic = getTrackedRace().getMarkPassing(alinghi, getTrackedRace().getRace().getCourse().getLastWaypoint());
+        assertSame(alinghiOriginalFinish, alinghiNoLongerSynthetic.getOriginal());
+        assertTrue(alinghiNoLongerSynthetic.getOriginal() != alinghiNoLongerSynthetic);
     }
 
     @SafeVarargs
