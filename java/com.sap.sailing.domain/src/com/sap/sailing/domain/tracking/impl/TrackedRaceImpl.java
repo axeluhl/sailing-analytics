@@ -49,7 +49,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -112,7 +111,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -3249,7 +3247,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                     logger.info("Finished loading competitor tracks for " + getRace().getName());
                     logger.info("Started loading mark tracks for " + getRace().getName());
-                    for (Mark mark : getMarksFromRaceAndLogs()) {
+                    for (Mark mark : getMarksFromRegattaLogs()) {
                         try {
                             gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
                                     log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
@@ -3897,17 +3895,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Iterable<Mark> getMarksFromRaceAndLogs() {
-         final Map<Mark, List<DeviceMapping<Mark>>> markMappings = new HashMap<>();
+    public Iterable<Mark> getMarksFromRegattaLogs() {
          final Set<Mark> result = new HashSet<>();
-         race.getCourse().getWaypoints().forEach(waypoint -> Util.addAll(waypoint.getMarks(), result));
-         final Set<Mark> marksDefinedInRegattaLog = new HashSet<Mark>(); 
          for (RegattaLog log : attachedRegattaLogs.values()) {
-             marksDefinedInRegattaLog.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());
-             markMappings.putAll(new RegattaLogDeviceMarkMappingFinder(log).analyze());
+             result.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());
          }
-         result.addAll(marksDefinedInRegattaLog);
-         result.addAll(markMappings.keySet());
          return result;
     }
 }

@@ -872,7 +872,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * exist for a mark only if that mark is also defined by a {@link RegattaLogDefineMarkEvent}, so for
      * this standard case, adding the marks from the device mark mappings would be redundant.
      */
-    default Iterable<Mark> getMarksFromRaceAndLogs() {
+    default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
     }
 }
