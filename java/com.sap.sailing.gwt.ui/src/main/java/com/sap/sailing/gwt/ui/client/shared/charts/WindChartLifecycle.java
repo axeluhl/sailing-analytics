@@ -14,8 +14,8 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindChartSettings, WindChartSettingsDialogComponent, WindChartLifecycle.WindChartConstructorArgs> {
     private final StringMessages stringMessages;
     
-    public static class WindChartConstructionParameters extends ComponentConstructionParameters<WindChart, WindChartSettings, WindChartSettingsDialogComponent, WindChartLifecycle.WindChartConstructorArgs> {
-        public WindChartConstructionParameters(WindChartLifecycle componentLifecycle,
+    public static class ConstructionParameters extends ComponentConstructionParameters<WindChart, WindChartSettings, WindChartSettingsDialogComponent, WindChartLifecycle.WindChartConstructorArgs> {
+        public ConstructionParameters(WindChartLifecycle componentLifecycle,
                 WindChartConstructorArgs componentConstructorArgs, WindChartSettings settings) {
             super(componentLifecycle, componentConstructorArgs, settings);
         }

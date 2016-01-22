@@ -1,12 +1,20 @@
 package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.shared.components.ComponentConstructionParameters;
 import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSettings, RaceMapSettingsDialogComponent, RaceMapLifecycle.RaceMapConstructorArgs> {
     private final StringMessages stringMessages;
     
+    public static class ConstructionParameters extends ComponentConstructionParameters<RaceMap, RaceMapSettings, RaceMapSettingsDialogComponent, RaceMapLifecycle.RaceMapConstructorArgs> {
+        public ConstructionParameters(RaceMapLifecycle componentLifecycle,
+                RaceMapConstructorArgs componentConstructorArgs, RaceMapSettings settings) {
+            super(componentLifecycle, componentConstructorArgs, settings);
+        }
+    }
+
     public RaceMapLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
@@ -38,8 +46,7 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSett
     
     @Override
     public RaceMap createComponent(RaceMapConstructorArgs raceMapContructorArgs, RaceMapSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return raceMapContructorArgs.createComponent(settings);
     }
 
     public class RaceMapConstructorArgs implements ComponentConstructorArgs<RaceMap, RaceMapSettings> {

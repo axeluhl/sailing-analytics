@@ -19,13 +19,13 @@ import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
-public class LeaderboardPanelLifecycle implements ComponentLifecycle<LeaderboardPanel, LeaderboardSettings, LeaderboardSettingsDialogComponent, LeaderboardPanelLifecycle.LeaderboardPanelConstructorArgs> {
+public class LeaderboardPanelLifecycle implements ComponentLifecycle<LeaderboardPanel, LeaderboardSettings, LeaderboardSettingsDialogComponent, LeaderboardPanelLifecycle.ConstructorArgs> {
     private final StringMessages stringMessages;
     private final List<RaceColumnDTO> raceList;
 
-    public static class LeaderboardPanelConstructionParameters extends ComponentConstructionParameters<LeaderboardPanel, LeaderboardSettings, LeaderboardSettingsDialogComponent, LeaderboardPanelLifecycle.LeaderboardPanelConstructorArgs> {
-        public LeaderboardPanelConstructionParameters(LeaderboardPanelLifecycle componentLifecycle,
-                LeaderboardPanelConstructorArgs componentConstructorArgs, LeaderboardSettings settings) {
+    public static class ConstructionParameters extends ComponentConstructionParameters<LeaderboardPanel, LeaderboardSettings, LeaderboardSettingsDialogComponent, LeaderboardPanelLifecycle.ConstructorArgs> {
+        public ConstructionParameters(LeaderboardPanelLifecycle componentLifecycle,
+                ConstructorArgs componentConstructorArgs, LeaderboardSettings settings) {
             super(componentLifecycle, componentConstructorArgs, settings);
         }
     }
@@ -72,15 +72,15 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
     }
 
     @Override
-    public LeaderboardPanel createComponent(LeaderboardPanelConstructorArgs componentConstructorArgs,
+    public LeaderboardPanel createComponent(ConstructorArgs componentConstructorArgs,
             LeaderboardSettings settings) {
         return componentConstructorArgs.createComponent(settings);
     }
 
-    public interface LeaderboardPanelConstructorArgs extends ComponentConstructorArgs<LeaderboardPanel, LeaderboardSettings> {
+    public interface ConstructorArgs extends ComponentConstructorArgs<LeaderboardPanel, LeaderboardSettings> {
     };
 
-    public static class LeaderboardPanelConstructorArgsV1 implements LeaderboardPanelConstructorArgs {
+    public static class ConstructorArgsV1 implements ConstructorArgs {
         private final SailingServiceAsync sailingService;
         private final AsyncActionsExecutor asyncActionsExecutor;
         private final LeaderboardSettings settings; 
@@ -95,7 +95,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
         private final UserAgentDetails userAgent;
         private final boolean showRaceDetails; 
         
-        public LeaderboardPanelConstructorArgsV1(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+        public ConstructorArgsV1(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
                 LeaderboardSettings settings, boolean isEmbedded, RegattaAndRaceIdentifier preSelectedRace,
                 CompetitorSelectionProvider competitorSelectionProvider, Timer timer, String leaderboardGroupName,
                 String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,

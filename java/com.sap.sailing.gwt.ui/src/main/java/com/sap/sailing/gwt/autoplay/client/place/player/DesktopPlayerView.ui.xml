@@ -3,6 +3,6 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.place"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-   	<g:DockLayoutPanel ui:field="dockPanel" unit='PX'>
-	</g:DockLayoutPanel>
+   	<g:SimplePanel ui:field="contentPanel">
+	</g:SimplePanel>
 </ui:UiBinder>    

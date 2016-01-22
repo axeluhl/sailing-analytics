@@ -6,6 +6,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.ComponentConstructionParameters;
 import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -14,6 +15,13 @@ import com.sap.sse.security.ui.client.UserService;
 public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManagerComponent, MediaPlayerSettings, MediaPlayerSettingsDialogComponent,   
     MediaPlayerLifecycle.MediaPlayerManagerConstructorArgs> {
     
+    public static class ConstructionParameters extends ComponentConstructionParameters<MediaPlayerManagerComponent, MediaPlayerSettings, MediaPlayerSettingsDialogComponent, MediaPlayerLifecycle.MediaPlayerManagerConstructorArgs> {
+        public ConstructionParameters(MediaPlayerLifecycle componentLifecycle,
+                MediaPlayerManagerConstructorArgs componentConstructorArgs, MediaPlayerSettings settings) {
+            super(componentLifecycle, componentConstructorArgs, settings);
+        }
+    }
+
     private final StringMessages stringMessages;
     
     public MediaPlayerLifecycle(StringMessages stringMessages) {

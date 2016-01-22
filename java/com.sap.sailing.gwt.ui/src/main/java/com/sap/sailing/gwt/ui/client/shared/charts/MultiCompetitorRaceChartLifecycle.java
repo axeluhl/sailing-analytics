@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.shared.components.ComponentConstructionParameters;
 import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -9,6 +10,13 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
     private final StringMessages stringMessages;
     
+    public static class ConstructionParameters extends ComponentConstructionParameters<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
+        public ConstructionParameters(MultiCompetitorRaceChartLifecycle componentLifecycle,
+                MultiCompetitorRaceChartConstructorArgs componentConstructorArgs, MultiCompetitorRaceChartSettings settings) {
+            super(componentLifecycle, componentConstructorArgs, settings);
+        }
+    }
+
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
     }
@@ -41,10 +49,9 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     }
 
     @Override
-    public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartConstructorArgs ComponentConstructorArgs,
+    public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartConstructorArgs componentConstructorArgs,
             MultiCompetitorRaceChartSettings settings) {
-        // TODO Auto-generated method stub
-        return null;
+        return componentConstructorArgs.createComponent(settings);
     }
 
     public class MultiCompetitorRaceChartConstructorArgs implements ComponentConstructorArgs<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings> {

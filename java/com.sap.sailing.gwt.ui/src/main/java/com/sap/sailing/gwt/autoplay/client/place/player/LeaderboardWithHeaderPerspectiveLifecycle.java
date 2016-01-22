@@ -5,7 +5,7 @@ import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle.SAPHeaderConstructionParameters;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle.LeaderboardPanelConstructionParameters;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle.ConstructionParameters;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveConstructorArgs;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspective, 
     LeaderboardPerspectiveSettings, LeaderboardPerspectiveSettingsDialogComponent,
-    LeaderboardWithHeaderPerspectiveLifecycle.LeaderboardWithHeaderPerspectiveConstructorArgs> {
+    LeaderboardWithHeaderPerspectiveLifecycle.ConstructorArgs> {
 
     private final SAPHeaderLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
@@ -64,17 +64,16 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    public LeaderboardWithHeaderPerspective createComponent(LeaderboardWithHeaderPerspectiveConstructorArgs leaderboardPerspectiveConstructorArgs,
+    public LeaderboardWithHeaderPerspective createComponent(ConstructorArgs leaderboardPerspectiveConstructorArgs,
             LeaderboardPerspectiveSettings settings) {
         return leaderboardPerspectiveConstructorArgs.createComponent(settings);
     }
 
-    public static class LeaderboardWithHeaderPerspectiveConstructorArgs implements PerspectiveConstructorArgs<LeaderboardWithHeaderPerspective, LeaderboardPerspectiveSettings> {
+    public static class ConstructorArgs implements PerspectiveConstructorArgs<LeaderboardWithHeaderPerspective, LeaderboardPerspectiveSettings> {
         private final SAPHeaderConstructionParameters sapHeaderConstructionParameters;
-        private final LeaderboardPanelConstructionParameters leaderboardConstructionParameters;
+        private final ConstructionParameters leaderboardConstructionParameters;
         
-        public LeaderboardWithHeaderPerspectiveConstructorArgs(SAPHeaderConstructionParameters sapHeaderConstructionParameters,
-                LeaderboardPanelConstructionParameters leaderboardConstructionParameters) {
+        public ConstructorArgs(SAPHeaderConstructionParameters sapHeaderConstructionParameters, ConstructionParameters leaderboardConstructionParameters) {
             this.sapHeaderConstructionParameters = sapHeaderConstructionParameters;
             this.leaderboardConstructionParameters = leaderboardConstructionParameters;
         }

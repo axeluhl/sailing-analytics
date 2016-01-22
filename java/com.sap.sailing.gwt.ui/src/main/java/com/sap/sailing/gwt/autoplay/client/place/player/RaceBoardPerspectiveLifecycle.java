@@ -15,12 +15,23 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveConstructorArgs;
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPanel, 
     RaceBoardPerspectiveSettings, RaceBoardPerspectiveSettingsDialogComponent,
-    RaceBoardPerspectiveLifecycle.RaceBoardPerspectiveConstructorArgs> {
+    RaceBoardPerspectiveLifecycle.ConstructorArgs> {
 
     private final StringMessages stringMessages;
+    private final RaceMapLifecycle raceMapLifecycle;
+    private final WindChartLifecycle windChartLifecycle;
+    private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
+    private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
+    private final MediaPlayerLifecycle mediaPlayerLifecycle;
     
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
+
+        raceMapLifecycle = new RaceMapLifecycle(stringMessages);
+        windChartLifecycle = new WindChartLifecycle(stringMessages);
+        leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
+        multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages);
+        mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         
         componentLifecycles.add(new RaceMapLifecycle(stringMessages));
         componentLifecycles.add(new WindChartLifecycle(stringMessages));
@@ -56,14 +67,49 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         return true;
     }
     
-    @Override
-    public RaceBoardPanel createComponent(RaceBoardPerspectiveConstructorArgs raceboardPerspectiveConstructorArgs,
-            RaceBoardPerspectiveSettings settings) {
-        return null;
+    public RaceMapLifecycle getRaceMapLifecycle() {
+        return raceMapLifecycle;
     }
 
-    public class RaceBoardPerspectiveConstructorArgs implements PerspectiveConstructorArgs<RaceBoardPanel, RaceBoardPerspectiveSettings> {
-        public RaceBoardPerspectiveConstructorArgs() {
+    public WindChartLifecycle getWindChartLifecycle() {
+        return windChartLifecycle;
+    }
+
+    public LeaderboardPanelLifecycle getLeaderboardPanelLifecycle() {
+        return leaderboardPanelLifecycle;
+    }
+
+    public MultiCompetitorRaceChartLifecycle getMultiCompetitorRaceChartLifecycle() {
+        return multiCompetitorRaceChartLifecycle;
+    }
+
+    public MediaPlayerLifecycle getMediaPlayerLifecycle() {
+        return mediaPlayerLifecycle;
+    }
+    
+    @Override
+    public RaceBoardPanel createComponent(ConstructorArgs raceboardPerspectiveConstructorArgs,
+            RaceBoardPerspectiveSettings settings) {
+        return raceboardPerspectiveConstructorArgs.createComponent(settings);
+    }
+
+    public static class ConstructorArgs implements PerspectiveConstructorArgs<RaceBoardPanel, RaceBoardPerspectiveSettings> {
+        private final WindChartLifecycle.ConstructionParameters windChartConstParams;
+        private final RaceMapLifecycle.ConstructionParameters raceMapConstParams;
+        private final LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams;
+        private final MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams;
+        private final MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams;
+
+        public ConstructorArgs(WindChartLifecycle.ConstructionParameters windChartConstParams,
+                RaceMapLifecycle.ConstructionParameters raceMapConstParams,
+                LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams,
+                MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams,
+                MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams) {
+            this.windChartConstParams = windChartConstParams;
+            this.raceMapConstParams = raceMapConstParams;
+            this.leaderboardPanelConstParams = leaderboardPanelConstParams;
+            this.multiChartConstParams = multiChartConstParams;
+            this.mediaPlayerConstParams = mediaPlayerConstParams;
         }
         
         @Override
@@ -71,5 +117,4 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
             return null;
         }
     }
-
 }
