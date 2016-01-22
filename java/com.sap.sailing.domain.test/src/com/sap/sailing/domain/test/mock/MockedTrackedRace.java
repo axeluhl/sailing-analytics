@@ -488,6 +488,27 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     public Iterable<? extends RaceColumn> getRaceColumns() {
                         return null;
                     }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+                        return null;
+                    }
+
+                    @Override
+                    public void registerCompetitor(Competitor competitor) {   
+                    }
+
+                    @Override
+                    public void registerCompetitors(Iterable<Competitor> competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitor(Competitor competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitors(Iterable<Competitor> competitor) {
+                    }
                 };
             }
 
@@ -904,10 +925,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
             boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
         return null;
-    }
-
-    @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
     }
 
     @Override
