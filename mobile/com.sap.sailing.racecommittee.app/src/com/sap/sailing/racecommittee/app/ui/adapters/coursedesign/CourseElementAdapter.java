@@ -122,6 +122,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
                 }
                 itemHolder.container.setBackgroundColor(bgColor);
             }
+        } else if (holder instanceof AddItemHolder) {
+            AddItemHolder itemHolder = (AddItemHolder) holder;
+            itemHolder.hintText.setVisibility((position == 0) ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -310,13 +313,17 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     public class AddItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        private ImageView addItem;
+        private TextView hintText;
+
         public AddItemHolder(View itemView) {
             super(itemView);
 
-            itemView = ViewHelper.get(itemView, R.id.add_item);
-            if (itemView != null) {
-                itemView.setOnClickListener(this);
+            addItem = ViewHelper.get(itemView, R.id.add_item);
+            if (addItem != null) {
+                addItem.setOnClickListener(this);
             }
+            hintText = ViewHelper.get(itemView, R.id.hint_text);
         }
 
         @Override

@@ -1,36 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/constant_white"
-    android:orientation="horizontal"
     android:paddingBottom="@dimen/default_margin_half"
     android:paddingTop="@dimen/default_margin_half">
 
-    <FrameLayout
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/add_item"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_add_42dp"
-            android:layout_gravity="center_horizontal" />
-    </FrameLayout>
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/add_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_add_42dp" />
+        </FrameLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Space
+            android:layout_width="92dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/hint_text"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="42dp"
         android:text="@string/add_waypoint"
         android:textAppearance="?attr/textXSmall"
-        android:textColor="?attr/white"
-        android:layout_weight="1"
-        android:layout_gravity="center_vertical"/>
-
-    <Space
-        android:layout_width="92dp"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:textColor="?attr/white" />
+</RelativeLayout>
