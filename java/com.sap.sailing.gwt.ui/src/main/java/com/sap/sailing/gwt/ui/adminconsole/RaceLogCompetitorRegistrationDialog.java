@@ -10,8 +10,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 public class RaceLogCompetitorRegistrationDialog extends AbstractCompetitorRegistrationsDialog {
-
-    private String leaderboardName;
     private String fleetName;
     private String raceColumnName;
 
