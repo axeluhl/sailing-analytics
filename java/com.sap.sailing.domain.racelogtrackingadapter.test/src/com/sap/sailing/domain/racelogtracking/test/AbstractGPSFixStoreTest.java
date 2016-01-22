@@ -49,7 +49,7 @@ public class AbstractGPSFixStoreTest {
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
-    private final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
+    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),

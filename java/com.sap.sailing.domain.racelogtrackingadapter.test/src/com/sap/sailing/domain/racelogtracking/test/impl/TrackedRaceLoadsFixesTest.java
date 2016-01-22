@@ -9,6 +9,7 @@ import java.util.Collections;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -46,6 +47,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
         DeviceIdentifier markDevice = new SmartphoneImeiIdentifier("imei2");
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark2));
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
@@ -89,6 +92,8 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark2));
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("imei2");
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
