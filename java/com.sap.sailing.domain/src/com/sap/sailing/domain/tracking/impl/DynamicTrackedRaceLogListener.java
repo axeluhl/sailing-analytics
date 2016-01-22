@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -122,6 +123,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             if (markPassingUpdateListener != null) {
                 removeMarkPassingEvents();
             }
+            trackedRace.updateMarkPassingsAfterRaceLogChanges();
         }
     }
 
@@ -157,6 +159,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
         }
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     private void analyseTrackingTimes(RaceLog raceLog) {
@@ -237,6 +240,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             // previous pass was aborted; notify TracTrac
             trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
         }
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     @Override
@@ -247,6 +251,16 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         analyzeCourseDesign(event.getCourseDesign());
+    }
+
+    /**
+     * We don't know whether this event is the one that is now valid; it could have a priority too low, or it could have
+     * a time point too early and thus superseded by a later event of the same type. There may also be other race logs.
+     * Therefore, re-evaluate the current situation "from scratch."
+     */
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -789,5 +790,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateFinishingTimesFromRaceLog(CompetitorResults event) {
+    }
+
+    @Override
+    public void updateMarkPassingsAfterRaceLogChanges() {
     }
 }

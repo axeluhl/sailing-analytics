@@ -3,11 +3,13 @@ package com.sap.sailing.domain.tracking.impl;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -15,7 +17,11 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -468,8 +474,159 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
     }
 
+    /**
+     * A mark passing produced from a {@link RaceLogFinishPositioningConfirmedEvent} where a
+     * {@link CompetitorResult#getFinishingTime() finishing time} has been provided for a competitor. The mark passing
+     * may have replaced an original mark passing, as provided by the {@link MarkPassingCalculator} or an external
+     * connector, or it may have been provided solely based on the presence of the finishing time in the
+     * {@link RaceLogFinishPositioningConfirmedEvent}. This leads to a different implementation of the
+     * {@link #getOriginal} implementation.
+     * 
+     * @author Axel Uhl (D043530)
+     */
+    private static class MarkPassingFromRaceLogProvidedFinishingTimeImpl extends MarkPassingImpl {
+        private static final long serialVersionUID = 2900812554717213461L;
+        private final MarkPassing original;
+
+        public MarkPassingFromRaceLogProvidedFinishingTimeImpl(TimePoint timePoint, Waypoint waypoint, Competitor competitor, MarkPassing original) {
+            super(timePoint, waypoint, competitor);
+            this.original = original;
+        }
+
+        /**
+         * May return {@code null} in case this mark passing was created based solely on the finishing
+         * time taken from a {@link RaceLogFinishPositioningConfirmedEvent}, or may contain the original
+         * {@link MarkPassing} that it replaced, otherwise. The original mark passing is expected not to
+         * implement this interface.
+         */
+        @Override
+        public MarkPassing getOriginal() {
+            return original;
+        }
+    }
+    
     @Override
-    public void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings) {
+    public void updateMarkPassings(Competitor competitor, final Iterable<MarkPassing> markPassings) {
+        final CompetitorResult resultFromRaceLog = getResultsFromRaceLog(competitor);
+        final Iterable<MarkPassing> markPassingsToUse = createOrUpdateFinishMarkPassingIfRequired(competitor, markPassings, resultFromRaceLog);
+        updateMarkPassingsNotConsideringFinishingTimesFromRaceLog(competitor, markPassingsToUse);
+    }
+    
+    @Override
+    public void updateMarkPassingsAfterRaceLogChanges() {
+        updateFinishingTimesFromRaceLog(getResultsFromRaceLogs());
+    }
+    
+    /**
+     * Iterates over the {@code markPassings} and checks if the finish mark passing needs to be updated based on the
+     * {@link CompetitorResult}. In the following cases an updated mark passings {@link Iterable} is returned that
+     * contains an update regarding the finish mark passing:
+     * 
+     * <ul>
+     * <li>An original finish mark passing exists, not wrapped by an updated mark passing or wrapped but not having the
+     * correct time, or no finish mark passing exists at all, and we have a finishing time in the
+     * {@code competitorResult}: then an updated wrapper mark passing is used; if an original finish mark passing
+     * existed, it will be used as the wrapper's {@link MarkPassing#getOriginal()} value; otherwise, {@code null} is
+     * used as the original.</li>
+     * <li>An original finish mark passing exists that is wrapped by an updated finishing time that came from the race
+     * log previously, and we have no finishing time in the {@code competitorResult}: then the wrapper is replaced by
+     * the original finish mark passing, thus reverting the finishing time to that of the original mark passing.</li>
+     * <li>A wrapper finish mark passing exists that has a {@code null} original, meaning it was created solely based
+     * on the race log finishing time, and we have no finish time in the {@code competitorResult}: then the synthetic
+     * finish mark passing is removed.</li>
+     * </ul>
+     * 
+     * If no such modification was required, the unmodified {@code markPassings} object is returned; otherwise, a new
+     * {@link Iterable} that contains the modifications regarding the finish mark passing is returned.<p>
+     * 
+     * Note that if that is a result of {@link #getMarkPassings(Competitor)} or
+     * {@link #getMarkPassingsInOrder(Waypoint)} then the caller must hold the corresponding read lock while calling
+     * this method.
+     */
+    private Iterable<MarkPassing> createOrUpdateFinishMarkPassingIfRequired(final Competitor competitor, Iterable<MarkPassing> markPassings, CompetitorResult competitorResult) {
+        assert competitorResult == null || competitorResult.getCompetitorId().equals(competitor.getId());
+        final Waypoint finish = getRace().getCourse().getLastWaypoint();
+        final List<MarkPassing> copyOfMarkPassings = new ArrayList<>();
+        boolean neededToCreateOrUpdateFinishMarkPassing = false;
+        boolean foundFinishMarkPassing = false;
+        for (final MarkPassing originalMarkPassing : markPassings) {
+            if (originalMarkPassing.getWaypoint() != finish) {
+                copyOfMarkPassings.add(originalMarkPassing);
+            } else {
+                foundFinishMarkPassing = true;
+                final MarkPassing finishMarkPassingToUse;
+                if (competitorResult != null && competitorResult.getFinishingTime() != null
+                 && (originalMarkPassing.getOriginal() == originalMarkPassing || !originalMarkPassing.getTimePoint().equals(competitorResult.getFinishingTime()))) {
+                    // since we so far only have the original mark passing or a wrapper mark passing with an
+                    // incorrect time point, we need to create a wrapper mark passing:
+                    finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
+                            competitorResult.getFinishingTime(), finish, competitor,
+                            originalMarkPassing.getOriginal());
+                    logger.info(getRace().getName()+": Updating finish mark passing "+originalMarkPassing.getOriginal()+" to "+finishMarkPassingToUse);
+                    neededToCreateOrUpdateFinishMarkPassing = true;
+                } else {
+                    finishMarkPassingToUse = originalMarkPassing.getOriginal();
+                    if (copyOfMarkPassings != originalMarkPassing) {
+                        logger.info(getRace().getName()+": Reverting race log-based finish mark passing "+originalMarkPassing+" to "+finishMarkPassingToUse+
+                                " because no finishing time found anymore for that competitor in race log");
+                        neededToCreateOrUpdateFinishMarkPassing = true;
+                    }
+                }
+                if (finishMarkPassingToUse != null) {
+                    copyOfMarkPassings.add(finishMarkPassingToUse);
+                }
+            }
+        }
+        if (!foundFinishMarkPassing && competitorResult != null && competitorResult.getFinishingTime() != null) {
+            // need to create a synthetic finish mark passing based on the race log-provided finishing time
+            final MarkPassingFromRaceLogProvidedFinishingTimeImpl finishMarkPassingToUse = new MarkPassingFromRaceLogProvidedFinishingTimeImpl(
+                    competitorResult.getFinishingTime(), finish, competitor,
+                    /* no original finish mark passing exists; synthetic finish mark passing */ null);
+            copyOfMarkPassings.add(finishMarkPassingToUse);
+            logger.info(getRace().getName()+": Created "+finishMarkPassingToUse+" based on finishing time provided in race log");
+            neededToCreateOrUpdateFinishMarkPassing = true;
+        }
+        return neededToCreateOrUpdateFinishMarkPassing ? copyOfMarkPassings : markPassings;
+    }
+
+    /**
+     * Looks in all {@link #attachedRaceLogs attached race logs} for the last valid
+     * {@link RaceLogFinishPositioningConfirmedEvent} that has a {@link CompetitorResult} for {@code competitor}. The
+     * first one found will be returned; if none is found, <code>null</code> will be returned.
+     */
+    private CompetitorResult getResultsFromRaceLog(Competitor competitor) {
+        CompetitorResult result = null;
+        final CompetitorResults results = getResultsFromRaceLogs();
+        if (results != null) {
+            for (CompetitorResult competitorResult : results) {
+                if (getRace().getCompetitorById(competitorResult.getCompetitorId()) == competitor) {
+                    result = competitorResult;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    private CompetitorResults getResultsFromRaceLogs() {
+        CompetitorResults results = null; 
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            results = new ConfirmedFinishPositioningListFinder(raceLog).analyze();
+            if (results != null) {
+                break;
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Updates the {@code markPassings} into the {@link #getMarkPassing(Competitor, Waypoint) mark passing data
+     * structure for the waypoints passed} and the {@link #getMarkPassings(Competitor) mark passing data structure for
+     * the competitor}. The mark passings are use as-is, without considering any
+     * {@link CompetitorResult#getFinishingTime() finishing times} for competitors coming from any {@link RaceLog}.
+     * See also {@link #updateMarkPassings(Competitor, Iterable)} which <em>does</em> consider those.
+     */
+    private void updateMarkPassingsNotConsideringFinishingTimesFromRaceLog(Competitor competitor, Iterable<MarkPassing> markPassings) {
         LockUtil.lockForRead(getSerializationLock()); // keep serializer from reading the mark passings collections
         try {
             Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
@@ -571,6 +728,33 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             notifyListeners(competitor, oldMarkPassings, markPassings);
         } finally {
             LockUtil.unlockAfterRead(getSerializationLock());
+        }
+    }
+
+    @Override
+    public void updateFinishingTimesFromRaceLog(CompetitorResults results) {
+        final Waypoint finish = getRace().getCourse().getLastWaypoint();
+        if (finish != null) { // can't do anything for an empty course
+            final Map<Competitor, CompetitorResult> resultMap = new HashMap<>();
+            if (results != null) {
+                for (final CompetitorResult result : results) {
+                    resultMap.put(getRace().getCompetitorById(result.getCompetitorId()), result);
+                }
+            }
+            for (final Competitor competitor : getRace().getCompetitors()) {
+                final CompetitorResult competitorResult = resultMap.get(competitor);
+                final NavigableSet<MarkPassing> markPassings = getMarkPassings(competitor);
+                final Iterable<MarkPassing> markPassingsToUse;
+                lockForRead(markPassings);
+                try {
+                    markPassingsToUse = createOrUpdateFinishMarkPassingIfRequired(competitor, markPassings, competitorResult);
+                } finally {
+                    unlockAfterRead(markPassings);
+                }
+                if (markPassingsToUse != markPassings) {
+                    updateMarkPassingsNotConsideringFinishingTimesFromRaceLog(competitor, markPassingsToUse);
+                }
+            }
         }
     }
 
@@ -829,4 +1013,5 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
+
 }

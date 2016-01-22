@@ -7,6 +7,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningListChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishPositioningListFinder;
 import com.sap.sailing.domain.base.Competitor;
@@ -89,11 +90,11 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     @Override
     public void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
         if (event instanceof RaceLogFinishPositioningConfirmedEvent) {
-            handleFinishPositioningList(raceColumn, raceLogIdentifier, event);
+            handleFinishPositioningList(raceColumn, raceLogIdentifier, (RaceLogFinishPositioningConfirmedEvent) event);
         }
     }
 
-    private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+    private void handleFinishPositioningList(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogFinishPositioningConfirmedEvent event) {
         Leaderboard leaderboard = service.getLeaderboardByName(raceLogIdentifier.getRegattaLikeParent().getName());
         if (leaderboard != null) {
             Fleet fleet = raceColumn.getFleetByName(raceLogIdentifier.getFleetName());
@@ -108,11 +109,18 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
     }
     
     /**
-     * Retrieves the last RaceLogFinishPositioningListChangedEvent from the racelog and compares the ranks and
-     * disqualifications entered by the race committee with the tracked ranks. When a tracked rank for a competitor is
-     * not the same as the rank of the race committee, a score correction is issued. The positioning list contains a
-     * list of competitors sorted by the positioning order when finishing. Additionally a MaxPointsReason might be
-     * entered by the Race Committee.<p>
+     * Called when a {@link RaceLogFinishPositioningConfirmedEvent} was received by the {@link RaceLog}. Retrieves the
+     * last {@link RaceLogFinishPositioningConfirmedEvent} from the racelog and compares the ranks and disqualifications
+     * entered by the race committee with the tracked ranks. When a tracked rank for a competitor is not the same as the
+     * rank of the race committee, a score correction is issued. The positioning list contains a list of competitors
+     * sorted by the positioning order when finishing. Additionally a MaxPointsReason might be entered by the Race
+     * Committee.
+     * <p>
+     * 
+     * For backward compatibility (old releases didn't store the {@link CompetitorResults} in the event) if no
+     * {@link CompetitorResults} are found even though there was a {@link RaceLogFinishPositioningConfirmedEvent}, the
+     * last {@link RaceLogFinishPositioningListChangedEvent} event with {@link CompetitorResults} is looked up and its
+     * results are used.
      * 
      * TODO bug 3420: also extract the optional score / finishing time / comment and make good use of it
      * 
@@ -130,7 +138,8 @@ public class RaceLogScoringReplicator implements RaceColumnListener {
             // we expect this case for old sailing events such as ESS Singapore, Quingdao, where the confirmation event did not contain the finish
             // positioning list
             FinishPositioningListFinder positioningListFinder = new FinishPositioningListFinder(raceLog);
-            positioningList = positioningListFinder.analyze();
+            positioningList = positioningListFinder.analyze(); // this is OK because the precondition for calling this method is that a
+            // RaceLogFinishPositioningConfirmedEvent event was found in the race log
         }
         if (positioningList != null) {
             for (CompetitorResult positionedCompetitor : positioningList) {

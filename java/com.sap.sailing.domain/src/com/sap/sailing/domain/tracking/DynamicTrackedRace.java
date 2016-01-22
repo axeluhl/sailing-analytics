@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
@@ -34,13 +38,39 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
-     * Updates all mark passings for <code>competitor</code> for this race. The
-     * mark passings must be provided in the order of the race's course and in
-     * increasing time stamps. Calling this method replaces all previous mark passings
-     * for this race for <code>competitor</code> and ensures that the "leaderboard"
-     * and all other derived information are updated accordingly. 
+     * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the
+     * order of the race's course and in increasing time stamps. Calling this method replaces all previous mark passings
+     * for this race for <code>competitor</code> and ensures that the "leaderboard" and all other derived information
+     * are updated accordingly.
+     * <p>
+     * 
+     * When an attached {@link RaceLog} has a {@link RaceLogFinishPositioningConfirmedEvent} that sets a
+     * {@link CompetitorResult#getFinishingTime() finishing time} for a competitor, it will be used to override the
+     * {@link MarkPassing#getTimePoint() time point} of the finishing waypoint's mark passing or, if no mark passing for
+     * the finishing waypoint exists yet for that competitor, create one. This can, in particular, be helpful when
+     * determining the time sailed for the {@code competitor} in order to determine the calculated time after applying
+     * any handicap rules and metrics.<p>
      */
     void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
+    
+    /**
+     * The {@link CompetitorResults} from the race log may optionally set a finishing time for competitors. Also,
+     * depending on how the race log has been modified (e.g., a new pass could have been started or a
+     * {@link RaceLogFinishPositioningConfirmedEvent} could have been revoked) it may be possible that a finishing
+     * time previously set from the race log now has to be reset to its original state as coming from the tracking
+     * provider. This can either mean resetting the mark passing to its {@link MarkPassing#getOriginal() original}
+     * version or removing it in case the {@link MarkPassing#getOriginal()} method delivers {@code null}, meaning
+     * that this mark passing was solely based on the race log information which now would have disappeared.
+     */
+    void updateFinishingTimesFromRaceLog(CompetitorResults result);
+
+    /**
+     * When there is a significant change in the race logs attached to this race, such as adding another race log or
+     * removing a race log or switching to another pass in one of the race logs attached, the effects on the
+     * valid {@link RaceLogFinishPositioningConfirmedEvent} are analyzed, and if relevant, the mark passings
+     * for the finish line that are affected will be {@link #updateMarkPassings(Competitor, Iterable) updated}.
+     */
+    void updateMarkPassingsAfterRaceLogChanges();
 
     /**
      * Sets the start time as received from the tracking infrastructure. This isn't necessarily
