@@ -310,8 +310,8 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         filterField.updateAll(result);
     }
     
-    void openEditCompetitorDialog(final CompetitorDTO competitor, String boatClass) {
-        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, competitor, new DialogCallback<CompetitorDTO>() {
+    void openEditCompetitorDialog(final CompetitorDTO originalCompetitor, String boatClass) {
+        final CompetitorEditDialog dialog = new CompetitorEditDialog(stringMessages, originalCompetitor, new DialogCallback<CompetitorDTO>() {
             @Override
             public void ok(final CompetitorDTO competitor) {
                 sailingService.addOrUpdateCompetitor(competitor, new AsyncCallback<CompetitorDTO>() {
@@ -322,11 +322,10 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
 
                     @Override
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
-                        //only reload selected competitors reloading wirh refreshCompetitorList(leaderboardName)
+                        //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
-                        int editedCompetitorIndex = getDataProvider().getList()
-                                .indexOf(competitor);
-                        getDataProvider().getList().remove(competitor);
+                        int editedCompetitorIndex = getDataProvider().getList().indexOf(originalCompetitor);
+                        getDataProvider().getList().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
                             getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
                         } else {
