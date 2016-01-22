@@ -3,10 +3,8 @@ package com.sap.sailing.mongodb.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +12,9 @@ import org.junit.Test;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -24,13 +22,13 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.impl.MongoRaceLogStoreImpl;
-import com.sap.sailing.domain.racelog.RaceLogIdentifier;
+import com.sap.sailing.domain.persistence.impl.MongoRegattaLogStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockEmptyServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PlaceHolderDeviceIdentifier;
+import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -47,11 +45,11 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     protected static final String column = "column";
     protected static final String fleet = "fleet";
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
-    protected RaceLogIdentifier logIdentifier;
+    protected RegattaLikeIdentifier logIdentifier;
 
     protected MongoObjectFactoryImpl mongoFactory;
     protected DomainObjectFactoryImpl domainFactory;
-    protected RaceLog raceLog;
+    protected RegattaLog RegattaLog;
     
     private TimePoint now() {
         return MillisecondsTimePoint.now();
@@ -61,13 +59,11 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
     public void setup() throws UnknownHostException, MongoException, InterruptedException {
         dropTestDB();
 
-        logIdentifier = mock(RaceLogIdentifier.class);
-        com.sap.sse.common.Util.Triple<String, String, String> triple = new com.sap.sse.common.Util.Triple<String, String, String>("a", "b", UUID.randomUUID().toString());
-        when(logIdentifier.getIdentifier()).thenReturn(triple);
+        logIdentifier = mock(RegattaLikeIdentifier.class);
     }
     
-    private RaceLog loadRaceLog() {        
-        return new MongoRaceLogStoreImpl(mongoFactory, domainFactory).getRaceLog(logIdentifier, true);
+    private RegattaLog loadRegattaLog() {        
+        return new MongoRegattaLogStoreImpl(mongoFactory, domainFactory).getRegattaLog(logIdentifier, true);
     }
     
     private void createFactories(TypeBasedServiceFinderFactory factory) {
@@ -76,23 +72,23 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
         domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
                 .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
 
-        raceLog = loadRaceLog();
+        RegattaLog = loadRegattaLog();
     }
     
     private DeviceIdentifier storeAndLoad(DeviceIdentifier device, TypeBasedServiceFinderFactory forStoring, TypeBasedServiceFinderFactory forLoading) {
         createFactories(forStoring);
         Competitor c = new CompetitorImpl("a", "a", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
         
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(now(), author, 0,
+        RegattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 0,
                 c, device, now(), now()));
         
         createFactories(forLoading);
         
-        RaceLog loadedRaceLog = loadRaceLog();
-        loadedRaceLog.lockForRead();
-        assertEquals(1, Util.size(loadedRaceLog.getRawFixes()));
-        RaceLogDeviceCompetitorMappingEvent mapping = (RaceLogDeviceCompetitorMappingEvent) loadedRaceLog.getRawFixes().iterator().next();
-        loadedRaceLog.unlockAfterRead();
+        RegattaLog loadedRegattaLog = loadRegattaLog();
+        loadedRegattaLog.lockForRead();
+        assertEquals(1, Util.size(loadedRegattaLog.getRawFixes()));
+        RegattaLogDeviceCompetitorMappingEvent mapping = (RegattaLogDeviceCompetitorMappingEvent) loadedRegattaLog.getRawFixes().iterator().next();
+        loadedRegattaLog.unlockAfterRead();
         
         return mapping.getDevice();
     }

@@ -187,40 +187,35 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         });
     }
     
-//    public LeaderboardPanel getSelectedLeaderboardPanel() {
-//        return selectedLeaderboardPanel;
-//    }
-//    
     private void updateLeaderboardSelection() {
-        if(leaderboardsTabPanel != null) {
+        if (leaderboardsTabPanel != null) {
             leaderboardsTabPanel.clear();
-            
             int index = 0;
             int leaderboardCount = leaderboardNamesAndDisplayNames.size();
             for (Util.Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
                 FlowPanel tabFlowPanel = new FlowPanel();
                 leaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
 
-                if(selectedLeaderboardName != null && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
+                if (selectedLeaderboardName != null
+                        && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
                     leaderboardsTabPanel.selectTab(index);
                 }
                 index++;
             }
-            // show the last leaderboard when no leaderboard is selected yet 
-            if(selectedLeaderboardName == null && leaderboardCount > 0) {
-                leaderboardsTabPanel.selectTab(leaderboardCount-1);
+            // show the last leaderboard when no leaderboard is selected yet
+            if (selectedLeaderboardName == null && leaderboardCount > 0) {
+                leaderboardsTabPanel.selectTab(leaderboardCount - 1);
             }
-            
             leaderboardsTabPanel.setVisible(leaderboardCount > 0);
-            if(!isEmbedded) {
+            if (!isEmbedded) {
                 leaderboardsLabel.setVisible(leaderboardCount > 0);
             }
         }
     }
 
     private void updateSelectedLeaderboard(String newSelectedLeaderboardName, int newTabIndex) {
-        if(newSelectedLeaderboardName != null) {
-            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+        if (newSelectedLeaderboardName != null) {
+            if (selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
                 selectedLeaderboardPanel.removeAllListeners();
                 selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
                 selectedLeaderboardPanel = null;
@@ -235,12 +230,12 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
             selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
-            for(LeaderboardUpdateListener listener: leaderboardUpdateListeners) {
+            for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
                 newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
             }
             setSelectedLeaderboard(newSelectedLeaderboardPanel);
         } else {
-            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+            if (selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
                 selectedLeaderboardPanel.removeAllListeners();
                 selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
                 selectedLeaderboardPanel = null;

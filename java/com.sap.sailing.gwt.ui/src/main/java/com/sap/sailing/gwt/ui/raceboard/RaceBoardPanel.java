@@ -61,7 +61,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -413,14 +412,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
-                // we don't use the EntryPointLinkFactory here, because of lacking support for Places
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = "/gwt/Home.html";
-                if (debugParam != null && !debugParam.isEmpty()) {
-                    link += "?gwt.codesvr=" + debugParam;
-                }
-                link += "#EventPlace:eventId="+eventId.toString();
-                link += "&navigationTab=Regatta&leaderboardName=" + URLEncoder.encode(leaderboardName);
+                String link = EntryPointLinkFactory.createLeaderboardPlaceLink(eventId.toString(), leaderboardName);
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");

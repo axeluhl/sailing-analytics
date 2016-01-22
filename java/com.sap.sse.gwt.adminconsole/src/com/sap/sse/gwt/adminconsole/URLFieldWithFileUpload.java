@@ -11,6 +11,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -54,7 +55,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                final JSONObject resultJson = JSONParser.parseLenient(event.getResults().replaceFirst("<pre[^>]*>(.*)</pre>", "$1")).isObject();
+                final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
                 Window.alert(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
                         resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()));
                 setURL("");
@@ -110,7 +111,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String result = event.getResults();
-                JSONArray resultJson = (JSONArray) JSONParser.parseLenient(result.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
+                JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get("file_uri") != null) {
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
@@ -184,5 +185,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         if (fireEvents) {
             ValueChangeEvent.fire(this, value);
         }
+    }
+
+    /**
+     * See https://github.com/twilson63/ngUpload/issues/43 and
+     * https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string. The JSON response of the file
+     * upload is wrapped by a &lt;pre&gt; element which needs to be stripped off if present to allow the JSON parser to
+     * succeed.
+     */
+    private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
+        return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
 }

@@ -234,10 +234,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     /**
-     * In addition to creating the track which is performed by the superclass implementation, this implementation registers
-     * a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean) notifies the listeners}
-     * about updates. The {@link #updated(TimePoint)} method is <em>not</em> called with the mark fix's time point because
-     * mark fixes may be received also from marks that don't belong to this race.
+     * In addition to creating the track which is performed by the superclass implementation, this implementation
+     * registers a {@link GPSTrackListener} with the mark's track and {@link #notifyListeners(GPSFix, Mark, boolean)
+     * notifies the listeners} about updates. In previous versions the {@link #updated(TimePoint)} method was
+     * <em>not</em> called with the mark fix's time point because mark fixes could have been received also from marks
+     * that don't belong to this race. However, we don't support any connector anymore that works this way. Therefore,
+     * it is now considered safe to call {@link #updated(TimePoint)} for the mark fix's time point.
      */
     @Override
     protected DynamicGPSFixTrackImpl<Mark> createMarkTrack(Mark mark) {
@@ -247,6 +249,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
             @Override
             public void gpsFixReceived(GPSFix fix, Mark mark, boolean firstFixInTrack) {
+                updated(fix.getTimePoint());
                 triggerManeuverCacheRecalculationForAllCompetitors();
                 notifyListeners(fix, mark, firstFixInTrack);
             }
@@ -755,8 +758,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void attachRaceLog(RaceLog raceLog) {
-        super.attachRaceLog(raceLog);
         logListener.addTo(raceLog);
+        super.attachRaceLog(raceLog);
     }
     
     @Override

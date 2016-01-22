@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -92,20 +93,20 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     private void fillWindAndStartLineData(StartAnalysisDTO startAnalysisDTO) {
         if (startAnalysisDTO.startAnalysisWindLineInfoDTO != null) {
             setLineAdvantageDivWidth(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType);
-            String startLineAdvantageType;
+            final String startLineAdvantageType;
             if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
-            }else{
+            } else {
                 startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWind();
             }
             startanalysis_card_line_advantage
-                    .setInnerHTML(startLineAdvantageType
+                    .setInnerHTML(SafeHtmlUtils.fromString(startLineAdvantageType
                             + ": "
                             + NumberFormat
                                     .getFormat("#0.0")
                                     .format(startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvantage)
-                            + " m");
+                            + " m").asString());
             String formattedTimeSinceStart;
             if (startAnalysisDTO.racingProcedureType.equals(RacingProcedureType.GateStart)) {
                 formattedTimeSinceStart = getRaceTimeStringFromMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);

@@ -63,9 +63,8 @@ public class MarkerService extends Service implements  CheckinManager.DataChange
             DatabaseHelper helper = DatabaseHelper.getInstance();
             helper.deleteRegattaFromDatabase(this, checkinData.checkinDigest);
             helper.storeCheckinRow(this, checkinData.marks, checkinData.getLeaderboard(), checkinData.getCheckinUrl(), checkinData.pings);
-        }
-        catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            e.printStackTrace();
+        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+            Log.e(TAG, "Error trying to analyze mark checkin data", e);
         }
     }
 
@@ -78,10 +77,9 @@ public class MarkerService extends Service implements  CheckinManager.DataChange
     }
 
     private class TimerRunnable implements Runnable {
-        ;
-        private  boolean running;
+        private boolean running;
 
-        public TimerRunnable(){
+        public TimerRunnable() {
             running = true;
         }
 
@@ -89,15 +87,14 @@ public class MarkerService extends Service implements  CheckinManager.DataChange
         public void run() {
             while (running) {
                 long timeDiff = Calendar.getInstance().getTimeInMillis() - lastCheck;
-
-                if(timeDiff > preferences.getDataRefreshInterval() * 1000) {
+                if (timeDiff > preferences.getDataRefreshInterval() * 1000) {
                     manager.callServerAndGenerateCheckinData();
                     lastCheck = Calendar.getInstance().getTimeInMillis();
                 }
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.d(TAG, "Interrupted Sleep", e);
                 }
             }
         }

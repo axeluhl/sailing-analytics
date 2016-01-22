@@ -15,6 +15,7 @@ import com.google.gwt.dom.client.MediaElement;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.media.client.Audio;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.Window.ClosingHandler;
@@ -123,7 +124,7 @@ public class MediaPlayerManagerComponent implements Component<MediaPlayerSetting
                     AudioElement mediaReachableTester = audio.getAudioElement();
                     addLoadMetadataHandler(mediaReachableTester, mediaTrack);
                     mediaReachableTester.setPreload(MediaElement.PRELOAD_METADATA);
-                    mediaReachableTester.setSrc(mediaTrack.url);
+                    mediaReachableTester.setSrc(UriUtils.fromString(mediaTrack.url).asString());
                     mediaReachableTester.load();
                 } else {
                     mediaTrack.status = Status.CANNOT_PLAY;
