@@ -96,7 +96,7 @@
                     android:id="@+id/add_item"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_add_42dp" />
+                    android:src="?attr/add" />
             </LinearLayout>
 
             <RelativeLayout

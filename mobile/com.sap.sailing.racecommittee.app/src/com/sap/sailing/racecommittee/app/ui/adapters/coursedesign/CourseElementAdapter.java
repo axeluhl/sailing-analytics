@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
@@ -193,8 +192,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public boolean onCheckCanStartDrag(RecyclerView.ViewHolder holder, int x, int y) {
-        ExLog.i(mContext, TAG, "onCheckCanStartDrag(" + x + ", " + y);
-
         if (holder instanceof ItemViewHolder) {
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             // x, y --- relative from the itemView's top-left
@@ -220,8 +217,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        ExLog.i(mContext, TAG, "onMoveItem(" + fromPosition + ", " + toPosition + ")");
-
         if (fromPosition == toPosition) {
             return;
         }
