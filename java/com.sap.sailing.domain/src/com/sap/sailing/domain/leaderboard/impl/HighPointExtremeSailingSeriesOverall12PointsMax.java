@@ -14,20 +14,21 @@ import com.sap.sailing.domain.leaderboard.MetaLeaderboard;
  * favour of the boat that had the better place at the last Regatta sailed."
  * 
  * @author Axel Uhl (d043530)
+ * @author Simon Marcel Pamies
  * 
  */
-public class HighPointExtremeSailingSeriesOverall extends AbstractHighPointExtremeSailingSeriesOverall {
+public class HighPointExtremeSailingSeriesOverall12PointsMax extends AbstractHighPointExtremeSailingSeriesOverall {
     private static final long serialVersionUID = -2500858156511889174L;
 
-    private static final int MAX_POINTS = 10;
+    private static final int MAX_POINTS = 12;
     
-    public HighPointExtremeSailingSeriesOverall() {
+    public HighPointExtremeSailingSeriesOverall12PointsMax() {
         super(MAX_POINTS);
     }
 
     @Override
     public ScoringSchemeType getType() {
-        return ScoringSchemeType.HIGH_POINT_ESS_OVERALL;
+        return ScoringSchemeType.HIGH_POINT_ESS_OVERALL_12;
     }
 
 }
