@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -116,8 +117,31 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
+    private boolean resetEditFragments(@IdRes int id, String action) {
+        if (findViewById(id) != null) {
+            Fragment fragment = getFragmentManager().findFragmentById(id);
+            if (fragment == null) {
+                fragment = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
+            }
+            if (fragment != null) {
+                LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+                manager.sendBroadcast(new Intent(action));
+                manager.sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onBackPressed() {
+        if (resetEditFragments(R.id.race_edit, AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT)) {
+            return;
+        }
+        if (resetEditFragments(R.id.finished_edit, AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT)) {
+            return;
+        }
+
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_container);
         if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
             if (getFragmentManager().getBackStackEntryCount() > 0) {

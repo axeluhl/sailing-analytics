@@ -195,30 +195,32 @@ public class WindFragment extends BaseFragment
      * disable setData button if gps data is missing or inaccurate
      */
     private void refreshUI() {
-        int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
-        int redColor = R.color.sap_red;
-        setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
-        setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
-        setTextAndColor(mAccuracyTimestamp, null, whiteColor);
-        if (mAccuracy != null) {
-            mAccuracy.setAccuracy(-1);
-        }
-
-        mSetData.setEnabled(false);
-        if (mCurrentLocation != null) {
-            double latitude = mCurrentLocation.getLatitude();
-            double longitude = mCurrentLocation.getLongitude();
-//            float accuracy = mCurrentLocation.getAccuracy();
-            long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-            setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
-            setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
-            setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
-                    .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+        if (isAdded()) {
+            int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+            int redColor = R.color.sap_red;
+            setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
+            setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
+            setTextAndColor(mAccuracyTimestamp, null, whiteColor);
             if (mAccuracy != null) {
-                mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                mAccuracy.setAccuracy(-1);
             }
 
-            mSetData.setEnabled(true);
+            mSetData.setEnabled(false);
+            if (mCurrentLocation != null) {
+                double latitude = mCurrentLocation.getLatitude();
+                double longitude = mCurrentLocation.getLongitude();
+//            float accuracy = mCurrentLocation.getAccuracy();
+                long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
+                setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
+                setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
+                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
+                        .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+                if (mAccuracy != null) {
+                    mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                }
+
+                mSetData.setEnabled(true);
+            }
         }
     }
 
