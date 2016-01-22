@@ -44,6 +44,7 @@ import com.sap.sailing.racecommittee.app.ui.views.AccuracyView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -54,6 +55,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class WindFragment extends BaseFragment
         implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
@@ -113,7 +115,7 @@ public class WindFragment extends BaseFragment
         ArrayList<String> numbers = new ArrayList<>();
         String kn = getString(R.string.wind_kn);
         for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
-            numbers.add(String.format("%.1f ", i) + kn);
+            numbers.add(String.format(Locale.US, "%.1f ", i) + kn);
         }
         return numbers.toArray(new String[numbers.size()]);
     }
@@ -211,8 +213,8 @@ public class WindFragment extends BaseFragment
                 double longitude = mCurrentLocation.getLongitude();
 //            float accuracy = mCurrentLocation.getAccuracy();
                 long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-                setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
-                setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
+                setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(latitude), whiteColor);
+                setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(longitude), whiteColor);
                 setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
                         .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
                 if (mAccuracy != null) {
@@ -332,7 +334,7 @@ public class WindFragment extends BaseFragment
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
             mWindInputDirection.setText(String.valueOf((int) enteredWindBearingFrom));
-            mWindInputSpeed.setText(String.valueOf(enteredWindSpeed));
+            mWindInputSpeed.setText(String.format(Locale.US, "%.1f", enteredWindSpeed));
         }
     }
 
