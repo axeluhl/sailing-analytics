@@ -52,7 +52,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
      */
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
 
-    private final AbstractLogEventAuthor regattaLogEventAuthorForAbstraceLeaderboard = new LogEventAuthorImpl(
+    private final AbstractLogEventAuthor regattaLogEventAuthorForAbstractLeaderboard = new LogEventAuthorImpl(
             AbstractLeaderboardImpl.class.getName(), 0);
     
     private static final Logger logger = Logger.getLogger(AbstractLeaderboardImpl.class.getName());
@@ -217,7 +217,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         TimePoint now = MillisecondsTimePoint.now();
         
         for (Competitor competitor : competitors) {
-            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstraceLeaderboard,
+            regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(now, now, regattaLogEventAuthorForAbstractLeaderboard,
                     UUID.randomUUID(), competitor));
         }
     }
@@ -238,7 +238,7 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
                 RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
                 if (competitorSet.contains(registerEvent.getCompetitor())) {
                     try {
-                        regattaLog.revokeEvent(regattaLogEventAuthorForAbstraceLeaderboard, event,
+                        regattaLog.revokeEvent(regattaLogEventAuthorForAbstractLeaderboard, event,
                                 "unregistering competitor because no longer selected for registration");
                     } catch (NotRevokableException e) {
                         logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
