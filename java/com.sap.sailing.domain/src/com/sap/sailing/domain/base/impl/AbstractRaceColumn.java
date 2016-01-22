@@ -279,7 +279,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
-            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allows on fleet "+fleet+" in column "+this);
+            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed  for fleet "+fleet+" in column "+this);
         }
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
