@@ -156,7 +156,7 @@
     <string name="override_default_start_procedure_type_select_description">Races will use selected start procedure type as a default. For this option to be active override checkbox has to be enabled.</string>
     <string name="settings_please_reload">Please execute action \'Reload\' to apply changes.</string>
     <string name="settings_advanced_service_header">Webservice URL</string>
-    <string name="settings_advanced_mail_header">Positioning mail recipient</string>
+    <string name="settings_advanced_mail_header">Results mail recipient</string>
     <string name="settings_category_polling">Polling</string>
     <string name="settings_polling_active_header">Activate Polling</string>
     <string name="settings_polling_active_description">When active the server will be polled for changes.</string>
