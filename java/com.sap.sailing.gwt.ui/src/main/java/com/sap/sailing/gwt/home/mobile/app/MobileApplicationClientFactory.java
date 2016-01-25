@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
@@ -24,7 +25,6 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;

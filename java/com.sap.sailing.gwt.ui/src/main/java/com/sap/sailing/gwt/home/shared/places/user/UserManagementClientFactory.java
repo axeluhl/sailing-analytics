@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.app;
+package com.sap.sailing.gwt.home.shared.places.user;
 
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sse.gwt.client.mvp.ClientFactory;

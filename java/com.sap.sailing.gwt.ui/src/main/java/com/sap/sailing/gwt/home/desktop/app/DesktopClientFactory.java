@@ -12,8 +12,8 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFac
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewClientFactory;
 import com.sap.sailing.gwt.home.shared.places.error.ErrorClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
+import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 
 public interface DesktopClientFactory extends AboutUsClientFactory, ContactClientFactory, EventClientFactory,
         EventsClientFactory, StartClientFactory, SponsoringClientFactory, SolutionsClientFactory,
