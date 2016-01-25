@@ -19,7 +19,8 @@ public abstract class AbstractSecureEntryPoint<S extends StringMessages> extends
 
     /**
      * Initializes the {@link UserManagementService} and removes the optional loading indicator from the DOM which is
-     * identified by the "loading" ID.
+     * identified by the "loading" ID. See the Home.html or AdminConsole.html entry point implementations for examples
+     * of how such a loading indicator can nicely be implemented.
      */
     protected void doOnModuleLoad() {
         securityProvider = new DefaultWithSecurityImpl();
