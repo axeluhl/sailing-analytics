@@ -19,8 +19,6 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer<CourseBase>
                 return courseDesignEvent.getCourseDesign();
             }
         }
-        
         return null;
     }
-
 }

@@ -276,17 +276,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             });
                         }
                     }).show();
-
-                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, new DialogCallback<Void>() {
-                        @Override
-                        public void ok(Void editedObject) {
-                        }
-
-                        @Override
-                        public void cancel() {
-                        }
-                    }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
@@ -580,8 +569,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final String result;
         RegattaDTO regatta = null;
         if (getSelectedLeaderboard().regattaName != null) {
-        if (allRegattas != null) {
-            for (RegattaDTO i : allRegattas) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
                     if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
                         regatta = i;
                         break;
@@ -597,7 +586,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     new AsyncCallback<Iterable<CompetitorDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            GWT.log("Error while searching BoatClass.");
+                            GWT.log("Error while searching boat class");
                             showWithBoatClass.showWithBoatClass(null);
                         }
                         
