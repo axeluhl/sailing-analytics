@@ -144,6 +144,10 @@ public class GateStartPathFinderFragment extends BaseFragment {
             }
         }
 
+        if (mNat != null) {
+            mNat.requestFocus();
+        }
+
         if (mButton != null) {
             mButton.setOnClickListener(new View.OnClickListener() {
 
