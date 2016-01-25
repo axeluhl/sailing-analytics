@@ -164,6 +164,7 @@ public class LoginActivity extends BaseActivity
         intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
         startActivity(intent);
+        finish();
     }
 
     private Serializable selectEvent(EventBase event) {
@@ -315,6 +316,10 @@ public class LoginActivity extends BaseActivity
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
         }
+
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
+        }
     }
 
     @Override
@@ -353,10 +358,6 @@ public class LoginActivity extends BaseActivity
             if (resultCode != ConnectionResult.SUCCESS) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
-        }
-
-        if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showEulaDialog(this, R.style.AppTheme_AlertDialog);
         }
     }
 

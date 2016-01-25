@@ -17,78 +17,76 @@ import android.widget.TextView;
 import com.sap.sailing.android.shared.R;
 
 public class EulaHelper {
-
     private static final String EULA_PREFERENCES = "eula.preferences";
-    private static final String EULA_CONFIRMED = "eula.confirmed";
+    private static final String EULA_CONFIRMED = "confirmed";
 
-    public static void showTrackingEulaDialog(final Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+    private static final int NO_THEME = 0;
+
+    private Context mContext;
+
+    private EulaHelper(Context context) {
+        mContext = context;
+    }
+
+    public static EulaHelper with(Context context) {
+        return new EulaHelper(context);
+    }
+
+    public void showEulaDialog() {
+        showEulaDialog(NO_THEME);
+    }
+
+    public void showEulaDialog(@StyleRes int theme) {
+        AlertDialog.Builder builder;
+        switch (theme) {
+            case NO_THEME:
+                builder = new AlertDialog.Builder(mContext);
+                break;
+
+            default:
+                builder = new AlertDialog.Builder(mContext, theme);
+        }
+
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(getSpannableMessage(context));
+        builder.setMessage(getSpannableMessage());
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                storeEulaAccepted(context);
+                storeEulaAccepted();
             }
         });
         AlertDialog alertDialog = builder.show();
         ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-
-    public static void showEulaDialog(final Context context, @StyleRes int theme) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, theme);
-        builder.setTitle(R.string.eula_title);
-        builder.setMessage(getSpannableMessage(context));
-        builder.setCancelable(false);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                storeEulaAccepted(context);
-            }
-        });
-        builder.setNegativeButton(R.string.skip, null);
-        AlertDialog alertDialog = builder.show();
-        ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
-    }
-
-    private static void storeEulaAccepted(Context context) {
-        SharedPreferences preferences = context.getApplicationContext().getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
+    private void storeEulaAccepted() {
+        SharedPreferences preferences = mContext.getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(EULA_CONFIRMED, true);
-        editor.apply();
+        editor.commit();
     }
 
-    public static boolean isEulaAccepted(Context context) {
-        boolean accepted = false;
-        SharedPreferences preferences = context.getApplicationContext().getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
-        if (preferences.contains(EULA_CONFIRMED)) {
-            accepted = preferences.getBoolean(EULA_CONFIRMED, false);
-        }
-        return accepted;
+    public boolean isEulaAccepted() {
+        SharedPreferences preferences = mContext.getSharedPreferences(EULA_PREFERENCES, Context.MODE_PRIVATE);
+        return preferences.getBoolean(EULA_CONFIRMED, false);
     }
 
-    public static void openEulaPage(Context context) {
-        String url = context.getString(R.string.eula_url);
+    public void openEulaPage() {
+        String url = mContext.getString(R.string.eula_url);
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        context.startActivity(browserIntent);
+        mContext.startActivity(browserIntent);
     }
 
-    /**
-     * Prepare text for dialog with clickable text part.
-     * @param context
-     * @return
-     */
-    private static SpannableString getSpannableMessage(final Context context) {
-        String message = context.getString(R.string.eula_message);
-        String clickableText = context.getString(R.string.linked_eula_message_part);
+    private SpannableString getSpannableMessage() {
+        String message = mContext.getString(R.string.eula_message);
+        String clickableText = mContext.getString(R.string.linked_eula_message_part);
 
         SpannableString spannableString = new SpannableString(message);
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                openEulaPage(context);
+                openEulaPage();
             }
         };
 

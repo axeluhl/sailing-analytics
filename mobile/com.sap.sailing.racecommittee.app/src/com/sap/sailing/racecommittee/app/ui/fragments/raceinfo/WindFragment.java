@@ -44,6 +44,7 @@ import com.sap.sailing.racecommittee.app.ui.views.AccuracyView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -51,8 +52,10 @@ import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class WindFragment extends BaseFragment
         implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
@@ -93,6 +96,8 @@ public class WindFragment extends BaseFragment
 
     private RacePositionsPoller positionPoller;
 
+    private IsTrackedReceiver mReceiver;
+
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
         Bundle args = new Bundle();
@@ -110,7 +115,7 @@ public class WindFragment extends BaseFragment
         ArrayList<String> numbers = new ArrayList<>();
         String kn = getString(R.string.wind_kn);
         for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
-            numbers.add(String.format("%.1f ", i) + kn);
+            numbers.add(String.format(Locale.US, "%.1f ", i) + kn);
         }
         return numbers.toArray(new String[numbers.size()]);
     }
@@ -121,10 +126,6 @@ public class WindFragment extends BaseFragment
 
         // initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
-
-        //register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new IsTrackedReceiver(), filter);
     }
 
     @Override
@@ -160,6 +161,8 @@ public class WindFragment extends BaseFragment
         mMapWebView = ViewHelper.get(layout, R.id.web_view);
         mMapHide = ViewHelper.get(layout, R.id.position_hide);
 
+        mReceiver = new IsTrackedReceiver(mContentMapShow);
+
         return layout;
     }
 
@@ -189,35 +192,46 @@ public class WindFragment extends BaseFragment
         refreshUI();
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
+            setupLayouts(false);
+            return true;
+        }
+        return super.onBackPressed();
+    }
+
     /**
      * refresh location data labels and highlight missing or inaccuracy gps data
      * disable setData button if gps data is missing or inaccurate
      */
     private void refreshUI() {
-        int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
-        int redColor = R.color.sap_red;
-        setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
-        setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
-        setTextAndColor(mAccuracyTimestamp, null, whiteColor);
-        if (mAccuracy != null) {
-            mAccuracy.setAccuracy(-1);
-        }
-
-        mSetData.setEnabled(false);
-        if (mCurrentLocation != null) {
-            double latitude = mCurrentLocation.getLatitude();
-            double longitude = mCurrentLocation.getLongitude();
-//            float accuracy = mCurrentLocation.getAccuracy();
-            long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-            setTextAndColor(mLatitude, getString(R.string.latitude_value, latitude), whiteColor);
-            setTextAndColor(mLongitude, getString(R.string.longitude_value, longitude), whiteColor);
-            setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
-                    .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+        if (isAdded()) {
+            int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+            int redColor = R.color.sap_red;
+            setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
+            setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
+            setTextAndColor(mAccuracyTimestamp, null, whiteColor);
             if (mAccuracy != null) {
-                mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                mAccuracy.setAccuracy(-1);
             }
 
-            mSetData.setEnabled(true);
+            mSetData.setEnabled(false);
+            if (mCurrentLocation != null) {
+                double latitude = mCurrentLocation.getLatitude();
+                double longitude = mCurrentLocation.getLongitude();
+//            float accuracy = mCurrentLocation.getAccuracy();
+                long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
+                setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(latitude), whiteColor);
+                setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(longitude), whiteColor);
+                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
+                        .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+                if (mAccuracy != null) {
+                    mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                }
+
+                mSetData.setEnabled(true);
+            }
         }
     }
 
@@ -329,7 +343,7 @@ public class WindFragment extends BaseFragment
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
             mWindInputDirection.setText(String.valueOf((int) enteredWindBearingFrom));
-            mWindInputSpeed.setText(String.valueOf(enteredWindSpeed));
+            mWindInputSpeed.setText(String.format(Locale.US, "%.1f", enteredWindSpeed));
         }
     }
 
@@ -355,6 +369,7 @@ public class WindFragment extends BaseFragment
                 loadRaceMap(true, false, false, true);
                 mMapLayout.setVisibility(View.VISIBLE);
             } else {
+                mMapWebView.loadUrl("about:blank");
                 settings.setJavaScriptEnabled(false);
                 mMapLayout.setVisibility(View.GONE);
             }
@@ -389,6 +404,7 @@ public class WindFragment extends BaseFragment
         pauseApiClient();
         pausePositionPoller();
 
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
@@ -399,6 +415,10 @@ public class WindFragment extends BaseFragment
         // connect googleApiClient and register position poller
         resumeApiClient();
         resumePositionPoller();
+
+        //register receiver to be notified if race is tracked
+        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
@@ -482,12 +502,19 @@ public class WindFragment extends BaseFragment
         preferences.setWindSpeed(wind.getKnots());
     }
 
-    private class IsTrackedReceiver extends BroadcastReceiver {
+    private static class IsTrackedReceiver extends BroadcastReceiver {
+
+        private WeakReference<Button> reference;
+
+        public IsTrackedReceiver(Button button) {
+            reference = new WeakReference<>(button);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mContentMapShow != null) {
-                mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            Button button = reference.get();
+            if (button != null) {
+                button.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
             }
         }
     }

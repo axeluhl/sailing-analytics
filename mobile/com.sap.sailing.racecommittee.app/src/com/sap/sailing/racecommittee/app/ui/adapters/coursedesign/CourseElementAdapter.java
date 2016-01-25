@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
     private Context mContext;
     private List<CourseListDataElementWithIdImpl> mElements;
     private MarkImageHelper mImageHelper;
-    private LongClick mLongClickListener;
     private ItemClick mItemClickListener;
     private EventListener mEventListener;
 
@@ -123,6 +123,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
                 }
                 itemHolder.container.setBackgroundColor(bgColor);
             }
+        } else if (holder instanceof AddItemHolder) {
+            AddItemHolder itemHolder = (AddItemHolder) holder;
+            itemHolder.hintText.setVisibility((position == 0) ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -166,10 +169,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         mItemClickListener = listener;
     }
 
-    public void setLongClickListener(LongClick listener) {
-        mLongClickListener = listener;
-    }
-
     public void setEventListener(EventListener listener) {
         mEventListener = listener;
     }
@@ -195,8 +194,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public boolean onCheckCanStartDrag(RecyclerView.ViewHolder holder, int x, int y) {
-        ExLog.i(mContext, TAG, "onCheckCanStartDrag(" + x + ", " + y);
-
         if (holder instanceof ItemViewHolder) {
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             // x, y --- relative from the itemView's top-left
@@ -222,8 +219,6 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        ExLog.i(mContext, TAG, "onMoveItem(" + fromPosition + ", " + toPosition + ")");
-
         if (fromPosition == toPosition) {
             return;
         }
@@ -285,6 +280,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     @Override
     public void onPerformAfterSwipeReaction(RecyclerView.ViewHolder holder, int result, int reaction) {
+        ExLog.i(mContext, TAG, "onPerformAfterSwipeReaction() called with: " + "holder = [" + holder + "], result = [" + result + "], reaction = [" + reaction + "]");
+
         int position = holder.getAdapterPosition();
         CourseListDataElementWithIdImpl element = mElements.get(position);
 
@@ -305,10 +302,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     public interface ItemClick {
         void onAddItemClick();
-    }
 
-    public interface LongClick {
-        void onItemLongClick(int type, CourseListDataElementWithIdImpl element);
+        void onItemEditClick(int type, CourseListDataElementWithIdImpl element);
     }
 
     public interface EventListener {
@@ -317,13 +312,17 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     public class AddItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        private ImageView addItem;
+        private TextView hintText;
+
         public AddItemHolder(View itemView) {
             super(itemView);
 
-            itemView = ViewHelper.get(itemView, R.id.add_item);
-            if (itemView != null) {
-                itemView.setOnClickListener(this);
+            addItem = ViewHelper.get(itemView, R.id.add_item);
+            if (addItem != null) {
+                addItem.setOnClickListener(this);
             }
+            hintText = ViewHelper.get(itemView, R.id.hint_text);
         }
 
         @Override
@@ -334,7 +333,7 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
     }
 
-    public class ItemViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener, View.OnClickListener {
+    public class ItemViewHolder extends BaseDraggableSwipeViewHolder implements View.OnClickListener {
 
         public ViewGroup container;
         public View dragHandle;
@@ -363,13 +362,13 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
             if (mEditable) {
                 if (leftColumn != null) {
-                    leftColumn.setOnLongClickListener(this);
+                    leftColumn.setOnClickListener(this);
                 }
                 if (roundingDirection != null) {
-                    roundingDirection.setOnLongClickListener(this);
+                    roundingDirection.setOnClickListener(this);
                 }
                 if (rightColumn != null) {
-                    rightColumn.setOnLongClickListener(this);
+                    rightColumn.setOnClickListener(this);
                 }
                 if (addItem != null) {
                     addItem.setOnClickListener(this);
@@ -378,32 +377,26 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
 
         @Override
-        public boolean onLongClick(View v) {
-            if (mLongClickListener != null) {
+        public void onClick(View v) {
+            if (mItemClickListener != null) {
                 switch (v.getId()) {
                     case R.id.column_left:
-                        mLongClickListener.onItemLongClick(TOUCH_LEFT_AREA, mElements.get(getAdapterPosition()));
+                        mItemClickListener.onItemEditClick(TOUCH_LEFT_AREA, mElements.get(getAdapterPosition()));
                         break;
 
                     case R.id.column_right:
                         if (addItem.getVisibility() == View.GONE) {
-                            mLongClickListener.onItemLongClick(TOUCH_RIGHT_AREA, mElements.get(getAdapterPosition()));
+                            mItemClickListener.onItemEditClick(TOUCH_RIGHT_AREA, mElements.get(getAdapterPosition()));
                         }
                         break;
 
+                    case R.id.rounding_direction:
+                        mItemClickListener.onItemEditClick(TOUCH_TYPE_AREA, mElements.get(getAdapterPosition()));
+                        break;
+
                     default:
-                        mLongClickListener.onItemLongClick(TOUCH_TYPE_AREA, mElements.get(getAdapterPosition()));
+                        mItemClickListener.onAddItemClick();
                 }
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public void onClick(View v) {
-            if (mItemClickListener != null) {
-                mItemClickListener.onAddItemClick();
             }
         }
 

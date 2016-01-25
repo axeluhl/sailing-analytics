@@ -51,8 +51,8 @@ public class StartActivity extends AbstractStartActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showTrackingEulaDialog(this);
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog();
         }
     }
 

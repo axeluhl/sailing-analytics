@@ -50,7 +50,8 @@ public class BaseFragment extends RaceFragment {
             fragment.getArguments().putAll(getArguments());
         }
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(viewId, fragment).commit();
+        transaction.replace(viewId, fragment);
+        transaction.commit();
     }
 
     protected void goHome() {
@@ -60,5 +61,9 @@ public class BaseFragment extends RaceFragment {
             sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
+    }
+
+    public boolean onBackPressed() {
+        return false;
     }
 }

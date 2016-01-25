@@ -135,7 +135,6 @@ public class TimePanelFragment extends BasePanelFragment {
                 }
             }
 
-
             if (mHeaderTime != null && startTime != null) {
                 String time;
                 int resId;

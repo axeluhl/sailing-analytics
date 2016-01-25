@@ -111,7 +111,7 @@ public class SystemInformationActivityHelper {
         eulaButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                EulaHelper.openEulaPage(activity);
+                EulaHelper.with(activity).openEulaPage();
             }
         });
         licenceButton.setOnClickListener(new OnClickListener() {

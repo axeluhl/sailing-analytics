@@ -48,7 +48,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="2"
+                    android:layout_weight="15"
                     android:text="@string/race_summary_start"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"/>
@@ -59,7 +59,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="invisible"
                     tools:visibility="visible"/>
@@ -69,16 +68,16 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:gravity="right"
+                    android:layout_weight="8"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="11:00:00"/>
+                    tools:text="11:00:00"
+                    android:gravity="center_horizontal" />
 
                 <View
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"/>
+                    android:layout_weight="10"/>
             </LinearLayout>
 
             <LinearLayout
@@ -91,7 +90,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="2"
+                    android:layout_weight="15"
                     android:text="@string/race_summary_finish_begin"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"/>
@@ -102,7 +101,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="visible"/>
 
@@ -111,8 +109,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:gravity="right"
+                    android:layout_weight="8"
+                    android:gravity="center_horizontal"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
                     tools:text="11:12:18"/>
@@ -122,11 +120,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
+                    android:layout_weight="10"
                     android:gravity="right"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="12' 18"/>
+                    tools:text="18h 12' 18''"/>
             </LinearLayout>
 
             <LinearLayout
@@ -139,7 +137,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="2"
+                    android:layout_weight="15"
                     android:text="@string/race_summary_finish_end"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"/>
@@ -150,7 +148,6 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/default_margin_half"
-                    android:layout_marginRight="@dimen/default_margin_half"
                     android:src="?attr/create"
                     android:visibility="visible"/>
 
@@ -159,22 +156,22 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:gravity="right"
+                    android:layout_weight="8"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="11:16:36"/>
+                    tools:text="11:16:36"
+                    android:gravity="center_horizontal" />
 
                 <TextView
                     android:id="@+id/race_finish_end_duration"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
+                    android:layout_weight="10"
                     android:gravity="right"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="16' 36"/>
+                    tools:text="0h 16' 36''"/>
             </LinearLayout>
 
             <LinearLayout
@@ -187,7 +184,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="2"
+                    android:layout_weight="15"
                     android:text="@string/race_summary_finish_duration"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"/>
@@ -197,11 +194,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_weight="2"
+                    android:layout_weight="20"
                     android:gravity="right"
                     android:textColor="?attr/white"
                     android:textSize="@dimen/finished_default_text_size"
-                    tools:text="04' 18"/>
+                    tools:text="0h 04' 18''"/>
             </LinearLayout>
 
             <LinearLayout

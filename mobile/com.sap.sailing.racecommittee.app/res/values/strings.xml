@@ -476,5 +476,11 @@
     <string name="prev_course">Previous Course</string>
     <string name="layout_course">Course Layout</string>
     <string name="wind_degree">°</string>
+    <string name="add_waypoint">Press plus to add waypoint</string>
+    <string name="unpublished_course">Unpublished course design</string>
+    <string name="reset_state_1">New</string>
+    <string name="reset_state_2">Reset</string>
+    <string name="reset_message_1">Do you want to clear the list?</string>
+    <string name="reset_message_2">Do you want to reset to the last state?</string>
 
 </resources>

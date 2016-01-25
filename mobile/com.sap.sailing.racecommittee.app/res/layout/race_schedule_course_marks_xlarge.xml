@@ -60,27 +60,33 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/publishCourse"
+                    android:id="@+id/takeHistoryCourse"
                     style="?attr/buttonSolidNormal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="20dp"
-                    android:text="@string/publish" />
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="@string/take_previous" />
 
                 <Button
                     android:id="@+id/unpublishCourse"
                     style="?attr/buttonSolidNormal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:text="@string/unpublish" />
 
                 <Button
-                    android:id="@+id/takeHistoryCourse"
+                    android:id="@+id/publishCourse"
                     style="?attr/buttonSolidNormal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/take_previous" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="@string/publish" />
             </LinearLayout>
         </RelativeLayout>
 

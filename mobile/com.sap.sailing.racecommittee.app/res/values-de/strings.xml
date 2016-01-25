@@ -88,7 +88,7 @@
 
     <string name="publish">Veröffentlichen</string>
     <string name="unpublish">Zurücknehmen</string>
-    <string name="take_previous">Vorherigen Kurs übernehmen</string>
+    <string name="take_previous">Kurs übernehmen</string>
     <string name="take_previous_short">übernehmen</string>
     <string name="markImage">Bild der Bahnmarke</string>
     <string name="cancel">Abbrechen</string>
@@ -450,5 +450,11 @@
     <string name="prev_course">Vorheriger Kurs</string>
     <string name="layout_course">Kurs Layout</string>
     <string name="wind_degree">°</string>
+    <string name="add_waypoint">Wegpunkt hinzufügen</string>
+    <string name="unpublished_course">Unpublished course design</string>
+    <string name="reset_state_1">Neu</string>
+    <string name="reset_state_2">Zurücksetzen</string>
+    <string name="reset_message_1">Soll die Liste komplett gelöscht werden?</string>
+    <string name="reset_message_2">Soll die Liste zum letzten bekannten Stand zurückgesetzt werden?</string>
 
 </resources>
