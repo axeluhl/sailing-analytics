@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
@@ -15,6 +16,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.R;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class EulaHelper {
     private static final String EULA_PREFERENCES = "eula.preferences";
@@ -48,7 +54,7 @@ public class EulaHelper {
         }
 
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(getSpannableMessage());
+        builder.setMessage(Html.fromHtml(getContent(mContext, R.raw.license)));
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
@@ -78,20 +84,32 @@ public class EulaHelper {
         mContext.startActivity(browserIntent);
     }
 
-    private SpannableString getSpannableMessage() {
-        String message = mContext.getString(R.string.eula_message);
-        String clickableText = mContext.getString(R.string.linked_eula_message_part);
+    protected String getContent(final Context context, final int contentResourceId) {
+        BufferedReader reader = null;
+        try {
+            final InputStream inputStream = context.getResources().openRawResource(contentResourceId);
+            if (inputStream != null) {
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder builder = new StringBuilder();
+                String aux;
 
-        SpannableString spannableString = new SpannableString(message);
-        ClickableSpan clickableSpan = new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-                openEulaPage();
+                while ((aux = reader.readLine()) != null) {
+                    builder.append(aux).append(System.getProperty("line.separator"));
+                }
+
+                return builder.toString();
             }
-        };
-
-        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-        return spannableString;
+            throw new IOException("Error opening license file.");
+        } catch (final IOException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    // Don't care.
+                }
+            }
+        }
     }
 }
