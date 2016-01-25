@@ -47,12 +47,10 @@ public class FlagPanelFragment extends BasePanelFragment {
     // Course Toggle
     private View mCourseFlags;
     private View mCourseLock;
-    private View mCourseLayer;
 
     // More Toggle (Finish)
     private View mMoreFlags;
     private View mMoreLock;
-    private View mMoreLayer;
 
     public FlagPanelFragment() {
         mReceiver = new IntentReceiver();
@@ -94,14 +92,12 @@ public class FlagPanelFragment extends BasePanelFragment {
             mCourseFlags.setOnClickListener(new CourseFlagsClick());
         }
         mCourseLock = ViewHelper.get(layout, R.id.course_flags_lock);
-        mCourseLayer = ViewHelper.get(layout, R.id.course_flags_layer);
 
         mMoreFlags = ViewHelper.get(layout, R.id.more_flags);
         if (mMoreFlags != null) {
             mMoreFlags.setOnClickListener(new MoreFlagsClick());
         }
         mMoreLock = ViewHelper.get(layout, R.id.more_flags_lock);
-        mMoreLayer = ViewHelper.get(layout, R.id.more_flags_layer);
 
         return layout;
     }
