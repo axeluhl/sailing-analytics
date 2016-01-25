@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="beforeDescendants"
-    android:focusableInTouchMode="true"
-    android:orientation="vertical">
+    android:focusableInTouchMode="true">
 
     <RelativeLayout
         android:id="@+id/header_layout"
@@ -81,24 +80,41 @@
         android:background="?attr/sap_gray_black_30"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/set_data"
-            style="?attr/button"
-            android:layout_width="@dimen/default_button_width"
-            android:layout_height="@dimen/default_button_height"
+        <LinearLayout
+            android:id="@+id/button_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="@dimen/default_margin_half"
-            android:enabled="false"
-            android:padding="@dimen/default_padding_half"
-            android:text="@string/wind_set_data"
-            android:textSize="@dimen/textSize_18" />
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/position_show"
+                style="?attr/button"
+                android:layout_width="@dimen/default_button_width"
+                android:layout_height="@dimen/default_button_height"
+                android:layout_gravity="center"
+                android:text="@string/wind_map_button_show"
+                android:textSize="@dimen/textSize_18"
+                android:enabled="false" />
+
+            <Button
+                android:id="@+id/set_data"
+                style="?attr/button"
+                android:layout_width="@dimen/default_button_width"
+                android:layout_height="@dimen/default_button_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="@dimen/default_margin_half"
+                android:enabled="false"
+                android:padding="@dimen/default_padding_half"
+                android:text="@string/wind_set_data"
+                android:textSize="@dimen/textSize_18" />
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/set_data">
+            android:layout_above="@id/button_bar">
 
             <GridLayout
                 android:layout_width="wrap_content"
@@ -242,4 +258,16 @@
             </GridLayout>
         </RelativeLayout>
     </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/map_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </FrameLayout>
 </RelativeLayout>

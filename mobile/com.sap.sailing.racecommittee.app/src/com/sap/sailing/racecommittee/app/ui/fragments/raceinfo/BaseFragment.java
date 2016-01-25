@@ -62,4 +62,8 @@ public class BaseFragment extends RaceFragment {
             sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         }
     }
+
+    public boolean onBackPressed() {
+        return false;
+    }
 }

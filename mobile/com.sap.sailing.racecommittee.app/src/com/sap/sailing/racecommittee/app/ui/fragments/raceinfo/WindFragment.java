@@ -192,6 +192,15 @@ public class WindFragment extends BaseFragment
         refreshUI();
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
+            setupLayouts(false);
+            return true;
+        }
+        return super.onBackPressed();
+    }
+
     /**
      * refresh location data labels and highlight missing or inaccuracy gps data
      * disable setData button if gps data is missing or inaccurate
@@ -360,6 +369,7 @@ public class WindFragment extends BaseFragment
                 loadRaceMap(true, false, false, true);
                 mMapLayout.setVisibility(View.VISIBLE);
             } else {
+                mMapWebView.loadUrl("about:blank");
                 settings.setJavaScriptEnabled(false);
                 mMapLayout.setVisibility(View.GONE);
             }

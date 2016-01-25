@@ -59,6 +59,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
@@ -122,6 +123,13 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             Fragment fragment = getFragmentManager().findFragmentById(id);
             if (fragment == null) {
                 fragment = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
+            } else {
+                if (fragment instanceof BaseFragment) {
+                    BaseFragment base = (BaseFragment) fragment;
+                    if (base.onBackPressed()) {
+                        return true;
+                    }
+                }
             }
             if (fragment != null) {
                 LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
