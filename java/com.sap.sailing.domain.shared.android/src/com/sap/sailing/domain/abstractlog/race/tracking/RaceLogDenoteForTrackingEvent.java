@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
 
 /**
@@ -13,7 +13,7 @@ import com.sap.sailing.domain.base.BoatClass;
  * for creating this race will be accumulated in this RaceLog. Once it is present, the
  * actual {@link TrackedRace} can then be created from this information, and fixes for
  * competitors and marks that arrive on the server, for which a corresponding
- * {@link DeviceMappingEvent} exists will be added to the race.
+ * {@link RegattaLogDeviceMappingEvent} exists will be added to the race.
  * @author Fredrik Teschke
  *
  */

@@ -1,29 +1,55 @@
 package com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.OpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+/**
+ * Generates events that close the events that are responsible for the {@link #mapping} that is passed to the
+ * constructor.
+ * 
+ * @author Fredrik Teschke
+ *
+ */
 public class RegattaLogOpenEndedDeviceMappingCloser extends
-        OpenEndedDeviceMappingCloser<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor, RegattaLogCloseOpenEndedDeviceMappingEvent> {
+        RegattaLogAnalyzer<List<RegattaLogCloseOpenEndedDeviceMappingEvent>> {
+    private final DeviceMapping<?> mapping;
+    protected final AbstractLogEventAuthor author;
+    protected final TimePoint closingTimePoint;
 
-    public RegattaLogOpenEndedDeviceMappingCloser(RegattaLog log, DeviceMapping<?> mapping, AbstractLogEventAuthor author,
-            TimePoint closingTimePoint) {
-        super(log, mapping, author, closingTimePoint);
+    public RegattaLogOpenEndedDeviceMappingCloser(RegattaLog log, DeviceMapping<?> mapping,
+            AbstractLogEventAuthor author, TimePoint closingTimePoint) {
+        super(log);
+        this.mapping = mapping;
+        this.author = author;
+        this.closingTimePoint = closingTimePoint;
+    }
+
+    protected RegattaLogCloseOpenEndedDeviceMappingEvent createCloseEvent(TimePoint logicalTimePoint,
+            Serializable eventToCloseId) {
+        return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(logicalTimePoint, author, eventToCloseId,
+                closingTimePoint);
     }
 
     @Override
-    protected RegattaLogCloseOpenEndedDeviceMappingEvent createCloseEvent(TimePoint logicalTimePoint,
-            Serializable eventToCloseId) {
-        return new RegattaLogCloseOpenEndedDeviceMappingEventImpl(author,
-                logicalTimePoint, eventToCloseId, closingTimePoint);
+    protected List<RegattaLogCloseOpenEndedDeviceMappingEvent> performAnalysis() {
+        List<RegattaLogCloseOpenEndedDeviceMappingEvent> result = new ArrayList<RegattaLogCloseOpenEndedDeviceMappingEvent>();
+
+        for (Serializable eventId : mapping.getOriginalRaceLogEventIds()) {
+            RegattaLogDeviceMappingEvent<?> event = (RegattaLogDeviceMappingEvent<?>) getLog().getEventById(eventId);
+            if (event.getFrom() == null || event.getTo() == null) {
+                result.add(createCloseEvent(MillisecondsTimePoint.now(), event.getId()));
+            }
+        }
+        return result;
     }
 }

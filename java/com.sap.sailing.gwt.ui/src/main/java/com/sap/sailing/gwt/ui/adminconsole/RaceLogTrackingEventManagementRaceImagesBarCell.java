@@ -13,7 +13,6 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_REMOVE_DENOTATION = "ACTION_REMOVE_DENOTATION";
     public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
     public final static String ACTION_DEFINE_COURSE = "ACTION_DEFINE_COURSE";
-    public final static String ACTION_MAP_DEVICES = "ACTION_MAP_DEVICES";
     public final static String ACTION_COPY = "ACTION_COPY";
     public final static String ACTION_EDIT = "ACTION_EDIT";
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
@@ -40,7 +39,6 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             result.add(new ImageSpec(ACTION_REMOVE_DENOTATION, stringMessages.removeDenotation(), makeImagePrototype(resources.unDenoteForRaceLogTracking())));
             result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(), makeImagePrototype(resources.competitorRegistrations())));
             result.add(new ImageSpec(ACTION_DEFINE_COURSE, stringMessages.defineCourse(), makeImagePrototype(resources.defineCourse())));
-            result.add(new ImageSpec(ACTION_MAP_DEVICES, stringMessages.mapDevices(), makeImagePrototype(resources.mapDevices())));
             result.add(new ImageSpec(ACTION_COPY, stringMessages.copyCourseAndCompetitors(), makeImagePrototype(resources.copy())));
         }
         result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));

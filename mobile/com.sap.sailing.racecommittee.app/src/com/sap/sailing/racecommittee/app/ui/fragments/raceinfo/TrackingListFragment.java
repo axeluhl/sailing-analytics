@@ -26,8 +26,10 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropM
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
@@ -293,7 +295,7 @@ public class TrackingListFragment extends BaseFragment
     private ArrayList<CompetitorsWithIdImpl> initializeFinishList() {
         ArrayList<CompetitorsWithIdImpl> positioning = new ArrayList<>();
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
-            for (Util.Triple<Serializable, String, MaxPointsReason> results : getRaceState().getFinishPositioningList()) {
+            for (CompetitorResult results : getRaceState().getFinishPositioningList()) {
                 positioning.add(new CompetitorsWithIdImpl(mId, results));
                 mId++;
             }
@@ -382,15 +384,17 @@ public class TrackingListFragment extends BaseFragment
     }
 
     private void setCompetitorToBottomOfPositioningList(CompetitorsWithIdImpl item) {
-        int lastIndex = getCompetitorResults().size() - 1;
+        int lastIndex = Util.size(getCompetitorResults()) - 1;
         mFinishedData.remove(item);
         mFinishedData.add(lastIndex, item);
     }
 
     private CompetitorResults getCompetitorResults() {
         CompetitorResults result = new CompetitorResultsImpl();
+        int oneBasedRank = 1;
         for (CompetitorsWithIdImpl item : mFinishedData) {
-            result.add(new Util.Triple<>(item.getKey(), item.getText(), item.getReason()));
+            result.add(new CompetitorResultImpl(item.getKey(), item.getText(), oneBasedRank++, item.getReason(),
+                    /* score */ null, /* finishingTime */ null, /* comment */ null));
         }
         return result;
     }

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -26,6 +25,7 @@ import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 
 public interface RaceLogTrackingAdapter {
@@ -76,26 +76,10 @@ public interface RaceLogTrackingAdapter {
             throws NotDenotableForRaceLogTrackingException;
 
     /**
-     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService) using a random {@link PingDeviceIdentifier}
-     */
-    void pingMark(RaceLog raceLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-
-    /**
-     * @see #pingMark(RaceLog, Mark, GPSFix, RacingEventService)
+     * Add a fix to the {@link GPSFixStore}, and create a mapping with a virtual device for exactly that time point
+     * in the {@code regattaLogToAddTo}, mapping the virtual device to the {@code mark}.
      */
     void pingMark(RegattaLog regattaLogToAddTo, Mark mark, GPSFix gpsFix, RacingEventService service);
-
-    /**
-     * If not yet registered, register the competitors in {@code competitors}, and unregister all already registered
-     * competitors not in {@code competitors}.
-     */
-    void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors);
-
-    /**
-     * If not yet registered, register the competitors in {@code competitors}, and unregister all already registered
-     * competitors not in {@code competitors}.
-     */
-    void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors);
 
     /**
      * Invite competitors for tracking via the Tracking App by sending out emails.
@@ -114,16 +98,11 @@ public interface RaceLogTrackingAdapter {
             String emails, Locale locale) throws MailException;
 
     /**
-     * Duplicate the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the
-     * {@code to} race logs. The {@link Mark}s and {@link ControlPoint}s are duplicated and not reused. This also
-     * inserts the necessary {@link RaceLogDefineMarkEvent}s into the {@code to} race logs.
+     * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}
+     * race logs. The {@link Mark}s and {@link ControlPoint}s are reused and not duplicated.
      */
     void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service);
 
-    /**
-     * Duplicate the competitor registrations from the {@code from} race log to the {@code to} race logs.
-     */
-    void copyCompetitors(RaceLog from, Set<RaceLog> to, 
-            RacingEventService service);
+    void copyCompetitors(RaceColumn fromRaceColumn, Fleet fromFleet, Iterable<Pair<RaceColumn, Fleet>> toRaces);
 }
