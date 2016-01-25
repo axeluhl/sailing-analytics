@@ -28,6 +28,7 @@ public class CombinedWindPanel extends FlowPanel {
     
     public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle,
             StringMessages stringMessages, CoordinateSystem coordinateSystem) {
+        combinedWindPanelStyle.ensureInjected();
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;

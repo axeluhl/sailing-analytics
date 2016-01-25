@@ -18,8 +18,12 @@
 	text-align: center;
 }
 
-.combinedWindPanelCanvas{
+.combinedWindPanelCanvas {
 	width: 55px;
 	margin-left: 6px;
 	cursor: pointer;
+}
+
+.trueNorthIndicator {
+	opacity: 1.0;
 }

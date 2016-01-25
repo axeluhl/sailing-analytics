@@ -2,18 +2,26 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
-	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidgetResources"/>
+	<ui:with field="resources"
+		type="com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidgetResources" />
 
 	<g:HTMLPanel styleName="{resources.gss.startanalysis}">
 		<g:HTMLPanel ui:field="header" styleName="{resources.gss.panel_header}">
-			No Starts Available
 		</g:HTMLPanel>
-		<g:Image resource="{resources.left}" ui:field="leftButton"
-			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}"></g:Image>
-		<g:Image resource="{resources.right}" ui:field="rightButton"
-			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_right}"></g:Image>
+		<g:HTMLPanel ui:field="currentStartPanel" styleName="{resources.gss.current_start_panel}">
+
+		</g:HTMLPanel>
+		<g:HTMLPanel ui:field="leftButton"
+			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}">
+			<g:Image ui:field="leftButtonImage" styleName="{resources.gss.controll_header_button_image}" resource="{resources.left}"></g:Image>
+		</g:HTMLPanel>
+		<g:HTMLPanel ui:field="rightButton"
+			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_right}">
+			<g:Image ui:field="rightButtonImage" styleName="{resources.gss.controll_header_button_image}" resource="{resources.right}"></g:Image>
+		</g:HTMLPanel>
 		<g:FocusPanel ui:field="left_focus_panel" styleName="{resources.gss.left_focus_panel}"></g:FocusPanel>
-		<g:FocusPanel ui:field="right_focus_panel" styleName="{resources.gss.right_focus_panel}"></g:FocusPanel>
+		<g:FocusPanel ui:field="right_focus_panel"
+			styleName="{resources.gss.right_focus_panel}"></g:FocusPanel>
 		<g:HTMLPanel ui:field="startanalysis_card_container"
 			styleName="{resources.gss.card_container}">
 		</g:HTMLPanel>

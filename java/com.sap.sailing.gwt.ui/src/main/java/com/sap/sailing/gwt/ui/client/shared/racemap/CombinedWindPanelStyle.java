@@ -8,4 +8,5 @@ public interface CombinedWindPanelStyle extends CssResource {
     public String combinedWindPanel();
     public String combinedWindPanelTextLabel();
     public String combinedWindPanelCanvas();
+    public String trueNorthIndicator();
 }

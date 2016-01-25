@@ -1,30 +1,35 @@
 @require 'theme';
 
 .combinedWindPanel {
-	margin-top: 10pt;
-	margin-left: 10pt;
-	right: 0pt;
-	width: 45pt;
-	height: 45pt;
-	border-radius: 22.5pt;
+	margin-top: DASHBOARD_SPACE_VERY_SMALL;
+	margin-left: DASHBOARD_SPACE_VERY_SMALL;
+	right: 0px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
 	background-color: white;
 }
 
 .combinedWindPanelTextLabel {
-	margin-top: 15pt;
-	width: 45pt;
-	height: 25pt;
-	background-color: white;
-	line-height: 25pt;
-	vertical-align: middle;
-	font-size: 11pt;
-	font-family: DASHBOARD_FONT_FAMILY;
-	text-align: center;
+margin-top: DASHBOARD_SPACE_VERY_SMALL;
+width: 50px;
+height: DASHBOARD_SPACE_SMALL;
+line-height: DASHBOARD_SPACE_SMALL;
+vertical-align: middle;
+font-size: DASHBOARD_FONT_SIZE_SMALL;
+font-weight: bold;
+font-family: DASHBOARD_FONT_FAMILY;
+text-align: center;
+color: white;
 }
 
 .combinedWindPanelCanvas {
-	width: 35pt;
-	height: 35pt;
-	margin-top: 5pt;
-	margin-left: 5pt;
+	width: 30px !important;
+	height: 30px !important;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+
+.trueNorthIndicator {
+	opacity: 0.0;
 }

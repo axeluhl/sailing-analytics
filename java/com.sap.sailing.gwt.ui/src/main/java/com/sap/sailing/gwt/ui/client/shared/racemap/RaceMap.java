@@ -406,7 +406,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
             boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
+            RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -416,7 +416,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.errorReporter = errorReporter;
         this.timer = timer;
         timer.addTimeListener(this);
-        raceMapImageManager = new RaceMapImageManager();
+        raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<>();
         courseMiddleLines = new HashMap<>();
@@ -443,9 +443,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls, showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, raceMapResources.combinedWindPanelStyle(), stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.combinedWindPanelStyle(), stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
@@ -629,8 +629,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showHeaderPanel) {
                   createHeaderPanel(map);
               }
+              if (showMapControls) {
               createSettingsButton(map);
-
+              }
               // Data has been initialized
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();

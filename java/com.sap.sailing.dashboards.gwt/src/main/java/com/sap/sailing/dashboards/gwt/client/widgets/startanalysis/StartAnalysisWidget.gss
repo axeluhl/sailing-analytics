@@ -3,7 +3,7 @@
 .startanalysis {
 	position: absolute;
 	overflow: hidden;
-	background-color: white;
+	background-color: LIGHT_GREY;
 	left: 0pt;
 	right: 0pt;
 	top: 0pt;
@@ -11,42 +11,71 @@
 }
 
 .panel_header {
-	height: 100%;
+	height: DASHBOARD_SPACE_MEDIUM;
 	margin-top: 0;
-	line-height: 30pt;
+	line-height: DASHBOARD_SPACE_MEDIUM;
 	vertical-align: middle;
-	font-size: 14pt;
+	font-size: DASHBOARD_FONT_SIZE_LARGE;
 	font-family: DASHBOARD_FONT_FAMILY;
 	width: 100%;
 	text-align: center;
 	font-weight: bold;
 	overflow: visible;
-	background-color: white;
+	background-color: WHITE;
+}
+
+.current_start_panel {
+	height: DASHBOARD_SPACE_MEDIUM;
+	top: DASHBOARD_SPACE_MEDIUM;
+	line-height: DASHBOARD_SPACE_MEDIUM;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	z-index: 3;
 }
 
 .controll_header_button {
 	position: absolute;
-	top: 10pt;
-	height: 17.5pt;
-	width: 17.5pt;
+	height: DASHBOARD_SPACE_VERY_LARGE;
+	width: DASHBOARD_SPACE_VERY_LARGE;
+	top: 50%;
+	background-color: WHITE;
+	z-index: 1;
+	opacity: 0.9;
+}
+
+.controll_header_button:active {
+	background-color: LIGHT_GREY;
+}
+
+.controll_header_button_image {
+	position: absolute;
+	width: 18px;
+	height: DASHBOARD_SPACE_SMALL;
+	top: 20px;
+	left: 27px;
 }
 
 .controll_header_button_left {
-	left: 10%;
+	left: 31px;
 }
 
 .controll_header_button_right {
-	right: 10%;
+	right: 31px;
 }
 
 .card_container {
 	position: absolute;
 	overflow: visible;
-	top: 33.5pt;
-	bottom: 10pt;
+	top: DASHBOARD_SPACE_MEDIUM;
+	bottom: 70px;
+	padding-top: DASHBOARD_SPACE_MEDIUM;
+	padding-bottom: DASHBOARD_SPACE_SMALL;
 	width: 100%;
 	left: 0%;
-	background-color: white;
 	-webkit-transition: left 0.7s ease-in-out; /* For Safari 3.1 to 6.0 */
 	transition: left 0.7s ease-in-out;
 }
@@ -54,12 +83,19 @@
 .card {
 	position: absolute;
 	display: inline;
-	width: 80%;
+	width: 75%;
 	height: 100%;
-	/*#4293DB old water color*/
-	background-color: #004384;
 	margin-top: 1px; /*Shows otherwise small line at top edge*/
 	overflow: hidden;
+}
+
+.card_map_container {
+	position: absolute;
+	margin-top: 29px;
+    /*#4293DB old water color*/
+	background-color: #004384;
+	width: 100%;
+	height: 100%;
 }
 
 .card_table {
@@ -67,54 +103,49 @@
 	bottom: 0pt;
 	right: 0pt;
 	left: 0pt;
-	padding-left:10pt;
-	padding-right:10pt;
-	padding-bottom: 10pt;
-	background-color: #004384;;
+	background-color: WHITE;
 	z-index: 2;
 }
 
 .card_wind_line_data_container {
 	position: absolute;
-	top: 10pt;
-	left: 10pt;
-	width: 45pt;
-	height: 80pt;
+	top: 0pt;
+	left: 0;
+	width: 100%;
+	height: 30px;
 	z-index: 1;
+	background-color: WHITE;
+	color: LIGHT_TEXT_COLOR;
 }
 
 .card_data {
 	position: absolute;
 	right: 0pt;
 	width: 45pt;
-	height: 25pt;
-	line-height: 25pt;
+	height: DASHBOARD_SPACE_SMALL;
+	line-height: DASHBOARD_SPACE_SMALL;
 	vertical-align: middle;
-	font-size: 11pt;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
 	font-family: DASHBOARD_FONT_FAMILY;
+	font-weight: bold;
 	text-align: center;
 }
 
 .card_line_advantage {
 	top: 0pt;
-	left: 55pt;
+	left: 10px;
 	width: 215pt;
 	text-align: left;
-	padding-left: 7pt;
-	background-color: white;
 }
 
 .card_race_time{
 	position: absolute;
-	top: 10pt;
-	right: 10pt;
+	right: 10px;
 	width: 200px;
 	text-align: right;
-	color: white;
-	line-height: 25pt;
-	font-size: 11pt;
+	line-height: DASHBOARD_SPACE_SMALL;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
 	font-family: DASHBOARD_FONT_FAMILY;
-	z-index: 1;
 }
 
 .card_line_data_geo {

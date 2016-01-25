@@ -115,8 +115,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
     private boolean currentRaceHasBeenSelectedOnce;
-    
-    private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
+        
+    private final RaceMapResources raceMapResource = GWT.create(RaceMapResources.class);
     
     /**
      * @param eventId
@@ -158,11 +158,9 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
-                
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
-                selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true) {
+                selectedRaceIdentifier, raceMapResource, /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override

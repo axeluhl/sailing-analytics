@@ -6,9 +6,9 @@ package com.sap.sailing.dashboards.gwt.client.theme;
  */
 public class Colors {
     public static final String WHITE = "#FFFFFF";
-    public static final String LIGHT_GREY = "#FFFFFF";
-    public static final String DARK_GREY = "#FFFFFF";
-    public static final String LIGHT_TEXT_COLOR = "#FFFFFF";
+    public static final String LIGHT_GREY = "#F3F2F4";
+    public static final String DARK_GREY = "#E0E0E0";
+    public static final String LIGHT_TEXT_COLOR = "#848484";
     public static final String DARK_TEXT_COLOR = "#FFFFFF";
     public static final String DARK_BLUE = "#FFFFFF";
     public static final String LIGHT_BLUE = "#FFFFFF";

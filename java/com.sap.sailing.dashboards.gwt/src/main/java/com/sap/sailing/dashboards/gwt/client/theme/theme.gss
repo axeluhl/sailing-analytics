@@ -2,6 +2,24 @@
  
 /*Colors*/
 @def WHITE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.WHITE");
+@def LIGHT_GREY eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_GREY");
+@def DARK_GREY eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_GREY");
+@def LIGHT_TEXT_COLOR eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_TEXT_COLOR");
+@def DARK_TEXT_COLOR eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_TEXT_COLOR");
+@def DARK_BLUE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_BLUE");
+@def LIGHT_BLUE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_GREY");
+@def YELLOW eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.YELLOW");
 
 /*Fonts*/
 @def DASHBOARD_FONT_FAMILY eval("com.sap.sailing.dashboards.gwt.client.theme.Fonts.DASHBOARD_FONT_FAMILY");
+
+/*Sizes*/
+@def DASHBOARD_FONT_SIZE_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_SMALL");
+@def DASHBOARD_FONT_SIZE_MEDIUM eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_MEDIUM");
+@def DASHBOARD_FONT_SIZE_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_LARGE");
+
+@def DASHBOARD_SPACE_VERY_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_VERY_SMALL");
+@def DASHBOARD_SPACE_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_SMALL");
+@def DASHBOARD_SPACE_MEDIUM eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_MEDIUM");
+@def DASHBOARD_SPACE_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_LARGE");
+@def DASHBOARD_SPACE_VERY_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_VERY_LARGE");

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.overlays.Marker;
@@ -33,9 +32,7 @@ public class RaceMapImageManager {
 
     protected Map<Util.Pair<ManeuverType, Tack>, Marker> maneuverIconsForTypeAndTargetTack;
 
-    private static RaceMapResources resources = GWT.create(RaceMapResources.class);
-
-    public RaceMapImageManager() {
+    public RaceMapImageManager(RaceMapResources resources) {
         maneuverIconsForTypeAndTargetTack = new HashMap<Util.Pair<ManeuverType, Tack>, Marker>();
         trueNorthIndicatorIconTransformer = new ImageTransformer(resources.trueNorthIndicatorIcon());
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());

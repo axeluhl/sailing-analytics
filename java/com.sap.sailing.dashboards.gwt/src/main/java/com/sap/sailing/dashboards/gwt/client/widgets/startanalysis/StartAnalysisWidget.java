@@ -12,7 +12,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Cookies;
@@ -40,6 +39,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 
 /**
  * The class contains an collection of {@link StartAnalysisCard}s that are displayed in horizontal aligned pages. It
@@ -63,12 +63,21 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
 
     @UiField
     HTMLPanel header;
+    
+    @UiField
+    HTMLPanel currentStartPanel;
 
     @UiField
-    Image rightButton;
+    HTMLPanel rightButton;
 
     @UiField
-    Image leftButton;
+    HTMLPanel leftButton;
+    
+    @UiField
+    Image rightButtonImage;
+    
+    @UiField
+    Image leftButtonImage;
 
     @UiField
     FocusPanel left_focus_panel;
@@ -110,19 +119,22 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
 
     private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
     private static final int SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
-    private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 83;
+    private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 80;
+    private static final double MARGIN_LEFT_STARTANALYSIS_CARD = 12.5;
     private static final Logger logger = Logger.getLogger(StartAnalysisWidget.class.getName());
 
+    private static final RaceMapResources raceMapResources = GWT.create(DashboardRaceMapResources.class);
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
     public StartAnalysisWidget(DashboardClientFactory dashboardClientFactory) {
         StartAnalysisWidgetResources.INSTANCE.gss().ensureInjected();
-        StartAnalysisWidgetResources.INSTANCE.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.combinedWindPanelStyle().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
         initWidget(uiBinder.createAndBindUi(this));
+        header.getElement().setInnerText("Start Analysis");
         initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
         initAndAddBottomNotification();
@@ -132,14 +144,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
     }
 
     private void initLeftRightButtons() {
-        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
+        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
         left_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 clickedArrowButton(false);
             }
         });
-        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
         right_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -268,14 +280,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
                     int displayPage = page + 1;
-                    header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
+                    currentStartPanel.getElement().setInnerHTML(starts.get(displayPage - 1).raceName);
                     if (page != numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.right());
+                        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.right());
                         rightButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == 0) {
-                        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
-                        leftButton.getElement().getStyle().setProperty("disabled", "true");
+                        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
+                        leftButtonImage.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
             } else {
@@ -285,13 +297,13 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
                     int displayPage = page + 1;
-                    header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
+                    currentStartPanel.getElement().setInnerHTML(starts.get(displayPage - 1).raceName);
                     if (page >= 0) {
-                        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.left());
+                        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.left());
                         leftButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+                        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
                         rightButton.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
@@ -305,11 +317,11 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     * SCROLL_OFFSET_STARTANALYSIS_CARDS;
             page = numberOfStartAnalysisCards - 1;
             startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
-            header.getElement().setInnerHTML("Start " + starts.get(page).raceName);
+            currentStartPanel.getElement().setInnerHTML(starts.get(page).raceName);
             notifyStartAnalysisPageChangeListener(page);
-            rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+            rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
             rightButton.getElement().getStyle().setProperty("disabled", "true");
-            leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.left());
+            leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.left());
             leftButton.getElement().getStyle().setProperty("disabled", "false");
         }
     }
@@ -318,14 +330,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         logger.log(Level.INFO, "Adding Startanalysis Card");
         if (displaysCards == false) {
             displaysCards = true;
-            header.getElement().setInnerHTML("Start " + SafeHtmlUtils.fromString(startAnalysisDTO.raceName));
+            currentStartPanel.getElement().setInnerHTML(startAnalysisDTO.raceName);
         }
         if (numberOfStartAnalysisCards > 0) {
-            rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.right());
+            rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.right());
         }
         final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(numberOfStartAnalysisCards
-                * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO,
-                dashboardClientFactory.getSailingService());
+                * SCROLL_OFFSET_STARTANALYSIS_CARDS + MARGIN_LEFT_STARTANALYSIS_CARD, numberOfStartAnalysisCards, startAnalysisDTO,
+                dashboardClientFactory.getSailingService(), raceMapResources);
         startanalysis_card_container.add(startlineAnalysisCard);
         startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
         registerPageChangeListener(startlineAnalysisCard);
