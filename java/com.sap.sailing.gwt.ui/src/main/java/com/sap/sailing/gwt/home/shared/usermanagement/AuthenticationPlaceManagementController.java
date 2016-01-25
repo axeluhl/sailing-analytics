@@ -102,8 +102,8 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
         }
         
         private void updateViewHeading(Place placeToUse) {
-            userManagementView.setHeading(placeToUse instanceof AbstractUserManagementPlace
-                    ? ((AbstractUserManagementPlace) placeToUse).getLocationTitle() : "");
+            userManagementView.setHeading(placeToUse instanceof AbstractAuthenticationPlace
+                    ? ((AbstractAuthenticationPlace) placeToUse).getLocationTitle() : "");
         }
 
     }

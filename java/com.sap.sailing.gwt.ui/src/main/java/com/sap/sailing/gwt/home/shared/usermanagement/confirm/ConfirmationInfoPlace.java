@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.confirm;
 
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.usermanagement.AbstractUserManagementPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class ConfirmationInfoPlace extends AbstractUserManagementPlace implements HasMobileVersion {
+public class ConfirmationInfoPlace extends AbstractAuthenticationPlace implements HasMobileVersion {
     private final String name;
     private final Action action;
 
