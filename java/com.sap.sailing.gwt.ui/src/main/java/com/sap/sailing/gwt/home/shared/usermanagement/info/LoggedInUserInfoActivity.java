@@ -18,7 +18,8 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final LoggedInUserInfoView view;
-    private Callback callback;
+    private final Callback callback;
+    private EventBus eventBus;
     
     public LoggedInUserInfoActivity(LoggedInUserInfoView view, AuthenticationClientFactory authenticationClientFactory,
             UserManagementClientFactory clientFactory, LoggedInUserInfoView.Presenter.Callback callback,
@@ -32,6 +33,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
+        this.eventBus = eventBus;
         view.setPresenter(this);
         panel.setWidget(view);
         view.setUserInfo(authenticationClientFactory.getAuthenticationManager().getAuthenticationContext());
@@ -49,7 +51,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void gotoProfileUi() {
-        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
+        eventBus.fireEvent(new UserManagementRequestEvent());
         callback.handleUserProfileNavigation();
     }
 
