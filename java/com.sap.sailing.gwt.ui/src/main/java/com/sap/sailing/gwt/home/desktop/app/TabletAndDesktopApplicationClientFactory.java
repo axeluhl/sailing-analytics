@@ -32,7 +32,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
@@ -72,7 +72,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
         };
         this.userManagementWizardController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE), this,
-                new UserManagementCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
+                new AuthenticationCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
         getEventBus().addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
