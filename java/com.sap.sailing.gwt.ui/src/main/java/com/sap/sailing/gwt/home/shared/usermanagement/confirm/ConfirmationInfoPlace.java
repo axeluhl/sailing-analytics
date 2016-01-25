@@ -1,12 +1,10 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.confirm;
 
-import com.google.gwt.place.shared.PlaceTokenizer;
-import com.google.gwt.place.shared.Prefix;
-import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
-import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
+import com.sap.sailing.gwt.home.shared.usermanagement.AbstractUserManagementPlace;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class ConfirmationInfoPlace extends AbstractBasePlace implements HasMobileVersion {
+public class ConfirmationInfoPlace extends AbstractUserManagementPlace implements HasMobileVersion {
     private final String name;
     private final Action action;
 
@@ -31,24 +29,10 @@ public class ConfirmationInfoPlace extends AbstractBasePlace implements HasMobil
     public String toString() {
         return "ConfirmationInfoPlace [name=" + name + ", action=" + action + "]";
     }
-
-    @Prefix(PlaceTokenPrefixes.UserConfirmationInfo)
-    public static class Tokenizer implements PlaceTokenizer<ConfirmationInfoPlace> {
-
-        @Override
-        public ConfirmationInfoPlace getPlace(String token) {
-            Action action = null;
-            try {
-                action = Action.valueOf(token);
-            } catch (Exception e) {
-                action = Action.ERROR;
-            }
-            return new ConfirmationInfoPlace(action, "");
-        }
-
-        @Override
-        public String getToken(ConfirmationInfoPlace place) {
-            return place.getAction().name();
-        }
+    
+    @Override
+    public String getLocationTitle() {
+        return StringMessages.INSTANCE.accountConfirmation();
     }
+
 }

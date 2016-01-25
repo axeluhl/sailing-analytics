@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryV
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInView;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInViewImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
@@ -47,7 +46,7 @@ public class AuthenticationClientFactoryImpl implements AuthenticationClientFact
 
     @Override
     public ConfirmationInfoView createConfirmationInfoView() {
-        return new ConfirmationInfoViewImpl(resources, StringMessages.INSTANCE.accountConfirmation());
+        return new ConfirmationInfoViewImpl(resources);
     }
     
     @Override
