@@ -25,9 +25,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 eventBus.fireEvent(new AuthenticationContextEvent(uCtx));
             }
         });
-        eventBus.addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
+        eventBus.addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
             @Override
-            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
+            public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
                 if (!event.isLogin()) {
                     clientFactory.getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
                         @Override
@@ -54,7 +54,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     public void didLogout() {
         uCtx = new AuthenticationContextImpl();
         clientFactory.getUserService().updateUser(true);
-        eventBus.fireEvent(new UserManagementRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent());
     }
 
     @Override

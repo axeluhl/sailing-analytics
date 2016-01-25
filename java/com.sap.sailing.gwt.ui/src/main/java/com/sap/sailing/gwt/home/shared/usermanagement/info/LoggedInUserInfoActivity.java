@@ -7,7 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -47,7 +47,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void gotoProfileUi() {
-        eventBus.fireEvent(new UserManagementRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent());
         callback.handleUserProfileNavigation();
     }
 

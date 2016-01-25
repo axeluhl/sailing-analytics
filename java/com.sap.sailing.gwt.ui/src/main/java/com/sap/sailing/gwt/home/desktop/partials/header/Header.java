@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
 
 public class Header extends Composite {
@@ -138,7 +138,7 @@ public class Header extends Composite {
     
     @UiHandler("usermenu")
     void toggleUsermenu(ClickEvent event) {
-        eventBus.fireEvent(new UserManagementRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent());
     }
     
     private void updateActiveLink(Place place) {

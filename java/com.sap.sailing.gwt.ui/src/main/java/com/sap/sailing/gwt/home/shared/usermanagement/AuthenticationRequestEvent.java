@@ -3,20 +3,20 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class UserManagementRequestEvent extends GwtEvent<UserManagementRequestEvent.Handler> {
-    public static final Type<Handler> TYPE = new Type<UserManagementRequestEvent.Handler>();
+public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEvent.Handler> {
+    public static final Type<Handler> TYPE = new Type<AuthenticationRequestEvent.Handler>();
 
     public interface Handler extends EventHandler {
-        void onUserManagementRequestEvent(UserManagementRequestEvent event);
+        void onUserManagementRequestEvent(AuthenticationRequestEvent event);
     }
     
     private final boolean login;
 
-    public UserManagementRequestEvent() {
+    public AuthenticationRequestEvent() {
         this(true);
     }
     
-    public UserManagementRequestEvent(boolean login) {
+    public AuthenticationRequestEvent(boolean login) {
         super();
         this.login = login;
     }

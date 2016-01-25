@@ -34,7 +34,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
@@ -75,9 +75,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 new UserManagementCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
-        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
+        getEventBus().addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
             @Override
-            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
+            public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
                 if (userManagementDisplay.isShowing()) {
                     userManagementDisplay.hide();
                 } else {

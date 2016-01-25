@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -166,6 +166,6 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
+        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
     }
 }
