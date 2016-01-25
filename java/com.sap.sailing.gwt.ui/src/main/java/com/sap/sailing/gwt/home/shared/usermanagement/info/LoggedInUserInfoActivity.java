@@ -8,24 +8,20 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
-    private final AuthenticationClientFactory authenticationClientFactory;
-    private final UserManagementClientFactory clientFactory;
+    private final AuthenticationClientFactory clientFactory;
     private final PlaceController placeController;
     private final LoggedInUserInfoView view;
     private final Callback callback;
     private EventBus eventBus;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoView view, AuthenticationClientFactory authenticationClientFactory,
-            UserManagementClientFactory clientFactory, LoggedInUserInfoView.Presenter.Callback callback,
-            PlaceController placeController) {
+    public LoggedInUserInfoActivity(LoggedInUserInfoView view, AuthenticationClientFactory clientFactory,
+            LoggedInUserInfoView.Presenter.Callback callback, PlaceController placeController) {
         this.view = view;
-        this.authenticationClientFactory = authenticationClientFactory;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.callback = callback;
@@ -36,7 +32,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
         this.eventBus = eventBus;
         view.setPresenter(this);
         panel.setWidget(view);
-        view.setUserInfo(authenticationClientFactory.getAuthenticationManager().getAuthenticationContext());
+        view.setUserInfo(clientFactory.getAuthenticationManager().getAuthenticationContext());
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -57,15 +53,15 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void signOut() {
-        clientFactory.getUserManagement().logout(new AsyncCallback<SuccessInfo>() {
+        clientFactory.getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onSuccess(SuccessInfo result) {
-                authenticationClientFactory.getAuthenticationManager().didLogout();
+                clientFactory.getAuthenticationManager().didLogout();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                authenticationClientFactory.getAuthenticationManager().didLogout();
+                clientFactory.getAuthenticationManager().didLogout();
             }
         });
     }

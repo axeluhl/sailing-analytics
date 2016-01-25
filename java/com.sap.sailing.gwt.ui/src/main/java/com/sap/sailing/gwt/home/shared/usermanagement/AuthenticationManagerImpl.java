@@ -4,6 +4,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContextImpl;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -76,5 +77,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 // TODO Auto-generated method stub
             }
         });
+    }
+    
+    UserManagementServiceAsync getUserManagementService() {
+        return clientFactory.getUserManagementService();
     }
 }

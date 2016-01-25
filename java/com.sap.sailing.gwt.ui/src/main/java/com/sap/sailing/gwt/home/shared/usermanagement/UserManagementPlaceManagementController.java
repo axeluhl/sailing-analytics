@@ -30,10 +30,10 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         void handleSignInSuccess();
     }
     
-    public UserManagementPlaceManagementController(AuthenticationClientFactory authenticationClientFactory,
-            UserManagementClientFactory clientFactory, Callback callback, UserManagementView userManagementView,
-            EventBus globalEventBus) {
-        super(new Configuration(authenticationClientFactory, clientFactory, callback, userManagementView));
+    public UserManagementPlaceManagementController(AuthenticationClientFactory clientFactory,
+            UserManagementClientFactory userManagementClientFactory, Callback callback,
+            UserManagementView userManagementView, EventBus globalEventBus) {
+        super(new Configuration(clientFactory, userManagementClientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -43,16 +43,17 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
     }
     
     private static class Configuration implements PlaceManagementConfiguration {
-        private final AuthenticationClientFactory authenticationClientFactory;
-        private final UserManagementClientFactory clientFactory;
+        private final AuthenticationClientFactory clientFactory;
+        private final UserManagementClientFactory userManagementClientFactory;
         private final Callback callback;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
 
-        public Configuration(AuthenticationClientFactory authenticationClientFactory,
-                UserManagementClientFactory clientFactory, Callback callback, UserManagementView userManagementView) {
-            this.authenticationClientFactory = authenticationClientFactory;
+        public Configuration(AuthenticationClientFactory clientFactory,
+                UserManagementClientFactory userManagementClientFactory, Callback callback,
+                UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
+            this.userManagementClientFactory = userManagementClientFactory;
             this.callback = callback;
             this.userManagementView = userManagementView;
         }
@@ -78,27 +79,26 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
             this.updateViewHeading(placeToUse);
             
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity(authenticationClientFactory.createSignInView(), authenticationClientFactory,
-                        clientFactory, callback, placeController);
+                return new SignInActivity(clientFactory.createSignInView(), clientFactory, callback, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(authenticationClientFactory.createCreateAccountView(),
-                        authenticationClientFactory, clientFactory, callback, placeController);
+                return new CreateAccountActivity(clientFactory.createCreateAccountView(), clientFactory, callback,
+                        placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity(authenticationClientFactory.createPasswordRecoveryView(),
-                        authenticationClientFactory, clientFactory, callback, placeController);
+                return new PasswordRecoveryActivity(clientFactory.createPasswordRecoveryView(), clientFactory,
+                        callback, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity(authenticationClientFactory.createLoggedInUserInfoView(),
-                        authenticationClientFactory, clientFactory, callback, placeController);
+                return new LoggedInUserInfoActivity(clientFactory.createLoggedInUserInfoView(), clientFactory,
+                        callback, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
                 return new ConfirmationActivity((ConfirmationPlace) placeToUse,
-                        authenticationClientFactory.createConfirmationView(), clientFactory);
+                        clientFactory.createConfirmationView(), userManagementClientFactory);
             }
             
             return getActivity(new SignInPlace());
         }
         
         private boolean isLoggedIn() {
-            return authenticationClientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
+            return clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
         }
         
         private Place getPlaceToUse(Place requestedPlace) {

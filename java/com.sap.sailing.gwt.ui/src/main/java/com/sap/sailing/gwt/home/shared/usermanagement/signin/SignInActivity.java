@@ -8,23 +8,19 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
 
-    private final AuthenticationClientFactory authenticationClientFactory;
-    private final UserManagementClientFactory clientFactory;
+    private final AuthenticationClientFactory clientFactory;
     private final PlaceController placeController;
     private final SignInView view;
     private final UserManagementPlaceManagementController.Callback callback;
     
-    public SignInActivity(SignInView view, AuthenticationClientFactory authenticationClientFactory,
-            UserManagementClientFactory clientFactory, UserManagementPlaceManagementController.Callback callback,
-            PlaceController placeController) {
-        this.authenticationClientFactory = authenticationClientFactory;
+    public SignInActivity(SignInView view, AuthenticationClientFactory clientFactory,
+            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.view = view;
@@ -47,8 +43,8 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
 
     @Override
     public void login(String loginName, String password) {
-        clientFactory.getUserManagement().login(loginName, password,
-                new AsyncLoginCallback(authenticationClientFactory.getAuthenticationManager(), view, callback, true));
+        clientFactory.getUserManagementService().login(loginName, password,
+                new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, true));
     }
 
     @Override
