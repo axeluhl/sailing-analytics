@@ -1,14 +1,13 @@
 package com.sap.sailing.gwt.home.shared.places.user.confirmation;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
 
 public class ConfirmationActivityProxy extends AbstractActivityProxy {
     private final ConfirmationPlace place;
-    private final UserManagementClientFactory clientFactory;
+    private final ConfirmationClientFactory clientFactory;
 
-    public ConfirmationActivityProxy(ConfirmationPlace place, UserManagementClientFactory clientFactory) {
+    public ConfirmationActivityProxy(ConfirmationPlace place, ConfirmationClientFactory clientFactory) {
         this.place = place;
         this.clientFactory = clientFactory;
     }
@@ -18,7 +17,7 @@ public class ConfirmationActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                super.onSuccess(new ConfirmationActivity(place, clientFactory.createAccountConfirmationView(), clientFactory));
+                super.onSuccess(new ConfirmationActivity(place, clientFactory.createConfirmationView(), clientFactory));
             }
         });
     }

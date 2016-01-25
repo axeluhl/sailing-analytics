@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
@@ -29,7 +29,6 @@ import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
@@ -39,7 +38,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        ErrorAndBusyClientFactory, SearchResultClientFactory, UserManagementClientFactory, PasswordResetClientFactory {
+        ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
@@ -104,12 +103,7 @@ public class MobileApplicationClientFactory extends
     }
 
     @Override
-    public UserManagementServiceAsync getUserManagement() {
-        return super.getUserManagementService();
-    }
-    
-    @Override
-    public ConfirmationView createAccountConfirmationView() {
+    public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
     

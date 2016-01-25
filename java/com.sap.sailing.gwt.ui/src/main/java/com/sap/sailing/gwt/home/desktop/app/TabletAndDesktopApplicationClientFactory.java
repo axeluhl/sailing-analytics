@@ -38,7 +38,6 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 
@@ -140,17 +139,12 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public UserManagementServiceAsync getUserManagement() {
-        return super.getUserManagementService();
-    }
-    
-    @Override
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
     }
     
     @Override
-    public ConfirmationView createAccountConfirmationView() {
+    public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
     

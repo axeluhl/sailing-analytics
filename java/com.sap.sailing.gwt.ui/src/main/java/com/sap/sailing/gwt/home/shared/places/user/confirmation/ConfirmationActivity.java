@@ -4,17 +4,16 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class ConfirmationActivity extends AbstractActivity implements ConfirmationView.Presenter {
     private final ConfirmationPlace place;
     private final ConfirmationView view;
-    private final UserManagementClientFactory clientFactory;
+    private final ConfirmationClientFactory clientFactory;
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
 
-    public ConfirmationActivity(ConfirmationPlace place, ConfirmationView view, UserManagementClientFactory clientFactory) {
+    public ConfirmationActivity(ConfirmationPlace place, ConfirmationView view, ConfirmationClientFactory clientFactory) {
         this.place = place;
         this.view = view;
         this.clientFactory = clientFactory;
@@ -29,7 +28,7 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
             break;
         case MAIL_VERIFIED:
             panel.setWidget(clientFactory.createBusyView());
-            clientFactory.getUserManagement().validateEmail(place.getName(), place.getValidationSecret(),
+            clientFactory.getUserManagementService().validateEmail(place.getName(), place.getValidationSecret(),
                     new MarkedAsyncCallback<Boolean>(new AsyncCallback<Boolean>() {
                         @Override
                         public void onFailure(Throwable caught) {

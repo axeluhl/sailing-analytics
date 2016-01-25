@@ -36,7 +36,7 @@ public class PasswordResetActivity extends AbstractActivity implements PasswordR
             return;
         }
         
-        clientFactory.getUserManagement().updateSimpleUserPassword(username, null, place.getResetSecret(),
+        clientFactory.getUserManagementService().updateSimpleUserPassword(username, null, place.getResetSecret(),
                 newPassword, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
