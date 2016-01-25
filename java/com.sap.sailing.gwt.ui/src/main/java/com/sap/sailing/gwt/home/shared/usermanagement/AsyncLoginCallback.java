@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.Callback;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController.Callback;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -13,7 +13,7 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     private final boolean fireSignInSuccessfulEvent;
     
     public AsyncLoginCallback(AuthenticationManager authenticationManager, ErrorMessageView view,
-            UserManagementPlaceManagementController.Callback callback, boolean fireSignInSuccessfulEvent) {
+            AuthenticationPlaceManagementController.Callback callback, boolean fireSignInSuccessfulEvent) {
         this.authenticationManager = authenticationManager;
         this.view = view;
         this.callback = callback;

@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 
-public class UserManagementPlaceManagementController extends WrappedPlaceManagementController {
+public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
     public interface Callback extends CreateAccountView.Presenter.Callback,
             PasswordRecoveryView.Presenter.Callback, LoggedInUserInfoView.Presenter.Callback {
@@ -30,14 +30,14 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         void handleSignInSuccess();
     }
     
-    public UserManagementPlaceManagementController(AuthenticationClientFactory clientFactory,
+    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory,
             UserManagementClientFactory userManagementClientFactory, Callback callback,
             UserManagementView userManagementView, EventBus globalEventBus) {
         super(new Configuration(clientFactory, userManagementClientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                UserManagementPlaceManagementController.this.fireEvent(event);
+                AuthenticationPlaceManagementController.this.fireEvent(event);
             }
         });
     }

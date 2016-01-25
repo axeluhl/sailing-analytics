@@ -33,7 +33,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactor
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
@@ -70,7 +70,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
             }
         };
-        this.userManagementWizardController = new UserManagementPlaceManagementController(
+        this.userManagementWizardController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE), this,
                 new UserManagementCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().

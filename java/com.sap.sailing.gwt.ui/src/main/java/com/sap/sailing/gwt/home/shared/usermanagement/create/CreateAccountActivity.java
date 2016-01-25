@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
@@ -25,10 +25,10 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
-    private final UserManagementPlaceManagementController.Callback callback;
+    private final AuthenticationPlaceManagementController.Callback callback;
 
     public CreateAccountActivity(CreateAccountView view, AuthenticationClientFactory clientFactory,
-            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
+            AuthenticationPlaceManagementController.Callback callback, PlaceController placeController) {
         this.view = view;
         this.clientFactory = clientFactory;
         this.callback = callback;

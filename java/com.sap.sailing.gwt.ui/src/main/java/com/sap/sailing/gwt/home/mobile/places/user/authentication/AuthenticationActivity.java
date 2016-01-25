@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementCallbackImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMobile;
 
@@ -24,7 +24,7 @@ public class AuthenticationActivity extends AbstractActivity {
     @Override
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(userManagementView);
-        WrappedPlaceManagementController userManagementController = new UserManagementPlaceManagementController(
+        WrappedPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(clientFactory.getAuthenticationManager(), SharedResources.INSTANCE),
                 clientFactory, new UserManagementCallbackImpl(clientFactory.getNavigator()
                         .getMailVerifiedConfirmationNavigation(), clientFactory.getNavigator()
