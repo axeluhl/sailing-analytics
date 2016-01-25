@@ -9,20 +9,24 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {
 
+    // private final AuthenticationClientFactory authenticationClientFactory;
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final PasswordRecoveryView view;
     private final Callback callback;
 
-    public PasswordRecoveryActivity(PasswordRecoveryView view, UserManagementClientFactory clientFactory,
-            PasswordRecoveryView.Presenter.Callback callback, PlaceController placeController) {
+    public PasswordRecoveryActivity(PasswordRecoveryView view, AuthenticationClientFactory authenticationClientFactory,
+            UserManagementClientFactory clientFactory, PasswordRecoveryView.Presenter.Callback callback,
+            PlaceController placeController) {
         this.view = view;
+        // this.authenticationClientFactory = authenticationClientFactory;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.callback = callback;

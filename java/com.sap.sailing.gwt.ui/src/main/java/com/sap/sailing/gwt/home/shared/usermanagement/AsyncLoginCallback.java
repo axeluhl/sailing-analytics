@@ -2,20 +2,19 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.Callback;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     
-    private final UserManagementClientFactory clientFactory;
+    private final AuthenticationManager authenticationManager;
     private final ErrorMessageView view;
     private final Callback callback;
     private final boolean fireSignInSuccessfulEvent;
     
-    public AsyncLoginCallback(UserManagementClientFactory clientFactory, ErrorMessageView view,
+    public AsyncLoginCallback(AuthenticationManager authenticationManager, ErrorMessageView view,
             UserManagementPlaceManagementController.Callback callback, boolean fireSignInSuccessfulEvent) {
-        this.clientFactory = clientFactory;
+        this.authenticationManager = authenticationManager;
         this.view = view;
         this.callback = callback;
         this.fireSignInSuccessfulEvent = fireSignInSuccessfulEvent;
@@ -24,7 +23,7 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     @Override
     public void onSuccess(SuccessInfo result) {
         if (result.isSuccessful()) {
-            clientFactory.getAuthenticationManager().didLogin(result.getUserDTO());
+            authenticationManager.didLogin(result.getUserDTO());
             if (fireSignInSuccessfulEvent) {
                 callback.handleSignInSuccess();
             }

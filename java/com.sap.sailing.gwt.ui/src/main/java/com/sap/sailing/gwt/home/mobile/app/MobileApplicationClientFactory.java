@@ -28,10 +28,8 @@ import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFa
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
@@ -44,7 +42,6 @@ public class MobileApplicationClientFactory extends
         ErrorAndBusyClientFactory, SearchResultClientFactory, UserManagementClientFactory, PasswordResetClientFactory {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
-    private WithSecurity securityProvider;
     private final AuthenticationManager authenticationManager;
 
     public MobileApplicationClientFactory(boolean isStandaloneServer) {
@@ -67,7 +64,6 @@ public class MobileApplicationClientFactory extends
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
-        securityProvider = new DefaultWithSecurityImpl();
         authenticationManager = new AuthenticationManagerImpl(this, eventBus);
     }
 
@@ -103,14 +99,13 @@ public class MobileApplicationClientFactory extends
         return getTopLevelView().getNavigationPathDisplay();
     }
     
-    @Override
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
     }
 
     @Override
     public UserManagementServiceAsync getUserManagement() {
-        return securityProvider.getUserManagementService();
+        return super.getUserManagementService();
     }
     
     @Override

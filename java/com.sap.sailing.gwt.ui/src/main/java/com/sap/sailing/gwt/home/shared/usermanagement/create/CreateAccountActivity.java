@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
@@ -19,6 +20,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
 
+    private final AuthenticationClientFactory authenticationClientFactory;
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final CreateAccountView view;
@@ -27,9 +29,11 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
     private final UserManagementPlaceManagementController.Callback callback;
 
-    public CreateAccountActivity(CreateAccountView view, UserManagementClientFactory clientFactory,
-            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
+    public CreateAccountActivity(CreateAccountView view, AuthenticationClientFactory authenticationClientFactory,
+            UserManagementClientFactory clientFactory, UserManagementPlaceManagementController.Callback callback,
+            PlaceController placeController) {
         this.view = view;
+        this.authenticationClientFactory = authenticationClientFactory;
         this.clientFactory = clientFactory;
         this.callback = callback;
         this.placeController = placeController;
@@ -55,7 +59,8 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             @Override
             public void onSuccess(final UserDTO result) {
                 clientFactory.getUserManagement().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory, view, callback, false));
+                        new AsyncLoginCallback(authenticationClientFactory.getAuthenticationManager(),
+                                view, callback, false));
                 placeController.goTo(new ConfirmationPlace(Action.ACCOUNT_CREATED, username));
             }
             

@@ -78,17 +78,17 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
             this.updateViewHeading(placeToUse);
             
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity(authenticationClientFactory.createSignInView(), clientFactory, callback,
-                        placeController);
+                return new SignInActivity(authenticationClientFactory.createSignInView(), authenticationClientFactory,
+                        clientFactory, callback, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(authenticationClientFactory.createCreateAccountView(), clientFactory,
-                        callback, placeController);
+                return new CreateAccountActivity(authenticationClientFactory.createCreateAccountView(),
+                        authenticationClientFactory, clientFactory, callback, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity(authenticationClientFactory.createPasswordRecoveryView(),
-                        clientFactory, callback, placeController);
+                        authenticationClientFactory, clientFactory, callback, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity(authenticationClientFactory.createLoggedInUserInfoView(),
-                        clientFactory, callback, placeController);
+                        authenticationClientFactory, clientFactory, callback, placeController);
             } else if (placeToUse instanceof ConfirmationPlace) {
                 return new ConfirmationActivity((ConfirmationPlace) placeToUse,
                         authenticationClientFactory.createConfirmationView(), clientFactory);
@@ -98,7 +98,7 @@ public class UserManagementPlaceManagementController extends WrappedPlaceManagem
         }
         
         private boolean isLoggedIn() {
-            return clientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
+            return authenticationClientFactory.getAuthenticationManager().getAuthenticationContext().isLoggedIn();
         }
         
         private Place getPlaceToUse(Place requestedPlace) {

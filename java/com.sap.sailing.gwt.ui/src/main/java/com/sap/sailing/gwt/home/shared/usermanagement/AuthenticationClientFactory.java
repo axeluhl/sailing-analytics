@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryView;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInView;
 
-public interface AuthenticationClientFactory {
+public interface AuthenticationClientFactory extends WithAuthenticationManager {
 
     SignInView createSignInView();
     

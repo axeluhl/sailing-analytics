@@ -15,9 +15,12 @@ import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResourc
 
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     
+    private final AuthenticationManager authenticationManager;
     private final UserManagementSharedResources resources;
 
-    public AuthenticationClientFactoryImpl(UserManagementSharedResources resources) {
+    public AuthenticationClientFactoryImpl(AuthenticationManager authenticationManager,
+            UserManagementSharedResources resources) {
+        this.authenticationManager = authenticationManager;
         this.resources = resources;
     }
 
@@ -44,6 +47,11 @@ public class AuthenticationClientFactoryImpl implements AuthenticationClientFact
     @Override
     public ConfirmationView createConfirmationView() {
         return new ConfirmationViewImpl(resources, StringMessages.INSTANCE.accountConfirmation());
+    }
+    
+    @Override
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
     }
 
 }

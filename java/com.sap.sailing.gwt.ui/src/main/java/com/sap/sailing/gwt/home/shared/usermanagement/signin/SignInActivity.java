@@ -5,6 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.app.UserManagementClientFactory;
@@ -14,13 +15,16 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryP
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
 
+    private final AuthenticationClientFactory authenticationClientFactory;
     private final UserManagementClientFactory clientFactory;
     private final PlaceController placeController;
     private final SignInView view;
     private final UserManagementPlaceManagementController.Callback callback;
     
-    public SignInActivity(SignInView view, UserManagementClientFactory clientFactory,
-            UserManagementPlaceManagementController.Callback callback, PlaceController placeController) {
+    public SignInActivity(SignInView view, AuthenticationClientFactory authenticationClientFactory,
+            UserManagementClientFactory clientFactory, UserManagementPlaceManagementController.Callback callback,
+            PlaceController placeController) {
+        this.authenticationClientFactory = authenticationClientFactory;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.view = view;
@@ -44,7 +48,7 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     @Override
     public void login(String loginName, String password) {
         clientFactory.getUserManagement().login(loginName, password,
-                new AsyncLoginCallback(clientFactory, view, callback, true));
+                new AsyncLoginCallback(authenticationClientFactory.getAuthenticationManager(), view, callback, true));
     }
 
     @Override
