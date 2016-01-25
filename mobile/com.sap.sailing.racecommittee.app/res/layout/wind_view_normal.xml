@@ -188,14 +188,16 @@
                         android:layout_width="@dimen/wind_input_width"
                         android:layout_height="wrap_content"
                         android:inputType="number"
-                        android:textAppearance="?attr/textSmall" />
+                        android:textAppearance="?attr/textSmall"
+                        android:textColor="?attr/white"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="@dimen/side_padding"
                         android:text="@string/wind_degree"
-                        android:textAppearance="?attr/textSmall" />
+                        android:textAppearance="?attr/textSmall"
+                        android:textColor="?attr/white"/>
                 </LinearLayout>
 
                 <LinearLayout

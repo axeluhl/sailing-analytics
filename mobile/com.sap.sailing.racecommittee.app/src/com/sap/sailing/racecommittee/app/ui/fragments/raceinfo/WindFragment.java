@@ -222,8 +222,8 @@ public class WindFragment extends BaseFragment
                 double longitude = mCurrentLocation.getLongitude();
 //            float accuracy = mCurrentLocation.getAccuracy();
                 long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-                setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(latitude), whiteColor);
-                setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(longitude), whiteColor);
+                setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
+                setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
                 setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
                         .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
                 if (mAccuracy != null) {
