@@ -15,7 +15,7 @@ public class ConfirmationPlace extends AbstractBasePlace implements HasMobileVer
     private final Action action;
 
     public enum Action {
-        ERROR, ACCOUNT_CREATED, RESET_REQUESTED, RESET_EXECUTED, MAIL_VERIFIED;  
+        ERROR, RESET_EXECUTED, MAIL_VERIFIED;  
     };
 
     public ConfirmationPlace(Action action) {

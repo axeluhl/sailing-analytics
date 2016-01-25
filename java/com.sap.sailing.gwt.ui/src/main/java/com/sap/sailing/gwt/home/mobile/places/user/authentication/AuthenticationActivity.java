@@ -7,8 +7,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMobile;
@@ -26,10 +26,10 @@ public class AuthenticationActivity extends AbstractActivity {
         panel.setWidget(userManagementView);
         WrappedPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(clientFactory.getAuthenticationManager(), SharedResources.INSTANCE),
-                clientFactory, new AuthenticationCallbackImpl(clientFactory.getNavigator()
-                        .getMailVerifiedConfirmationNavigation(), clientFactory.getNavigator()
-                        .getPasswordResetNavigation(), clientFactory.getNavigator().getUserProfileNavigation(),
-                        new SignInSuccessfulNavigationMobile()), userManagementView, eventBus);
+                new AuthenticationCallbackImpl(clientFactory.getNavigator().getMailVerifiedConfirmationNavigation(),
+                        clientFactory.getNavigator().getPasswordResetNavigation(), clientFactory.getNavigator()
+                                .getUserProfileNavigation(), new SignInSuccessfulNavigationMobile()),
+                userManagementView, eventBus);
         userManagementController.start();
     }
     

@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoView;
+import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
@@ -46,8 +46,8 @@ public class AuthenticationClientFactoryImpl implements AuthenticationClientFact
     }
 
     @Override
-    public ConfirmationView createConfirmationView() {
-        return new ConfirmationViewImpl(resources, StringMessages.INSTANCE.accountConfirmation());
+    public ConfirmationInfoView createConfirmationInfoView() {
+        return new ConfirmationInfoViewImpl(resources, StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override

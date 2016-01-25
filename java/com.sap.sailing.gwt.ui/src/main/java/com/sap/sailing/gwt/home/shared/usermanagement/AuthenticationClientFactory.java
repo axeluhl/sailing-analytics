@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView;
+import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoView;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryView;
@@ -19,7 +19,7 @@ public interface AuthenticationClientFactory extends WithAuthenticationManager {
     
     LoggedInUserInfoView createLoggedInUserInfoView();
     
-    ConfirmationView createConfirmationView();
+    ConfirmationInfoView createConfirmationInfoView();
     
     // ContextObject
 }

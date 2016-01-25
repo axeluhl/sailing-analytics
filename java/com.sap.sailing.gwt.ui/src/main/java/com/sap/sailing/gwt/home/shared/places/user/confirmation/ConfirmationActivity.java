@@ -24,15 +24,6 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
     public void start(final AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(view);
         switch (place.getAction()) {
-        case ERROR:
-            view.setMessage(i18n_sec.error());
-            break;
-        case ACCOUNT_CREATED:
-            view.setMessage(i18n_sec.signedUpSuccessfully(place.getName()));
-            break;
-        case RESET_REQUESTED:
-            view.setMessage(i18n_sec.passwordResetLinkSent(place.getName()));
-            break;
         case RESET_EXECUTED:
             view.setMessage(i18n_sec.successfullyResetPassword(place.getName()));
             break;
@@ -55,7 +46,9 @@ public class ConfirmationActivity extends AbstractActivity implements Confirmati
                         }
                     }));
             break;
+        case ERROR:
         default:
+            view.setMessage(i18n_sec.error());
             break;
         }
     }

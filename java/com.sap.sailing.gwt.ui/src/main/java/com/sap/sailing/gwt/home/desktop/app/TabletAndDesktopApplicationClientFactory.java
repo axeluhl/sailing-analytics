@@ -29,10 +29,10 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
@@ -71,7 +71,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
             }
         };
         this.userManagementWizardController = new AuthenticationPlaceManagementController(
-                new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE), this,
+                new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());

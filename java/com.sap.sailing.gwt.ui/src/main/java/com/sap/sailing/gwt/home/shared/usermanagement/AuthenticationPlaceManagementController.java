@@ -6,9 +6,8 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.places.user.UserManagementClientFactory;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationActivity;
-import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoActivity;
+import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
@@ -30,10 +29,9 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
         void handleSignInSuccess();
     }
     
-    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory,
-            UserManagementClientFactory userManagementClientFactory, Callback callback,
+    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory, Callback callback,
             UserManagementView userManagementView, EventBus globalEventBus) {
-        super(new Configuration(clientFactory, userManagementClientFactory, callback, userManagementView));
+        super(new Configuration(clientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -44,16 +42,13 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
     
     private static class Configuration implements PlaceManagementConfiguration {
         private final AuthenticationClientFactory clientFactory;
-        private final UserManagementClientFactory userManagementClientFactory;
         private final Callback callback;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
 
-        public Configuration(AuthenticationClientFactory clientFactory,
-                UserManagementClientFactory userManagementClientFactory, Callback callback,
+        public Configuration(AuthenticationClientFactory clientFactory, Callback callback,
                 UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
-            this.userManagementClientFactory = userManagementClientFactory;
             this.callback = callback;
             this.userManagementView = userManagementView;
         }
@@ -89,9 +84,9 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity(clientFactory.createLoggedInUserInfoView(), clientFactory,
                         callback, placeController);
-            } else if (placeToUse instanceof ConfirmationPlace) {
-                return new ConfirmationActivity((ConfirmationPlace) placeToUse,
-                        clientFactory.createConfirmationView(), userManagementClientFactory);
+            } else if (placeToUse instanceof ConfirmationInfoPlace) {
+                return new ConfirmationInfoActivity((ConfirmationInfoPlace) placeToUse,
+                        clientFactory.createConfirmationInfoView());
             }
             
             return getActivity(new SignInPlace());
