@@ -21,10 +21,10 @@
         <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.passwordRepeat}" /></label>
         <g:PasswordTextBox addStyleNames="{local_res.css.form_input}" ui:field="passwordConfirmationUi"/>
         <div class="{local_res.css.form_actions}">
-            <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
-                    ui:field="signInUi"><ui:text from="{i18n_sec.signIn}" /></g:Anchor>
-            <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}" 
-                    ui:field="createAccountUi"><ui:text from="{i18n_sec.signUp}" /></g:Anchor>
+            <g:Button addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
+                    ui:field="signInUi"><ui:text from="{i18n_sec.signIn}" /></g:Button>
+            <g:Button addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}" 
+                    ui:field="createAccountUi"><ui:text from="{i18n_sec.signUp}" /></g:Button>
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>

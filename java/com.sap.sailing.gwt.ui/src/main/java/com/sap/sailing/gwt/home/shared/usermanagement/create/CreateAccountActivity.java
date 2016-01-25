@@ -39,37 +39,43 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         view.setPresenter(this);
         panel.setWidget(view);
+        validate("", "", "");
+    }
+    
+    @Override
+    public boolean validate(String username, String password, String passwordConfirmation) {
+        String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+        boolean isValid = errorMessage == null || errorMessage.isEmpty();
+        view.setErrorMessage(isValid ? null : errorMessage);
+        view.getCreateAccountControl().setEnabled(isValid);
+        return isValid;
     }
     
     @Override
     public void createAccount(final String username, final String fullName, final String company, String email,
             final String password, String passwordConfirmation) {
-        String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
-        if (errorMessage != null && !errorMessage.isEmpty()) {
-            view.setErrorMessage(errorMessage);
-            return;
-        }
-        
-        clientFactory.getUserManagementService().createSimpleUser(username, email, password, fullName, company,
-                callback.getCreateConfirmationUrl(), new AsyncCallback<UserDTO>() {
-            @Override
-            public void onSuccess(final UserDTO result) {
-                clientFactory.getUserManagementService().login(result.getName(), password, 
-                        new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, false));
-                placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, username));
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                if (caught instanceof UserManagementException) {
-                    if (UserManagementException.USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
-                        Window.alert(i18n_sec.userAlreadyExists(username));
-                    }
-                } else {
-                    Window.alert(i18n_sec.errorCreatingUser(username, caught.getMessage()));
+        if (validate(username, password, passwordConfirmation)) {
+            clientFactory.getUserManagementService().createSimpleUser(username, email, password, fullName, company,
+                    callback.getCreateConfirmationUrl(), new AsyncCallback<UserDTO>() {
+                @Override
+                public void onSuccess(final UserDTO result) {
+                    clientFactory.getUserManagementService().login(result.getName(), password, 
+                            new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, false));
+                    placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, username));
                 }
-            }
-        });
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    if (caught instanceof UserManagementException) {
+                        if (UserManagementException.USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
+                            Window.alert(i18n_sec.userAlreadyExists(username));
+                        }
+                    } else {
+                        Window.alert(i18n_sec.errorCreatingUser(username, caught.getMessage()));
+                    }
+                }
+            });
+        }
     }
 
     @Override

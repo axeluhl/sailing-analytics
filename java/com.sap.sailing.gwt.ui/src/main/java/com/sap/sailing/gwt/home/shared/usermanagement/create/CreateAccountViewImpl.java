@@ -8,8 +8,9 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -30,8 +31,8 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @UiField TextBox companyUi;
     @UiField PasswordTextBox passwordUi;
     @UiField PasswordTextBox passwordConfirmationUi;
-    @UiField Anchor createAccountUi;
-    @UiField Anchor signInUi;
+    @UiField Button createAccountUi;
+    @UiField Button signInUi;
     
     @UiField DivElement formErrorUi;
     
@@ -51,6 +52,11 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     }
     
     @Override
+    public HasEnabled getCreateAccountControl() {
+        return createAccountUi;
+    }
+    
+    @Override
     public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
     }
@@ -58,7 +64,6 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @Override
     public void setErrorMessage(String errorMessage) {
         formErrorUi.setInnerText(errorMessage);
-        selectAll(emailUi);
     }
     
     @Override
@@ -68,14 +73,12 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
-        triggerCreateAccount();
+        triggerValidateOrCreateAccount(true);
     }
     
     @UiHandler({ "emailUi", "usernameUi", "nameUi", "companyUi", "passwordUi", "passwordConfirmationUi"})
     void onCreateAccountKeyPressed(KeyUpEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-            triggerCreateAccount();
-        }
+        triggerValidateOrCreateAccount(event.getNativeKeyCode() == KeyCodes.KEY_ENTER);
     }
     
     @UiHandler("signInUi")
@@ -83,11 +86,15 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         presenter.signIn();
     }
     
-    private void triggerCreateAccount() {
-        String username = usernameUi.getValue(), email = emailUi.getValue();
-        String fullName = nameUi.getValue(), company = companyUi.getValue();
-        String password = passwordUi.getValue(), passwordConfirmation = passwordConfirmationUi.getValue();
-        presenter.createAccount(username, fullName, company, email, password, passwordConfirmation);
+    private void triggerValidateOrCreateAccount(boolean create) {
+        String username = usernameUi.getValue(), password = passwordUi.getValue(); 
+        String passwordConfirmation = passwordConfirmationUi.getValue();
+        if (create) {
+            String email = emailUi.getValue(), fullName = nameUi.getValue(), company = companyUi.getValue();
+            presenter.createAccount(username, fullName, company, email, password, passwordConfirmation);
+        } else {
+            presenter.validate(username, password, passwordConfirmation);
+        }
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
