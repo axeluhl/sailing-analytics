@@ -6,7 +6,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class CreateAccountPlace extends AbstractAuthenticationPlace {
 
     @Override
-    public String getLocationTitle() {
+    public String getHeaderText() {
         return StringMessages.INSTANCE.signUp();
     }
     

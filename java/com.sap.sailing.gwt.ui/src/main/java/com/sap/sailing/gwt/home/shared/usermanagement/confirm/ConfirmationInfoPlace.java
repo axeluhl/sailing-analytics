@@ -43,7 +43,7 @@ public class ConfirmationInfoPlace extends AbstractAuthenticationPlace {
     }
     
     @Override
-    public String getLocationTitle() {
+    public String getHeaderText() {
         return StringMessages.INSTANCE.accountConfirmation();
     }
 
