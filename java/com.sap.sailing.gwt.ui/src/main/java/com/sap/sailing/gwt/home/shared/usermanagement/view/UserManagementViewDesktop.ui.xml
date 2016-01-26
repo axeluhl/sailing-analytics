@@ -3,7 +3,7 @@
         xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sse.security.ui.authentication.UserManagementSharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
     <g:HTMLPanel addStyleNames="{local_res.css.flyover_content_wrapper}">
         <div class="{local_res.css.flyover_content}">
             <div class="{local_res.css.form_title}" ui:field="headingUi"></div>

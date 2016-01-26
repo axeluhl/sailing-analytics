@@ -4,7 +4,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
     <ui:with field="res" type="com.sap.sse.security.ui.authentication.UserManagementSharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
     <g:HTMLPanel>
         <div class="{local_res.css.form_description}"><ui:text from="{i18n_sec.generalWelcome}" /></div>
         <div class="{local_res.css.form_errors}" ui:field="formErrorUi"></div>

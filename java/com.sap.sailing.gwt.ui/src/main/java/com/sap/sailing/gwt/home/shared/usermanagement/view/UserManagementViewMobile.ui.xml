@@ -3,7 +3,7 @@
         xmlns:mp="urn:import:com.sap.sailing.gwt.home.mobile.partials" xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sse.security.ui.authentication.UserManagementSharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
     <mp:section.MobileSection borderTop="false">
         <mp:header>
             <mp:sectionHeader.SectionHeaderContent ui:field="sectionHeaderUi" />

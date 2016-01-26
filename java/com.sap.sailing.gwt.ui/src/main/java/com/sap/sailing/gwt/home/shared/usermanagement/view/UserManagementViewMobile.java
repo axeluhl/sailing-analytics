@@ -10,9 +10,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
+import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 
 public class UserManagementViewMobile extends Composite implements UserManagementView {
     
