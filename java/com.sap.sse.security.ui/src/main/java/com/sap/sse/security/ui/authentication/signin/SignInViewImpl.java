@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.signin;
+package com.sap.sse.security.ui.authentication.signin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -13,10 +13,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
-import com.sap.sse.security.ui.authentication.signin.SignInView;
 
 public class SignInViewImpl extends Composite implements SignInView {
     
@@ -46,9 +44,8 @@ public class SignInViewImpl extends Composite implements SignInView {
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         
-        if (!ExperimentalFeatures.SHOW_SOCIAL_LOGINS_FOR_USER_MANAGEMENT) {
-            socialLoginUi.removeFromParent();
-        }
+        // TODO implement social login functionality
+        socialLoginUi.removeFromParent();
     }
     
     @Override

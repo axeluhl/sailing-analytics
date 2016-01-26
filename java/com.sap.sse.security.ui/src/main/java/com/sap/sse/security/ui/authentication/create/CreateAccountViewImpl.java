@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.create;
+package com.sap.sse.security.ui.authentication.create;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
-import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class CreateAccountViewImpl extends Composite implements CreateAccountView {

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.recovery;
+package com.sap.sse.security.ui.authentication.recover;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
-import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 
 public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     

@@ -1,19 +1,19 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInViewImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
+import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoViewImpl;
 import com.sap.sse.security.ui.authentication.create.CreateAccountView;
+import com.sap.sse.security.ui.authentication.create.CreateAccountViewImpl;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
+import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoViewImpl;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
+import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryViewImpl;
 import com.sap.sse.security.ui.authentication.signin.SignInView;
+import com.sap.sse.security.ui.authentication.signin.SignInViewImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
