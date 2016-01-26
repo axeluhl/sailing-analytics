@@ -14,9 +14,9 @@ import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
-import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class GetEventOverviewNewsAction implements SailingAction<ResultWithTTL<ListResult<NewsEntryDTO>>>, IsClientCacheable {
     private UUID eventId;

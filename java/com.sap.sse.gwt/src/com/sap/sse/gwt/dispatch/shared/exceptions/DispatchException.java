@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.dispatch.client.exceptions;
+package com.sap.sse.gwt.dispatch.shared.exceptions;
 
 import java.util.UUID;
 

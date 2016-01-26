@@ -6,13 +6,13 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
-import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sse.gwt.dispatch.client.system.batching.AutomaticBatchingDispatch;
 import com.sap.sse.gwt.dispatch.client.system.caching.CachingDispatch;
-import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.DispatchRPCImpl;
+import com.sap.sse.gwt.dispatch.client.transport.DefaultTransport;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 
 /**
  * Base implementation of a client side dispatch executor.
@@ -27,7 +27,7 @@ import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.DispatchRPCImpl;
 public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> implements DispatchSystemAsync<CTX>,
         ProvidesServerTime {
     private final Logger LOG = Logger.getLogger(DispatchSystemDefaultImpl.class.getName());
-    private final DispatchRPCImpl<CTX> simpleDispatch;
+    private final DefaultTransport<CTX> simpleDispatch;
     private final DispatchSystemAsync<CTX> dispatch;
 
     public DispatchSystemDefaultImpl(String dispatchRPCPath) {
@@ -44,7 +44,7 @@ public abstract class DispatchSystemDefaultImpl<CTX extends DispatchContext> imp
      *            use a {@link Scheduler} to process the results
      */
     public DispatchSystemDefaultImpl(String dispatchRPCPath, boolean processResultsScheduled) {
-        simpleDispatch = new DispatchRPCImpl<CTX>(dispatchRPCPath);
+        simpleDispatch = new DefaultTransport<CTX>(dispatchRPCPath);
         dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
                 simpleDispatch, processResultsScheduled));
         LOG.finest("Started dispatch system for " + dispatchRPCPath);

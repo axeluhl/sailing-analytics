@@ -5,7 +5,7 @@ import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * The context provided to the backend action execution.

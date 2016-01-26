@@ -30,7 +30,7 @@ import com.sap.sailing.gwt.home.shared.partials.message.Message;
 import com.sap.sailing.gwt.home.shared.partials.video.Video;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public class EventOverviewStage extends Composite {
     

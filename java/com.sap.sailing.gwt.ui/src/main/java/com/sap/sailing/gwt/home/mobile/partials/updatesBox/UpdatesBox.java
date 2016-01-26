@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public class UpdatesBox extends Composite implements RefreshableWidget<ListResult<NewsEntryDTO>> {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

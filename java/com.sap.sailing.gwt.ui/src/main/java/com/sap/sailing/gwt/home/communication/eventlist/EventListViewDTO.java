@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.communication.eventlist;
 import java.util.ArrayList;
 
 import com.sap.sailing.gwt.home.communication.event.EventState;
-import com.sap.sse.gwt.dispatch.client.commands.DTO;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventListViewDTO implements DTO, Result {
     

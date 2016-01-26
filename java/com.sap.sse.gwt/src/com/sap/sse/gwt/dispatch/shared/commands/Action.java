@@ -1,10 +1,10 @@
-package com.sap.sse.gwt.dispatch.client.commands;
+package com.sap.sse.gwt.dispatch.shared.commands;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.system.DispatchSystemAsync;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * Action interface that defines actions that can be sent to server using a {@link DispatchSystemAsync}.

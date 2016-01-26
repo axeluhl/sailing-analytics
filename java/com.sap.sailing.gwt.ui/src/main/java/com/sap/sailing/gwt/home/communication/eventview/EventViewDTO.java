@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventViewDTO extends EventMetadataDTO implements Result, HasLogo {
 

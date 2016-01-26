@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.LiveRaceCalculator;
 import com.sap.sailing.gwt.home.server.EventActionUtil.CalculationWithEvent;
-import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.commands.SortedSetResult;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 public class GetLiveRacesForRegattaAction implements SailingAction<ResultWithTTL<SortedSetResult<LiveRaceDTO>>>,
         IsClientCacheable {

@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.HasLogo;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class EventSeriesViewDTO implements Result, HasLogo {
     private UUID id;

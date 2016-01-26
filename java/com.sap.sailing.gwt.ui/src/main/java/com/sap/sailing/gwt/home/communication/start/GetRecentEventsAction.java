@@ -11,9 +11,9 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class GetRecentEventsAction implements SailingAction<ListResult<EventQuickfinderDTO>>, IsClientCacheable {
     

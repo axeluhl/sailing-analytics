@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * Convenience class used to aggregate {@link DispatchCall} instances.

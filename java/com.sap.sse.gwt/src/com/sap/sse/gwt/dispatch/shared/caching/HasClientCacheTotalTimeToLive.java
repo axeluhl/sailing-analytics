@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.dispatch.client.system.caching;
+package com.sap.sse.gwt.dispatch.shared.caching;
 
 /**
  * Interface used by actions and results to provide cache time to live.

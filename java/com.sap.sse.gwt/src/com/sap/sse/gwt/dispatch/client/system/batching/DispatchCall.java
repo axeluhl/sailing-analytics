@@ -1,9 +1,9 @@
 package com.sap.sse.gwt.dispatch.client.system.batching;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * The convenience class wrapping an synchronous call.

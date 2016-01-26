@@ -3,7 +3,7 @@ package com.sap.sse.gwt.dispatch.client.transport.gwtrpc;
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * Result wrapper that encapsulates the curent server time.

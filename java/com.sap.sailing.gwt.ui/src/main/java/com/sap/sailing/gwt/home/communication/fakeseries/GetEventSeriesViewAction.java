@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDTO>, IsClientCacheable {

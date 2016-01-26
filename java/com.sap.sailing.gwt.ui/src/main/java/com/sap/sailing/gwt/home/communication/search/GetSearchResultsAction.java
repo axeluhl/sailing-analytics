@@ -11,9 +11,9 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.batching.NonBatchableAction;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * Use this action once for each result of {@link GetSearchServerNamesAction} and once for the main server.

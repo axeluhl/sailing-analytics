@@ -15,9 +15,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.dispatch.client.commands.DTO;
-import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 @GwtIncompatible
 public final class EventActionUtil {
