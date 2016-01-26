@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.framework;
+package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
@@ -9,8 +9,8 @@ import com.google.web.bindery.event.shared.Event.Type;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
+// TODO Refactor to com.sap.sse.gwt if needed
 public class WrappedPlaceManagementController {
     
     public interface PlaceManagementConfiguration extends ActivityMapper {
