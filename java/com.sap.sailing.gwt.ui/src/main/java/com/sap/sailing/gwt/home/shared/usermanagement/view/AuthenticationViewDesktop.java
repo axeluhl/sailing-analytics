@@ -17,9 +17,8 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
-import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
-public class AuthenticationViewDesktop extends Composite implements AuthenticationView {
+public class AuthenticationViewDesktop extends Composite implements FlyoutAuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     
@@ -39,9 +38,13 @@ public class AuthenticationViewDesktop extends Composite implements Authenticati
     public AuthenticationViewDesktop() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
-//        popupPanel.addAutoHidePartner(autoHidePartner);
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
+    }
+    
+    @Override
+    public void setAutoHidePartner(IsWidget autoHidePartner) {
+        popupPanel.addAutoHidePartner(autoHidePartner.asWidget().getElement());
     }
     
     @Override

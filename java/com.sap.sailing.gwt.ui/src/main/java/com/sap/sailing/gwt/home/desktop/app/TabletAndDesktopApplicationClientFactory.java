@@ -30,18 +30,18 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewDesktop;
+import com.sap.sailing.gwt.home.shared.usermanagement.view.FlyoutAuthenticationPresenter;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final WrappedPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
@@ -74,18 +74,9 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 new AuthenticationCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
                         getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
-        getEventBus().addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
-            @Override
-            public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
-                if (userManagementDisplay.isShowing()) {
-                    userManagementDisplay.hide();
-                } else {
-                    userManagementDisplay.setWidget(createBusyView());
-                    userManagementDisplay.show();
-                    userManagementWizardController.start();
-                }
-            }
-        });
+
+        new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
+                userManagementWizardController, this, eventBus);
     }
     
     @Override
