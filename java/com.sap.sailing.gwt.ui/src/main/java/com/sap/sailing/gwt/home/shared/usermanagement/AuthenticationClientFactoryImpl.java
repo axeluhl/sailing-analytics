@@ -10,8 +10,8 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryV
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInView;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInViewImpl;
+import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
 
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     

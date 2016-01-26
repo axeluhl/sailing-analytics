@@ -2,8 +2,8 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContextImpl;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;

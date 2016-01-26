@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 
 public interface SharedResources extends ClientBundle, UserManagementSharedResources {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);

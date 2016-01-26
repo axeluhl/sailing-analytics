@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface AuthenticationManager {

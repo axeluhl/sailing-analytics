@@ -10,8 +10,8 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
-import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
     

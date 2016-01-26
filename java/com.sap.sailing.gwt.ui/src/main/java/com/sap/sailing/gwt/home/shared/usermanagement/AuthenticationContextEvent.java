@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.usermanagement;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class AuthenticationContextEvent extends GwtEvent<AuthenticationContextEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<AuthenticationContextEvent.Handler>();

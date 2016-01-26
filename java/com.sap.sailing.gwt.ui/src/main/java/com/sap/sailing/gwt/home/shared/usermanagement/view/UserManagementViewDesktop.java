@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementResources.LocalCss;
-import com.sap.sse.security.ui.client.usermanagement.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 
 public class UserManagementViewDesktop extends Composite implements UserManagementView {
     

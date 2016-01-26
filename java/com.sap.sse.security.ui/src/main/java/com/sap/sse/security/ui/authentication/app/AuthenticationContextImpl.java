@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.app;
+package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
 
