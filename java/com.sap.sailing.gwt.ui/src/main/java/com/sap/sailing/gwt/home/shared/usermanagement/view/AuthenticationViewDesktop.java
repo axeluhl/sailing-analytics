@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
+import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 
 public class AuthenticationViewDesktop extends Composite implements FlyoutAuthenticationView {
     

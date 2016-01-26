@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.view;
+package com.sap.sse.security.ui.authentication.view;
 
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
