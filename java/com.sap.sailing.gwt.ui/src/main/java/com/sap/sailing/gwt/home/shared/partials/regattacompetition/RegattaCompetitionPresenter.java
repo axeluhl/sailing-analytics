@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionSeriesView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.gwt.dispatch.client.ListResult;
+import com.sap.sse.gwt.dispatch.client.commands.ListResult;
 
 public abstract class RegattaCompetitionPresenter implements
         RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>, 

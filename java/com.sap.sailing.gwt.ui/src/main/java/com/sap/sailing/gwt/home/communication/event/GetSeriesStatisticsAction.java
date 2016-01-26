@@ -8,9 +8,9 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.StatisticsCalculator;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 
 public class GetSeriesStatisticsAction implements SailingAction<ResultWithTTL<EventStatisticsDTO>>, IsClientCacheable {
     

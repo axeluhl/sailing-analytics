@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
 
 public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHandler<RegattaMetadataDTO, String>{
     

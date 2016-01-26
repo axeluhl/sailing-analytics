@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 
-import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
 
 public class GetMiniLeaderboardDTO implements DTO {
     private ArrayList<MiniLeaderboardItemDTO> items = new ArrayList<MiniLeaderboardItemDTO>();

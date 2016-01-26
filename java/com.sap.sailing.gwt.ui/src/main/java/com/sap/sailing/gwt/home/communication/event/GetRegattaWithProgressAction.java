@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 
 public class GetRegattaWithProgressAction implements SailingAction<ResultWithTTL<RegattaWithProgressDTO>>, IsClientCacheable {
 

@@ -18,8 +18,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 import com.sap.sse.shared.media.VideoDescriptor;
 
 public class GetEventOverviewStageAction implements SailingAction<ResultWithTTL<EventOverviewStageDTO>>, IsClientCacheable {

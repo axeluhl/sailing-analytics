@@ -10,14 +10,14 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.DispatchSystemAsync;
-import com.sap.sse.gwt.dispatch.client.DispatchContext;
-import com.sap.sse.gwt.dispatch.client.Result;
-import com.sap.sse.gwt.dispatch.client.caching.CachingDispatch;
-import com.sap.sse.gwt.dispatch.client.caching.HasClientCacheTotalTimeToLive;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.Action;
+import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
+import com.sap.sse.gwt.dispatch.client.system.DispatchSystemAsync;
+import com.sap.sse.gwt.dispatch.client.system.caching.CachingDispatch;
+import com.sap.sse.gwt.dispatch.client.system.caching.HasClientCacheTotalTimeToLive;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 
 public class CacheDispatchTest {
 

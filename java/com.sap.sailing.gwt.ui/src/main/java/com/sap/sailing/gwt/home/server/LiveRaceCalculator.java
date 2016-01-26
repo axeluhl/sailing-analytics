@@ -3,8 +3,8 @@ package com.sap.sailing.gwt.home.server;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.SortedSetResult;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.commands.SortedSetResult;
 
 @GwtIncompatible
 public final class LiveRaceCalculator implements RaceCallback {

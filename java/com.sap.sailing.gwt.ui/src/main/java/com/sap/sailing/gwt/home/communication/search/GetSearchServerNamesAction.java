@@ -4,7 +4,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
-import com.sap.sse.gwt.dispatch.client.StringsResult;
+import com.sap.sse.gwt.dispatch.client.commands.StringsResult;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 /**

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.communication.event;
 
 import java.util.UUID;
 
-import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
 
 public class EventSeriesReferenceDTO implements DTO {
 
