@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.server;
+package com.sap.sse.gwt.dispatch.servlets;
 
 import javax.servlet.http.HttpServletRequest;
 
