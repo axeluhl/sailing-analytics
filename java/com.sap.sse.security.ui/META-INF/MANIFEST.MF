@@ -24,7 +24,8 @@ Require-Bundle: javax.servlet;bundle-version="2.5.0",
  com.sap.sse.security.common,
  com.sap.sse.mail
 Web-ContextPath: /security/ui
-Export-Package: com.sap.sse.security.ui.client,
+Export-Package: com.sap.sailing.gwt.home.shared.usermanagement.app,
+ com.sap.sse.security.ui.client,
  com.sap.sse.security.ui.client.component,
  com.sap.sse.security.ui.client.i18n,
  com.sap.sse.security.ui.client.usermanagement,
