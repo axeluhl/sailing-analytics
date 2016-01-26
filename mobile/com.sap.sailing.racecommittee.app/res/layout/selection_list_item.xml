@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/selection"
     android:layout_width="match_parent"
     android:layout_height="@dimen/selector_header_height">
 
@@ -16,7 +16,7 @@
         android:layout_marginRight="@dimen/side_padding"
         android:textColor="?attr/white"
         android:textSize="@dimen/management_text_normal"
-        tools:text="@string/start_mode"/>
+        tools:text="@string/start_mode" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -32,7 +32,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/side_padding"
-            android:src="@drawable/ic_chevron_right_grey600_24dp"/>
+            android:src="@drawable/ic_chevron_right_grey600_24dp" />
 
         <TextView
             android:id="@+id/item_value"
@@ -46,7 +46,7 @@
             android:singleLine="true"
             android:textColor="?attr/white"
             android:textSize="@dimen/management_text_small"
-            tools:text="Papa"/>
+            tools:text="Papa" />
 
         <ImageView
             android:id="@+id/item_flag"
@@ -56,12 +56,12 @@
             android:layout_toLeftOf="@+id/item_value"
             android:visibility="gone"
             tools:src="@drawable/flag_papa_48dp"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
-        android:background="?attr/black"/>
+        android:background="?attr/black" />
 </RelativeLayout>
