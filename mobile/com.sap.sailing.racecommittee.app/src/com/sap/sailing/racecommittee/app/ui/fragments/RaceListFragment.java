@@ -58,7 +58,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -142,12 +141,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 }
             }
         }
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 
     private void filterChanged() {
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
         mAdapter.notifyDataSetChanged();
 
@@ -489,7 +486,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         initializeViewElements();
         // prepare views and do initial filtering
         filterChanged();
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 
