@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.recovery;
+package com.sap.sse.security.ui.authentication.recover;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.AbstractAuthenticationPlace;
+import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryPlace extends AbstractAuthenticationPlace {

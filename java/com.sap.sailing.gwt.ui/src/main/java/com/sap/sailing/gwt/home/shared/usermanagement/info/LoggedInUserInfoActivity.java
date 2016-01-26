@@ -5,11 +5,11 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
+import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {

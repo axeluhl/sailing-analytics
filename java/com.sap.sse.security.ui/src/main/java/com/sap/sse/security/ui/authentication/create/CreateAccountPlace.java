@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.create;
+package com.sap.sse.security.ui.authentication.create;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.AbstractAuthenticationPlace;
+import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class CreateAccountPlace extends AbstractAuthenticationPlace {

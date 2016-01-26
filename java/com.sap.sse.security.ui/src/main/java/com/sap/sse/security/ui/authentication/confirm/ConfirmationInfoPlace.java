@@ -1,6 +1,6 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.confirm;
+package com.sap.sse.security.ui.authentication.confirm;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.AbstractAuthenticationPlace;
+import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class ConfirmationInfoPlace extends AbstractAuthenticationPlace {
@@ -10,18 +10,18 @@ public class ConfirmationInfoPlace extends AbstractAuthenticationPlace {
     public enum Action {
         ACCOUNT_CREATED {
             @Override
-            String getMessage(StringMessages i18n, String name) {
+            public String getMessage(StringMessages i18n, String name) {
                 return i18n.signedUpSuccessfully(name);
             }
         },
         RESET_REQUESTED {
             @Override
-            String getMessage(StringMessages i18n, String name) {
+            public String getMessage(StringMessages i18n, String name) {
                 return i18n.passwordResetLinkSent(name);
             }
         };
         
-        abstract String getMessage(StringMessages i18n, String name);
+        public abstract String getMessage(StringMessages i18n, String name);
     };
 
     public ConfirmationInfoPlace(Action action, String name) {
