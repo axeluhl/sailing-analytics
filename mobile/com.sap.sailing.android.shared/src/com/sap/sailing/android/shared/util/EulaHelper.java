@@ -54,9 +54,9 @@ public class EulaHelper {
         }
 
         builder.setTitle(R.string.eula_title);
-        builder.setMessage(Html.fromHtml(getContent(mContext, R.raw.license)));
+        builder.setMessage(getSpannableMessage());
         builder.setCancelable(false);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.eula_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 storeEulaAccepted();
@@ -82,6 +82,23 @@ public class EulaHelper {
         String url = mContext.getString(R.string.eula_url);
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         mContext.startActivity(browserIntent);
+    }
+
+    private SpannableString getSpannableMessage() {
+        String message = mContext.getString(R.string.eula_message);
+        String clickableText = mContext.getString(R.string.linked_eula_message_part);
+
+        SpannableString spannableString = new SpannableString(message);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                openEulaPage();
+            }
+        };
+
+        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+        return spannableString;
     }
 
     protected String getContent(final Context context, final int contentResourceId) {
