@@ -6,7 +6,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -34,11 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectionReducer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -53,9 +47,8 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEv
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -118,7 +111,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -658,13 +650,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public synchronized void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
         while (loadingFromWindStoreState != LoadingFromStoresState.FINISHED) {
-            wait();
-        }
-    }
-
-    @Override
-    public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
-        while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -1838,10 +1823,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void loadGPSFixesForExtendedTimeRange(final TimePoint start, final TimePoint end, final boolean waitForGPSFixesToLoad) {
-        for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            loadFixesForLog(raceLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
-                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
-        }
         for (final RegattaLog regattaLog : attachedRegattaLogs.values()) {
             loadFixesForLog(regattaLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
                     /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
@@ -3205,8 +3186,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * waiters on <code>this</code> object are notified when done with adding the <code>log</code> to
      * <code>addLogToMap</code>.
      */
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
-            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap, final boolean waitForGPSFixesToLoad) {
+    private void loadFixesForLog(
+            final RegattaLog log, ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final boolean waitForGPSFixesToLoad) {
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
@@ -3237,8 +3218,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            the time to use to crop the end of the time range for which to load fixes; if <code>null</code>,
      *            the end of the time range will be restricted only by the device mapping intervals
      */
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(final LogT log,
-            ConcurrentHashMap<Serializable, LogT> addLogToMap, final TimePoint startOfTimeWindowToLoad,
+    private void loadFixesForLog(final RegattaLog log,
+            ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final TimePoint startOfTimeWindowToLoad,
             final TimePoint endOfTimeWindowToLoad, final boolean waitForGPSFixesToLoad) {
         Thread t = new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
                 + log.getId()+" from "+startOfTimeWindowToLoad+" to "+endOfTimeWindowToLoad) {
@@ -3266,7 +3247,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                     logger.info("Finished loading competitor tracks for " + getRace().getName());
                     logger.info("Started loading mark tracks for " + getRace().getName());
-                    for (Mark mark : getMarksFromRaceAndLogs()) {
+                    for (Mark mark : getMarksFromRegattaLogs()) {
                         try {
                             gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
                                     log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
@@ -3314,20 +3295,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return loadingFromGPSFixStore;
     }
 
-    /**
-     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
-     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
-     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
-     */
     @Override
-    public void attachRaceLog(final RaceLog raceLog) {
-        loadFixesForLog(raceLog, attachedRaceLogs, /* wait for fixes to load */ false);
-        try {
-            // The log is attached to the tracked race by a background thread; this method wants
-            // to guarantee that the log is at least really attached to the TrackedRace before returning:
-            waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
-        } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+    public void attachRaceLog(RaceLog raceLog) {
+        synchronized (TrackedRaceImpl.this) {
+            attachedRaceLogs.put(raceLog.getId(), raceLog);
+            notifyAll();
         }
     }
 
@@ -3923,19 +3895,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Iterable<Mark> getMarksFromRaceAndLogs() {
-         final List<AbstractLog<?, ?>> allLogs = new ArrayList<AbstractLog<?, ?>>();
-         final List<AbstractLog<?, ?>> raceLogs = new ArrayList<>();
-         raceLogs.addAll(attachedRaceLogs.values());
-         allLogs.addAll(raceLogs);
-         allLogs.addAll(attachedRegattaLogs.values());
-         final Map<Mark, List<DeviceMapping<Mark>>> markMappings = new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory(),
-                 new MapWithValueCollectionReducer<>(), allLogs).analyze();
+    public Iterable<Mark> getMarksFromRegattaLogs() {
          final Set<Mark> result = new HashSet<>();
-         result.addAll(markMappings.keySet());
-         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new RaceLogDefinedMarkFinder.Factory();
-         Set<Mark> marksDefinedInRaceLog = new MultiLogAnalyzer<>(analyzerFactory, new SetReducer<Mark>(), raceLogs).analyze();
-         result.addAll(marksDefinedInRaceLog);
+         for (RegattaLog log : attachedRegattaLogs.values()) {
+             result.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());
+         }
          return result;
     }
 }
