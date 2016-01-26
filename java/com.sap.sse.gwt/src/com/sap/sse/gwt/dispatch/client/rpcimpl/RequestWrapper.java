@@ -7,6 +7,16 @@ import com.sap.sse.gwt.dispatch.client.Action;
 import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 
+/**
+ * Wrapper that encapsulates an action to be sent to the server.
+ *
+ * @param <A>
+ *            Action
+ * @param <R>
+ *            Result
+ * @param <CTX>
+ *            Execution context
+ */
 public class RequestWrapper<R extends Result, A extends Action<R, CTX>, CTX extends DispatchContext> implements
         IsSerializable {
     

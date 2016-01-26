@@ -1,9 +1,7 @@
 package com.sap.sse.gwt.dispatch.client.caching;
 
 /**
- * Interface used by actions and results to override default cache time to live.
- * 
- * @author pgtaboada
+ * Interface used by actions and results to provide cache time to live.
  *
  */
 public interface HasClientCacheTotalTimeToLive {

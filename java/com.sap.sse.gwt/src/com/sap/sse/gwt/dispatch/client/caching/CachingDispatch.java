@@ -8,29 +8,42 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.DispatchAsync;
+import com.sap.sse.gwt.dispatch.client.DispatchSystemAsync;
 import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 
 /**
  * Delegating dispatch implementation that caches results if actions implement IsClientCache interface.
  * 
- * @author pgtaboada
  */
-public final class CachingDispatch<CTX extends DispatchContext> implements DispatchAsync<CTX> {
-
+public final class CachingDispatch<CTX extends DispatchContext> implements DispatchSystemAsync<CTX> {
     private static final Logger LOG = Logger.getLogger(CachingDispatch.class.getName());
-
     private final CacheCleanupTask invalidationTask;
     private final HashMap<String, ResultHolder> resultsCache = new HashMap<>();
-    private final DispatchAsync<CTX> dispatch;
+    private final DispatchSystemAsync<CTX> dispatch;
     private final int defaultTimeToLive;
 
-    public CachingDispatch(DispatchAsync<CTX> service) {
+    /**
+     * Create new caching dispatch instance with default values.
+     * 
+     * @param service
+     *            the underlying service used to make dispatch calls
+     */
+    public CachingDispatch(DispatchSystemAsync<CTX> service) {
         this(service, true, (int) Duration.ONE_MINUTE.times(3).asMillis());
     }
 
-    public CachingDispatch(DispatchAsync<CTX> service, boolean enableCleanup, int defaultTimeToLive) {
+    /**
+     * Create new caching dispatch instance with given parameters
+     * 
+     * @param service
+     *            the underlying service used to make dispatch calls
+     * @param enableCleanup
+     *            enable cleanup cached elements
+     * @param defaultTimeToLive
+     *            default cached element time to live
+     */
+    public CachingDispatch(DispatchSystemAsync<CTX> service, boolean enableCleanup, int defaultTimeToLive) {
         this.dispatch = service;
         this.defaultTimeToLive = defaultTimeToLive;
         if (enableCleanup) {
@@ -60,21 +73,23 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
     };
 
     /**
-     * Perform dispatch call with intercepting callback.
+     * Perform dispatch call with using an intercepting callback for client cacheable commands.
      * 
      * @param action
      * @param callback
      */
     private <R extends Result, A extends Action<R, CTX>> void executeAndCache(final A action,
             final AsyncCallback<R> callback) {
-        dispatch.execute(action, new InterceptingCallback<>(action, callback));
+        if (action instanceof IsClientCacheable) {
+            dispatch.execute(action, new InterceptingCallback<>(action, callback));
+        } else {
+            dispatch.execute(action, callback);
+        }
     }
 
     /**
      * Intercepting callback that stores the result into cache.
      * 
-     * @author pgtaboada
-     *
      * @param <R>
      * @param <A>
      */
@@ -89,26 +104,35 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
 
         @Override
         public void onSuccess(R result) {
-            if (action instanceof IsClientCacheable) {
-                final IsClientCacheable clientCacheableAction = (IsClientCacheable) action;
-                final String instanceKey = key(clientCacheableAction);
-                int cacheTotalTimeToLiveMillis = defaultTimeToLive;
-                if (result instanceof HasClientCacheTotalTimeToLive) {
-                    cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) result).cacheTotalTimeToLiveMillis();
-                } else if (action instanceof HasClientCacheTotalTimeToLive) {
-                    cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) action).cacheTotalTimeToLiveMillis();
-                }
-                resultsCache.put(instanceKey, new ResultHolder(System.currentTimeMillis()
-                        + cacheTotalTimeToLiveMillis, result));
-                LOG.finest("Added " + instanceKey + " to cache, ttl: " + cacheTotalTimeToLiveMillis + "ms");
-                if (invalidationTask != null && !invalidationTask.isRunning()) {
-                    LOG.finest("Schedule cache cleanup");
-                    invalidationTask.schedule((int) Duration.ONE_MINUTE.times(5).asMillis());
-                }
+            final IsClientCacheable clientCacheableAction = (IsClientCacheable) action;
+            final String instanceKey = key(clientCacheableAction);
+            int cacheTotalTimeToLiveMillis = timeToLive(action, result);
+            resultsCache.put(instanceKey, new ResultHolder(System.currentTimeMillis() + cacheTotalTimeToLiveMillis,
+                    result));
+            LOG.finest("Added " + instanceKey + " to cache, ttl: " + cacheTotalTimeToLiveMillis + "ms");
+            if (invalidationTask != null && !invalidationTask.isRunning()) {
+                LOG.finest("Schedule cache cleanup");
+                invalidationTask.schedule((int) Duration.ONE_MINUTE.times(5).asMillis());
             }
             callback.onSuccess(result);
         }
 
+        /**
+         * Calculate time to live fore result
+         * 
+         * @param action
+         * @param result
+         * @return
+         */
+        private int timeToLive(A action, R result) {
+            int cacheTotalTimeToLiveMillis = defaultTimeToLive;
+            if (result instanceof HasClientCacheTotalTimeToLive) {
+                cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) result).cacheTotalTimeToLiveMillis();
+            } else if (action instanceof HasClientCacheTotalTimeToLive) {
+                cacheTotalTimeToLiveMillis = ((HasClientCacheTotalTimeToLive) action).cacheTotalTimeToLiveMillis();
+            }
+            return cacheTotalTimeToLiveMillis;
+        }
         @Override
         public void onFailure(Throwable caught) {
             callback.onFailure(caught);
@@ -130,8 +154,6 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
     /**
      * Holder class used to store results in cache.
      * 
-     * @author pgtaboada
-     *
      */
     private static class ResultHolder {
         final Result payload;
@@ -168,8 +190,6 @@ public final class CachingDispatch<CTX extends DispatchContext> implements Dispa
     /**
      * Removes due elements from resultscache.
      * 
-     * @author pgtaboada
-     *
      */
     private class CacheCleanupTask extends Timer {
         @Override

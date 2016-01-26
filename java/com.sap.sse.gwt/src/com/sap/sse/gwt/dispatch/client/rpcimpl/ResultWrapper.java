@@ -1,9 +1,15 @@
-package com.sap.sse.gwt.dispatch.client;
+package com.sap.sse.gwt.dispatch.client.rpcimpl;
 
 import java.util.Date;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.gwt.dispatch.client.Result;
 
+/**
+ * Result wrapper that encapsulates the curent server time.
+ *
+ * @param <R>
+ */
 public class ResultWrapper<R extends Result> implements IsSerializable {
     
     private Date currentServerTime = new Date();

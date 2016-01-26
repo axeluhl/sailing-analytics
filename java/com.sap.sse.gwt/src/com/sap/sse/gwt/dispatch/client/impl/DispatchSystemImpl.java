@@ -1,43 +1,62 @@
 package com.sap.sse.gwt.dispatch.client.impl;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.DispatchAsync;
+import com.sap.sse.gwt.dispatch.client.DispatchSystemAsync;
 import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 import com.sap.sse.gwt.dispatch.client.batching.AutomaticBatchingDispatch;
 import com.sap.sse.gwt.dispatch.client.caching.CachingDispatch;
+import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sse.gwt.dispatch.client.rpcimpl.SimpleDispatch;
 
-public class DispatchSystemImpl<CTX extends DispatchContext> implements DispatchSystem<CTX> {
-    
+/**
+ * Base implementation of a client side dispatch executor.
+ *
+ * The dispatch system implements caching {@link CachingDispatch} and automatic batching
+ * {@link AutomaticBatchingDispatch}.
+ * 
+ * @param <CTX>
+ */
+public abstract class DispatchSystemImpl<CTX extends DispatchContext> implements DispatchSystem<CTX> {
+    private final Logger LOG = Logger.getLogger(DispatchSystemImpl.class.getName());
     private final SimpleDispatch<CTX> simpleDispatch;
-    private final DispatchAsync<CTX> dispatch;
+    private final DispatchSystemAsync<CTX> dispatch;
 
     public DispatchSystemImpl(String dispatchRPCPath) {
         this(dispatchRPCPath, false);
     }
     
+    /**
+     * 
+     * Create a dispatch system
+     * 
+     * @param dispatchRPCPath
+     *            rpc-servlet path
+     * @param processResultsScheduled
+     *            use a {@link Scheduler} to process the results
+     */
     public DispatchSystemImpl(String dispatchRPCPath, boolean processResultsScheduled) {
         simpleDispatch = new SimpleDispatch<CTX>(dispatchRPCPath);
         dispatch = new CachingDispatch<CTX>(new AutomaticBatchingDispatch<CTX>(
                 simpleDispatch, processResultsScheduled));
+        LOG.finest("Started dispatch system for " + dispatchRPCPath);
     }
     
     @Override
     public <R extends Result, A extends Action<R, CTX>> void execute(final A action, final AsyncCallback<R> callback) {
-        // TODO: client side execution time logging
-        AsyncCallback<R> wrappedCallback = new AsyncCallback<R>() {
+        final AsyncCallback<R> wrappedCallback = new AsyncCallback<R>() {
             @Override
             public void onFailure(Throwable caught) {
-                if (caught instanceof ServerDispatchException) {
+                if (caught instanceof DispatchException) {
                     ServerDispatchException sde = (ServerDispatchException) caught;
-                    // TODO: browser console log
-                    GWT.log("Server exception with id: " + sde.getUuid());
+                    LOG.log(Level.SEVERE, "Server exception with id: " + sde.getExceptionId());
                 }
                 callback.onFailure(caught);
             }

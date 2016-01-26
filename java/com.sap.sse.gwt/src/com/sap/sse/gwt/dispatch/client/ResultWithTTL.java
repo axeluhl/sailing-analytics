@@ -4,6 +4,11 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.dispatch.client.caching.HasClientCacheTotalTimeToLive;
 
+/**
+ * Result implementation that holds a {@link DTO} with a defined time to live expiration.
+ *
+ * @param <T>
+ */
 public class ResultWithTTL<T extends DTO> implements Result, HasClientCacheTotalTimeToLive {
     
     /** max millis the result might be loaded earlier so we do batches **/

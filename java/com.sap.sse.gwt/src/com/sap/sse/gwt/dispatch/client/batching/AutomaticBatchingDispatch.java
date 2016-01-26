@@ -6,15 +6,15 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.DispatchAsync;
+import com.sap.sse.gwt.dispatch.client.DispatchSystemAsync;
 import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 
-public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements DispatchAsync<CTX> {
+public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements DispatchSystemAsync<CTX> {
 
     private static final Logger LOG = Logger.getLogger(AutomaticBatchingDispatch.class.getName());
 
-    private final DispatchAsync<CTX> executionContext;
+    private final DispatchSystemAsync<CTX> executionContext;
 
     private DispatchCallStack<CTX> currentCallstack;
 
@@ -29,7 +29,7 @@ public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements D
      *            the underlying service implementation to use
      * 
      */
-    public AutomaticBatchingDispatch(DispatchAsync<CTX> service) {
+    public AutomaticBatchingDispatch(DispatchSystemAsync<CTX> service) {
         this(service, false);
     }
     
@@ -40,9 +40,10 @@ public class AutomaticBatchingDispatch<CTX extends DispatchContext> implements D
      * 
      * @param service
      *            the underlying service implementation to use
-     * 
+     * @param processResultsScheduled
+     *            use a {@link Scheduler} to process the results
      */
-    public AutomaticBatchingDispatch(DispatchAsync<CTX> service, boolean processResultsScheduled) {
+    public AutomaticBatchingDispatch(DispatchSystemAsync<CTX> service, boolean processResultsScheduled) {
         this.executionContext = service;
         this.processResultsScheduled = processResultsScheduled;
     }
