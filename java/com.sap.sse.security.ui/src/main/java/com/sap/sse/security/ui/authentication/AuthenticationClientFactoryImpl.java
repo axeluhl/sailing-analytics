@@ -1,9 +1,5 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sse.security.ui.authentication;
 
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
-import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoViewImpl;
 import com.sap.sse.security.ui.authentication.create.CreateAccountView;

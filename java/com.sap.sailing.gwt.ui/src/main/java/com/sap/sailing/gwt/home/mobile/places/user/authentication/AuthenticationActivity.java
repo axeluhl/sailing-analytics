@@ -8,10 +8,10 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMobile;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 
 public class AuthenticationActivity extends AbstractActivity {
     private final MobileApplicationClientFactory clientFactory;
