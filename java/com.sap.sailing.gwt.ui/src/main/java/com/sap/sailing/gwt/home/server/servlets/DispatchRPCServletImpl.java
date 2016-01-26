@@ -12,13 +12,13 @@ import com.sap.sailing.gwt.ui.server.Activator;
 import com.sap.sailing.gwt.ui.server.ProxiedRemoteServiceServlet;
 import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.commands.Action;
+import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
-import com.sap.sse.gwt.dispatch.client.rpcimpl.DispatchRPC;
-import com.sap.sse.gwt.dispatch.client.rpcimpl.RequestWrapper;
-import com.sap.sse.gwt.dispatch.client.rpcimpl.ResultWrapper;
+import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.DispatchRPC;
+import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.RequestWrapper;
+import com.sap.sse.gwt.dispatch.client.transport.gwtrpc.ResultWrapper;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DispatchRPCServletImpl extends ProxiedRemoteServiceServlet implements DispatchRPC<SailingDispatchContext> {

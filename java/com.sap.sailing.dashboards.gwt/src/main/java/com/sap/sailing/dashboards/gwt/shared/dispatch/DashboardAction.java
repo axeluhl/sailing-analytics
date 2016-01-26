@@ -1,8 +1,8 @@
 package com.sap.sailing.dashboards.gwt.shared.dispatch;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.commands.Action;
+import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 /**

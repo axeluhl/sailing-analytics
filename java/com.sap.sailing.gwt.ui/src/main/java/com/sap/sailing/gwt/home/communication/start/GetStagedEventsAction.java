@@ -7,9 +7,9 @@ import com.sap.sailing.gwt.server.EventHolder;
 import com.sap.sailing.gwt.server.EventStageCandidateCalculator;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.dispatch.client.ListResult;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.ListResult;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 
 public class GetStagedEventsAction implements SailingAction<ListResult<EventStageDTO>>, IsClientCacheable {
     private boolean useTeaserImage;

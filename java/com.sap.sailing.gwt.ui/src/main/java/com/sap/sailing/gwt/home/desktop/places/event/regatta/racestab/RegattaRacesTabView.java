@@ -53,8 +53,8 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.dispatch.client.DTO;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
 
 /**
  * Created by pgtaboada on 25.11.14.

@@ -12,9 +12,9 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.SortedSetResult;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.commands.SortedSetResult;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 
 public class GetRegattaListViewAction implements SailingAction<ResultWithTTL<SortedSetResult<RegattaWithProgressDTO>>>,
         IsClientCacheable {

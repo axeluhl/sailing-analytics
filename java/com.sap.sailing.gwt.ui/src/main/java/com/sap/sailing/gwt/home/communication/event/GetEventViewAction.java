@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.gwt.dispatch.client.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
 
 public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClientCacheable {

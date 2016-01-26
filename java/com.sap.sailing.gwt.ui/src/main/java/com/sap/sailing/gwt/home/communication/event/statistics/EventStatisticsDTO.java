@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
 
 public class EventStatisticsDTO implements DTO {
     private int regattasFoughtCount;

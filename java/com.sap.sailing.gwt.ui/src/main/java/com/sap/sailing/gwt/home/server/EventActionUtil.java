@@ -15,8 +15,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.dispatch.client.DTO;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
 @GwtIncompatible

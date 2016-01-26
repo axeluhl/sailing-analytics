@@ -2,7 +2,7 @@ package com.sap.sailing.dashboards.gwt.shared.dispatch;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sse.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.client.commands.Result;
 
 /**
  * @author Alexander Ries (D062114)

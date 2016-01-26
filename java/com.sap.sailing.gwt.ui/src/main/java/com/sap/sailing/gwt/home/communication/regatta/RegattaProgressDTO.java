@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.home.communication.regatta;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sse.gwt.dispatch.client.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
 
 public class RegattaProgressDTO implements DTO {
     private ArrayList<RegattaProgressSeriesDTO> series = new ArrayList<>();

@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.DefaultActionProvider;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.DTO;
-import com.sap.sse.gwt.dispatch.client.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.client.commands.DTO;
+import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
 
 public abstract class RefreshManager {
     private static final Logger LOG = Logger.getLogger(RefreshManager.class.getName());

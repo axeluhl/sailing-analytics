@@ -8,8 +8,8 @@ import com.sap.sailing.gwt.home.communication.search.GetSearchResultsAction;
 import com.sap.sailing.gwt.home.communication.search.GetSearchServerNamesAction;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
-import com.sap.sse.gwt.dispatch.client.ListResult;
-import com.sap.sse.gwt.dispatch.client.StringsResult;
+import com.sap.sse.gwt.dispatch.client.commands.ListResult;
+import com.sap.sse.gwt.dispatch.client.commands.StringsResult;
 
 public class SearchResultActivity extends AbstractActivity {
    
