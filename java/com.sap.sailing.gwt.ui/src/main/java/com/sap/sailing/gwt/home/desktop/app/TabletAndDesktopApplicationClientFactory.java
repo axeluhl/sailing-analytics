@@ -76,7 +76,7 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                         getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
 
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
-                userManagementWizardController, this, eventBus);
+                userManagementWizardController, eventBus);
     }
     
     @Override
