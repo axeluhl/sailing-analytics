@@ -3,6 +3,5 @@
     xmlns:s="urn:import:com.sap.sailing.gwt.autoplay.client.place"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-   	<g:SimplePanel ui:field="contentPanel">
-	</g:SimplePanel>
+   	<g:SimpleLayoutPanel ui:field="contentPanel" />
 </ui:UiBinder>    
