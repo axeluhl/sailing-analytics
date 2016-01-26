@@ -9,7 +9,20 @@ public class ConfirmationInfoPlace extends AbstractAuthenticationPlace implement
     private final Action action;
 
     public enum Action {
-        ERROR, ACCOUNT_CREATED, RESET_REQUESTED;  
+        ACCOUNT_CREATED {
+            @Override
+            String getMessage(StringMessages i18n, String name) {
+                return i18n.signedUpSuccessfully(name);
+            }
+        },
+        RESET_REQUESTED {
+            @Override
+            String getMessage(StringMessages i18n, String name) {
+                return i18n.passwordResetLinkSent(name);
+            }
+        };
+        
+        abstract String getMessage(StringMessages i18n, String name);
     };
 
     public ConfirmationInfoPlace(Action action, String name) {

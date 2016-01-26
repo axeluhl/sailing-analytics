@@ -19,18 +19,7 @@ public class ConfirmationInfoActivity extends AbstractActivity implements Confir
     @Override
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         panel.setWidget(view);
-        switch (place.getAction()) {
-        case ACCOUNT_CREATED:
-            view.setMessage(i18n_sec.signedUpSuccessfully(place.getName()));
-            break;
-        case RESET_REQUESTED:
-            view.setMessage(i18n_sec.passwordResetLinkSent(place.getName()));
-            break;
-        case ERROR:
-        default:
-            view.setMessage(i18n_sec.error());
-            break;
-        }
+        view.setMessage(place.getAction().getMessage(i18n_sec, place.getName()));
     }
 
 }
