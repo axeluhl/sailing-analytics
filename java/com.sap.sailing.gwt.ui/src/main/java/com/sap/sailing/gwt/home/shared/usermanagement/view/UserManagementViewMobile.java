@@ -13,9 +13,9 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
-import com.sap.sse.security.ui.authentication.view.UserManagementView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
-public class UserManagementViewMobile extends Composite implements UserManagementView {
+public class UserManagementViewMobile extends Composite implements AuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     

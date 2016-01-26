@@ -15,12 +15,12 @@ import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryActivity;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
 import com.sap.sse.security.ui.authentication.signin.SignInActivity;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
-import com.sap.sse.security.ui.authentication.view.UserManagementView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
     public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
-            UserManagementView userManagementView, EventBus globalEventBus) {
+            AuthenticationView userManagementView, EventBus globalEventBus) {
         super(new Configuration(clientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
@@ -33,11 +33,11 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
     private static class Configuration implements PlaceManagementConfiguration {
         private final AuthenticationClientFactory clientFactory;
         private final AuthenticationCallback callback;
-        private final UserManagementView userManagementView;
+        private final AuthenticationView userManagementView;
         private PlaceController placeController;
 
         public Configuration(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
-                UserManagementView userManagementView) {
+                AuthenticationView userManagementView) {
             this.clientFactory = clientFactory;
             this.callback = callback;
             this.userManagementView = userManagementView;

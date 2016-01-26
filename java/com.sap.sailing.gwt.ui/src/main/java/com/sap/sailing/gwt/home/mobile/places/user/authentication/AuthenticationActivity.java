@@ -11,11 +11,11 @@ import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMob
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
-import com.sap.sse.security.ui.authentication.view.UserManagementView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
 public class AuthenticationActivity extends AbstractActivity {
     private final MobileApplicationClientFactory clientFactory;
-    private final UserManagementView userManagementView = new UserManagementViewMobile();
+    private final AuthenticationView userManagementView = new UserManagementViewMobile();
 
     public AuthenticationActivity(AuthenticationPlace place, MobileApplicationClientFactory clientFactory) {
         this.clientFactory = clientFactory;
