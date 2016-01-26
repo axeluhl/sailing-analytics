@@ -31,13 +31,13 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetVi
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactoryImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManager;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationManagerImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationRequestEvent;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
+import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 

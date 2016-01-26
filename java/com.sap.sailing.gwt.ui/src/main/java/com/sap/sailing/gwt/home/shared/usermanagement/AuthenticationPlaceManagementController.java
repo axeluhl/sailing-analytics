@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryV
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     

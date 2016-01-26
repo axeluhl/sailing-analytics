@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
@@ -79,7 +79,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         });
     }
     
-    UserManagementServiceAsync getUserManagementService() {
+    // TODO change to package private or remove
+    public UserManagementServiceAsync getUserManagementService() {
         return clientFactory.getUserManagementService();
     }
 }

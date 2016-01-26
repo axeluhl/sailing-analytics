@@ -9,7 +9,7 @@ import com.google.web.bindery.event.shared.Event.Type;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.google.web.bindery.event.shared.SimpleEventBus;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
 public class WrappedPlaceManagementController {
     
