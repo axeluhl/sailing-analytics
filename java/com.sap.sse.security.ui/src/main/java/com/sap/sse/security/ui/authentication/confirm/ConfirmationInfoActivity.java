@@ -1,10 +1,8 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.confirm;
+package com.sap.sse.security.ui.authentication.confirm;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
-import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class ConfirmationInfoActivity extends AbstractActivity implements ConfirmationInfoView.Presenter {

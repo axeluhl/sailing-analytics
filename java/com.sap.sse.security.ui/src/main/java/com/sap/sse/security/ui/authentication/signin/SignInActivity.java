@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.signin;
+package com.sap.sse.security.ui.authentication.signin;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -11,7 +11,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
-import com.sap.sse.security.ui.authentication.signin.SignInView;
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
 

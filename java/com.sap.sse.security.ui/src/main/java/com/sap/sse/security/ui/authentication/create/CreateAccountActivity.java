@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.create;
+package com.sap.sse.security.ui.authentication.create;
 
 import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
 
@@ -14,7 +14,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace.Action;
-import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;

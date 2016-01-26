@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.info;
+package com.sap.sse.security.ui.authentication.info;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -8,7 +8,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
-import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 

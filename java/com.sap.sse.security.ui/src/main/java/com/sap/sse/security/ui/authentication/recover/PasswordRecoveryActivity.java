@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.recovery;
+package com.sap.sse.security.ui.authentication.recover;
 
 import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
 
@@ -11,7 +11,6 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace.Action;
-import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {

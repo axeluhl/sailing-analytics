@@ -6,21 +6,21 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.RequiresLoggedInUser;
+import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoActivity;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
+import com.sap.sse.security.ui.authentication.create.CreateAccountActivity;
 import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
+import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoActivity;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
+import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryActivity;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
+import com.sap.sse.security.ui.authentication.signin.SignInActivity;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
