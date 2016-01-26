@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public final class BatchResult implements Result {
     private ArrayList<Result> results = new ArrayList<>();

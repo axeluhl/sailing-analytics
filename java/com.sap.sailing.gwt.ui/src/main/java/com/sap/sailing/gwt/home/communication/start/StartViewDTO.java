@@ -8,7 +8,7 @@ import java.util.List;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class StartViewDTO implements Result {
 

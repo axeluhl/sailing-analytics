@@ -1,8 +1,8 @@
 package com.sap.sse.gwt.dispatch.client.system;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * Async interface that defines the dispatch system contract.

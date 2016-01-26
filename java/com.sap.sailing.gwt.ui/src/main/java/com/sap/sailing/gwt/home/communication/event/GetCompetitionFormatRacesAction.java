@@ -8,10 +8,10 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceCompetitionFormatDataCalculator;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.commands.ListResult;
-import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class GetCompetitionFormatRacesAction implements
         SailingAction<ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>>>, IsClientCacheable {

@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.home.shared.refresh;
 
-import com.sap.sse.gwt.dispatch.client.commands.DTO;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public interface RefreshableWidget<D extends DTO> {
     void setData(D data);

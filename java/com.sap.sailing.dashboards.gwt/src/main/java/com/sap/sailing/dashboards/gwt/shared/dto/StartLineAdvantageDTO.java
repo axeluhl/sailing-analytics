@@ -3,7 +3,7 @@ package com.sap.sailing.dashboards.gwt.shared.dto;
 import java.util.Comparator;
 
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 public class StartLineAdvantageDTO extends AverageDTO implements Result {
     

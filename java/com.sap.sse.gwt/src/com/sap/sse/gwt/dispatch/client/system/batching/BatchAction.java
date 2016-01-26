@@ -5,10 +5,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public final class BatchAction<CTX extends DispatchContext> implements Action<BatchResult, CTX> {
     private static final Logger logger = Logger.getLogger(BatchAction.class.getName());

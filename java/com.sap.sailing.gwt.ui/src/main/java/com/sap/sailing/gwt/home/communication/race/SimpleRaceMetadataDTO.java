@@ -9,7 +9,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.gwt.dispatch.client.commands.DTO;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class SimpleRaceMetadataDTO implements DTO, Comparable<SimpleRaceMetadataDTO> {
     public enum RaceViewState {

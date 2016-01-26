@@ -7,10 +7,11 @@ import java.util.logging.Logger;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.system.DispatchSystemAsync;
+import com.sap.sse.gwt.dispatch.shared.caching.HasClientCacheTotalTimeToLive;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * Delegating dispatch implementation that caches results if actions implement IsClientCache interface.

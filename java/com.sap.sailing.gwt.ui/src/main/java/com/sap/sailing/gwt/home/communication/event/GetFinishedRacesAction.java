@@ -8,9 +8,9 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceListDataCalculator;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.commands.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.client.commands.SortedSetResult;
 import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<SortedSetResult<RaceListRaceDTO>>>,
         IsClientCacheable {

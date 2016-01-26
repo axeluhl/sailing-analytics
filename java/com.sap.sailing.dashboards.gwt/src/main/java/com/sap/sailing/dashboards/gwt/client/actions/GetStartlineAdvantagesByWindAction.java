@@ -12,7 +12,7 @@ import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAndCachesM
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class GetStartlineAdvantagesByWindAction  extends RequiresLiveRaceAndCachesMovingAverageAction<StartlineAdvantagesWithMaxAndAverageDTO> {
 

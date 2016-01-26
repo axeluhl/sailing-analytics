@@ -6,7 +6,7 @@ import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * @author Alexander Ries (D062114)

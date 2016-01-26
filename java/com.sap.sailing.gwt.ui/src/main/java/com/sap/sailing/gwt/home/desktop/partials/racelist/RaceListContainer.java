@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sse.gwt.dispatch.client.commands.CollectionResult;
+import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
 public class RaceListContainer<T extends RaceMetadataDTO<?>> extends Composite implements RefreshableWidget<CollectionResult<T>> {
 

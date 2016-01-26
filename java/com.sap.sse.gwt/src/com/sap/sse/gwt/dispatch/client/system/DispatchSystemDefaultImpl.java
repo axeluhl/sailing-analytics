@@ -6,13 +6,13 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.gwt.dispatch.client.commands.Action;
-import com.sap.sse.gwt.dispatch.client.commands.Result;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
-import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sse.gwt.dispatch.client.system.batching.AutomaticBatchingDispatch;
 import com.sap.sse.gwt.dispatch.client.system.caching.CachingDispatch;
 import com.sap.sse.gwt.dispatch.client.transport.DefaultTransport;
+import com.sap.sse.gwt.dispatch.shared.commands.Action;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 
 /**
  * Base implementation of a client side dispatch executor.

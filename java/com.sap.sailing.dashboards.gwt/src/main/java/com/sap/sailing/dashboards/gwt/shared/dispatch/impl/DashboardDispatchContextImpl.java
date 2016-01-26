@@ -12,7 +12,7 @@ import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * @author Alexander Ries (D062114)

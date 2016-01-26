@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.dispatch.client.commands.SortedSetResult;
+import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 public class RegattaLiveRaces extends Composite implements RefreshableWidget<SortedSetResult<LiveRaceDTO>> {
 
