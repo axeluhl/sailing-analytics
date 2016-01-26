@@ -164,15 +164,15 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             }
             Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
             switch (getFilterMode()) {
-            case ALL:
-                mAllRacesButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mAllRacesButton, drawable);
-                break;
+                case ALL:
+                    mAllRacesButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mAllRacesButton, drawable);
+                    break;
 
-            default:
-                mCurrentRacesButton.setTextColor(colorOrange);
-                BitmapHelper.setBackground(mCurrentRacesButton, drawable);
-                break;
+                default:
+                    mCurrentRacesButton.setTextColor(colorOrange);
+                    BitmapHelper.setBackground(mCurrentRacesButton, drawable);
+                    break;
             }
         }
     }
@@ -327,13 +327,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         switch (scrollState) {
-        case SCROLL_STATE_FLING:
-        case SCROLL_STATE_TOUCH_SCROLL:
-            mUpdateList = false;
-            break;
+            case SCROLL_STATE_FLING:
+            case SCROLL_STATE_TOUCH_SCROLL:
+                mUpdateList = false;
+                break;
 
-        default:
-            mUpdateList = true;
+            default:
+                mUpdateList = true;
         }
     }
 
@@ -440,11 +440,39 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 mViewItems.add(new RaceListDataTypeHeader(fleets.get(0), false));
                 // ... and add all the sorted race views!
                 List<RaceListDataTypeRace> raceListDataTypeRaces = getRaceListDataTypeRaces(mRacesByGroup, fleets);
+                if (fleetsEqual(fleets)) {
+                    raceListDataTypeRaces = sortRaceList(raceListDataTypeRaces, fleets.size());
+                }
                 for (RaceListDataTypeRace raceListDataTypeRace : raceListDataTypeRaces) {
                     mViewItems.add(raceListDataTypeRace);
                 }
             }
         }
+    }
+
+    private boolean fleetsEqual(List<RaceGroupSeriesFleet> fleets) {
+        if (!fleets.isEmpty()) {
+            int lastFleetOrder = fleets.get(0).getFleet().getOrdering();
+            for (RaceGroupSeriesFleet fleet : fleets) {
+                int currentFleetOrder = fleet.getFleet().getOrdering();
+                if (currentFleetOrder != lastFleetOrder) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private List<RaceListDataTypeRace> sortRaceList(List<RaceListDataTypeRace> raceList, int fleetSize) {
+        int racePerFleet = raceList.size() / fleetSize;
+        List<RaceListDataTypeRace> sortedList = new ArrayList<>();
+        for (int race = 0; race < racePerFleet; race++) {
+            for (int fleet = 0; fleet < fleetSize; fleet++) {
+                sortedList.add(raceList.get(race + (fleet * racePerFleet)));
+            }
+        }
+        return sortedList;
     }
 
     private static LinkedHashMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
@@ -461,7 +489,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         return seriesWithFleets;
     }
 
-    private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, List<RaceGroupSeriesFleet> fleets) {
+    private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup,
+        List<RaceGroupSeriesFleet> fleets) {
         List<RaceListDataTypeRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet fleet : fleets) {
             for (ManagedRace race : racesByGroup.get(fleet)) {
