@@ -1,16 +1,10 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
-import com.sap.sse.security.ui.authentication.AuthenticationCallback;
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
-import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
-import com.sap.sse.security.ui.authentication.RequiresLoggedInUser;
-import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoActivity;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.create.CreateAccountActivity;

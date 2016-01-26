@@ -7,9 +7,9 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewMobile;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.view.UserManagementView;
 
