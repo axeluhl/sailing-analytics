@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
+import com.sap.sse.security.ui.authentication.view.UserManagementView;
 
 public class UserManagementViewMobile extends Composite implements UserManagementView {
     

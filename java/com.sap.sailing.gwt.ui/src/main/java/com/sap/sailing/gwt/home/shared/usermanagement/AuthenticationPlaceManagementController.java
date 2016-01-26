@@ -6,7 +6,6 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sse.security.ui.authentication.AbstractAuthenticationPlace;
 import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
@@ -22,6 +21,7 @@ import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryActivity;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
 import com.sap.sse.security.ui.authentication.signin.SignInActivity;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
+import com.sap.sse.security.ui.authentication.view.UserManagementView;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
