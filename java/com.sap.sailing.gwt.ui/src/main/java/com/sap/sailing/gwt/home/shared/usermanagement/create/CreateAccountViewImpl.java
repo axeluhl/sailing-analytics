@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -49,6 +50,43 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         StringMessages i18n = StringMessages.INSTANCE;
         setPlaceholder(passwordUi, i18n.newPasswordPlaceholder());
         setPlaceholder(passwordConfirmationUi, i18n.passwordRepeatPlaceholder());
+        
+        emailUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangeEmail(emailUi.getValue());
+            }
+        });
+        usernameUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangeUsername(usernameUi.getValue());
+            }
+        });
+        nameUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangeFullName(nameUi.getValue());
+            }
+        });
+        companyUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangeCompany(companyUi.getValue());
+            }
+        });
+        passwordUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangePassword(passwordUi.getValue());
+            }
+        });
+        passwordConfirmationUi.addKeyUpHandler(new FieldKeyUpHandler() {
+            @Override
+            void updateFieldValue() {
+                presenter.onChangePasswordConfirmation(passwordConfirmationUi.getValue());
+            }
+        });
     }
     
     @Override
@@ -73,28 +111,12 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     
     @UiHandler("createAccountUi")
     void onCreateAccountUiControlClicked(ClickEvent event) {
-        triggerValidateOrCreateAccount(true);
-    }
-    
-    @UiHandler({ "emailUi", "usernameUi", "nameUi", "companyUi", "passwordUi", "passwordConfirmationUi"})
-    void onCreateAccountKeyPressed(KeyUpEvent event) {
-        triggerValidateOrCreateAccount(event.getNativeKeyCode() == KeyCodes.KEY_ENTER);
+        presenter.createAccount();
     }
     
     @UiHandler("signInUi")
     void onSignInControlUiClicked(ClickEvent event) {
         presenter.signIn();
-    }
-    
-    private void triggerValidateOrCreateAccount(boolean create) {
-        String username = usernameUi.getValue(), password = passwordUi.getValue(); 
-        String passwordConfirmation = passwordConfirmationUi.getValue();
-        if (create) {
-            String email = emailUi.getValue(), fullName = nameUi.getValue(), company = companyUi.getValue();
-            presenter.createAccount(username, fullName, company, email, password, passwordConfirmation);
-        } else {
-            presenter.validate(username, password, passwordConfirmation);
-        }
     }
     
     private void setPlaceholder(Widget widget, String placeholderText) {
@@ -106,4 +128,16 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
         textBox.selectAll();
     }
     
+    private abstract class FieldKeyUpHandler implements KeyUpHandler {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+            if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                presenter.createAccount();
+            } else {
+                updateFieldValue();
+            }
+        }
+        
+        abstract void updateFieldValue();
+    }
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.shared.usermanagement.create;
 
+import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
+
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
@@ -24,7 +26,7 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private final CreateAccountView view;
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
-    private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
+    private final CreateAccountFormValues values = new CreateAccountFormValues();
     private final AuthenticationPlaceManagementController.Callback callback;
 
     public CreateAccountActivity(CreateAccountView view, AuthenticationClientFactory clientFactory,
@@ -39,48 +41,85 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     public void start(AcceptsOneWidget panel, EventBus eventBus) {
         view.setPresenter(this);
         panel.setWidget(view);
-        validate("", "", "");
+        values.validate();
     }
     
     @Override
-    public boolean validate(String username, String password, String passwordConfirmation) {
-        String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
-        boolean isValid = errorMessage == null || errorMessage.isEmpty();
-        view.setErrorMessage(isValid ? null : errorMessage);
-        view.getCreateAccountControl().setEnabled(isValid);
-        return isValid;
-    }
-    
-    @Override
-    public void createAccount(final String username, final String fullName, final String company, String email,
-            final String password, String passwordConfirmation) {
-        if (validate(username, password, passwordConfirmation)) {
-            clientFactory.getUserManagementService().createSimpleUser(username, email, password, fullName, company,
-                    callback.getCreateConfirmationUrl(), new AsyncCallback<UserDTO>() {
+    public void createAccount() {
+        if (values.validate()) {
+            clientFactory.getUserManagementService().createSimpleUser(values.username, values.email, 
+                    values.password, values.fullName, values.company, callback.getCreateConfirmationUrl(), 
+                    new AsyncCallback<UserDTO>() {
                 @Override
                 public void onSuccess(final UserDTO result) {
-                    clientFactory.getUserManagementService().login(result.getName(), password, 
+                    clientFactory.getUserManagementService().login(result.getName(), values.password, 
                             new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, false));
-                    placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, username));
+                    placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, result.getName()));
                 }
                 
                 @Override
                 public void onFailure(Throwable caught) {
                     if (caught instanceof UserManagementException) {
-                        if (UserManagementException.USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
-                            Window.alert(i18n_sec.userAlreadyExists(username));
+                        if (USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
+                            Window.alert(i18n_sec.userAlreadyExists(values.username));
                         }
                     } else {
-                        Window.alert(i18n_sec.errorCreatingUser(username, caught.getMessage()));
+                        Window.alert(i18n_sec.errorCreatingUser(values.username, caught.getMessage()));
                     }
                 }
             });
         }
     }
+    
+    @Override
+    public void onChangeEmail(String newValue) {
+        values.email = newValue;
+    }
+    
+    @Override
+    public void onChangeUsername(String newValue) {
+        values.username = newValue;
+        values.validate();
+    }
+    
+    @Override
+    public void onChangeFullName(String newValue) {
+        values.fullName = newValue;
+    }
 
+    @Override
+    public void onChangeCompany(String newValue) {
+        values.company = newValue;
+    }
+    
+    @Override
+    public void onChangePassword(String newValue) {
+        values.password = newValue;
+        values.validate();
+    }
+    
+    @Override
+    public void onChangePasswordConfirmation(String newValue) {
+        values.passwordConfirmation = newValue;
+        values.validate();
+    }
+    
     @Override
     public void signIn() {
         placeController.goTo(new SignInPlace());
+    }
+    
+    private class CreateAccountFormValues {
+        private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
+        private String username, fullName, company, email, password, passwordConfirmation;
+        
+        private boolean validate() {
+            String errorMessage = validator.validateUsernameAndPassword(username, password, passwordConfirmation);
+            boolean isValid = errorMessage == null || errorMessage.isEmpty();
+            view.setErrorMessage(isValid ? null : errorMessage);
+            view.getCreateAccountControl().setEnabled(isValid);
+            return isValid;
+        }
     }
 
 }

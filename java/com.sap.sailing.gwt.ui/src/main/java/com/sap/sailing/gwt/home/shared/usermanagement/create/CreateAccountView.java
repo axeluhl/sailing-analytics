@@ -12,10 +12,19 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
     
     public interface Presenter {
         
-        boolean validate(String username, String password, String passwordConfirmation);
+        void onChangeEmail(String newValue);
         
-        void createAccount(String username, String fullName, String company, 
-                String email, String password, String passwordConfirmation);
+        void onChangeUsername(String newValue);
+        
+        void onChangeFullName(String newValue);
+        
+        void onChangeCompany(String newValue);
+        
+        void onChangePassword(String newValue);
+        
+        void onChangePasswordConfirmation(String newValue);
+        
+        void createAccount();
         
         void signIn();
         
