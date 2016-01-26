@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.UserManagementView;
 
@@ -28,7 +28,7 @@ public class UserManagementViewMobile extends Composite implements UserManagemen
     private final MobileSection contentContainerUi;
     
     @UiField(provided = true)
-    UserManagementSharedResources res = SharedResources.INSTANCE;
+    AuthenticationSharedResources res = SharedResources.INSTANCE;
 
     public UserManagementViewMobile() {
         LOCAL_CSS.ensureInjected();

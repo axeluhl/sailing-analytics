@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 
 public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     
@@ -27,11 +27,11 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     @UiField DivElement formErrorUi;
     
     @UiField(provided = true)
-    final UserManagementSharedResources res;
+    final AuthenticationSharedResources res;
 
     private Presenter presenter;
     
-    public PasswordRecoveryViewImpl(UserManagementSharedResources resources) {
+    public PasswordRecoveryViewImpl(AuthenticationSharedResources resources) {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

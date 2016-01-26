@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserInfoView {
@@ -28,11 +28,11 @@ public class LoggedInUserInfoViewImpl extends Composite implements LoggedInUserI
     @UiField Anchor signOutUi;
     
     @UiField(provided = true)
-    final UserManagementSharedResources res;
+    final AuthenticationSharedResources res;
     
     private Presenter presenter;
     
-    public LoggedInUserInfoViewImpl(UserManagementSharedResources resources) {
+    public LoggedInUserInfoViewImpl(AuthenticationSharedResources resources) {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

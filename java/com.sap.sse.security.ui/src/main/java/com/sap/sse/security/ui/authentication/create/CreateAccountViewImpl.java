@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class CreateAccountViewImpl extends Composite implements CreateAccountView {
@@ -38,11 +38,11 @@ public class CreateAccountViewImpl extends Composite implements CreateAccountVie
     @UiField DivElement formErrorUi;
     
     @UiField(provided = true)
-    final UserManagementSharedResources res;
+    final AuthenticationSharedResources res;
 
     private Presenter presenter;
     
-    public CreateAccountViewImpl(UserManagementSharedResources resources) {
+    public CreateAccountViewImpl(AuthenticationSharedResources resources) {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

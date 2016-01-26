@@ -15,10 +15,10 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     
     private final AuthenticationManager authenticationManager;
-    private final UserManagementSharedResources resources;
+    private final AuthenticationSharedResources resources;
 
     public AuthenticationClientFactoryImpl(AuthenticationManager authenticationManager,
-            UserManagementSharedResources resources) {
+            AuthenticationSharedResources resources) {
         this.authenticationManager = authenticationManager;
         this.resources = resources;
     }

@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
-    <ui:with field="res" type="com.sap.sse.security.ui.authentication.UserManagementSharedResources" />
+    <ui:with field="res" type="com.sap.sse.security.ui.authentication.AuthenticationSharedResources" />
     <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
     <g:HTMLPanel>
         <div class="{local_res.css.form_description}"><ui:text from="{i18n_sec.generalWelcome}" /></div>

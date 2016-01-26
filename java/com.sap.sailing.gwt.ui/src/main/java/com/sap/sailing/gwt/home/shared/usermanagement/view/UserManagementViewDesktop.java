@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.UserManagementView;
 
@@ -34,7 +34,7 @@ public class UserManagementViewDesktop extends Composite implements UserManageme
     @UiField SimplePanel contentContainerUi;
     
     @UiField(provided = true)
-    UserManagementSharedResources res = SharedResources.INSTANCE;
+    AuthenticationSharedResources res = SharedResources.INSTANCE;
 
     public UserManagementViewDesktop() {
         LOCAL_CSS.ensureInjected();

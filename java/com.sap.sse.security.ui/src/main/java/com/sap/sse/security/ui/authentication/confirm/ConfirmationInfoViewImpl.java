@@ -6,7 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 
 public class ConfirmationInfoViewImpl extends Composite implements ConfirmationInfoView {
     private static WidgetUiBinder uiBinder = GWT.create(WidgetUiBinder.class);
@@ -15,9 +15,9 @@ public class ConfirmationInfoViewImpl extends Composite implements ConfirmationI
     }
 
     @UiField protected Label messageUi;
-    @UiField(provided = true) final UserManagementSharedResources res;
+    @UiField(provided = true) final AuthenticationSharedResources res;
 
-    public ConfirmationInfoViewImpl(UserManagementSharedResources resources) {
+    public ConfirmationInfoViewImpl(AuthenticationSharedResources resources) {
         this.res = resources;
         initWidget(uiBinder.createAndBindUi(this));
     }

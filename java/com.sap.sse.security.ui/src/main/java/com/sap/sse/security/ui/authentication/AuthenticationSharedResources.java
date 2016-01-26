@@ -1,13 +1,13 @@
 package com.sap.sse.security.ui.authentication;
 
 
-public interface UserManagementSharedResources {
+public interface AuthenticationSharedResources {
     
-    UserManagementMainCss mainCss();
+    AuthenticationMainCss mainCss();
 
-    UserManagementMediaCss mediaCss();
+    AuthenticationMediaCss mediaCss();
     
-    public interface UserManagementMainCss {
+    public interface AuthenticationMainCss {
         String button();
         String buttonprimary();
         String buttonprimaryoutlined();
@@ -18,7 +18,7 @@ public interface UserManagementSharedResources {
         String mainsection_header_title();
     }
 
-    public interface UserManagementMediaCss {
+    public interface AuthenticationMediaCss {
     }
 
 }
