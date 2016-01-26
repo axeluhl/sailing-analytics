@@ -5,6 +5,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountViewIm
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryViewImpl;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInViewImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;

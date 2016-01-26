@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryP
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;

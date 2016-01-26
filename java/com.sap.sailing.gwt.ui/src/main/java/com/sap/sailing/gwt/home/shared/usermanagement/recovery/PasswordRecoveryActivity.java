@@ -7,10 +7,10 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactory;
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace.Action;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
