@@ -16,10 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.test.AbstractLeaderboardTest;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -70,29 +66,6 @@ public class SerializeRaceLogEventsTest {
         try {
             assertEquals(Util.size(raceLog.getRawFixes()), Util.size(rl.getRawFixes()));
             assertEquals(((RaceLogStartTimeEvent) raceLog.getFirstRawFix()).getStartTime(), ((RaceLogStartTimeEvent) rl.getFirstRawFix()).getStartTime());
-        } finally {
-            rl.unlockAfterRead();
-            raceLog.unlockAfterRead();
-        }
-    }
-
-    @Test
-    public void testRaceLogSerializationWithEventContainingDeviceIdentifier() throws IOException, ClassNotFoundException {
-        RaceLogDeviceCompetitorMappingEvent mappingEvent = new RaceLogDeviceCompetitorMappingEventImpl(
-        		MillisecondsTimePoint.now(), new LogEventAuthorImpl("Author Name", /* priority */0), 0,
-        		AbstractLeaderboardTest.createCompetitor("Test Competitor"), new SmartphoneImeiIdentifier("1948364938463903"), new MillisecondsTimePoint(0), new MillisecondsTimePoint(10));
-        raceLog.add(mappingEvent);
-        oos.writeObject(raceLog);
-        ObjectInputStream ois = getObjectInputStream();
-        RaceLog rl = (RaceLog) ois.readObject();
-        raceLog.lockForRead();
-        rl.lockForRead();
-        try {
-            RaceLogDeviceCompetitorMappingEvent expected = ((RaceLogDeviceCompetitorMappingEvent) raceLog.getFirstRawFix());
-            RaceLogDeviceCompetitorMappingEvent actual = ((RaceLogDeviceCompetitorMappingEvent) rl.getFirstRawFix());
-        	
-            assertEquals(Util.size(raceLog.getRawFixes()), Util.size(rl.getRawFixes()));
-            assertEquals(expected.getDevice().getIdentifierType(), actual.getDevice().getIdentifierType());
         } finally {
             rl.unlockAfterRead();
             raceLog.unlockAfterRead();

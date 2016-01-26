@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.server.servlets;
 
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,11 +14,11 @@ import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.gwt.dispatch.client.Action;
 import com.sap.sse.gwt.dispatch.client.Result;
-import com.sap.sse.gwt.dispatch.client.ResultWrapper;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sse.gwt.dispatch.client.rpcimpl.DispatchRPC;
 import com.sap.sse.gwt.dispatch.client.rpcimpl.RequestWrapper;
+import com.sap.sse.gwt.dispatch.client.rpcimpl.ResultWrapper;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DispatchRPCServletImpl extends ProxiedRemoteServiceServlet implements DispatchRPC<SailingDispatchContext> {
@@ -52,9 +51,9 @@ public class DispatchRPCServletImpl extends ProxiedRemoteServiceServlet implemen
             logger.log(Level.WARNING, "Server exception", d);
             throw d;
         } catch (Throwable t) {
-            String serverExceptionUUID = UUID.randomUUID().toString();
-            logger.log(Level.SEVERE, "Uncaught server exception id: " + serverExceptionUUID, t);
-            throw new ServerDispatchException(serverExceptionUUID, t);
+            ServerDispatchException dispatchException = new ServerDispatchException(t);
+            logger.log(Level.SEVERE, "Uncaught server exception id: " + dispatchException.getExceptionId(), t);
+            throw dispatchException;
         } finally {
             long duration = System.currentTimeMillis() - start;
             final Level logLevel;

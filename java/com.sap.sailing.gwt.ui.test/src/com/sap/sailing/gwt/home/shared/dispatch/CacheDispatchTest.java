@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.dispatch.client.Action;
-import com.sap.sse.gwt.dispatch.client.DispatchAsync;
+import com.sap.sse.gwt.dispatch.client.DispatchSystemAsync;
 import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 import com.sap.sse.gwt.dispatch.client.caching.CachingDispatch;
@@ -263,7 +263,7 @@ public class CacheDispatchTest {
         }
     }
 
-    private class DispatchMock implements DispatchAsync<DispatchContextMock> {
+    private class DispatchMock implements DispatchSystemAsync<DispatchContextMock> {
         @Override
         public <R extends Result, A extends Action<R, DispatchContextMock>> void execute(A action,
                 AsyncCallback<R> callback) throws DispatchException {

@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,6 +53,8 @@ import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
+    private static final Logger logger = Logger.getLogger(HomeServiceUtil.class.getName());
+
     public interface EventVisitor {
         void visit(EventBase event, boolean onRemoteServer, URL baseURL);
     }
@@ -533,7 +537,9 @@ public final class HomeServiceUtil {
         try {
             return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */"");
         } catch (MalformedURLException e) {
-            throw new ServerDispatchException(e);
+            ServerDispatchException dispatchException = new ServerDispatchException(e);
+            logger.log(Level.SEVERE, "Uncaught server exception id: " + dispatchException.getExceptionId(), e);
+            throw dispatchException;
         }
     }
 

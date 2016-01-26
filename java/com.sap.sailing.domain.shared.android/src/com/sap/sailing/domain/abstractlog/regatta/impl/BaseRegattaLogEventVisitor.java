@@ -2,6 +2,7 @@ package com.sap.sailing.domain.abstractlog.regatta.impl;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
@@ -39,4 +40,7 @@ public class BaseRegattaLogEventVisitor implements RegattaLogEventVisitor {
     public void visit(RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent event) {
     }
 
+    @Override
+    public void visit(RegattaLogDefineMarkEvent event) {
+    }
 }

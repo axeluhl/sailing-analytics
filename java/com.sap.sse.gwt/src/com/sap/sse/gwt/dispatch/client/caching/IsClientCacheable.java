@@ -3,13 +3,14 @@ package com.sap.sse.gwt.dispatch.client.caching;
 /**
  * Cache interface used by the caching dispatch to identify which command can be cached on client side.
  * 
- * @author pgtaboada
- *
+ * Each command must provide an instance key used to store the results in the cache.
+ * 
+ * The instance key is appended to an class identifying key.
  */
 public interface IsClientCacheable {
 
     /**
-     * The instance specific key used to identify instance specific results in the cache.
+     * The builder used to identify instance specific results in the cache.
      * 
      * @return
      */

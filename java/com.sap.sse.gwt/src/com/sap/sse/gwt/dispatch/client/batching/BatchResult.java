@@ -1,21 +1,21 @@
 package com.sap.sse.gwt.dispatch.client.batching;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.gwt.dispatch.client.Result;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
-public class BatchResult implements Result {
-    private LinkedList<Result> results = new LinkedList<Result>();
+public final class BatchResult implements Result {
+    private ArrayList<Result> results = new ArrayList<>();
+    private ArrayList<DispatchException> exceptions = new ArrayList<>();
 
-    private LinkedList<DispatchException> exceptions = new LinkedList<DispatchException>();
-
-    @SuppressWarnings("unused")
-    private BatchResult() {
+    protected BatchResult() {
     }
 
+    @GwtIncompatible
     public BatchResult(List<Result> results, List<DispatchException> exceptions) {
         this.results.addAll(results);
         this.exceptions.addAll(exceptions);
@@ -37,9 +37,20 @@ public class BatchResult implements Result {
         return results.get(i);
     }
 
+    /**
+     * Retrieves the result at a given position only if it has the right type. Type safety is ensured by comparing class
+     * name. We cannot use isAssignableFrom because this is GWT/ client code.
+     * 
+     * @param i
+     *            result position
+     * @param type
+     *            required result type
+     * @return result at given position
+     */
     @SuppressWarnings("unchecked")
     public <T extends Result> T getResult(int i, Class<T> type) {
         Object result = results.get(i);
+        
         if (result != null && type.getName().equals(result.getClass().getName()))
             return (T) result;
         return null;

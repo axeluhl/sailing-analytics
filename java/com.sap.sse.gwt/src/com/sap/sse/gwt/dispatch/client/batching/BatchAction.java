@@ -10,20 +10,20 @@ import com.sap.sse.gwt.dispatch.client.DispatchContext;
 import com.sap.sse.gwt.dispatch.client.Result;
 import com.sap.sse.gwt.dispatch.client.exceptions.DispatchException;
 
-public class BatchAction<CTX extends DispatchContext> implements Action<BatchResult, CTX> {
+public final class BatchAction<CTX extends DispatchContext> implements Action<BatchResult, CTX> {
     private static final Logger logger = Logger.getLogger(BatchAction.class.getName());
-    private Action<?, CTX>[] actions;
+    private ArrayList<Action<?, CTX>> actions = new ArrayList<Action<?, CTX>>();
 
-    @SuppressWarnings("unused")
-    private BatchAction() {
+    protected BatchAction() {
     }
 
-    @SafeVarargs
-    public BatchAction(Action<?, CTX>... actions) {
-        this.actions = actions;
+    public BatchAction(ArrayList<Action<?, CTX>> actions) {
+        if (actions != null) {
+            this.actions.addAll(actions);
+        }
     }
 
-    public Action<?, CTX>[] getActions() {
+    public ArrayList<Action<?, CTX>> getActions() {
         return actions;
     }
 
@@ -31,7 +31,7 @@ public class BatchAction<CTX extends DispatchContext> implements Action<BatchRes
     @GwtIncompatible
     public BatchResult execute(CTX ctx) throws DispatchException {
 
-        final int nrOfActions = getActions().length;
+        final int nrOfActions = getActions().size();
         final ArrayList<Result> results = new ArrayList<Result>(nrOfActions);
         final ArrayList<DispatchException> exceptions = new ArrayList<DispatchException>(nrOfActions);
 

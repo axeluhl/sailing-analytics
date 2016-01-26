@@ -8,6 +8,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 
+/**
+ * Convenience to enqueue and execute ScheduledCommands using the GWT scheduler.
+ */
 public class SplitScheduler {
     
     private static final SplitScheduler INSTANCE = new SplitScheduler();
@@ -16,6 +19,12 @@ public class SplitScheduler {
     
     private boolean scheduled = false;
     
+    private SplitScheduler() {
+    }
+
+    /**
+     * Repeating command instance that picks up the next element in the queue of pending commands and executes it.
+     */
     private final RepeatingCommand repeatingCommand = new RepeatingCommand() {
         @Override
         public boolean execute() {
@@ -33,13 +42,15 @@ public class SplitScheduler {
         }
     };
     
-    private SplitScheduler() {
-    }
-    
     public static SplitScheduler get() {
         return INSTANCE;
     }
     
+    /**
+     * Add a command to the queue and executes it using the gwt scheduler.
+     * 
+     * @param command
+     */
     public void schedule(ScheduledCommand command) {
         pendingCommands.add(command);
         
