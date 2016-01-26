@@ -21,5 +21,4 @@ public interface AuthenticationClientFactory extends WithAuthenticationManager {
     
     ConfirmationInfoView createConfirmationInfoView();
     
-    // ContextObject
 }

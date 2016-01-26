@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
+import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.UserManagementView;
 

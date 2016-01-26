@@ -79,8 +79,8 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         });
     }
     
-    // TODO change to package private or remove
-    public UserManagementServiceAsync getUserManagementService() {
+    // TODO Remove after refactor accesst UserManagementServiceAsync
+    UserManagementServiceAsync getUserManagementService() {
         return clientFactory.getUserManagementService();
     }
 }
