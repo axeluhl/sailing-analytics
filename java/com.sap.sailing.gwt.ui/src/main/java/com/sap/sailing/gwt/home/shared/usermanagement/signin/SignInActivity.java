@@ -5,7 +5,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
@@ -18,10 +18,10 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     private final AuthenticationClientFactory clientFactory;
     private final PlaceController placeController;
     private final SignInView view;
-    private final AuthenticationPlaceManagementController.Callback callback;
+    private final AuthenticationCallback callback;
     
     public SignInActivity(SignInView view, AuthenticationClientFactory clientFactory,
-            AuthenticationPlaceManagementController.Callback callback, PlaceController placeController) {
+            AuthenticationCallback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.view = view;

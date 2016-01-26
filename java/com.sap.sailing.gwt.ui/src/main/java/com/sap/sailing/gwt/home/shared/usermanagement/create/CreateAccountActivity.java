@@ -9,7 +9,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.shared.usermanagement.AsyncLoginCallback;
-import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationPlaceManagementController;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallback;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
@@ -28,10 +28,10 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final CreateAccountFormValues values = new CreateAccountFormValues();
-    private final AuthenticationPlaceManagementController.Callback callback;
+    private final AuthenticationCallback callback;
 
     public CreateAccountActivity(CreateAccountView view, AuthenticationClientFactory clientFactory,
-            AuthenticationPlaceManagementController.Callback callback, PlaceController placeController) {
+            AuthenticationCallback callback, PlaceController placeController) {
         this.view = view;
         this.clientFactory = clientFactory;
         this.callback = callback;

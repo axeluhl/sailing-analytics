@@ -6,7 +6,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlac
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 
-public class AuthenticationCallbackImpl implements AuthenticationPlaceManagementController.Callback {
+public class AuthenticationCallbackImpl implements AuthenticationCallback {
 
     private final String createConfirmationUrl;
     private final String passwordResetUrl;

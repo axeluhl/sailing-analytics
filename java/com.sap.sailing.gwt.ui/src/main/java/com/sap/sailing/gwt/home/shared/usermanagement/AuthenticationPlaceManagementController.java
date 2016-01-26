@@ -18,22 +18,13 @@ import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.RequiresLoggedInUser;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
-import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
-import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
-import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
-    public interface Callback extends CreateAccountView.Presenter.Callback,
-            PasswordRecoveryView.Presenter.Callback, LoggedInUserInfoView.Presenter.Callback {
-        
-        void handleSignInSuccess();
-    }
-    
-    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory, Callback callback,
+    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
             UserManagementView userManagementView, EventBus globalEventBus) {
         super(new Configuration(clientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
@@ -46,11 +37,11 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
     
     private static class Configuration implements PlaceManagementConfiguration {
         private final AuthenticationClientFactory clientFactory;
-        private final Callback callback;
+        private final AuthenticationCallback callback;
         private final UserManagementView userManagementView;
         private PlaceController placeController;
 
-        public Configuration(AuthenticationClientFactory clientFactory, Callback callback,
+        public Configuration(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
                 UserManagementView userManagementView) {
             this.clientFactory = clientFactory;
             this.callback = callback;
