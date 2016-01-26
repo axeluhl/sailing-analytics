@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.dispatch;
+package com.sap.sse.gwt.test.dispatch.client.system.caching;
 
 import java.net.URL;
 import java.util.UUID;
