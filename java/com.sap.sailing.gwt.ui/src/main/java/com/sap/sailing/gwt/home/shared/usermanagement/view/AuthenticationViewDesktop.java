@@ -19,14 +19,14 @@ import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
-public class UserManagementViewDesktop extends Composite implements AuthenticationView {
+public class AuthenticationViewDesktop extends Composite implements AuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     
-    interface UserManagementViewUiBinder extends UiBinder<Widget, UserManagementViewDesktop> {
+    interface AuthenticationViewUiBinder extends UiBinder<Widget, AuthenticationViewDesktop> {
     }
     
-    private static UserManagementViewUiBinder uiBinder = GWT.create(UserManagementViewUiBinder.class);
+    private static AuthenticationViewUiBinder uiBinder = GWT.create(AuthenticationViewUiBinder.class);
     
     private final PopupPanel popupPanel = new PopupPanel(true, false);
     
@@ -36,7 +36,7 @@ public class UserManagementViewDesktop extends Composite implements Authenticati
     @UiField(provided = true)
     AuthenticationSharedResources res = SharedResources.INSTANCE;
 
-    public UserManagementViewDesktop() {
+    public AuthenticationViewDesktop() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
 //        popupPanel.addAutoHidePartner(autoHidePartner);

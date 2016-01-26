@@ -15,14 +15,14 @@ import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
-public class UserManagementViewMobile extends Composite implements AuthenticationView {
+public class AuthenticationViewMobile extends Composite implements AuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     
-    interface UserManagementViewUiBinder extends UiBinder<MobileSection, UserManagementViewMobile> {
+    interface AuthenticationViewUiBinder extends UiBinder<MobileSection, AuthenticationViewMobile> {
     }
     
-    private static UserManagementViewUiBinder uiBinder = GWT.create(UserManagementViewUiBinder.class);
+    private static AuthenticationViewUiBinder uiBinder = GWT.create(AuthenticationViewUiBinder.class);
     
     @UiField SectionHeaderContent sectionHeaderUi;
     private final MobileSection contentContainerUi;
@@ -30,7 +30,7 @@ public class UserManagementViewMobile extends Composite implements Authenticatio
     @UiField(provided = true)
     AuthenticationSharedResources res = SharedResources.INSTANCE;
 
-    public UserManagementViewMobile() {
+    public AuthenticationViewMobile() {
         LOCAL_CSS.ensureInjected();
         super.initWidget(contentContainerUi = uiBinder.createAndBindUi(this));
     }
