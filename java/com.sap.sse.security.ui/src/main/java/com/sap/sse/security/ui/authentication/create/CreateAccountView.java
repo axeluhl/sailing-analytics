@@ -1,8 +1,8 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.create;
+package com.sap.sse.security.ui.authentication.create;
 
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.ErrorMessageView;
+import com.sap.sse.security.ui.authentication.ErrorMessageView;
 
 public interface CreateAccountView extends ErrorMessageView, IsWidget {
     

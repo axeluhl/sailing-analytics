@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.recovery;
+package com.sap.sse.security.ui.authentication.recover;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.ErrorMessageView;
+import com.sap.sse.security.ui.authentication.ErrorMessageView;
 
 public interface PasswordRecoveryView extends ErrorMessageView, IsWidget {
 

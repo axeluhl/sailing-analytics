@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationClientFactor
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace.Action;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {

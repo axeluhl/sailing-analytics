@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.confirm;
+package com.sap.sse.security.ui.authentication.confirm;
 
 import com.google.gwt.user.client.ui.IsWidget;
 

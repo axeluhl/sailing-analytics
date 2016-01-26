@@ -1,7 +1,7 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.signin;
+package com.sap.sse.security.ui.authentication.signin;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.shared.usermanagement.ErrorMessageView;
+import com.sap.sse.security.ui.authentication.ErrorMessageView;
 
 public interface SignInView extends ErrorMessageView, IsWidget {
 

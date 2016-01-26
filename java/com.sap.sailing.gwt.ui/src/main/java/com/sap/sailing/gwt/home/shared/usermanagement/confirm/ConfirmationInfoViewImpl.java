@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.UserManagementSharedResources;
+import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
 
 public class ConfirmationInfoViewImpl extends Composite implements ConfirmationInfoView {
     private static WidgetUiBinder uiBinder = GWT.create(WidgetUiBinder.class);

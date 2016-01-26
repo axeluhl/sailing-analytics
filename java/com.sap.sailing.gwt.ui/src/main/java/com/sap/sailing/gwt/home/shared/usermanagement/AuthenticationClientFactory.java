@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.shared.usermanagement;
 
-import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoView;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryView;
-import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInView;
+import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
+import com.sap.sse.security.ui.authentication.create.CreateAccountView;
+import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
+import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
+import com.sap.sse.security.ui.authentication.signin.SignInView;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public interface AuthenticationClientFactory extends WithAuthenticationManager {

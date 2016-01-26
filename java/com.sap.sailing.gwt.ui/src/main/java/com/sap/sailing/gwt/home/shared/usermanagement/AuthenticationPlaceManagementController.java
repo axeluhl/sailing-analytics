@@ -10,17 +10,17 @@ import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoAc
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.create.CreateAccountView;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoView;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.recovery.PasswordRecoveryView;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInActivity;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementView;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.create.CreateAccountView;
+import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
+import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     

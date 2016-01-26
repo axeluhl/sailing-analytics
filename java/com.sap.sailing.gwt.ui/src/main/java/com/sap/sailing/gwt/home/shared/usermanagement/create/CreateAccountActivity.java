@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPl
 import com.sap.sailing.gwt.home.shared.usermanagement.confirm.ConfirmationInfoPlace.Action;
 import com.sap.sailing.gwt.home.shared.usermanagement.signin.SignInPlace;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;

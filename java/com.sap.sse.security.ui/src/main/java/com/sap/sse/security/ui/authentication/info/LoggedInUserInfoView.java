@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.info;
+package com.sap.sse.security.ui.authentication.info;
 
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
