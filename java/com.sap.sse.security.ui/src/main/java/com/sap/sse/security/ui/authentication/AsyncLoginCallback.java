@@ -1,8 +1,6 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sse.security.ui.authentication;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
-import com.sap.sse.security.ui.authentication.ErrorMessageView;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 

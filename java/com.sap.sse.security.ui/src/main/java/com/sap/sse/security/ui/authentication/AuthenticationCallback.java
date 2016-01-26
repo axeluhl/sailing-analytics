@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement;
+package com.sap.sse.security.ui.authentication;
 
 import com.sap.sse.security.ui.authentication.create.CreateAccountView;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoView;
