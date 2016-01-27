@@ -11,8 +11,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 
 public class PasswordRecoveryViewImpl extends Composite implements PasswordRecoveryView {
     
@@ -27,11 +27,11 @@ public class PasswordRecoveryViewImpl extends Composite implements PasswordRecov
     @UiField DivElement formErrorUi;
     
     @UiField(provided = true)
-    final AuthenticationSharedResources res;
+    final CommonSharedResources res;
 
     private Presenter presenter;
     
-    public PasswordRecoveryViewImpl(AuthenticationSharedResources resources) {
+    public PasswordRecoveryViewImpl(CommonSharedResources resources) {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

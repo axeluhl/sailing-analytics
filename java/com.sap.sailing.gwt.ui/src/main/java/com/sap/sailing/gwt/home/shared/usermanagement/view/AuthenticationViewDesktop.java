@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
+import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
@@ -34,7 +34,7 @@ public class AuthenticationViewDesktop extends Composite implements FlyoutAuthen
     @UiField SimplePanel contentContainerUi;
     
     @UiField(provided = true)
-    AuthenticationSharedResources res = SharedResources.INSTANCE;
+    CommonSharedResources res = SharedResources.INSTANCE;
 
     public AuthenticationViewDesktop() {
         LOCAL_CSS.ensureInjected();

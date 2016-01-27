@@ -1,13 +1,13 @@
-package com.sap.sse.security.ui.authentication;
+package com.sap.sse.gwt.common;
 
 
-public interface AuthenticationSharedResources {
+public interface CommonSharedResources {
     
-    AuthenticationMainCss mainCss();
+    CommonMainCss mainCss();
 
-    AuthenticationMediaCss mediaCss();
+    CommonMediaCss mediaCss();
     
-    public interface AuthenticationMainCss {
+    public interface CommonMainCss {
         String button();
         String buttonprimary();
         String buttonprimaryoutlined();
@@ -18,7 +18,7 @@ public interface AuthenticationSharedResources {
         String mainsection_header_title();
     }
 
-    public interface AuthenticationMediaCss {
+    public interface CommonMediaCss {
     }
 
 }

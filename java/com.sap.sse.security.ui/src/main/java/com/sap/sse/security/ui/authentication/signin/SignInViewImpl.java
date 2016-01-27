@@ -13,8 +13,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
-import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
 
 public class SignInViewImpl extends Composite implements SignInView {
     
@@ -35,11 +35,11 @@ public class SignInViewImpl extends Composite implements SignInView {
     @UiField DivElement socialLoginUi;
     
     @UiField(provided = true)
-    final AuthenticationSharedResources res;
+    final CommonSharedResources res;
 
     private Presenter presenter;
 
-    public SignInViewImpl(AuthenticationSharedResources resources) {
+    public SignInViewImpl(CommonSharedResources resources) {
         this.res = resources;
         UserManagementResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));

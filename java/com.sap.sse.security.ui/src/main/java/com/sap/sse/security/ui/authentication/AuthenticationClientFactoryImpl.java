@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.authentication;
 
+import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoView;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoViewImpl;
 import com.sap.sse.security.ui.authentication.create.CreateAccountView;
@@ -14,10 +15,10 @@ import com.sap.sse.security.ui.authentication.signin.SignInViewImpl;
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     
     private final AuthenticationManager authenticationManager;
-    private final AuthenticationSharedResources resources;
+    private final CommonSharedResources resources;
 
     public AuthenticationClientFactoryImpl(AuthenticationManager authenticationManager,
-            AuthenticationSharedResources resources) {
+            CommonSharedResources resources) {
         this.authenticationManager = authenticationManager;
         this.resources = resources;
     }

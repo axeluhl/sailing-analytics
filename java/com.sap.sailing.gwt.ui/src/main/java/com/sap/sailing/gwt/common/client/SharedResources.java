@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.sap.sse.security.ui.authentication.AuthenticationSharedResources;
+import com.sap.sse.gwt.common.CommonSharedResources;
 
-public interface SharedResources extends ClientBundle, AuthenticationSharedResources {
+public interface SharedResources extends ClientBundle, CommonSharedResources {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
     @Source("main.gss")
@@ -14,7 +14,7 @@ public interface SharedResources extends ClientBundle, AuthenticationSharedResou
     @Source("media.gss")
     MediaCss mediaCss();
 
-    public interface MainCss extends CssResource, AuthenticationMainCss {
+    public interface MainCss extends CssResource, CommonMainCss {
         String mobile();
         String desktop();
         String wrapper();
@@ -77,7 +77,7 @@ public interface SharedResources extends ClientBundle, AuthenticationSharedResou
         String fleetcorner();
     }
 
-    public interface MediaCss extends CssResource, AuthenticationMediaCss {
+    public interface MediaCss extends CssResource, CommonMediaCss {
         String grid();
         String stackenblochen();
         String column();
