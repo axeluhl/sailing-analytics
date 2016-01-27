@@ -13,10 +13,15 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     
     private final WithSecurity clientFactory;
     private final EventBus eventBus;
+    private final String emailConfirmationUrl;
+    private final String passwordResetUrl;
 
-    public AuthenticationManagerImpl(final WithSecurity clientFactory, final EventBus eventBus) {
+    public AuthenticationManagerImpl(WithSecurity clientFactory, final EventBus eventBus,
+            String emailConfirmationUrl, String passwordResetUrl) {
         this.clientFactory = clientFactory;
         this.eventBus = eventBus;
+        this.emailConfirmationUrl = emailConfirmationUrl;
+        this.passwordResetUrl = passwordResetUrl;
         clientFactory.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
@@ -34,15 +39,15 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
 
     @Override
-    public void createAccount(String name, String email, String password, String fullName, String company,
-            String validationBaseURL, AsyncCallback<UserDTO> callback) {
-        clientFactory.getUserManagementService().createSimpleUser(name, email, password, fullName, company,
-                validationBaseURL, callback);
+    public void createAccount(String name, String email, String password, String fullName, 
+            String company, AsyncCallback<UserDTO> callback) {
+        clientFactory.getUserManagementService().createSimpleUser(name, email, password, 
+                fullName, company, emailConfirmationUrl, callback);
     }
     
     @Override
-    public void reqeustPasswordReset(String username, String eMailAddress, String baseURL, AsyncCallback<Void> callback) {
-        clientFactory.getUserManagementService().resetPassword(username, eMailAddress, baseURL, callback);
+    public void reqeustPasswordReset(String username, String eMailAddress, AsyncCallback<Void> callback) {
+        clientFactory.getUserManagementService().resetPassword(username, eMailAddress, passwordResetUrl, callback);
     }
     
     @Override

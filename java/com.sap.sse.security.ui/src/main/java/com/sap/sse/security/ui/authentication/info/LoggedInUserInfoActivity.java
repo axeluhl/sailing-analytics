@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
@@ -14,11 +15,11 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
     private final AuthenticationClientFactory clientFactory;
     private final PlaceController placeController;
     private final LoggedInUserInfoView view;
-    private final Callback callback;
+    private final AuthenticationCallback callback;
     private EventBus eventBus;
     
     public LoggedInUserInfoActivity(LoggedInUserInfoView view, AuthenticationClientFactory clientFactory,
-            LoggedInUserInfoView.Presenter.Callback callback, PlaceController placeController) {
+            AuthenticationCallback callback, PlaceController placeController) {
         this.view = view;
         this.clientFactory = clientFactory;
         this.placeController = placeController;

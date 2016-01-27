@@ -63,7 +63,9 @@ public class MobileApplicationClientFactory extends
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
-        authenticationManager = new AuthenticationManagerImpl(this, eventBus);
+        this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
+                .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
+                .getPasswordResetNavigation().getFullQualifiedUrl());
     }
 
     public MobilePlacesNavigator getNavigator() {

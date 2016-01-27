@@ -7,10 +7,10 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface AuthenticationManager {
     
-    void createAccount(String name, String email, String password, String fullName, String company,
-            String validationBaseURL, AsyncCallback<UserDTO> callback);
+    void createAccount(String name, String email, String password, String fullName, 
+             String company, AsyncCallback<UserDTO> callback);
     
-    void reqeustPasswordReset(String username, String eMailAddress, String baseURL, AsyncCallback<Void> callback);
+    void reqeustPasswordReset(String username, String eMailAddress, AsyncCallback<Void> callback);
     
     void login(String username, String password, AsyncCallback<SuccessInfo> callback);
     

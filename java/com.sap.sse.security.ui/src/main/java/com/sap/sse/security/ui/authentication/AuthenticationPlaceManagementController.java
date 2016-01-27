@@ -69,8 +69,8 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
                 return new CreateAccountActivity(clientFactory.createCreateAccountView(), clientFactory, callback,
                         placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity(clientFactory.createPasswordRecoveryView(), clientFactory,
-                        callback, placeController);
+                return new PasswordRecoveryActivity(clientFactory.createPasswordRecoveryView(), 
+                        clientFactory, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
                 return new LoggedInUserInfoActivity(clientFactory.createLoggedInUserInfoView(), clientFactory,
                         callback, placeController);

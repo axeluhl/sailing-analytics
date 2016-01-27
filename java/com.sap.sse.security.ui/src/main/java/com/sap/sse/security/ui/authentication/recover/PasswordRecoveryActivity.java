@@ -18,14 +18,12 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
     private final AuthenticationClientFactory clientFactory;
     private final PlaceController placeController;
     private final PasswordRecoveryView view;
-    private final Callback callback;
 
     public PasswordRecoveryActivity(PasswordRecoveryView view, AuthenticationClientFactory clientFactory,
-            PasswordRecoveryView.Presenter.Callback callback, PlaceController placeController) {
+            PlaceController placeController) {
         this.view = view;
         this.clientFactory = clientFactory;
         this.placeController = placeController;
-        this.callback = callback;
     }
     
     @Override
@@ -36,27 +34,26 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
 
     @Override
     public void resetPassword(final String email, final String username) {
-        clientFactory.getAuthenticationManager().reqeustPasswordReset(username, email, callback.getPasswordResetUrl(),
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        String name = (username == null || username.isEmpty()) ? email : username;
-                        placeController.goTo(new ConfirmationInfoPlace(Action.RESET_REQUESTED, name));
+        clientFactory.getAuthenticationManager().reqeustPasswordReset(username, email, new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                String name = (username == null || username.isEmpty()) ? email : username;
+                placeController.goTo(new ConfirmationInfoPlace(Action.RESET_REQUESTED, name));
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                StringMessages i18n = StringMessages.INSTANCE;
+                if (caught instanceof UserManagementException) {
+                    if (CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
+                        view.setErrorMessage(i18n.cannotResetPasswordWithoutValidatedEmail(username));
+                    } else {
+                        view.setErrorMessage(i18n.errorResettingPassword(username, caught.getMessage()));
                     }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        StringMessages i18n = StringMessages.INSTANCE;
-                        if (caught instanceof UserManagementException) {
-                            if (CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
-                                view.setErrorMessage(i18n.cannotResetPasswordWithoutValidatedEmail(username));
-                            } else {
-                                view.setErrorMessage(i18n.errorResettingPassword(username, caught.getMessage()));
-                            }
-                        } else {
-                            view.setErrorMessage(i18n.errorDuringPasswordReset(caught.getMessage()));
-                        }
-                    }
-                });
+                } else {
+                    view.setErrorMessage(i18n.errorDuringPasswordReset(caught.getMessage()));
+                }
+            }
+        });
     }
 }

@@ -60,7 +60,6 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
-        authenticationManager = new AuthenticationManagerImpl(this, eventBus);
         
         final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
         final Runnable signInSuccesfullNavigation = new Runnable() {
@@ -69,11 +68,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
             }
         };
+        this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getHomePlacesNavigator()
+                .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getHomePlacesNavigator()
+                .getPasswordResetNavigation().getFullQualifiedUrl());
         this.userManagementWizardController = new AuthenticationPlaceManagementController(
                 new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
-                new AuthenticationCallbackImpl(getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
-                        getHomePlacesNavigator().getPasswordResetNavigation(), getHomePlacesNavigator().
-                        getUserProfileNavigation(), signInSuccesfullNavigation), userManagementDisplay, getEventBus());
+                new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
+                        signInSuccesfullNavigation), userManagementDisplay, getEventBus());
 
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus);

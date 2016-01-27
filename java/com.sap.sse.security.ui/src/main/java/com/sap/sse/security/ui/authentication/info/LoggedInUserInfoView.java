@@ -11,9 +11,5 @@ public interface LoggedInUserInfoView extends IsWidget {
     public interface Presenter {
         void gotoProfileUi();
         void signOut();
-        
-        public interface Callback {
-            void handleUserProfileNavigation();
-        }
     }
 }

@@ -28,9 +28,5 @@ public interface CreateAccountView extends ErrorMessageView, IsWidget {
         
         void signIn();
         
-        public interface Callback {
-            
-            String getCreateConfirmationUrl();
-        }
     }
 }

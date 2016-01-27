@@ -11,9 +11,5 @@ public interface PasswordRecoveryView extends ErrorMessageView, IsWidget {
         
         void resetPassword(String email, String username);
         
-        public interface Callback {
-            
-            String getPasswordResetUrl();
-        }
     }
 }
