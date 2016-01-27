@@ -18,11 +18,11 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
     private final AuthenticationCallback callback;
     private EventBus eventBus;
     
-    public LoggedInUserInfoActivity(LoggedInUserInfoView view, AuthenticationClientFactory clientFactory,
-            AuthenticationCallback callback, PlaceController placeController) {
-        this.view = view;
+    public LoggedInUserInfoActivity(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
+            PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.view = clientFactory.createLoggedInUserInfoView();
         this.callback = callback;
     }
 

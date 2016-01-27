@@ -19,8 +19,8 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
-    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
-            AuthenticationView userManagementView, EventBus globalEventBus) {
+    public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory,
+            AuthenticationCallback callback, AuthenticationView userManagementView, EventBus globalEventBus) {
         super(new Configuration(clientFactory, callback, userManagementView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
@@ -64,19 +64,15 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
             this.updateViewHeading(placeToUse);
             
             if (placeToUse instanceof SignInPlace) {
-                return new SignInActivity(clientFactory.createSignInView(), clientFactory, callback, placeController);
+                return new SignInActivity(clientFactory, callback, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(clientFactory.createCreateAccountView(), clientFactory, callback,
-                        placeController);
+                return new CreateAccountActivity(clientFactory, callback, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
-                return new PasswordRecoveryActivity(clientFactory.createPasswordRecoveryView(), 
-                        clientFactory, placeController);
+                return new PasswordRecoveryActivity(clientFactory, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {
-                return new LoggedInUserInfoActivity(clientFactory.createLoggedInUserInfoView(), clientFactory,
-                        callback, placeController);
+                return new LoggedInUserInfoActivity(clientFactory, callback, placeController);
             } else if (placeToUse instanceof ConfirmationInfoPlace) {
-                return new ConfirmationInfoActivity((ConfirmationInfoPlace) placeToUse,
-                        clientFactory.createConfirmationInfoView());
+                return new ConfirmationInfoActivity(clientFactory, (ConfirmationInfoPlace) placeToUse);
             }
             
             return getActivity(new SignInPlace());

@@ -29,12 +29,12 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     private final CreateAccountFormValues values = new CreateAccountFormValues();
     private final AuthenticationCallback callback;
 
-    public CreateAccountActivity(CreateAccountView view, AuthenticationClientFactory clientFactory,
-            AuthenticationCallback callback, PlaceController placeController) {
-        this.view = view;
+    public CreateAccountActivity(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
+            PlaceController placeController) {
         this.clientFactory = clientFactory;
-        this.callback = callback;
         this.placeController = placeController;
+        this.view = clientFactory.createCreateAccountView();
+        this.callback = callback;
     }
 
     @Override

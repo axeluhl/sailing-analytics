@@ -19,11 +19,10 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
     private final PlaceController placeController;
     private final PasswordRecoveryView view;
 
-    public PasswordRecoveryActivity(PasswordRecoveryView view, AuthenticationClientFactory clientFactory,
-            PlaceController placeController) {
-        this.view = view;
+    public PasswordRecoveryActivity(AuthenticationClientFactory clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
+        this.view = clientFactory.createPasswordRecoveryView();
     }
     
     @Override

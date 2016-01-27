@@ -19,11 +19,11 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
     private final SignInView view;
     private final AuthenticationCallback callback;
     
-    public SignInActivity(SignInView view, AuthenticationClientFactory clientFactory,
+    public SignInActivity(AuthenticationClientFactory clientFactory,
             AuthenticationCallback callback, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
-        this.view = view;
+        this.view = clientFactory.createSignInView();
         this.callback = callback;
     }
 
