@@ -32,7 +32,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -275,7 +274,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         race_flag = ViewHelper.get(layout, R.id.race_flag);
         time = ViewHelper.get(layout, R.id.time);
         race_name = ViewHelper.get(layout, R.id.race_name);
-        race_finished = ViewHelper.get(layout, R.id.race_finshed);
+        race_finished = ViewHelper.get(layout, R.id.race_finished);
         race_started = ViewHelper.get(layout, R.id.race_started);
         race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
         race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);

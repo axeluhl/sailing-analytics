@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/navigation_drawer_cell_height"
@@ -12,29 +11,30 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="@dimen/default_margin"
         android:layout_marginLeft="@dimen/default_margin"
-        tools:src="@drawable/flag_bravo_48dp"/>
+        android:layout_marginRight="@dimen/default_margin"
+        tools:src="@drawable/flag_bravo_48dp" />
 
     <ImageView
         android:id="@+id/delimiter_line"
         android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
-        android:background="?attr/black"
-        android:layout_toLeftOf="@id/protest_image"/>
+        android:layout_toLeftOf="@id/protest_image"
+        android:background="?attr/black" />
 
     <ImageView
         android:id="@+id/bottom_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/thin_line"
-        android:background="?attr/black"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true"
+        android:background="?attr/black" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/navigation_drawer_left_padding"
+        android:layout_marginLeft="@dimen/navigation_drawer_text_margin"
+        android:layout_marginRight="@dimen/navigation_drawer_text_margin"
         android:layout_toLeftOf="@id/delimiter_line"
         android:orientation="vertical">
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:textAppearance="?attr/textNormal"
-            tools:text="Extreme 40"/>
+            tools:text="Extreme 40" />
 
         <TextView
             android:id="@+id/fleet_series"
@@ -52,6 +52,6 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:textAppearance="?attr/textSmall"
-            tools:text="Day 1\nYellow"/>
+            tools:text="Day 1\nYellow" />
     </LinearLayout>
 </RelativeLayout>
