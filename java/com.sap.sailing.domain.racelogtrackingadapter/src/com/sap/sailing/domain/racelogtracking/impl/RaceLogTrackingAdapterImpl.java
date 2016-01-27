@@ -3,13 +3,12 @@ package com.sap.sailing.domain.racelogtracking.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -22,33 +21,19 @@ import javax.mail.util.ByteArrayDataSource;
 import org.osgi.framework.ServiceReference;
 
 import com.google.zxing.WriterException;
-import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
-import com.sap.sailing.domain.abstractlog.impl.AllEventsOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.impl.LastEventOfTypeFinder;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.RegisteredCompetitorsAnalyzer;
-import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -63,6 +48,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
@@ -70,10 +56,8 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogRaceTrackerExistsEx
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.RaceHandle;
@@ -82,6 +66,7 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -150,44 +135,44 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException {
-
-        BoatClass boatClass = null;
+        final BoatClass boatClass;
         if (leaderboard instanceof RegattaLeaderboard) {
             RegattaLeaderboard rLeaderboard = (RegattaLeaderboard) leaderboard;
             boatClass = rLeaderboard.getRegatta().getBoatClass();
         } else {
-            throw new NotDenotableForRaceLogTrackingException(
-                    "Can only denote races in RegattaLeaderboards for RaceLog-tracking");
+            if (!Util.isEmpty(raceColumn.getAllCompetitors(fleet))) {
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors(fleet));
+            } else if (!Util.isEmpty(raceColumn.getAllCompetitors())) {
+                boatClass = findDominatingBoatClass(raceColumn.getAllCompetitors());
+            } else if (!Util.isEmpty(leaderboard.getAllCompetitors())) {
+                boatClass = findDominatingBoatClass(leaderboard.getAllCompetitors());
+            } else {
+                throw new NotDenotableForRaceLogTrackingException("Couldn't infer boat class, no competitors on race and leaderboard");
+            }
         }
-
         if (raceName == null) {
             raceName = leaderboard.getName() + " " + raceColumn.getName() + " " + fleet.getName();
         }
-
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert raceLog != null : new NotDenotableForRaceLogTrackingException("No RaceLog found in place");
-
         if (new RaceLogTrackingStateAnalyzer(raceLog).analyze().isForTracking()) {
             throw new NotDenotableForRaceLogTrackingException("Already denoted for tracking");
         }
-
         RaceLogEvent event = new RaceLogDenoteForTrackingEventImpl(MillisecondsTimePoint.now(),
                 service.getServerAuthor(), raceLog.getCurrentPassId(), raceName, boatClass, UUID.randomUUID());
         raceLog.add(event);
+    }
+    
+    private BoatClass findDominatingBoatClass(Iterable<Competitor> allCompetitors) {
+        return Util.getDominantObject(()->StreamSupport.stream(allCompetitors.spliterator(), /* parallel */ false).map(c->c.getBoat().getBoatClass()).iterator());
     }
 
     @Override
     public void denoteAllRacesForRaceLogTracking(final RacingEventService service, final Leaderboard leaderboard)
             throws NotDenotableForRaceLogTrackingException {
-        if (leaderboard instanceof FlexibleLeaderboard) {
-            throw new NotDenotableForRaceLogTrackingException("Can only use regatta leaderboards for RaceLog-tracking");
-        }
         for (RaceColumn column : leaderboard.getRaceColumns()) {
             for (Fleet fleet : column.getFleets()) {
-                try {
-                    denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
-                } catch (NotDenotableForRaceLogTrackingException e) {
-                }
+                denoteRaceForRaceLogTracking(service, leaderboard, column, fleet, null);
             }
         }
     }
@@ -202,18 +187,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         return new RaceLogTrackingStateAnalyzer(raceColumn.getRaceLog(fleet)).analyze();
     }
 
-    private void revokeAlreadyDefinedMarks(RaceLog raceLog, AbstractLogEventAuthor author) {
-        List<RaceLogEvent> markEvents = new AllEventsOfTypeFinder<>(raceLog, /* only unrevoked */true,
-                RaceLogDefineMarkEvent.class).analyze();
-        for (RaceLogEvent event : markEvents) {
-            try {
-                raceLog.revokeEvent(author, event, "removing mark that was already defined");
-            } catch (NotRevokableException e) {
-                logger.log(Level.WARNING, "Could not remove mark that was already defined by adding RevokeEvent", e);
-            }
-        }
-    }
-
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service) {
@@ -223,29 +196,16 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
         }
 
-        final List<RaceLogEvent> raceLogDeviceMarkMappingEvents = new AllEventsOfTypeFinder<>(fromRaceLog, /*
-                                                                                                            * only
-                                                                                                            * unrevoked
-                                                                                                            */true,
-                RaceLogDeviceMarkMappingEvent.class).analyze();
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
                     CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
                     TimePoint now = MillisecondsTimePoint.now();
                     int i = 0;
-                    revokeAlreadyDefinedMarks(toRaceLog, service.getServerAuthor());
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
                         newCourse.addWaypoint(i++, oldWaypoint);
                     }
-                    for (Mark mark : marks) {
-                        RaceLogEvent event = new RaceLogDefineMarkEventImpl(now, service.getServerAuthor(),
-                                toRaceLog.getCurrentPassId(), mark);
-                        toRaceLog.add(event);
-                    }
-                    for (RaceLogEvent raceLogDeviceMarkMappingEvent : raceLogDeviceMarkMappingEvents) {
-                        toRaceLog.add(raceLogDeviceMarkMappingEvent);
-                    }
+
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
                             service.getServerAuthor(), passId, newCourse);
@@ -257,53 +217,37 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     @Override
-    public void copyCompetitors(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, RacingEventService service) {
-        final Set<Competitor> competitors = new RegisteredCompetitorsAnalyzer<>(fromRaceLog).analyze();
-        for (RaceLog toRaceLog : toRaceLogs) {
-            registerCompetitors(service, toRaceLog, competitors);
+    public void copyCompetitors(final RaceColumn fromRaceColumn, final Fleet fromFleet, final Iterable<Pair<RaceColumn, Fleet>> toRaces) {
+        Iterable<Competitor> competitorsToCopy = fromRaceColumn.getAllCompetitors(fromFleet);
+        for (Pair<RaceColumn, Fleet> toRace : toRaces) {
+            final RaceColumn toRaceColumn = toRace.getA();
+            final Fleet toFleet = toRace.getB();
+            try {
+                if (toRaceColumn.isCompetitorRegistrationInRacelogEnabled(toFleet)) {
+                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                } else {
+                    toRaceColumn.enableCompetitorRegistrationOnRaceLog(toFleet);
+                    toRaceColumn.registerCompetitors(competitorsToCopy, toFleet);
+                }
+            } catch (CompetitorRegistrationOnRaceLogDisabledException e1) {
+                // cannot happen as we explicitly checked successfully before, or enabled it when the check failed; still produce a log documenting this strangeness:
+                logger.log(Level.WARNING, "Internal error: race column "+toRaceColumn.getName()+" does not accept competitor registration although it should", e1);
+            }
         }
     }
 
-    @FunctionalInterface
-    private static interface DeviceMarkMappingEventFactory<VisitorT, EventT extends AbstractLogEvent<VisitorT>> {
-        EventT createDeviceMarkMapping(DeviceIdentifier device, TimePoint timePoint);
-    }
-
-    private <VisitorT, EventT extends AbstractLogEvent<VisitorT>, LogT extends AbstractLog<EventT, VisitorT>> void pingMark(
-            LogT log, Mark mark, GPSFix gpsFix, RacingEventService service,
-            DeviceMarkMappingEventFactory<VisitorT, EventT> factory, DeviceIdentifier device) {
-        TimePoint time = gpsFix.getTimePoint();
-        EventT mapping = factory.createDeviceMarkMapping(device, time);
+    @Override
+    public void pingMark(RegattaLog log, Mark mark, GPSFix gpsFix, RacingEventService service) {
+        final PingDeviceIdentifierImpl device = new PingDeviceIdentifierImpl();
+        final TimePoint timePoint = gpsFix.getTimePoint();
+        final RegattaLogEvent mapping = new RegattaLogDeviceMarkMappingEventImpl(timePoint,
+                timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, device, timePoint, timePoint);
         log.add(mapping);
         try {
             service.getGPSFixStore().storeFix(device, gpsFix);
         } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not ping mark " + mark);
         }
-    }
-
-    @Override
-    public void pingMark(RaceLog raceLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
-        DeviceMarkMappingEventFactory<RaceLogEventVisitor, RaceLogEvent> raceLogEventFactory =
-                (DeviceIdentifier dev, TimePoint timePoint) -> new RaceLogDeviceMarkMappingEventImpl(timePoint, service
-                        .getServerAuthor(), raceLog.getCurrentPassId(), mark, dev, timePoint, timePoint);
-        pingMark(
-                raceLog,
-                mark,
-                gpsFix,
-                service,
-                raceLogEventFactory,
-                new PingDeviceIdentifierImpl());
-    }
-
-    @Override
-    public void pingMark(RegattaLog regattaLog, Mark mark, GPSFix gpsFix, RacingEventService service) {
-        DeviceMarkMappingEventFactory<RegattaLogEventVisitor, RegattaLogEvent> regattaLogEventFactory =
-                (DeviceIdentifier dev, TimePoint timePoint) -> new RegattaLogDeviceMarkMappingEventImpl(timePoint,
-                timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, dev, timePoint, timePoint);
-        pingMark(regattaLog, mark, gpsFix, service,
-                regattaLogEventFactory,
-                new PingDeviceIdentifierImpl());
     }
 
     @Override
@@ -319,55 +263,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         } catch (NotRevokableException e) {
             logger.log(Level.WARNING, "could not remove denotation by adding RevokeEvents", e);
         }
-    }
-
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void registerCompetitors(
-            AbstractLogEventAuthor author, LogT log, Set<Competitor> competitors,
-            Function<Competitor, EventT> registerEventFactory) {
-        Set<Competitor> alreadyRegistered = new HashSet<Competitor>(new RegisteredCompetitorsAnalyzer<>(log).analyze());
-        Set<Competitor> toBeRegistered = new HashSet<Competitor>();
-
-        for (Competitor c : competitors) {
-            toBeRegistered.add(c);
-        }
-
-        Set<Competitor> toBeRemoved = new HashSet<Competitor>(alreadyRegistered);
-        toBeRemoved.removeAll(toBeRegistered);
-        toBeRegistered.removeAll(alreadyRegistered);
-
-        // register
-        for (Competitor c : toBeRegistered) {
-            log.add(registerEventFactory.apply(c));
-        }
-
-        // unregister
-        for (EventT event : log.getUnrevokedEventsDescending()) {
-            if (event instanceof RegisterCompetitorEvent) {
-                RegisterCompetitorEvent<?> registerEvent = (RegisterCompetitorEvent<?>) event;
-                if (toBeRemoved.contains(registerEvent.getCompetitor())) {
-                    try {
-                        log.revokeEvent(author, event,
-                                "unregistering competitor because no longer selected for registration");
-                    } catch (NotRevokableException e) {
-                        logger.log(Level.WARNING, "could not unregister competitor by adding RevokeEvent", e);
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void registerCompetitors(RacingEventService service, RaceLog raceLog, Set<Competitor> competitors) {
-        registerCompetitors(service.getServerAuthor(), raceLog, competitors,
-                c -> new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), service.getServerAuthor(),
-                        raceLog.getCurrentPassId(), c));
-    }
-
-    @Override
-    public void registerCompetitors(RacingEventService service, RegattaLog regattaLog, Set<Competitor> competitors) {
-        registerCompetitors(service.getServerAuthor(), regattaLog, competitors,
-                c -> new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(),
-                        MillisecondsTimePoint.now(), service.getServerAuthor(), UUID.randomUUID(), c));
     }
 
     private MailService getMailService() {
