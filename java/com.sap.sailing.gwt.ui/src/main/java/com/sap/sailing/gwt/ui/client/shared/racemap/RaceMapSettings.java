@@ -10,6 +10,8 @@ import com.sap.sse.common.settings.AbstractSettings;
 
 public class RaceMapSettings extends AbstractSettings {
 
+    private static final Set<ManeuverType> DEFAULT_SHOWN_MANEUVER = getDefaultManeuvers();
+
     private boolean showDouglasPeuckerPoints = false;
 
     private final Set<ManeuverType> maneuverTypesToShow;
@@ -19,9 +21,9 @@ public class RaceMapSettings extends AbstractSettings {
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
-    
+
     private boolean transparentHoverlines = false; // as discussed with Stefan on 2015-12-08
-    
+
     private int hoverlineStrokeWeight = 15; // as discussed with Stefan on 2015-12-08
 
     private long tailLengthInMilliseconds = 100000l;
@@ -29,28 +31,34 @@ public class RaceMapSettings extends AbstractSettings {
     private double buoyZoneRadiusInMeters = 0.0;
 
     private boolean showSelectedCompetitorsInfo = true;
-    
+
     private boolean showWindStreamletColors = false;
-    
+
     private boolean showWindStreamletOverlay = false;
 
     private boolean showSimulationOverlay = false;
-    
+
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
-     * bearings / headings so that an assumed average wind direction for the race is coming from the top of the map
-     * ("wind-up display"). The implementation hinges on
+     * bearings / headings so that an assumed average wind direction for the race is coming from the top of the map (
+     * "wind-up display"). The implementation hinges on
      * {@link Position#getLocalCoordinates(Position, com.sap.sailing.domain.common.Bearing)} which can transform
-     * positions to any other coordinate space that is translated and rotated compared to the original
-     * coordinate space.
+     * positions to any other coordinate space that is translated and rotated compared to the original coordinate space.
      */
     private boolean windUp = false;
 
     public RaceMapSettings() {
-        // empty default settings; don't show maneuvers by default
-        maneuverTypesToShow = new HashSet<ManeuverType>();
+        maneuverTypesToShow = DEFAULT_SHOWN_MANEUVER;
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
+    }
+
+    private static HashSet<ManeuverType> getDefaultManeuvers() {
+        HashSet<ManeuverType> types = new HashSet<ManeuverType>();
+        types.add(ManeuverType.JIBE);
+        types.add(ManeuverType.TACK);
+        types.add(ManeuverType.PENALTY_CIRCLE);
+        return types;
     }
 
     /**
@@ -58,7 +66,8 @@ public class RaceMapSettings extends AbstractSettings {
      */
     public RaceMapSettings(RaceMapSettings settings) {
         this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
-        this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.helpLinesSettings = new RaceMapHelpLinesSettings(
+                settings.getHelpLinesSettings().getVisibleHelpLineTypes());
         this.transparentHoverlines = settings.transparentHoverlines;
         this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
         this.maneuverTypesToShow = settings.maneuverTypesToShow;
@@ -70,7 +79,8 @@ public class RaceMapSettings extends AbstractSettings {
         this.showWindStreamletColors = settings.showWindStreamletColors;
         this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
         this.windUp = settings.windUp;
-        this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
+        this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(),
+                settings.zoomSettings.isZoomToSelectedCompetitors());
     }
 
     /**
@@ -95,7 +105,7 @@ public class RaceMapSettings extends AbstractSettings {
     public boolean isShowDouglasPeuckerPoints() {
         return showDouglasPeuckerPoints;
     }
-    
+
     public void setShowDouglasPeuckerPoints(boolean showDouglasPeuckerPoints) {
         this.showDouglasPeuckerPoints = showDouglasPeuckerPoints;
     }
@@ -159,19 +169,19 @@ public class RaceMapSettings extends AbstractSettings {
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
     }
-    
+
     public boolean getTransparentHoverlines() {
         return this.transparentHoverlines;
     }
-    
+
     public void setTransparentHoverlines(boolean transparentHoverlines) {
         this.transparentHoverlines = transparentHoverlines;
     }
-    
+
     public int getHoverlineStrokeWeight() {
         return this.hoverlineStrokeWeight;
     }
-    
+
     public void setHoverlineStrokeWeight(int hoverlineStrokeWeight) {
         this.hoverlineStrokeWeight = hoverlineStrokeWeight;
     }

@@ -1455,4 +1455,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorTryingToCreateEmbeddedMap(String message);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String maneuverType();
 }
