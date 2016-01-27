@@ -81,6 +81,7 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -126,7 +127,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * 
  */
 public class LeaderboardPanel extends SimplePanel implements Component<LeaderboardSettings>, TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-    IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider {
+    IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -3226,8 +3227,14 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         }
     }
     
+    @Override
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
+    }
+
+    @Override
+    public void removeLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        this.leaderboardUpdateListener.remove(listener);
     }
 
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {

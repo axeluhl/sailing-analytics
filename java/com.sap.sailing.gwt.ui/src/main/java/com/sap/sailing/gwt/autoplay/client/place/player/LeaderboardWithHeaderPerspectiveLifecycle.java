@@ -2,10 +2,8 @@ package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle.SAPHeaderConstructionParameters;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle.ConstructionParameters;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
@@ -70,10 +68,11 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     public static class ConstructorArgs implements PerspectiveConstructorArgs<LeaderboardWithHeaderPerspective, LeaderboardPerspectiveSettings> {
-        private final SAPHeaderConstructionParameters sapHeaderConstructionParameters;
-        private final ConstructionParameters leaderboardConstructionParameters;
+        private final SAPHeaderLifecycle.ConstructionParameters sapHeaderConstructionParameters;
+        private final LeaderboardPanelLifecycle.ConstructionParameters leaderboardConstructionParameters;
         
-        public ConstructorArgs(SAPHeaderConstructionParameters sapHeaderConstructionParameters, ConstructionParameters leaderboardConstructionParameters) {
+        public ConstructorArgs(SAPHeaderLifecycle.ConstructionParameters sapHeaderConstructionParameters,
+                LeaderboardPanelLifecycle.ConstructionParameters leaderboardConstructionParameters) {
             this.sapHeaderConstructionParameters = sapHeaderConstructionParameters;
             this.leaderboardConstructionParameters = leaderboardConstructionParameters;
         }

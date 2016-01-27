@@ -6,11 +6,11 @@ import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SAPHeaderLifecycle implements ComponentLifecycle<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.SAPHeaderConstructorArgs> {
+public class SAPHeaderLifecycle implements ComponentLifecycle<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.ConstructorArgs> {
 
-    public static class SAPHeaderConstructionParameters extends ComponentConstructionParameters<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.SAPHeaderConstructorArgs> {
-        public SAPHeaderConstructionParameters(SAPHeaderLifecycle componentLifecycle,
-                SAPHeaderConstructorArgs componentConstructorArgs, AbstractSettings settings) {
+    public static class ConstructionParameters extends ComponentConstructionParameters<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.ConstructorArgs> {
+        public ConstructionParameters(SAPHeaderLifecycle componentLifecycle,
+                ConstructorArgs componentConstructorArgs, AbstractSettings settings) {
             super(componentLifecycle, componentConstructorArgs, settings);
         }
     }
@@ -44,15 +44,15 @@ public class SAPHeaderLifecycle implements ComponentLifecycle<SAPHeader, Abstrac
     }
     
     @Override
-    public SAPHeader createComponent(SAPHeaderConstructorArgs sapHeaderContructorArgs, AbstractSettings settings) {
+    public SAPHeader createComponent(ConstructorArgs sapHeaderContructorArgs, AbstractSettings settings) {
         return sapHeaderContructorArgs.createComponent(settings);
     }
 
-    public static class SAPHeaderConstructorArgs implements ComponentConstructorArgs<SAPHeader, AbstractSettings> {
+    public static class ConstructorArgs implements ComponentConstructorArgs<SAPHeader, AbstractSettings> {
         private final String pageTitle;
         private final boolean startInAutoScreenMode;
         
-        public SAPHeaderConstructorArgs(String pageTitle, boolean startInAutoScreenMode) {
+        public ConstructorArgs(String pageTitle, boolean startInAutoScreenMode) {
             this.pageTitle = pageTitle;
             this.startInAutoScreenMode = startInAutoScreenMode;
         }

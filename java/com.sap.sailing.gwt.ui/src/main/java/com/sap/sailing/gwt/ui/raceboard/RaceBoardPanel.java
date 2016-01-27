@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -66,8 +67,6 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -80,8 +79,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider,
-        RequiresResize {
+public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UUID eventId;
@@ -153,7 +151,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         this.asyncActionsExecutor = asyncActionsExecutor;
         FlowPanel mainPanel = new ResizableFlowPanel();
         mainPanel.setSize("100%", "100%");
-        initWidget(mainPanel);
+        setWidget(mainPanel);
         raceInformationHeader = new FlowPanel();
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
@@ -463,42 +461,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         }
     }
 
-    @Override
-    public String getLocalizedShortName() {
-        return getPerspectiveName();
-    }
-
-    @Override
-    public boolean hasSettings() {
-        return true;
-    }
-
-    @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getSettingsDialogComponent() {
-        return new RaceBoardPerspectiveSettingsDialogComponent(perspectiveSettings, StringMessages.INSTANCE);
-    }
-
-    @Override
-    public RaceBoardPerspectiveSettings getSettings() {
-        return perspectiveSettings;
-    }
-
-    @Override
-    public void updateSettings(RaceBoardPerspectiveSettings newSettings) {
-        this.perspectiveSettings = newSettings;
-    }
-
-    @Override
-    public String getDependentCssClassName() {
-        return "";
-    }
-
-    @Override
-    public String getPerspectiveName() {
-        return "Race Viewer";
-    }
-
-//    @Override
+    //    @Override
 //    public void setSettingsOfComponents(CompositeLifecycleSettings settingsOfComponents) {
 //        RaceMapSettings raceMapSettings = settingsOfComponents.getSettingsForType(RaceMapSettings.class);
 //        raceMap.updateSettings(raceMapSettings);

@@ -10,13 +10,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle.SAPHeaderConstructionParameters;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle.ConstructionParameters;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle.ConstructionParameters;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -27,15 +29,16 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
  * @author Frank
  *
  */
-public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardPerspectiveSettings> {
+public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardPerspectiveSettings> implements LeaderboardUpdateProvider {
     private LeaderboardPerspectiveSettings settings;
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 70;
     private final Widget currentContentWidget;
+    private final LeaderboardPanel leaderboardPanel;
     
     public LeaderboardWithHeaderPerspective(LeaderboardPerspectiveSettings perspectiveSettings, 
-            SAPHeaderConstructionParameters sapHeaderConstructionParameters,
-            ConstructionParameters leaderboardParameters,
+            ConstructionParameters sapHeaderConstructionParameters,
+            LeaderboardPanelLifecycle.ConstructionParameters leaderboardParameters,
             StringMessages stringMessages) {
         super();
         this.settings = perspectiveSettings;
@@ -50,7 +53,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         });
 
         SAPHeader sapHeader = sapHeaderConstructionParameters.createComponent();
-        LeaderboardPanel leaderboardPanel = leaderboardParameters.createComponent();
+        leaderboardPanel = leaderboardParameters.createComponent();
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
 
         components.add(sapHeader);
@@ -190,5 +193,15 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transform", "translateX(" + diffX / 2.0 + "px) scale(" + scaleFactor + ")");
             CSS3Util.setProperty(contentWidget.getElement().getStyle(), "transformOrigin", "0 0");
         }
+    }
+
+    @Override
+    public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        leaderboardPanel.addLeaderboardUpdateListener(listener);
+    }
+
+    @Override
+    public void removeLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        leaderboardPanel.removeLeaderboardUpdateListener(listener);
     }
 }
