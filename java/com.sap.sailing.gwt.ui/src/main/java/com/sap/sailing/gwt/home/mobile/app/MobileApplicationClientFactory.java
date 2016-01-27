@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
+import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -38,7 +39,8 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  */
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
-        ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory {
+        ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
+        WithAuthenticationManager {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
@@ -100,6 +102,7 @@ public class MobileApplicationClientFactory extends
         return getTopLevelView().getNavigationPathDisplay();
     }
     
+    @Override
     public AuthenticationManager getAuthenticationManager() {
         return authenticationManager;
     }
