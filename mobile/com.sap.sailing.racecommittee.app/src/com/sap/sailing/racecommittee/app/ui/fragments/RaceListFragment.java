@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
@@ -45,6 +46,7 @@ import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -59,8 +61,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.comparators.RaceListDataTypeComparator;
-import com.sap.sailing.racecommittee.app.ui.comparators.RegattaSeriesFleetComparator;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
@@ -85,7 +85,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private FilterMode mFilterMode;
     private ListView mListView;
     private LinkedHashMap<String, ManagedRace> mManagedRacesById;
-    private TreeMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
+    private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
     private ManagedRace mSelectedRace;
     private IntentReceiver mReceiver;
     private boolean mUpdateList = true;
@@ -112,7 +112,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mFilterMode = FilterMode.ACTIVE;
         mSelectedRace = null;
         mManagedRacesById = new LinkedHashMap<>();
-        mRacesByGroup = new TreeMap<>(new RegattaSeriesFleetComparator());
+        mRacesByGroup = new LinkedHashMap<>();
         mViewItems = new ArrayList<>();
     }
 
@@ -145,12 +145,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 }
             }
         }
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 
     private void filterChanged() {
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.getFilter().filterByMode(getFilterMode());
         mAdapter.notifyDataSetChanged();
 
@@ -429,17 +427,84 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         // 2. Remove previous view items
         mViewItems.clear();
 
-        // 3. Create view elements from tree
-        for (RaceGroupSeriesFleet key : mRacesByGroup.navigableKeySet()) {
-            // ... add the header view...
-            mViewItems.add(new RaceListDataTypeHeader(key));
+        // 3. Group active fleets from tree by series
+        Map<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = getFleetsGroupedBySeries(mRacesByGroup.keySet());
 
-            List<ManagedRace> races = mRacesByGroup.get(key);
-            for (ManagedRace race : races) {
-                // ... and add the race view!
-                mViewItems.add(new RaceListDataTypeRace(race));
+        // 4. Create view elements from series with fleets
+        for (SeriesBase series : seriesWithFleets.keySet()) {
+            List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
+            if (fleets.size() == 1) { // Default fleet
+                // ... add the header view for default fleet...
+                RaceGroupSeriesFleet fleet = fleets.get(0);
+                mViewItems.add(new RaceListDataTypeHeader(fleet));
+                List<ManagedRace> races = mRacesByGroup.get(fleet);
+                for (ManagedRace race : races) {
+                    // ... and add the race view!
+                    mViewItems.add(new RaceListDataTypeRace(race));
+                }
+            } else if (fleets.size() > 1) {
+                // ... add the header view for all following fleets...
+                mViewItems.add(new RaceListDataTypeHeader(fleets.get(0), false));
+                // ... and add all the sorted race views!
+                List<RaceListDataTypeRace> raceListDataTypeRaces = getRaceListDataTypeRaces(mRacesByGroup, fleets);
+                if (fleetsEqual(fleets)) {
+                    raceListDataTypeRaces = sortRaceList(raceListDataTypeRaces, fleets.size());
+                }
+                for (RaceListDataTypeRace raceListDataTypeRace : raceListDataTypeRaces) {
+                    mViewItems.add(raceListDataTypeRace);
+                }
             }
         }
+    }
+
+    private boolean fleetsEqual(List<RaceGroupSeriesFleet> fleets) {
+        if (!fleets.isEmpty()) {
+            int lastFleetOrder = fleets.get(0).getFleet().getOrdering();
+            for (RaceGroupSeriesFleet fleet : fleets) {
+                int currentFleetOrder = fleet.getFleet().getOrdering();
+                if (currentFleetOrder != lastFleetOrder) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private List<RaceListDataTypeRace> sortRaceList(List<RaceListDataTypeRace> raceList, int fleetSize) {
+        int racePerFleet = raceList.size() / fleetSize;
+        List<RaceListDataTypeRace> sortedList = new ArrayList<>();
+        for (int race = 0; race < racePerFleet; race++) {
+            for (int fleet = 0; fleet < fleetSize; fleet++) {
+                sortedList.add(raceList.get(race + (fleet * racePerFleet)));
+            }
+        }
+        return sortedList;
+    }
+
+    private static LinkedHashMap<SeriesBase, List<RaceGroupSeriesFleet>> getFleetsGroupedBySeries(Set<RaceGroupSeriesFleet> raceGroupSeriesFleets) {
+        LinkedHashMap<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = new LinkedHashMap<>();
+        for (RaceGroupSeriesFleet key : raceGroupSeriesFleets) {
+            SeriesBase series = key.getSeries();
+            List<RaceGroupSeriesFleet> fleets = seriesWithFleets.get(series);
+            if (fleets == null) {
+                fleets = new ArrayList<>();
+            }
+            fleets.add(key);
+            seriesWithFleets.put(series, fleets);
+        }
+        return seriesWithFleets;
+    }
+
+    private static List<RaceListDataTypeRace> getRaceListDataTypeRaces(LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup,
+        List<RaceGroupSeriesFleet> fleets) {
+        List<RaceListDataTypeRace> races = new ArrayList<>();
+        for (RaceGroupSeriesFleet fleet : fleets) {
+            for (ManagedRace race : racesByGroup.get(fleet)) {
+                races.add(new RaceListDataTypeRace(race, fleet));
+            }
+        }
+        return races;
     }
 
     public void setupOn(Collection<ManagedRace> races) {
@@ -457,7 +522,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         initializeViewElements();
         // prepare views and do initial filtering
         filterChanged();
-        mAdapter.sort(new RaceListDataTypeComparator());
         mAdapter.notifyDataSetChanged();
     }
 

@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -112,7 +113,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index : ViewType.RACE.index);
+        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index :
+                getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
     }
 
     @Override
@@ -140,10 +142,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 regatta = header.getRaceGroup().getName();
             }
             boat_class.setText(regatta);
-            String fleetSeries = RaceHelper.getFleetSeries(header.getFleet(), header.getSeries());
-            if (!TextUtils.isEmpty(fleetSeries)) {
-                fleet_series.setText(fleetSeries);
-                fleet_series.setVisibility(View.VISIBLE);
+            if (header.isFleetVisible()) {
+                fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
+            } else {
+                fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
             }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
             protest_image.setOnClickListener(new View.OnClickListener() {
@@ -174,9 +176,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 }
             }
 
-            if (!TextUtils.isEmpty(race.getRaceName())) {
-                race_name.setText(race.getRaceName());
-            }
+            race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
+
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
@@ -293,9 +294,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             if (panel_right != null) {
                 panel_right.setVisibility(View.VISIBLE);
-            }
-            if (fleet_series != null) {
-                fleet_series.setVisibility(View.GONE);
             }
             if (update_badge != null) {
                 update_badge.setVisibility(View.GONE);
