@@ -267,8 +267,7 @@ public class CacheDispatchTest {
         @Override
         public <R extends Result, A extends Action<R, DispatchContextMock>> void execute(A action,
                 AsyncCallback<R> callback) throws DispatchException {
-            action.execute(new DispatchContextMock());
-
+            callback.onSuccess(action.execute(new DispatchContextMock()));
         }
     }
 }
