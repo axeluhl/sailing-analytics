@@ -1025,4 +1025,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
     }
+
+    @Override
+    public void updateMarkPassingsAfterRaceLogChanges() {
+    }
 }

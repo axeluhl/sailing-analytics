@@ -102,4 +102,9 @@ public class DummyMarkPassingWithTimePointOnly implements MarkPassing {
             }
         };
     }
+
+    @Override
+    public MarkPassing getOriginal() {
+        return this;
+    }
 }

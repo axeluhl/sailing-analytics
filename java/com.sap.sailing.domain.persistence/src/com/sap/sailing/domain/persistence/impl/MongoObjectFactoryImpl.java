@@ -19,6 +19,8 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
@@ -1150,22 +1152,25 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         return result;
     }
     
-    private BasicDBList storePositionedCompetitors(List<com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason>> positionedCompetitors) {
+    private BasicDBList storePositionedCompetitors(CompetitorResults positionedCompetitors) {
         BasicDBList dbList = new BasicDBList();
         if (positionedCompetitors != null) {
-            for (com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> competitorPair : positionedCompetitors) {
+            for (CompetitorResult competitorPair : positionedCompetitors) {
                 dbList.add(storePositionedCompetitor(competitorPair));
             }
         }
         return dbList;
     }
     
-    private DBObject storePositionedCompetitor(com.sap.sse.common.Util.Triple<Serializable, String, MaxPointsReason> competitorTriple) {
+    private DBObject storePositionedCompetitor(CompetitorResult competitorResult) {
         DBObject result = new BasicDBObject();
-        result.put(FieldNames.COMPETITOR_ID.name(), competitorTriple.getA());
-        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorTriple.getB());
-        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorTriple.getC().name());
-        
+        result.put(FieldNames.COMPETITOR_ID.name(), competitorResult.getCompetitorId());
+        result.put(FieldNames.COMPETITOR_DISPLAY_NAME.name(), competitorResult.getCompetitorDisplayName());
+        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name(), competitorResult.getMaxPointsReason() == null ? null : competitorResult.getMaxPointsReason().name());
+        result.put(FieldNames.LEADERBOARD_CORRECTED_SCORE.name(), competitorResult.getScore());
+        result.put(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name(), competitorResult.getFinishingTime() == null ? null : competitorResult.getFinishingTime().asMillis());
+        result.put(FieldNames.LEADERBOARD_RANK.name(), competitorResult.getOneBasedRank());
+        result.put(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name(), competitorResult.getComment());
         return result;
     }
 

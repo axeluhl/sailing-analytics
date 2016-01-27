@@ -57,6 +57,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
@@ -1515,27 +1516,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private CompetitorResults loadPositionedCompetitors(BasicDBList dbPositionedCompetitorList) {
-        CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
+        CompetitorResultsImpl positionedCompetitors = new CompetitorResultsImpl();
+        int rankCounter = 1;
         for (Object object : dbPositionedCompetitorList) {
             DBObject dbObject = (DBObject) object;
-
-            Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
-            
-            String competitorName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
+            final Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
+            String competitorDisplayName = (String) dbObject.get(FieldNames.COMPETITOR_DISPLAY_NAME.name());
             //The Competitor name is a new field in the list. Therefore the name might be null for existing events. In this case a standard name is set. 
-            if (competitorName == null) {
-                competitorName = "loaded competitor";
+            if (competitorDisplayName == null) {
+                competitorDisplayName = "loaded competitor";
             }
-            
             //At this point we do not retrieve the competitor object since at any point in time, especially after a server restart, the DomainFactory and its competitor
             //cache might be empty. But at this time the race log is loaded from database, so the competitor would be null.
             //By not using the Competitor object retrieved from the DomainFactory we get completely independent from server restarts and the timepoint of loading
             //competitors by tracking providers.
-            
-            MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
-            
-            Util.Triple<Serializable, String, MaxPointsReason> positionedCompetitor = new Util.Triple<Serializable, String, MaxPointsReason>(competitorId, competitorName, maxPointsReason);
+            final Integer rank = (Integer) dbObject.get(FieldNames.LEADERBOARD_RANK.name());
+            final MaxPointsReason maxPointsReason = MaxPointsReason.valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
+            final Double score = (Double) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+            final Long finishingTimePointAsMillis = (Long) dbObject.get(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name());
+            final TimePoint finishingTime = finishingTimePointAsMillis == null ? null : new MillisecondsTimePoint(finishingTimePointAsMillis);
+            final String comment = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
+            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
+                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment);
             positionedCompetitors.add(positionedCompetitor);
+            rankCounter++;
         }
         return positionedCompetitors;
     }

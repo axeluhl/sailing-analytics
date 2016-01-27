@@ -38,4 +38,9 @@ public class MarkPassingImpl implements MarkPassing {
         return ""+getTimePoint()+": "+getCompetitor()+" passed "+getWaypoint();
     }
 
+    @Override
+    public MarkPassing getOriginal() {
+        return this;
+    }
+
 }
