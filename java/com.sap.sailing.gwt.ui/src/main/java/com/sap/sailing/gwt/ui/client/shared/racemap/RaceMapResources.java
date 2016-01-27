@@ -15,7 +15,7 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/wind_combined.png")
     ImageResource combinedWindIcon();
-
+    
     @Source("com/sap/sailing/gwt/ui/client/images/true_north_indicator.png")
     ImageResource trueNorthIndicatorIcon();
 
