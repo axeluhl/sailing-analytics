@@ -49,7 +49,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
                 new AsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
-                clientFactory.getAuthenticationManager().refreshUser();
+                clientFactory.getAuthenticationManager().refreshUserInfo();
                 Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
             }
             

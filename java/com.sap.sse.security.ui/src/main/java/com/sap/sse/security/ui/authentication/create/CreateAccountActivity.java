@@ -47,13 +47,13 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     @Override
     public void createAccount() {
         if (values.validate()) {
-            clientFactory.getUserManagementService().createSimpleUser(values.username, values.email, 
+            clientFactory.getAuthenticationManager().createAccount(values.username, values.email, 
                     values.password, values.fullName, values.company, callback.getCreateConfirmationUrl(), 
                     new AsyncCallback<UserDTO>() {
                 @Override
                 public void onSuccess(final UserDTO result) {
-                    clientFactory.getUserManagementService().login(result.getName(), values.password, 
-                            new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, false));
+                    clientFactory.getAuthenticationManager().login(result.getName(), values.password, 
+                            new AsyncLoginCallback(view, callback, false));
                     placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, result.getName()));
                 }
                 

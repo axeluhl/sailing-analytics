@@ -36,7 +36,7 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
 
     @Override
     public void resetPassword(final String email, final String username) {
-        clientFactory.getUserManagementService().resetPassword(username, email, callback.getPasswordResetUrl(),
+        clientFactory.getAuthenticationManager().reqeustPasswordReset(username, email, callback.getPasswordResetUrl(),
                 new AsyncCallback<Void>() {
                     @Override
                     public void onSuccess(Void result) {

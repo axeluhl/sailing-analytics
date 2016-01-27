@@ -43,8 +43,8 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
 
     @Override
     public void login(String loginName, String password) {
-        clientFactory.getUserManagementService().login(loginName, password,
-                new AsyncLoginCallback(clientFactory.getAuthenticationManager(), view, callback, true));
+        clientFactory.getAuthenticationManager().login(loginName, password,
+                new AsyncLoginCallback(view, callback, true));
     }
 
     @Override

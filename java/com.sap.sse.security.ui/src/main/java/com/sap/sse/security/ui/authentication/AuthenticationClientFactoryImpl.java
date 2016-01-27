@@ -10,7 +10,6 @@ import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryView;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryViewImpl;
 import com.sap.sse.security.ui.authentication.signin.SignInView;
 import com.sap.sse.security.ui.authentication.signin.SignInViewImpl;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     
@@ -53,9 +52,4 @@ public class AuthenticationClientFactoryImpl implements AuthenticationClientFact
         return authenticationManager;
     }
     
-    @Override
-    public UserManagementServiceAsync getUserManagementService() {
-        return ((AuthenticationManagerImpl) authenticationManager).getUserManagementService();
-    }
-
 }

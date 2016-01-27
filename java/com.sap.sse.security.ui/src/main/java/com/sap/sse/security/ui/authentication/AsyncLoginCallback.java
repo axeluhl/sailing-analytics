@@ -6,14 +6,11 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     
-    private final AuthenticationManager authenticationManager;
     private final ErrorMessageView view;
     private final AuthenticationCallback callback;
     private final boolean fireSignInSuccessfulEvent;
     
-    public AsyncLoginCallback(AuthenticationManager authenticationManager, ErrorMessageView view,
-            AuthenticationCallback callback, boolean fireSignInSuccessfulEvent) {
-        this.authenticationManager = authenticationManager;
+    public AsyncLoginCallback(ErrorMessageView view, AuthenticationCallback callback, boolean fireSignInSuccessfulEvent) {
         this.view = view;
         this.callback = callback;
         this.fireSignInSuccessfulEvent = fireSignInSuccessfulEvent;
@@ -22,7 +19,6 @@ public class AsyncLoginCallback implements AsyncCallback<SuccessInfo> {
     @Override
     public void onSuccess(SuccessInfo result) {
         if (result.isSuccessful()) {
-            authenticationManager.didLogin(result.getUserDTO());
             if (fireSignInSuccessfulEvent) {
                 callback.handleSignInSuccess();
             }

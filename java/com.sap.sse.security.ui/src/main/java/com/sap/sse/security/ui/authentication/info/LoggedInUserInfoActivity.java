@@ -3,13 +3,11 @@ package com.sap.sse.security.ui.authentication.info;
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
-import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class LoggedInUserInfoActivity extends AbstractActivity implements LoggedInUserInfoView.Presenter {
 
@@ -53,18 +51,7 @@ public class LoggedInUserInfoActivity extends AbstractActivity implements Logged
 
     @Override
     public void signOut() {
-        clientFactory.getUserManagementService().logout(new AsyncCallback<SuccessInfo>() {
-            @Override
-            public void onSuccess(SuccessInfo result) {
-                clientFactory.getAuthenticationManager().didLogout();
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                clientFactory.getAuthenticationManager().didLogout();
-            }
-        });
+        clientFactory.getAuthenticationManager().logout();
     }
-
 
 }
