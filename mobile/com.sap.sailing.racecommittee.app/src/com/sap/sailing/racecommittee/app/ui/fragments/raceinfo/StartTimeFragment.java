@@ -752,7 +752,9 @@ public class StartTimeFragment extends BaseFragment
         fragment.setArguments(args);
         transaction.replace(viewId, fragment);
         transaction.commit();
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
+        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        if (getActivity().findViewById(R.id.race_edit) != null) {
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        }
     }
 }
