@@ -71,9 +71,6 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         
         Intent intent = new Intent(this, MessageSendingService.class);
         ExLog.i(this, TAG, "bindSendingService");
-        if (sendingService != null) {
-            sendingService.setMessageSendingServiceLogger(sendingServiceConnection);
-        }
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
     
@@ -82,9 +79,6 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         super.onStop();
         
         ExLog.i(this, TAG, "unbindSendingService");
-        if (sendingService != null) {
-            sendingService.setMessageSendingServiceLogger(null);
-        }
         unbindService(sendingServiceConnection);
         boundSendingService = false;
     }
