@@ -87,6 +87,7 @@ public class RaceFlagViewerFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
 
+        mFlagCache = null;
         getRaceState().getRacingProcedure().addChangedListener(mProcedureListener);
     }
 
