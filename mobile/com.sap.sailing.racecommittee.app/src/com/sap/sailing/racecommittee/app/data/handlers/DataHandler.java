@@ -10,12 +10,16 @@ public abstract class DataHandler<T> {
     }
 
     public abstract void onResult(T data);
-    
+
     public boolean hasCachedResults() {
         return false;
     }
-    
+
     public T getCachedResults() {
         return null;
+    }
+
+    public void clearCache() {
+        // no op
     }
 }
