@@ -8,6 +8,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.datamining.annotations.Connector;
 import com.sap.sse.datamining.annotations.Dimension;
+import com.sap.sse.datamining.annotations.Statistic;
 
 public interface HasTrackedRaceContext {
     
@@ -33,5 +34,14 @@ public interface HasTrackedRaceContext {
     
     @Dimension(messageKey="Year", ordinal=2)
     public Integer getYear();
+    
+    @Dimension(messageKey="IsTracked", ordinal=6)
+    public Boolean isTracked();
+    
+    @Statistic(messageKey="NumberOfCompetitorFixes", resultDecimals=0, ordinal=0)
+    public int getNumberOfCompetitorFixes();
+    
+    @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=1)
+    public int getNumberOfMarkFixes();
     
 }

@@ -15,7 +15,7 @@ import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceSelectionChangeListener, RaceTimesInfoProviderListener {
+public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
     
     private RegattaAndRaceIdentifier selectedRace;
@@ -30,11 +30,16 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport,
+            RegattaAndRaceIdentifier selectedRaceIdentifier) {
         super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
+        selectedRace = selectedRaceIdentifier;
+        if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
+            raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
+        }
     }
     
     /**
@@ -83,7 +88,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             // timer will only accept this update if the delay hasn't been updated explicitly
             timer.setLivePlayDelayInMillis(raceTimesInfo.delayToLiveInMs);
             if ((raceTimesInfo.startOfTracking != null || raceTimesInfo.startOfRace != null) && 
-                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null)) {
+                    (raceTimesInfo.newestTrackingEvent != null || raceTimesInfo.endOfRace != null || raceTimesInfo.endOfTracking != null)) {
                 // we set here the min and max of the time slider, the start and end of the race as well as the known
                 // leg markers
                 boolean liveModeToBeMadePossible = isLiveModeToBeMadePossible();
@@ -135,27 +140,20 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         redrawAllMarkers(lastRaceTimesInfo);
     }
 
+    /**
+     * If and only if the {@link #selectedRace}'s timing is described by the {@link #raceTimesInfoProvider} and
+     * according to the timing the current live time point is after the start of tracking or at least after three
+     * minutes before the race, and the current live time point is not after the end of tracking then live mode will be
+     * made possible (<code>true</code> will be returned).
+     */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
-        long eventTimeoutTolerance = 60 * 1000; // 60s
-        long timeBeforeRaceStartTolerance = 3 * 60 * 1000; // 3min
         long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
         return lastRaceTimesInfo != null &&
-                lastRaceTimesInfo.newestTrackingEvent != null &&
-                liveTimePointInMillis < lastRaceTimesInfo.newestTrackingEvent.getTime() + eventTimeoutTolerance &&
-                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime())||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - timeBeforeRaceStartTolerance));
-    }
-    
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRace = selectedRaces.iterator().next();
-            if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
-                raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
-            }
-        }
+                ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START)) &&
+                 (lastRaceTimesInfo.endOfTracking == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfTracking.getTime());
     }
     
     @Override

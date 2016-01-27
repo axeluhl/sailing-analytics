@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +39,6 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -64,7 +61,6 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
@@ -83,8 +79,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeListener,
-        LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
+public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateListener, PopupPositionProvider, RequiresResize {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
     private final UUID eventId;
@@ -96,7 +91,6 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
     private final List<ComponentViewer> componentViewers;
     private RaceTimePanel timePanel;
     private final Timer timer;
-    private final RaceSelectionProvider raceSelectionProvider;
     private final UserAgentDetails userAgent;
     private final CompetitorSelectionProvider competitorSelectionProvider;
     private final TimeRangeWithZoomModel timeRangeWithZoomModel; 
@@ -135,7 +129,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
      */
     public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
-            Timer timer, RaceSelectionProvider theRaceSelectionProvider, String leaderboardName,
+            Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, RaceBoardViewConfiguration raceboardViewConfiguration,
             ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport) {
@@ -143,7 +137,6 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.raceboardViewConfiguration = raceboardViewConfiguration;
-        this.raceSelectionProvider = theRaceSelectionProvider;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -151,8 +144,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         this.eventId = eventId;
         this.currentRaceHasBeenSelectedOnce = false;
         this.leaderboardName = leaderboardName;
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
-        selectedRaceIdentifier = raceSelectionProvider.getSelectedRaces().iterator().next();
+        this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.setRaceBoardName(selectedRaceIdentifier.getRaceName());
         this.asyncActionsExecutor = asyncActionsExecutor;
         FlowPanel mainPanel = new ResizableFlowPanel();
@@ -228,11 +220,9 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             }
         }
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardViewConfiguration.isCanReplayDuringLiveRaces(), isScreenLargeEnoughToOfferChartSupport);
+                raceboardViewConfiguration.isCanReplayDuringLiveRaces(), isScreenLargeEnoughToOfferChartSupport, selectedRaceIdentifier);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
-        raceSelectionProvider.addRaceSelectionChangeListener(timePanel);
-        timePanel.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
     }
     
     /**
@@ -249,19 +239,16 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
-        raceMap.onRaceSelectionChange(Collections.singletonList(selectedRaceIdentifier));
         List<Component<?>> components = new ArrayList<Component<?>>();
         if (isScreenLargeEnoughToOfferChartSupport) {
-            competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider,
+        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, 
                         timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
-            competitorChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             components.add(competitorChart);
-            windChart = new WindChart(sailingService, raceSelectionProvider, timer, timeRangeWithZoomModel, new WindChartSettings(),
+        windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel, new WindChartSettings(),
                     stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
             windChart.setVisible(false);
-            windChart.onRaceSelectionChange(raceSelectionProvider.getSelectedRaces());
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             components.add(windChart);
             editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
@@ -382,10 +369,6 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
         return errorReporter;
     }
     
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-    }
-
     public RaceBoardViewConfiguration getConfiguration() {
         return raceboardViewConfiguration;
     }
@@ -422,14 +405,7 @@ public class RaceBoardPanel extends SimplePanel implements RaceSelectionChangeLi
             final Anchor regattaNameAnchor = new Anchor(raceIdentifier.getRegattaName());
             regattaNameAnchor.setTitle(raceIdentifier.getRegattaName());
             if (eventId != null) {
-                // we don't use the EntryPointLinkFactory here, because of lacking support for Places
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = "/gwt/Home.html";
-                if (debugParam != null && !debugParam.isEmpty()) {
-                    link += "?gwt.codesvr=" + debugParam;
-                }
-                link += "#EventPlace:eventId="+eventId.toString();
-                link += "&navigationTab=Regatta&leaderboardName=" + URLEncoder.encode(leaderboardName);
+                String link = EntryPointLinkFactory.createLeaderboardPlaceLink(eventId.toString(), leaderboardName);
                 regattaNameAnchor.setHref(link);
             } else {
                 String leaderboardGroupNameParam = Window.Location.getParameter("leaderboardGroupName");

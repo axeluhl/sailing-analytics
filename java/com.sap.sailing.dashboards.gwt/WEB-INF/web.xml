@@ -19,18 +19,6 @@
 	</servlet>
 
 	<servlet>
-		<display-name>Rib Dashboard Service</display-name>
-		<servlet-name>RibDashboardService</servlet-name>
-		<servlet-class>com.sap.sailing.dashboards.gwt.server.RibDashboardServiceImpl
-		</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RibDashboardService</servlet-name>
-		<url-pattern>/service/ribdashboard
-		</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<display-name>Sailing Service</display-name>
 		<servlet-name>SailingService</servlet-name>
 		<servlet-class>com.sap.sailing.gwt.ui.server.SailingServiceImpl</servlet-class>
@@ -38,6 +26,16 @@
 	<servlet-mapping>
 		<servlet-name>SailingService</servlet-name>
 		<url-pattern>/service/sailing</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<display-name>Dispatch Service</display-name>
+		<servlet-name>DispatchService</servlet-name>
+		<servlet-class>com.sap.sailing.dashboards.gwt.server.DashboardDispatchRPCServletImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DispatchService</servlet-name>
+		<url-pattern>/service/dispatch</url-pattern>
 	</servlet-mapping>
 	
 		<!-- enabling remote logging -->

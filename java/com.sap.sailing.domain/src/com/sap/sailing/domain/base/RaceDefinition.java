@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 
@@ -30,5 +31,12 @@ public interface RaceDefinition extends Named, WithID {
      * Gets the boat used by the competitor for this race.
      */
     Boat getBoatOfCompetitorById(Serializable competitorID);
+
+    /**
+     * The MD5 hash as produced by
+     * {@link RaceCompetitorIdsAsStringWithMD5Hash#getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID()}
+     * for this race's competitor set.
+     */
+    byte[] getCompetitorMD5();
 
 }

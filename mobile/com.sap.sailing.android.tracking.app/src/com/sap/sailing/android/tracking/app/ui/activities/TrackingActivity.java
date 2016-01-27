@@ -427,7 +427,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    ExLog.e(TrackingActivity.this, TAG, "Interrupted sleep");
                 }
             }
         }

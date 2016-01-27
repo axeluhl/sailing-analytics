@@ -325,7 +325,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -416,6 +416,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSchemeLowPointForLeagueOverallLeaderboard();
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
+    String scoringSchemeHighPointEssOverall12();
+    String scoringSchemeHighPointEssOverall12Description();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight();
+    String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1111,6 +1115,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String timeZone();
     String eventOfficialWebsiteURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
@@ -1442,6 +1447,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String registerCompetitorsOnRace();
+    String doYouWantToRegisterCompetitorsDirectlyOnTheRace();
+    String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+    String warningDirectCompetitorRegistration();
+    String warningRegattaCompetitorRegistration();
+    String competitorRegistrationsOnRaceDisabled();
+    String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
     String pleaseSelect();
@@ -1450,4 +1462,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String errorTryingToCreateEmbeddedMap(String message);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String showOnlyCompetitorsOfLog();
+    String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
 }

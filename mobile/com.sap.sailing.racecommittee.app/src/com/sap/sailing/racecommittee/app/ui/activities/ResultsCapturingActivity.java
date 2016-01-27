@@ -125,6 +125,18 @@ public class ResultsCapturingActivity extends SessionActivity {
         super.onPause();
         releaseCamera();
     }
+    
+    @Override
+    public void onStop() {
+        super.onStop();
+        releaseCamera();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releaseCamera();
+    }
 
     private void setupCamera() {
         int cameraId = getBackCameraId();
