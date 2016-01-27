@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.authentication.view;
 
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 
@@ -10,7 +11,7 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
     private final WrappedPlaceManagementController authenticationPlaceManagementController;
 
     public FlyoutAuthenticationPresenter(final FlyoutAuthenticationView flyoutAuthenticationView,
-            AuthenticationMenuView authenticationMenuView,
+            final AuthenticationMenuView authenticationMenuView,
             WrappedPlaceManagementController authenticationPlaceManagementController,
             EventBus eventBus) {
         this.flyoutAuthenticationView = flyoutAuthenticationView;
@@ -23,6 +24,13 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
             @Override
             public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
                 toggleFlyout();
+            }
+        });
+        
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
+            @Override
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
+                authenticationMenuView.setAuthenticated(event.getCtx().isLoggedIn());
             }
         });
     }
