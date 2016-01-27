@@ -8,7 +8,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (Eclipse Eclipse Committers), http://www.eclipse.org
+1. Eclipse (Eclipse for Eclipse Committers, e.g. version "Mars"), http://www.eclipse.org
 2. Eclipse Extensions
   * Install Google plugin for Eclipse (https://developers.google.com/eclipse/docs/download)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)

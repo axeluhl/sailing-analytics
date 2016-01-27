@@ -5,13 +5,12 @@ import java.io.Serializable;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.shared.events.impl.AbstractDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
-public class RegattaLogDeviceCompetitorMappingEventImpl extends
-        AbstractDeviceMappingEventImpl<RegattaLogEventVisitor, Competitor> implements
+public class RegattaLogDeviceCompetitorMappingEventImpl extends RegattaLogDeviceMappingEventImpl<Competitor> implements
         RegattaLogDeviceCompetitorMappingEvent {
     public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, Serializable pId, Competitor mappedTo, DeviceIdentifier device,
@@ -19,9 +18,8 @@ public class RegattaLogDeviceCompetitorMappingEventImpl extends
         super(createdAt, logicalTimePoint, author, pId, mappedTo, device, from, to);
     }
 
-    public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, Competitor mappedTo, DeviceIdentifier device,
-            TimePoint from, TimePoint to) {
+    public RegattaLogDeviceCompetitorMappingEventImpl(TimePoint logicalTimePoint, AbstractLogEventAuthor author,
+            Competitor mappedTo, DeviceIdentifier device, TimePoint from, TimePoint to) {
         super(logicalTimePoint, author, mappedTo, device, from, to);
     }
 
