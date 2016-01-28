@@ -5996,12 +5996,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (raceLog != raceLogToIgnore) {
                     LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
                     CourseBase course = finder.analyze();
-                    for (Waypoint waypoint: course.getWaypoints()) {
-                        for (Mark mark : waypoint.getMarks()) {
-                            if (markIds.contains(mark.getId().toString())) {
-                                racesContainingMarksToDeleteInCourse.add(raceColumn.getName()+"/"+fleet.getName());
-                                marksAreUsedInOtherRaceLogs = true;
-                          }
+                    if (course != null) {
+                        for (Waypoint waypoint : course.getWaypoints()) {
+                            for (Mark mark : waypoint.getMarks()) {
+                                if (markIds.contains(mark.getId().toString())) {
+                                    racesContainingMarksToDeleteInCourse.add(raceColumn.getName() + "/"
+                                            + fleet.getName());
+                                    marksAreUsedInOtherRaceLogs = true;
+                                }
+                            }
                         }
                     }
                 }
