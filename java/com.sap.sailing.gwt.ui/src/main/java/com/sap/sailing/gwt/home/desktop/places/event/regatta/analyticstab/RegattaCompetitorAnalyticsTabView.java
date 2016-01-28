@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUpdateProvider;
 import com.sap.sse.common.Util;
 
 /**
@@ -41,7 +41,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     private Presenter currentPresenter;
 
     private final int MAX_COMPETITORS_IN_CHART = 30; 
-    private LeaderboardPanel leaderboardPanel;
+    private LeaderboardUpdateProvider leaderboardUpdateProvider = null;
     
     public RegattaCompetitorAnalyticsTabView() {
         super();
@@ -69,11 +69,11 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel();
-            if(leaderboardPanel == null) {
+            if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
-            leaderboardPanel.addLeaderboardUpdateListener(this);
+            leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
+            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
 
             DetailType initialDetailType = DetailType.REGATTA_RANK;
@@ -147,6 +147,8 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     @Override
     protected void onUnload() {
         super.onUnload();
-        leaderboardPanel.removeLeaderboardUpdateListener(this);
+        if (leaderboardUpdateProvider != null) {
+            leaderboardUpdateProvider.removeLeaderboardUpdateListener(this); 
+        }
    }
 }
