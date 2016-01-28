@@ -475,11 +475,13 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         }
         Course course = new CourseImpl(raceName + " course", courseBase.getWaypoints());
         if (raceColumn.getTrackedRace(fleet) != null) {
-            try {
-                raceLog.revokeEvent(params.getService().getServerAuthor(), event,
-                        "could not start tracking because tracked race already exists");
-            } catch (NotRevokableException e) {
-                logger.log(Level.WARNING, "Couldn't revoke event "+event, e);
+            if (event != null) {
+                try {
+                    raceLog.revokeEvent(params.getService().getServerAuthor(), event,
+                            "could not start tracking because tracked race already exists");
+                } catch (NotRevokableException e) {
+                    logger.log(Level.WARNING, "Couldn't revoke event "+event, e);
+                }
             }
             throw new RaceNotCreatedException(String.format("Race for racelog (%s) has already been created", raceLog));
         }
