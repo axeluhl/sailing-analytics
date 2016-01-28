@@ -49,13 +49,13 @@ public abstract class RaceLogFinishPositioningEventDeserializer extends BaseRace
             final String competitorDisplayName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMPETITOR_NAME);
             final String maxPointsReasonName = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON);
             final MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName);
-            final Long rank = (Long) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_RANK);
+            final Number rank = (Number) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_RANK);
             final Double score = (Double) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_SCORE);
             final Long finishingTimePointAsMillis = (Long) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_FINISHING_TIME_POINT_AS_MILLIS);
             final TimePoint finishingTime = finishingTimePointAsMillis == null ? null : new MillisecondsTimePoint(finishingTimePointAsMillis);
             final String comment = (String) jsonPositionedCompetitor.get(RaceLogFinishPositioningConfirmedEventSerializer.FIELD_COMMENT);
             CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : (int) (long) rank, maxPointsReason, score, finishingTime, comment);
+                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank.intValue(), maxPointsReason, score, finishingTime, comment);
             rankCounter++;
             positionedCompetitors.add(positionedCompetitor);
         }
