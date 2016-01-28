@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -50,10 +51,15 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mReceiver= new IntentReceiver(this);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         getLoaderManager().restartLoader(MARKER_LOADER, null, this);
-        mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(getString(R.string.database_changed));
         LocalBroadcastManager.getInstance(getActivity().getApplicationContext()).registerReceiver(mReceiver, filter);
@@ -127,11 +133,19 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
 
     // Broadcast receiver to update ui on data changed
     private class IntentReceiver extends BroadcastReceiver {
+
+        private LoaderCallbacks<Cursor> loaderCallbacks;
+
+        public IntentReceiver(LoaderCallbacks<Cursor> callbacks) {
+            loaderCallbacks = callbacks;
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Adapter will be notified");
             String action = intent.getAction();
             if(action.equals(getString(R.string.database_changed))) {
+                getLoaderManager().restartLoader(MARKER_LOADER, null, loaderCallbacks);
                 adapter.notifyDataSetChanged();
             }
         }
