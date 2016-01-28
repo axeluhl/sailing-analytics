@@ -224,6 +224,29 @@ This action is typed against the StringsResult, a base result class provided by 
     }
     
 There are a few more default result implemetations provided by the com.sap.sse.gwt in the com.sap.sse.gwt.dispatch.shared.commands package.
+
+To finally make the server side call, just send the action instance through the dispatch system:
+ 
+    clientFactory.getDispatch().execute(
+        
+        new GetSearchServerNamesAction(), 
+        
+        new AsyncCallback<StringsResult>() {
+            @Override
+            public void onSuccess(StringsResult result) {
+                for (String serverName : result.getValues()) {
+                    //...
+                }
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                //...
+            }
+        }
+        
+    );
+ 
  
 ## Exception handling
  
@@ -233,17 +256,54 @@ The Action interface explicetely declares that the server side execution may thr
     R execute(CTX ctx) throws DispatchException;
 
 Custom exceptions that should be delivered to the client should always extend the DispatchException. 
+  
+<img src="/wiki/images/dispatch/sse_exceptions.png"/>
+
 The DispatchException creates an unique UUID String that is logged on the server side and sent to the client. 
 This way it is possible to find the server exception catched in the client code in the server logs (if logging on both ends is properly configured).
-  
- 
+
 ## The default transport
  
 The default (and currently only one) transport mechanism uses GWT RPC to communicate with the server. The implementations can be found in the com.sap.sse.gwt.dispatch.client.transport package.
 
 ## The dispatch decorators
 
-### Caching
+The current dispatch implementation DispatchSystemDefaultImpl uses the decorator pattern 
+to add cross cutting concern functionality to the core dispatch system.
+ 
+There are currently two decorators provided by the com.sap.sse.gwt module: CachingDispatch and AutomaticBatchingDispatch.
 
-### Batching
+<img src="/wiki/images/dispatch/sse_dispatch_decorators.png"/>
+  
+
+### CachingDispatch
+
+The caching dispatch decorator uses th IsClientCacheable contract interface to identify actions that may be cached on 
+the client side of the dispatch system.
+
+The results are stored in a HashMap under an instance specific key. The key consists two parts: the class 
+name and an custom instance key created by calling the IsClientCacheable.cacheInstanceKey(StringBuilder key) on the action.
+
+The caching decorator delivers resuls from the local cache transparently to the caller. 
+
+The motivation for the caching decorator is to significantly reduce the amount of data sent over the wire. 
+This is especially important on mobile devices, where delivering the results 
+for the back and forth navigation from local cache improves navigation speed.
+
+### AutomaticBatchingDispatch
+
+The AutomaticBatchingDispatch decorator provides transparent batching: actions fired in the same event loop are 
+queued up and sent as one batch action to the server, where the actions are sequentially "unpacked" and "executed".
+
+<img src="/wiki/images/dispatch/see_batching.png"/>
+
+This means that the order in which the action get fired is the order in which they get enqueued/ executed. 
+
+The batching reduces the amount of data sent over the wire and keeps the number of the connections 
+low – both improvements regarding user latency experience. 
+
+By ensuring order of execution, the application must not wait until one request/ action finishes before starting 
+the next, eliminating the need for extra roundtrips otherwise required due to the asynchronous nature of AJAX calls. 
+
+<img src="/wiki/images/dispatch/ajax-async.png"/>
 
