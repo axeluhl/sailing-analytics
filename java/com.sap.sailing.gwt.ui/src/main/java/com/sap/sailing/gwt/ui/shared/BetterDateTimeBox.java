@@ -18,6 +18,10 @@ public class BetterDateTimeBox extends DateTimeBox {
         DatetimepickerResourceInjector.configureWithCssFile();
     }
     
+    public BetterDateTimeBox() {
+        super.setFormat("mm/dd/yyyy hh:ii");
+    }
+    
     public Element getPicker() {
         return getNativePickerElement(getBox().getElement());
     }
