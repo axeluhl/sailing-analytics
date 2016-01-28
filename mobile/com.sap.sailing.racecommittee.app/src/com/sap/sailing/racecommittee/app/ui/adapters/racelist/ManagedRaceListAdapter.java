@@ -32,6 +32,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -176,6 +177,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
 
             race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
+
+            RaceGroupSeriesFleet fleet = race.getFleet();
+            if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
+                if (!TextUtils.isEmpty(race_name.getText())) {
+                    race_name.setText(race_name.getText() + " - " + fleet.getFleetName());
+                } else {
+                    race_name.setText(fleet.getFleetName());
+                }
+            }
 
             RaceState state = race.getRace().getState();
             if (state != null) {
