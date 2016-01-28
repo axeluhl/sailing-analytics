@@ -114,6 +114,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
+    private final Anchor userManagementMenu = new Anchor();
     private boolean currentRaceHasBeenSelectedOnce;
     
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
@@ -154,6 +155,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
+        userManagementMenu.setStyleName("User-Management-Icon");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
@@ -198,6 +200,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 }, selectedRaceIdentifier);
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
+        raceMap.getRightHeaderPanel().add(userManagementMenu);
 
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.

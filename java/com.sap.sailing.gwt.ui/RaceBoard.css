@@ -655,7 +655,7 @@ img.openColumn {
 
 .RegattaAndRaceTime-Header {
 	position: absolute;
-	right: 10px;
+	right: 55px;
 	top: 13px;
 	text-align: right;
 	color: white;
@@ -752,4 +752,22 @@ img.openColumn {
 
 .Media-Select-Popup .Caption {
 	padding: 4px 10px;
+}
+
+.User-Management-Icon {
+    width: 3rem;
+    height: 3rem;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    background-image: url('images/home/loggedout.svg');
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 6px;
+}
+
+.User-Management-Icon.loggedin {
+    background-image: url('images/home/loggedin.svg');
 }
