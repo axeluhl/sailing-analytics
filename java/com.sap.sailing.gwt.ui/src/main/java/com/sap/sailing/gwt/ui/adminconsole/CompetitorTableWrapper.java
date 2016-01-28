@@ -324,13 +324,13 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     public void onSuccess(CompetitorDTO updatedCompetitor) {
                         //only reload selected competitors reloading with refreshCompetitorList(leaderboardName)
                         //would not work in case the list is not based on a leaderboard e.g. AbstractCompetitorRegistrationDialog
-                        int editedCompetitorIndex = getDataProvider().getList().indexOf(originalCompetitor);
-                        getDataProvider().getList().remove(originalCompetitor);
+                        int editedCompetitorIndex = getFilterField().indexOf(originalCompetitor);
+                        getFilterField().remove(originalCompetitor);
                         if (editedCompetitorIndex >= 0){
-                            getDataProvider().getList().add(editedCompetitorIndex, updatedCompetitor);
+                            getFilterField().add(editedCompetitorIndex, updatedCompetitor);
                         } else {
                             //in case competitor was not present --> not edit, but create
-                            getDataProvider().getList().add(updatedCompetitor);
+                            getFilterField().add(updatedCompetitor);
                         }
                         getDataProvider().refresh();
                     }  
