@@ -51,23 +51,35 @@ public class RaceFilter extends Filter {
         List<RaceListDataType> filteredItems = new ArrayList<RaceListDataType>();
         RaceListDataTypeRace currentUnscheduledItem = null;
         RaceListDataTypeRace currentFinishedItem = null;
+        int finishedItems = 0;
+        int subItems = 0;
+        List<RaceListDataTypeHeader> headersToRemove= new ArrayList<>();
+        RaceListDataTypeHeader currentHeader = null;
         
         List<RaceListDataType> allItems = new ArrayList<RaceListDataType>(items);
         for (RaceListDataType item : allItems) {
             if (item instanceof RaceListDataTypeHeader) {
+                if (currentHeader != null && subItems > 0 && subItems == finishedItems) {
+                    headersToRemove.add(currentHeader);
+                }
                 RaceListDataTypeHeader headerItem = (RaceListDataTypeHeader) item;
                 filteredItems.add(headerItem);
                 
                 // new run for all types!
+                currentHeader = (RaceListDataTypeHeader) item;
                 currentUnscheduledItem = null;
                 currentFinishedItem = null;
+                finishedItems = 0;
+                subItems = 0;
             } else if (item instanceof RaceListDataTypeRace) {
+                subItems ++;
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
                 RaceLogRaceStatus status = raceItem.getCurrentStatus();
                 if (currentUnscheduledItem == null && status.equals(RaceLogRaceStatus.UNSCHEDULED)) {
                     filteredItems.add(raceItem);
                     currentUnscheduledItem = raceItem;
                 } else if (status.equals(RaceLogRaceStatus.FINISHED)) {
+                    finishedItems ++;
                     if (filteredItems.contains(currentFinishedItem)) {
                         filteredItems.remove(currentFinishedItem);
                     }
@@ -82,8 +94,31 @@ public class RaceFilter extends Filter {
                 }
             }
         }
-        
+        if (currentHeader != null && subItems > 0 && subItems == finishedItems) {
+            headersToRemove.add(currentHeader);
+        }
+        removeFinishedSeries(filteredItems, headersToRemove);
         return createResults(filteredItems);
+    }
+
+    private void removeFinishedSeries(List<RaceListDataType> filteredItems, List<RaceListDataTypeHeader> headersToRemove) {
+        List<RaceListDataType> itemsToKeep = new ArrayList<>();
+        boolean keepItems = false;
+        for (RaceListDataType item : filteredItems) {
+            if (item instanceof RaceListDataTypeHeader) {
+                keepItems = !headersToRemove.contains(item);
+                if (keepItems) {
+                    itemsToKeep.add(item);
+                }
+
+            } else if (item instanceof RaceListDataTypeRace) {
+                if (keepItems) {
+                    itemsToKeep.add(item);
+                }
+            }
+        }
+        filteredItems.clear();
+        filteredItems.addAll(itemsToKeep);
     }
 
     @SuppressWarnings("unchecked")
