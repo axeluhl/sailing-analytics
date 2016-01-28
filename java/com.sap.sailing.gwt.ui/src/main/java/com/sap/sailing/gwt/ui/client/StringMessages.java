@@ -1270,8 +1270,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardAverageWindMinutes(int minutes);
     String dashboardWindChartHint();
     
+    String dashboardStartAnalysesHeader();
     String dashboardNewStartAnalysisAvailable();
-    
+    String dashboardNoStartAnalysesAvailableHeader();
+    String dashboardNoStartAnalysesAvailableMessage();
     String dashboardStartlineAdvantagesByWind();
     String dashboardStartlineAdvantageByGeometry();
     String dashboardRankAtFirstMark();

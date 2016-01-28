@@ -8,8 +8,13 @@
 	<g:HTMLPanel styleName="{resources.gss.startanalysis}">
 		<g:HTMLPanel ui:field="header" styleName="{resources.gss.panel_header}">
 		</g:HTMLPanel>
+		<div class="{resources.gss.no_data_message_container}">
+		    <span>
+		    <div ui:field="noDataMessageHeader" class="{resources.gss.no_data_message_header}"></div>
+		    <div ui:field="noDataMessage" class="{resources.gss.no_data_message}"></div>
+		    </span>
+		</div>
 		<g:HTMLPanel ui:field="currentStartPanel" styleName="{resources.gss.current_start_panel}">
-
 		</g:HTMLPanel>
 		<g:HTMLPanel ui:field="leftButton"
 			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}">

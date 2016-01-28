@@ -24,6 +24,33 @@
 	background-color: WHITE;
 }
 
+.no_data_message_container {
+	position: absolute;
+	top: DASHBOARD_SPACE_MEDIUM;
+	bottom: 0px;
+	width: 100%;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	font-family: DASHBOARD_FONT_FAMILY;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: DASHBOARD_LINE_HEIGHT;
+}
+
+.no_data_message_header {
+	color: DARK_TEXT_COLOR;
+	font-weight: bold;
+	text-align: center;
+}
+
+.no_data_message {
+	color: LIGHT_TEXT_COLOR;
+	max-width: 230px;
+    margin: auto;
+    font-weight: normal;
+}
+
 .current_start_panel {
 	height: DASHBOARD_SPACE_MEDIUM;
 	top: DASHBOARD_SPACE_MEDIUM;
@@ -44,6 +71,10 @@
 	top: 50%;
 	background-color: WHITE;
 	z-index: 1;
+	opacity: 0.0;
+}
+
+.controll_header_button_visible {
 	opacity: 0.9;
 }
 

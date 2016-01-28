@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -39,6 +40,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 
 /**
@@ -91,6 +93,12 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
      * */
     @UiField
     HTMLPanel startanalysis_card_container;
+    
+    @UiField
+    DivElement noDataMessageHeader;
+    
+    @UiField
+    DivElement noDataMessage;
 
     /**
      * The CSS "left" property from the {@link #startanalysis_card_container}.
@@ -134,7 +142,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         pageChangeListener = new ArrayList<StartAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
         initWidget(uiBinder.createAndBindUi(this));
-        header.getElement().setInnerText("Start Analysis");
+        header.getElement().setInnerText(StringMessages.INSTANCE.dashboardStartAnalysesHeader());
         initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
         initAndAddBottomNotification();
@@ -173,6 +181,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
             public void onSuccess(StartAnalysesDTO result) {
               logger.log(Level.INFO, "Received startanalysis list");
               if (result != null && !result.getStartAnalyses().isEmpty()) {
+                  hideNoDataMessage();
                   if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
                       removeAllStartAnalysisCards();
                   }
@@ -181,9 +190,11 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                   }
                   logger.log(Level.INFO, "Updating UI with startanalysis list");
                   addNewStartAnalysisCards(result.getStartAnalyses());
+                  showControllHeaderButtons();
                   settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(result.getStartAnalyses().get(0).competitor.getName());
               } else {
                   logger.log(Level.INFO, "Received startanalysis list is null or empty");
+                  showNoDataMessageWithHeaderAndMessage(null, null);
               }
             }
         });
@@ -310,6 +321,11 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
             }
         }
     }
+    
+    private void showControllHeaderButtons() {
+        leftButton.getElement().addClassName(StartAnalysisWidgetResources.INSTANCE.gss().controll_header_button_visible());
+        rightButton.getElement().addClassName(StartAnalysisWidgetResources.INSTANCE.gss().controll_header_button_visible());
+    }
 
     private void scrollToLast() {
         if (numberOfStartAnalysisCards > 1) {
@@ -395,6 +411,16 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         } else {
             return false;
         }
+    }
+    
+    private void showNoDataMessageWithHeaderAndMessage(String header, String message) {
+        noDataMessageHeader.setInnerHTML(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader());
+        noDataMessage.setInnerHTML(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
+    }
+    
+    private void hideNoDataMessage() {
+        noDataMessageHeader.setInnerHTML("");
+        noDataMessage.setInnerHTML("");
     }
     
     @Override
