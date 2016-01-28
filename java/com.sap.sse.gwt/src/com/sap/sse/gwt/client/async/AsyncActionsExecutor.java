@@ -19,9 +19,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class AsyncActionsExecutor {
     private class ExecutionJob<T> implements AsyncCallback<T> {
-        private AsyncAction<T> action;
-        private String category;
-        private AsyncCallback<T> callback;
+        private final AsyncAction<T> action;
+        private final String category;
+        private final AsyncCallback<T> callback;
         
         public ExecutionJob(AsyncAction<T> action, String category, AsyncCallback<T> callback) {
             this.action = action;

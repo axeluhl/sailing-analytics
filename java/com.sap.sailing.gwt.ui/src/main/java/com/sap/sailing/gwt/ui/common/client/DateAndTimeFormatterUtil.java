@@ -60,4 +60,12 @@ public class DateAndTimeFormatterUtil {
         
         return result;
     }
+    
+    public static String getClientTimeZoneAsGMTString() {
+        Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int localeTimezoneOffset = now.getTimezoneOffset();
+        TimeZone localeTimeZone = TimeZone.createTimeZone(localeTimezoneOffset);
+        return localeTimeZone.getGMTString(now);
+    }
 }

@@ -21,13 +21,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 /**
  * Base class implementing {@link RaceLogEventVisitor}. Every method is implemented as a no-op.
@@ -100,16 +97,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     }
     
     @Override
-    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-    	
-    }
-    
-    @Override
-    public void visit(RaceLogDeviceMarkMappingEvent event) {
-    	
-    }
-    
-    @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
     	
     }
@@ -127,16 +114,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     @Override
     public void visit(RaceLogRegisterCompetitorEvent event) {
 
-    }
-    
-    @Override
-    public void visit(RaceLogDefineMarkEvent event) {
-         
-    }
-
-    @Override
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
-        
     }
     
     @Override
@@ -166,6 +143,11 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
+        
+    }
+    
+    @Override
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         
     }
 }

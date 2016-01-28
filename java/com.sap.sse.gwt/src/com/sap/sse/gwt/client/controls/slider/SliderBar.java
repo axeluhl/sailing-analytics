@@ -1083,13 +1083,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = DOM.createDiv();
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
-                        if (enabled) {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
-                        } else {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
-                        }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
+                    }
+                    if (enabled) {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel");
+                    } else {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
                     }
 
                     // Set the marker label text

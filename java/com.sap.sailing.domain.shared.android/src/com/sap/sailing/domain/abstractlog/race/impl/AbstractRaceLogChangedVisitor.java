@@ -22,13 +22,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogStartTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 
 public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisitor {
     protected abstract void notifyListenerAboutEventAdded(RaceLogEvent event);
@@ -93,16 +90,6 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     }
 
     @Override
-    public void visit(RaceLogDeviceCompetitorMappingEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    @Override
-    public void visit(RaceLogDeviceMarkMappingEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    @Override
     public void visit(RaceLogDenoteForTrackingEvent event) {
         notifyListenerAboutEventAdded(event);
     }
@@ -119,16 +106,6 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
 
     @Override
     public void visit(RaceLogRegisterCompetitorEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-
-    @Override
-    public void visit(RaceLogDefineMarkEvent event) {
-        notifyListenerAboutEventAdded(event);
-    }
-    
-    @Override
-    public void visit(RaceLogCloseOpenEndedDeviceMappingEvent event) {
         notifyListenerAboutEventAdded(event);
     }
     
@@ -159,6 +136,11 @@ public abstract class AbstractRaceLogChangedVisitor implements RaceLogEventVisit
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
+        notifyListenerAboutEventAdded(event);
+    }
+    
+    @Override
+    public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         notifyListenerAboutEventAdded(event);
     }
 }

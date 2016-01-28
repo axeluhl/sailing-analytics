@@ -24,4 +24,53 @@ public class DeviceMappingDTO implements IsSerializable {
         this.mappedTo = mappedTo;
         this.originalRaceLogEventIds = originalRaceLogEventIds;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((deviceIdentifier == null) ? 0 : deviceIdentifier.hashCode());
+        result = prime * result + ((from == null) ? 0 : from.hashCode());
+        result = prime * result + ((mappedTo == null) ? 0 : mappedTo.hashCode());
+        result = prime * result + ((originalRaceLogEventIds == null) ? 0 : originalRaceLogEventIds.hashCode());
+        result = prime * result + ((to == null) ? 0 : to.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DeviceMappingDTO other = (DeviceMappingDTO) obj;
+        if (deviceIdentifier == null) {
+            if (other.deviceIdentifier != null)
+                return false;
+        } else if (!deviceIdentifier.equals(other.deviceIdentifier))
+            return false;
+        if (from == null) {
+            if (other.from != null)
+                return false;
+        } else if (!from.equals(other.from))
+            return false;
+        if (mappedTo == null) {
+            if (other.mappedTo != null)
+                return false;
+        } else if (!mappedTo.equals(other.mappedTo))
+            return false;
+        if (originalRaceLogEventIds == null) {
+            if (other.originalRaceLogEventIds != null)
+                return false;
+        } else if (!originalRaceLogEventIds.equals(other.originalRaceLogEventIds))
+            return false;
+        if (to == null) {
+            if (other.to != null)
+                return false;
+        } else if (!to.equals(other.to))
+            return false;
+        return true;
+    }
 }

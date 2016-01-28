@@ -43,7 +43,7 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         
         final Duration ttl;
-        if(eventState == EventState.RUNNING) {
+        if(eventState == EventState.RUNNING || eventState == EventState.UPCOMING) {
             EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
                 @Override
                 public void doForRace(RaceContext context) {

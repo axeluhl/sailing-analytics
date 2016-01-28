@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -72,7 +73,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                 competitorIdAsString);
         if (competitor == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + competitorIdAsString + "'.")
+                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             String jsonString = getCompetitorJSON(competitor).toJSONString();
@@ -89,7 +90,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
 
         if (competitor == null) {
             return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + competitorId + "'.").type(MediaType.TEXT_PLAIN)
+                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorId) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         }
 
@@ -97,7 +98,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
 
         if (team == null) {
             return Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a team associated with competitor '" + competitorId + "'.")
+                    .entity("Could not find a team associated with competitor '" + StringEscapeUtils.escapeHtml(competitorId) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
 
@@ -127,9 +128,10 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         CompetitorStore store = service.getCompetitorStore();
         Competitor competitor = store.getExistingCompetitorByIdAsString(competitorId);
         if (competitor == null) {
-            logger.log(Level.INFO, "Could not find competitor to store image for: " + competitorId);
+            logger.log(Level.INFO, "Could not find competitor to store image for: " + StringEscapeUtils.escapeHtml(competitorId));
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity("Could not find competitor with id " + competitorId).type(MediaType.TEXT_PLAIN).build());
+                    .entity("Could not find competitor with id " +
+                            StringEscapeUtils.escapeHtml(competitorId)).type(MediaType.TEXT_PLAIN).build());
         }
 
         String fileExtension = "";

@@ -1,10 +1,26 @@
 package com.sap.sailing.domain.abstractlog.regatta.events;
 
+import java.io.Serializable;
+
+import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.events.CloseOpenEndedDeviceMappingEvent;
+import com.sap.sse.common.TimePoint;
 
-public interface RegattaLogCloseOpenEndedDeviceMappingEvent extends RegattaLogEvent,
-CloseOpenEndedDeviceMappingEvent<RegattaLogEventVisitor> {
-
+/**
+ * Closes the time range of a {@link RegattaLogDeviceMappingEvent}. This means that the {@link #getClosingTimePoint() timepoint} provided
+ * by this event is substituted for the missing timepoint in the {@code DeviceMappingEvent} it refers to.
+ * @author Fredrik Teschke
+ *
+ */
+public interface RegattaLogCloseOpenEndedDeviceMappingEvent extends RegattaLogEvent, Revokable {
+    /**
+     * Returns the timepoint that shall substitute the missing one in the corresponding {@link RegattaLogDeviceMappingEvent}.
+     */
+    TimePoint getClosingTimePoint();
+    
+    /**
+     * Returns the {@code id} of the event for which this event provides the closing timepoint.
+     * @return
+     */
+    Serializable getDeviceMappingEventId();
 }

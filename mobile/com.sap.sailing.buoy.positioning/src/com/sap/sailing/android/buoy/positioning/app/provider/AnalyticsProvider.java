@@ -80,13 +80,6 @@ public class AnalyticsProvider extends ContentProvider {
         return true;
     }
 
-    // private void deleteDatabase() {
-    // Context context = getContext();
-    // mOpenHelper.close();
-    // AnalyticsDatabase.deleteDatabase(context);
-    // mOpenHelper = new AnalyticsDatabase(context);
-    // }
-
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (BuildConfig.DEBUG && AppPreferences.getPrintDatabaseOperationDebugMessages()) {

@@ -13,13 +13,12 @@ import java.util.Set;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -30,6 +29,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -40,13 +40,14 @@ import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
-import com.sap.sailing.gwt.ui.client.RaceSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
@@ -54,11 +55,10 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
-public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer, RaceSelectionChangeListener,
+public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
     private final AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
     
@@ -127,20 +127,25 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(final CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
+            AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
-                leaderboardTable, tableResources, leaderboardColumnListHandler);
+                leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         AnchorCell anchorCell = new AnchorCell();
         Column<StrippedLeaderboardDTO, SafeHtml> linkColumn = new Column<StrippedLeaderboardDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(StrippedLeaderboardDTO object) {
-                String debugParam = Window.Location.getParameter("gwt.codesvr");
-                String link = URLEncoder.encode("/gwt/Leaderboard.html?name=" + object.name
-                        + (showRaceDetails ? "&showRaceDetails=true" : "")
-                        + (object.displayName != null ? "&displayName="+object.displayName : "")
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                Map<String, String> leaderboardUrlParams = new HashMap<>();
+                leaderboardUrlParams.put("name", object.name);
+                if (showRaceDetails) {
+                    leaderboardUrlParams.put(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, "true");
+                }
+                if (object.displayName != null) {
+                    leaderboardUrlParams.put("displayName", object.displayName);
+                }
+                String link = EntryPointLinkFactory.createLeaderboardLink(leaderboardUrlParams);
                 return ANCHORTEMPLATE.cell(link, object.name);
             }
 
@@ -307,9 +312,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                         }
                     }
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_SCORES.equals(value)) {
-                    String debugParam = Window.Location.getParameter("gwt.codesvr");
-                    Window.open("/gwt/LeaderboardEditing.html?name=" + leaderboardDTO.name
-                            + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""), "_blank", null);
+                    Map<String, String> leaderboardEditingParams = new HashMap<>();
+                    leaderboardEditingParams.put("name", leaderboardDTO.name);
+                    String leaderboardEditingUrl = EntryPointLinkFactory.createLeaderboardEditingLink(leaderboardEditingParams);
+                    Window.open(leaderboardEditingUrl, "_blank", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS.equals(value)) {
                     EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.name, stringMessages, 
                             errorReporter, new DialogCallback<List<CompetitorDTO>>() {
@@ -326,7 +332,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 } else if (LeaderboardConfigImagesBarCell.ACTION_CONFIGURE_URL.equals(value)) {
                     openLeaderboardUrlConfigDialog(leaderboardDTO, stringMessages);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EXPORT_XML.equals(value)) {
-                    Window.open("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name, "", null);
+                    Window.open(UriUtils.fromString("/export/xml?domain=leaderboard&name=" + leaderboardDTO.name).asString(), "", null);
                 } else if (LeaderboardConfigImagesBarCell.ACTION_OPEN_COACH_DASHBOARD.equals(value)) {
                     Map<String, String> dashboardURLParameters = new HashMap<String, String>();
                     dashboardURLParameters.put("leaderboardName", leaderboardDTO.name);
@@ -672,17 +678,6 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     @Override
     protected void leaderboardSelectionChanged() {
-        // make sure that clearing the selection doesn't cause an unlinking of the selected tracked race
-        raceSelectionProvider.removeRaceSelectionChangeListener(this);
-        trackedRacesListComposite.clearSelection();
-        // add listener again using a scheduled command which is executed when the browser's event loop re-gains
-        // control; we assume that at that point in time the selection updates have already been performed
-        Scheduler.get().scheduleFinally(new ScheduledCommand() {
-            @Override
-            public void execute() {
-                raceSelectionProvider.addRaceSelectionChangeListener(LeaderboardConfigPanel.this);
-            }
-        });
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {

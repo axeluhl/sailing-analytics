@@ -40,8 +40,10 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
+import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall12PointsMax;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets1LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointLastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEight;
@@ -97,6 +99,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPoint();
         case HIGH_POINT_ESS_OVERALL:
             return new HighPointExtremeSailingSeriesOverall();
+        case HIGH_POINT_ESS_OVERALL_12:
+            return new HighPointExtremeSailingSeriesOverall12PointsMax();
         case HIGH_POINT_LAST_BREAKS_TIE:
             return new HighPointLastBreaksTie();
         case HIGH_POINT_FIRST_GETS_ONE:
@@ -115,6 +119,8 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new HighPointWinnerGetsEightAndInterpolation();
         case HIGH_POINT_FIRST_GETS_TEN_OR_EIGHT:
             return new HighPointFirstGets10Or8AndLastBreaksTie();
+        case HIGH_POINT_FIRST_GETS_TWELVE_OR_EIGHT:
+            return new HighPointFirstGets12Or8AndLastBreaksTie();
         case LOW_POINT_WITH_ELIMINATIONS_AND_ROUNDS_WINNER_GETS_07:
             return new LowPointWithEliminationsAndRoundsWinnerGets07();
         case LOW_POINT_LEAGUE_OVERALL:
@@ -257,51 +263,58 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         double radiusCalculationFactor = 10.0;
         Placemark startBest = null;
         Placemark finishBest = null;
+        Position startPosition = null;
 
         // Get start postition
-        Iterator<Mark> startMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
-        Position startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
-        if (startPosition != null) {
-            try {
-                // Get distance to nearest placemark and calculate the search radius
-                Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
-                if (startNearest != null) {
-                    Distance startNearestDistance = startNearest.distanceFrom(startPosition);
-                    double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best start place
-                    startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
-                            new Placemark.ByPopulationDistanceRatio(startPosition));
-                }
-            } catch (IOException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            } catch (org.json.simple.parser.ParseException e) {
-                logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
-            }
-        }
-
-        // Get finish position
-        Iterator<Mark> finishMarks = race.getRace().getCourse().getFirstWaypoint().getMarks().iterator();
-        GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
-        Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
-        if (startPosition != null && finishPosition != null) {
-            if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
-                finishBest = startBest;
-            } else {
+        final Waypoint firstWaypoint = race.getRace().getCourse().getFirstWaypoint();
+        if (firstWaypoint != null) {
+            Iterator<Mark> startMarks = firstWaypoint.getMarks().iterator();
+            GPSFix startMarkFix = startMarks.hasNext() ? race.getOrCreateTrack(startMarks.next()).getLastRawFix() : null;
+            startPosition = startMarkFix != null ? startMarkFix.getPosition() : null;
+            if (startPosition != null) {
                 try {
                     // Get distance to nearest placemark and calculate the search radius
-                    Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
-                    Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
-                    double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
-
-                    // Get the estimated best finish place
-                    finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
-                            new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    Placemark startNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(startPosition);
+                    if (startNearest != null) {
+                        Distance startNearestDistance = startNearest.distanceFrom(startPosition);
+                        double startRadius = startNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best start place
+                        startBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(startPosition, startRadius,
+                                new Placemark.ByPopulationDistanceRatio(startPosition));
+                    }
                 } catch (IOException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
                 } catch (org.json.simple.parser.ParseException e) {
                     logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                }
+            }
+        }
+
+        // Get finish position
+        final Waypoint lastWaypoint = race.getRace().getCourse().getLastWaypoint();
+        if (lastWaypoint != null) {
+            Iterator<Mark> finishMarks = firstWaypoint.getMarks().iterator();
+            GPSFix finishMarkFix = finishMarks.hasNext() ? race.getOrCreateTrack(finishMarks.next()).getLastRawFix() : null;
+            Position finishPosition = finishMarkFix != null ? finishMarkFix.getPosition() : null;
+            if (startPosition != null && finishPosition != null) {
+                if (startPosition.getDistance(finishPosition).getKilometers() <= ReverseGeocoder.POSITION_CACHE_DISTANCE_LIMIT_IN_KM) {
+                    finishBest = startBest;
+                } else {
+                    try {
+                        // Get distance to nearest placemark and calculate the search radius
+                        Placemark finishNearest = ReverseGeocoder.INSTANCE.getPlacemarkNearest(finishPosition);
+                        Distance finishNearestDistance = finishNearest.distanceFrom(finishPosition);
+                        double finishRadius = finishNearestDistance.getKilometers() * radiusCalculationFactor;
+    
+                        // Get the estimated best finish place
+                        finishBest = ReverseGeocoder.INSTANCE.getPlacemarkLast(finishPosition, finishRadius,
+                                new Placemark.ByPopulationDistanceRatio(finishPosition));
+                    } catch (IOException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    } catch (org.json.simple.parser.ParseException e) {
+                        logger.throwing(TrackedRaceImpl.class.getName(), "getPlaceOrder()", e);
+                    }
                 }
             }
         }

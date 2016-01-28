@@ -15,6 +15,88 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+
+********************************************
+************* TracAPI 3.1.3 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 25/01/2016
+Build number: 11888
+
+ 1) Bugs
+ 
+ - The bug of the previous release (3.1.3) was not fixed.
+
+********************************************
+************* TracAPI 3.1.2 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 21/01/2016
+Build number: 11864 
+
+ 1) Bugs
+ 
+ - The ISubscriber.stop() method never finishes due to a deadlock (it happens sometimes).
+ There is a deadlock between one of the internal threads responsible to update the progress 
+ and the thread that calls the stop method. The release 3.1.1 fixed a part of the bug but
+ it continues happening due to a new deadlock (Reported by Axel Uhl, 20/01/2016) 
+
+********************************************
+************* TracAPI 3.1.1 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 18/01/2016
+Build number: 11844
+
+ 1) Bugs
+ 
+ - The ISubscriber.stop() method never finishes due to a deadlock (it happens sometimes).
+ There is a deadlock between one of the internal threads responsible to update the progress 
+ and the thread that calls the stop method (Reported by Axel Uhl, 16/11/2015) 
+
+********************************************
+************* TracAPI 3.1.0 ****************
+********************************************
+This is a final version. It fixes bugs in the implementation and it adds some new features. 
+These features add methods to the API breaking the backward compatibility. These changes are:
+
+ - The IRaceCompetitorListener interface implements a new method removeOffsetPositions. If 
+ your app implements this interface, you have to implement this extra method.  
+ 
+This version provides a new JavaDoc version.
+
+Release date: 11/12/2015
+Build number: 11801
+
+ 1) Features
+ 
+   - Adding the method IRaceCompetitorListener.removeOffsetPositions that is invoked
+  to invalidate a set of positions. It is used when the event administrator detects 
+  an error in the snapping algorithm (in route sports) and he want to remove the wrong
+  positions (Requested by Chris Terkelsen, 26/11/2015)
+ 
+  - Adding the method IControl.getMapName() that contains the name that has to be used to
+  display the control on the map (Requested by Chris Terkelsen, 09/12/2015)
+    
+ 2) Bugs
+ 
+  - The static controls send a position event using the race start time instead the 
+  event start time. (Reported by Jerome Soussens, 11/12/2015)
+   
+********************************************
+************* TracAPI 3.0.14 ***************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 29/09/2015
+Build number: 11514
+
+ 1) Bugs
+ 
+ - NullPointerException caused by a synchronization error (Reported by Jérome Soussens, 28/09/2015)
  
 ********************************************
 ************* TracAPI 3.0.13 ***************

@@ -1,6 +1,7 @@
 package com.sap.sse.security;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,7 +20,21 @@ import com.sap.sse.security.shared.Account.AccountType;
 public class User implements Named, WithID {
     private static final long serialVersionUID = 1788215575606546042L;
 
+    /**
+     * The ID for this user; usually a nickname or short name. Implements the {@link WithID} key
+     */
     private String name;
+
+    /**
+     * An optional clear-text user name, used to address the user, e.g., in the UI ("Hello ...")
+     */
+    private String fullName;
+
+    /**
+     * An optional company affiliation. May be used, e.g., to better understand the statistics of
+     * corporate vs. private users, if used as a marketing tool.
+     */
+    private String company;
 
     private String email;
     
@@ -51,13 +66,16 @@ public class User implements Named, WithID {
     }
 
     public User(String name, String email, Collection<Account> accounts) {
-        this(name, email, /* is email validated */ false, /* password reset secret */ null, /* validation secret */ null, accounts);
+        this(name, email, /* fullName */ null, /* company */ null, /* is email validated */ false,
+             /* password reset secret */ null, /* validation secret */ null, accounts);
     }
 
-    public User(String name, String email, Boolean emailValidated, String passwordResetSecret, String validationSecret,
-            Collection<Account> accounts) {
+    public User(String name, String email, String fullName, String company, Boolean emailValidated,
+            String passwordResetSecret, String validationSecret, Collection<Account> accounts) {
         super();
         this.name = name;
+        this.fullName = fullName;
+        this.company = company;
         this.roles = new HashSet<>();
         this.permissions = new HashSet<>();
         this.email = email;
@@ -84,6 +102,22 @@ public class User implements Named, WithID {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     public Iterable<String> getRoles() {
@@ -171,7 +205,7 @@ public class User implements Named, WithID {
     
     private String createRandomSecret() {
         final byte[] bytes1 = new byte[64];
-        new Random().nextBytes(bytes1);
+        new SecureRandom().nextBytes(bytes1);
         final byte[] bytes2 = new byte[64];
         new Random().nextBytes(bytes2);
         return new Sha256Hash(bytes1, bytes2, 1024).toBase64();

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
-import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorCreateDialogPO;
+import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorEditDialogPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorTablePO.CompetitorEntry;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -24,7 +24,7 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
     @Test
     public void testOpenCreateCompetitorDialog() {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
-        final TrackedRacesCompetitorCreateDialogPO dialog = competitorsPanel.pushAddButton(); // fails with an exception if the dialog is not found
+        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton(); // fails with an exception if the dialog is not found
         assertNotNull(dialog);
     }
 
@@ -37,7 +37,7 @@ public class TestCompetitorCreation extends AbstractSeleniumTest {
     @Test
     public void testCompetitorCreation() {
         final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
-        final TrackedRacesCompetitorCreateDialogPO dialog = competitorsPanel.pushAddButton();
+        final TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddButton();
         final String name = ""+System.currentTimeMillis();
         dialog.setNameTextBox(name);
         String sailId = ""+System.currentTimeMillis();

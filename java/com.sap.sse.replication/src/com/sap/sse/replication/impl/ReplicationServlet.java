@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.jpountz.lz4.LZ4BlockOutputStream;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -111,7 +112,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                     if (replicable == null) {
                         final String msg = "Couldn't find replicable with ID "+replicableIdAsString+". Aborting serialization of initial load.";
                         logger.severe(msg);
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg);
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, StringEscapeUtils.escapeHtml(msg));
                         break; // causing an error on the replica which is expecting the replica's initial load
                     }
                     try {
@@ -130,7 +131,7 @@ public class ReplicationServlet extends AbstractHttpServlet {
                 channel.getConnection().close();
             }
         default:
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + action + " not understood. Must be one of "
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Action " + StringEscapeUtils.escapeHtml(action) + " not understood. Must be one of "
                     + Arrays.toString(Action.values()));
         }
     }
