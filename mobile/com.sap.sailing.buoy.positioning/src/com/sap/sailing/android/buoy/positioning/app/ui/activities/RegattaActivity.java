@@ -1,8 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +19,6 @@ import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
@@ -33,7 +29,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     private String leaderboardName;
     private String checkinDigest;
-    private List<MarkInfo> marks;
     private final String TAG = RegattaActivity.class.getName();
     private String checkinUrl;
 
@@ -47,14 +42,11 @@ public class RegattaActivity extends AbstractRegattaActivity {
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
-        setMarks(new ArrayList<MarkInfo>());
 
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
         checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest).urlString;
-
-        setMarks(DatabaseHelper.getInstance().getMarks(this, checkinDigest));
 
         setContentView(R.layout.fragment_container);
         OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
@@ -179,14 +171,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     public RegattaFragment getRegattaFragment() {
         return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-    }
-
-    public List<MarkInfo> getMarks() {
-        return marks;
-    }
-
-    public void setMarks(List<MarkInfo> marks) {
-        this.marks = marks;
     }
 
     /**
