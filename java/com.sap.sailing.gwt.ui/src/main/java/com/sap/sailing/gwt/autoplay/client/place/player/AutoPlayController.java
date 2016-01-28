@@ -161,18 +161,23 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     }
 
     private WindChartLifecycle.ConstructionParameters createWindChartConstructionParameters() {
-        return null;
+        WindChartLifecycle.ConstructionParameters result = null;
+        return result;
     }
 
     private RaceMapLifecycle.ConstructionParameters createRaceMapConstructionParameters() {
-        return null;
+        RaceMapLifecycle.ConstructionParameters result = null;
+        return result;
     }
 
     private MultiCompetitorRaceChartLifecycle.ConstructionParameters createMultiCompeitorRaceChartConstructionParameters() {
-        return null;
+        MultiCompetitorRaceChartLifecycle.ConstructionParameters result = null;
+        return result;
     }
 
     private MediaPlayerLifecycle.ConstructionParameters createMediaPlayerConstructionParameters() {
+        MediaPlayerLifecycle.ConstructionParameters result = null;
+        return result;
     }
     
     private void showRaceBoard() {
