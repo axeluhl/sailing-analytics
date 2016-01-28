@@ -35,7 +35,6 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                 leaderboardName, //
                 true,
                 autoExpandLastRaceColumn);
-        leaderboardPanel.addLeaderboardUpdateListener(this);
         
         if(ElementSizeMutationObserver.isSupported()) {
             ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {

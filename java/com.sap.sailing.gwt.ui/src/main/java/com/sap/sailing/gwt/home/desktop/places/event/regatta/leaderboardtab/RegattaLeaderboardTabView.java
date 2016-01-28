@@ -64,6 +64,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             if(leaderboardPanel == null) {
                 leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
+            leaderboardPanel.addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {

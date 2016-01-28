@@ -19,9 +19,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
@@ -70,7 +70,7 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
             if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
-
+            regattaAnalyticsManager.getLeaderboardPanel().addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
 
             DetailType initialDetailType = DetailType.REGATTA_RANK;
