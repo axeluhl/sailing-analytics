@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
@@ -48,6 +49,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -433,7 +435,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private void openCreateEventDialog() {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventListDataProvider.getList());
-        List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
+        final List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), existingLeaderboardGroups,
                 sailingService, stringMessages, new DialogCallback<EventDTO>() {
@@ -442,11 +444,55 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
 
             @Override
-            public void ok(EventDTO newEvent) {
+            public void ok(final EventDTO newEvent) {
                 createNewEvent(newEvent);
+                if (newEvent.getLeaderboardGroups().isEmpty()){
+                    //show simple Dialog
+                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>(){
+                        @Override
+                        public void ok(Void editedObject) {
+                            openLeaderboardGroupCreationDialog(existingLeaderboardGroups, newEvent);
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }).show();
+                }
             }
         });
         dialog.show();
+    }
+    
+    private void openLeaderboardGroupCreationDialog(final List<LeaderboardGroupDTO> existingLeaderboardGroups, final EventDTO newEvent) {
+        LeaderboardGroupCreateDialog leaderboardGroupCreateDialog = new LeaderboardGroupCreateDialog(existingLeaderboardGroups, stringMessages, new DialogCallback<LeaderboardGroupDialog.LeaderboardGroupDescriptor>() {
+            @Override
+            public void ok(final LeaderboardGroupDescriptor newGroup) {
+                sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+                        newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                        newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                                new AsyncCallback<LeaderboardGroupDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
+                                                + ": " + t.getMessage());
+                                    }
+                                    @Override
+                                    public void onSuccess(LeaderboardGroupDTO newGroup) {
+                                        newEvent.addLeaderboardGroup(newGroup);
+                                        //just use newEvent twice as id and name didn't change
+                                        updateEvent(newEvent, newEvent);
+                                    }
+                                }));
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+
+        leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName());
+        leaderboardGroupCreateDialog.show();
     }
 
     private void openEditEventDialog(final EventDTO selectedEvent) {
