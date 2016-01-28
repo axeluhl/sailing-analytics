@@ -34,6 +34,8 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
+    private LeaderboardPanel leaderboardPanel;
+    
     public RegattaLeaderboardTabView() {
         leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
@@ -60,7 +62,7 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
-            LeaderboardPanel leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel(); 
+            leaderboardPanel = regattaAnalyticsManager.getLeaderboardPanel(); 
             if(leaderboardPanel == null) {
                 leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
@@ -104,4 +106,9 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
     
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        leaderboardPanel.removeLeaderboardUpdateListener(this);
+    }
 }

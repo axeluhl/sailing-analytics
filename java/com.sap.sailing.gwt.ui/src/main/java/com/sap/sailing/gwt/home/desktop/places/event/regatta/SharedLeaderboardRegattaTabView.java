@@ -18,7 +18,7 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventRegattaPlace> extends Composite implements RegattaTabView<T>,
         LeaderboardUpdateListener {
     private boolean initialLeaderboardSizeCalculated = false;
-    
+
     public SharedLeaderboardRegattaTabView() {
     }
 
