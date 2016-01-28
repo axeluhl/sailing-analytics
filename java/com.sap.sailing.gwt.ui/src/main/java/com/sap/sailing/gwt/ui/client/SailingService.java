@@ -619,4 +619,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Collection<CompetitorDTO> getCompetitorRegistrationsOnRaceLog(String leaderboardName, String raceColumnName,
             String fleetName);
 
+    Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName,
+            String fleetName);
 }

@@ -268,6 +268,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceF
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -284,6 +285,7 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
@@ -6019,5 +6021,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String fleetName) {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         return convertToCompetitorDTOs(new RegisteredCompetitorsAnalyzer<>(raceLog).analyze());
+    }
+    
+    @Override
+    public Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName, String fleetName) {
+        Map<MarkDTO, List<GPSFixDTO>> result = new HashMap<MarkDTO, List<GPSFixDTO>>();
+        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
+        for (Mark mark : new RaceLogDefinedMarkFinder(raceLog).analyze()) {
+            DynamicGPSFixTrack<Mark, GPSFix> track = new DynamicGPSFixTrackImpl<Mark>(mark, 1);
+            try {
+                racingEventServiceTracker.getService().getGPSFixStore().loadMarkTrack(track, raceLog, mark);
+                track.lockForRead();
+                List<GPSFixDTO> fixes = new ArrayList<GPSFixDTO>();
+                for (GPSFix fix : track.getFixes()) {
+                    GPSFixDTO gpsFixDTO = new GPSFixDTO();
+                    gpsFixDTO.timepoint = fix.getTimePoint().asDate();
+                    gpsFixDTO.position = fix.getPosition();
+                    fixes.add(gpsFixDTO);
+                }
+                track.unlockAfterRead();
+                MarkDTO markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
+                markDTO.color = mark.getColor();
+                markDTO.shape = mark.getShape();
+                markDTO.pattern = mark.getPattern();
+                markDTO.type = mark.getType();
+                result.put(markDTO, fixes);
+            } catch (TransformationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NoCorrespondingServiceRegisteredException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }

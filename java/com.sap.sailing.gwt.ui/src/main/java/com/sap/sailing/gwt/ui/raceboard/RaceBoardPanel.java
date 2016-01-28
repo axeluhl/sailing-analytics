@@ -258,7 +258,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             components.add(editMarkPassingPanel);
-            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, stringMessages, sailingService, timer, timeRangeWithZoomModel,
+            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
                     asyncActionsExecutor, errorReporter);
             raceMap.setEditMarkPositionPanel(editMarkPositionPanel);
             components.add(editMarkPositionPanel);
