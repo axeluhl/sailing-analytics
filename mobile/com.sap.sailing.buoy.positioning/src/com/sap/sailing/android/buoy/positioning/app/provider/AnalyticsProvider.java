@@ -219,9 +219,17 @@ public class AnalyticsProvider extends ContentProvider {
             ExLog.i(getContext(), TAG, message);
         }
 
-        // final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         switch (sUriMatcher.match(uri)) {
+            case LEADERBOARD:
+                int numLeaderboardRowsUpdated = db.update(Tables.LEADERBOARDS, values, selection, selectionArgs);
+                notifyChange(uri);
+                return numLeaderboardRowsUpdated;
+            case MARK:
+                int numMarkRowsUpdated = db.update(Tables.MARKS, values, selection, selectionArgs);
+                notifyChange(uri);
+                return numMarkRowsUpdated;
         default:
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

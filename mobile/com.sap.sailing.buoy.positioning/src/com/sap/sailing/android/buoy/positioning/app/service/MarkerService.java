@@ -30,8 +30,7 @@ public class MarkerService extends IntentService implements  CheckinManager.Data
         try {
             CheckinData checkinData = (CheckinData) data;
             DatabaseHelper helper = DatabaseHelper.getInstance();
-            helper.deleteRegattaFromDatabase(this, checkinData.checkinDigest);
-            helper.storeCheckinRow(this, checkinData.marks, checkinData.getLeaderboard(), checkinData.getCheckinUrl(), checkinData.pings);
+            helper.updateMarks(this, checkinData.marks, checkinData.getLeaderboard());
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
             Log.e(TAG, "Error trying to analyze mark checkin data", e);
         }

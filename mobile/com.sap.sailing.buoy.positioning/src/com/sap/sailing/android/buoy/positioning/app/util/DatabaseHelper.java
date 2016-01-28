@@ -65,7 +65,7 @@ public class DatabaseHelper {
         checkinUrlInfo.checkinDigest = checkinDigest;
 
         Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
-                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+            CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
             if (uc.moveToFirst()) {
                 checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
@@ -81,7 +81,7 @@ public class DatabaseHelper {
     public List<MarkInfo> getMarks(Context context, String checkinDigest) {
         List<MarkInfo> marks = new ArrayList<>();
         Cursor mc = context.getContentResolver().query(Mark.CONTENT_URI, null,
-                Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+            Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (mc != null) {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
@@ -102,7 +102,7 @@ public class DatabaseHelper {
     public List<MarkPingInfo> getMarkPings(Context context, String markID) {
         List<MarkPingInfo> marks = new ArrayList<>();
         Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null,
-                MarkPing.MARK_ID + " = ?", new String[] { markID }, MarkPing.MARK_PING_TIMESTAMP + " DESC");
+            MarkPing.MARK_ID + " = ?", new String[] { markID }, MarkPing.MARK_PING_TIMESTAMP + " DESC");
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
@@ -178,7 +178,7 @@ public class DatabaseHelper {
 
         // now insert marks
 
-        ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
+        ArrayList<ContentProviderOperation> opList = new ArrayList<>();
 
         // marks
         for (MarkInfo mark : markList) {
@@ -215,6 +215,60 @@ public class DatabaseHelper {
         } catch (OperationApplicationException e) {
             throw new GeneralDatabaseHelperException(e.getMessage());
         }
+    }
+
+    private void deleteMark(Context context, MarkInfo markInfo) {
+        ContentResolver cr = context.getContentResolver();
+        cr.delete(Mark.CONTENT_URI, Mark.MARK_ID + " = ?", new String[] { markInfo.getId() });
+
+        if (BuildConfig.DEBUG) {
+            ExLog.i(context, TAG, "Deleted mark with id: " + markInfo.getId());
+        }
+    }
+
+    public void updateMarks(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard) throws GeneralDatabaseHelperException {
+        ContentResolver cr = context.getContentResolver();
+
+        // Update Leaderboard
+        ContentValues leaderboardValues = new ContentValues();
+        leaderboardValues.put(Leaderboard.LEADERBOARD_NAME, leaderboard.name);
+        leaderboardValues.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
+        leaderboardValues.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
+        cr.update(Leaderboard.CONTENT_URI, leaderboardValues, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] {leaderboard.checkinDigest});
+        List<MarkInfo> currentMarks = getMarks(context, leaderboard.checkinDigest);
+        // Delete marks which where deleted on the server
+        for (MarkInfo currentMark : currentMarks){
+            if (!markList.contains(currentMark)) {
+                deleteMark(context, currentMark);
+            }
+        }
+        // Update marks
+        for (MarkInfo mark : markList) {
+            ContentValues cmv = new ContentValues();
+            cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
+            cmv.put(Mark.MARK_ID, mark.getId());
+            cmv.put(Mark.MARK_NAME, mark.getName());
+            cmv.put(Mark.MARK_TYPE, mark.getType());
+            cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());
+            if (!dataBaseContainsMark(context, mark)) {
+                cr.insert(Mark.CONTENT_URI, cmv);
+            } else {
+                cr.update(Mark.CONTENT_URI, cmv, Mark.MARK_ID + " = ?", new String[] { mark.getId() });
+            }
+        }
+        LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
+    }
+
+    private boolean dataBaseContainsMark(Context context, MarkInfo mark) {
+        Cursor contentResolver = context.getContentResolver().query(Mark.CONTENT_URI, null, Mark.MARK_CHECKIN_DIGEST + " = ?" +
+            " AND " + Mark.MARK_ID + " = ? ", new String[] { mark.getCheckinDigest(), mark.getId() }, "");
+        int count = 0;
+        if (contentResolver != null) {
+            count = contentResolver.getCount();
+
+            contentResolver.close();
+        }
+        return count != 0;
     }
 
     public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException {
