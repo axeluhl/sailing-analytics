@@ -191,7 +191,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (Util.isEmpty(store.getUsers())) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
-                createSimpleUser("admin", "nobody@sapsailing.com", "admin", /* validationBaseURL */ null);
+                createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
+                        /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -322,8 +323,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public User createSimpleUser(final String username, final String email, String password,
-            final String validationBaseURL) throws UserManagementException, MailException {
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -337,6 +338,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final User result = store.createUser(username, email, upa);
+        result.setFullName(fullName);
+        result.setCompany(company);
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));

@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -22,13 +22,15 @@ public class UserAccountDetails extends Composite {
     }
     
     public interface Presenter {
-        void handleSaveChangesRequest(String email);
+        void handleSaveChangesRequest(String fullName, String company);
+        void handleEmailChangeRequest(String email);
         void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
     }
     
     @UiField DivElement editImageLinkUi;
     @UiField InputElement usernameUi;
-    @UiField InputElement nameUi;
+    @UiField TextBox nameUi;
+    @UiField TextBox companyUi;
     @UiField TextBox emailUi;
     @UiField PasswordTextBox oldPasswordUi;
     @UiField PasswordTextBox newPasswordUi;
@@ -46,14 +48,15 @@ public class UserAccountDetails extends Composite {
         setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
     }
 
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         UserDTO currentUser = userManagementContext.getCurrentUser();
         // TODO correct message
         editImageLinkUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available
         editImageLinkUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
-        nameUi.setValue(currentUser.getName());
+        nameUi.setValue(currentUser.getFullName());
+        companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
         oldPasswordUi.setValue("");
@@ -67,7 +70,12 @@ public class UserAccountDetails extends Composite {
     
     @UiHandler("saveChangesUi")
     void onSaveChangesClicked(ClickEvent event) {
-        presenter.handleSaveChangesRequest(emailUi.getValue());
+        presenter.handleSaveChangesRequest(nameUi.getValue(), companyUi.getValue());
+    }
+    
+    @UiHandler("changeEmailUi")
+    void onChangeEmailClicked(ClickEvent event) {
+        presenter.handleEmailChangeRequest(emailUi.getValue());
     }
     
     @UiHandler("changePasswordUi")

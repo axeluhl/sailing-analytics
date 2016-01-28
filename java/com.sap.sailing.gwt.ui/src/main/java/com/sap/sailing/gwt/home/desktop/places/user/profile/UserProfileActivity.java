@@ -18,9 +18,9 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -57,19 +57,36 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
-        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
                 currentView.setUserManagementContext(event.getCtx());
             }
         });
-        
     }
-    
+
     @Override
-    public void handleSaveChangesRequest(final String email) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+    public void handleSaveChangesRequest(String fullName, String company) {
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
+        clientFactory.getUserManagementService().updateUserProperties(username, fullName, company,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                clientFactory.getAuthenticationManager().refreshUserInfo();
+                Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
+            }
+        });
+    }
+
+    @Override
+    public void handleEmailChangeRequest(final String email) {
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
                 .setHash(homePlacesNavigator.getMailVerifiedConfirmationNavigation().getTargetUrl()).buildString();
         clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
@@ -88,7 +105,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Window.alert(errorMessage);
@@ -115,6 +132,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
                     @Override
                     public void onSuccess(Void result) {
                         Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
                     }
                 });
     }
@@ -148,6 +166,6 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getEventBus().fireEvent(new UserManagementRequestEvent());
+        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
     }
 }

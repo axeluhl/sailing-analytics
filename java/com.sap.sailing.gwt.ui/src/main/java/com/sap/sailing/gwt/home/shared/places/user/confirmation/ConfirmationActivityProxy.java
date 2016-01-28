@@ -17,7 +17,7 @@ public class ConfirmationActivityProxy extends AbstractActivityProxy {
         GWT.runAsync(new AbstractRunAsyncCallback() {
             @Override
             public void onSuccess() {
-                super.onSuccess(new ConfirmationActivity(place, clientFactory));
+                super.onSuccess(new ConfirmationActivity(place, clientFactory.createConfirmationView(), clientFactory));
             }
         });
     }

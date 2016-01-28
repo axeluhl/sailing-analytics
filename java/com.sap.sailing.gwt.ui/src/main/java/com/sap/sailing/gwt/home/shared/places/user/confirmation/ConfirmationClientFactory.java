@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.home.shared.places.user.confirmation;
 
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithUserManagementService;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sse.security.ui.client.WithSecurity;
 
-public interface ConfirmationClientFactory extends ClientFactoryWithUserManagementService, ErrorAndBusyClientFactory {
+public interface ConfirmationClientFactory extends WithSecurity, ErrorAndBusyClientFactory {
     
-    ConfirmationView createAccountConfirmationView(String message);
+    ConfirmationView createConfirmationView();
 }

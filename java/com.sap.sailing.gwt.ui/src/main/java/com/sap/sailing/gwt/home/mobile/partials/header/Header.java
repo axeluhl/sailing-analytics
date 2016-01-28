@@ -21,10 +21,10 @@ import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 
 public class Header extends Composite {
 
@@ -73,7 +73,7 @@ public class Header extends Composite {
         signOutNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signOut(), new Runnable() {
             @Override
             public void run() {
-                eventBus.fireEvent(new UserManagementRequestEvent(false));
+                eventBus.fireEvent(new AuthenticationRequestEvent(false));
             }
         });
         
@@ -92,9 +92,9 @@ public class Header extends Composite {
         });
         
         if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_MOBILE) {
-            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+            eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
                 @Override
-                public void onUserChangeEvent(UserManagementContextEvent event) {
+                public void onUserChangeEvent(AuthenticationContextEvent event) {
                     String loggedInStyle = HeaderResources.INSTANCE.css().header_navigation_iconsignedin();
                     UIObject.setStyleName(dropdownTriggerUi, loggedInStyle, event.getCtx().isLoggedIn());
                     signInNavigationItem.setVisible(!event.getCtx().isLoggedIn());

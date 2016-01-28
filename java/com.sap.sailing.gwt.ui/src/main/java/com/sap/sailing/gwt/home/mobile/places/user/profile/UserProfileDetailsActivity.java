@@ -7,8 +7,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -28,10 +28,10 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         panel.setWidget(currentView);
-        currentView.setUserManagementContext(clientFactory.getUserManagementContext());
-        eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
+        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+        eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
-            public void onUserChangeEvent(UserManagementContextEvent event) {
+            public void onUserChangeEvent(AuthenticationContextEvent event) {
                 currentView.setUserManagementContext(event.getCtx());
             }
         });
@@ -43,8 +43,26 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     }
     
     @Override
-    public void handleSaveChangesRequest(final String email) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+    public void handleSaveChangesRequest(String fullName, String company) {
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
+        clientFactory.getUserManagementService().updateUserProperties(username, fullName, company,
+                new AsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                clientFactory.getAuthenticationManager().refreshUserInfo();
+                Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
+            }
+        });
+    }
+    
+    @Override
+    public void handleEmailChangeRequest(final String email) {
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         final String url = Window.Location.createUrlBuilder()
                 .setHash(clientFactory.getNavigator().getMailVerifiedConfirmationNavigation().getTargetUrl())
                 .buildString();
@@ -64,7 +82,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     
     @Override
     public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
-        final String username = clientFactory.getUserManagementContext().getCurrentUser().getName();
+        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
         String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Window.alert(errorMessage);
@@ -91,6 +109,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
                     @Override
                     public void onSuccess(Void result) {
                         Window.alert(i18n_sec.passwordSuccessfullyChanged());
+                        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
                     }
                 });
     }

@@ -32,9 +32,9 @@ import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
 import com.sap.sse.gwt.client.mvp.PlaceChangedEvent;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
 public class Header extends Composite {
     @UiField Anchor startPageLink;
@@ -56,7 +56,7 @@ public class Header extends Composite {
     private final PlaceNavigation<EventsPlace> eventsNavigation;
     private final PlaceNavigation<SolutionsPlace> solutionsNavigation;
     
-    private final EventBus eventBus;
+    private final AuthenticationMenuView authenticationMenuView;
     
     interface HeaderUiBinder extends UiBinder<Widget, Header> {
     }
@@ -65,7 +65,6 @@ public class Header extends Composite {
 
     public Header(final DesktopPlacesNavigator navigator, EventBus eventBus) {
         this.navigator = navigator;
-        this.eventBus = eventBus;
 
         HeaderResources.INSTANCE.css().ensureInjected();
         
@@ -97,14 +96,8 @@ public class Header extends Composite {
             }
         });
         
-        if (ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
-            eventBus.addHandler(UserManagementContextEvent.TYPE, new UserManagementContextEvent.Handler() {
-                @Override
-                public void onUserChangeEvent(UserManagementContextEvent event) {
-                    usermenu.setStyleName(HeaderResources.INSTANCE.css().loggedin(), event.getCtx().isLoggedIn());
-                }
-            });
-        } else {
+        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin());
+        if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
             usermenu.removeFromParent();
         }
     }
@@ -134,11 +127,6 @@ public class Header extends Composite {
         PlaceNavigation<SearchResultPlace> searchResultNavigation = navigator.getSearchResultNavigation(searchText
                 .getText());
         navigator.goToPlace(searchResultNavigation);
-    }
-    
-    @UiHandler("usermenu")
-    void toggleUsermenu(ClickEvent event) {
-        eventBus.fireEvent(new UserManagementRequestEvent());
     }
     
     private void updateActiveLink(Place place) {
@@ -174,5 +162,9 @@ public class Header extends Composite {
             e.preventDefault();
             setActiveLink(activeLink);
          }
+    }
+
+    public AuthenticationMenuView getAuthenticationMenuView() {
+        return authenticationMenuView;
     }
 }

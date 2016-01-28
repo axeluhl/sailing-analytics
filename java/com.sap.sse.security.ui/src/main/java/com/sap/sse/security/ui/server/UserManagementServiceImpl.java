@@ -124,10 +124,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());

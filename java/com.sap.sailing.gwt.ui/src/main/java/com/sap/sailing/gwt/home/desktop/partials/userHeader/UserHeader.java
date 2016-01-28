@@ -6,7 +6,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class UserHeader extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -22,12 +22,11 @@ public class UserHeader extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         UserHeaderResources.INSTANCE.css().ensureInjected();
         imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
-        nameUi.setInnerText(userManagementContext.getCurrentUser().getName());
         
-        // TODO there is no distinction between usernam und the user's name, so we show the email instead as username
-        usernameUi.setInnerText(userManagementContext.getCurrentUser().getEmail());
+        nameUi.setInnerText(userManagementContext.getUserTitle());
+        usernameUi.setInnerText(userManagementContext.getUserSubtitle());
     }
 }

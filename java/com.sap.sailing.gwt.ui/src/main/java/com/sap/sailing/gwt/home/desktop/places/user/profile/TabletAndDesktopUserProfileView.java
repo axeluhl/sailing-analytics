@@ -14,9 +14,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.userHeader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class TabletAndDesktopUserProfileView extends Composite implements UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> {
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
@@ -64,7 +64,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     }
     
     @Override
-    public void setUserManagementContext(UserManagementContext userManagementContext) {
+    public void setUserManagementContext(AuthenticationContext userManagementContext) {
         headerUi.setUserManagementContext(userManagementContext);
         tabPanelUi.getCurrentTab().setUserManagementContext(userManagementContext);
     }

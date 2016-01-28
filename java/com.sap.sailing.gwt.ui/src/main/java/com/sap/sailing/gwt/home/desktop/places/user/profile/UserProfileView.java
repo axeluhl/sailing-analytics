@@ -6,11 +6,11 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountDetails;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.NotLoggedInPresenter;
+import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
@@ -40,6 +40,6 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
     
     void showErrorInCurrentTab(IsWidget errorView);
 
-    void setUserManagementContext(UserManagementContext userManagementContext);
+    void setUserManagementContext(AuthenticationContext userManagementContext);
     
 }

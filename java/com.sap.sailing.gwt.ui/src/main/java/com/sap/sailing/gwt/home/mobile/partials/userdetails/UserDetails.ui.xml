@@ -12,23 +12,32 @@
           <form action="" method="">
             <div class="{res.mainCss.input}">
               <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.name}' />
+                <ui:text from='{i18n_sec.username}' />
               </div>
               <input ui:field="usernameUi" type="text" disabled="disabled" class="{res.mainCss.input_input}" />
             </div>
             <div class="{res.mainCss.input}">
               <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.username}' />
+                <ui:text from='{i18n_sec.name}' />
               </div>
-              <input ui:field="nameUi" type="text" disabled="disabled" class="{res.mainCss.input_input}" />
+              <input ui:field="nameUi" type="text" class="{res.mainCss.input_input}" />
             </div>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.company}' />
+              </div>
+              <input ui:field="companyUi" type="text" class="{res.mainCss.input_input}" />
+            </div>
+            <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+              <ui:text from='{i18n_sec.save}' />
+            </g:Button>
             <div class="{res.mainCss.input}">
               <div class="{res.mainCss.input_label}">
                 <ui:text from='{i18n_sec.email}' />
               </div>
               <g:TextBox ui:field="emailUi" addStyleNames="{res.mainCss.input_input}" />
             </div>
-            <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+            <g:Button ui:field="changeEmailUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
               <ui:text from='{i18n_sec.save}' />
             </g:Button>
             <div class="{res.mainCss.input}">

@@ -17,12 +17,13 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 
 /**
  * This is the top-level view of the application. Every time another presenter wants to reveal itself,
  * {@link TabletAndDesktopApplicationView} will add its content of the target inside the {@code mainContantPanel}.
  */
-public class TabletAndDesktopApplicationView extends Composite implements ApplicationTopLevelView<DesktopResettableNavigationPathDisplay> {
+public class TabletAndDesktopApplicationView extends Composite implements DesktopApplicationTopLevelView {
     interface TabletAndDesktopApplicationViewUiBinder extends UiBinder<Widget, TabletAndDesktopApplicationView> {
     }
 
@@ -66,6 +67,11 @@ public class TabletAndDesktopApplicationView extends Composite implements Applic
     @Override
     public ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+    
+    @Override
+    public AuthenticationMenuView getAuthenticationMenuView() {
+        return headerPanel.getAuthenticationMenuView();
     }
     
     @Override

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.app;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystemImpl;
 import com.sap.sailing.gwt.home.desktop.places.error.TabletAndDesktopErrorView;
@@ -19,9 +20,6 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.TabletAndDesktopWhatsNew
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContext;
-import com.sap.sailing.gwt.home.shared.app.UserManagementContextImpl;
-import com.sap.sailing.gwt.home.shared.framework.WrappedPlaceManagementController;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
@@ -30,26 +28,23 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementContextEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementPlaceManagementController.SignInSuccessfulEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.UserManagementRequestEvent;
-import com.sap.sailing.gwt.home.shared.usermanagement.info.LoggedInUserInfoPlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.view.UserManagementViewDesktop;
+import com.sap.sailing.gwt.home.shared.usermanagement.AuthenticationCallbackImpl;
+import com.sap.sailing.gwt.home.shared.usermanagement.view.AuthenticationViewDesktop;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
+import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
+import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
+import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 
-public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<ApplicationTopLevelView<DesktopResettableNavigationPathDisplay>> implements DesktopClientFactory {
+public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
-    private final WithSecurity securityProvider;
     private final WrappedPlaceManagementController userManagementWizardController;
-    private UserManagementContext uCtx = new UserManagementContextImpl();
+    private final AuthenticationManager authenticationManager;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
         this(new SimpleEventBus(), isStandaloneServer);
@@ -65,38 +60,24 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
     private TabletAndDesktopApplicationClientFactory(EventBus eventBus, PlaceController placeController, DesktopPlacesNavigator placesNavigator) {
         super(new TabletAndDesktopApplicationView(placesNavigator, eventBus), eventBus, placeController, placesNavigator);
-        securityProvider = new DefaultWithSecurityImpl();
-        securityProvider.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
-            @Override
-            public void onUserStatusChange(UserDTO user) {
-                uCtx = new UserManagementContextImpl(user);
-                getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-            }
-        });
         
-        final UserManagementViewDesktop userManagementDisplay = new UserManagementViewDesktop();
-        this.userManagementWizardController = new UserManagementPlaceManagementController<TabletAndDesktopApplicationClientFactory>(
-                this, getHomePlacesNavigator().getMailVerifiedConfirmationNavigation(),
-                getHomePlacesNavigator().getPasswordResetNavigation(),
-                getHomePlacesNavigator().getUserProfileNavigation(), userManagementDisplay, getEventBus());
-        this.userManagementWizardController.addHandler(SignInSuccessfulEvent.TYPE, new SignInSuccessfulEvent.Handler() {
+        final AuthenticationViewDesktop userManagementDisplay = new AuthenticationViewDesktop();
+        final Runnable signInSuccesfullNavigation = new Runnable() {
             @Override
-            public void onSignInSuccessful(SignInSuccessfulEvent event) {
+            public void run() {
                 userManagementWizardController.goTo(new LoggedInUserInfoPlace());
             }
-        });
-        getEventBus().addHandler(UserManagementRequestEvent.TYPE, new UserManagementRequestEvent.Handler() {
-            @Override
-            public void onUserManagementRequestEvent(UserManagementRequestEvent event) {
-                if (userManagementDisplay.isShowing()) {
-                    userManagementDisplay.hide();
-                } else {
-                    userManagementDisplay.setWidget(createBusyView());
-                    userManagementDisplay.show();
-                    userManagementWizardController.start();
-                }
-            }
-        });
+        };
+        this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getHomePlacesNavigator()
+                .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getHomePlacesNavigator()
+                .getPasswordResetNavigation().getFullQualifiedUrl());
+        this.userManagementWizardController = new AuthenticationPlaceManagementController(
+                new AuthenticationClientFactoryImpl(authenticationManager, SharedResources.INSTANCE),
+                new AuthenticationCallbackImpl(getHomePlacesNavigator().getUserProfileNavigation(),
+                        signInSuccesfullNavigation), userManagementDisplay, getEventBus());
+
+        new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
+                userManagementWizardController, eventBus);
     }
     
     @Override
@@ -150,32 +131,13 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
     }
 
     @Override
-    public UserManagementServiceAsync getUserManagement() {
-        return securityProvider.getUserManagementService();
-    }
-
-    @Override
-    public UserManagementContext getUserManagementContext() {
-        return uCtx;
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
     }
     
     @Override
-    public void resetUserManagementContext() {
-        uCtx = new UserManagementContextImpl();
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementRequestEvent());
-    }
-
-    @Override
-    public void didLogin(UserDTO user) {
-        uCtx = new UserManagementContextImpl(user);
-        securityProvider.getUserService().updateUser(true);
-        getEventBus().fireEvent(new UserManagementContextEvent(uCtx));
-    }
-    
-    @Override
-    public ConfirmationView createAccountConfirmationView(String message) {
-        return new ConfirmationViewImpl(StringMessages.INSTANCE.accountConfirmation(), message);
+    public ConfirmationView createConfirmationView() {
+        return new ConfirmationViewImpl(SharedResources.INSTANCE, StringMessages.INSTANCE.accountConfirmation());
     }
     
     @Override
