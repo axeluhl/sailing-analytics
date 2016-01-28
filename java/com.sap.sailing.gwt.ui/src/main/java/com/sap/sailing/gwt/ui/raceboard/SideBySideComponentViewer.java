@@ -70,6 +70,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
     private final EditMarkPassingsPanel markPassingsPanel;
+    private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
 
     private LayoutPanel mainPanel;
 
@@ -80,6 +81,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
             final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel) {
+        this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
@@ -162,10 +164,8 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
         additionalVerticalButtons.add(new Pair<Button, String>(mediaSelectionButton,
                 mediaPlayerManagerComponent.getDependentCssClassName()));
-        if (/* TODO check for correct role; was: user != null */ true) {
-            additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
-                    "managemedia"));
-        }
+        additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
+                "managemedia"));
         onUserStatusChange(userService.getCurrentUser());
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
@@ -311,6 +311,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
                 forceLayout();
             }
         }
+        mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
     }
     
     /**
