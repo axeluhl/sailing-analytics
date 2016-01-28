@@ -182,7 +182,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                         points[i++] = new Point(fix.timepoint.getTime(), 1);
                                     }
                                     setSeriesPoints(markSeries, points);
-                                    
                                     hideLoading();
                                     onResize();
                                 }
