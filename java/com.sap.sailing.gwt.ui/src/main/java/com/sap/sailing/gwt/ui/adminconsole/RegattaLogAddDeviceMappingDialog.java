@@ -80,7 +80,6 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         return null;
                     }
                 }, true, callback);
-
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
@@ -110,9 +109,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         + caught.getMessage());
             }
         });
-
         deviceId = createTextBox("");
-
         itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
@@ -130,34 +127,27 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         validate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
-
         if (mapping != null) {
             deviceId.setValue(mapping.deviceIdentifier.deviceId);
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
-
         qrWidget = setupQRCodeWidget();
         qrWidget.generateQRCode();
-        
         this.leaderboardName = leaderboardName;
-        
         loadCompetitorsAndMarks();
-        
         events = new GenericListBox<EventDTO>(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
                 return item.getName();
             }
         });
-        
         events.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 qrWidget.generateQRCode();
             }
         });
-        
         sailingService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
             @Override
             public void onSuccess(Collection<EventDTO> result) {
@@ -203,17 +193,6 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         return panel;
     }
 
-    @Override
-    protected boolean validate() {
-        if (super.validate()){
-            qrWidget.generateQRCode();
-            return true;
-        } else {
-            qrWidget.clear();
-            return false;
-        }
-    }
-    
     private DeviceMappingQRCodeWidget setupQRCodeWidget() {
         return new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override
