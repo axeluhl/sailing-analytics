@@ -34,6 +34,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     private boolean editable;
     private Button registerBtn;
     private Button unregisterBtn;
+    private Button addCompetitorButton;
     private CheckBox showOnlyCompetitorsOfLogCheckBox;
 
     private String boatClass;
@@ -63,7 +64,7 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     protected Widget getAdditionalWidget() {
         final FlowPanel mainPanel = new FlowPanel();
         final HorizontalPanel buttonPanel = new HorizontalPanel();
-        final Button addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
+        addCompetitorButton = new Button(stringMessages.add(stringMessages.competitor()));
         addCompetitorButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -175,16 +176,20 @@ public abstract class AbstractCompetitorRegistrationsDialog extends DataEntryDia
     public void deactivateRegistrationButtons(String tooltip){
         registerBtn.setEnabled(false);
         unregisterBtn.setEnabled(false);
+        addCompetitorButton.setEnabled(false);
         registerBtn.setTitle(tooltip);
         unregisterBtn.setTitle(tooltip);
+        addCompetitorButton.setTitle(tooltip);
         validate();
     }
     
     public void activateRegistrationButtons(){
         registerBtn.setEnabled(true);
         unregisterBtn.setEnabled(true);
+        addCompetitorButton.setEnabled(true);
         registerBtn.setTitle("");
         unregisterBtn.setTitle("");
+        addCompetitorButton.setTitle("");
         validate();
     }
 
