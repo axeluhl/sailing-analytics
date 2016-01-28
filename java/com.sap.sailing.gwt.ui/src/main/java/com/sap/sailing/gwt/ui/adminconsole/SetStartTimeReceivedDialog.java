@@ -2,16 +2,15 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Date;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class SetStartTimeReceivedDialog extends DataEntryDialog<Date> {
+public class SetStartTimeReceivedDialog extends DataEntryDialogWithBootstrap<Date> {
 
     private final StringMessages stringMessages;
     
@@ -28,13 +27,7 @@ public class SetStartTimeReceivedDialog extends DataEntryDialog<Date> {
         
         Label timeBoxLabel = new Label(stringMessages.startTime() + ":");
         content.setWidget(0, 0, timeBoxLabel);
-        timeBox = new BetterDateTimeBox();
-        timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
-            }
-        });
+        timeBox = createDateTimeBox(new Date());
         content.setWidget(0, 1, timeBox);
         
         return content;
