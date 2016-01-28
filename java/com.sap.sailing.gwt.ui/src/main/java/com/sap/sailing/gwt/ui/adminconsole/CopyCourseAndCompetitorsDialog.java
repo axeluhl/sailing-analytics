@@ -48,12 +48,10 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
                 validate();
             }
         });
-        
         courseCheckBox = new CheckBox(stringMessages.copyCourse());
         courseCheckBox.setValue(true);
         competitorCheckBox = new CheckBox(stringMessages.copyCompetitors());
-        competitorCheckBox.setValue(true);
-        
+        competitorCheckBox.setValue(false); // competitors are usually registered on the regatta
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
     }
