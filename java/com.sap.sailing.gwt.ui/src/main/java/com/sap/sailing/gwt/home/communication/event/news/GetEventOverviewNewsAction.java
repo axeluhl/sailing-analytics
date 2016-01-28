@@ -14,7 +14,7 @@ import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 

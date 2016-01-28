@@ -18,7 +18,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.shared.media.VideoDescriptor;
 

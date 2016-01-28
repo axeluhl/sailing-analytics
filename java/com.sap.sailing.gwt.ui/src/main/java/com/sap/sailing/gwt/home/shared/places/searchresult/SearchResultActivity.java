@@ -28,9 +28,9 @@ public class SearchResultActivity extends AbstractActivity {
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
             view.setSearchText(searchText);
-            GetSearchServerNamesAction action = new GetSearchServerNamesAction();
             searchOnServer(panel, view, new GetSearchResultsAction(searchText));
-            clientFactory.getDispatch().execute(action, new ActivityCallback<StringsResult>(clientFactory, panel) {
+            clientFactory.getDispatch().execute(new GetSearchServerNamesAction(),
+                    new ActivityCallback<StringsResult>(clientFactory, panel) {
                 @Override
                 public void onSuccess(StringsResult result) {
                     for (String serverName : result.getValues()) {

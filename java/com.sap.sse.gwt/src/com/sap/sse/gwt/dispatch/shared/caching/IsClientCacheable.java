@@ -1,4 +1,4 @@
-package com.sap.sse.gwt.dispatch.client.system.caching;
+package com.sap.sse.gwt.dispatch.shared.caching;
 
 /**
  * Cache interface used by the caching dispatch to identify which command can be cached on client side.

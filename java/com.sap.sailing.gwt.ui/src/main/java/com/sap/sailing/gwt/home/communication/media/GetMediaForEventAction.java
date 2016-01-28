@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;

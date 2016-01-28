@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceCompetitionFormatDataCalculator;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;

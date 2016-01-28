@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.statistics.EventStatisticsDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.StatisticsCalculator;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 

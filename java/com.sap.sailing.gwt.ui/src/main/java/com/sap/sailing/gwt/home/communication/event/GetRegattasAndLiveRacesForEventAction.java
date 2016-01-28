@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class GetRegattasAndLiveRacesForEventAction implements SailingAction<ResultWithTTL<RegattasAndLiveRacesDTO>>,

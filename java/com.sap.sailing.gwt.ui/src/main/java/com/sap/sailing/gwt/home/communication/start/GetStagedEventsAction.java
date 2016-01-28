@@ -7,7 +7,7 @@ import com.sap.sailing.gwt.server.EventHolder;
 import com.sap.sailing.gwt.server.EventStageCandidateCalculator;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 

@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sse.common.Duration;
-import com.sap.sse.gwt.dispatch.client.system.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
