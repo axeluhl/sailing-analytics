@@ -109,14 +109,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
     }
     
-//    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
-//        RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-//                competitorsAndTheirBoats, raceboardTimer, raceToShow, leaderboardName, null, /* event */null, raceboardPerspectiveLifecycleAndSettings.getSettings(),
-//                errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
-//                /* isScreenLargeEnoughToOfferChartSupport */ true);
-//        return raceBoardPanel;
-//    }
-    
     private void showLeaderboard() {
         if (activeTvView != AutoPlayModes.Leaderboard) {
             playerView.clearContent();
@@ -181,7 +173,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     }
 
     private MediaPlayerLifecycle.ConstructionParameters createMediaPlayerConstructionParameters() {
-        return null;
     }
     
     private void showRaceBoard() {
@@ -191,13 +182,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 @Override
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
-//                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
-//                            currentLiveRace, result.getCompetitorAndTheirBoats());
-//                    raceBoardPanel.setSize("100%", "100%");
-//                    FlowPanel timePanel = createTimePanel(raceBoardPanel);
-//                    
-//                    final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
-//                    toggleButton.setVisible(false);
 
                     RaceBoardPerspectiveLifecycle perspectiveLifeycle = (RaceBoardPerspectiveLifecycle) raceboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
                     CompositeLifecycleSettings componentSettings = raceboardPerspectiveComponentLifecyclesAndSettings.getComponentSettings();
@@ -219,13 +203,9 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
 
                     playerView.setContent(raceboardPerspective);
 
-//                    playerView.getDockPanel().addSouth(timePanel, 67);                     
-//                    playerView.getDockPanel().add(raceBoardPanel);
                     activeTvView = AutoPlayModes.Raceboard;
                     leaderboardTimer.pause();
                     raceboardTimer.setPlayMode(PlayModes.Live);
-                    
-//                    raceBoardPanel.setSettingsOfComponents(raceboardPerspective.getSettingsOfComponents());
                     
                     isInitialScreen = false;
                 }
@@ -239,22 +219,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         }
     }
 
-//    private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
-//        FlowPanel timeLineInnerBgPanel = new FlowPanel();
-//        timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
-//        timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
-//        
-//        FlowPanel timeLineInnerPanel = new FlowPanel();
-//        timeLineInnerPanel.add(timeLineInnerBgPanel);
-//        timeLineInnerPanel.addStyleName("timeLineInnerPanel");
-//        
-//        FlowPanel timelinePanel = new FlowPanel();
-//        timelinePanel.add(timeLineInnerPanel);
-//        timelinePanel.addStyleName("timeLinePanel");
-//        
-//        return timelinePanel;
-//    }
-    
     public void updatePlayMode(AutoPlayModes tvView) {
         switch (tvView) {
             case Leaderboard:
@@ -305,7 +269,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                             return raceIdentifier;
                         }
                     }
-//                    return raceIdentifier;
                 }
             }
         }
