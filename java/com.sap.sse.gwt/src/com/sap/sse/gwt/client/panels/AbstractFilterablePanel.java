@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -35,7 +35,7 @@ import com.sap.sse.common.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-    protected Collection<T> all;
+    protected List<T> all;
     protected final AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
@@ -104,6 +104,21 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void add(T object) {
         all.add(object);
         filter();
+    }
+
+    /**
+     * Adds an object at a certain position and applies the search filter.
+     */
+    public void add(int index, T object) {
+        all.add(index, object);
+        filter();
+    }
+    
+    /**
+     * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
+     */
+    public int indexOf(T object) {
+        return all.indexOf(object);
     }
     
     /**

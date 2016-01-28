@@ -3226,7 +3226,7 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             timeChanged(getLeaderboardDisplayDate(), null);
         }
     }
-    
+
     @Override
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
