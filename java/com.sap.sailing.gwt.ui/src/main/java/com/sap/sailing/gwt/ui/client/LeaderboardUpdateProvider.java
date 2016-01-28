@@ -1,6 +1,4 @@
-package com.sap.sailing.gwt.ui.leaderboard;
-
-import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+package com.sap.sailing.gwt.ui.client;
 
 public interface LeaderboardUpdateProvider {
     void addLeaderboardUpdateListener(LeaderboardUpdateListener listener);

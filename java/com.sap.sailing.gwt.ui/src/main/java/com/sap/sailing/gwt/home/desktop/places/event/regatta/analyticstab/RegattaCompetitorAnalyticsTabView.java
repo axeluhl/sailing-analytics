@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUpdateProvider;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sse.common.Util;
 
 /**

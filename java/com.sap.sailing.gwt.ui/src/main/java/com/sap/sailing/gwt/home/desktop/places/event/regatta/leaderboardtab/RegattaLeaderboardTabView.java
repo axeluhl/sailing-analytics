@@ -18,8 +18,8 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDat
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUpdateProvider;
 
 /**
  * Created by pgtaboada on 25.11.14.
