@@ -48,7 +48,11 @@ public class RegattaLogImportFixesAndAddMappingsDialog extends DataEntryDialog<C
                 new DataEntryDialog.Validator<Collection<DeviceMappingDTO>>() {
                     @Override
                     public String getErrorMessage(Collection<DeviceMappingDTO> valueToValidate) {
-                        return null;
+                        if (!valueToValidate.isEmpty()){
+                            return null;
+                        } else {
+                            return stringMessages.pleaseCreateAtLeastOneMappingBy();
+                        }
                     }
                 }, true, callback);
         this.stringMessages = stringMessages;
@@ -155,6 +159,7 @@ public class RegattaLogImportFixesAndAddMappingsDialog extends DataEntryDialog<C
             }
         }
         select();
+        validate();
     }
 
     private void deviceSelectionChanged(TrackFileImportDeviceIdentifierDTO deviceId) {
