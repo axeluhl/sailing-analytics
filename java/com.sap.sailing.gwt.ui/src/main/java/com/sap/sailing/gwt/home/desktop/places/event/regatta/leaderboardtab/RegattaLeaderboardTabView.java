@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRe
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardUpdateProvider;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -34,6 +35,8 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
+    private LeaderboardUpdateProvider leaderboardUpdateProvider = null;
+    
     public RegattaLeaderboardTabView() {
         leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
@@ -64,6 +67,8 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             if(leaderboardPanel == null) {
                 leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
+            leaderboardUpdateProvider = leaderboardPanel;
+            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
             if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
@@ -103,4 +108,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
     
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        if (leaderboardUpdateProvider != null) {
+            leaderboardUpdateProvider.removeLeaderboardUpdateListener(this);
+        }
+    }
 }

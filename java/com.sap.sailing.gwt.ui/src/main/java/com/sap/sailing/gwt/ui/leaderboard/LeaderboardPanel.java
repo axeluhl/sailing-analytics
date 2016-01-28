@@ -127,7 +127,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
         Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher,
-        BusyStateProvider {
+        BusyStateProvider, LeaderboardUpdateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -3211,9 +3211,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             timeChanged(getLeaderboardDisplayDate(), null);
         }
     }
-    
+
+    @Override
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
+    }
+
+    @Override
+    public void removeLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        this.leaderboardUpdateListener.remove(listener);
     }
 
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
