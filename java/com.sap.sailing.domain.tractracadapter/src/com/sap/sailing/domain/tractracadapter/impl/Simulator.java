@@ -24,7 +24,9 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class Simulator {
@@ -33,13 +35,15 @@ public class Simulator {
     private DynamicTrackedRace trackedRace;
     private final WindStore windStore;
     private boolean stopped;
-    private long advanceInMillis = -1;
+    private Duration advanceInMillis = Duration.NULL.minus(1);
     private Timer timer = new Timer("Timer for TracTrac Simulator");
+    private final Duration offsetToStart;
     
-    public Simulator(WindStore windStore) {
+    public Simulator(WindStore windStore, Duration offsetToStart) {
         super();
         assert windStore != null;
         this.windStore = windStore;
+        this.offsetToStart = offsetToStart;
     }
 
     /**
@@ -69,7 +73,7 @@ public class Simulator {
     /**
      * This is what everybody is waiting for :-). Notifies all waiters.
      */
-    public synchronized void setAdvanceInMillis(long advanceInMillis) {
+    public synchronized void setAdvanceInMillis(Duration advanceInMillis) {
         this.advanceInMillis = advanceInMillis;
         notifyAll();
     }
@@ -114,7 +118,7 @@ public class Simulator {
      * Waits until {@link #advanceInMillis} is set to something not equal to -1 which is its initial value. Unblocked by
      * {@link #setAdvanceInMillis(long)}.
      */
-    private synchronized long getAdvanceInMillis() {
+    private synchronized Duration getAdvance() {
         while (!isAdvanceInMillisSet()) {
             try {
                 wait(2000); // wait for two seconds, then re-evaluate whether there is a start time
@@ -124,6 +128,16 @@ public class Simulator {
             }
         }
         return advanceInMillis;
+    }
+    
+    private Duration getOffsetToStart() {
+        final Duration result;
+        if (offsetToStart != null) {
+            result = offsetToStart;
+        } else {
+            result = Duration.NULL;
+        }
+        return result;
     }
 
     /**
@@ -157,12 +171,12 @@ public class Simulator {
      * Like {@link #delay}, only that it doesn't wait until <code>timePoint</code> is reached in wall time.
      */
     public TimePoint advance(TimePoint timePoint) {
-        return new MillisecondsTimePoint(timePoint.asMillis()+getAdvanceInMillis());
+        return timePoint.plus(getAdvance());
     }
 
     /**
      * If {@link #advanceInMillis} is already set to a non-negative value, it is left alone, and
-     * {@link #delay(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
+     * {@link #advance(TimePoint)} is called. Otherwise, <code>time</code> is taken to be the original start time of the
      * race which is then used to compute {@link #advanceInMillis} such that
      * <code>time.asMillis() + advanceInMillis == System.currentTimeMillis()</code>.
      */
@@ -183,13 +197,13 @@ public class Simulator {
         if (isAdvanceInMillisSet()) {
             return advance(time);
         } else {
-            setAdvanceInMillis(System.currentTimeMillis() - time.asMillis());
+            setAdvanceInMillis(new MillisecondsDurationImpl(MillisecondsTimePoint.now().minus(time.asMillis()).plus(getOffsetToStart()).asMillis()));
             return advance(time);
         }
     }
 
     private boolean isAdvanceInMillisSet() {
-        return advanceInMillis != -1;
+        return !advanceInMillis.equals(Duration.NULL.minus(1));
     }
 
     /**
@@ -238,21 +252,35 @@ public class Simulator {
             // deliver an empty list now
             trackedRace.updateMarkPassings(competitor, markPassings);
         }
-        
+    }
+    
+    public void scheduleCompetitorPosition(final Competitor competitor, GPSFixMoving competitorFix) {
+        final RecordGPSFix<Competitor> recorder = (c, f)->trackedRace.recordFix(c, f);
+        scheduleFixRecording(competitor, competitorFix, recorder);
+    }
+    
+    @FunctionalInterface
+    private static interface RecordGPSFix<T> {
+        void recordFix(T objectForFix, GPSFixMoving fix);
     }
 
     public void scheduleMarkPosition(final Mark mark, GPSFixMoving markFix) {
-        final TimePoint transformedTimepoint = advance(markFix.getTimePoint());
-        final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(markFix.getPosition(), transformedTimepoint, markFix.getSpeed());
+        final RecordGPSFix<Mark> recorder = (m, f)->trackedRace.recordFix(mark, f);
+        scheduleFixRecording(mark, markFix, recorder);
+    }
+
+    private <T> void scheduleFixRecording(final T object, GPSFixMoving fix, final RecordGPSFix<T> recorder) {
+        final TimePoint transformedTimepoint = advance(fix.getTimePoint());
+        final GPSFixMoving transformedMarkFix = new GPSFixMovingImpl(fix.getPosition(), transformedTimepoint, fix.getSpeed());
         long waitTime = getWaitTimeInMillisUntil(transformedMarkFix.getTimePoint());
         if (waitTime <= 0) {
-            trackedRace.recordFix(mark, transformedMarkFix);
+            recorder.recordFix(object, transformedMarkFix);
         } else {
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     try {
-                        trackedRace.recordFix(mark, transformedMarkFix);
+                        recorder.recordFix(object, transformedMarkFix);
                     } catch (Exception e) {
                         logger.throwing(Simulator.class.getName(), "scheduleMarkPosition", e);
                     }

@@ -19,12 +19,18 @@ public class RaceMapSettings extends AbstractSettings {
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
+    
+    private boolean transparentHoverlines = false; // as discussed with Stefan on 2015-12-08
+    
+    private int hoverlineStrokeWeight = 15; // as discussed with Stefan on 2015-12-08
 
     private long tailLengthInMilliseconds = 100000l;
 
     private double buoyZoneRadiusInMeters = 0.0;
 
     private boolean showSelectedCompetitorsInfo = true;
+    
+    private boolean showWindStreamletColors = false;
     
     private boolean showWindStreamletOverlay = false;
 
@@ -53,12 +59,15 @@ public class RaceMapSettings extends AbstractSettings {
     public RaceMapSettings(RaceMapSettings settings) {
         this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
         this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.transparentHoverlines = settings.transparentHoverlines;
+        this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
         this.maneuverTypesToShow = settings.maneuverTypesToShow;
         this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
         this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
         this.showSelectedCompetitorsInfo = settings.showSelectedCompetitorsInfo;
         this.showSimulationOverlay = settings.showSimulationOverlay;
         this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
+        this.showWindStreamletColors = settings.showWindStreamletColors;
         this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
         this.windUp = settings.windUp;
         this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
@@ -97,6 +106,14 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setShowWindStreamletOverlay(boolean showWindStreamletOverlay) {
         this.showWindStreamletOverlay = showWindStreamletOverlay;
+    }
+
+    public boolean isShowWindStreamletColors() {
+        return showWindStreamletColors;
+    }
+
+    public void setShowWindStreamletColors(boolean showWindStreamletColors) {
+        this.showWindStreamletColors = showWindStreamletColors;
     }
 
     public boolean isShowSimulationOverlay() {
@@ -141,6 +158,22 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
+    }
+    
+    public boolean getTransparentHoverlines() {
+        return this.transparentHoverlines;
+    }
+    
+    public void setTransparentHoverlines(boolean transparentHoverlines) {
+        this.transparentHoverlines = transparentHoverlines;
+    }
+    
+    public int getHoverlineStrokeWeight() {
+        return this.hoverlineStrokeWeight;
+    }
+    
+    public void setHoverlineStrokeWeight(int hoverlineStrokeWeight) {
+        this.hoverlineStrokeWeight = hoverlineStrokeWeight;
     }
 
     public boolean isShowSelectedCompetitorsInfo() {

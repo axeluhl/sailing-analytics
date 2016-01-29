@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.Scheduler;
@@ -12,10 +10,13 @@ import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -26,7 +27,6 @@ import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.RaceSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -103,7 +104,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         asyncActionsExecutor = new AsyncActionsExecutor();
         showWindChart = false;
         leaderboard = null;
-        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true); 
+        leaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, /* autoExpandFirstRace */ false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true); 
         
         leaderboardTimer = new Timer(PlayModes.Live, /* delayBetweenAutoAdvancesInMilliseconds */1000l);
         leaderboardTimer.setLivePlayDelayInMillis(delayToLiveInMillis);
@@ -162,13 +163,11 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
         }
     }
     
-    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow) {
-        RaceSelectionModel raceSelectionModel = new RaceSelectionModel();
-        List<RegattaAndRaceIdentifier> singletonList = Collections.singletonList(raceToShow);
-        raceSelectionModel.setSelection(singletonList);
+    private RaceBoardPanel createRaceBoardPanel(String leaderboardName, RegattaAndRaceIdentifier raceToShow, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats) {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                raceboardTimer, raceSelectionModel, leaderboardName, null, /* event */null, raceboardViewConfig,
-                errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */false);
+                competitorsAndTheirBoats, raceboardTimer, raceToShow, leaderboardName, null, /* event */null, raceboardViewConfig,
+                errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
+                /* isScreenLargeEnoughToOfferChartSupport */ true);
         return raceBoardPanel;
     }
     
@@ -279,23 +278,35 @@ public class AutoPlayController implements RaceTimesInfoProviderListener {
 
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
-            playerView.clear();
-            RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace);
-            raceBoardPanel.setSize("100%", "100%");
-            if (showWindChart) {
-                raceBoardPanel.setWindChartVisible(true);
-            }
-            FlowPanel timePanel = createTimePanel(raceBoardPanel);
+            sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),
+                    leaderboardName, null, null, new AsyncCallback<RaceboardDataDTO>() {
+                @Override
+                public void onSuccess(RaceboardDataDTO result) {
+                    playerView.clear();
+                    RaceBoardPanel raceBoardPanel = createRaceBoardPanel(leaderboardName, currentLiveRace, result.getCompetitorAndTheirBoats());
+                    raceBoardPanel.setSize("100%", "100%");
+                    if (showWindChart) {
+                        raceBoardPanel.setWindChartVisible(true);
+                    }
+                    FlowPanel timePanel = createTimePanel(raceBoardPanel);
+                    
+                    final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
+                    toggleButton.setVisible(false);
+                    playerView.getDockPanel().addSouth(timePanel, 67);                     
+                    playerView.getDockPanel().add(raceBoardPanel);
+                    activeTvView = AutoPlayModes.Raceboard;
+                    leaderboardTimer.pause();
+                    raceboardTimer.setPlayMode(PlayModes.Live);
+                    
+                    isInitialScreen = false;
+                }
+                
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error while loading data for raceboard: " + caught.getMessage());
+                }
+            });
             
-            final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
-            toggleButton.setVisible(false);
-            playerView.getDockPanel().addSouth(timePanel, 67);                     
-            playerView.getDockPanel().add(raceBoardPanel);
-            activeTvView = AutoPlayModes.Raceboard;
-            leaderboardTimer.pause();
-            raceboardTimer.setPlayMode(PlayModes.Live);
-            
-            isInitialScreen = false;
         }
     }
 

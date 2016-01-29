@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
@@ -95,8 +98,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         flexibleLeaderboard.addRace(trackedRace, RACECOLUMN_FLEXIBLELEADERBOARD+"2", false);
         Wind wind = new WindImpl(new DegreePosition(12, 13), startOfSecondRace.plus(Duration.ONE_MINUTE), new KnotSpeedWithBearingImpl(
                 /* speedInKnots */18, new DegreeBearingImpl(185)));
-        assertTrue(previousTrackedRace.takesWindFix(wind)); // previous race has tracking still open and takes the fix
-        assertTrue(trackedRace.takesWindFix(wind)); // tracked race also needs to take the fix as it falls into the regular tracking interval
+        assertTrue(previousTrackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // previous race has tracking still open and takes the fix
+        assertTrue(trackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // tracked race also needs to take the fix as it falls into the regular tracking interval
     }
 
     @Test
@@ -117,8 +120,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         Wind wind = new WindImpl(new DegreePosition(12, 13),
                 endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
                 new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
-        assertFalse(previousTrackedRace.takesWindFix(wind)); // previous race has tracking closed one second after it started and doesn't accept the fix
-        assertTrue(trackedRace.takesWindFix(wind)); // tracked race also needs to take the fix as it falls into the regular tracking interval
+        assertFalse(previousTrackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // previous race has tracking closed one second after it started and doesn't accept the fix
+        assertTrue(trackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // tracked race also needs to take the fix as it falls into the regular tracking interval
     }
 
     @Test
@@ -134,7 +137,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         Wind wind = new WindImpl(new DegreePosition(12, 13),
                 endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
                 new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
-        assertTrue(trackedRace.takesWindFix(wind));
+        assertTrue(trackedRace.takesWindFixWithTimePoint(wind.getTimePoint()));
     }
 
     @Test
@@ -154,8 +157,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         Wind wind = new WindImpl(new DegreePosition(12, 13),
                 endOfFirstRace.plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS).plus(Duration.ONE_MINUTE), // fix is after the grace period
                 new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
-        assertFalse(previousTrackedRace.takesWindFix(wind)); // fix is after first race's end plus grace period
-        assertFalse(trackedRace.takesWindFix(wind));
+        assertFalse(previousTrackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // fix is after first race's end plus grace period
+        assertFalse(trackedRace.takesWindFixWithTimePoint(wind.getTimePoint()));
     }
 
     @Test
@@ -175,8 +178,8 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         Wind wind = new WindImpl(new DegreePosition(12, 13),
                 startOfFirstRace.plus(Duration.ONE_SECOND), // fix is recorded by previous race
                 new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)));
-        assertTrue(previousTrackedRace.takesWindFix(wind)); // fix is after first race's end plus grace period
-        assertFalse(trackedRace.takesWindFix(wind));
+        assertTrue(previousTrackedRace.takesWindFixWithTimePoint(wind.getTimePoint())); // fix is after first race's end plus grace period
+        assertFalse(trackedRace.takesWindFixWithTimePoint(wind.getTimePoint()));
     }
 
     @Test
@@ -197,6 +200,17 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         assertTrue(trackedRace.hasRaceExecutionOrderProvidersAttached());
         series.setRegatta(null);
         assertFalse(trackedRace.hasRaceExecutionOrderProvidersAttached());
+    }
+
+    @Test
+    public void testThatTrackedRaceReceivesRaceLogWhenSeriesIsLinkedToRegatta() {
+        createTestSetupWithRegattaAndSeries(/* linkSeriesToRegatta */false);
+        raceColumnInSeries.setTrackedRace(fleet, trackedRace);
+        assertNull(raceColumnInSeries.getRaceLog(fleet));
+        regatta.addSeries(series);
+        final RaceLog raceLog = raceColumnInSeries.getRaceLog(fleet);
+        assertNotNull(raceLog);
+        assertNotNull(trackedRace.getRaceLog(raceLog.getId()));
     }
 
     private void createTestSetupWithRegattaAndSeries(boolean linkSeriesToRegatta) {
@@ -244,9 +258,9 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         r2.setTrackedRace(fleet, tr1);
         r3.setTrackedRace(fleet, tr2);
         r4.setTrackedRace(fleet, tr3); // produce a cycle because now transitively tr1 has itself as a predecessor
-        assertTrue(tr3.takesWindFix(new WindImpl(new DegreePosition(12, 13),
+        assertTrue(tr3.takesWindFixWithTimePoint(new WindImpl(new DegreePosition(12, 13),
                 startOfThirdRace.minus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2)),
-                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)))));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185))).getTimePoint()));
     }
 
     /**
@@ -265,9 +279,9 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         final TrackedRace tr1 = createTrackedRace("FirstRace", startOfFirstRace, endOfFirstRace);
         r1.setTrackedRace(fleet, tr1);
         r2.setTrackedRace(fleet, tr1);
-        assertTrue(tr1.takesWindFix(new WindImpl(new DegreePosition(12, 13),
+        assertTrue(tr1.takesWindFixWithTimePoint(new WindImpl(new DegreePosition(12, 13),
                 startOfFirstRace.minus(TrackedRaceImpl.EXTRA_LONG_TIME_BEFORE_START_TO_TRACK_WIND_MILLIS.divide(2)),
-                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185)))));
+                new KnotSpeedWithBearingImpl(/* speedInKnots */18, new DegreeBearingImpl(185))).getTimePoint()));
     }
 
     private DynamicTrackedRace createTrackedRace(final String name, final TimePoint startOfRace, final TimePoint endOfRace) {

@@ -25,7 +25,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
     private final Context mContext;
 
-    interface Tables {
+    public interface Tables {
         String COMPETITORS = "competitors";
         String EVENTS = "events";
         String EVENTS_COMPETITORS = "events_competitors";

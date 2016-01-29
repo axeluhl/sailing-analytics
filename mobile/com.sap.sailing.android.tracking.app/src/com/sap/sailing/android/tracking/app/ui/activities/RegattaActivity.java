@@ -43,7 +43,6 @@ import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -52,6 +51,7 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BitmapHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
@@ -144,28 +144,26 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        case R.id.options_menu_checkout:
-            ExLog.i(this, TAG, "Clicked CHECKOUT.");
-            checkout();
-            return true;
-        case R.id.options_menu_add_team_image:
-            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-            return true;
-        case R.id.options_menu_refresh:
-            manager.callServerAndGenerateCheckinData();
-            return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            AboutDialog dialog = new AboutDialog(this);
-            dialog.show();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_checkout:
+                ExLog.i(this, TAG, "Clicked CHECKOUT.");
+                checkout();
+                return true;
+            case R.id.options_menu_add_team_image:
+                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+                return true;
+            case R.id.options_menu_refresh:
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.options_menu_info:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -437,6 +435,9 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
 
         protected String doInBackground(String... urls) {
             uploadUrl = urls[0];
+            DataOutputStream outputStream = null;
+            FileInputStream imageInputStream = null;
+            BufferedReader reader = null;
             try {
                 if (imageFile != null) {
                     URL url = new URL(uploadUrl);
@@ -445,11 +446,11 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     urlConnection.setDoOutput(true);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "image/jpeg");
-                    DataOutputStream outputStream = new DataOutputStream(urlConnection.getOutputStream());
+                    outputStream = new DataOutputStream(urlConnection.getOutputStream());
 
                     int nRead;
                     byte[] data = new byte[2048];
-                    FileInputStream imageInputStream = new FileInputStream(imageFile);
+                    imageInputStream = new FileInputStream(imageFile);
                     while ((nRead = imageInputStream.read(data, 0, data.length)) != -1) {
                         outputStream.write(data, 0, nRead);
                     }
@@ -458,7 +459,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                     outputStream.close();
                     Log.d(TAG, "Image upload response: " + urlConnection.getResponseCode());
                     if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
+                        reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
                         StringBuilder builder = new StringBuilder();
                         String output;
                         while ((output = reader.readLine()) != null) {
@@ -471,6 +472,16 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             } catch (IOException e) {
                 ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
                 cancel(true);
+            } finally {
+                if (outputStream != null) {
+                    RegattaActivity.this.safeClose(outputStream);
+                }
+                if (imageInputStream != null) {
+                    RegattaActivity.this.safeClose(imageInputStream);
+                }
+                if (reader != null) {
+                    RegattaActivity.this.safeClose(reader);
+                }
             }
             return "";
         }
@@ -508,14 +519,15 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         protected File doInBackground(String... urls) {
             downloadUrl = urls[0];
             File imageFile = null;
-
+            InputStream in = null;
+            FileOutputStream outputStream = null;
             try {
-                InputStream in = new java.net.URL(downloadUrl).openStream();
+                in = new java.net.URL(downloadUrl).openStream();
                 imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
-                if (!imageFile.exists()){
+                if (!imageFile.exists()) {
                     imageFile.createNewFile();
                 }
-                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                outputStream = new FileOutputStream(imageFile);
                 int read = 0;
                 byte[] bytes = new byte[1024];
 
@@ -525,7 +537,14 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 outputStream.close();
                 in.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download image file " + imageFile);
+            } finally {
+                if (in != null) {
+                    safeClose(in);
+                }
+                if (outputStream != null) {
+                    safeClose(outputStream);
+                }
             }
             return imageFile;
         }
@@ -561,7 +580,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 InputStream in = new java.net.URL(downloadUrl).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl+": "+e.getMessage());
             }
             return mIcon11;
         }

@@ -13,7 +13,6 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
@@ -68,7 +67,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         if (getArguments() != null) {
             String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
-            if (managedRace == null && !(getClass() == RaceFlagViewerFragment.class)) {
+            if (managedRace == null) {
                 throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());
             }
         } else {

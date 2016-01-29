@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -57,13 +56,13 @@ public class RawPositionReceiver extends AbstractReceiverWithQueue<IRaceCompetit
         IRace race = event.getA().getRace();
         DynamicTrackedRace trackedRace = getTrackedRace(race);
         if (trackedRace != null) {
-            GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
-            if (getSimulator() != null) {
-                fix = new GPSFixMovingImpl(fix.getPosition(), getSimulator().delay(
-                        fix.getTimePoint()), fix.getSpeed());
-            }
+            final GPSFixMoving fix = getDomainFactory().createGPSFixMoving(event.getB());
             Competitor competitor = getDomainFactory().getOrCreateCompetitor(event.getA().getCompetitor());
-            trackedRace.recordFix(competitor, fix);
+            if (getSimulator() != null) {
+                getSimulator().scheduleCompetitorPosition(competitor, fix);
+            } else {
+                trackedRace.recordFix(competitor, fix);
+            }
         } else {
             logger.warning("Couldn't find tracked race for race " + race.getName()
                     + ". Dropping raw position event " + event);

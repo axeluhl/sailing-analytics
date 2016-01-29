@@ -23,6 +23,10 @@ public class AggregationProcessorDefinitionDTO implements Serializable, Comparab
         this.aggregatedTypeName = aggregatedTypeName;
         this.displayName = displayName;
     }
+    
+    public String getMessageKey() {
+        return messageKey;
+    }
 
     public String getExtractedTypeName() {
         return extractedTypeName;

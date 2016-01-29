@@ -20,11 +20,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.DataMiningServiceAsync;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
 import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class AbstractQueryDefinitionProvider implements QueryDefinitionProvider {
+public abstract class AbstractQueryDefinitionProvider<SettingsType extends Settings> implements QueryDefinitionProvider<SettingsType> {
 
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;

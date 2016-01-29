@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -15,9 +14,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -36,7 +34,6 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
             .getMongoObjectFactory(getMongoService());
     protected DomainObjectFactoryImpl domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
             .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
-    protected RaceLogEventFactory eventFactory = RaceLogEventFactory.INSTANCE;
 
     public StoreAndLoadRaceLogsTest() throws UnknownHostException, MongoException {
         super();
@@ -99,7 +96,7 @@ public class StoreAndLoadRaceLogsTest extends AbstractMongoDBTest {
     }
 
     private RaceLogFlagEvent createRaceLogFlagEvent(Serializable id) {
-        return eventFactory.createFlagEvent(new MillisecondsTimePoint(42), new LogEventAuthorImpl("Test author", /* priority */ 1), id, Collections.<Competitor> emptyList(),
+        return new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), new MillisecondsTimePoint(42), new LogEventAuthorImpl("Test author", /* priority */ 1), id,
                 42, Flags.ALPHA, Flags.BRAVO, true);
     }
 

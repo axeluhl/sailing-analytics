@@ -98,7 +98,7 @@ public class ApplicationPlaceUpdater {
 
     private Place getRealSeriesPlace(SeriesPlace place) {
         String seriesId = place.getEventUuidAsString();
-        SeriesContext context = new SeriesContext().withId(seriesId);
+        SeriesContext context = new SeriesContext(seriesId);
 
         // TODO evaluate additional parameters
 

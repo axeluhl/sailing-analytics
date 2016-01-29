@@ -24,6 +24,7 @@ public interface SectionHeaderResources extends ClientBundle {
         String sectionheader_item_infotext();
         String sectionheader_item_arrow();
         String sectionheader_item_adjust_title();
+        String sectionheader_item_select();
         String accordion();
         String collapsed();
     }

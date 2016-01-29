@@ -1,8 +1,7 @@
 package com.sap.sse.datamining.components.management;
 
-import java.util.UUID;
-
 import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 
 public interface DataRetrieverChainDefinitionProvider {
     
@@ -12,11 +11,12 @@ public interface DataRetrieverChainDefinitionProvider {
             Class<DataSourceType> dataSourceType);
 
     public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getByDataType(
-            Class<DataType> dataType);
+            Class<DataType> retrievedDataType);
 
     public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> get(
             Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
 
-    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> get(UUID id);
+    public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getForDTO(
+            DataRetrieverChainDefinitionDTO retrieverChainDTO, ClassLoader classLoader);
 
 }

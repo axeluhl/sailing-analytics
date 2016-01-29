@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -78,6 +81,16 @@ public class BaseActivity extends SendingServiceAwareActivity {
         preferences = AppPreferences.on(this);
         if (preferences.wakelockEnabled()) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    public void safeClose(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                ExLog.ex(this, TAG, e);
+            }
         }
     }
 }

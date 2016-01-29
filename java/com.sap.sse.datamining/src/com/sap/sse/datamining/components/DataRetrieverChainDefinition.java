@@ -3,7 +3,6 @@ package com.sap.sse.datamining.components;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.common.settings.SerializableSettings;
@@ -34,8 +33,6 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * @param <DataType> The type of the retrieved data elements and the <code>ResultType</code> of the last Processor.
  */
 public interface DataRetrieverChainDefinition<DataSourceType, DataType> {
-    
-    public UUID getID();
     
     public Class<DataSourceType> getDataSourceType();
     

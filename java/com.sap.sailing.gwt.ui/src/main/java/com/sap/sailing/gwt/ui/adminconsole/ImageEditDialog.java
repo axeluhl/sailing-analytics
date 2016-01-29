@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class ImageEditDialog extends ImageDialog {
-    public ImageEditDialog(ImageDTO imageDTO, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(imageDTO.getCreatedAtDate(), new ImageParameterValidator(stringMessages), stringMessages, callback);
+    public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
+        super(imageDTO.getCreatedAtDate(), new ImageParameterValidator(stringMessages), sailingService, stringMessages, callback);
         createdAtLabel = new Label(imageDTO.getCreatedAtDate().toString());
         imageURLAndUploadComposite.setURL(imageDTO.getSourceRef());
         titleTextBox = createTextBox(imageDTO.getTitle());
@@ -25,7 +26,7 @@ public class ImageEditDialog extends ImageDialog {
         List<String> tags = new ArrayList<String>();
         tags.addAll(imageDTO.getTags());
         tagsListEditor.setValue(tags);
-        image = loadImageFromURL(imageDTO.getSourceRef());
-        imageHolder.setWidget(image);
+//        image = loadImageFromURL(imageDTO.getSourceRef());
+//        imageHolder.setWidget(image);
     }
 }

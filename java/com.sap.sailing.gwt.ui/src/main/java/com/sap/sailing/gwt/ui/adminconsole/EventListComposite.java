@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -32,14 +31,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.EventSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -50,6 +48,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -60,12 +60,11 @@ import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
  */
 public class EventListComposite extends Composite implements EventsRefresher, LeaderboardGroupsDisplayer {
     private final SailingServiceAsync sailingService;
-    private final EventSelectionProvider eventSelectionProvider;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
 
     private CellTable<EventDTO> eventTable;
-    private MultiSelectionModel<EventDTO> eventSelectionModel;
+    private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     private ListDataProvider<EventDTO> eventListDataProvider;
     private List<EventDTO> allEvents;
     private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
@@ -93,10 +92,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public EventListComposite(final SailingServiceAsync sailingService, final EventSelectionProvider eventSelectionProvider,
-            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    @SuppressWarnings("unchecked")
+    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
         this.sailingService = sailingService;
-        this.eventSelectionProvider = eventSelectionProvider;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         availableLeaderboardGroups = Collections.emptyList();
@@ -134,7 +132,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void onClick(ClickEvent event) {
                 if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvents())) {
-                    removeEvents(eventSelectionModel.getSelectedSet());
+                    removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
             }
         });
@@ -143,24 +141,14 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventListDataProvider = new ListDataProvider<EventDTO>();
         eventTable = createEventTable();
         eventTable.ensureDebugId("EventsCellTable");
+        refreshableEventSelectionModel = (RefreshableMultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
         eventTable.setVisible(false);
 
-        @SuppressWarnings("unchecked")
-        MultiSelectionModel<EventDTO> multiSelectionModel = (MultiSelectionModel<EventDTO>) eventTable.getSelectionModel();
-        eventSelectionModel = multiSelectionModel;
-
-        eventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                final boolean somethingSelected = !eventSelectionModel.getSelectedSet().isEmpty();
+                final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
                 removeEventsButton.setEnabled(somethingSelected);
-                
-                List<EventDTO> selectedEvents = getSelectedEvents();
-                List<UUID> selectedEventUUIDs = new ArrayList<UUID>();
-                for (EventDTO selectedEvent : selectedEvents) {
-                    selectedEventUUIDs.add(selectedEvent.id);
-                }
-                EventListComposite.this.eventSelectionProvider.setSelection(selectedEventUUIDs);
             }
         });
         
@@ -194,22 +182,23 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private CellTable<EventDTO> createEventTable() {
-        CellTable<EventDTO> table = new CellTable<EventDTO>(/* pageSize */10000, tableRes);
+        FlushableCellTable<EventDTO> table = new FlushableCellTable<EventDTO>(/* pageSize */10000, tableRes);
         eventListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 
-        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(tableRes.cellTableStyle().cellTableCheckboxSelected(),
-            tableRes.cellTableStyle().cellTableCheckboxDeselected(), tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
-            @Override
-            protected ListDataProvider<EventDTO> getListDataProvider() {
-                return eventListDataProvider;
-            }
-
-            @Override
-            public Boolean getValue(EventDTO row) {
-                return eventTable.getSelectionModel().isSelected(row);
-            }
-        };
+        SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn = new SelectionCheckboxColumn<EventDTO>(
+                tableRes.cellTableStyle().cellTableCheckboxSelected(),
+                tableRes.cellTableStyle().cellTableCheckboxDeselected(),
+                tableRes.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<EventDTO>() {
+                    @Override
+                    public boolean representSameEntity(EventDTO dto1, EventDTO dto2) {
+                        return dto1.id.equals(dto2.id);
+                    }
+                    @Override
+                    public int hashCode(EventDTO t) {
+                        return t.id.hashCode();
+                    }
+                },eventListDataProvider,table);
         
         AnchorCell anchorCell = new AnchorCell();
         Column<EventDTO, SafeHtml> eventNameColumn = new Column<EventDTO, SafeHtml>(anchorCell) {
@@ -447,7 +436,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), existingLeaderboardGroups,
-                stringMessages, new DialogCallback<EventDTO>() {
+                sailingService, stringMessages, new DialogCallback<EventDTO>() {
             @Override
             public void cancel() {
             }
@@ -466,7 +455,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),  
-                existingLeaderboardGroups, stringMessages,
+                existingLeaderboardGroups, sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
             @Override
             public void cancel() {
@@ -601,20 +590,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     eventTable.setVisible(true);
                     noEventsLabel.setVisible(false);
                 }
-                
-                Set<UUID> selectedEventUUIDs = new HashSet<>();
-                for (EventDTO selectedEvent : eventSelectionModel.getSelectedSet()) {
-                    selectedEventUUIDs.add(selectedEvent.id);
-                }
-                eventSelectionModel.clear();
                 allEvents.clear();
                 allEvents.addAll(events);
                 filterTextbox.updateAll(allEvents);
-                for (EventDTO e : allEvents) {
-                    if (selectedEventUUIDs.contains(e.id)) {
-                        eventSelectionModel.setSelected(e, true);
-                    }
-                }
             }
         });
     }
@@ -623,15 +601,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         return allEvents;
     }
     
-    private List<EventDTO> getSelectedEvents() {
-        List<EventDTO> result = new ArrayList<EventDTO>();
-        if (eventListDataProvider != null) {
-            for (EventDTO Event : eventListDataProvider.getList()) {
-                if (eventSelectionModel.isSelected(Event)) {
-                    result.add(Event);
-                }
-            }
-        }
-        return result;
+    public RefreshableMultiSelectionModel<EventDTO> getRefreshableMultiSelectionModel() {
+        return refreshableEventSelectionModel;
     }
 }

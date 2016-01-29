@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import com.sap.sse.i18n.impl.NullResourceBundleStringMessages;
+
 /**
  * Allow server-side internationalization similar to GWT client-side by using property files.
  * 
@@ -18,6 +20,8 @@ import java.util.Map;
  * </pre>
  */
 public interface ResourceBundleStringMessages {
+    
+    public static final ResourceBundleStringMessages NULL = new NullResourceBundleStringMessages();
 
     public String getResourceBaseName();
 

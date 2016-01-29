@@ -12,7 +12,6 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
     private LocalizedTypeDTO retrievedDataType;
     private SerializableSettings defaultSettings;
 
-
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
      */
@@ -49,7 +48,7 @@ public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetri
     
     @Override
     public String toString() {
-        return retrieverTypeName + "[retrievedDataType: " + retrievedDataType + "]";
+        return getRetrieverTypeName() + "[retrievedDataType: " + getRetrievedDataType() + "]";
     }
     
     @Override

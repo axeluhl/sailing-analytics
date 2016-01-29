@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
@@ -52,11 +53,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private final WindSource raceCommitteeWindSource;
 
-    private LastPublishedCourseDesignFinder courseDesignFinder;
-    private StartTimeFinder startTimeFinder;
-    private AbortingFlagFinder abortingFlagFinder;
     private MarkPassingDataFinder markPassingDataFinder;
-    private TrackingTimesFinder trackingTimesFinder;
     
     private MarkPassingUpdateListener markPassingUpdateListener;
 
@@ -73,12 +70,24 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             raceLogs.add(raceLog);
             trackedRace.invalidateStartTime();
             trackedRace.invalidateEndTime();
-            courseDesignFinder = new LastPublishedCourseDesignFinder(raceLog);
-            startTimeFinder = new StartTimeFinder(trackedRace.getRaceLogResolver(), raceLog);
-            abortingFlagFinder = new AbortingFlagFinder(raceLog);
-            trackingTimesFinder = new TrackingTimesFinder(raceLog);
             analyze(raceLog);
         }
+    }
+
+    private LastPublishedCourseDesignFinder createCourseDesignFinder(RaceLog raceLog) {
+        return new LastPublishedCourseDesignFinder(raceLog);
+    }
+
+    private TrackingTimesFinder createTrackingTimesFinder(RaceLog raceLog) {
+        return new TrackingTimesFinder(raceLog);
+    }
+
+    private AbortingFlagFinder createAbortingFlagFinder(RaceLog raceLog) {
+        return new AbortingFlagFinder(raceLog);
+    }
+
+    private StartTimeFinder createStartTimeFinder(RaceLog raceLog) {
+        return new StartTimeFinder(trackedRace.getRaceLogResolver(), raceLog);
     }
 
     public void setMarkPassingUpdateListener(MarkPassingUpdateListener listener) {
@@ -114,6 +123,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             if (markPassingUpdateListener != null) {
                 removeMarkPassingEvents();
             }
+            trackedRace.updateMarkPassingsAfterRaceLogChanges();
         }
     }
 
@@ -149,10 +159,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
         }
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     private void analyseTrackingTimes(RaceLog raceLog) {
-        Pair<TimePoint, TimePoint> times = trackingTimesFinder.analyze();
+        Pair<TimePoint, TimePoint> times = createTrackingTimesFinder(raceLog).analyze();
         if (times != null) {
             trackedRace.setStartOfTrackingReceived(times.getA());
             trackedRace.setEndOfTrackingReceived(times.getB());
@@ -160,11 +171,16 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
-        CourseBase courseDesign = courseDesignFinder.analyze();
+        CourseBase courseDesign = null;
+        for (RaceLog raceLog : raceLogs) {
+            courseDesign = createCourseDesignFinder(raceLog).analyze();
+            if (courseDesign != null) {
+                break;
+            }
+        }
         if (courseDesign == null) {
             courseDesign = courseBaseProvidedByEvent;
         }
-
         // On the initial analyze step after attaching the RaceLog there might be no course design.
         if (courseDesign != null) {
             // Because this code can be triggered by an obsolete (delayed) event...
@@ -179,13 +195,16 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
         /* start time will be set by StartTimeFinder in TrackedRace.getStartTime() */
         trackedRace.invalidateStartTime();
-        
-        TimePoint startTime = startTimeFinder.analyze().getStartTime();
-        
+        TimePoint startTime = null;
+        for (RaceLog raceLog : raceLogs) {
+            startTime = createStartTimeFinder(raceLog).analyze().getStartTime();
+            if (startTime != null) {
+                break;
+            }
+        }
         if (startTime == null) {
             startTime  = startTimeProvidedByEvent;
         }
-
         if (startTime != null) {
             /* invoke listeners with received start time, this will also trigger tractrac update */
             trackedRace.onStartTimeChangedByRaceCommittee(startTime);
@@ -210,11 +229,18 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         trackedRace.invalidateStartTime(); // this will notify RaceStateListeners in case the start time changes by the event
         /* reset start time */
         trackedRace.onStartTimeChangedByRaceCommittee(null);
-        RaceLogFlagEvent abortingFlag = abortingFlagFinder.analyze();
+        RaceLogFlagEvent abortingFlag = null;
+        for (RaceLog raceLog : raceLogs) {
+            abortingFlag = createAbortingFlagFinder(raceLog).analyze();
+            if (abortingFlag != null) {
+                break;
+            }
+        }
         if (abortingFlag != null) {
             // previous pass was aborted; notify TracTrac
             trackedRace.onAbortedByRaceCommittee(abortingFlag.getUpperFlag());
         }
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     @Override
@@ -225,6 +251,16 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogCourseDesignChangedEvent event) {
         analyzeCourseDesign(event.getCourseDesign());
+    }
+
+    /**
+     * We don't know whether this event is the one that is now valid; it could have a priority too low, or it could have
+     * a time point too early and thus superseded by a later event of the same type. There may also be other race logs.
+     * Therefore, re-evaluate the current situation "from scratch."
+     */
+    @Override
+    public void visit(RaceLogFinishPositioningConfirmedEvent event) {
+        trackedRace.updateMarkPassingsAfterRaceLogChanges();
     }
 
     @Override

@@ -8,7 +8,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 
 #### Installations
 
-1. Eclipse (e.g. Eclipse Luna for Eclipse Committers), http://www.eclipse.org
+1. Eclipse (Eclipse for Eclipse Committers, e.g. version "Mars"), http://www.eclipse.org
 2. Eclipse Extensions
   * Install Google plugin for Eclipse (https://developers.google.com/eclipse/docs/download)
   * Install Eclipse debugger for GWT SuperDevMode (master version: http://p2.sapsailing.com/p2/sdbg; public release: http://sdbg.github.io/p2)
@@ -37,11 +37,9 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
 2. Bugzilla
   * Ask the Bugzilla administrator (Frank Mittag, Axel Uhl) to create a bugzilla account for you.
   * Bugzilla url: http://bugzilla.sapsailing.com/bugzilla/
-3. Race Analysis user
-  * Add yourself as an user to the Race Analysis suite by adding a Jetty user in the file java\target\configuration\jetty\etc\realm.properties
-4. Wiki
+3. Wiki
   * Send a request to Axel Uhl or Simon Marcel Pamies that includes the SHA1 hash of your desired password. Obtain such an SHA1 hash for your password here: http://www.sha1-online.com/.
-5. Hudson
+4. Hudson
   * Request a Hudson user by sending e-mail to Axel Uhl, Frank Mittag or Simon Marcel Pamies.
  
 #### Steps to build and run the Race Analysis Suite 
@@ -66,14 +64,16 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Import all projects from the `mobile/` subdirectory of the git main folder; this in particular contains the race committee app projects
   * Set the Eclipse target platform to race-analysis-p2-remote.target (located in com.sap.sailing.targetplatform/definitions)
   * Wait until the target platform has been resolved completely
-  * In the project com.sap.sailing.gwt.ui create a new subfolder "classes" in the folder WEB-INF
   * Rebuild all projects
 4. Run the Race Analysis Suite
   * Start the MongoDB
-  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the run dropdown
-  * Run "SailingGWT" in the run dropdown 
-5. Within the Race Analysis Suite
+  * Start the appropriate Eclipse launch configuration (e.g. 'Sailing Server (Proxy)') You´ll find this in the debug dropdown
+  * Run "Security UI sdm" in the debug dropdown
+  * Run "SailingGWT" in the debug dropdown
+5. Import races within the Race Analysis Suite
+  * Choose "Security UI sdm" in the upper left corner of the "Development Mode" Tab in Eclipse and open "...Login.html" in your browser
   * Default Login: user "admin", password "admin"
+  * Choose "Sailing GWT" in the "Development Mode" Tab and open "...AdminConsole.html..." (It is normal that the first try fails. Reload the page after the first try)
   * For TracTrac Events: (Date 27.11.2012) Use Live URI tcp://10.18.22.156:4412, Stored URI tcp://10.18.22.156:4413, JSON URL  http://germanmaster.traclive.dk/events/event_20120905_erEuropean/jsonservice.php
   * Press List Races
 

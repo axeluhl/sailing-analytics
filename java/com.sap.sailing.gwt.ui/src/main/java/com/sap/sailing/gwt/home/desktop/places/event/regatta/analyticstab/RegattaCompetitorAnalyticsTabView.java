@@ -19,13 +19,14 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorCharts;
 import com.sap.sailing.gwt.home.desktop.partials.old.competitorcharts.OldCompetitorChartsDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDataManager;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sse.common.Util;
 
 /**
@@ -40,7 +41,8 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     private Presenter currentPresenter;
 
     private final int MAX_COMPETITORS_IN_CHART = 30; 
-
+    private LeaderboardUpdateProvider leaderboardUpdateProvider = null;
+    
     public RegattaCompetitorAnalyticsTabView() {
         super();
     }
@@ -56,13 +58,13 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(RegattaCompetitorAnalyticsPlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String regattaId = myPlace.getRegattaId();
+        String regattaId = currentPresenter.getRegattaId();
 
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
@@ -70,7 +72,8 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
             if(regattaAnalyticsManager.getLeaderboardPanel() == null) {
                 createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
-
+            leaderboardUpdateProvider = regattaAnalyticsManager.getLeaderboardPanel();
+            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
 
             DetailType initialDetailType = DetailType.REGATTA_RANK;
@@ -140,4 +143,12 @@ public class RegattaCompetitorAnalyticsTabView extends SharedLeaderboardRegattaT
     @Override
     public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
     }
+
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        if (leaderboardUpdateProvider != null) {
+            leaderboardUpdateProvider.removeLeaderboardUpdateListener(this); 
+        }
+   }
 }

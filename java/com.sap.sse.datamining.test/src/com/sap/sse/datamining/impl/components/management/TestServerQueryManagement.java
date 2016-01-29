@@ -47,7 +47,7 @@ public class TestServerQueryManagement {
     @Test
     public void testStatisticQueryManagementWithConflict() {
         DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
@@ -58,7 +58,7 @@ public class TestServerQueryManagement {
     public void testStatisticQueryManagementWithoutConflict() {
         DataMiningSession firstQuerySession = new UUIDDataMiningSession(UUID.randomUUID());
         DataMiningSession secondQuerySession = new UUIDDataMiningSession(UUID.randomUUID());
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
@@ -71,7 +71,7 @@ public class TestServerQueryManagement {
         Collection<Function<?>> dimensions = new ArrayList<>();
         Method getYear = FunctionTestsUtil.getMethodFromClass(Test_HasRaceContext.class, "getYear");
         dimensions.add(functionFactory.createMethodWrappingFunction(getYear));
-        AdditionalQueryData additionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
+        AdditionalQueryData additionalData = new AdditionalDimensionValuesQueryData(dimensions);
         
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
@@ -85,13 +85,13 @@ public class TestServerQueryManagement {
         Collection<Function<?>> firstQueryDimensions = new ArrayList<>();
         Method getYear = FunctionTestsUtil.getMethodFromClass(Test_HasRaceContext.class, "getYear");
         firstQueryDimensions.add(functionFactory.createMethodWrappingFunction(getYear));
-        AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), firstQueryDimensions);
+        AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(firstQueryDimensions);
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, firstQueryAdditionalData);
 
         Collection<Function<?>> secondQueryDimensions = new ArrayList<>();
         Method getLegNumber = FunctionTestsUtil.getMethodFromClass(Test_HasLegOfCompetitorContext.class, "getLegNumber");
         secondQueryDimensions.add(functionFactory.createMethodWrappingFunction(getLegNumber));
-        AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), secondQueryDimensions);
+        AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(secondQueryDimensions);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, secondQueryAdditionalData);
         
         runQueriesAndVerifyNoConflict(session, firstQuery, session, secondQuery);
@@ -105,9 +105,9 @@ public class TestServerQueryManagement {
         Method getYear = FunctionTestsUtil.getMethodFromClass(Test_HasRaceContext.class, "getYear");
         dimensions.add(functionFactory.createMethodWrappingFunction(getYear));
         
-        AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
+        AdditionalQueryData firstQueryAdditionalData = new AdditionalDimensionValuesQueryData(dimensions);
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, firstQueryAdditionalData);
-        AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(new UUID(0, 0), dimensions);
+        AdditionalQueryData secondQueryAdditionalData = new AdditionalDimensionValuesQueryData(dimensions);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, secondQueryAdditionalData);
         
         runQueriesAndVerifyNoConflict(firstQuerySession, firstQuery, secondQuerySession, secondQuery);
@@ -116,7 +116,7 @@ public class TestServerQueryManagement {
     @Test 
     public void testOtherQueryManagement() {
         DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-        AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalOtherQueryData();
         
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
@@ -166,7 +166,7 @@ public class TestServerQueryManagement {
     public void testAbortingRandomQueryOfNullManager() {
         DataMiningQueryManager manager = new NullDataMiningQueryManager();
 
-        AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalOtherQueryData();
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAbortRandomOneAndVerifyAbortion(manager, firstQuery, secondQuery);
@@ -176,7 +176,7 @@ public class TestServerQueryManagement {
     public void testAbortingRandomQueryOfSingleQueryPerKeyManager() {
         DataMiningQueryManager manager = new SingleQueryPerSessionManager();
 
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAbortRandomOneAndVerifyAbortion(manager, firstQuery, secondQuery);
@@ -186,8 +186,8 @@ public class TestServerQueryManagement {
     public void testAbortingRandomQueryOfStrategyPerQueryTypeManager() {
         DataMiningQueryManager manager = new StrategyPerQueryTypeManager();
 
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalStatisticQueryData(new UUID(0, 0)));
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalOtherQueryData(new UUID(0, 0)));
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalStatisticQueryData());
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalOtherQueryData());
         runQueriesAbortRandomOneAndVerifyAbortion(manager, firstQuery, secondQuery);
     }
 
@@ -214,7 +214,7 @@ public class TestServerQueryManagement {
     public void testAbortingAllQueryOfNullManager() {
         DataMiningQueryManager manager = new NullDataMiningQueryManager();
 
-        AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalOtherQueryData();
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAbortAllAndVerifyAbortion(manager, firstQuery, secondQuery);
@@ -224,7 +224,7 @@ public class TestServerQueryManagement {
     public void testAbortingAllQueryOfSingleQueryPerKeyManager() {
         DataMiningQueryManager manager = new SingleQueryPerSessionManager();
 
-        AdditionalQueryData additionalData = new AdditionalStatisticQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalStatisticQueryData();
         final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         runQueriesAbortAllAndVerifyAbortion(manager, firstQuery, secondQuery);
@@ -234,8 +234,8 @@ public class TestServerQueryManagement {
     public void testAbortingAllQueryOfStrategyPerQueryTypeManager() {
         DataMiningQueryManager manager = new StrategyPerQueryTypeManager();
 
-        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalStatisticQueryData(new UUID(0, 0)));
-        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalOtherQueryData(new UUID(0, 0)));
+        final ControllablePseudoQuery<Double> firstQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalStatisticQueryData());
+        final ControllablePseudoQuery<Double> secondQuery = new ControllablePseudoQuery<Double>(Double.class, new AdditionalOtherQueryData());
         runQueriesAbortAllAndVerifyAbortion(manager, firstQuery, secondQuery);
     }
 
@@ -260,7 +260,7 @@ public class TestServerQueryManagement {
     
     @Test
     public void testControllablePseudoQuery() {
-        AdditionalQueryData additionalData = new AdditionalOtherQueryData(new UUID(0, 0));
+        AdditionalQueryData additionalData = new AdditionalOtherQueryData();
         
         final ControllablePseudoQuery<Double> normalQuery = new ControllablePseudoQuery<Double>(Double.class, additionalData);
         assertThat(normalQuery.getState(), is(QueryState.NOT_STARTED));
@@ -435,7 +435,7 @@ public class TestServerQueryManagement {
         }
         @Override
         public AdditionalQueryData getAdditionalData() {
-            return new AdditionalStatisticQueryData(new UUID(0, 0));
+            return new AdditionalStatisticQueryData();
         }
         @Override
         public <T extends AdditionalQueryData> T getAdditionalData(Class<T> additionalDataType) {

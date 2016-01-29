@@ -47,6 +47,7 @@ public class SailingDataRetrievalChainDefinitions {
                 leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "RaceSailingDomainRetrieverChain");
         trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
                 HasTrackedRaceContext.class, "Race");
+        dataRetrieverChainDefinitions.add(trackedRaceRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");
@@ -72,7 +73,7 @@ public class SailingDataRetrievalChainDefinitions {
         dataRetrieverChainDefinitions.add(gpsFixRetrieverChainDefinition);
     }
 
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+    public Iterable<DataRetrieverChainDefinition<?, ?>> get() {
         return dataRetrieverChainDefinitions;
     }
 

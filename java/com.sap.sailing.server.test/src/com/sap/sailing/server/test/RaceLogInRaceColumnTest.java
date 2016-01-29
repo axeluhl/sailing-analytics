@@ -9,7 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -61,7 +61,7 @@ public class RaceLogInRaceColumnTest {
         server.apply(addLeaderboardColumn);
 
         TimePoint t1 = MillisecondsTimePoint.now();
-        RaceLogEvent rlEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(
+        RaceLogEvent rlEvent = new RaceLogFlagEventImpl(
                 t1, author, 0, Flags.CLASS, Flags.NONE, true);
 
         Leaderboard leaderboard = racingEventServiceServer.getLeaderboardByName(LEADERBOARDNAME);
@@ -118,8 +118,8 @@ public class RaceLogInRacingEventServiceImplTest {
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis() + 1000);
 		int passId = 0;
 		boolean isDisplayed = true;
-		RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
-		RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent2 = new RaceLogFlagEventImpl(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
 
         Leaderboard leaderboard = racingEventServiceServer.getLeaderboardByName(LEADERBOARDNAME);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName("newColumn");
@@ -197,8 +197,8 @@ public class RaceLogInRacingEventServiceImplTest {
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis() + 1000);
 		int passId = 0;
 		boolean isDisplayed = true;
-		RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
-		RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent2 = new RaceLogFlagEventImpl(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
 
         Leaderboard leaderboard = racingEventServiceServer.getLeaderboardByName(regattaLeaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName("R1");
@@ -276,8 +276,8 @@ public class RaceLogInRacingEventServiceImplTest {
         TimePoint t2 = new MillisecondsTimePoint(t1.asMillis() + 1000);
 		int passId = 0;
 		boolean isDisplayed = true;
-		RaceLogFlagEvent rcEvent = RaceLogEventFactory.INSTANCE.createFlagEvent(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
-		RaceLogFlagEvent rcEvent2 = RaceLogEventFactory.INSTANCE.createFlagEvent(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent = new RaceLogFlagEventImpl(t1, passId, Flags.CLASS, Flags.NONE, isDisplayed);
+		RaceLogFlagEvent rcEvent2 = new RaceLogFlagEventImpl(t2, passId, Flags.AP, Flags.NONE, isDisplayed);
 
         Leaderboard leaderboard = racingEventServiceServer.getLeaderboardByName(regattaLeaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName("R1");

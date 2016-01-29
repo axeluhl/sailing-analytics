@@ -55,7 +55,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
         tabPanelUi.activatePlace(place);
         StringBuilder titleBuilder = new StringBuilder(TextMessages.INSTANCE.sapSailing()).append(" - ");
 
-        titleBuilder.append(currentPresenter.getCtx().getSeriesDTO().getDisplayName());
+        titleBuilder.append(currentPresenter.getSeriesDTO().getDisplayName());
 
         String currentTabTitle = tabPanelUi.getCurrentTabTitle();
         if (currentTabTitle != null && !currentTabTitle.isEmpty()) {
@@ -73,7 +73,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     private void initBreadCrumbs() {
         addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
         addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        addBreadCrumbItem(currentPresenter.getCtx().getSeriesDTO().getDisplayName(),  currentPresenter.getCurrentEventSeriesNavigation());
+        addBreadCrumbItem(currentPresenter.getSeriesDTO().getDisplayName(),  currentPresenter.getCurrentEventSeriesNavigation());
     }
 
     private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {

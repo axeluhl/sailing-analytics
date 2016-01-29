@@ -50,6 +50,10 @@ table td,select,button {
     z-index: 20;
 }
 
+.gwt-ToggleButton {
+	display: inline-block;
+}
+
 .gwt-PopupPanelGlass {
 	z-index: 19;
 }
@@ -244,4 +248,9 @@ input.magnifier {
 
 .definitionProviderControlsElements {
 	margin: 2px;
+}
+
+.queryDefinitionViewerContent {
+	background-color: white;
+	padding: 5px;
 }

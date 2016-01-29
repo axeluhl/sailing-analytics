@@ -12,7 +12,10 @@
 			background-color: rgba(0,0,0,0.9);
 			z-index: 5;
 		}
-		.closeAction {
+		.actionContainer {
+			text-align: right;
+		}
+		.action {
 			height: 50px;
 			width: auto;
 			cursor: pointer;
@@ -25,13 +28,19 @@
 		.content {
 			overflow: auto !important;
 		}
+		.is_autoplaying {
+		  	background-color: #f0ab00;
+		}
 	</ui:style>
 	<g:LayoutPanel>
 		<g:layer top="0" bottom="0">
 			<g:SimpleLayoutPanel styleName="{style.container}" ui:field="contentUi" />
 		</g:layer>
-		<g:layer top="0" right="0" width="50px" height="50px">
-			<g:Image title="{i18n.closeFullscreenView}" url="images/home/close.svg" styleName="{style.closeAction}" ui:field="closeActionUi"/>
+		<g:layer top="0" right="0" width="100px" height="50px">
+			<g:FlowPanel addStyleNames="{style.actionContainer}">
+				<g:Image url="images/home/reload.svg" styleName="{style.action}" ui:field="autoplayActionUi"/>
+				<g:Image url="images/home/close.svg" styleName="{style.action}" ui:field="closeActionUi"/>
+			</g:FlowPanel>
 		</g:layer>
 	</g:LayoutPanel>
 </ui:UiBinder> 

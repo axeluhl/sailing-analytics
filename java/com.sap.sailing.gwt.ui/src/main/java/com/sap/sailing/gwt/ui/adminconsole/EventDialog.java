@@ -22,7 +22,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -117,7 +119,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
      * assignments for re-association with the new {@link EventDTO} created by the {@link #getResult} method.
      */
-    public EventDialog(EventParameterValidator validator, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
+    public EventDialog(EventParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, List<LeaderboardGroupDTO> availableLeaderboardGroups,
             Iterable<LeaderboardGroupDTO> leaderboardGroupsOfEvent, DialogCallback<EventDTO> callback) {
         super(stringMessages.event(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
@@ -144,10 +146,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
-                        leaderboardGroupNames, "Select a leaderboard group..."));
+                        leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         
-        imagesListComposite = new ImagesListComposite(stringMessages);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages);
         videosListComposite = new VideosListComposite(stringMessages);
     }
 
@@ -194,34 +196,34 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-
-        Grid formGrid = new Grid(8, 2);
-        panel.add(formGrid);
-
+        Grid formGrid = new Grid(9, 2);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
         formGrid.setWidget(1, 1, descriptionEntryField);
         formGrid.setWidget(2, 0, new Label(stringMessages.venue() + ":"));
         formGrid.setWidget(2, 1, venueEntryField);
-        formGrid.setWidget(3, 0, new Label(stringMessages.startDate() + ":"));
-        formGrid.setWidget(3, 1, startDateBox);
-        formGrid.setWidget(4, 0, new Label(stringMessages.endDate() + ":"));
-        formGrid.setWidget(4, 1, endDateBox);
-        formGrid.setWidget(5, 0, new Label(stringMessages.isPublic() + ":"));
-        formGrid.setWidget(5, 1, isPublicCheckBox);
-        formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
-        formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
-        formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
+        formGrid.setWidget(3, 0, new Label(stringMessages.timeZone() + ":"));
+        formGrid.setWidget(3, 1, new Label(DateAndTimeFormatterUtil.getClientTimeZoneAsGMTString()));
+        formGrid.setWidget(4, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(4, 1, startDateBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(5, 1, endDateBox);
+        formGrid.setWidget(6, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(6, 1, isPublicCheckBox);
+        formGrid.setWidget(7, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
+        formGrid.setWidget(7, 1, officialWebsiteURLEntryField);
+        formGrid.setWidget(8, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
+        formGrid.setWidget(8, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
-        tabPanel.setHeight("250px");
+        tabPanel.setHeight("500px");
         panel.add(tabPanel);
+        tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
         tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
         tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
-        tabPanel.add(new ScrollPanel(imagesListComposite), "Images");
-        tabPanel.add(new ScrollPanel(videosListComposite), "Videos");
+        tabPanel.add(new ScrollPanel(imagesListComposite), stringMessages.images());
+        tabPanel.add(new ScrollPanel(videosListComposite), stringMessages.videos());
         return panel;
     }
 

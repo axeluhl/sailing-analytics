@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -29,7 +30,7 @@ import com.sap.sse.common.Util.Pair;
 public class EventsResource extends AbstractSailingServerResource {
 
     private Response getBadEventErrorResponse(String eventId) {
-        return  Response.status(Status.NOT_FOUND).entity("Could not find an event with id '" + eventId + "'.").type(MediaType.TEXT_PLAIN).build();
+        return  Response.status(Status.NOT_FOUND).entity("Could not find an event with id '" + StringEscapeUtils.escapeHtml(eventId) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET

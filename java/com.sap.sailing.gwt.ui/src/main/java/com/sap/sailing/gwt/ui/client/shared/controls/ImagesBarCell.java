@@ -157,7 +157,8 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         if (data != null) {
             SafeStyles imgStyle = getImageStyle();
             for (ImageSpec imageSpec : getImageSpecs()) {
-                SafeHtml rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
+                SafeHtml rendered;
+                rendered = getImageTemplate().cell(imageSpec.getActionName(), imgStyle, imageSpec.getTooltip(),
                         imageSpec.getImagePrototype().getSafeHtml());
                 sb.append(rendered);
             }

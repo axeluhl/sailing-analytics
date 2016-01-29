@@ -5,6 +5,7 @@ import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 
 public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     protected final PlaceController placeController;
@@ -47,6 +48,10 @@ public abstract class AbstractPlaceNavigator implements PlaceNavigator {
     public <T extends Place> void pushPlaceToHistoryStack(T destinationPlace) {
         String placeHistoryToken = mapper.getToken(destinationPlace);
         History.newItem(placeHistoryToken, false);
+    }
+    
+    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
+        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
     }
 
     @Override

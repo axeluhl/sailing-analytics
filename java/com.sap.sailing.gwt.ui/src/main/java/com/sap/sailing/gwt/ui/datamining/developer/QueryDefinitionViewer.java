@@ -1,81 +1,130 @@
 package com.sap.sailing.gwt.ui.datamining.developer;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.datamining.QueryDefinitionProvider;
+import com.sap.sailing.gwt.ui.datamining.QueryDefinitionChangedListener;
+import com.sap.sailing.gwt.ui.datamining.developer.QueryDefinitionParser.TypeToCodeStrategy;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class QueryDefinitionViewer implements Component<SerializableSettings> {
+public class QueryDefinitionViewer implements Component<SerializableSettings>, QueryDefinitionChangedListener {
+    
+    private static final String codeFormatRadioButtonGroup = "codeFormatRadioButtonGroup";
     
     private final StringMessages stringMessages;
-    private final QueryDefinitionProvider queryDefinitionProvider;
     private final QueryDefinitionParser queryDefinitionParser;
     
-    private final Button viewButton;
-    private final DialogBox dialogBox;
-    private final HTML definitionHtml;
+    private final DockLayoutPanel dockPanel;
+    private final TabLayoutPanel contentPanel;
+    private final HTML detailsHtml;
+    private final HTML codeHtml;
+    private final RadioButton useClassGetNameRadioButton;
+    private final RadioButton useStringLiteralsRadioButton;
+    
+    private StatisticQueryDefinitionDTO currentDefinition;
 
-    public QueryDefinitionViewer(StringMessages stringMessages, QueryDefinitionProvider queryDefinitionProvider) {
+    public QueryDefinitionViewer(StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.queryDefinitionProvider = queryDefinitionProvider;
         queryDefinitionParser = new QueryDefinitionParser();
         
-        viewButton = new Button(stringMessages.viewQueryDefinition(), new ClickHandler() {
+        detailsHtml = new HTML();
+        detailsHtml.setWordWrap(false);
+        
+        codeHtml = new HTML();
+        codeHtml.setWordWrap(false);
+        ValueChangeHandler<Boolean> typeStrategyChangedHandler = new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                updateCode();
+            }
+        };
+        useClassGetNameRadioButton = new RadioButton(codeFormatRadioButtonGroup, stringMessages.useClassGetName());
+        useClassGetNameRadioButton.setTitle(stringMessages.useClassGetNameTooltip());
+        useClassGetNameRadioButton.setValue(true);
+        useClassGetNameRadioButton.addValueChangeHandler(typeStrategyChangedHandler);
+        useStringLiteralsRadioButton = new RadioButton(codeFormatRadioButtonGroup, stringMessages.useStringLiterals());
+        useStringLiteralsRadioButton.setTitle(stringMessages.useStringLiteralsTooltip());
+        useStringLiteralsRadioButton.addValueChangeHandler(typeStrategyChangedHandler);
+        HorizontalPanel codeControlsPanel = new HorizontalPanel();
+        codeControlsPanel.setSpacing(5);
+        codeControlsPanel.add(useClassGetNameRadioButton);
+        codeControlsPanel.add(useStringLiteralsRadioButton);
+        DockLayoutPanel codeDockPanel = new DockLayoutPanel(Unit.PX);
+        codeDockPanel.addNorth(codeControlsPanel, 30);
+        ScrollPanel codeScrollPanel = new ScrollPanel(codeHtml);
+        codeScrollPanel.getElement().addClassName("queryDefinitionViewerContent");
+        codeDockPanel.add(codeScrollPanel);
+        
+        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                show();
+                switch (contentPanel.getSelectedIndex()) {
+                case 0:
+                    copyToClipboard(queryDefinitionParser.parseToDetailsAsText(currentDefinition));
+                    break;
+                case 1:
+                    copyToClipboard(queryDefinitionParser.parseToCodeAsText(currentDefinition, getTypeStrategy()));
+                    break;
+                }
             }
         });
+
+        HorizontalPanel controlsPanel = new HorizontalPanel();
+        controlsPanel.setSpacing(5);
+        controlsPanel.add(copyToClipboardButton);
         
-        dialogBox = new DialogBox(false, true);
-        dialogBox.setText(stringMessages.viewQueryDefinition());
-        dialogBox.setAnimationEnabled(true);
+        contentPanel = new TabLayoutPanel(30, Unit.PX);
+        ScrollPanel detailsScrollPanel = new ScrollPanel(detailsHtml);
+        detailsScrollPanel.getElement().addClassName("queryDefinitionViewerContent");
+        contentPanel.add(detailsScrollPanel, stringMessages.details());
+        contentPanel.add(codeDockPanel, stringMessages.code());
         
-        Button closeButton = new Button(stringMessages.close(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                dialogBox.hide();
-            }
-        });
-        
-        definitionHtml = new HTML();
-        definitionHtml.setWordWrap(false);
-        
-        DockPanel dockPanel = new DockPanel();
-        dockPanel.setSpacing(4);
-        dockPanel.add(closeButton, DockPanel.SOUTH);
-        dockPanel.setCellHorizontalAlignment(closeButton, DockPanel.ALIGN_RIGHT);
-        dockPanel.add(definitionHtml, DockPanel.CENTER);
-        dockPanel.setWidth("100%");
-        dialogBox.setWidget(dockPanel);
+        dockPanel = new DockLayoutPanel(Unit.PX);
+        dockPanel.addSouth(controlsPanel, 45);
+        dockPanel.add(contentPanel);
+    }
+    
+    public static native void copyToClipboard(String text) /*-{
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+    }-*/;
+    
+    @Override
+    public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
+        currentDefinition = newQueryDefinition;
+        updateDetails();
+        updateCode();
     }
 
-    /**
-     * Opens a dialog and shows the current {@link StatisticQueryDefinitionDTO QueryDefinition}
-     * of the {@link QueryDefinitionProvider}.<br>
-     * Does nothing, if there's already an open dialog.
-     */
-    public void show() {
-        show(queryDefinitionProvider.getQueryDefinition());
+    private void updateDetails() {
+        detailsHtml.setHTML(queryDefinitionParser.parseToDetailsAsSafeHtml(currentDefinition));
     }
 
+    private void updateCode() {
+        codeHtml.setHTML(queryDefinitionParser.parseToCodeAsSafeHtml(currentDefinition, getTypeStrategy()));
+    }
 
-    /**
-     * Opens a dialog and shows the given {@link StatisticQueryDefinitionDTO QueryDefinition}.<br>
-     * Does nothing, if there's already an open dialog.
-     */
-    public void show(StatisticQueryDefinitionDTO queryDefinition) {
-        definitionHtml.setHTML(queryDefinitionParser.parseToSafeHtml(queryDefinition));
-        dialogBox.center();
+    private TypeToCodeStrategy getTypeStrategy() {
+        if (useClassGetNameRadioButton.getValue()) {
+            return TypeToCodeStrategy.CLASS_GET_NAME;
+        }
+        if (useStringLiteralsRadioButton.getValue()) {
+            return TypeToCodeStrategy.STRING_LITERALS;
+        }
+        return TypeToCodeStrategy.CLASS_GET_NAME;
     }
 
     @Override
@@ -85,17 +134,17 @@ public class QueryDefinitionViewer implements Component<SerializableSettings> {
 
     @Override
     public Widget getEntryWidget() {
-        return viewButton;
+        return dockPanel;
     }
 
     @Override
     public boolean isVisible() {
-        return viewButton.isVisible();
+        return dockPanel.isVisible();
     }
 
     @Override
     public void setVisible(boolean visibility) {
-        viewButton.setVisible(visibility);
+        dockPanel.setVisible(visibility);
     }
 
     @Override

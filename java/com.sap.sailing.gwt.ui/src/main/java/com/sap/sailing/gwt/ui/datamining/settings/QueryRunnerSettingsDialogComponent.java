@@ -17,7 +17,6 @@ public class QueryRunnerSettingsDialogComponent implements SettingsDialogCompone
     private CheckBox runAutomaticallyBox;
 
     public QueryRunnerSettingsDialogComponent(QueryRunnerSettings initialSettings, StringMessages stringMessages) {
-        super();
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
     }

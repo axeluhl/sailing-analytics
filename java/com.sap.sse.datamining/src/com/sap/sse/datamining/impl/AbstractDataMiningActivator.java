@@ -19,5 +19,10 @@ public abstract class AbstractDataMiningActivator implements BundleActivator, Da
     public void stop(BundleContext context) throws Exception {
         context.ungetService(dataMiningBundleServiceReference);
     }
+    
+    @Override
+    public ClassLoader getClassLoader() {
+        return this.getClass().getClassLoader();
+    }
 
 }

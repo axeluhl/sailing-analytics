@@ -36,7 +36,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.ui.adminconsole.StructureImportListComposite.RegattaStructureProvider;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
-import com.sap.sailing.gwt.ui.client.RegattaSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -103,14 +102,14 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
         this.regattaRefresher = regattaRefresher;
-        this.regattaListComposite = new StructureImportListComposite(this.sailingService, new RegattaSelectionModel(
-                true), this.regattaRefresher, this, this.errorReporter, this.stringMessages);
+        this.regattaListComposite = new StructureImportListComposite(this.sailingService, this.regattaRefresher, this,
+                this.errorReporter, this.stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
 
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
-
+        
         createUI(mainPanel);
         regattaListComposite.addSelectionChangeHandler(new Handler() {
             @Override
@@ -237,7 +236,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
     }
 
     private void openEventCreateDialog() {
-        EventCreateDialog dialog = new EventCreateDialog(existingEvents, Collections.<LeaderboardGroupDTO>emptyList(), stringMessages,
+        EventCreateDialog dialog = new EventCreateDialog(existingEvents, Collections.<LeaderboardGroupDTO>emptyList(), sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
                     @Override
                     public void cancel() {

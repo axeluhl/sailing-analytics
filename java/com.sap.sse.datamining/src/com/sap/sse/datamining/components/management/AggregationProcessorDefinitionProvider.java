@@ -7,6 +7,6 @@ public interface AggregationProcessorDefinitionProvider {
     
     public <ExtractedType> AggregationProcessorDefinition<ExtractedType, ?> get(Class<ExtractedType> extractedType, String aggregationNameMessageKey);
     public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getByExtractedType(Class<ExtractedType> extractedType);
-    public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO);
+    public <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO, ClassLoader classLoader);
 
 }

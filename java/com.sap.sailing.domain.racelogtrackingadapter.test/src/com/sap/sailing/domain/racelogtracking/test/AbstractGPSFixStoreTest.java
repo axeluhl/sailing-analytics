@@ -3,14 +3,19 @@ package com.sap.sailing.domain.racelogtracking.test;
 import static com.sap.sse.common.Util.size;
 import static junit.framework.Assert.assertEquals;
 
+import java.util.UUID;
+
 import org.junit.After;
 import org.junit.Before;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -39,11 +44,12 @@ public class AbstractGPSFixStoreTest {
             new MockDeviceAndSessionIdentifierWithGPSFixesDeserializer();
     protected final DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
     protected RaceLog raceLog;
+    protected RegattaLog regattaLog;
     protected GPSFixStore store;
     protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
-    private final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
+    protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
 
     protected GPSFixMoving createFix(long millis, double lat, double lng, double knots, double degrees) {
         return new GPSFixMovingImpl(new DegreePosition(lat, lng),
@@ -54,6 +60,7 @@ public class AbstractGPSFixStoreTest {
     public void setServiceAndRaceLog() {
         service = new RacingEventServiceImpl(null, null, serviceFinderFactory);
         raceLog = new RaceLogImpl("racelog");
+        regattaLog = new RegattaLogImpl("regattalog");
         store = new MongoGPSFixStoreImpl(service.getMongoObjectFactory(), service.getDomainObjectFactory(),
                 serviceFinderFactory);
     }
@@ -65,18 +72,18 @@ public class AbstractGPSFixStoreTest {
         mongoOF.getGPSFixMetadataCollection().drop();
     }
 
-    protected void map(RaceLog raceLog, Competitor comp, DeviceIdentifier device, long from, long to) {
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceCompetitorMappingEvent(MillisecondsTimePoint.now(), author, device,
-                comp, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+    protected void map(RegattaLog regattaLog, Competitor comp, DeviceIdentifier device, long from, long to) {
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(),
+                comp, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
     protected void map(Competitor comp, DeviceIdentifier device, long from, long to) {
-        map(raceLog, comp, device, from, to);
+        map(regattaLog, comp, device, from, to);
     }
 
     protected void map(Mark mark, DeviceIdentifier device, long from, long to) {
-        raceLog.add(RaceLogEventFactory.INSTANCE.createDeviceMarkMappingEvent(MillisecondsTimePoint.now(), author, device,
-                mark, 0, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
+        regattaLog.add(new RegattaLogDeviceMarkMappingEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID.randomUUID(),
+                mark, device, new MillisecondsTimePoint(from), new MillisecondsTimePoint(to)));
     }
 
     protected void testNumberOfRawFixes(Track<?> track, long expected) {

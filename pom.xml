@@ -1,68 +1,178 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.sap.sailing</groupId>
-	<artifactId>workspace</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>com.sap.sailing</groupId>
+    <artifactId>workspace</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<modules>
-		<module>java</module>
-	</modules>
+    <modules>
+        <module>java</module>
+    </modules>
 
-	<profiles>
-		<profile>
-			<!-- deactivate with parameter '-P !with-mobile'-->
-			<id>with-mobile</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<modules>
-				<module>mobile</module>
-			</modules>
-		</profile>
-		<profile>
-			<!-- activate with parameter '-P with-ios'-->
-			<id>with-ios</id>
-			<modules>
-				<module>ios</module>
-			</modules>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>with-mobile</id>
+            <activation>
+                <!-- This profile is active by default, when running on a Lean DI environment.
+                     On Lean DI, the only things we want to build are the Android apps and everything that's needed for it.
+                     In a non Lean DI build, you can activate this profile with the parameter "-P with-mobile". -->
+                <property>
+                    <name>ldi.releaseBuild</name>
+                </property>
+            </activation>
+            <modules>
+                <module>mobile</module>
+            </modules>
+        </profile>
+        <profile>
+            <!-- activate with parameter '-P with-ios'-->
+            <id>with-ios</id>
+            <modules>
+                <module>ios</module>
+            </modules>
+        </profile>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	</properties>
-	
-	<repositories>
-		<repository>
-			<id>equinox-sdk-3.9</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/luna/</url>
-		</repository>
-<!--		
-		<repository>
-			<id>sap-nexus</id>
-			<url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
-		</repository>
---> 
-		<repository>
-			<id>sailing-server-maven</id>
-			<url>http://maven.sapsailing.com/maven</url>
-		</repository>
+      <profile>
+        <id>leandi</id>
+        <activation>
+          <!-- This profile is active by default, when running on a Lean DI environment.
+               The definitions in this profile aren't valid when running locally or on hudson.sapsailing.com. -->
+          <property>
+            <name>ldi.releaseBuild</name>
+          </property>
+        </activation>
+        <modules>
+            <!-- The submodule "install-android-sdk" ensures that the Android SDK is being assembled by unzipping severall *.zip files on Lean DI. -->
+            <module>install-android-sdk</module>
+        </modules>
+        <properties>
+            <!-- By default, the Android API *.jar is hosted in MAven repositories under "android:android".
+                 On Lean DI, the deviant coordinates "com.google.download.android:android".
+                 To make this work without the need of a duplicate definition of the dependencies by profile,
+                 the groupId of this artifact is defined by a property so that we can easily change it for Lean DI. -->
+            <android.api.groupId>com.google.download.android</android.api.groupId>
+            <!-- By default, the Android API we use is "5.1.1_r2". On Lean DI this version is uploaded to nexus with a different version.
+                 To make this work without the need of a duplicate definition of the dependencies by profile,
+                 the version of this artifact is defined by a property so that we can easily change it for Lean DI. -->
+            <android.api.version>5.1.1</android.api.version>
+        </properties>
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                    <sdk>
+                        <!-- On Lean DI ther is no environment variable "ANDROID_HOME" that by default points to the location where the Android SDK is hosted.
+                             That's why we need to explicitly define the location of the SDK. -->
+                        <path>${ldi.android.sdk.location}</path>
+                    </sdk>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      <profile>
+        <id>non-leandi</id>
+        <activation>
+          <property>
+            <name>!ldi.releaseBuild</name>
+          </property>
+        </activation>
+        <!-- The repository declarations are only active when running ion a non Lean DI environment.
+             On Lean DI we are not allowed to define our own repositories because everything must be hosted in SAP's Nexus server. -->
+        <repositories>
+          <repository>
+              <id>equinox-sdk-3.9</id>
+              <layout>p2</layout>
+              <url>http://download.eclipse.org/releases/luna/</url>
+          </repository>
+  <!--        
+          <repository>
+              <id>sap-nexus</id>
+              <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
+          </repository>
+  --> 
+          <repository>
+              <id>sailing-server-maven</id>
+              <url>http://maven.sapsailing.com/maven</url>
+          </repository>
+  
+          <repository>
+              <id>central</id>
+              <url>http://repo1.maven.org/maven2</url>
+          </repository>
+   
+          <repository>
+              <id>uni-luebeck</id>
+              <url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
+          </repository>
+        </repositories>
+      </profile>
+    </profiles>
 
-		<repository>
-			<id>central</id>
-			<url>http://repo1.maven.org/maven2</url>
-		</repository>
- 
-		<repository>
-			<id>uni-luebeck</id>
-			<url>http://www.itm.uni-luebeck.de/projects/maven/releases</url>
-		</repository>
-	</repositories>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
+        <!-- Lean DI specific properties that are needed to assemble the Android SDK. -->
+        <ldi.download.android.sdk.version>24.4</ldi.download.android.sdk.version>
+        <ldi.download.android.tools.version>21.1</ldi.download.android.tools.version>
+        <ldi.download.android.platform-tools.version>23.0.1</ldi.download.android.platform-tools.version>
+        <ldi.download.android.build-tools.version>22.0.1</ldi.download.android.build-tools.version>
+        <ldi.android.build-tools.version>5.1</ldi.android.build-tools.version>
+        <ldi.download.android.platform.version>22_r02</ldi.download.android.platform.version>
+        
+        <!-- WORKSPACE is an env set by Jenkins pointing to the build job's work directory.-->
+        <ldi.android.sdk.parent.location>${env.WORKSPACE}</ldi.android.sdk.parent.location>
+        <ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
+        
+        <android.platform.version>22</android.platform.version>
+        <android.api.groupId>android</android.api.groupId>
+        <android.api.version>5.1.1_r2</android.api.version>
+    </properties>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-help-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <id>activeProfiles</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>active-profiles</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+            
+      <plugin>
+          <groupId>com.simpligility.maven.plugins</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+          <version>4.3.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <androidManifestFile>AndroidManifest.xml</androidManifestFile>
+            <destinationManifestFile>${project.build.directory}/AndroidManifest.xml</destinationManifestFile>
+            <sdk>
+              <platform>${android.platform}</platform>
+            </sdk>
+          </configuration>
+        </plugin>
+        
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

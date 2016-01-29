@@ -125,6 +125,18 @@ public class ResultsCapturingActivity extends SessionActivity {
         super.onPause();
         releaseCamera();
     }
+    
+    @Override
+    public void onStop() {
+        super.onStop();
+        releaseCamera();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        releaseCamera();
+    }
 
     private void setupCamera() {
         int cameraId = getBackCameraId();
@@ -208,8 +220,9 @@ public class ResultsCapturingActivity extends SessionActivity {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            FileOutputStream fos = null;
             try {
-                FileOutputStream fos = new FileOutputStream(currentImageFile);
+                fos = new FileOutputStream(currentImageFile);
                 fos.write(data);
                 fos.close();
                 photoList.add(Uri.fromFile(currentImageFile));
@@ -217,6 +230,10 @@ public class ResultsCapturingActivity extends SessionActivity {
             } catch (Exception e) {
                 String toastText = getString(R.string.error_picture_callback);
                 Toast.makeText(ResultsCapturingActivity.this, toastText, Toast.LENGTH_LONG).show();
+            } finally {
+                if (fos != null) {
+                    safeClose(fos);
+                }
             }
         }
     };

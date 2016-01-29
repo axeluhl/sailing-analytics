@@ -7,17 +7,18 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
-import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     private static final long serialVersionUID = 6830414905539642446L;
@@ -123,7 +124,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
      * Assuming both competitors scored in the same number of races, compares the sorted scores.
      */
     @Override
-    public int compareByBetterScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
+    public int compareByBetterScore(Competitor o1, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
         final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
         // needs to compare net points; therefore, divide the total points by the column factor for comparison:
         List<Double> o1NetScores = new ArrayList<>();
@@ -162,9 +163,16 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     @Override
     public int compareByLastRace(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o1Scores, List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter) {
         int result = 0;
-        if (!o1Scores.isEmpty() && !o2Scores.isEmpty()) {
-            result = getScoreComparator(nullScoresAreBetter).compare(o1Scores.get(o1Scores.size()-1).getB(),
-                    o2Scores.get(o2Scores.size()-1).getB());
+        final Comparator<Double> pureScoreComparator = getScoreComparator(nullScoresAreBetter);
+        ListIterator<Pair<RaceColumn, Double>> o1Iter = o1Scores.listIterator(o1Scores.size());
+        ListIterator<Pair<RaceColumn, Double>> o2Iter = o2Scores.listIterator(o2Scores.size());
+        while (result == 0 && o1Iter.hasPrevious() && o2Iter.hasPrevious()) {
+            result = pureScoreComparator.compare(o1Iter.previous().getB(), o2Iter.previous().getB());
+        }
+        if (o1Iter.hasPrevious() != o2Iter.hasPrevious()) {
+            // if, as may be allowed by some scoring scheme variants, competitors with different numbers of scored races are compared
+            // and are equal for all races of the competitor who scored fewer races, the competitor who scored more races is preferred
+            result = o1Iter.hasNext() ? -1 : 1;
         }
         return result;
     }
@@ -182,8 +190,7 @@ public abstract class AbstractScoringSchemeImpl implements ScoringScheme {
     }
 
     @Override
-    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2,
-            TimePoint timePoint) throws NoWindException {
+    public int compareByLatestRegattaInMetaLeaderboard(Leaderboard leaderboard, Competitor o1, Competitor o2, TimePoint timePoint) {
         return 0;
     }
 }

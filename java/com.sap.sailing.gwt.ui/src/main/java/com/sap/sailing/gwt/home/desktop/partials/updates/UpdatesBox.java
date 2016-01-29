@@ -10,9 +10,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView.Presenter;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
 
 public class UpdatesBox extends Composite {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

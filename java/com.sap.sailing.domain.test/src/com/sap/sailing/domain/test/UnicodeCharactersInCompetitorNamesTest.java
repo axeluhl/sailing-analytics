@@ -67,7 +67,7 @@ public class UnicodeCharactersInCompetitorNamesTest {
                                         + TracTracConnectionConstants.PORT_STORED), new URI(
                                 "http://tracms.traclive.dk/update_course"),
                         /* startOfTracking */null, /* endOfTracking */null, /* delayToLiveInMillis */0l,
-                        /* simulateWithStartTimeNow */ false, /* ignoreTracTracMarkPassings*/
+                        /* offsetToStartTimeOfSimulatedRace */ null, /* ignoreTracTracMarkPassings*/
 			false, EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                         EmptyWindStore.INSTANCE, EmptyGPSFixStore.INSTANCE, "tracTest", "tracTest", "", "",
                         new DummyTrackedRegattaRegistry(), mock(RaceLogResolver.class));

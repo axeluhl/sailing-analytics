@@ -13,10 +13,9 @@ public interface FunctionProvider {
     public Collection<Function<?>> getAllStatistics();
 
     public Collection<Function<?>> getFunctionsFor(Class<?> sourceType);
-    
     public Collection<Function<?>> getStatisticsFor(Class<?> sourceType);
-
     public Collection<Function<?>> getDimensionsFor(Class<?> sourceType);
+    public Collection<Function<?>> getExternalFunctionsFor(Class<?> sourceType);
     
     public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
@@ -24,8 +23,9 @@ public interface FunctionProvider {
             DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
 
     /**
+     * @param classLoader TODO
      * @return The first function, that matches the given DTO or <code>null</code>
      */
-    public Function<?> getFunctionForDTO(FunctionDTO functionDTO);
+    public Function<?> getFunctionForDTO(FunctionDTO functionDTO, ClassLoader classLoader);
 
 }

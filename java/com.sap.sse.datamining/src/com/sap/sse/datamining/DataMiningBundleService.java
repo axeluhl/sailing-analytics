@@ -16,6 +16,11 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  *
  */
 public interface DataMiningBundleService {
+
+    /**
+     * @return The {@link #getClassLoader()} for the data mining bundle.
+     */
+    public ClassLoader getClassLoader();
     
     /**
      * @return a {@link ResourceBundleStringMessages} that can provide the string messages used by this bundle.

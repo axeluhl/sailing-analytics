@@ -17,9 +17,18 @@ public class RegattaLogRegisterCompetitorEventImpl extends BaseRegisterCompetito
      * @throws IllegalArgumentException
      *             if {@code competitor} is null
      */
-    public RegattaLogRegisterCompetitorEventImpl(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Competitor competitor) throws IllegalArgumentException {
-        super(createdAt, author, logicalTimePoint, id, competitor);
+    public RegattaLogRegisterCompetitorEventImpl(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, Competitor competitor) throws IllegalArgumentException {
+        super(createdAt, logicalTimePoint, author, id, competitor);
+    }
+
+    /**
+     * @throws IllegalArgumentException
+     *             if {@code competitor} is null
+     */
+    public RegattaLogRegisterCompetitorEventImpl(TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Competitor competitor) throws IllegalArgumentException {
+        super(logicalTimePoint, author, competitor);
     }
 
     @Override

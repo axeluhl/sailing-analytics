@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
@@ -33,13 +32,13 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     private final static long startPhaseESSThreeUpInterval = 3 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseESSTwoUpInterval = 2 * 60 * 1000; // minutes * seconds * milliseconds
     private final static long startPhaseESSOneUpInterval = 1 * 60 * 1000; // minutes * seconds * milliseconds
-    
+
     @SuppressWarnings("unused")
     private final ESSConfiguration configuration;
-    
-    public ESSRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, ESSConfiguration configuration, RaceLogResolver raceLogResolver) {
-        super(raceLog, author, factory, configuration, raceLogResolver);
+
+    public ESSRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, ESSConfiguration configuration,
+            RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
         this.configuration = configuration;
         update();
     }
@@ -48,7 +47,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     public RacingProcedureType getType() {
         return RacingProcedureType.ESS;
     }
-    
+
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
@@ -66,12 +65,11 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
 
     @Override
     protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
-        return Arrays.<RaceStateEvent> asList(
-                new RaceStateEventImpl(startTime.minus(startPhaseAPDownInterval), RaceStateEvents.ESS_AP_DOWN),
-                new RaceStateEventImpl(startTime.minus(startPhaseESSThreeUpInterval), RaceStateEvents.ESS_THREE_UP),
-                new RaceStateEventImpl(startTime.minus(startPhaseESSTwoUpInterval), RaceStateEvents.ESS_TWO_UP),
-                new RaceStateEventImpl(startTime.minus(startPhaseESSOneUpInterval), RaceStateEvents.ESS_ONE_UP),
-                new RaceStateEventImpl(startTime, RaceStateEvents.START));
+        return Arrays.<RaceStateEvent> asList(new RaceStateEventImpl(startTime.minus(startPhaseAPDownInterval),
+                RaceStateEvents.ESS_AP_DOWN), new RaceStateEventImpl(startTime.minus(startPhaseESSThreeUpInterval),
+                RaceStateEvents.ESS_THREE_UP), new RaceStateEventImpl(startTime.minus(startPhaseESSTwoUpInterval),
+                RaceStateEvents.ESS_TWO_UP), new RaceStateEventImpl(startTime.minus(startPhaseESSOneUpInterval),
+                RaceStateEvents.ESS_ONE_UP), new RaceStateEventImpl(startTime, RaceStateEvents.START));
     }
 
     @Override
@@ -91,62 +89,51 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     @Override
     public FlagPoleState getActiveFlags(TimePoint startTime, TimePoint now) {
         if (now.before(startTime.minus(startPhaseAPDownInterval))) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, true), new FlagPole(Flags.ESSTHREE, false)), null,
-                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)), 
+            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.AP, true), new FlagPole(Flags.ESSTHREE, false)),
+                    null, Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)),
                     startTime.minus(startPhaseAPDownInterval));
         } else if (now.before(startTime.minus(startPhaseESSThreeUpInterval))) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)),
-                    startTime.minus(startPhaseAPDownInterval),
-                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)), 
-                    startTime.minus(startPhaseESSThreeUpInterval));
+            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.AP, false), new FlagPole(Flags.ESSTHREE, false)),
+                    startTime.minus(startPhaseAPDownInterval), Arrays.asList(new FlagPole(Flags.ESSTHREE, true),
+                            new FlagPole(Flags.ESSTWO, false)), startTime.minus(startPhaseESSThreeUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSTwoUpInterval))) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSTHREE, true), new FlagPole(Flags.ESSTWO, false)),
-                    startTime.minus(startPhaseESSThreeUpInterval),
-                    Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)), 
+            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.ESSTHREE, true),
+                    new FlagPole(Flags.ESSTWO, false)), startTime.minus(startPhaseESSThreeUpInterval), Arrays.asList(
+                    new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)),
                     startTime.minus(startPhaseESSTwoUpInterval));
         } else if (now.before(startTime.minus(startPhaseESSOneUpInterval))) {
             return new FlagPoleState(
                     Arrays.asList(new FlagPole(Flags.ESSTWO, true), new FlagPole(Flags.ESSONE, false)),
-                    startTime.minus(startPhaseESSTwoUpInterval),
-                    Arrays.asList(new FlagPole(Flags.ESSONE, true)), 
+                    startTime.minus(startPhaseESSTwoUpInterval), Arrays.asList(new FlagPole(Flags.ESSONE, true)),
                     startTime.minus(startPhaseESSOneUpInterval));
-        } if (now.before(startTime)) {
-            return new FlagPoleState(
-                    Arrays.asList(new FlagPole(Flags.ESSONE, true)),
-                    startTime.minus(startPhaseESSOneUpInterval),
-                    Arrays.asList(new FlagPole(Flags.ESSONE, false)), 
+        }
+        if (now.before(startTime)) {
+            return new FlagPoleState(Arrays.asList(new FlagPole(Flags.ESSONE, true)),
+                    startTime.minus(startPhaseESSOneUpInterval), Arrays.asList(new FlagPole(Flags.ESSONE, false)),
                     startTime);
         } else {
             if (isIndividualRecallDisplayed(now)) {
-                return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.XRAY, true)),
-                        getIndividualRecallDisplayedTime(),
-                        Arrays.asList(new FlagPole(Flags.XRAY, false)),
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.XRAY, true)),
+                        getIndividualRecallDisplayedTime(), Arrays.asList(new FlagPole(Flags.XRAY, false)),
                         getIndividualRecallRemovalTime());
             } else if (isFinished(now)) {
-                return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
             } else if (isInFinishingPhase(now)) {
-                return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
-                        getFinishingTime(),
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
-                        null);
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.BLUE, true)), getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), null);
             } else {
                 TimePoint recallRemoved = getIndividualRecallRemovalTime();
-                return new FlagPoleState(Collections.<FlagPole>emptyList(), recallRemoved == null ? startTime : recallRemoved);
+                return new FlagPoleState(Collections.<FlagPole> emptyList(), recallRemoved == null ? startTime
+                        : recallRemoved);
             }
         }
     }
-    
+
     @Override
     protected RacingProcedureChangedListeners<? extends RacingProcedureChangedListener> createChangedListenerContainer() {
         return new ESSChangedListeners();
     }
-    
+
     @Override
     protected ESSChangedListeners getChangedListeners() {
         return (ESSChangedListeners) super.getChangedListeners();
@@ -156,7 +143,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     public void addChangedListener(ESSChangedListener listener) {
         getChangedListeners().add(listener);
     }
-    
+
     @Override
     public TimePoint getTimeLimit(TimePoint startTime) {
         TimePoint firstBoatTime = new FinishingTimeFinder(raceLog).analyze();
@@ -165,12 +152,12 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
         }
         return null;
     }
-    
+
     @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
-    
+
     @Override
     public ESSConfiguration getConfiguration() {
         return (ESSConfiguration) super.getConfiguration();

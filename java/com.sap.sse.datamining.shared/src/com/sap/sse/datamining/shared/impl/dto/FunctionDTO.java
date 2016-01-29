@@ -69,20 +69,7 @@ public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     }
     
     public String toString() {
-        return (isDimension() ? "Dimension " : "Function ") + sourceTypeName + "." + functionName + "(" + parametersAsString() + ") : " + returnTypeName;
-    }
-
-    private String parametersAsString() {
-        StringBuilder parameterBuilder = new StringBuilder();
-        boolean first = true;
-        for (String parameterTypeName : parameterTypeNames) {
-            if (!first) {
-                parameterBuilder.append(", ");
-            }
-            parameterBuilder.append(parameterTypeName);
-            first = false;
-        }
-        return parameterBuilder.toString();
+        return (isDimension() ? "Dimension " : "Function ") + getSourceTypeName() + "." + getFunctionName() + " : " + getReturnTypeName();
     }
 
     @Override

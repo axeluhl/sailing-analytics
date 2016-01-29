@@ -46,7 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -159,7 +158,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
@@ -217,8 +215,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.ResultImpl;
@@ -229,7 +225,10 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class RacingEventServiceImpl implements RacingEventService, ClearStateTestSupport, RegattaListener,
@@ -1058,12 +1057,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint) {
         GPSFixTrack<Mark, GPSFix> track = null;
         // If no spanning track is found, the fix closest to the time point requested is used instead
         GPSFix nonSpanningFallback = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            final GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
             if (trackCandidate != null) {
                 if (spansTimePoint(trackCandidate, timePoint)) {
                     track = trackCandidate;
@@ -1073,31 +1072,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
-            // try to load from store
-            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-            track = loadedTrack;
-            Set<AbstractLog<?, ?>> logs = new HashSet<>();
-            logs.add(leaderboard.getRegattaLike().getRegattaLog());
-            if (raceLog == null) { // no race log explicitly provided --> use all race logs
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        logs.add(raceColumn.getRaceLog(fleet));
-                    }
-                }
-            } else {
-                logs.add(raceLog);
-            }
-            for (AbstractLog<?, ?> log : logs) {
-                try {
-                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
-                }
-            }
-        }
-        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
-        if (result == null) {
+        final Position result; 
+        if (track != null) {
+            result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        } else {
             result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
         }
         return result;
@@ -1741,6 +1719,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         private RegattaAndRaceIdentifier getRaceIdentifier() {
             return trackedRace.getRaceIdentifier();
         }
+
     }
 
     /**
@@ -3165,7 +3144,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     logger.info("Searching remote server " + remoteRef + " for " + query);
                     URLConnection urlConnection = eventsURL.openConnection();
                     urlConnection.connect();
-                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
                     final LeaderboardGroupBaseJsonDeserializer leaderboardGroupBaseJsonDeserializer = new LeaderboardGroupBaseJsonDeserializer();

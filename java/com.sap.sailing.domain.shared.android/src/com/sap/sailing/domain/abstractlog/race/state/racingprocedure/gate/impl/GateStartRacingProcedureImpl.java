@@ -5,11 +5,12 @@ import java.util.Collection;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent.GateLineOpeningTimes;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.GateLineOpeningTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.PathfinderFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPathfinderEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
@@ -43,14 +44,15 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     private boolean gateLineOpeningTimesHasBeenSet;
     private String cachedPathfinder;
 
-    public GateStartRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, RaceLogEventFactory factory,
+    public GateStartRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
             GateStartConfiguration configuration, RaceLogResolver raceLogResolver) {
-        super(raceLog, author, factory, configuration, raceLogResolver);
+        super(raceLog, author, configuration, raceLogResolver);
         this.gateLineOpeningTimeAnalyzer = new GateLineOpeningTimeFinder(raceLog);
         this.pathfinderAnalyzer = new PathfinderFinder(raceLog);
 
         long defaultGolfDownTime = getDefaultGolfDownTime();
-        this.cachedGateLineOpeningTimes = new GateLineOpeningTimes(GateStartRacingProcedure.DefaultGateLaunchStopTime, defaultGolfDownTime);
+        this.cachedGateLineOpeningTimes = new GateLineOpeningTimes(GateStartRacingProcedure.DefaultGateLaunchStopTime,
+                defaultGolfDownTime);
         this.gateLineOpeningTimesHasBeenSet = false;
 
         update();
@@ -78,7 +80,8 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
         if (startTime.before(now)) {
-            if (getConfiguration().hasPathfinder() != null && getConfiguration().hasPathfinder() && getPathfinder() == null) {
+            if (getConfiguration().hasPathfinder() != null && getConfiguration().hasPathfinder()
+                    && getPathfinder() == null) {
                 return new PathfinderPrerequisite(function, this, now, startTime);
             } else if (!gateLineOpeningTimesHasBeenSet) {
                 return new GateLaunchTimePrerequisite(function, this, now, startTime, getDefaultGolfDownTime());
@@ -125,8 +128,8 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         switch (event.getEventName()) {
         case START:
             if (!gateLineOpeningTimesHasBeenSet) {
-                setGateLineOpeningTimes(event.getTimePoint(), 
-                        cachedGateLineOpeningTimes.getGateLaunchStopTime(), cachedGateLineOpeningTimes.getGolfDownTime());
+                setGateLineOpeningTimes(event.getTimePoint(), cachedGateLineOpeningTimes.getGateLaunchStopTime(),
+                        cachedGateLineOpeningTimes.getGolfDownTime());
             }
             rescheduleGateShutdownTime(event.getTimePoint());
             return true;
@@ -147,35 +150,29 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
         TimePoint gateShutdownTime = getGateShutdownTimePoint(startTime);
         if (now.before(startTime.minus(startPhaseClassOverGolfUpIntervall))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, false), new FlagPole(Flags.PAPA,
-                    false)), null, Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
-                    startTime.minus(startPhaseClassOverGolfUpIntervall));
+                    false)), null, Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
+                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall));
         } else if (now.before(startTime.minus(startPhasePapaUpInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall),
-                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, true)),
-                    startTime.minus(startPhasePapaUpInterval));
+                    false)), startTime.minus(startPhaseClassOverGolfUpIntervall), Arrays.asList(new FlagPole(classFlag,
+                    Flags.GOLF, true), new FlagPole(Flags.PAPA, true)), startTime.minus(startPhasePapaUpInterval));
         } else if (now.before(startTime.minus(startPhasePapaDownInterval))) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    true)), startTime.minus(startPhasePapaUpInterval),
-                    Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA, false)),
-                    startTime.minus(startPhasePapaDownInterval));
+                    true)), startTime.minus(startPhasePapaUpInterval), Arrays.asList(new FlagPole(classFlag,
+                    Flags.GOLF, true), new FlagPole(Flags.PAPA, false)), startTime.minus(startPhasePapaDownInterval));
         } else if (now.before(startTime)) {
             return new FlagPoleState(Arrays.asList(new FlagPole(classFlag, Flags.GOLF, true), new FlagPole(Flags.PAPA,
-                    false)), startTime.minus(startPhasePapaDownInterval),
-                    Arrays.asList(new FlagPole(classFlag, false), new FlagPole(Flags.GOLF, true)), startTime);
+                    false)), startTime.minus(startPhasePapaDownInterval), Arrays.asList(new FlagPole(classFlag, false),
+                    new FlagPole(Flags.GOLF, true)), startTime);
         } else if (now.before(gateShutdownTime)) {
             return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, true)), startTime,
                     Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
         } else {
             if (isFinished(now)) {
-                return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.BLUE, false)), getFinishedTime());
             } else if (isInFinishingPhase(now)) {
-                return new FlagPoleState(
-                        Arrays.asList(new FlagPole(Flags.BLUE, true)),
-                        getFinishingTime(),
-                        Arrays.asList(new FlagPole(Flags.BLUE, false)),
-                        null);
+                return new FlagPoleState(Arrays.asList(new FlagPole(Flags.BLUE, true)), getFinishingTime(),
+                        Arrays.asList(new FlagPole(Flags.BLUE, false)), null);
             } else {
                 return new FlagPoleState(Arrays.asList(new FlagPole(Flags.GOLF, false)), gateShutdownTime);
             }
@@ -204,7 +201,8 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
 
     @Override
     public void setGateLineOpeningTimes(TimePoint now, long gateLaunchStopTime, long golfDownTime) {
-        raceLog.add(factory.createGateLineOpeningTimeEvent(now, author, raceLog.getCurrentPassId(), gateLaunchStopTime, golfDownTime));
+        raceLog.add(new RaceLogGateLineOpeningTimeEventImpl(now, author, raceLog.getCurrentPassId(), gateLaunchStopTime,
+                golfDownTime));
     }
 
     @Override
@@ -214,7 +212,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
 
     @Override
     public void setPathfinder(TimePoint timePoint, String sailingId) {
-        raceLog.add(factory.createPathfinderEvent(timePoint, author, raceLog.getCurrentPassId(), sailingId));
+        raceLog.add(new RaceLogPathfinderEventImpl(timePoint, author, raceLog.getCurrentPassId(), sailingId));
     }
 
     @Override
