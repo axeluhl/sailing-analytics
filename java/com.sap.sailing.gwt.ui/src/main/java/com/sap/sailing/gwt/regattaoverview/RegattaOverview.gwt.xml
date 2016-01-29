@@ -6,7 +6,6 @@
 	
 	<!-- Other module inherits                                      -->
 
-    <inherits name="com.sap.sse.gwt.CommonSharedResources" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
