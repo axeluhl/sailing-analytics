@@ -12,25 +12,29 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
-import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SAPHeader extends Composite implements Component<AbstractSettings> {
+public class SAPHeader extends Composite implements Component<SAPHeaderSettings> {
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 
+    private SAPHeaderSettings settings;
+    private final SAPHeaderLifecycle componentLifecycle;
+    
     interface SAPHeaderUiBinder extends UiBinder<Widget, SAPHeader> {
     }
 
     @UiField DivElement pageTitleDiv;
     @UiField Button startFullScreenButton;
     
-    public SAPHeader(String pageTitle, boolean startInAutoScreenMode) {
+    public SAPHeader(SAPHeaderLifecycle componentLifecycle, SAPHeaderSettings settings, boolean startInAutoScreenMode) {
+        this.componentLifecycle = componentLifecycle;
+        this.settings = settings;
+        
         SAPHeaderResources.INSTANCE.css().ensureInjected();
         
         initWidget(uiBinder.createAndBindUi(this));
         
-        pageTitleDiv.setInnerText(pageTitle);
+        pageTitleDiv.setInnerText(settings.getTitle());
         startFullScreenButton.setVisible(startInAutoScreenMode);
 
         // the 'fullscreen' button should disappear after some seconds (10)
@@ -51,7 +55,7 @@ public class SAPHeader extends Composite implements Component<AbstractSettings> 
 
     @Override
     public String getLocalizedShortName() {
-        return "Header";
+        return componentLifecycle.getLocalizedShortName();
     }
     
     @Override
@@ -61,21 +65,21 @@ public class SAPHeader extends Composite implements Component<AbstractSettings> 
     
     @Override
     public boolean hasSettings() {
-        return false;
+        return componentLifecycle.hasSettings();
     }
     
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
-        return null;
+    public SAPHeaderSettingsDialogComponent getSettingsDialogComponent() {
+        return componentLifecycle.getSettingsDialogComponent(settings);
     }
     
     @Override
-    public AbstractSettings getSettings() {
-        return null;
+    public SAPHeaderSettings getSettings() {
+        return settings;
     }
     
     @Override
-    public void updateSettings(AbstractSettings newSettings) {
+    public void updateSettings(SAPHeaderSettings newSettings) {
         // no-op
     }
     

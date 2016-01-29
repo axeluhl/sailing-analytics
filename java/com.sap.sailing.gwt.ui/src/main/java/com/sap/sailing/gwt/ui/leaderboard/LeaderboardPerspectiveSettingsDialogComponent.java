@@ -14,14 +14,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class LeaderboardPerspectiveSettingsDialogComponent implements SettingsDialogComponent<LeaderboardPerspectiveSettings> {
+public class LeaderboardPerspectiveSettingsDialogComponent implements SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> {
     CheckBox leaderboardAutoZoomBox;
     DoubleBox leaderboardZoomFactorBox;
 
     private final StringMessages stringMessages;
-    private final LeaderboardPerspectiveSettings initialSettings;
+    private final LeaderboardWithHeaderPerspectiveSettings initialSettings;
     
-    public LeaderboardPerspectiveSettingsDialogComponent(LeaderboardPerspectiveSettings settings, StringMessages stringMessages) {
+    public LeaderboardPerspectiveSettingsDialogComponent(LeaderboardWithHeaderPerspectiveSettings settings, StringMessages stringMessages) {
         this.initialSettings = settings;
         this.stringMessages = stringMessages;
     }
@@ -57,16 +57,16 @@ public class LeaderboardPerspectiveSettingsDialogComponent implements SettingsDi
     
 
     @Override
-    public LeaderboardPerspectiveSettings getResult() {
-        LeaderboardPerspectiveSettings result = new LeaderboardPerspectiveSettings(leaderboardAutoZoomBox.getValue(), leaderboardZoomFactorBox.getValue());
+    public LeaderboardWithHeaderPerspectiveSettings getResult() {
+        LeaderboardWithHeaderPerspectiveSettings result = new LeaderboardWithHeaderPerspectiveSettings(leaderboardAutoZoomBox.getValue(), leaderboardZoomFactorBox.getValue());
         return result;
     }
     
     @Override
-    public Validator<LeaderboardPerspectiveSettings> getValidator() {
-        return new Validator<LeaderboardPerspectiveSettings>() {
+    public Validator<LeaderboardWithHeaderPerspectiveSettings> getValidator() {
+        return new Validator<LeaderboardWithHeaderPerspectiveSettings>() {
             @Override
-            public String getErrorMessage(LeaderboardPerspectiveSettings valueToValidate) {
+            public String getErrorMessage(LeaderboardWithHeaderPerspectiveSettings valueToValidate) {
                 String errorMessage = null;
                 return errorMessage;
             }

@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
@@ -23,9 +22,8 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
@@ -33,9 +31,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -67,20 +65,20 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     private RegattaAndRaceIdentifier currentLiveRace;
     private boolean showRaceDetails;
     
-    private final ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
-    private final ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
-    private final PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings;
-    private final PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings;
+    private final PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
+    private final PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
+    private final PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings;
+    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings;
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView,
-            ComponentLifecycleAndSettings<LeaderboardPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings, 
-            ComponentLifecycleAndSettings<RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings,
-            PerspectiveLifecycleAndComponentSettings leaderboardPerspectiveComponentLifecyclesAndSettings,
-            PerspectiveLifecycleAndComponentSettings raceboardPerspectiveComponentLifecyclesAndSettings) {
+            PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings, 
+            PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings,
+            PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings,
+            PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -116,16 +114,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
             String headerTitle = TextMessages.INSTANCE.leaderboard() +  ": " + autoPlayerConfiguration.getLeaderboardName();
             
-            LeaderboardWithHeaderPerspectiveLifecycle perspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-            CompositeLifecycleSettings componentSettings = leaderboardPerspectiveComponentLifecyclesAndSettings.getComponentSettings();
-            LeaderboardSettings leaderboardSettings = componentSettings.getSettingsOfComponentLifecycle(perspectiveLifeycle.getLeaderboardPanelLifecycle());
-        
-            SAPHeaderLifecycle.ConstructionParameters sapHeaderConstParams = createSAPHeaderConstructionParameters(headerTitle, withFullscreenButton);
-            LeaderboardPanelLifecycle.ConstructionParameters leaderboardConstParams = createLeaderboardPanelConstructionParameters(leaderboardSettings, autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
-
-            LeaderboardWithHeaderPerspectiveLifecycle.ConstructorArgs perspectiveArgs = new LeaderboardWithHeaderPerspectiveLifecycle.ConstructorArgs(sapHeaderConstParams, leaderboardConstParams);
-            LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-            LeaderboardWithHeaderPerspective leaderboardPerspective = leaderboardPerspectiveLifeycle.createComponent(perspectiveArgs, leaderboardPerspectiveLifecycleAndSettings.getSettings());
+            LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleAndSettings.getSettings(),
+                    leaderboardPerspectiveComponentLifecyclesAndSettings, 
+                    sailingService, asyncActionsExecutor,
+                    new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
+                    autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
+                    userAgent, withFullscreenButton);
 
             playerView.setContent(leaderboardPerspective);
             currentLiveRace = null;
@@ -139,29 +133,19 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         }
     }
 
-    private SAPHeaderLifecycle.ConstructionParameters createSAPHeaderConstructionParameters(String headerTitle, 
-            boolean withFullscreenButton) {
-        LeaderboardWithHeaderPerspectiveLifecycle perspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-        
-        return new SAPHeaderLifecycle.ConstructionParameters(perspectiveLifeycle.getSapHeaderLifecycle(), 
-                new SAPHeaderLifecycle.ConstructorArgs(headerTitle, withFullscreenButton), null);
-    }
-
-    private LeaderboardPanelLifecycle.ConstructionParameters createLeaderboardPanelConstructionParameters(LeaderboardSettings leaderboardSettings,
-            String leaderboardName, boolean showRaceDetails) {
-        CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */ true);
-        LeaderboardWithHeaderPerspectiveLifecycle perspectiveLifeycle = (LeaderboardWithHeaderPerspectiveLifecycle) leaderboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-
-        LeaderboardPanelLifecycle.ConstructorArgsV1 v1 = new LeaderboardPanelLifecycle.ConstructorArgsV1(sailingService, asyncActionsExecutor,
-                leaderboardSettings, true, /* preSelectedRace */null, selectionModel, leaderboardTimer, /*leaderboardGroupName*/ "",
-                leaderboardName, errorReporter, StringMessages.INSTANCE, userAgent, showRaceDetails);
-                
-        return new LeaderboardPanelLifecycle.ConstructionParameters(perspectiveLifeycle.getLeaderboardPanelLifecycle(), 
-                v1, leaderboardSettings);
-    }
-
     private WindChartLifecycle.ConstructionParameters createWindChartConstructionParameters() {
         WindChartLifecycle.ConstructionParameters result = null;
+        
+//        public WindChartConstructorArgs(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+//                TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
+//                AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
+//        
+            // from RaceboardPanel
+//            windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel,
+//                    new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
+//                    true);
+            
+            
         return result;
     }
 
@@ -188,25 +172,25 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
 
-                    RaceBoardPerspectiveLifecycle perspectiveLifeycle = (RaceBoardPerspectiveLifecycle) raceboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
+                    RaceBoardPerspectiveLifecycle perspectiveLifeycle = raceboardPerspectiveLifecycleAndSettings.getPerspectiveLifecycle();
                     CompositeLifecycleSettings componentSettings = raceboardPerspectiveComponentLifecyclesAndSettings.getComponentSettings();
                     LeaderboardSettings leaderboardSettings = componentSettings.getSettingsOfComponentLifecycle(perspectiveLifeycle.getLeaderboardPanelLifecycle());
                 
-                    WindChartLifecycle.ConstructionParameters windChartConstParams = createWindChartConstructionParameters();
-                    RaceMapLifecycle.ConstructionParameters raceMapConstParams = createRaceMapConstructionParameters();
-                    LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams = createLeaderboardPanelConstructionParameters(leaderboardSettings, autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
-                    MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams = createMultiCompeitorRaceChartConstructionParameters();  
-                    MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams = createMediaPlayerConstructionParameters();
-                    
-                    RaceBoardPerspectiveLifecycle.ConstructorArgs perspectiveArgs = new RaceBoardPerspectiveLifecycle.ConstructorArgs(windChartConstParams,
-                            raceMapConstParams, leaderboardPanelConstParams, multiChartConstParams, mediaPlayerConstParams,
-                            sailingService, mediaService, userService, asyncActionsExecutor,
-                            result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
-                            errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
-                    RaceBoardPerspectiveLifecycle raceboardPerspectiveLifeycle = (RaceBoardPerspectiveLifecycle) raceboardPerspectiveLifecycleAndSettings.getComponentLifecycle();
-                    RaceBoardPerspective raceboardPerspective = raceboardPerspectiveLifeycle.createComponent(perspectiveArgs, raceboardPerspectiveLifecycleAndSettings.getSettings());
+//                    WindChartLifecycle.ConstructionParameters windChartConstParams = createWindChartConstructionParameters();
+//                    RaceMapLifecycle.ConstructionParameters raceMapConstParams = createRaceMapConstructionParameters();
+//                    LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams = createLeaderboardPanelConstructionParameters(leaderboardSettings, autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
+//                    MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams = createMultiCompeitorRaceChartConstructionParameters();  
+//                    MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams = createMediaPlayerConstructionParameters();
+//                    
+//                    RaceBoardPerspectiveLifecycle.ConstructorArgs perspectiveArgs = new RaceBoardPerspectiveLifecycle.ConstructorArgs(windChartConstParams,
+//                            raceMapConstParams, leaderboardPanelConstParams, multiChartConstParams, mediaPlayerConstParams,
+//                            sailingService, mediaService, userService, asyncActionsExecutor,
+//                            result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
+//                            errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
+//                    RaceBoardPerspectiveLifecycle raceboardPerspectiveLifeycle = raceboardPerspectiveLifecycleAndSettings.getPerspectiveLifecycle();
+//                    RaceBoardPerspective raceboardPerspective = raceboardPerspectiveLifeycle.createComponent(perspectiveArgs, raceboardPerspectiveLifecycleAndSettings.getSettings());
 
-                    playerView.setContent(raceboardPerspective);
+//                    playerView.setContent(raceboardPerspective);
 
                     activeTvView = AutoPlayModes.Raceboard;
                     leaderboardTimer.pause();

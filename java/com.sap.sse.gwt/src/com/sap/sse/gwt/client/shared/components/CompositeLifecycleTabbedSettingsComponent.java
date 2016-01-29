@@ -39,12 +39,12 @@ public class CompositeLifecycleTabbedSettingsComponent implements Component<Comp
  
     @Override
     public void updateSettings(CompositeLifecycleSettings newSettings) {
-//        for (ComponentLifecycleAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
-//            updateSettings(componentAndSettings);
-//        }
+        for (ComponentLifecycleAndSettings<?,?> componentAndSettings : newSettings.getSettingsPerComponentLifecycle()) {
+            updateSettings(componentAndSettings);
+        }
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings) {
+    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> void updateSettings(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
 //        componentLifecycleAndSettings.getA().updateSettings(componentLifecycleAndSettings.getB());
     }
 
@@ -55,7 +55,7 @@ public class CompositeLifecycleTabbedSettingsComponent implements Component<Comp
         } else {
             StringBuilder result = new StringBuilder();
             boolean first = true;
-            for (ComponentLifecycleAndSettings<?> component : compositeLifecycleSettings.getSettingsPerComponentLifecycle()) {
+            for (ComponentLifecycleAndSettings<?,?> component : compositeLifecycleSettings.getSettingsPerComponentLifecycle()) {
                 if (first) {
                     first = false;
                 } else {

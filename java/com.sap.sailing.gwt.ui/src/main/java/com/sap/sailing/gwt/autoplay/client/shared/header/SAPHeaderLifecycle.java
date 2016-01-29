@@ -1,65 +1,68 @@
 package com.sap.sailing.gwt.autoplay.client.shared.header;
 
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentConstructionParameters;
 import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SAPHeaderLifecycle implements ComponentLifecycle<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.ConstructorArgs> {
-
-    public static class ConstructionParameters extends ComponentConstructionParameters<SAPHeader, AbstractSettings, SettingsDialogComponent<AbstractSettings>, SAPHeaderLifecycle.ConstructorArgs> {
+public class SAPHeaderLifecycle implements ComponentLifecycle<SAPHeader, SAPHeaderSettings, SAPHeaderSettingsDialogComponent, SAPHeaderLifecycle.ConstructorArgs> {
+    private final StringMessages stringMessages;
+    private final String defaultTitle;
+    
+    public static class ConstructionParameters extends ComponentConstructionParameters<SAPHeader, SAPHeaderSettings, SAPHeaderSettingsDialogComponent, SAPHeaderLifecycle.ConstructorArgs> {
         public ConstructionParameters(SAPHeaderLifecycle componentLifecycle,
-                ConstructorArgs componentConstructorArgs, AbstractSettings settings) {
+                ConstructorArgs componentConstructorArgs, SAPHeaderSettings settings) {
             super(componentLifecycle, componentConstructorArgs, settings);
         }
     }
 
-    public SAPHeaderLifecycle() {
+    public SAPHeaderLifecycle(String defaultTitle, StringMessages stringMessages) {
+        this.defaultTitle = defaultTitle;
+        this.stringMessages = stringMessages;
     }
     
     @Override
-    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent(AbstractSettings settings) {
-        return null;
+    public SAPHeaderSettingsDialogComponent getSettingsDialogComponent(SAPHeaderSettings settings) {
+        return new SAPHeaderSettingsDialogComponent(cloneSettings(settings), stringMessages);
     }
 
     @Override
-    public AbstractSettings createDefaultSettings() {
-        return null;
+    public SAPHeaderSettings createDefaultSettings() {
+        return new SAPHeaderSettings(defaultTitle);
     }
 
     @Override
-    public AbstractSettings cloneSettings(AbstractSettings settings) {
-        return null;
+    public SAPHeaderSettings cloneSettings(SAPHeaderSettings settings) {
+        return new SAPHeaderSettings(settings.getTitle());
     }
 
     @Override
     public String getLocalizedShortName() {
-        return "Header";
+        return "SAP Header";
     }
 
     @Override
     public boolean hasSettings() {
-        return false;
+        return true;
     }
     
     @Override
-    public SAPHeader createComponent(ConstructorArgs sapHeaderContructorArgs, AbstractSettings settings) {
+    public SAPHeader createComponent(ConstructorArgs sapHeaderContructorArgs, SAPHeaderSettings settings) {
         return sapHeaderContructorArgs.createComponent(settings);
     }
 
-    public static class ConstructorArgs implements ComponentConstructorArgs<SAPHeader, AbstractSettings> {
-        private final String pageTitle;
+    public static class ConstructorArgs implements ComponentConstructorArgs<SAPHeader, SAPHeaderSettings> {
         private final boolean startInAutoScreenMode;
+        private final SAPHeaderLifecycle componentLifecycle;
         
-        public ConstructorArgs(String pageTitle, boolean startInAutoScreenMode) {
-            this.pageTitle = pageTitle;
+        public ConstructorArgs(SAPHeaderLifecycle componentLifecycle, boolean startInAutoScreenMode) {
+            this.componentLifecycle = componentLifecycle;
             this.startInAutoScreenMode = startInAutoScreenMode;
         }
         
         @Override
-        public SAPHeader createComponent(AbstractSettings newSettings) {
-            return new SAPHeader(pageTitle, startInAutoScreenMode);
+        public SAPHeader createComponent(SAPHeaderSettings settings) {
+            return new SAPHeader(componentLifecycle, settings, startInAutoScreenMode);
         }
     }
 

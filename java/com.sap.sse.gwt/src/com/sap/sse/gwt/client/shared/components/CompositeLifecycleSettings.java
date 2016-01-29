@@ -4,21 +4,38 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 
 public class CompositeLifecycleSettings extends AbstractSettings {
-    private final Iterable<ComponentLifecycleAndSettings<?>> settingsPerComponentLifecycle;
+    private final Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponentLifecycle;
 
-    public CompositeLifecycleSettings(Iterable<ComponentLifecycleAndSettings<?>> settingsPerComponent) {
+    public CompositeLifecycleSettings(Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponent) {
         this.settingsPerComponentLifecycle = settingsPerComponent;
     }
 
-    public Iterable<ComponentLifecycleAndSettings<?>> getSettingsPerComponentLifecycle() {
+    public Iterable<ComponentLifecycleAndSettings<?,?>> getSettingsPerComponentLifecycle() {
         return settingsPerComponentLifecycle;
     }
 
+//    public <C extends ComponentLifecycle<?, S, ?,?>, S extends Settings> void setSettingsOfComponentLifecycle(C componentLifecycle, S settings) {
+//        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
+//        if(componentLifecycleAndSettings != null) {
+//            componentLifecycleAndSettings.setSettings(settings);
+//        }
+//    }
+//
     public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<?,S,?,?> componentLifecycle) {
         S result = null;
-        for (ComponentLifecycleAndSettings<?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
+        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
+        if(componentLifecycleAndSettings != null) {
+            result = componentLifecycleAndSettings.getSettings();
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> findComponentLifecycleAndSettings(ComponentLifecycle<?,S,?,?> componentLifecycle) {
+        ComponentLifecycleAndSettings<C,S> result = null;
+        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle() == componentLifecycle) {
-                result = (S) componentLifecycleAndSettings.getSettings();
+                result = (ComponentLifecycleAndSettings<C, S>) componentLifecycleAndSettings;
                 break;
             }
         }
@@ -27,7 +44,7 @@ public class CompositeLifecycleSettings extends AbstractSettings {
 
     public boolean hasSettings() {
         boolean result = false;
-        for (ComponentLifecycleAndSettings<?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
+        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle().hasSettings()) {
                 result = true;
                 break;

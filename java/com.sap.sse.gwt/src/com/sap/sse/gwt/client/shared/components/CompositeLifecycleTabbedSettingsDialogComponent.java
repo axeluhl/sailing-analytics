@@ -13,16 +13,16 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class CompositeLifecycleTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeLifecycleSettings> {
     
-    public class ComponentLifecycleWithSettingsAndDialogComponent<SettingsType extends Settings> {
-        private ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings;
+    public class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<?,SettingsType,?,?>, SettingsType extends Settings> {
+        private ComponentLifecycleAndSettings<ComponentLifecycleType, SettingsType> componentLifecycleAndSettings;
         private SettingsDialogComponent<SettingsType> dialogComponent;
 
-        public ComponentLifecycleWithSettingsAndDialogComponent(ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings, SettingsDialogComponent<SettingsType> dialogComponent) {
+        public ComponentLifecycleWithSettingsAndDialogComponent(ComponentLifecycleAndSettings<ComponentLifecycleType, SettingsType> componentLifecycleAndSettings, SettingsDialogComponent<SettingsType> dialogComponent) {
             this.componentLifecycleAndSettings = componentLifecycleAndSettings;
             this.dialogComponent = dialogComponent;
         }
         
-        public ComponentLifecycleAndSettings<SettingsType> getComponentLifecycleAndSettings() {
+        public ComponentLifecycleAndSettings<ComponentLifecycleType,SettingsType> getComponentLifecycleAndSettings() {
             return componentLifecycleAndSettings;
         }
 
@@ -31,26 +31,26 @@ public class CompositeLifecycleTabbedSettingsDialogComponent implements Settings
         }
     }
     
-    private final Collection<ComponentLifecycleWithSettingsAndDialogComponent<?>> componentLifecycleAndDialogComponents;
+    private final Collection<ComponentLifecycleWithSettingsAndDialogComponent<?,?>> componentLifecycleAndDialogComponents;
 
     public CompositeLifecycleTabbedSettingsDialogComponent(CompositeLifecycleSettings componentLifecyclesSettings) {
         this.componentLifecycleAndDialogComponents = new ArrayList<>();
-        for (ComponentLifecycleAndSettings<?> componentLifecycleAndSettings : componentLifecyclesSettings.getSettingsPerComponentLifecycle()) {
+        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings : componentLifecyclesSettings.getSettingsPerComponentLifecycle()) {
             if (componentLifecycleAndSettings.getComponentLifecycle().hasSettings()) {
                 this.componentLifecycleAndDialogComponents.add(createComponentLifecycleAndDialogComponent(componentLifecycleAndSettings));
             }
         }
     }
 
-    private <SettingsType extends Settings> ComponentLifecycleWithSettingsAndDialogComponent<SettingsType> createComponentLifecycleAndDialogComponent(ComponentLifecycleAndSettings<SettingsType> componentLifecycleAndSettings) {
-        SettingsType settings = componentLifecycleAndSettings.getSettings();
-        return new ComponentLifecycleWithSettingsAndDialogComponent<SettingsType>(componentLifecycleAndSettings, componentLifecycleAndSettings.getComponentLifecycle().getSettingsDialogComponent(settings));
+    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleWithSettingsAndDialogComponent<C,S> createComponentLifecycleAndDialogComponent(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
+        S settings = componentLifecycleAndSettings.getSettings();
+        return new ComponentLifecycleWithSettingsAndDialogComponent<C,S>(componentLifecycleAndSettings, componentLifecycleAndSettings.getComponentLifecycle().getSettingsDialogComponent(settings));
     }
 
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         TabPanel result = new TabPanel();
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?> component : componentLifecycleAndDialogComponents) {
+        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
             Widget w = component.getDialogComponent().getAdditionalWidget((DataEntryDialog<?>) dialog);
             result.add(w, component.getComponentLifecycleAndSettings().getComponentLifecycle().getLocalizedShortName());
         }
@@ -60,15 +60,15 @@ public class CompositeLifecycleTabbedSettingsDialogComponent implements Settings
 
     @Override
     public CompositeLifecycleSettings getResult() {
-        Collection<ComponentLifecycleAndSettings<?>> settings = new HashSet<>();
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?> component : componentLifecycleAndDialogComponents) {
+        Collection<ComponentLifecycleAndSettings<?,?>> settings = new HashSet<>();
+        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
             settings.add(getComponentAndSettings(component));
         }
         return new CompositeLifecycleSettings(settings);
     }
 
-    private <SettingsType extends Settings> ComponentLifecycleAndSettings<SettingsType> getComponentAndSettings(ComponentLifecycleWithSettingsAndDialogComponent<SettingsType> component) {
-        return new ComponentLifecycleAndSettings<SettingsType>(component.getComponentLifecycleAndSettings().getComponentLifecycle(), component.getDialogComponent().getResult());
+    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> getComponentAndSettings(ComponentLifecycleWithSettingsAndDialogComponent<C,S> component) {
+        return new ComponentLifecycleAndSettings<C,S>(component.getComponentLifecycleAndSettings().getComponentLifecycle(), component.getDialogComponent().getResult());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CompositeLifecycleTabbedSettingsDialogComponent implements Settings
 
     @Override
     public FocusWidget getFocusWidget() {
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?> component : componentLifecycleAndDialogComponents) {
+        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
             FocusWidget fw = component.getDialogComponent().getFocusWidget();
             if (fw != null) {
                 return fw;
