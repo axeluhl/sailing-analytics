@@ -655,7 +655,7 @@ img.openColumn {
 
 .RegattaAndRaceTime-Header {
 	position: absolute;
-	right: 55px;
+	right: 65px;
 	top: 13px;
 	text-align: right;
 	color: white;
@@ -764,10 +764,16 @@ img.openColumn {
     background-image: url('images/home/loggedout.svg');
     cursor: pointer;
     position: absolute;
-    right: 0;
+    right: 10px;
     top: 6px;
 }
 
 .User-Management-Icon.loggedin {
     background-image: url('images/home/loggedin.svg');
+}
+
+#usrMngmtFlyover {
+	position: absolute;
+	top: 50px;
+	right: 10px;
 }

@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -68,7 +70,20 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.authentication.AuthenticationCallback;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
+import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
+import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
+import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
+import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
+import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
+import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -114,7 +129,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     
     private final FlowPanel raceInformationHeader;
     private final FlowPanel regattaAndRaceTimeInformationHeader;
-    private final Anchor userManagementMenu = new Anchor();
+    private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
     
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
@@ -155,7 +170,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        userManagementMenu.setStyleName("User-Management-Icon");
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), "loggedin");
+        this.userManagementMenuView.asWidget().setStyleName("User-Management-Icon");
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
@@ -200,8 +216,11 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 }, selectedRaceIdentifier);
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
-        raceMap.getRightHeaderPanel().add(userManagementMenu);
-
+        raceMap.getRightHeaderPanel().add(userManagementMenuView);
+        Label usermanagementFlyoutDiv = new Label();
+        usermanagementFlyoutDiv.getElement().setId("usrMngmtFlyover");
+        raceMap.getRightHeaderPanel().add(usermanagementFlyoutDiv);
+        
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
         boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
@@ -265,6 +284,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
+        this.setupUserManagementControlPanel();
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -282,6 +302,28 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         }
     }
     
+    private void setupUserManagementControlPanel() {
+        RaceBoardResources.INSTANCE.mainCss().ensureInjected();
+        EventBus eventBus = new SimpleEventBus();
+        WithSecurity withSecurity = new DefaultWithSecurityImpl();
+        FlyoutAuthenticationView userManagementDisplay = new RaceBoardAuthenticationView();
+        AuthenticationManager authenticationManager = new AuthenticationManagerImpl(withSecurity, eventBus, "", "");
+        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(authenticationManager, RaceBoardResources.INSTANCE);
+        AuthenticationCallback callback = new AuthenticationCallback() {
+            @Override
+            public void handleUserProfileNavigation() {
+                // TODO Auto-generated method stub
+            }
+            
+            @Override
+            public void handleSignInSuccess() {
+                // TODO Auto-generated method stub
+            }
+        };
+        WrappedPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, userManagementDisplay, eventBus);
+        new FlyoutAuthenticationPresenter(userManagementDisplay, userManagementMenuView, userManagementController, eventBus );
+    }
+
     @SuppressWarnings("unused")
     private <SettingsType extends AbstractSettings> void addSettingsMenuItem(MenuBar settingsMenu, final Component<SettingsType> component) {
         if (component.hasSettings()) {
