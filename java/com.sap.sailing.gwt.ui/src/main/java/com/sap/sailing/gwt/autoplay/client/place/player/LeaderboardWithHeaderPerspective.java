@@ -23,9 +23,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -100,12 +99,12 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
 
     @Override
     public String getPerspectiveName() {
-        return StringMessages.INSTANCE.leaderboard() + " Viewer";
+        return perspectiveLifecycle.getPerspectiveName();
     }
 
     @Override
     public String getLocalizedShortName() {
-        return getPerspectiveName();
+        return perspectiveLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -124,12 +123,12 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return perspectiveLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getSettingsDialogComponent() {
-        return new LeaderboardPerspectiveSettingsDialogComponent(settings, StringMessages.INSTANCE);
+        return perspectiveLifecycle.getSettingsDialogComponent(settings);
     }
 
     @Override
