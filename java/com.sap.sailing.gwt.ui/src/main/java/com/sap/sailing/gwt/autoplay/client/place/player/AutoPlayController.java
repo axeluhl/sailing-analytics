@@ -10,7 +10,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
@@ -18,11 +17,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -31,7 +25,6 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -112,8 +105,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             playerView.clearContent();
             
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
-            String headerTitle = TextMessages.INSTANCE.leaderboard() +  ": " + autoPlayerConfiguration.getLeaderboardName();
-            
+
             LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleAndSettings.getSettings(),
                     leaderboardPerspectiveComponentLifecyclesAndSettings, 
                     sailingService, asyncActionsExecutor,
@@ -133,37 +125,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         }
     }
 
-    private WindChartLifecycle.ConstructionParameters createWindChartConstructionParameters() {
-        WindChartLifecycle.ConstructionParameters result = null;
-        
-//        public WindChartConstructorArgs(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
-//                TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
-//                AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-//        
-            // from RaceboardPanel
-//            windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel,
-//                    new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
-//                    true);
-            
-            
-        return result;
-    }
-
-    private RaceMapLifecycle.ConstructionParameters createRaceMapConstructionParameters() {
-        RaceMapLifecycle.ConstructionParameters result = null;
-        return result;
-    }
-
-    private MultiCompetitorRaceChartLifecycle.ConstructionParameters createMultiCompeitorRaceChartConstructionParameters() {
-        MultiCompetitorRaceChartLifecycle.ConstructionParameters result = null;
-        return result;
-    }
-
-    private MediaPlayerLifecycle.ConstructionParameters createMediaPlayerConstructionParameters() {
-        MediaPlayerLifecycle.ConstructionParameters result = null;
-        return result;
-    }
-    
     private void showRaceBoard() {
         if (activeTvView != AutoPlayModes.Raceboard) {
             sailingService.getRaceboardData(currentLiveRace.getRegattaName(), currentLiveRace.getRaceName(),
@@ -172,25 +133,12 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
 
-                    RaceBoardPerspectiveLifecycle perspectiveLifeycle = raceboardPerspectiveLifecycleAndSettings.getPerspectiveLifecycle();
-                    CompositeLifecycleSettings componentSettings = raceboardPerspectiveComponentLifecyclesAndSettings.getComponentSettings();
-                    LeaderboardSettings leaderboardSettings = componentSettings.getSettingsOfComponentLifecycle(perspectiveLifeycle.getLeaderboardPanelLifecycle());
-                
-//                    WindChartLifecycle.ConstructionParameters windChartConstParams = createWindChartConstructionParameters();
-//                    RaceMapLifecycle.ConstructionParameters raceMapConstParams = createRaceMapConstructionParameters();
-//                    LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams = createLeaderboardPanelConstructionParameters(leaderboardSettings, autoPlayerConfiguration.getLeaderboardName(), showRaceDetails);
-//                    MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams = createMultiCompeitorRaceChartConstructionParameters();  
-//                    MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams = createMediaPlayerConstructionParameters();
-//                    
-//                    RaceBoardPerspectiveLifecycle.ConstructorArgs perspectiveArgs = new RaceBoardPerspectiveLifecycle.ConstructorArgs(windChartConstParams,
-//                            raceMapConstParams, leaderboardPanelConstParams, multiChartConstParams, mediaPlayerConstParams,
-//                            sailingService, mediaService, userService, asyncActionsExecutor,
-//                            result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, AutoPlayController.this.autoPlayerConfiguration.getLeaderboardName(),
-//                            errorReporter, StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
-//                    RaceBoardPerspectiveLifecycle raceboardPerspectiveLifeycle = raceboardPerspectiveLifecycleAndSettings.getPerspectiveLifecycle();
-//                    RaceBoardPerspective raceboardPerspective = raceboardPerspectiveLifeycle.createComponent(perspectiveArgs, raceboardPerspectiveLifecycleAndSettings.getSettings());
+                    RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(raceboardPerspectiveLifecycleAndSettings.getSettings(),
+                            raceboardPerspectiveComponentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
+                            result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), errorReporter,
+                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
 
-//                    playerView.setContent(raceboardPerspective);
+                    playerView.setContent(raceboardPerspective);
 
                     activeTvView = AutoPlayModes.Raceboard;
                     leaderboardTimer.pause();

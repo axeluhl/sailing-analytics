@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifec
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -23,6 +22,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveConstructorArgs;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -36,7 +36,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
-    
+
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
 
@@ -107,12 +107,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     public static class ConstructorArgs implements PerspectiveConstructorArgs<RaceBoardPerspective, RaceBoardPerspectiveSettings> {
-        private final WindChartLifecycle.ConstructionParameters windChartConstParams;
-        private final RaceMapLifecycle.ConstructionParameters raceMapConstParams;
-        private final LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams;
-        private final MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams;
-        private final MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams;
-
+        private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
         private final SailingServiceAsync sailingService;
         private final MediaServiceAsync mediaService;
         private final UserService userService;
@@ -126,23 +121,14 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         private final UserAgentDetails userAgent;
         private final RaceTimesInfoProvider raceTimesInfoProvider;
         
-        public ConstructorArgs(WindChartLifecycle.ConstructionParameters windChartConstParams,
-                RaceMapLifecycle.ConstructionParameters raceMapConstParams,
-                LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams,
-                MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams,
-                MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams,
+        public ConstructorArgs(PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings,
                 SailingServiceAsync sailingService, MediaServiceAsync mediaService,
                 UserService userService, AsyncActionsExecutor asyncActionsExecutor,
                 Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
                 RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
                 ErrorReporter errorReporter, StringMessages stringMessages,
                 UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
-            this.windChartConstParams = windChartConstParams;
-            this.raceMapConstParams = raceMapConstParams;
-            this.leaderboardPanelConstParams = leaderboardPanelConstParams;
-            this.multiChartConstParams = multiChartConstParams;
-            this.mediaPlayerConstParams = mediaPlayerConstParams;
-            
+            this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
             this.sailingService = sailingService;
             this.mediaService = mediaService;
             this.userService = userService;
@@ -159,15 +145,11 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         
         @Override
         public RaceBoardPerspective createComponent(RaceBoardPerspectiveSettings settings) {
-            RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-                    competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, null, /* event */null, settings,
-                    errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
-                    /* isScreenLargeEnoughToOfferChartSupport */ true);
-            
-            RaceBoardPerspective perspective = new RaceBoardPerspective(settings, windChartConstParams, raceMapConstParams,
-                    leaderboardPanelConstParams, multiChartConstParams, mediaPlayerConstParams, stringMessages, raceBoardPanel); 
-            
-            return perspective;
+            RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(settings,
+                    componentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
+                    competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, errorReporter,
+                    stringMessages, userAgent, raceTimesInfoProvider);            
+            return raceboardPerspective;
         }
     }
 }

@@ -1,23 +1,31 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
+import java.util.Map;
+
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
+import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
-import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettingsDialogComponent;
+import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A perspective managing a RaceboardPanel and the corresponding timepanel.
@@ -29,15 +37,23 @@ public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoard
     private final DockLayoutPanel dockPanel;
     private final static int TIMEPANEL_HEIGHT = 67;
     
-    public RaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, WindChartLifecycle.ConstructionParameters windChartConstParams,
-            RaceMapLifecycle.ConstructionParameters raceMapConstParams,
-            LeaderboardPanelLifecycle.ConstructionParameters leaderboardPanelConstParams,
-            MultiCompetitorRaceChartLifecycle.ConstructionParameters multiChartConstParams,
-            MediaPlayerLifecycle.ConstructionParameters mediaPlayerConstParams,
-            StringMessages stringMessages, RaceBoardPanel raceBoardPanel) {
+    private final RaceBoardPerspectiveLifecycle perspectiveLifecycle; 
+    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
+    
+    public RaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, 
+            PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings,
+            SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            UserService userService, AsyncActionsExecutor asyncActionsExecutor,
+            Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
+            ErrorReporter errorReporter, StringMessages stringMessages,
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         super();
         this.settings = perspectiveSettings;
+        this.perspectiveLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle();
+        this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
 
+        RaceBoardPanel raceBoardPanel = createRaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor, competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, errorReporter, stringMessages, userAgent, raceTimesInfoProvider); 
         raceBoardPanel.setSize("100%", "100%");
         FlowPanel timePanel = createTimePanel(raceBoardPanel);
         
@@ -67,14 +83,28 @@ public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoard
         return timelinePanel;
     }
 
+    private RaceBoardPanel createRaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+            UserService userService, AsyncActionsExecutor asyncActionsExecutor,
+            Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
+            ErrorReporter errorReporter, StringMessages stringMessages,
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+      RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
+      competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, null, /* event */null, settings,
+      errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
+      /* isScreenLargeEnoughToOfferChartSupport */ true);
+
+      return raceBoardPanel;
+    }
+
     @Override
     public String getPerspectiveName() {
-        return StringMessages.INSTANCE.leaderboard() + " Viewer";
+        return perspectiveLifecycle.getPerspectiveName();
     }
 
     @Override
     public String getLocalizedShortName() {
-        return getPerspectiveName();
+        return perspectiveLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -93,13 +123,12 @@ public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoard
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return perspectiveLifecycle.hasSettings();
     }
 
-    
     @Override
     public SettingsDialogComponent<RaceBoardPerspectiveSettings> getSettingsDialogComponent() {
-        return new RaceBoardPerspectiveSettingsDialogComponent(settings, StringMessages.INSTANCE);
+        return perspectiveLifecycle.getSettingsDialogComponent(settings);
     }
 
     @Override
