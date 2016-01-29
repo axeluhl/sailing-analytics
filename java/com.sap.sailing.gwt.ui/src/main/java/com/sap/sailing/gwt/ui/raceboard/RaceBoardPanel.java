@@ -306,22 +306,15 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         RaceBoardResources.INSTANCE.mainCss().ensureInjected();
         EventBus eventBus = new SimpleEventBus();
         WithSecurity withSecurity = new DefaultWithSecurityImpl();
-        FlyoutAuthenticationView userManagementDisplay = new RaceBoardAuthenticationView();
-        AuthenticationManager authenticationManager = new AuthenticationManagerImpl(withSecurity, eventBus, "", "");
-        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(authenticationManager, RaceBoardResources.INSTANCE);
-        AuthenticationCallback callback = new AuthenticationCallback() {
-            @Override
-            public void handleUserProfileNavigation() {
-                // TODO Auto-generated method stub
-            }
-            
-            @Override
-            public void handleSignInSuccess() {
-                // TODO Auto-generated method stub
-            }
-        };
-        WrappedPlaceManagementController userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, userManagementDisplay, eventBus);
-        new FlyoutAuthenticationPresenter(userManagementDisplay, userManagementMenuView, userManagementController, eventBus );
+        FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
+        AuthenticationManager manager = new AuthenticationManagerImpl(withSecurity, eventBus,
+                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createEmailValidationLink(), 
+                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createPasswordResetLink());
+        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, RaceBoardResources.INSTANCE);
+        WrappedPlaceManagementController userManagementController = null;
+        AuthenticationCallback callback = new AuthenticationCallbackImpl(userManagementController);
+        userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
+        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus);
     }
 
     @SuppressWarnings("unused")
