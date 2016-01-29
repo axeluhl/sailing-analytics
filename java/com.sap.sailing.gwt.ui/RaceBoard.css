@@ -772,8 +772,12 @@ img.openColumn {
     background-image: url('images/home/loggedin.svg');
 }
 
-#usrMngmtFlyover {
-	position: absolute;
-	top: 50px;
-	right: 10px;
+.User-Management-View {
+    top: 70px !important;
+    left: inherit !important;
+    right: 0 !important;
+}
+
+.User-Management-View * {
+    font-size: 15px;
 }

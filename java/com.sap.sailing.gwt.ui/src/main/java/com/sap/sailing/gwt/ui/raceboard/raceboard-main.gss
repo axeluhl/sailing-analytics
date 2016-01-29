@@ -8,62 +8,9 @@ html,
 body {
   height: 100%;
   font-family: 'Open Sans', sans-serif;
-  font-size: 93.75%;
-  line-height: 1.333;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -ms-content-zooming: none;
-}
-figure {
-  margin: 0;
-}
-a {
-  text-decoration: none;
-  color: #008fcc;
-}
-a:hover {
-  text-decoration: underline;
-}
-a img {
-  vertical-align: bottom;
-}
-hr {
-  font-size: 1rem;
-  margin: 0;
-  height: 1px;
-  border: none;
-  border-top: 1px solid #ebebeb;
-}
-h1 {
-  font-size: 2.133333333333333em;
-}
-h2 {
-  font-size: 1.466666666666667em;
-  font-weight: bold;
-  color: #008fcc;
-  margin-top: 0.7em;
-  margin-bottom: 0.7em;
-}
-h3 {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin: 0 0 0.5em;
-}
-h4 {
-  font-size: 1em;
-  font-weight: bold;
-  color: #008fcc;
-}
-h5 {
-  font-size: 0.866666666666667em;
-  font-weight: 600;
-  color: #008fcc;
-}
-figure img {
-  display: block;
-}
-figcaption {
-  margin-top: 1.333333333333333em;
 }
 .button {
   font-size: 1rem;

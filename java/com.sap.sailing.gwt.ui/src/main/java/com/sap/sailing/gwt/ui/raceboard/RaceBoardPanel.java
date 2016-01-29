@@ -217,9 +217,6 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceMap.getLeftHeaderPanel().add(raceInformationHeader);
         raceMap.getRightHeaderPanel().add(regattaAndRaceTimeInformationHeader);
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
-        Label usermanagementFlyoutDiv = new Label();
-        usermanagementFlyoutDiv.getElement().setId("usrMngmtFlyover");
-        raceMap.getRightHeaderPanel().add(usermanagementFlyoutDiv);
         
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
