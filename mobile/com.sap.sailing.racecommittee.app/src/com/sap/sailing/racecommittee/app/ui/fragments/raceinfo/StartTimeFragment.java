@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -25,7 +24,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;

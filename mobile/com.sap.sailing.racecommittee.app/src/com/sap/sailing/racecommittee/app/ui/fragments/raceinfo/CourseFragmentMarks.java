@@ -1,14 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.IdRes;
-import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,8 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -44,8 +44,6 @@ import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
-import com.sap.sailing.racecommittee.app.domain.impl.SelectionItem;
-import com.sap.sailing.racecommittee.app.ui.adapters.SelectionAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
@@ -54,11 +52,6 @@ import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseMarksDialogF
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
 
