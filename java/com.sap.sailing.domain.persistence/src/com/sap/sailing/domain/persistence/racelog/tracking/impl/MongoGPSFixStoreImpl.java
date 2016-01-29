@@ -14,9 +14,9 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
-import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -107,9 +107,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log, Competitor competitor)
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
+        List<DeviceMapping<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
@@ -118,9 +118,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark)
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
+        List<DeviceMapping<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze().get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
@@ -192,9 +192,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log,
             Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
-        List<DeviceMapping<Competitor>> mappings = new DeviceCompetitorMappingFinder<>(log).analyze().get(competitor);
+        List<DeviceMapping<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
                 final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
@@ -211,9 +211,9 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
     
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark,
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
             TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
-        List<DeviceMapping<Mark>> mappings = new DeviceMarkMappingFinder<>(log).analyze().get(mark);
+        List<DeviceMapping<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze().get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
@@ -261,5 +261,4 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
         }
         return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
     }
-
 }

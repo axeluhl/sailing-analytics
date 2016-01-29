@@ -74,6 +74,13 @@ public abstract class CourseManagementWidget implements IsWidget {
         marks = new MarkTableWrapper<RefreshableMultiSelectionModel<MarkDTO>>(
                 /* multiSelection */ true, sailingService, stringMessages, errorReporter);
         
+        marks.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                markSelectionChanged();
+            }
+        });
+        
         CaptionPanel waypointsPanel = new CaptionPanel(stringMessages.waypoints());
         CaptionPanel controlPointsPanel = new CaptionPanel(stringMessages.twoMarkControlPoint());
         CaptionPanel marksPanel = new CaptionPanel(stringMessages.mark());
@@ -156,6 +163,9 @@ public abstract class CourseManagementWidget implements IsWidget {
         controlPointsBtnsPanel.add(addControlPoint);
     }
     
+    protected void markSelectionChanged() {
+    }
+
     private void removeWaypoint(WaypointDTO waypoint) {
         waypoints.getDataProvider().getList().remove(waypoint);
     }

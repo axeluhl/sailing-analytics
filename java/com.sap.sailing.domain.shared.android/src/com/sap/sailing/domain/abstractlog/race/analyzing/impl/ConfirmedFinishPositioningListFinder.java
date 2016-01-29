@@ -19,7 +19,6 @@ public class ConfirmedFinishPositioningListFinder extends RaceLogAnalyzer<Compet
                 return finishPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             }
         }
-        
         return null;
     }
 }
