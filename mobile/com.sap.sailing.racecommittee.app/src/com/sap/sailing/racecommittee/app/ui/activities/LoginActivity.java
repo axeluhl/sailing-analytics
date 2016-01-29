@@ -311,6 +311,10 @@ public class LoginActivity extends BaseActivity
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
         }
+
+        if (!EulaHelper.isEulaAccepted(this)) {
+            EulaHelper.showEulaDialog(this);
+        }
     }
 
     @Override
@@ -352,9 +356,6 @@ public class LoginActivity extends BaseActivity
             }
         }
 
-        if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showEulaDialog(this);
-        }
     }
 
     @Override

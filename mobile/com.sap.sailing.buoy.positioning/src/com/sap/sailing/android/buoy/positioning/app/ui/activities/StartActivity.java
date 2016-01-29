@@ -24,11 +24,7 @@ public class StartActivity extends AbstractStartActivity {
             getSupportActionBar().setHomeButtonEnabled(false);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         if (!EulaHelper.isEulaAccepted(this)) {
             EulaHelper.showEulaDialog(this);
         }
