@@ -16,6 +16,7 @@ import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
+import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 public class PingHelper {
     private static String TAG = PingHelper.class.getName();
@@ -25,9 +26,9 @@ public class PingHelper {
         try {
             JSONObject fixJson = new JSONObject();
 
-            fixJson.put("timestamp", new Date().getTime());
-            fixJson.put("longitude", location.getLongitude());
-            fixJson.put("latitude", location.getLatitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, new Date().getTime());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
 
             String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
 

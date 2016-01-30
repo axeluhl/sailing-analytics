@@ -5,6 +5,12 @@
 *.ipr
 *.iws
 
+# Eclipse #
+###########
+.settings
+.project
+.classpath
+
 # Build Output #
 ################
 target/

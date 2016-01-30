@@ -36,6 +36,10 @@ public class StartActivity extends AbstractStartActivity {
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
         refreshDatabase();
+
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog();
+        }
     }
 
     @Override

@@ -16,7 +16,7 @@ android {
         versionName "$verCode - Laser"
         useJack false // not working on Windows yet
 
-//        /* UI testing with espresso */
+        /* UI testing with espresso */
 //        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 

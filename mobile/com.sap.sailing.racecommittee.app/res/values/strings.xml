@@ -482,6 +482,6 @@
     <string name="reset_state_2">Reset</string>
     <string name="reset_message_1">Do you want to clear the list?</string>
     <string name="reset_message_2">Do you want to reset to the last state?</string>
-    <string name="geo_coords">%1$d° %2$d′ %3$.3f″</string>
+    <string name="geo_coords" translatable="false">%1$d° %2$d′ %3$.3f″</string>
 
 </resources>

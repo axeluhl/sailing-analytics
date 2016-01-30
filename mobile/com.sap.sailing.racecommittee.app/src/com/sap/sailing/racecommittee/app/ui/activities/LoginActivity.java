@@ -359,6 +359,7 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
+
     }
 
     @Override

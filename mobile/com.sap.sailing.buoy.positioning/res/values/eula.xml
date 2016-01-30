@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="eula_url">http://www.sapsailing.com/EULA_Android_BuoyPinger.html</string>
+    <string name="eula_url" translatable="false">http://www.sapsailing.com/EULA_Android_BuoyPinger.html</string>
 </resources>
