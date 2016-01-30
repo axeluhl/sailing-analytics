@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.leaderboard.ResultDiscardingRule;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -37,6 +38,8 @@ public interface RaceColumnListener extends Serializable {
     void resultDiscardingRuleChanged(ResultDiscardingRule oldDiscardingRule, ResultDiscardingRule newDiscardingRule);
 
     void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event);
+    
+    default void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {};
 
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.

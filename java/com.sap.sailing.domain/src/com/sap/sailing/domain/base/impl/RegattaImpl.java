@@ -505,6 +505,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
+    public void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {
+        raceColumnListeners.notifyListenersAboutRegattaLogEventAdded(raceColumn, event);
+    }
+
+    @Override
     public ScoringScheme getScoringScheme() {
         return scoringScheme;
     }
