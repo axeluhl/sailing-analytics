@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfiguration
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -285,7 +286,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
         }
         DeviceConfigurationDTO dto = getResult();
         sailingService.createOrUpdateDeviceConfiguration(matcher, dto, 
-                new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                new MarkedAsyncCallback<>(new AsyncCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void onSuccess(DeviceConfigurationMatcherDTO matcher) {
                 markAsDirty(false);
@@ -295,7 +296,7 @@ public class DeviceConfigurationDetailComposite extends Composite {
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-        });
+        }));
     }
 
     private KeyUpHandler dirtyMarker = new KeyUpHandler() {

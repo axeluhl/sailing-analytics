@@ -64,33 +64,35 @@ public class DeviceConfigurationCreateMatcherDialog extends DataEntryDialog<Devi
     }
 
     private ListBox typeBox;
-    private List<TextBox> devicesBoxes;
+    private final List<TextBox> devicesBoxes;
+    private final StringMessages stringMessages;
     
     public DeviceConfigurationCreateMatcherDialog(StringMessages stringMessages,
             Validator<DeviceConfigurationMatcherDTO> validator,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
-        super("Create Device Configuration", "Specify for which devices the new configuration should apply", 
-                "Create", stringMessages.cancel(), validator, callback);
+        super(stringMessages.createDeviceConfiguration(), stringMessages.forWhichDevicesShouldConfigurationApply(), 
+                stringMessages.create(), stringMessages.cancel(), validator, callback);
         this.devicesBoxes = new ArrayList<TextBox>();
+        this.stringMessages = stringMessages;
     }
     
     @Override
     protected Widget getAdditionalWidget() {
         final Grid valueGrid = new Grid(2, 2);
         
-        valueGrid.setWidget(0, 0, createLabel("Matcher type"));
+        valueGrid.setWidget(0, 0, createLabel(stringMessages.matcherType()));
         typeBox = createListBox(false);
         typeBox.addItem(DeviceConfigurationMatcherType.SINGLE.name());
         typeBox.addItem(DeviceConfigurationMatcherType.MULTI.name());
         valueGrid.setWidget(0, 1, typeBox);
-        valueGrid.setWidget(1, 0, createLabel("Matching devices"));
+        valueGrid.setWidget(1, 0, createLabel(stringMessages.matchingDevices()));
 
         final Grid devicesGrid = new Grid(2, 2);
         TextBox firstDeviceBox = createTextBox("");
         devicesGrid.setWidget(0, 0, firstDeviceBox);
         devicesBoxes.add(firstDeviceBox);
         
-        final Button addDeviceButton = new Button("Add Device");
+        final Button addDeviceButton = new Button(stringMessages.addDevice());
         addDeviceButton.setVisible(false);
         addDeviceButton.addClickHandler(new ClickHandler() {
             @Override

@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -136,7 +137,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     }
 
     private void createConfiguration(final DeviceConfigurationDTO configuration) {
-        sailingService.getDeviceConfigurationMatchers(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
+        sailingService.getDeviceConfigurationMatchers(new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationMatcherDTO> allMatchers) {
                 createConfiguration(allMatchers, configuration);
@@ -146,7 +147,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-        });
+        }));
     }
 
     private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
@@ -156,7 +157,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             @Override
             public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
                 sailingService.createOrUpdateDeviceConfiguration(createdMatcher, configuration, 
-                        new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                        new MarkedAsyncCallback<>(new AsyncCallback<DeviceConfigurationMatcherDTO>() {
                     @Override
                     public void onSuccess(DeviceConfigurationMatcherDTO newMatcher) {
                         listComposite.refreshTable();
@@ -168,7 +169,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
                     }
-                });
+                }));
             }
 
             @Override
