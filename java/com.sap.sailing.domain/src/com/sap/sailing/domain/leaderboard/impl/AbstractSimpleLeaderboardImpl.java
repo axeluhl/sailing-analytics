@@ -1209,8 +1209,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {
-        getRaceColumnListeners().notifyListenersAboutRegattaLogEventAdded(raceColumn, event);
+    public void regattaLogEventAdded(RegattaLogEvent event) {
+        getRaceColumnListeners().notifyListenersAboutRegattaLogEventAdded(event);
     }
 
     @Override

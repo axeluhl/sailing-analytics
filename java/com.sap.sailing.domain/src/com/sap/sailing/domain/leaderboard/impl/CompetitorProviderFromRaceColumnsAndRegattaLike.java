@@ -12,11 +12,13 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -163,11 +165,13 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                     rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
                 }
             }
+            final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
+            Util.addAll(new CompetitorsInLogAnalyzer<>(regattaLog).analyze(), result);
             // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
             provider.addRaceColumnListener(raceColumnListener);
             // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
-            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
+            regattaLog.addListener(regattaLogCompetitorsCacheInvalidationListener);
             allCompetitorsCache = result;
         }
         return allCompetitorsCache;

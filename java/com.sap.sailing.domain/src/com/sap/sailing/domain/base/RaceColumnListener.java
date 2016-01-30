@@ -39,7 +39,7 @@ public interface RaceColumnListener extends Serializable {
 
     void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event);
     
-    default void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {};
+    default void regattaLogEventAdded(RegattaLogEvent event) {};
 
     /**
      * A listener can use this to specify that it must not be serialized together with other listeners.

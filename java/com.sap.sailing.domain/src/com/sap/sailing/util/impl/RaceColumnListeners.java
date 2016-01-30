@@ -158,9 +158,9 @@ public class RaceColumnListeners implements Serializable {
         }
     }
 
-    public void notifyListenersAboutRegattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {
+    public void notifyListenersAboutRegattaLogEventAdded(RegattaLogEvent event) {
         for (RaceColumnListener listener : getRaceColumnListeners()) {
-            listener.regattaLogEventAdded(raceColumn, event);
+            listener.regattaLogEventAdded(event);
         }
     }
 }

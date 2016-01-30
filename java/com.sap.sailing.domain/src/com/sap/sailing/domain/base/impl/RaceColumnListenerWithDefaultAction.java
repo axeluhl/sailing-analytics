@@ -96,7 +96,7 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
     }
 
     @Override
-    default void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {
+    default void regattaLogEventAdded(RegattaLogEvent event) {
         defaultAction(); 
     }
 

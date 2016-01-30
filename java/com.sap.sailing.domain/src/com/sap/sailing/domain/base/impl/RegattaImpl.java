@@ -135,8 +135,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private transient CompetitorProviderFromRaceColumnsAndRegattaLike competitorsProvider;
     private AbstractLogEventAuthor regattaLogEventAuthorForRegatta = new LogEventAuthorImpl(
-            AbstractLeaderboardImpl.class.getName(), 0);;
-
+            AbstractLeaderboardImpl.class.getName(), 0);
+    
     /**
      * Constructs a regatta with an empty {@link RaceLogStore}.
      */
@@ -235,6 +235,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
                 return null;
             }
         };
+        this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));
         this.raceExecutionOrderCache = new RaceExecutionOrderCache();
     }
 
@@ -284,6 +285,9 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         } else {
             raceLogStore = EmptyRaceLogStore.INSTANCE;
         }
+        // re-establish the transient listener on regattaLikeHelper that is responsible for forwarding the
+        // regatta log events
+        this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));
     }
 
     protected Object readResolve() throws ObjectStreamException {
@@ -505,8 +509,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public void regattaLogEventAdded(RaceColumn raceColumn, RegattaLogEvent event) {
-        raceColumnListeners.notifyListenersAboutRegattaLogEventAdded(raceColumn, event);
+    public void regattaLogEventAdded(RegattaLogEvent event) {
+        raceColumnListeners.notifyListenersAboutRegattaLogEventAdded(event);
     }
 
     @Override

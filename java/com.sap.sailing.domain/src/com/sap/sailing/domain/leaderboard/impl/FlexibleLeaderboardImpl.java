@@ -13,12 +13,15 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceColumnListener;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
+import com.sap.sailing.domain.base.impl.RegattaLogEventAdditionForwarder;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
@@ -50,7 +53,10 @@ import com.sap.sse.common.Duration;
  * found on a {@link Regatta} that is modeled properly with its series and fleets. In particular, the
  * {@link IsRegattaLike} interface requires this leaderboard to provide a {@link RegattaLog} and to grant access to its
  * {@link RaceColumn}s by name. A {@link BaseRegattaLikeImpl} is used as a delegate to implement the {@link IsRegattaLike}
- * interface.
+ * interface.<p>
+ * 
+ * {@link RaceColumnListener}s will be {@link RaceColumnListener#regattaLogEventAdded(RegattaLogEvent) notified} about events
+ * added to the {@link RegattaLog} that belongs to this leaderboard.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -98,6 +104,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
                 return getRaceColumnByName(raceColumnName);
             }
         };
+        this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
         this.raceExecutionOrderProvider = new RaceExecutionOrderCache();
     }
 
@@ -113,6 +120,7 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         for (RaceColumn column : getRaceColumns()) {
             column.setRaceLogInformation(raceLogStore, new FlexibleLeaderboardAsRegattaLikeIdentifier(this));
         }
+        regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(getRaceColumnListeners()));
     }
     
     protected Object readResolve() throws ObjectStreamException {
