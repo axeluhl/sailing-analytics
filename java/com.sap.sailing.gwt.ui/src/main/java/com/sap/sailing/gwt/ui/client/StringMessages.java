@@ -1473,4 +1473,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String forWhichDeviceShouldConfigurationApply();
     String create();
     String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
 }

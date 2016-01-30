@@ -31,7 +31,7 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
             }
             for (String identifier : valueToValidate.clients) {
                 if (identifier.isEmpty()) {
-                    return "Enter an identifier name";
+                    return stringMessages.enterDeviceIdentifierName();
                 }
             }
             return null;
@@ -55,6 +55,13 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
         grid.setWidget(0, 0, createLabel("Identifier"));
         grid.setWidget(0, 1, identifierBox);
         return grid;
+    }
+
+    
+    @Override
+    public void show() {
+        super.show();
+        identifierBox.setFocus(true);
     }
 
     @Override
