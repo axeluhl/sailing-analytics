@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -16,24 +15,18 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
     public static class MatcherValidator implements Validator<DeviceConfigurationMatcherDTO> {
         
         private List<DeviceConfigurationMatcherDTO> allMatchers;
+        private final StringMessages stringMessages;
     
-        public MatcherValidator(List<DeviceConfigurationMatcherDTO> allMatchers) {
+        public MatcherValidator(List<DeviceConfigurationMatcherDTO> allMatchers, StringMessages stringMessages) {
             this.allMatchers = allMatchers;
+            this.stringMessages = stringMessages;
         }
     
         @Override
         public String getErrorMessage(DeviceConfigurationMatcherDTO valueToValidate) {
             for (DeviceConfigurationMatcherDTO existingMatcher : allMatchers) {
-                if (existingMatcher.type.equals(valueToValidate.type)) {
-                    switch (valueToValidate.type) {
-                    case SINGLE:
-                        if (existingMatcher.clients.containsAll(valueToValidate.clients)) {
-                            return "There is already a configuration for such a matcher.";
-                        }
-                        break;
-                    default:
-                        break;
-                    }
+                if (existingMatcher.clients.containsAll(valueToValidate.clients)) {
+                    return stringMessages.thereIsAlreadyAConfigurationForThisDevice();
                 }
             }
             for (String identifier : valueToValidate.clients) {
@@ -67,7 +60,6 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
     @Override
     protected DeviceConfigurationMatcherDTO getResult() {
         DeviceConfigurationMatcherDTO matcher = new DeviceConfigurationMatcherDTO();
-        matcher.type = DeviceConfigurationMatcherType.SINGLE;
         matcher.clients = Arrays.asList(identifierBox.getValue());
         return matcher;
     }

@@ -152,7 +152,7 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
 
     private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
         getCreateDialog(stringMessages, 
-                new DeviceConfigurationCreateSingleMatcherDialog.MatcherValidator(allMatchers), 
+                new DeviceConfigurationCreateSingleMatcherDialog.MatcherValidator(allMatchers, stringMessages), 
                 new DialogCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
@@ -191,7 +191,7 @@ public abstract class DeviceConfigurationPanel extends SimplePanel implements De
         detailComposite.setConfiguration(null);
         detailComposite.setVisible(false);
         for (DeviceConfigurationMatcherDTO identifier : refreshableMultiSelectionModel.getSelectedSet()) {
-            sailingService.removeDeviceConfiguration(identifier.type, identifier.clients, new AsyncCallback<Boolean>() {
+            sailingService.removeDeviceConfiguration(identifier.clients, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
                     listComposite.refreshTable();

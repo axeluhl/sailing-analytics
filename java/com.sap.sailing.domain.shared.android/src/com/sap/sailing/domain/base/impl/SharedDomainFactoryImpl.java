@@ -31,7 +31,6 @@ import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcher
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.WithID;
@@ -349,9 +348,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
     }
 
     @Override
-    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, 
-            List<String> clientIdentifiers) {
-        DeviceConfigurationMatcher probe = createMatcher(type, clientIdentifiers);
+    public DeviceConfigurationMatcher getOrCreateDeviceConfigurationMatcher(List<String> clientIdentifiers) {
+        DeviceConfigurationMatcher probe = createMatcher(clientIdentifiers);
         DeviceConfigurationMatcher matcher = configurationMatcherCache.get(probe.getMatcherIdentifier());
         if (matcher == null) {
             configurationMatcherCache.put(probe.getMatcherIdentifier(), probe);
@@ -360,16 +358,8 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         return matcher;
     }
     
-    private DeviceConfigurationMatcher createMatcher(DeviceConfigurationMatcherType type, List<String> clientIdentifiers) {
-        DeviceConfigurationMatcher matcher = null;
-        switch (type) {
-        case SINGLE:
-            matcher = new DeviceConfigurationMatcherSingle(clientIdentifiers.get(0));
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown matcher type: " + type);
-        }
-        return matcher;
+    private DeviceConfigurationMatcher createMatcher(List<String> clientIdentifiers) {
+        return new DeviceConfigurationMatcherSingle(clientIdentifiers.get(0));
     }
     
     @Override

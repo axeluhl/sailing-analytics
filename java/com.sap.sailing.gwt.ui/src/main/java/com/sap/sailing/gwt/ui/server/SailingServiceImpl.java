@@ -177,7 +177,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -4707,7 +4706,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.type, matcherDto.clients);
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.clients);
         DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
         if (configuration == null) {
             return null;
@@ -4718,15 +4717,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.type, matcherDTO.clients);
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.clients);
         DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
         getService().createOrUpdateDeviceConfiguration(matcher, configuration);
         return convertToDeviceConfigurationMatcherDTO(matcher);
     }
 
     @Override
-    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
+    public boolean removeDeviceConfiguration(List<String> clientIds) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(clientIds);
         getService().removeDeviceConfiguration(matcher);
         return true;
     }
@@ -4737,14 +4736,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
         }
         DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
-                matcher.getMatcherType(),
-                clients,  
-                matcher.getMatchingRank());
+                clients);
         return dto;
     }
 
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIds) {
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIds);
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(List<String> clientIds) {
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIds);
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {

@@ -23,7 +23,6 @@ public class DeviceConfigurationReplicationTest extends AbstractServerReplicatio
         Thread.sleep(1000);
         Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
         assertEquals(1, configurationMap.size());
-        assertEquals(matcher.getMatcherType(), configurationMap.keySet().iterator().next().getMatcherType());
     }
     
     @Test

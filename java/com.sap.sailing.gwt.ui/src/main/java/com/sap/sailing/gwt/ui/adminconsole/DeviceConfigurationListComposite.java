@@ -58,12 +58,12 @@ public abstract class DeviceConfigurationListComposite extends Composite {
         refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<DeviceConfigurationMatcherDTO>() {
             @Override
             public boolean representSameEntity(DeviceConfigurationMatcherDTO dto1, DeviceConfigurationMatcherDTO dto2) {
-                return Util.equalsWithNull(dto1.type.name(), dto2.type.name());
+                return Util.equalsWithNull(dto1.clients, dto2.clients);
             }
 
             @Override
             public int hashCode(DeviceConfigurationMatcherDTO t) {
-                return t.type.name() == null ? 0 : t.type.name().hashCode();
+                return t.clients == null ? 0 : t.clients.hashCode();
             }
         }, configurationsDataProvider);
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);

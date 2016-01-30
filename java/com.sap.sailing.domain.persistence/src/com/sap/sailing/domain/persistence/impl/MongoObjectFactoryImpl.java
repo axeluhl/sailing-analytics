@@ -1270,7 +1270,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
 
     private DBObject createDeviceConfigurationMatcherObject(DeviceConfigurationMatcher matcher) {
         DBObject matcherObject = new BasicDBObject();
-        matcherObject.put(FieldNames.CONFIGURATION_MATCHER_TYPE.name(), matcher.getMatcherType().name());
         if (matcher instanceof DeviceConfigurationMatcherSingle) {
             BasicDBList client = new BasicDBList();
             client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
