@@ -65,19 +65,15 @@ public class DeviceConfigurationDetailComposite extends Composite {
     private CheckBox overwriteRegattaConfigurationBox;
     private RegattaConfigurationDTO currentRegattaConfiguration;
     
-    
     public DeviceConfigurationDetailComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final DeviceConfigurationCloneListener listener) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        
         this.cloneListener = listener;
-        
         this.matcher = null;
         this.originalConfiguration = null;
         this.currentRegattaConfiguration = null;
-        
         captionPanel = new CaptionPanel(stringMessages.configuration());
         VerticalPanel verticalPanel = new VerticalPanel();
         contentPanel = new VerticalPanel();
@@ -97,14 +93,11 @@ public class DeviceConfigurationDetailComposite extends Composite {
             }
         });
         verticalPanel.add(contentPanel);
-        
         verticalPanel.add(new HTML("<hr  style=\"width:100%;\" />"));
-        
         HorizontalPanel actionPanel = new HorizontalPanel();
         actionPanel.add(cloneButton);
         actionPanel.add(updateButton);
         verticalPanel.add(actionPanel);
-        
         captionPanel.add(verticalPanel);
         initWidget(captionPanel);
     }

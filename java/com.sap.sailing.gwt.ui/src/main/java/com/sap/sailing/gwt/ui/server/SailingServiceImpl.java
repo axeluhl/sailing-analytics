@@ -122,7 +122,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
@@ -4734,13 +4733,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
         List<String> clients = new ArrayList<String>();
-        
         if (matcher instanceof DeviceConfigurationMatcherSingle) {
             clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
-            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
         }
-        
         DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
                 matcher.getMatcherType(),
                 clients,  

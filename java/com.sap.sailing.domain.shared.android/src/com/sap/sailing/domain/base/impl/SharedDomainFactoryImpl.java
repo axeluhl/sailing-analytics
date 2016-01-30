@@ -27,7 +27,6 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.MarkType;
@@ -366,9 +365,6 @@ public class SharedDomainFactoryImpl implements SharedDomainFactory {
         switch (type) {
         case SINGLE:
             matcher = new DeviceConfigurationMatcherSingle(clientIdentifiers.get(0));
-            break;
-        case MULTI:
-            matcher = new DeviceConfigurationMatcherMulti(clientIdentifiers);
             break;
         default:
             throw new IllegalArgumentException("Unknown matcher type: " + type);

@@ -1470,6 +1470,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String matchingDevices();
     String addDevice();
     String createDeviceConfiguration();
-    String forWhichDevicesShouldConfigurationApply();
+    String forWhichDeviceShouldConfigurationApply();
     String create();
 }

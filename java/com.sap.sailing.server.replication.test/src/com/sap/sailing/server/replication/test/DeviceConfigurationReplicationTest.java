@@ -10,7 +10,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 
@@ -18,12 +17,10 @@ public class DeviceConfigurationReplicationTest extends AbstractServerReplicatio
 
     @Test
     public void testCreateConfiguration() throws InterruptedException {
-        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherMulti(Arrays.asList("a", "b"));
+        DeviceConfigurationMatcher matcher = new DeviceConfigurationMatcherSingle("a");
         DeviceConfigurationImpl configuration = new DeviceConfigurationImpl(new RegattaConfigurationImpl());
-        
         master.createOrUpdateDeviceConfiguration(matcher, configuration);
         Thread.sleep(1000);
-        
         Map<DeviceConfigurationMatcher, DeviceConfiguration> configurationMap = replica.getAllDeviceConfigurations();
         assertEquals(1, configurationMap.size());
         assertEquals(matcher.getMatcherType(), configurationMap.keySet().iterator().next().getMatcherType());

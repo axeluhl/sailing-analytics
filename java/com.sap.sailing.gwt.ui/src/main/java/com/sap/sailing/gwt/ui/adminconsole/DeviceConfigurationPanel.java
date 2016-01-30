@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
+public abstract class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
 
     public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
         if (clientIdentifiers.size() == 1) {
@@ -152,7 +152,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
 
     private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
         getCreateDialog(stringMessages, 
-                new DeviceConfigurationCreateMatcherDialog.MatcherValidator(allMatchers), 
+                new DeviceConfigurationCreateSingleMatcherDialog.MatcherValidator(allMatchers), 
                 new DialogCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
@@ -177,21 +177,15 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         }).show();
     }
     
-    protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
+    abstract protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
             final Validator<DeviceConfigurationMatcherDTO> validator,
-            final DialogCallback<DeviceConfigurationMatcherDTO> callback) {
-        return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
-    }
+            final DialogCallback<DeviceConfigurationMatcherDTO> callback);
 
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages);
-    }
+    abstract protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, StringMessages stringMessages);
 
-    protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener) {
-        return new DeviceConfigurationDetailComposite(sailingService, errorReporter, stringMessages, cloneListener);
-    }
+    abstract protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener);
 
     private void removeConfiguration() {
         detailComposite.setConfiguration(null);

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TextBox;
@@ -12,13 +13,46 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialog<DeviceConfigurationMatcherDTO> {
     
+    public static class MatcherValidator implements Validator<DeviceConfigurationMatcherDTO> {
+        
+        private List<DeviceConfigurationMatcherDTO> allMatchers;
+    
+        public MatcherValidator(List<DeviceConfigurationMatcherDTO> allMatchers) {
+            this.allMatchers = allMatchers;
+        }
+    
+        @Override
+        public String getErrorMessage(DeviceConfigurationMatcherDTO valueToValidate) {
+            for (DeviceConfigurationMatcherDTO existingMatcher : allMatchers) {
+                if (existingMatcher.type.equals(valueToValidate.type)) {
+                    switch (valueToValidate.type) {
+                    case SINGLE:
+                        if (existingMatcher.clients.containsAll(valueToValidate.clients)) {
+                            return "There is already a configuration for such a matcher.";
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+            for (String identifier : valueToValidate.clients) {
+                if (identifier.isEmpty()) {
+                    return "Enter an identifier name";
+                }
+            }
+            return null;
+        }
+        
+    }
+
     private TextBox identifierBox;
     
     public DeviceConfigurationCreateSingleMatcherDialog(StringMessages stringMessages,
             Validator<DeviceConfigurationMatcherDTO> validator,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
-        super("Create Device Configuration", "Specify for which device the new configuration should apply", 
-                "Create", stringMessages.cancel(), validator, callback);
+        super(stringMessages.createDeviceConfiguration(), stringMessages.forWhichDeviceShouldConfigurationApply(), 
+                stringMessages.create(), stringMessages.cancel(), validator, callback);
         this.identifierBox = createTextBox("");
     }
     

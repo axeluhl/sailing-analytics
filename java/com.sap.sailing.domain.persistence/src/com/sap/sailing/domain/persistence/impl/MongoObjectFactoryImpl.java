@@ -75,7 +75,6 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.common.Bearing;
@@ -115,7 +114,6 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.TypeBasedServiceFinder;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -1277,10 +1275,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             BasicDBList client = new BasicDBList();
             client.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
             matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), client);
-        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
-            BasicDBList clients = new BasicDBList();
-            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
-            matcherObject.put(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name(), clients);
         }
         return matcherObject;
     }
