@@ -17,7 +17,6 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.CompetitorsInLogAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -165,8 +164,10 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                 }
             }
             final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
-            Util.addAll(new CompetitorsInLogAnalyzer<>(regattaLog).analyze(), result);
-            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
+            // Don't add regatta log competitors; if no race exists, the leaderboard is not considered to have any
+            // competitors. The competitors are collected from the races. Those, however, will be the regatta log
+            // competitors if the race does not define its own.
+            // Note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
             provider.addRaceColumnListener(raceColumnListener);
             // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
