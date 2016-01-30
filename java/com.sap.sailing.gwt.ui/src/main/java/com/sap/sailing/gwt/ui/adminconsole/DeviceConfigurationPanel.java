@@ -21,12 +21,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
-public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
+public abstract class DeviceConfigurationPanel extends SimplePanel implements DeviceConfigurationCloneListener {
 
     public static String renderIdentifiers(List<String> clientIdentifiers, StringMessages stringMessages) {
         if (clientIdentifiers.size() == 1) {
@@ -136,7 +137,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
     }
 
     private void createConfiguration(final DeviceConfigurationDTO configuration) {
-        sailingService.getDeviceConfigurationMatchers(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
+        sailingService.getDeviceConfigurationMatchers(new MarkedAsyncCallback<>(new AsyncCallback<List<DeviceConfigurationMatcherDTO>>() {
             @Override
             public void onSuccess(List<DeviceConfigurationMatcherDTO> allMatchers) {
                 createConfiguration(allMatchers, configuration);
@@ -146,17 +147,17 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
-        });
+        }));
     }
 
     private void createConfiguration(final List<DeviceConfigurationMatcherDTO> allMatchers, final DeviceConfigurationDTO configuration) {
         getCreateDialog(stringMessages, 
-                new DeviceConfigurationCreateMatcherDialog.MatcherValidator(allMatchers), 
+                new DeviceConfigurationCreateSingleMatcherDialog.MatcherValidator(allMatchers, stringMessages), 
                 new DialogCallback<DeviceConfigurationMatcherDTO>() {
             @Override
             public void ok(DeviceConfigurationMatcherDTO createdMatcher) {
                 sailingService.createOrUpdateDeviceConfiguration(createdMatcher, configuration, 
-                        new AsyncCallback<DeviceConfigurationMatcherDTO>() {
+                        new MarkedAsyncCallback<>(new AsyncCallback<DeviceConfigurationMatcherDTO>() {
                     @Override
                     public void onSuccess(DeviceConfigurationMatcherDTO newMatcher) {
                         listComposite.refreshTable();
@@ -168,7 +169,7 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(caught.getMessage());
                     }
-                });
+                }));
             }
 
             @Override
@@ -176,27 +177,21 @@ public class DeviceConfigurationPanel extends SimplePanel implements DeviceConfi
         }).show();
     }
     
-    protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
+    abstract protected DataEntryDialog<DeviceConfigurationMatcherDTO> getCreateDialog(final StringMessages stringMessages, 
             final Validator<DeviceConfigurationMatcherDTO> validator,
-            final DialogCallback<DeviceConfigurationMatcherDTO> callback) {
-        return new DeviceConfigurationCreateMatcherDialog(stringMessages, validator, callback);
-    }
+            final DialogCallback<DeviceConfigurationMatcherDTO> callback);
 
-    protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringMessages) {
-        return new DeviceConfigurationListComposite(sailingService, errorReporter, stringMessages);
-    }
+    abstract protected DeviceConfigurationListComposite createListComposite(SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, StringMessages stringMessages);
 
-    protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
-            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener) {
-        return new DeviceConfigurationDetailComposite(sailingService, errorReporter, stringMessages, cloneListener);
-    }
+    abstract protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
+            ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener);
 
     private void removeConfiguration() {
         detailComposite.setConfiguration(null);
         detailComposite.setVisible(false);
         for (DeviceConfigurationMatcherDTO identifier : refreshableMultiSelectionModel.getSelectedSet()) {
-            sailingService.removeDeviceConfiguration(identifier.type, identifier.clients, new AsyncCallback<Boolean>() {
+            sailingService.removeDeviceConfiguration(identifier.clients, new AsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean result) {
                     listComposite.refreshTable();
