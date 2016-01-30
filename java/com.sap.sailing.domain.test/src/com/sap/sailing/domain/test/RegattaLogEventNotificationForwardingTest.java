@@ -22,8 +22,10 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
+import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -156,7 +158,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     
     @Test
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidation() throws NoWindException, InterruptedException, ExecutionException {
-        Regatta regatta = new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, new LowPoint(), "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = createRegatta();
         RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
@@ -175,10 +177,18 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         assertEquals(event.getCompetitor().getName(), dto3.competitors.get(0).getName());
     }
 
+    private Regatta createRegatta() {
+        Series series = new SeriesImpl("Test Series", /* isMedal */ false, /* fleets */ Collections.singleton(new FleetImpl("Default")),
+                Collections.singleton("R1"), /* trackedRegattaRegistry */ null);
+        Regatta regatta = new RegattaImpl("test", null, null, null, Collections.singleton(series), false,
+                new LowPoint(), "test", null, OneDesignRankingMetric::new);
+        return regatta;
+    }
+
     @Test
     public void testAddCompetitorToRegattaAndEnsureCacheInvalidationOnDeserializedRegattaLeaderboard() throws NoWindException,
             InterruptedException, ExecutionException, ClassNotFoundException, IOException {
-        Regatta regatta = new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, new LowPoint(), "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = createRegatta();
         RegattaLeaderboard leaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));
         final TimePoint now = MillisecondsTimePoint.now();
         leaderboard.getScoreCorrection().setTimePointOfLastCorrectionsValidity(now);
