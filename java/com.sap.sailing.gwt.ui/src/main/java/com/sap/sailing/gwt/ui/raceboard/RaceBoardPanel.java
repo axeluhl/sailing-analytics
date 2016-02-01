@@ -81,9 +81,7 @@ import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
-import com.sap.sse.security.ui.client.DefaultWithSecurityImpl;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.WithSecurity;
 
 /**
  * A view showing a list of components visualizing a race from the regattas announced by calls to {@link #fillRegattas(List)}.
@@ -281,7 +279,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
-        this.setupUserManagementControlPanel();
+        this.setupUserManagementControlPanel(userService);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
             mainPanel.add(componentViewer.getViewerWidget());
@@ -299,12 +297,11 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         }
     }
     
-    private void setupUserManagementControlPanel() {
+    private void setupUserManagementControlPanel(UserService userService) {
         RaceBoardResources.INSTANCE.mainCss().ensureInjected();
         EventBus eventBus = new SimpleEventBus();
-        WithSecurity withSecurity = new DefaultWithSecurityImpl();
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        AuthenticationManager manager = new AuthenticationManagerImpl(withSecurity, eventBus,
+        AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
                 com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createEmailValidationLink(), 
                 com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createPasswordResetLink());
         AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, RaceBoardResources.INSTANCE);
