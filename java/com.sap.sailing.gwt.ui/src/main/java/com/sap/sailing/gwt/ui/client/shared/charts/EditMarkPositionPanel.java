@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -26,15 +27,20 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
+
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
+import com.google.gwt.maps.client.mvc.MVCArray;
+import com.google.gwt.maps.client.overlays.Polyline;
+import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
@@ -42,6 +48,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -49,12 +56,14 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
+import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -72,6 +81,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private final Label noMarkSelectedLabel;
 
     private Set<HandlerRegistration> courseMarkHandlers;
+    private Set<HandlerRegistration> fixHandlers;
 
     private Set<String> selectedMarks;
 
@@ -83,7 +93,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private String leaderboardName;    
     private String raceColumnName;
     private String fleetName;
-    private Map<MarkDTO, List<GPSFixDTO>> marks;
+    private Map<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>> marks;
+    private Map<MarkDTO, Polyline> polylines;
     private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
 
@@ -94,6 +105,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
+        this.polylines = new HashMap<MarkDTO, Polyline>();
         this.markDataProvider = new ListDataProvider<>();
         this.marksPanel = new MarksPanel(this, markDataProvider);
         this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
@@ -187,7 +199,25 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                 }
                                 @Override
                                 public void onSuccess(Map<MarkDTO, List<GPSFixDTO>> result) {
-                                    marks = result;
+                                    marks = new HashMap<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>>();
+                                    for (Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
+                                        List<Pair<GPSFixDTO, FixOverlay>> fixOverlayPairs = new ArrayList<Pair<GPSFixDTO, FixOverlay>>();
+                                        MVCArray<LatLng> polylinePath = MVCArray.newInstance();
+                                        for (GPSFixDTO fix : fixes.getValue()) {
+                                            FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, "#505050", raceMap.getCoordinateSystem());
+                                            overlay.setVisible(false);
+                                            fixOverlayPairs.add(new Pair<GPSFixDTO, FixOverlay>(fix, overlay));
+                                            polylinePath.push(LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg()));
+                                        }
+                                        marks.put(fixes.getKey(), fixOverlayPairs);
+                                        PolylineOptions options = PolylineOptions.newInstance();
+                                        if (map != null) {
+                                            options.setMap(map);
+                                        }
+                                        options.setPath(polylinePath);
+                                        options.setVisible(false);
+                                        polylines.put(fixes.getKey(), Polyline.newInstance(options));
+                                    }
                                     List<MarkDTO> markList = new ArrayList<MarkDTO>();
                                     markList.addAll(marks.keySet());
                                     markDataProvider.setList(markList);
@@ -204,11 +234,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     private void setSeriesPoints(MarkDTO mark) {
-        List<GPSFixDTO> fixes = marks.get(mark);
+        List<Pair<GPSFixDTO, FixOverlay>> fixes = marks.get(mark);
         Point[] points = new Point[fixes.size()];
         int i = 0;
-        for (GPSFixDTO fix : fixes) {
-            points[i++] = new Point(fix.timepoint.getTime(), 1);
+        for (Pair<GPSFixDTO, FixOverlay> fix : fixes) {
+            points[i++] = new Point(fix.getA().timepoint.getTime(), 1);
         }
         setSeriesPoints(markSeries, points);
     }
@@ -329,6 +359,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 map.setOptions(mapOptions);
             }
         }));
+        for (Map.Entry<MarkDTO, Polyline> polyline : polylines.entrySet()) {
+            polyline.getValue().setMap(map);
+        }
     }
 
     @Override
@@ -361,21 +394,41 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         if (selected.size() > 0) {
             setWidget(chart);
             setSeriesPoints(selected.get(0));
+            onResize(); // redraw chart
             for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
                 if (!overlay.getKey().equals(selected.get(0).getName())) {
                     overlay.getValue().setVisible(false);
                 }
             }
-            onResize();
+            for (Pair<GPSFixDTO, FixOverlay> fix : marks.get(selected.get(0))) {
+                fix.getB().setVisible(true);
+            }
+            polylines.get(selected.get(0)).setVisible(true);
         } else {
             setWidget(noMarkSelectedLabel);
             showAllCourseMarkOverlays();
+            hideAllFixOverlays();
+            hideAllPolylines();
         }
     }
     
     public void showAllCourseMarkOverlays() {
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
             overlay.getValue().setVisible(true);
+        }
+    }
+    
+    public void hideAllFixOverlays() {
+        for (Map.Entry<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>> mark : marks.entrySet()) {
+            for (Pair<GPSFixDTO, FixOverlay> fix : mark.getValue()) {
+                fix.getB().setVisible(false);
+            }
+        }
+    }
+    
+    public void hideAllPolylines() {
+        for (Map.Entry<MarkDTO, Polyline> polyline : polylines.entrySet()) {
+            polyline.getValue().setVisible(false);
         }
     }
 }

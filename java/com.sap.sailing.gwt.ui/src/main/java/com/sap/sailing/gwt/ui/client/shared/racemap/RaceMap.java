@@ -2787,4 +2787,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public Map<String, CourseMarkOverlay> getCourseMarkOverlays() {
         return courseMarkOverlays;
     }
+    
+    public CoordinateSystem getCoordinateSystem() {
+        return coordinateSystem;
+    }
 }
