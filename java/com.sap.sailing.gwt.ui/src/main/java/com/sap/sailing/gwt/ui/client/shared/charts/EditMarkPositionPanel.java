@@ -71,7 +71,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private Series markSeries;
     private final Label noMarkSelectedLabel;
 
-    private Map<String, CourseMarkOverlay> courseMarkOverlays;
     private Set<HandlerRegistration> courseMarkHandlers;
 
     private Set<String> selectedMarks;
@@ -216,7 +215,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     public void setVisible(boolean visible) {
         this.visible = visible;
-        if (visible) {
+        if (map == null) {
+            map = raceMap.getMap();
+            if (map != null) {
+                setMap(map);
+            }
+        }
+        if (this.visible) {
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(marksPanel);
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
@@ -233,7 +238,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
             unregisterCourseMarkHandlers();
         }
-        super.setVisible(visible);
+        super.setVisible(this.visible);
     }
 
     private void unregisterCourseMarkHandlers() {
@@ -245,24 +250,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
     }
 
-    public void setMarkOverlays(final Map<String, CourseMarkOverlay> courseMarkOverlays) {
-        this.courseMarkOverlays = courseMarkOverlays;
-        if (visible) {
-            registerCourseMarkListeners();
-        }
-    }
-
     private void registerCourseMarkListeners() {
-        for (final Map.Entry<String, CourseMarkOverlay> courseMark : courseMarkOverlays.entrySet()) {
-            courseMarkHandlers.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
-                @Override
-                public void onEvent(MouseDownMapEvent event) {
-                    selectedMarks.add(courseMark.getKey());
-                    MapOptions mapOptions = MapOptions.newInstance(false);
-                    mapOptions.setDraggable(false);
-                    map.setOptions(mapOptions);
-                }
-            }));
+        if (map != null) {
+            Map<String, CourseMarkOverlay> courseMarkOverlays = raceMap.getCourseMarkOverlays();
+            for (final Map.Entry<String, CourseMarkOverlay> courseMark : courseMarkOverlays.entrySet()) {
+                courseMarkHandlers.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
+                    @Override
+                    public void onEvent(MouseDownMapEvent event) {
+                        selectedMarks.add(courseMark.getKey());
+                        MapOptions mapOptions = MapOptions.newInstance(false);
+                        mapOptions.setDraggable(false);
+                        map.setOptions(mapOptions);
+                    }
+                }));
+            }
         }
     }
     
@@ -312,7 +313,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             @Override
             public void onEvent(MouseMoveMapEvent event) {
                 for (final String markName : selectedMarks) {
-                    courseMarkOverlays.get(markName).setMarkPosition(event.getMouseEvent().getLatLng());
+                    CourseMarkOverlay overlay = raceMap.getCourseMarkOverlays().get(markName);
+                    if (overlay != null) {
+                        overlay.setMarkPosition(event.getMouseEvent().getLatLng());
+                    }
                 }
             }
         }));
@@ -357,9 +361,21 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         if (selected.size() > 0) {
             setWidget(chart);
             setSeriesPoints(selected.get(0));
+            for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
+                if (!overlay.getKey().equals(selected.get(0).getName())) {
+                    overlay.getValue().setVisible(false);
+                }
+            }
             onResize();
         } else {
             setWidget(noMarkSelectedLabel);
+            showAllCourseMarkOverlays();
+        }
+    }
+    
+    public void showAllCourseMarkOverlays() {
+        for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
+            overlay.getValue().setVisible(true);
         }
     }
 }
