@@ -24,6 +24,13 @@ public interface RaceBoardResources extends CommonSharedResources, ClientBundle 
         String mainsection();
         String mainsection_header();
         String mainsection_header_title();
+        
+        String usermanagement_icon();
+        String usermanagement_loggedin();
+        String usermanagement_view();
+        String usermanagement_view_content_wrapper();
+        String usermanagement_view_content();
+        String usermanagement_mobile();
     }
 
     public interface RaceBoardMediaCss extends CommonMediaCss, CssResource {

@@ -60,6 +60,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPresele
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -130,6 +131,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
     
+    private static final RaceBoardMainCss MAIN_CSS = RaceBoardResources.INSTANCE.mainCss();
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     /**
@@ -168,8 +170,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), "loggedin");
-        this.userManagementMenuView.asWidget().setStyleName("User-Management-Icon");
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), MAIN_CSS.usermanagement_loggedin());
+        this.userManagementMenuView.asWidget().setStyleName(MAIN_CSS.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
@@ -298,7 +300,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     }
     
     private void setupUserManagementControlPanel(UserService userService) {
-        RaceBoardResources.INSTANCE.mainCss().ensureInjected();
+        MAIN_CSS.ensureInjected();
         EventBus eventBus = new SimpleEventBus();
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
         AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,

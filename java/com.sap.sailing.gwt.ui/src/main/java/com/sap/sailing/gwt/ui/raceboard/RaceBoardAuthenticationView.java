@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
@@ -29,14 +29,15 @@ public class RaceBoardAuthenticationView extends Composite implements FlyoutAuth
     @UiField DivElement headingUi;
     @UiField SimplePanel contentContainerUi;
     
-    @UiField(provided = true) CommonSharedResources res = RaceBoardResources.INSTANCE;
+    @UiField(provided = true) RaceBoardResources res = RaceBoardResources.INSTANCE;
 
     public RaceBoardAuthenticationView() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
-        popupPanel.setStyleName("User-Management-View");
+        popupPanel.setStyleName(res.mainCss().usermanagement_view());
+        popupPanel.setStyleName(res.mainCss().usermanagement_mobile(), DeviceDetector.isMobile());
     }
     
     @Override
