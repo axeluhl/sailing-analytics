@@ -19,12 +19,38 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
 
+    /**
+     * Creates an {@link AuthenticationManagerImpl} instance based on the {@link UserService} and
+     * {@link UserManagementServiceAsync} instances provided by the given {@link WithSecurity} instance.
+     * 
+     * @param userService
+     *            the {@link UserService} instance to use
+     * @param eventBus
+     *            the {@link EventBus} instance
+     * @param emailConfirmationUrl
+     *            URL with is send to users to verify their email address
+     * @param passwordResetUrl
+     *            URL with is send to users to reset their password
+     */
     public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
         this(clientFactory.getUserManagementService(), clientFactory.getUserService(), eventBus, emailConfirmationUrl,
                 passwordResetUrl);
     }
     
+    /**
+     * Creates an {@link AuthenticationManagerImpl} instance based on the given {@link UserService} and its underlying
+     * {@link UserManagementServiceAsync} instance.
+     * 
+     * @param userService
+     *            the {@link UserService} instance to use
+     * @param eventBus
+     *            the {@link EventBus} instance
+     * @param emailConfirmationUrl
+     *            URL with is send to users to verify their email address
+     * @param passwordResetUrl
+     *            URL with is send to users to reset their password
+     */
     public AuthenticationManagerImpl(UserService userService, EventBus eventBus, String emailConfirmationUrl,
             String passwordResetUrl) {
         this(userService.getUserManagementService(), userService, eventBus, emailConfirmationUrl, passwordResetUrl);
