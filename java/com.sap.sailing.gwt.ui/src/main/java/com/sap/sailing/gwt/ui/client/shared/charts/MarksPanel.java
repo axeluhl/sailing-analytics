@@ -1,0 +1,109 @@
+package com.sap.sailing.gwt.ui.client.shared.charts;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
+import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
+import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+
+public class MarksPanel extends SimplePanel implements Component<AbstractSettings> {
+    private static final LeaderboardTableResources tableResources = GWT.create(LeaderboardTableResources.class);
+    
+    private final ListDataProvider<MarkDTO> markDataProvider;    
+    private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
+    
+    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider) {
+        this.markDataProvider = markDataProvider;
+        setTitle("Marks");
+        markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
+        markTable.getElement().getStyle().setMargin(10, Unit.PX);
+        markTable.getElement().getStyle().setProperty("minWidth", 300, Unit.PX);
+        SelectionCheckboxColumn<MarkDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<MarkDTO>(
+                tableResources.cellTableStyle().cellTableCheckboxSelected(),
+                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
+                new EntityIdentityComparator<MarkDTO>() {
+                    @Override
+                    public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
+                        return dto1.getIdAsString().equals(dto2.getIdAsString());
+                    }
+                    @Override
+                    public int hashCode(MarkDTO t) {
+                        return t.getIdAsString().hashCode();
+                    }
+                },
+                this.markDataProvider,
+                markTable);
+        markTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
+        markTable.setColumnWidth(selectionCheckboxColumn, 27, Unit.PX);
+        Column<MarkDTO, String> markNameColumn = new Column<MarkDTO, String>(new TextCell()) {
+            @Override
+            public String getValue(MarkDTO object) {
+                return object.getName();
+            }
+        };
+        markTable.addColumn(markNameColumn, new TextHeader("Marks"));
+        markTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
+        markTable.getSelectionModel().addSelectionChangeHandler(parent);
+        markDataProvider.addDataDisplay(markTable);
+        setWidget(markTable);
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+    }
+    
+    @Override
+    public String getLocalizedShortName() {
+        return null;
+    }
+
+    @Override
+    public Widget getEntryWidget() {
+        return this;
+    }
+
+    @Override
+    public boolean hasSettings() {
+        return false;
+    }
+
+    @Override
+    public SettingsDialogComponent<AbstractSettings> getSettingsDialogComponent() {
+        return null;
+    }
+
+    @Override
+    public void updateSettings(AbstractSettings newSettings) {
+    }
+
+    @Override
+    public String getDependentCssClassName() {
+        return null;
+    }
+
+    public List<MarkDTO> getSelectedMarks() {
+        List<MarkDTO> list = new ArrayList<MarkDTO>();
+        for (MarkDTO mark : markDataProvider.getList()) {
+            if (markTable.getSelectionModel().isSelected(mark)) {
+                list.add(mark);
+            }
+        }
+        return list;               
+    }
+}

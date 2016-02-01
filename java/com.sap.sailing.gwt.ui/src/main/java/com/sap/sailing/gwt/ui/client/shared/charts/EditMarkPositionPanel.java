@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,8 +26,6 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsData;
 import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
-import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
-
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
@@ -38,8 +37,11 @@ import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -48,6 +50,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
@@ -60,9 +64,12 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 
-public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize {    
+public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {    
     private final RaceMap raceMap;
+    private final LeaderboardPanel leaderboardPanel;
+    private final MarksPanel marksPanel;
     private Series markSeries;
+    private final Label noMarkSelectedLabel;
 
     private Map<String, CourseMarkOverlay> courseMarkOverlays;
     private Set<HandlerRegistration> courseMarkHandlers;
@@ -78,19 +85,27 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private String raceColumnName;
     private String fleetName;
     private Map<MarkDTO, List<GPSFixDTO>> marks;
+    private final ListDataProvider<MarkDTO> markDataProvider;
+    private SideBySideComponentViewer sideBySideComponentViewer;
 
-    public EditMarkPositionPanel(final RaceMap raceMap, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
+    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
+            RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.raceMap = raceMap;
+        this.leaderboardPanel = leaderboardPanel;
+        this.markDataProvider = new ListDataProvider<>();
+        this.marksPanel = new MarksPanel(this, markDataProvider);
+        this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
+        this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.leaderboardName = leaderboardName;
-        courseMarkHandlers = new HashSet<>();
-        selectedMarks = new HashSet<>();
-        mapListeners = new HashSet<>();
+        this.courseMarkHandlers = new HashSet<>();
+        this.selectedMarks = new HashSet<>();
+        this.mapListeners = new HashSet<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
-        setVisible(false);
+        this.setVisible(false);
         
         chart = new Chart()
                 .setPersistent(true)
@@ -107,10 +122,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 .setCredits(new Credits().setEnabled(false))
                 .setChartTitle(new ChartTitle().setText("Mark Fixes"))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setPersistent(true)
-                .setLinePlotOptions(
-                        new LinePlotOptions().setLineWidth(0).setMarker(new Marker().setEnabled(true).setRadius(4))
-                                .setShadow(false));
+                .setPersistent(true);
+        
+        timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         chart.setClickEventHandler(new ChartClickEventHandler() {
             @Override
@@ -138,13 +152,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         chart.getYAxis().setAxisTitleText("").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
-        markSeries = chart.createSeries().setType(Series.Type.FLAGS).setName("Test").setYAxis(0)
-                .setPlotOptions(new LinePlotOptions().setSelected(true));
+        markSeries = chart.createSeries().setType(Series.Type.SCATTER).setYAxis(0)
+                .setPlotOptions(new LinePlotOptions().setSelected(true).setShowInLegend(false));
         chart.addSeries(markSeries, false, false);
     }
     
     private void loadData(final Date from, final Date to) {
-        if (selectedRaceIdentifier != null && from != null && to != null) {
+        if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
             setWidget(chart);
             showLoading("Loading mark fixes...");
             if (leaderboardName != null) {
@@ -175,14 +189,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                 @Override
                                 public void onSuccess(Map<MarkDTO, List<GPSFixDTO>> result) {
                                     marks = result;
-                                    List<GPSFixDTO> fixes = marks.entrySet().iterator().next().getValue();
-                                    Point[] points = new Point[fixes.size()];
-                                    int i = 0;
-                                    for (GPSFixDTO fix : fixes) {
-                                        points[i++] = new Point(fix.timepoint.getTime(), 1);
-                                    }
-                                    setSeriesPoints(markSeries, points);
+                                    List<MarkDTO> markList = new ArrayList<MarkDTO>();
+                                    markList.addAll(marks.keySet());
+                                    markDataProvider.setList(markList);
                                     hideLoading();
+                                    onSelectionChange(null);
                                     onResize();
                                 }
                             });
@@ -192,14 +203,32 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             }
         }
     }
+    
+    private void setSeriesPoints(MarkDTO mark) {
+        List<GPSFixDTO> fixes = marks.get(mark);
+        Point[] points = new Point[fixes.size()];
+        int i = 0;
+        for (GPSFixDTO fix : fixes) {
+            points[i++] = new Point(fix.timepoint.getTime(), 1);
+        }
+        setSeriesPoints(markSeries, points);
+    }
 
     public void setVisible(boolean visible) {
         this.visible = visible;
         if (visible) {
+            if (sideBySideComponentViewer != null) {
+                sideBySideComponentViewer.setLeftComponent(marksPanel);
+                sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
+            }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             unregisterCourseMarkHandlers();
             registerCourseMarkListeners();
         } else {
+            if (sideBySideComponentViewer != null) {
+                sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
+                sideBySideComponentViewer.setLeftComponentToggleButtonVisible(true);
+            }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
             unregisterCourseMarkHandlers();
@@ -267,7 +296,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     @Override
     public void updateSettings(AbstractSettings newSettings) {
-
     }
 
     @Override
@@ -309,6 +337,29 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void timeChanged(Date newTime, Date oldTime) {
         if (isVisible()) {
             loadData(timeRangeWithZoomProvider.getFromTime(), timeRangeWithZoomProvider.getToTime());
+            updateTimePlotLine(newTime);
+        }
+    }
+    
+    private void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
+    }
+
+    public void setComponentViewer(SideBySideComponentViewer sideBySideComponentViewer) {
+        this.sideBySideComponentViewer = sideBySideComponentViewer;
+    }
+
+    @Override
+    public void onSelectionChange(SelectionChangeEvent event) {
+        List<MarkDTO> selected = marksPanel.getSelectedMarks();
+        if (selected.size() > 0) {
+            setWidget(chart);
+            setSeriesPoints(selected.get(0));
+            onResize();
+        } else {
+            setWidget(noMarkSelectedLabel);
         }
     }
 }

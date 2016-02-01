@@ -62,7 +62,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         }
     }
 
-    private final Component<?> leftComponent;
+    private Component<?> leftComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -90,6 +90,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
+        markPositionPanel.setComponentViewer(this);
         userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
@@ -173,6 +174,12 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
+    }
+    
+    public void setLeftComponent(Component<?> component) {
+        leftComponent = component;
+        leftScrollPanel.setWidget(leftComponent.getEntryWidget());
+        leftScrollPanel.setTitle(leftComponent.getEntryWidget().getTitle());
     }
 
     /**
@@ -341,6 +348,13 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
             Style drapperStyle = leftScrollPanelSplitter.getDragger().getElement().getStyle();
             if (visible) drapperStyle.clearMarginTop();
             else drapperStyle.setMarginTop(-25, Unit.PX);
+        }
+    }
+    
+    public void setLeftComponentToggleButtonVisible(boolean visible) {
+        Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
+        if (leftScrollPanelSplitter != null) {
+            leftScrollPanelSplitter.getToggleButton().setVisible(visible);
         }
     }
 }
