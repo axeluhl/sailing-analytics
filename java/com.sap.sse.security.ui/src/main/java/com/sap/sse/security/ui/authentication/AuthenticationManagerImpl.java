@@ -107,7 +107,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
     
     @Override
-    public void reqeustPasswordReset(final String username, String eMailAddress, SuccessCallback<Void> callback) {
+    public void requestPasswordReset(final String username, String eMailAddress, SuccessCallback<Void> callback) {
         userManagementService.resetPassword(username, eMailAddress, passwordResetUrl, new AsyncCallbackImpl<Void>(callback) {
             @Override
             public void onFailure(Throwable caught) {

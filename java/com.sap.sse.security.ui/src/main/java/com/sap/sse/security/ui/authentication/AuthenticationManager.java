@@ -9,7 +9,7 @@ public interface AuthenticationManager {
     void createAccount(String name, String email, String password, String fullName, 
              String company, SuccessCallback<UserDTO> callback);
     
-    void reqeustPasswordReset(String username, String eMailAddress, SuccessCallback<Void> callback);
+    void requestPasswordReset(String username, String eMailAddress, SuccessCallback<Void> callback);
     
     void login(String username, String password, SuccessCallback<SuccessInfo> callback);
     
