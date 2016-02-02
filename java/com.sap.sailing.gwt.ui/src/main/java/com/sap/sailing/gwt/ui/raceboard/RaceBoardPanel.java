@@ -310,7 +310,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         WrappedPlaceManagementController userManagementController = null;
         AuthenticationCallback callback = new AuthenticationCallbackImpl(userManagementController);
         userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
-        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus);
+        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
             regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);
             userManagementMenuView.asWidget().removeFromParent();
