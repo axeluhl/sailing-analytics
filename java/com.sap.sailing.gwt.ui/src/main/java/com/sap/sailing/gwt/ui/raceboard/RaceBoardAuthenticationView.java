@@ -1,9 +1,7 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.view;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,40 +9,39 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 
-public class AuthenticationViewDesktop extends Composite implements FlyoutAuthenticationView {
+public class RaceBoardAuthenticationView extends Composite implements FlyoutAuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
     
-    interface AuthenticationViewUiBinder extends UiBinder<Widget, AuthenticationViewDesktop> {
+    interface RaceBoardAuthenticationViewUiBinder extends UiBinder<Widget, RaceBoardAuthenticationView> {
     }
     
-    private static AuthenticationViewUiBinder uiBinder = GWT.create(AuthenticationViewUiBinder.class);
+    private static RaceBoardAuthenticationViewUiBinder uiBinder = GWT.create(RaceBoardAuthenticationViewUiBinder.class);
     
     private final PopupPanel popupPanel = new PopupPanel(true, false);
     
     @UiField DivElement headingUi;
     @UiField SimplePanel contentContainerUi;
     
-    @UiField(provided = true)
-    CommonSharedResources res = SharedResources.INSTANCE;
+    @UiField(provided = true) RaceBoardResources res = RaceBoardResources.INSTANCE;
 
     private Presenter presenter;
 
-    public AuthenticationViewDesktop() {
+    public RaceBoardAuthenticationView() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
+        popupPanel.setStyleName(res.mainCss().usermanagement_view());
+        popupPanel.setStyleName(res.mainCss().usermanagement_mobile(), DeviceDetector.isMobile());
         
         popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
@@ -76,17 +73,8 @@ public class AuthenticationViewDesktop extends Composite implements FlyoutAuthen
     }
     
     public void show() {
-        popupPanel.setPopupPositionAndShow(new PositionCallback() {
-            @Override
-            public void setPosition(int offsetWidth, int offsetHeight) {
-                Element anchor = Document.get().getElementById("usrMngmtFlyover");
-                if (anchor != null) {
-                    int left = anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 15;
-                    popupPanel.setPopupPosition(left, anchor.getAbsoluteTop() + 20);
-                }
-                presenter.onVisibilityChanged(true);
-            }
-        });
+        popupPanel.show();
+        presenter.onVisibilityChanged(true);
     }
     
     public void hide() {

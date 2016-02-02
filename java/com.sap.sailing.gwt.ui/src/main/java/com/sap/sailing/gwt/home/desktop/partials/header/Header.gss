@@ -116,6 +116,12 @@
   margin-left: 1rem;
   cursor: pointer;
 }
+.user_menu_button.open {
+  background-image: url('images/home/loggedout-open.svg');
+}
 .user_menu_button.loggedin {
   background-image: url('images/home/loggedin.svg');
+}
+.user_menu_button.loggedin.open {
+  background-image: url('images/home/loggedin-open.svg');
 }

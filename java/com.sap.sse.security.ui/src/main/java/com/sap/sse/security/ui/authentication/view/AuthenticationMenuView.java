@@ -8,6 +8,8 @@ public interface AuthenticationMenuView extends IsWidget {
     
     void setAuthenticated(boolean authenticated);
     
+    void setOpen(boolean open);
+    
     public interface Presenter {
         void toggleFlyout();
     }

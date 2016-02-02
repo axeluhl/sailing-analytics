@@ -10,10 +10,12 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
     private Presenter presenter;
     private final Anchor anchor;
     private final String loggedInStyle;
+    private final String openStyle;
 
-    public AuthenticationMenuViewImpl(Anchor anchor, String loggedInStyle) {
+    public AuthenticationMenuViewImpl(Anchor anchor, String loggedInStyle, String openStyle) {
         this.anchor = anchor;
         this.loggedInStyle = loggedInStyle;
+        this.openStyle = openStyle;
         anchor.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -35,6 +37,11 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
     @Override
     public void setAuthenticated(boolean authenticated) {
         anchor.setStyleName(loggedInStyle, authenticated);
+    }
+    
+    @Override
+    public void setOpen(boolean open) {
+        anchor.setStyleName(openStyle, open);
     }
 
 }

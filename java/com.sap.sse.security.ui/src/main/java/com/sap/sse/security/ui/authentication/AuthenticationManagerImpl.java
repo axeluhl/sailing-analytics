@@ -4,6 +4,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -11,18 +13,57 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 public class AuthenticationManagerImpl implements AuthenticationManager {
     
-    private final WithSecurity clientFactory;
+    private final UserManagementServiceAsync userManagementService;
+    private final UserService userService;
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
 
-    public AuthenticationManagerImpl(WithSecurity clientFactory, final EventBus eventBus,
+    /**
+     * Creates an {@link AuthenticationManagerImpl} instance based on the {@link UserService} and
+     * {@link UserManagementServiceAsync} instances provided by the given {@link WithSecurity} instance.
+     * 
+     * @param userService
+     *            the {@link UserService} instance to use
+     * @param eventBus
+     *            the {@link EventBus} instance
+     * @param emailConfirmationUrl
+     *            URL with is send to users to verify their email address
+     * @param passwordResetUrl
+     *            URL with is send to users to reset their password
+     */
+    public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
-        this.clientFactory = clientFactory;
+        this(clientFactory.getUserManagementService(), clientFactory.getUserService(), eventBus, emailConfirmationUrl,
+                passwordResetUrl);
+    }
+    
+    /**
+     * Creates an {@link AuthenticationManagerImpl} instance based on the given {@link UserService} and its underlying
+     * {@link UserManagementServiceAsync} instance.
+     * 
+     * @param userService
+     *            the {@link UserService} instance to use
+     * @param eventBus
+     *            the {@link EventBus} instance
+     * @param emailConfirmationUrl
+     *            URL with is send to users to verify their email address
+     * @param passwordResetUrl
+     *            URL with is send to users to reset their password
+     */
+    public AuthenticationManagerImpl(UserService userService, EventBus eventBus, String emailConfirmationUrl,
+            String passwordResetUrl) {
+        this(userService.getUserManagementService(), userService, eventBus, emailConfirmationUrl, passwordResetUrl);
+    }
+    
+    private AuthenticationManagerImpl(UserManagementServiceAsync userManagementService, UserService userService,
+            final EventBus eventBus, String emailConfirmationUrl, String passwordResetUrl) {
+        this.userManagementService = userManagementService;
+        this.userService = userService;
         this.eventBus = eventBus;
         this.emailConfirmationUrl = emailConfirmationUrl;
         this.passwordResetUrl = passwordResetUrl;
-        clientFactory.getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user) {
                 eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
@@ -41,33 +82,33 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public void createAccount(String name, String email, String password, String fullName, 
             String company, AsyncCallback<UserDTO> callback) {
-        clientFactory.getUserManagementService().createSimpleUser(name, email, password, 
-                fullName, company, emailConfirmationUrl, callback);
+        userManagementService
+                .createSimpleUser(name, email, password, fullName, company, emailConfirmationUrl, callback);
     }
     
     @Override
     public void reqeustPasswordReset(String username, String eMailAddress, AsyncCallback<Void> callback) {
-        clientFactory.getUserManagementService().resetPassword(username, eMailAddress, passwordResetUrl, callback);
+        userManagementService.resetPassword(username, eMailAddress, passwordResetUrl, callback);
     }
     
     @Override
     public void login(String username, String password, AsyncCallback<SuccessInfo> callback) {
-        clientFactory.getUserService().login(username, password, callback);
+        userService.login(username, password, callback);
     }
     
     @Override
     public void logout() {
-        clientFactory.getUserService().logout();
+        userService.logout();
         eventBus.fireEvent(new AuthenticationRequestEvent());
     }
     
     @Override
     public void refreshUserInfo() {
-        clientFactory.getUserService().updateUser(true);
+        userService.updateUser(true);
     }
     
     @Override
     public AuthenticationContext getAuthenticationContext() {
-        return new AuthenticationContextImpl(clientFactory.getUserService().getCurrentUser());
+        return new AuthenticationContextImpl(userService.getCurrentUser());
     }
 }

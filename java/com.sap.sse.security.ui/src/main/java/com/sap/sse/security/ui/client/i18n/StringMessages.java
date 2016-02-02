@@ -96,4 +96,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String youAreNotSignedIn();
     String accountConfirmation();
     String error();
+    String refresh();
 }
