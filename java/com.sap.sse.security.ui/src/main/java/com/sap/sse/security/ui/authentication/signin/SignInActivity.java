@@ -4,13 +4,14 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.security.ui.authentication.AsyncLoginCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationManager.SuccessCallback;
 import com.sap.sse.security.ui.authentication.create.CreateAccountPlace;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryPlace;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class SignInActivity extends AbstractActivity implements SignInView.Presenter {
 
@@ -43,8 +44,12 @@ public class SignInActivity extends AbstractActivity implements SignInView.Prese
 
     @Override
     public void login(String loginName, String password) {
-        clientFactory.getAuthenticationManager().login(loginName, password,
-                new AsyncLoginCallback(view, callback, true));
+        clientFactory.getAuthenticationManager().login(loginName, password, new SuccessCallback<SuccessInfo>() {
+            @Override
+            public void onSuccess(SuccessInfo result) {
+                callback.handleSignInSuccess();
+            }
+        });
     }
 
     @Override

@@ -1,13 +1,19 @@
 package com.sap.sse.security.ui.authentication;
 
+import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
+import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
+
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
+import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -18,6 +24,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private final EventBus eventBus;
     private final String emailConfirmationUrl;
     private final String passwordResetUrl;
+    
+    private final StringMessages i18n = StringMessages.INSTANCE;
+    private final ErrorMessageView view = new ErrorMessageViewImpl();
 
     /**
      * Creates an {@link AuthenticationManagerImpl} instance based on the {@link UserService} and
@@ -80,20 +89,62 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     }
 
     @Override
-    public void createAccount(String name, String email, String password, String fullName, 
-            String company, AsyncCallback<UserDTO> callback) {
-        userManagementService
-                .createSimpleUser(name, email, password, fullName, company, emailConfirmationUrl, callback);
+    public void createAccount(final String name, String email, String password, String fullName, 
+            String company, SuccessCallback<UserDTO> callback) {
+        userManagementService.createSimpleUser(name, email, password, fullName, company, emailConfirmationUrl,
+                new AsyncCallbackImpl<UserDTO>(callback) {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if (caught instanceof UserManagementException) {
+                            if (USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
+                                view.setErrorMessage(i18n.userAlreadyExists(name));
+                            }
+                        } else {
+                            view.setErrorMessage(i18n.errorCreatingUser(name, caught.getMessage()));
+                        }
+                    }
+        });
     }
     
     @Override
-    public void reqeustPasswordReset(String username, String eMailAddress, AsyncCallback<Void> callback) {
-        userManagementService.resetPassword(username, eMailAddress, passwordResetUrl, callback);
+    public void reqeustPasswordReset(final String username, String eMailAddress, SuccessCallback<Void> callback) {
+        userManagementService.resetPassword(username, eMailAddress, passwordResetUrl, new AsyncCallbackImpl<Void>(callback) {
+            @Override
+            public void onFailure(Throwable caught) {
+                if (caught instanceof UserManagementException) {
+                    if (CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
+                        view.setErrorMessage(i18n.cannotResetPasswordWithoutValidatedEmail(username));
+                    } else {
+                        view.setErrorMessage(i18n.errorResettingPassword(username, caught.getMessage()));
+                    }
+                } else {
+                    view.setErrorMessage(i18n.errorDuringPasswordReset(caught.getMessage()));
+                }
+            }
+        });
     }
     
     @Override
-    public void login(String username, String password, AsyncCallback<SuccessInfo> callback) {
-        userService.login(username, password, callback);
+    public void login(String username, String password, final SuccessCallback<SuccessInfo> callback) {
+        userService.login(username, password, new AsyncCallback<SuccessInfo>() {
+            @Override
+            public void onSuccess(SuccessInfo result) {
+                if (result.isSuccessful()) {
+                    callback.onSuccess(result);
+                } else {
+                    if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
+                        view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
+                    } else {
+                        view.setErrorMessage(result.getMessage());
+                    }
+                }
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
+            }
+        });
     }
     
     @Override
@@ -110,5 +161,26 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public AuthenticationContext getAuthenticationContext() {
         return new AuthenticationContextImpl(userService.getCurrentUser());
+    }
+    
+    private abstract class AsyncCallbackImpl<T> implements AsyncCallback<T> {
+        
+        private final SuccessCallback<T> successCallback;
+        
+        private AsyncCallbackImpl(SuccessCallback<T> successCallback) {
+            this.successCallback = successCallback;
+        }
+        
+        @Override
+        public final void onSuccess(T result) {
+            this.successCallback.onSuccess(result);
+        }
+    }
+    
+    private class ErrorMessageViewImpl implements ErrorMessageView {
+        @Override
+        public void setErrorMessage(String errorMessage) {
+            Window.alert(errorMessage);
+        }
     }
 }
