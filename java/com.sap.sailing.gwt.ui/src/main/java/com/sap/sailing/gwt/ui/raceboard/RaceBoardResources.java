@@ -31,6 +31,7 @@ public interface RaceBoardResources extends CommonSharedResources, ClientBundle 
         String usermanagement_view_content_wrapper();
         String usermanagement_view_content();
         String usermanagement_mobile();
+        String usermanagement_open();
     }
 
     public interface RaceBoardMediaCss extends CommonMediaCss, CssResource {

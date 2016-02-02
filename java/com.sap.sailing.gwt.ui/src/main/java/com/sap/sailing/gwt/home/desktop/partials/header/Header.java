@@ -96,7 +96,7 @@ public class Header extends Composite {
             }
         });
         
-        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin());
+        authenticationMenuView = new AuthenticationMenuViewImpl(usermenu, HeaderResources.INSTANCE.css().loggedin(), HeaderResources.INSTANCE.css().open());
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_DESKTOP) {
             usermenu.removeFromParent();
         }

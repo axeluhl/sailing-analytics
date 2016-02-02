@@ -4,6 +4,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface FlyoutAuthenticationView extends AuthenticationView {
     
+    void setPresenter(Presenter presenter);
+    
     boolean isShowing();
     
     void show();
@@ -11,5 +13,9 @@ public interface FlyoutAuthenticationView extends AuthenticationView {
     void hide();
     
     void setAutoHidePartner(IsWidget autoHidePartner);
+    
+    public interface Presenter {
+        void onVisibilityChanged(boolean isShowing);
+    }
 
 }

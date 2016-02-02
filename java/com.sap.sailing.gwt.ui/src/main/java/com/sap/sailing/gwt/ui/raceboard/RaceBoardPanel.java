@@ -170,7 +170,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), MAIN_CSS.usermanagement_loggedin());
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), MAIN_CSS.usermanagement_loggedin(), MAIN_CSS.usermanagement_open());
         this.userManagementMenuView.asWidget().setStyleName(MAIN_CSS.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();

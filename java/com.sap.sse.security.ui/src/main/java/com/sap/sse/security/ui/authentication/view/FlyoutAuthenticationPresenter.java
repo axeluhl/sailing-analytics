@@ -5,17 +5,21 @@ import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 
-public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Presenter {
+public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Presenter, FlyoutAuthenticationView.Presenter {
     
     private final FlyoutAuthenticationView flyoutAuthenticationView;
     private final WrappedPlaceManagementController authenticationPlaceManagementController;
+    private final AuthenticationMenuView authenticationMenuView;
 
     public FlyoutAuthenticationPresenter(final FlyoutAuthenticationView flyoutAuthenticationView,
             final AuthenticationMenuView authenticationMenuView,
             WrappedPlaceManagementController authenticationPlaceManagementController,
             EventBus eventBus) {
         this.flyoutAuthenticationView = flyoutAuthenticationView;
+        this.authenticationMenuView = authenticationMenuView;
         this.authenticationPlaceManagementController = authenticationPlaceManagementController;
+        
+        flyoutAuthenticationView.setPresenter(this);
         
         authenticationMenuView.setPresenter(this);
         flyoutAuthenticationView.setAutoHidePartner(authenticationMenuView);
@@ -43,6 +47,11 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
             flyoutAuthenticationView.show();
             authenticationPlaceManagementController.start();
         }
+    }
+
+    @Override
+    public void onVisibilityChanged(boolean isShowing) {
+        authenticationMenuView.setOpen(isShowing);
     }
 
 }

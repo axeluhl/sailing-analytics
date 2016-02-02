@@ -25,5 +25,6 @@ public interface HeaderResources extends ClientBundle {
         String submit();
         String user_menu_button();
         String loggedin();
+        String open();
     }
 }

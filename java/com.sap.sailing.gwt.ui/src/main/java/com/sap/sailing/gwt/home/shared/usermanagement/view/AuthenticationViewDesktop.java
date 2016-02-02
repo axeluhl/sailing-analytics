@@ -4,6 +4,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -36,11 +38,25 @@ public class AuthenticationViewDesktop extends Composite implements FlyoutAuthen
     @UiField(provided = true)
     CommonSharedResources res = SharedResources.INSTANCE;
 
+    private Presenter presenter;
+
     public AuthenticationViewDesktop() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
         super.initWidget(uiBinder.createAndBindUi(this));
         popupPanel.setWidget(this);
+        
+        popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                presenter.onVisibilityChanged(false);
+            }
+        });
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
     
     @Override
@@ -68,6 +84,7 @@ public class AuthenticationViewDesktop extends Composite implements FlyoutAuthen
                     int left = anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 15;
                     popupPanel.setPopupPosition(left, anchor.getAbsoluteTop() + 20);
                 }
+                presenter.onVisibilityChanged(true);
             }
         });
     }

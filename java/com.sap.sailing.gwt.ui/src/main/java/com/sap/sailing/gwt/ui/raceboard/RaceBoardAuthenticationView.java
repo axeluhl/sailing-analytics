@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,6 +33,8 @@ public class RaceBoardAuthenticationView extends Composite implements FlyoutAuth
     
     @UiField(provided = true) RaceBoardResources res = RaceBoardResources.INSTANCE;
 
+    private Presenter presenter;
+
     public RaceBoardAuthenticationView() {
         LOCAL_CSS.ensureInjected();
         popupPanel.addStyleName(LOCAL_CSS.flyover());
@@ -38,6 +42,18 @@ public class RaceBoardAuthenticationView extends Composite implements FlyoutAuth
         popupPanel.setWidget(this);
         popupPanel.setStyleName(res.mainCss().usermanagement_view());
         popupPanel.setStyleName(res.mainCss().usermanagement_mobile(), DeviceDetector.isMobile());
+        
+        popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
+            @Override
+            public void onClose(CloseEvent<PopupPanel> event) {
+                presenter.onVisibilityChanged(false);
+            }
+        });
+    }
+    
+    @Override
+    public void setPresenter(Presenter presenter) {
+        this.presenter = presenter;
     }
     
     @Override
@@ -58,6 +74,7 @@ public class RaceBoardAuthenticationView extends Composite implements FlyoutAuth
     
     public void show() {
         popupPanel.show();
+        presenter.onVisibilityChanged(true);
     }
     
     public void hide() {
