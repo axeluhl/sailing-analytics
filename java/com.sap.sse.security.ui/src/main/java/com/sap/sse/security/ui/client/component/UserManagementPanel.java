@@ -47,6 +47,12 @@ public class UserManagementPanel extends DockPanel {
         HorizontalPanel buttonPanel = new HorizontalPanel();
         west.add(buttonPanel);
         singleSelectionModel = new SingleSelectionModel<>();
+        buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userListDataProvider.updateDisplays();
+            }
+        }));
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
