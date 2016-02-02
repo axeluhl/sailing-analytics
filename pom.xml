@@ -40,22 +40,6 @@
 	        <module>ios</module>
 	    </modules>
         </profile>
-
-            <activation>
-                <!-- This profile is active by default, when running on a Lean DI environment.
-            </activation>
-            <modules>
-                <module>mobile</module>
-            </modules>
-        </profile>
-        <profile>
-            <!-- activate with parameter '-P with-ios'-->
-            <id>with-ios</id>
-            <modules>
-                <module>ios</module>
-            </modules>
-        </profile>
-
       <profile>
         <id>leandi</id>
         <activation>
