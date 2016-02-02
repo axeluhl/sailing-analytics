@@ -1,0 +1,144 @@
+@require 'theme';
+
+.startanalysis {
+	position: absolute;
+	overflow: hidden;
+	background-color: white;
+	left: 0pt;
+	right: 0pt;
+	top: 0pt;
+	bottom: 0pt;
+}
+
+.panel_header {
+	height: 100%;
+	margin-top: 0;
+	line-height: 30pt;
+	vertical-align: middle;
+	font-size: 14pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	width: 100%;
+	text-align: center;
+	font-weight: bold;
+	overflow: visible;
+	background-color: white;
+}
+
+.controll_header_button {
+	position: absolute;
+	top: 10pt;
+	height: 17.5pt;
+	width: 17.5pt;
+}
+
+.controll_header_button_left {
+	left: 10%;
+}
+
+.controll_header_button_right {
+	right: 10%;
+}
+
+.card_container {
+	position: absolute;
+	overflow: visible;
+	top: 33.5pt;
+	bottom: 10pt;
+	width: 100%;
+	left: 0%;
+	background-color: white;
+	-webkit-transition: left 0.7s ease-in-out; /* For Safari 3.1 to 6.0 */
+	transition: left 0.7s ease-in-out;
+}
+
+.card {
+	position: absolute;
+	display: inline;
+	width: 80%;
+	height: 100%;
+	/*#4293DB old water color*/
+	background-color: #004384;
+	margin-top: 1px; /*Shows otherwise small line at top edge*/
+	overflow: hidden;
+}
+
+.card_table {
+	position: absolute;
+	bottom: 0pt;
+	right: 0pt;
+	left: 0pt;
+	padding-left:10pt;
+	padding-right:10pt;
+	padding-bottom: 10pt;
+	background-color: #004384;;
+	z-index: 2;
+}
+
+.card_wind_line_data_container {
+	position: absolute;
+	top: 10pt;
+	left: 10pt;
+	width: 45pt;
+	height: 80pt;
+	z-index: 1;
+}
+
+.card_data {
+	position: absolute;
+	right: 0pt;
+	width: 45pt;
+	height: 25pt;
+	line-height: 25pt;
+	vertical-align: middle;
+	font-size: 11pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	text-align: center;
+}
+
+.card_line_advantage {
+	top: 0pt;
+	left: 55pt;
+	width: 215pt;
+	text-align: left;
+	padding-left: 7pt;
+	background-color: white;
+}
+
+.card_race_time{
+	position: absolute;
+	top: 10pt;
+	right: 10pt;
+	width: 200px;
+	text-align: right;
+	color: white;
+	line-height: 25pt;
+	font-size: 11pt;
+	font-family: DASHBOARD_FONT_FAMILY;
+	z-index: 1;
+}
+
+.card_line_data_geo {
+	top: 0pt;
+	left: 220pt;
+	width: 100pt;
+	text-align: left;
+	background-color: white;
+}
+
+.left_focus_panel {
+	position: absolute;
+	top: 0pt;
+	right: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}
+
+.right_focus_panel {
+	position: absolute;
+	top: 0pt;
+	left: 0pt;
+	width: 50%;
+	height: 100%;
+	z-index: 2;
+}

@@ -41,6 +41,7 @@ public enum BoatClassMasterdata {
     FOLKBOAT ("Folkboat", true, 7.68, 2.20, BoatHullType.MONOHULL, false, "Folke", "Folkeboot"),
     FUN ("FUN", true, 7.20, 2.45, BoatHullType.MONOHULL, true, "FUN O.D.", "FUN OD", "Open FUN"),
     F_16 ("Formula 16", true, 5.00, 2.50, BoatHullType.CATAMARAN, true, "F16", "F-16"),
+    GC_32 ("GC 32", false, 10.0, 6.00, BoatHullType.CATAMARAN, true, "GC32", "GC-32"),
     HOBIE_16 ("Hobie 16", true, 5.05, 2.41, BoatHullType.CATAMARAN, false, "H16"),
     H_BOAT ("H-Boat", true, 8.28, 2.18, BoatHullType.MONOHULL, true, "HB"),
     HOBIE_TIGER ("Hobie Tiger", true, 5.51, 2.60, BoatHullType.CATAMARAN, true),

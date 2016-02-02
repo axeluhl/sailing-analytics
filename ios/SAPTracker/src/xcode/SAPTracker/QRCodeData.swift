@@ -26,42 +26,27 @@ public class QRCodeData {
     
     public func parseString(urlString: String) -> Bool {
         let url = NSURL(string: urlString)
-        
-        if (url == nil || url!.host == nil) {
+        if (url == nil || url!.host == nil || url!.query == nil) {
             return false
         }
         
-        // TODO: add a flag http / https
-        if url!.scheme != "comsapsailingtracker" {
-            serverUrl = url!.scheme
-        } else {
-            serverUrl = "http"
-        }
-        
-        serverUrl! += "://" + url!.host!
+        // Set server url
+        serverUrl = url!.scheme + "://" + url!.host!
         if ((url!.port) != nil) {
             serverUrl! += ":" + url!.port!.stringValue
         }
         
-        let queryString = url!.query
-        if (queryString == nil) {
-            return false
-        }
-        let urlComponents = queryString!.componentsSeparatedByString("&")
-        var queryStringDictionary = [String:String]()
-        for keyValuePair in urlComponents {
-            let pairComponents = keyValuePair.componentsSeparatedByString("=")
-            let key = pairComponents[0]
-            let value = pairComponents[1]
-            queryStringDictionary[key] = value
-        }
-        eventId = queryStringDictionary[QRCodeData.Keys.eventId]
-        leaderBoardName = queryStringDictionary[QRCodeData.Keys.leaderBoardName]
-        // change %20 to space
-        if leaderBoardName != nil {
-            leaderBoardName = leaderBoardName!.stringByReplacingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
-        }
-        competitorId = queryStringDictionary[QRCodeData.Keys.competitorId]
+        // Get query parameter
+        eventId = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.eventId) // queryStringDictionary[QRCodeData.Keys.eventId]
+        leaderBoardName = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.leaderBoardName)
+        competitorId = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.competitorId) // queryStringDictionary[QRCodeData.Keys.competitorId]
         return eventId != nil && leaderBoardName != nil && competitorId != nil
     }
+    
+    func getQueryStringParameter(url: String, param: String) -> String? {
+        return NSURLComponents(string: url)?.queryItems?.filter({ (item) -> Bool in
+            item.name == param
+        }).first?.value?.stringByRemovingPercentEncoding;
+    }
+    
 }

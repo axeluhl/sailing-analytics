@@ -24,6 +24,7 @@ public class MobileGalleryPlayer extends ResizeComposite {
     @UiField DivElement mainSliderUi;
 
     private int selectedIdx;
+    private boolean autoplay;
 
     public MobileGalleryPlayer(ImageDTO selected, Collection<? extends ImageDTO> images) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -83,4 +84,27 @@ public class MobileGalleryPlayer extends ResizeComposite {
 	    adaptiveHeight : false,
 	});
     }-*/;
+    
+    private native void _slickPlay() /*-{
+    $wnd.$('.mainSlider').slick('slickPlay').slick('slickNext').slick(
+            'setOption', 'autoplay', true); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+    }-*/;
+    
+    private native void _slickPause() /*-{
+        $wnd.$('.mainSlider').slick('slickPause').slick('setOption',
+                'autoplay', false); // workaround for bug https://github.com/kenwheeler/slick/issues/1446
+    }-*/;
+    
+    public void toggleAutoplay() {
+        autoplay = !autoplay;
+        if (autoplay) {
+            _slickPlay();
+        } else {
+            _slickPause();
+        }
+    }
+    
+    public boolean isAutoplaying() {
+        return autoplay;
+    }
 }

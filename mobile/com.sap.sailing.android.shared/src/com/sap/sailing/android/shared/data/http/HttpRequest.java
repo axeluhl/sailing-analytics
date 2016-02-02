@@ -3,6 +3,7 @@ package com.sap.sailing.android.shared.data.http;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,9 +106,7 @@ public abstract class HttpRequest {
             ExLog.i(context, TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
             throw e;
         } finally {
-            if (responseInputStream != null) {
-                responseInputStream.close();
-            }
+            safeClose(responseInputStream);
         }
     }
 
@@ -138,6 +137,16 @@ public abstract class HttpRequest {
             outputStream.write(data, 0, count);
         }
         return true;
+    }
+
+    protected void safeClose(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                ExLog.ex(context, TAG, e);
+            }
+        }
     }
 
     protected abstract BufferedInputStream doRequest(HttpURLConnection connection) throws IOException;

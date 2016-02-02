@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.home.desktop.partials.old.leaderboard.OldLeaderboardDelegateFullscreenViewer;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
@@ -17,8 +18,8 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaAnalyticsDat
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.SharedLeaderboardRegattaTabView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.Placeholder;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
-import com.sap.sailing.gwt.ui.shared.general.EventState;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -34,6 +35,8 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     @UiField(provided = true)
     protected OldLeaderboard leaderboard;
 
+    private LeaderboardUpdateProvider leaderboardUpdateProvider = null;
+    
     public RegattaLeaderboardTabView() {
         leaderboard = new OldLeaderboard(new OldLeaderboardDelegateFullscreenViewer());
     }
@@ -50,13 +53,13 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
     
     @Override
     public TabView.State getState() {
-        return currentPresenter.getCtx().getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
+        return currentPresenter.getEventDTO().isHasAnalytics() ? TabView.State.VISIBLE : TabView.State.INVISIBLE;
     }
 
     @Override
     public void start(final RegattaLeaderboardPlace myPlace, final AcceptsOneWidget contentArea) {
         contentArea.setWidget(new Placeholder());
-        String regattaId = myPlace.getRegattaId();
+        String regattaId = currentPresenter.getRegattaId();
         if (regattaId != null && !regattaId.isEmpty()) {
             String leaderboardName = regattaId;
             RegattaAnalyticsDataManager regattaAnalyticsManager = currentPresenter.getCtx().getRegattaAnalyticsManager();
@@ -64,9 +67,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
             if(leaderboardPanel == null) {
                 leaderboardPanel = createSharedLeaderboardPanel(leaderboardName, regattaAnalyticsManager);
             }
+            leaderboardUpdateProvider = leaderboardPanel;
+            leaderboardUpdateProvider.addLeaderboardUpdateListener(this);
             initWidget(ourUiBinder.createAndBindUi(this));
             leaderboard.setLeaderboard(leaderboardPanel, currentPresenter.getAutoRefreshTimer());
-            if (currentPresenter.getCtx().getEventDTO().getState() == EventState.RUNNING) {
+            if (currentPresenter.getEventDTO().getState() == EventState.RUNNING) {
                 // TODO: start autorefresh?
             }
             regattaAnalyticsManager.hideCompetitorChart();
@@ -103,4 +108,11 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
         return new RegattaLeaderboardPlace(currentPresenter.getCtx());
     }
     
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        if (leaderboardUpdateProvider != null) {
+            leaderboardUpdateProvider.removeLeaderboardUpdateListener(this);
+        }
+    }
 }

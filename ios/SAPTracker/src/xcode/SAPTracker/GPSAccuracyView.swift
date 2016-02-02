@@ -8,7 +8,7 @@
 
 import UIKit
 
-class GPSAccuracyView: UIView {
+class GPSAccuracyView : UIView {
 
     let barView = UIView()
 
@@ -42,8 +42,9 @@ class GPSAccuracyView: UIView {
         var height = 1.0
         var color = TrackingViewController.Color.Red
         if (horizontalAccuracy < 0) {
+            
         } else if (horizontalAccuracy > 48) {
-            var height = 0.3
+            height = 0.33
         } else if (horizontalAccuracy > 10) {
             height = 0.66
             color = TrackingViewController.Color.Orange
@@ -51,10 +52,9 @@ class GPSAccuracyView: UIView {
             height = 1.0
             color = TrackingViewController.Color.Green
         }
-        let frame = CGRect(x: 0, y: CGFloat(1.0-height)*bounds.height, width: bounds.width, height: CGFloat(height)*bounds.height)
+        let frame = CGRect(x:0, y:CGFloat(1.0 - height) * bounds.height, width:bounds.width, height:CGFloat(height) * bounds.height)
         barView.frame = frame
         barView.backgroundColor = color
-
     }
     
     func newLocation(notification: NSNotification) {
@@ -62,8 +62,8 @@ class GPSAccuracyView: UIView {
         drawBar(horizontalAccuracy)
     }
     
-    
     func locationManagerFailed(notification: NSNotification) {
         drawBar(-1.0)
     }
+    
 }

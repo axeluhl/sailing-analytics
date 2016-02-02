@@ -22,8 +22,6 @@ public interface RemoteServiceMappingConstants {
 
     public static final String serverConfigurationServiceRemotePath = "service/serverconfiguration";
 
-    public static final String homeServiceRemotePath = "service/home";
-
     public static final String simulatorServiceRemotePath = "service/simulator";
 
     public static final String dataMiningServiceRemotePath = "service/datamining";

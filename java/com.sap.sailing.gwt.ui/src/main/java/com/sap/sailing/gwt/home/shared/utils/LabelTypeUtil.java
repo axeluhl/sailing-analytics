@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.shared.utils;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
 
 public final class LabelTypeUtil {
     private LabelTypeUtil() {

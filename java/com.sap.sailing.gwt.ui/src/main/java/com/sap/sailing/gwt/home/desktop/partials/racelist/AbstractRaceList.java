@@ -3,7 +3,9 @@ package com.sap.sailing.gwt.home.desktop.partials.racelist;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -13,16 +15,21 @@ import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory.SortableRaceListStartTimeColumn;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListResources.LocalCss;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
 import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
-public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>> extends Composite {
+public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>>
+        extends Composite implements FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
 
     private static final LocalCss CSS = RaceListResources.INSTANCE.css();
 
@@ -105,6 +112,26 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
             comperator.setAscending(ascending);
         }
         this.cellTable.addColumn(column, header, comperator, ascending);
+    }
+    
+    @Override
+    public void onFilterValueChanged(final Filter<SimpleRaceMetadataDTO> filter) {
+        this.cellTable.setRowStyles(new RowStyles<T>() {
+            @Override
+            public String getStyleNames(T row, int rowIndex) {
+                return filter.matches(row) ? null : CSS.racesListHideColumn();
+            }
+        });
+        this.cellTable.redraw();
+    }
+    
+    @Override
+    public Collection<SimpleCompetitorDTO> getFilterableValues() {
+        Set<SimpleCompetitorDTO> filterableValues = new HashSet<>();
+        for (T entry : cellTable.getDataProvider().getList()) {
+            filterableValues.addAll(entry.getCompetitors());
+        }
+        return filterableValues;
     }
     
 }

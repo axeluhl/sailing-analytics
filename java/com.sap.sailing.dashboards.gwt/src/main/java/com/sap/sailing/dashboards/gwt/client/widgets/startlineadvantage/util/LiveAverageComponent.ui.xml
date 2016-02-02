@@ -1,0 +1,41 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util.LiveAverageComponentResources"/>
+    
+	<g:HTMLPanel ui:field="liveAveragePanel" styleName="{resources.gss.live_average_component}">
+
+		<g:HTMLPanel styleName="{resources.gss.header_container}">
+			    <div class="{resources.gss.header}" ui:field="header"></div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="livePanel" styleName="{resources.gss.live_container}">
+			    <div class="{resources.gss.value_panel}">
+					<span class="{resources.gss.panel_value_number}" ui:field="liveNumber"></span>
+					<span class="{resources.gss.panel_value_unit}" ui:field="liveUnit"></span>
+				</div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="middleLine" styleName="{resources.gss.middle_line}">
+			
+		</g:HTMLPanel>
+
+		<g:HTMLPanel ui:field="averagePanel" styleName="{resources.gss.average_container}">
+			    <div class="{resources.gss.value_panel}">
+					<span class="{resources.gss.panel_value_number}" ui:field="averageNumber"></span>
+					<span class="{resources.gss.panel_value_unit}" ui:field="averageUnit"></span>
+				</div>
+		</g:HTMLPanel>
+
+		<g:HTMLPanel styleName="{resources.gss.live_label_container}">
+			    <div class="{resources.gss.label_text}" ui:field="liveLabel"></div>
+		</g:HTMLPanel>
+		
+		<g:HTMLPanel styleName="{resources.gss.average_label_container}">
+			    <div class="{resources.gss.label_text}" ui:field="averageLabel"></div>
+		</g:HTMLPanel>
+
+	</g:HTMLPanel>
+
+</ui:UiBinder> 

@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.List;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
@@ -35,7 +35,7 @@ import com.sap.sse.common.filter.AbstractListFilter;
  * 
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
-    protected Collection<T> all;
+    protected List<T> all;
     protected final AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
@@ -105,9 +105,47 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         all.add(object);
         filter();
     }
+
+    /**
+     * Adds an object at a certain position and applies the search filter.
+     */
+    public void add(int index, T object) {
+        all.add(index, object);
+        filter();
+    }
+    
+    /**
+     * Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
+     */
+    public int indexOf(T object) {
+        return all.indexOf(object);
+    }
+    
+    /**
+     * Removes an object and applies the search filter.
+     */
+    public void remove(T object) {
+        all.remove(object);
+        filter();
+    }
     
     public void addAll(Iterable<T> objects) {
         Util.addAll(objects, all);
+        filter();
+    }
+    
+    /**
+     * Would better be called {@code clear()}, but {@link #clear} is already the method inherited from {@link Panel}...
+     * This method removes all entries from this filterable panel. The effect is the same as invoking
+     * <code>removeAll(all)</code> with <code>all</code> being a copy of what you get when calling {@link #getAll()}.
+     */
+    public void removeAll() {
+        all.clear();
+        filter();
+    }
+    
+    public void removeAll(Iterable<T> objects) {
+        Util.removeAll(objects, all);
         filter();
     }
     

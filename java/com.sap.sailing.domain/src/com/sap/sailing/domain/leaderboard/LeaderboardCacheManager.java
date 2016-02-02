@@ -271,7 +271,7 @@ public class LeaderboardCacheManager {
 
                     @Override
                     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
-                        removeFromCache(leaderboard);
+                        defaultAction();
                         registerListener(leaderboard, trackedRace);
                     }
 

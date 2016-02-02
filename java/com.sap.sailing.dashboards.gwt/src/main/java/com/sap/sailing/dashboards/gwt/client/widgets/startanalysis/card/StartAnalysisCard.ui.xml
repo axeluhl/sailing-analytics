@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidgetResources"/>
+
+	<g:HTMLPanel ui:field="startanalysis_card" styleName="{resources.gss.card}">
+		<div class="{resources.gss.card_wind_line_data_container}">
+			<div ui:field="startanalysis_card_line_advantage"
+				class="{resources.gss.card_data} {resources.gss.card_line_advantage}"></div>
+		</div>
+		<div ui:field="startanalysis_card_race_time" class="{resources.gss.card_race_time}">Time: 00:05:00</div>
+		<g:HTMLPanel ui:field="startanalysis_card_table"
+			styleName="{resources.gss.card_table}"></g:HTMLPanel>
+	</g:HTMLPanel>
+</ui:UiBinder> 

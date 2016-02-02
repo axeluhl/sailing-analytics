@@ -83,19 +83,19 @@ public class DataManager: NSObject {
     }
     
     func newEvent(checkIn: CheckIn) -> Event {
-        var event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as! Event
+        let event = NSEntityDescription.insertNewObjectForEntityForName("Event", inManagedObjectContext: self.managedObjectContext!) as! Event
         event.checkIn = checkIn
         return event
     }
     
     func newLeaderBoard(checkIn: CheckIn) -> LeaderBoard {
-        var leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as! LeaderBoard
+        let leaderBoard = NSEntityDescription.insertNewObjectForEntityForName("LeaderBoard", inManagedObjectContext: self.managedObjectContext!) as! LeaderBoard
         leaderBoard.checkIn = checkIn
         return leaderBoard
     }
     
     func newCompetitor(checkIn: CheckIn) -> Competitor {
-        var competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as! Competitor
+        let competitor = NSEntityDescription.insertNewObjectForEntityForName("Competitor", inManagedObjectContext: self.managedObjectContext!) as! Competitor
         competitor.checkIn = checkIn
         return competitor
     }
@@ -143,7 +143,7 @@ public class DataManager: NSObject {
     lazy var applicationDocumentsDirectory: NSURL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "com.sap.sailing.ios.CoreData" in the application's documents Application Support directory.
         let urls = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)
-        return urls[urls.count-1] as! NSURL
+        return urls[urls.count-1] 
     }()
     
     lazy var managedObjectModel: NSManagedObjectModel = {

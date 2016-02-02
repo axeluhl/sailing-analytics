@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 
 import java.util.Iterator;
 
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumnInSeries;
 import com.sap.sailing.domain.base.RaceDefinition;
@@ -14,7 +15,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 
 /**
- * Obtains flees and medal information from the {@link Series} to which it is connected at construction time.
+ * Obtains fleets and medal information from the {@link Series} to which it is connected at construction time.
  * 
  * @author Axel Uhl (D043530)
  *
@@ -130,5 +131,11 @@ public class RaceColumnInSeriesImpl extends AbstractRaceColumn implements RaceCo
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public RegattaLog getRegattaLog() {
+        Regatta regatta = getRegatta();
+        return regatta.getRegattaLog();
     }
 }

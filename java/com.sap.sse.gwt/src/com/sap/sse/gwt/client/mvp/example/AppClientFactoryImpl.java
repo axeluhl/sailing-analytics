@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.mvp.example.hello.HelloPlace;
 import com.sap.sse.gwt.client.mvp.example.hello.HelloView;
 import com.sap.sse.gwt.client.mvp.example.hello.HelloViewImpl;
 
-public class AppClientFactoryImpl extends ClientFactoryImpl implements AppClientFactory {
+public class AppClientFactoryImpl extends ClientFactoryImpl<TopLevelView> implements AppClientFactory {
     private HelloView helloView;
     private GoodbyeView goodbyeView;
     

@@ -1,0 +1,7 @@
+@provide 'theme';
+ 
+/*Colors*/
+@def WHITE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.WHITE");
+
+/*Fonts*/
+@def DASHBOARD_FONT_FAMILY eval("com.sap.sailing.dashboards.gwt.client.theme.Fonts.DASHBOARD_FONT_FAMILY");

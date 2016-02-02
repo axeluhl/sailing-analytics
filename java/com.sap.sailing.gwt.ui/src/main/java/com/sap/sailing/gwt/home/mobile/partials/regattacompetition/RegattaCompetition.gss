@@ -52,6 +52,8 @@
   position: absolute;
   top: 50%;
   left: 1.133333333333333em;
+  right: 2.133333333333333em;
+  text-align: left;
   -webkit-transform: translateY(-50%);
      -moz-transform: translateY(-50%);
       -ms-transform: translateY(-50%);
@@ -105,6 +107,7 @@
 }
 .regattacompetition_phase_fleet_raceplanned {
   background-color: #999;
+  font-style: italic;
 }
 .regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_title:after {
   display: none;

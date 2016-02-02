@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
@@ -134,20 +135,23 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(6, 2);
+        Grid formGrid = new Grid(7, 2);
         panel.add(formGrid);
-        formGrid.setWidget(0, 0, new Label(stringMessages.startDate() + ":"));
-        formGrid.setWidget(0, 1, startDateBox);
-        formGrid.setWidget(1, 0, new Label(stringMessages.endDate() + ":"));
-        formGrid.setWidget(1, 1, endDateBox);
-        formGrid.setWidget(2, 0, new Label(stringMessages.scoringSystem() + ":"));
-        formGrid.setWidget(2, 1, scoringSchemeListBox);
-        formGrid.setWidget(3, 0, new Label(stringMessages.event() + ":"));
-        formGrid.setWidget(3, 1, sailingEventsListBox);
-        formGrid.setWidget(4, 0, new Label(stringMessages.courseArea() + ":"));
-        formGrid.setWidget(4, 1, courseAreaListBox);
-        formGrid.setWidget(5, 0, new Label(stringMessages.useStartTimeInference() + ":"));
-        formGrid.setWidget(5, 1, useStartTimeInferenceCheckBox);
+
+        formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
+        formGrid.setWidget(0, 1, new Label(DateAndTimeFormatterUtil.getClientTimeZoneAsGMTString()));
+        formGrid.setWidget(1, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(1, 1, startDateBox);
+        formGrid.setWidget(2, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(2, 1, endDateBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.scoringSystem() + ":"));
+        formGrid.setWidget(3, 1, scoringSchemeListBox);
+        formGrid.setWidget(4, 0, new Label(stringMessages.event() + ":"));
+        formGrid.setWidget(4, 1, sailingEventsListBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.courseArea() + ":"));
+        formGrid.setWidget(5, 1, courseAreaListBox);
+        formGrid.setWidget(6, 0, new Label(stringMessages.useStartTimeInference() + ":"));
+        formGrid.setWidget(6, 1, useStartTimeInferenceCheckBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }

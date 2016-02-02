@@ -26,6 +26,7 @@ public class CheckinData extends AbstractCheckinData {
     public String deviceUid;
     public String uriString;
     public String checkinDigest;
+    private boolean update;
 
     public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
@@ -74,5 +75,13 @@ public class CheckinData extends AbstractCheckinData {
         checkinUrlInfo.urlString = uriString;
         checkinUrlInfo.checkinDigest = checkinDigest;
         return checkinUrlInfo;
+    }
+
+    public boolean isUpdate() {
+        return update;
+    }
+
+    public void setUpdate(boolean update) {
+        this.update = update;
     }
 }
