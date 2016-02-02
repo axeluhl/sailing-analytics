@@ -58,3 +58,9 @@ Stopping a running server has---for your convenience---been wrapped into the `st
 ## Automatic Java Instance Start-Up After Boot
 
 When firing up an EC2 instance it can be convenient to not having to log on to have the EC2 instance run a Java instance automatically after it has completed its boot process. This is possible using so-called _user data_. The process of firing up an instance that either builds a certain git commit, installs and starts it after server boot or that downloads and installs a release and starts it is explained [here](http://wiki.sapsailing.com/wiki/amazon-ec2#HowTo).
+
+## App Build Process for iOS and Android
+
+For iOS and Android there are two different build processes in place. At this point (2016-02-02) we're only just beginning to understand how things work, and this is an attempt to summarize the technical steps necessary to get the build done and hand things over to the "Final Assembly" department for deployment to the stores.
+
+Our iOS app build is described by the contents of branch ``central-ios-release-build``. We usually merge ``ubilabs--ios--develop`` into ``master`` and then ``master`` into ``central-ios-release-build``. Builds off the latter branch can be tested using [this Jenkins job](http://dewdfms0036.wdf.sap.corp:8080/job/sapsailingcapture-GIT-DEV-OD-ENTERPRISE/). Run a [Build with Parameters](http://dewdfms0036.wdf.sap.corp:8080/job/sapsailingcapture-GIT-DEV-OD-ENTERPRISE/build?delay=0sec) and enter ``central-ios-release-build`` as the TREEISH. The build should succeed and produce the .ipa file somewhere in the [build's target Maven repository](http://dewdfms0036.wdf.sap.corp:8080/job/sapsailingcapture-GIT-DEV-OD-ENTERPRISE/ws/.m2/repository/com/sap/sailing/mobile/ios/SAPTracker/).
