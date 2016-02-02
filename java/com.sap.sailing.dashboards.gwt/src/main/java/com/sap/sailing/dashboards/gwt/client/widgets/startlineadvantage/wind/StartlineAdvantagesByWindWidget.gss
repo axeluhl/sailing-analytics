@@ -1,21 +1,22 @@
 @require 'theme';
 
-.start_line_advantages_by_wind_component{
+.start_line_advantages_by_wind_component {
 	position: absolute;
 	height: 100%;
 	width: 100%;
+	background-color: LIGHT_GREY;
 }
 
-.advantage_maximum_live_average{
+.advantage_maximum_live_average {
 	position: absolute;
-	height: 30%;
 	width: 100%;
-	top: 4pt;
+	top: DASHBOARD_SPACE_MEDIUM;
+	height: auto;
 }
 
-.advantages_on_line_chart_container{
-    position: absolute;
-	height: 70%;
-	top: 30%;
+.advantages_on_line_chart_container {
+	position: absolute;
+	top: 150px;
 	width: 100%;
+	bottom: 0px;
 }

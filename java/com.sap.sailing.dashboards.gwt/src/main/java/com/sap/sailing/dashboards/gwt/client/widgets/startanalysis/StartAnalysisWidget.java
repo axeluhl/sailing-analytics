@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,6 +33,7 @@ import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.Competit
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
 import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
+import com.sap.sailing.dashboards.gwt.client.widgets.header.DashboardWidgetHeaderAndNoDataMessage;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.card.StartAnalysisCard;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
@@ -62,9 +62,9 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
 
     interface StartlineAnalysis extends CssResource {
     }
-
-    @UiField
-    HTMLPanel header;
+    
+    @UiField(provided = true)
+    DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
     
     @UiField
     HTMLPanel currentStartPanel;
@@ -93,12 +93,6 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
      * */
     @UiField
     HTMLPanel startanalysis_card_container;
-    
-    @UiField
-    DivElement noDataMessageHeader;
-    
-    @UiField
-    DivElement noDataMessage;
 
     /**
      * The CSS "left" property from the {@link #startanalysis_card_container}.
@@ -136,13 +130,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
      * Component that contains handles, displays and loads startanalysis cards.
      * */
     public StartAnalysisWidget(DashboardClientFactory dashboardClientFactory) {
+        dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         StartAnalysisWidgetResources.INSTANCE.gss().ensureInjected();
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
         initWidget(uiBinder.createAndBindUi(this));
-        header.getElement().setInnerText(StringMessages.INSTANCE.dashboardStartAnalysesHeader());
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartAnalysesHeader());
         initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
         initAndAddBottomNotification();
@@ -175,13 +170,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
             @Override
             public void onFailure(Throwable caught) {
                 logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
+                dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
             }
 
             @Override
             public void onSuccess(StartAnalysesDTO result) {
               logger.log(Level.INFO, "Received startanalysis list");
               if (result != null && !result.getStartAnalyses().isEmpty()) {
-                  hideNoDataMessage();
+                  dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                   if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
                       removeAllStartAnalysisCards();
                   }
@@ -194,7 +190,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                   settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(result.getStartAnalyses().get(0).competitor.getName());
               } else {
                   logger.log(Level.INFO, "Received startanalysis list is null or empty");
-                  showNoDataMessageWithHeaderAndMessage(null, null);
+                  dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
               }
             }
         });
@@ -255,12 +251,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                             }
                         } else {
                             logger.log(Level.INFO, "Received competitors are null or empty");
+                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
                         }
                     }
                     
                     @Override
                     public void onFailure(Throwable caught) {
                         logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
+                        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
                     }
                 });
     }
@@ -411,16 +409,6 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         } else {
             return false;
         }
-    }
-    
-    private void showNoDataMessageWithHeaderAndMessage(String header, String message) {
-        noDataMessageHeader.setInnerHTML(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader());
-        noDataMessage.setInnerHTML(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
-    }
-    
-    private void hideNoDataMessage() {
-        noDataMessageHeader.setInnerHTML("");
-        noDataMessage.setInnerHTML("");
     }
     
     @Override

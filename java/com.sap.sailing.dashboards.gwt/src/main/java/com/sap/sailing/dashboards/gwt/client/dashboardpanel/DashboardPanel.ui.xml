@@ -36,7 +36,7 @@
 					</g:HTMLPanel>
 					<g:HTMLPanel styleName="{resources.style.collumn} {resources.style.collumnthree}">
 							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_geometry_container}">
-						<startlineadvantagegeometry:StartLineAdvantageByGeometryWidget ui:field="startlineAdvantageByGeometryComponent"></startlineadvantagegeometry:StartLineAdvantageByGeometryWidget>
+						<startlineadvantagegeometry:StartlineAdvantageByGeometryWidget ui:field="startlineAdvantageByGeometryWidget"></startlineadvantagegeometry:StartlineAdvantageByGeometryWidget>
 						</g:HTMLPanel>
 							<g:HTMLPanel styleName="{resources.style.startline_advantage_by_wind_container}">
 							<startlineadvantagewind:StartlineAdvantagesByWindWidget

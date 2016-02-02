@@ -47,44 +47,41 @@
 
 .collumnthree {
 	left: 66.8%;
-	right: 0pt;
+	right: 0px;
 }
 
 .left {
-	left: 0pt;
+	left: 0px;
 	right: 50%;
 }
 
 .right {
 	left: 50%;
-	right: 0pt;
+	right: 0px;
 }
 
 .startline_advantage_by_wind_container {
 	position: absolute;
-	background-color: white;
-	top: 27%;
-	right: 0pt;
-	left: 0pt;
+	top: 163px;
+	right: 0px;
+	left: 0px;
 	bottom: 0%;
 }
 
 .startline_advantage_by_geometry_container {
 	position: absolute;
-	background-color: white;
-	top: 0%;
-	right: 0pt;
-	left: 0pt;
-	bottom: 73%;
-	margin-bottom: 10pt;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+	height: 150px
 }
 
 .windcharthint {
 	position: absolute;
-	bottom: 0pt;
+	bottom: 0px;
 	height: 15pt;
 	line-height: 15pt;
-	margin-top: 0pt;
+	margin-top: 0px;
 	vertical-align: middle;
 	font-size: 12pt;
 	font-family: DASHBOARD_FONT_FAMILY;
@@ -105,7 +102,7 @@
 
 .windloadinghinttext {
 	position: absolute;
-	bottom: 0pt;
+	bottom: 0px;
 	height: 15pt;
 	line-height: 15pt;
 	margin-top: 0pt;

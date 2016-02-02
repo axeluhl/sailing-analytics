@@ -101,9 +101,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             final String startLineAdvantageType;
             if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometryHeader();
             } else {
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWind();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWindHeader();
             }
             startanalysis_card_line_advantage
                     .setInnerHTML(SafeHtmlUtils.fromString(startLineAdvantageType

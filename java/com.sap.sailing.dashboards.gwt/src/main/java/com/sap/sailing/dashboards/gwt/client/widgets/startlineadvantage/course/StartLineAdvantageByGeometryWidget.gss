@@ -1,31 +1,15 @@
 @require 'theme';
 
-.startLineAdvantageComponent_liveAveragePanel {
-	bottom: 5pt;
-	margin-top: 4pt;
+.start_line_advantage_by_geometry_widget {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-color: LIGHT_GREY;
 }
 
-.startLineAdvantageComponent_header {
-	font-size: 14pt;
-}
-
-.startLineAdvantageComponent_livePanel {
-	top: 35%;
-	bottom: 20%;
-}
-
-.startLineAdvantageComponent_averagePanel {
-	top: 35%;
-	bottom: 20%;
-}
-
-.startLineAdvantageComponent_middleLine {
-	top: 35%;
-	bottom: 20%;
-}
-
-.startLineAdvantageComponent_wrapper {
+.advantage_maximum_live_average {
 	position: absolute;
 	width: 100%;
-	height: 100%;
+	top: DASHBOARD_SPACE_MEDIUM;
+	height: auto;
 }

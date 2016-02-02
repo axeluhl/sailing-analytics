@@ -17,12 +17,11 @@ public interface WindBotWidgetResources extends ClientBundle {
 
     public interface WindBotComponentGss extends CssResource {
         String wind_bot_component();
-        String name_panel();
+        String live_average_header();
         String live_average_container();
         String left();
         String right();
         String windchart_container();
         String windchart();
-        String compass_container();
     }
 }

@@ -26,10 +26,6 @@ public interface StartAnalysisWidgetResources extends ClientBundle {
 
     public interface StartAnalysisGSS extends CssResource {
         String startanalysis();
-        String panel_header();
-        String no_data_message_container();
-        String no_data_message_header();
-        String no_data_message();
         String current_start_panel();
         String controll_header_button();
         String controll_header_button_visible();

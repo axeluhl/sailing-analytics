@@ -3,12 +3,16 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:client="urn:import:com.sap.sailing.dashboards.gwt.client"
 	xmlns:util="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util"
 	xmlns:windchart="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot.charts"
-	xmlns:compass="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot.compass">
+	xmlns:compass="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.windbot.compass"
+	xmlns:header="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.header">
 
 	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidgetResources"/>
 
 	<g:HTMLPanel ui:field="windBotComponent" styleName="{resources.gss.wind_bot_component}">
-		<g:HTMLPanel ui:field="windBotNamePanel" styleName="{resources.gss.name_panel}"></g:HTMLPanel>
+	    <header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage"></header:DashboardWidgetHeaderAndNoDataMessage>
+		<compass:LocationPointerCompass ui:field="locationPointerCompass"></compass:LocationPointerCompass>
+		<div ui:field="totalWindSpeedHeader" class="{resources.gss.live_average_header} {resources.gss.left}"></div>
+		<div ui:field="totalWindDirectionHeader" class="{resources.gss.live_average_header} {resources.gss.right}"></div>
 		<g:HTMLPanel
 			styleName="{resources.gss.live_average_container} {resources.gss.left}">
 			<util:LiveAverageComponent ui:field="trueWindSpeedLiveAverageComponent"></util:LiveAverageComponent>
@@ -26,10 +30,6 @@
 			styleName="{resources.gss.windchart_container} {resources.gss.right}">
 			<windchart:VerticalWindChart ui:field="trueWindDirectionVerticalWindChart"
 				styleName="{resources.gss.windchart}"></windchart:VerticalWindChart>
-		</g:HTMLPanel>
-		<g:HTMLPanel styleName="{resources.gss.compass_container}">
-			<compass:LocationPointerCompass
-				ui:field="locationPointerCompass"></compass:LocationPointerCompass>
 		</g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

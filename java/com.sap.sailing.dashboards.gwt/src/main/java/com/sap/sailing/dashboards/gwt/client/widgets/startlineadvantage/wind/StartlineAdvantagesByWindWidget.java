@@ -6,18 +6,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.actions.GetStartlineAdvantagesByWindAction;
 import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
+import com.sap.sailing.dashboards.gwt.client.widgets.header.DashboardWidgetHeaderAndNoDataMessage;
 import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.wind.charts.StartlineAdvantagesOnLineChart;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
@@ -41,10 +42,16 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
     }
     
     @UiField(provided = true)
+    DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
+    
+    @UiField(provided = true)
     LiveAverageComponent advantageMaximumLiveAverage;
     
     @UiField(provided = true)
     StartlineAdvantagesOnLineChart startlineAdvantagesOnLineChart;
+    
+    @UiField
+    HTMLPanel dataDisplayContainer;
     
     public DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesByWindWidget.class.getName());
@@ -52,12 +59,15 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
     public StartlineAdvantagesByWindWidget(DashboardClientFactory dashboardClientFactory) {
         StartlineAdvantagesByWindWidgetResources.INSTANCE.gss().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
+        dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
+        advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.metersUnit());
         startlineAdvantagesOnLineChart = new StartlineAdvantagesOnLineChart();
-        advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWind(), "m");
-        advantageMaximumLiveAverage.header.getStyle().setFontSize(14, Unit.PT);
         advantageMaximumLiveAverage.liveLabel.setInnerHTML("advantage max.");
         advantageMaximumLiveAverage.averageLabel.setInnerHTML("advantage max. average "+StringMessages.INSTANCE.dashboardAverageWindMinutes(15));
         initWidget(uiBinder.createAndBindUi(this));
+        hideDataDisplayContainer();
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWindHeader());
+        dataDisplayContainer.getElement().getStyle().setOpacity(0.0);
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
     
@@ -79,8 +89,10 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
                                         result.maximum.doubleValue()));
                                 advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(
                                         result.average.doubleValue()));
+                                showDataDisplayContainer();
                             } else {
                                 logger.log(Level.INFO, "StartlineAdvantagesWithMaxAndAverageDTO is null");
+                                dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableMessage());
                             }
                         }
 
@@ -88,9 +100,18 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
                         public void onFailure(Throwable caught) {
                             logger.log(Level.INFO, "Failed to received StartlineAdvantagesWithMaxAndAverageDTO, "
                                     + caught.getMessage());
+                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableMessage());
                         }
                     });
         }
+    }
+    
+    private void showDataDisplayContainer(){
+        dataDisplayContainer.getElement().getStyle().setOpacity(1.0);
+    }
+    
+    private void hideDataDisplayContainer(){
+        dataDisplayContainer.getElement().getStyle().setOpacity(0.0);
     }
     
     @Override

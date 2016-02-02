@@ -26,7 +26,7 @@ import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
 import com.sap.sailing.dashboards.gwt.client.notifications.orientation.WrongDeviceOrientationNotification;
 import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidget;
-import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartLineAdvantageByGeometryWidget;
+import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartlineAdvantageByGeometryWidget;
 import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.wind.StartlineAdvantagesByWindWidget;
 import com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidget;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
@@ -81,7 +81,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     public StartAnalysisWidget startanalysisComponent;
     
     @UiField(provided = true)
-    public StartLineAdvantageByGeometryWidget startlineAdvantageByGeometryComponent;
+    public StartlineAdvantageByGeometryWidget startlineAdvantageByGeometryWidget;
 
     private List<WindBotWidget> windBotComponents;
     private StringMessages stringConstants;
@@ -94,7 +94,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         windBotComponents = new ArrayList<WindBotWidget>();
         startanalysisComponent = new StartAnalysisWidget(this.dashboardClientFactory);
         startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindWidget(this.dashboardClientFactory);
-        startlineAdvantageByGeometryComponent = new StartLineAdvantageByGeometryWidget(this.dashboardClientFactory);
+        startlineAdvantageByGeometryWidget = new StartlineAdvantageByGeometryWidget(this.dashboardClientFactory);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
@@ -136,12 +136,12 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         windBotComponents.clear();
         for (String windBotID : windBotIDs) {
             if (windBotAddedCounterTOConsiderForPanels == 0) {
-                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID);
+                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
                 leftwindbotcontainer.add(leftwindBotComponent);
                 windBotComponents.add(leftwindBotComponent);
                 windloadinghintleft.getStyle().setOpacity(0.0);
             } else if (windBotAddedCounterTOConsiderForPanels == 1) {
-                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID);
+                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
                 rightwindbotcontainer.add(rightwindBotComponent);
                 windBotComponents.add(rightwindBotComponent);
                 windloadinghintright.getStyle().setOpacity(0.0);

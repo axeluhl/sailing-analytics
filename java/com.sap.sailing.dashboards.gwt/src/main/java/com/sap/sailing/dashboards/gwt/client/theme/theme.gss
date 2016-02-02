@@ -14,9 +14,11 @@
 @def DASHBOARD_FONT_FAMILY eval("com.sap.sailing.dashboards.gwt.client.theme.Fonts.DASHBOARD_FONT_FAMILY");
 
 /*Sizes*/
+@def DASHBOARD_FONT_SIZE_VERY_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_VERY_SMALL");
 @def DASHBOARD_FONT_SIZE_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_SMALL");
 @def DASHBOARD_FONT_SIZE_MEDIUM eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_MEDIUM");
 @def DASHBOARD_FONT_SIZE_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_LARGE");
+@def DASHBOARD_FONT_SIZE_VERY_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_FONT_SIZE_VERY_LARGE");
 
 @def DASHBOARD_SPACE_VERY_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_VERY_SMALL");
 @def DASHBOARD_SPACE_SMALL eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_SMALL");

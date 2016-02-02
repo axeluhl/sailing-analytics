@@ -14,16 +14,8 @@ public interface StartLineAdvantageByGeometryWidgetRessources extends ClientBund
     
     @Shared
     public interface StartLineAdvantageByGeometryGss extends CssResource {
-        public String startLineAdvantageComponent_liveAveragePanel();
-
-        public String startLineAdvantageComponent_header();
-
-        public String startLineAdvantageComponent_livePanel();
-
-        public String startLineAdvantageComponent_averagePanel();
-
-        public String startLineAdvantageComponent_middleLine();
-
-        public String startLineAdvantageComponent_wrapper();
+        
+        String start_line_advantage_by_geometry_widget();
+        String advantage_maximum_live_average();
     }
 }
