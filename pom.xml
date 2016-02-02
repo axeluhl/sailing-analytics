@@ -90,8 +90,10 @@
             <name>!ldi.releaseBuild</name>
           </property>
         </activation>
+-->
         <!-- The repository declarations are only active when running ion a non Lean DI environment.
              On Lean DI we are not allowed to define our own repositories because everything must be hosted in SAP's Nexus server. -->
+<!-- This profile should not be present when building with MiOS
         <repositories>
           <repository>
               <id>equinox-sdk-3.9</id>
