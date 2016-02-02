@@ -82,6 +82,7 @@
           </pluginManagement>
         </build>
       </profile>
+<!-- This profile should not be present when building with MiOS
       <profile>
         <id>non-leandi</id>
         <activation>
@@ -97,12 +98,14 @@
               <layout>p2</layout>
               <url>http://download.eclipse.org/releases/luna/</url>
           </repository>
+-->
   <!--        
           <repository>
               <id>sap-nexus</id>
               <url>http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.snapshots</url>
           </repository>
   --> 
+<!-- This profile should not be present when building with MiOS
           <repository>
               <id>sailing-server-maven</id>
               <url>http://maven.sapsailing.com/maven</url>
@@ -119,6 +122,7 @@
           </repository>
         </repositories>
       </profile>
+-->
     </profiles>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -142,6 +146,7 @@
     </properties>
     
     <build>
+<!-- Try to go without the active-profiles stuff for the MiOS build:
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -158,10 +163,10 @@
                 </executions>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-            
-      <plugin>
+-->
+     <pluginManagement>
+      <plugins>
+        <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>
           <artifactId>android-maven-plugin</artifactId>
           <version>4.3.0</version>
@@ -174,8 +179,7 @@
             </sdk>
           </configuration>
         </plugin>
-        
-            </plugins>
-        </pluginManagement>
+      </plugins>
+     </pluginManagement>
     </build>
 </project>
