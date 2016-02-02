@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
+import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
@@ -73,6 +74,11 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
             style.setFontSize(16, Unit.PX);
             style.setPadding(0.75, Unit.EM);
             tabPanelUi.addTabExtension(seriesAnchor);
+        } else {
+            String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
+            if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
+                tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
+            }
         }
     }
 

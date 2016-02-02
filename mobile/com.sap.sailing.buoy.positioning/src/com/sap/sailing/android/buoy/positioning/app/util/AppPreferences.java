@@ -30,6 +30,7 @@ public class AppPreferences extends BaseAppPreferences {
     public void setDataRefreshInterval(long interval){
         preferences.edit().putLong(context.getString(R.string.preference_data_refresh_interval_seconds_key), interval)
             .apply();
+        MarkerUtils.withContext(context).restartMarkerService();
     }
 
     public long getDataRefreshInterval(){

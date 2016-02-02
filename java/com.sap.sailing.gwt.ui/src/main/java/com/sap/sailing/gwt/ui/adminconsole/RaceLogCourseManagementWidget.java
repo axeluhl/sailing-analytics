@@ -141,7 +141,7 @@ public class RaceLogCourseManagementWidget extends CourseManagementWidget {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load course: " + caught.getMessage());
+                        errorReporter.reportError("Could not load course: " + caught.getMessage(), /* silent */ true);
                     }
                 });
     }
