@@ -35,7 +35,7 @@ public class TimeTicksCalculator {
 
             if (i + 1 < units.length) {
                 // lessThan is in the middle between the highest multiple and the next unit.
-                long lessThan = (interval * multiples[multiples.length - 1] + units[i + 1].unitInMs) / 2;
+                double lessThan = (interval * multiples[multiples.length - 1] + units[i + 1].unitInMs) / 2;
 
                 // break and keep the current unit
                 if (tickInterval <= lessThan) {
@@ -50,7 +50,8 @@ public class TimeTicksCalculator {
         }
 
         // get the count
-        count = (int) normalizeTickInterval(tickInterval / interval, multiples, 1);
+        double temp = ((double) tickInterval) / ((double) interval);
+        count = (int) normalizeTickInterval(temp, multiples, 1);
 
         return new NormalizedInterval(unit.name(), interval, count);
     }
@@ -63,8 +64,8 @@ public class TimeTicksCalculator {
      * @param {Number} magnitude
      * @param {Object} options
      */
-    public long normalizeTickInterval(long interval, int[] multiples, int magnitude) {
-        long normalized;
+    public long normalizeTickInterval(double interval, int[] multiples, int magnitude) {
+        double normalized;
 
         // round to a tenfold of 1, 2, 2.5 or 5
         normalized = interval / magnitude;
@@ -81,7 +82,7 @@ public class TimeTicksCalculator {
         // multiply back to the correct magnitude
         interval *= magnitude;
 
-        return interval;
+        return Math.round(interval);
     }
 
     private long makeTime(int year, int month) {
@@ -225,20 +226,20 @@ public class TimeTicksCalculator {
     }
 
     enum TimeUnits {
-        MILLISECOND(1, new int[] { 1, 2, 5, 10, 20, 25, 50, 100, 200, 500 }), 
-        SECOND(1000, new int[] { 1, 2, 5, 10, 15, 30 }),
-        MINUTE(60 * 1000, new int[] { 1, 2, 5, 10, 15, 30 }),
-        HOUR(60 * 60 * 1000, new int[] { 1, 2, 3, 4, 6, 8, 12 }),
-        DAY(24 * 3600000l, new int[] { 1, 2 }), 
-        WEEK(7 * 24 * 3600000l, new int[] { 1, 2 }), 
-        MONTH(30 * 24 * 3600000l, new int[] { 1, 2, 3, 4, 6 }),
-        YEAR(31556952000l, new int[] {});
+        MILLISECOND(1l, 1, 2, 5, 10, 20, 25, 50, 100, 200, 500), 
+        SECOND(1000l, 1, 2, 5, 10, 15, 30),
+        MINUTE(60 * 1000l, 1, 2, 5, 10, 15, 30),
+        HOUR(60 * 60 * 1000l, 1, 2, 3, 4, 6, 8, 12),
+        DAY(24 * 3600000l, 1, 2), 
+        WEEK(7 * 24 * 3600000l, 1, 2), 
+        MONTH(30 * 24 * 3600000l, 1, 2, 3, 4, 6),
+        YEAR(31556952000l);
 
         int[] allowedMultiples;
 
         long unitInMs;
 
-        TimeUnits(long unitInMs, int[] allowedMultiples) {
+        TimeUnits(long unitInMs, int... allowedMultiples) {
             this.unitInMs = unitInMs;
             this.allowedMultiples = allowedMultiples;
         }

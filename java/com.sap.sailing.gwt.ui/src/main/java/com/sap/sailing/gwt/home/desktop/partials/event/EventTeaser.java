@@ -13,13 +13,13 @@ import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
 import com.sap.sailing.gwt.home.desktop.utils.LongNamesUtil;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.general.EventMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class EventTeaser extends Composite {
 

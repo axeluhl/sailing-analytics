@@ -40,6 +40,10 @@ public class AppPreferences extends BaseAppPreferences {
         return context.getString(R.string.preference_server_event_path, "/events").replace("{event_id}", eventId);
     }
 
+    public String getServerEventUrl(String eventId) {
+        return context.getString(R.string.preference_server_event_url, eventId);
+    }
+
     public String getServerLeaderboardPath(String leaderboardName) {
         return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace(
                 "{leaderboard_name}", leaderboardName);

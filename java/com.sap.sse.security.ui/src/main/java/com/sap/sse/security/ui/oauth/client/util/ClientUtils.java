@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.oauth.client.util;
 
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
@@ -275,7 +276,7 @@ public class ClientUtils {
     }
 
     public static void redirect(String url) {
-        Window.Location.assign(url);
+        Window.Location.assign(UriUtils.fromString(url).asString());
     }
 
     public static boolean redirected() {

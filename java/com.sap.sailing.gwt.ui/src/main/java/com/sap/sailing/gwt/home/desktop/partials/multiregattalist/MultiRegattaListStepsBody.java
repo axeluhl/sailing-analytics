@@ -16,10 +16,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.UIObject;
+import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressFleetDTO;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressFleetDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
 import com.sap.sse.common.Util;
 
 public class MultiRegattaListStepsBody extends UIObject implements RequiresResize {

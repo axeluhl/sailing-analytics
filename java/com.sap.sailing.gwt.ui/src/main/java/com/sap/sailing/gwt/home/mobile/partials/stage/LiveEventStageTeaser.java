@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.stage;
 
+import com.sap.sailing.gwt.home.communication.event.EventLinkAndMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
-import com.sap.sailing.gwt.ui.shared.general.EventLinkAndMetadataDTO;
 
 public class LiveEventStageTeaser extends StageTeaser {
 

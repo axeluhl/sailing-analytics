@@ -77,4 +77,8 @@ public class BreadcrumbPane extends Widget {
 			}
 		});
 	}
+	
+	public void clear() {
+	    breadcrumDiv.removeAllChildren();
+	}
 }

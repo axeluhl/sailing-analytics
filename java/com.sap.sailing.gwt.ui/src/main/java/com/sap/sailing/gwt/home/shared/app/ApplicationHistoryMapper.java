@@ -19,15 +19,16 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeri
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.mobile.places.series.minileaderboard.SeriesMiniOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 
@@ -56,7 +57,8 @@ import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
         // Mobile only places:
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
-        SeriesMiniOverallLeaderboardPlace.Tokenizer.class
+        SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
+        ErrorPlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }

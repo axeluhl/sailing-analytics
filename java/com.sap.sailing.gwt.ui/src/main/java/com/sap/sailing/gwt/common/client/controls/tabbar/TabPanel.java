@@ -7,6 +7,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
@@ -22,6 +24,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
+import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 
 /**
  * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
@@ -42,6 +45,7 @@ public class TabPanel<PRESENTER> extends Composite {
     @UiField
     TabBar tabBar;
     @UiField BreadcrumbPane breadcrumbs;
+    @UiField DivElement breadcrumbsContainer;
     @UiField FlowPanel tabExtension;
     private TabView<Place, PRESENTER> currentTab;
     
@@ -53,6 +57,10 @@ public class TabPanel<PRESENTER> extends Composite {
         this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
+        
+        if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP) {
+            breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
+        }
     }
 
     public TabView<?, PRESENTER> getCurrentTab() {

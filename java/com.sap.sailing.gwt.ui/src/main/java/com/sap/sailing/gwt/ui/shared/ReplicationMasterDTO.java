@@ -6,12 +6,16 @@ public class ReplicationMasterDTO implements IsSerializable {
     private String hostname;
     private int messagingPort;
     private int servletPort;
+    private String messagingHostname;
+    private String exchangeName;
     ReplicationMasterDTO() {}
-    public ReplicationMasterDTO(String hostname, int messagingPort, int servletPort) {
+    public ReplicationMasterDTO(String hostname, int servletPort, String messagingHostname, int messagingPort, String exchangeName) {
         super();
         this.hostname = hostname;
-        this.messagingPort = messagingPort;
         this.servletPort = servletPort;
+        this.messagingHostname = messagingHostname;
+        this.messagingPort = messagingPort;
+        this.exchangeName = exchangeName;
     }
     public String getHostname() {
         return hostname;
@@ -21,5 +25,11 @@ public class ReplicationMasterDTO implements IsSerializable {
     }
     public int getServletPort() {
         return servletPort;
+    }
+    public String getMessagingHostname() {
+        return messagingHostname;
+    }
+    public String getExchangeName() {
+        return exchangeName;
     }
 }

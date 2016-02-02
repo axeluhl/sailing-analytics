@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.stage;
 
+import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.start.EventStageDTO;
 
 /**
  * Teaser band with no action on the homepage stage

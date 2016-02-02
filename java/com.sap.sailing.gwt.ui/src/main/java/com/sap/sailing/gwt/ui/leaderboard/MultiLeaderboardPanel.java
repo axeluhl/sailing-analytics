@@ -3,8 +3,10 @@ package com.sap.sailing.gwt.ui.leaderboard;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.FontWeight;
@@ -35,7 +37,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * A panel managing multiple {@link LeaderboardPanel}s (e.g. from a meta leaderboard) so that the user can switch between them. 
  * @author Frank
  */
-public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener {
+public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSettings> implements TimeListener, SelectedLeaderboardChangeProvider {
 
     private LeaderboardPanel selectedLeaderboardPanel;
     private FlowPanel selectedLeaderboardFlowPanel;
@@ -60,7 +62,8 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     private final String metaLeaderboardName;
     private final boolean isEmbedded;
 
-    private List<LeaderboardUpdateListener> leaderboardUpdateListener;
+    private final Set<LeaderboardUpdateListener> leaderboardUpdateListeners;
+    private final Set<SelectedLeaderboardChangeListener> selectedLeaderboardChangeListeners;
 
     public MultiLeaderboardPanel(SailingServiceAsync sailingService, String metaLeaderboardName, AsyncActionsExecutor asyncActionsExecutor,
             Timer timer, boolean isEmbedded, String preselectedLeaderboardName, RaceIdentifier preselectedRace, 
@@ -81,13 +84,14 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         selectedLeaderboardPanel = null;
         leaderboardNamesAndDisplayNames = new ArrayList<Util.Pair<String, String>>();
         leaderboardNamesAndSettings = new HashMap<String, LeaderboardSettings>();
-        leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
+        leaderboardUpdateListeners = new HashSet<LeaderboardUpdateListener>();
+        selectedLeaderboardChangeListeners = new HashSet<SelectedLeaderboardChangeListener>();
     }
 
     private LeaderboardSettings getOrCreateLeaderboardSettings(String leaderboardName, LeaderboardSettings currentLeaderboardSettings) {
         LeaderboardSettings newLeaderboardSettings = leaderboardNamesAndSettings.get(leaderboardName);
         if(newLeaderboardSettings == null) {
-            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false, /* showRegattaRank */ true);
+            newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null, null, false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
         }
         if(currentLeaderboardSettings != null) {
             newLeaderboardSettings = LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(newLeaderboardSettings, currentLeaderboardSettings);
@@ -152,7 +156,7 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
 
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
-        this.leaderboardUpdateListener.add(listener);
+        this.leaderboardUpdateListeners.add(listener);
     }
 
     public void setLeaderboardNames(List<Util.Pair<String, String>> newLeaderboardNamesAndDisplayNames) {
@@ -178,35 +182,34 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
     }
     
     private void updateLeaderboardSelection() {
-        if(leaderboardsTabPanel != null) {
+        if (leaderboardsTabPanel != null) {
             leaderboardsTabPanel.clear();
-            
             int index = 0;
             int leaderboardCount = leaderboardNamesAndDisplayNames.size();
             for (Util.Pair<String, String> leaderboardNameAndDisplayName : leaderboardNamesAndDisplayNames) {
                 FlowPanel tabFlowPanel = new FlowPanel();
                 leaderboardsTabPanel.add(tabFlowPanel, leaderboardNameAndDisplayName.getB(), false);
 
-                if(selectedLeaderboardName != null && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
+                if (selectedLeaderboardName != null
+                        && selectedLeaderboardName.equals(leaderboardNameAndDisplayName.getA())) {
                     leaderboardsTabPanel.selectTab(index);
                 }
                 index++;
             }
-            // show the last leaderboard when no leaderboard is selected yet 
-            if(selectedLeaderboardName == null && leaderboardCount > 0) {
-                leaderboardsTabPanel.selectTab(leaderboardCount-1);
+            // show the last leaderboard when no leaderboard is selected yet
+            if (selectedLeaderboardName == null && leaderboardCount > 0) {
+                leaderboardsTabPanel.selectTab(leaderboardCount - 1);
             }
-            
             leaderboardsTabPanel.setVisible(leaderboardCount > 0);
-            if(!isEmbedded) {
+            if (!isEmbedded) {
                 leaderboardsLabel.setVisible(leaderboardCount > 0);
             }
         }
     }
 
     private void updateSelectedLeaderboard(String newSelectedLeaderboardName, int newTabIndex) {
-        if(newSelectedLeaderboardName != null) {
-            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+        if (newSelectedLeaderboardName != null) {
+            if (selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
                 selectedLeaderboardPanel.removeAllListeners();
                 selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
                 selectedLeaderboardPanel = null;
@@ -215,18 +218,18 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
             
             selectedLeaderboardFlowPanel = (FlowPanel) leaderboardsTabPanel.getWidget(newTabIndex);
             LeaderboardSettings newLeaderboardSettings = getOrCreateLeaderboardSettings(newSelectedLeaderboardName, leaderboardNamesAndSettings.get(selectedLeaderboardName));
-            selectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, isEmbedded,
+            LeaderboardPanel newSelectedLeaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor, newLeaderboardSettings, isEmbedded,
                     /* preselectedRace*/ null, new CompetitorSelectionModel(true), timer,
                     null, newSelectedLeaderboardName, errorReporter, stringMessages, userAgent,
                     showRaceDetails, /* competitorSearchTextBox */ null, /* showSelectionCheckbox */ true,  /* raceTimesInfoProvider */null, 
                     false, /* adjustTimerDelay */ true, /*autoApplyTopNFilter*/ false, false);
-            selectedLeaderboardFlowPanel.add(selectedLeaderboardPanel);
-            for(LeaderboardUpdateListener listener: leaderboardUpdateListener) {
-                selectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
+            selectedLeaderboardFlowPanel.add(newSelectedLeaderboardPanel);
+            for (LeaderboardUpdateListener listener : leaderboardUpdateListeners) {
+                newSelectedLeaderboardPanel.addLeaderboardUpdateListener(listener);
             }
-            
+            setSelectedLeaderboard(newSelectedLeaderboardPanel);
         } else {
-            if(selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
+            if (selectedLeaderboardPanel != null && selectedLeaderboardFlowPanel != null) {
                 selectedLeaderboardPanel.removeAllListeners();
                 selectedLeaderboardFlowPanel.remove(selectedLeaderboardPanel);
                 selectedLeaderboardPanel = null;
@@ -254,4 +257,23 @@ public class MultiLeaderboardPanel extends AbstractLazyComponent<LeaderboardSett
         }
     }
 
+    @Override
+    public void addSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+        selectedLeaderboardChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeSelectedLeaderboardChangeListener(SelectedLeaderboardChangeListener listener) {
+        selectedLeaderboardChangeListeners.remove(listener);
+    }
+
+    @Override
+    public void setSelectedLeaderboard(LeaderboardPanel selectedLeaderboard) {
+        if(this.selectedLeaderboardPanel != selectedLeaderboard) {
+            this.selectedLeaderboardPanel = selectedLeaderboard;
+            for (SelectedLeaderboardChangeListener listener : selectedLeaderboardChangeListeners) {
+                listener.onSelectedLeaderboardChanged(selectedLeaderboardPanel);
+            }
+        }
+    }
 }

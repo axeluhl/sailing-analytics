@@ -6,14 +6,12 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -35,11 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.AbstractLog;
-import com.sap.sailing.domain.abstractlog.AbstractLogEvent;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.AnalyzerFactory;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.MapWithValueCollectionReducer;
-import com.sap.sailing.domain.abstractlog.MultiLogAnalyzer.SetReducer;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -54,9 +47,8 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEv
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogDefinedMarkFinder;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.analyzing.DeviceMarkMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -119,7 +111,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -154,6 +145,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
+import com.sap.sse.util.IdentityWrapper;
 import com.sap.sse.util.SmartFutureCache;
 import com.sap.sse.util.SmartFutureCache.AbstractCacheUpdater;
 import com.sap.sse.util.SmartFutureCache.EmptyUpdateInterval;
@@ -183,7 +175,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
      * sources such as the track-based estimation wind source, may be excluded by adding them to this set.
      */
-    private final Set<WindSource> windSourcesToExclude;
+    private final ConcurrentHashMap<WindSource, TrackedRaceImpl> windSourcesToExclude;
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a mark fix, a race
@@ -269,7 +261,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
     
-    private transient Map<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
+    private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected final MarkPassingCalculator markPassingCalculator;
     
@@ -354,7 +346,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private final NamedReentrantReadWriteLock loadingFromGPSFixStoreLock;
 
-    private final Map<Iterable<MarkPassing>, NamedReentrantReadWriteLock> locksForMarkPassings;
+    private final ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock> locksForMarkPassings;
     
     /**
      * Caches wind requests for a few seconds to accelerate access in live mode
@@ -412,7 +404,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         rankingMetric = rankingMetricConstructor.apply(this);
         raceStates = new WeakHashMap<>();
         shortTimeWindCache = new ShortTimeWindCache(this, millisecondsOverWhichToAverageWind / 2);
-        locksForMarkPassings = new IdentityHashMap<>();
+        locksForMarkPassings = new ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock>();
         attachedRaceLogs = new ConcurrentHashMap<>();
         attachedRegattaLogs = new ConcurrentHashMap<>();
         attachedRaceExecutionOrderProviders = new ConcurrentHashMap<>();
@@ -424,8 +416,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 + race.getName(), /* fair */ false);
         this.cacheInvalidationTimerLock = new Object();
         this.updateCount = 0;
-        this.windSourcesToExclude = new HashSet<WindSource>();
-        this.directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        this.windSourcesToExclude = new ConcurrentHashMap<>();
+        this.directionFromStartToNextMarkCache = new ConcurrentHashMap<TimePoint, Future<Wind>>();
         this.millisecondsOverWhichToAverageSpeed = millisecondsOverWhichToAverageSpeed;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
@@ -624,7 +616,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         gpsFixStore = EmptyGPSFixStore.INSTANCE;
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
-        directionFromStartToNextMarkCache = new HashMap<TimePoint, Future<Wind>>();
+        directionFromStartToNextMarkCache = new ConcurrentHashMap<>();
         crossTrackErrorCache = new CrossTrackErrorCache(this);
         crossTrackErrorCache.invalidate();
         maneuverCache = createManeuverCache();
@@ -658,13 +650,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public synchronized void waitUntilLoadingFromWindStoreComplete() throws InterruptedException {
         while (loadingFromWindStoreState != LoadingFromStoresState.FINISHED) {
-            wait();
-        }
-    }
-
-    @Override
-    public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException {
-        while (!attachedRaceLogs.containsKey(fromRaceLog.getId()) || loadingFromGPSFixStore) {
             wait();
         }
     }
@@ -963,32 +948,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public boolean isLive(TimePoint at) {
-        final Date startOfLivePeriod;
-        final Date endOfLivePeriod;
+        final TimePoint startOfLivePeriod;
+        final TimePoint endOfLivePeriod;
         if (!hasGPSData() || !hasWindData()) {
             startOfLivePeriod = null;
             endOfLivePeriod = null;
         } else {
             if (getStartOfRace() == null) {
-                startOfLivePeriod = getStartOfTracking().asDate();
+                startOfLivePeriod = getStartOfTracking();
             } else {
-                startOfLivePeriod = new Date(getStartOfRace().asMillis() - TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
+                startOfLivePeriod = getStartOfRace().minus(TimingConstants.PRE_START_PHASE_DURATION_IN_MILLIS);
             }
             if (getEndOfRace() == null) {
                 if (getTimePointOfNewestEvent() != null) {
-                    endOfLivePeriod = new Date(getTimePointOfNewestEvent().asMillis()
-                            + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                    endOfLivePeriod = getTimePointOfNewestEvent().plus(
+                            TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
                 } else {
                     endOfLivePeriod = null;
                 }
             } else {
-                endOfLivePeriod = new Date(getEndOfRace().asMillis() + TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
+                endOfLivePeriod = getEndOfRace().plus(TimingConstants.IS_LIVE_GRACE_PERIOD_IN_MILLIS);
             }
         }
     
         // if an empty timepoint is given then take the start of the race
         if (at == null) {
-            at = new MillisecondsTimePoint(startOfLivePeriod.getTime()+1);
+            at = startOfLivePeriod.plus(1);
         }
         
         // whenLastTrackedRaceWasLive is null if there is no tracked race for fleet, or the tracked race hasn't started yet at the server time
@@ -996,8 +981,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         final boolean result =
                 startOfLivePeriod != null &&
                 endOfLivePeriod != null &&
-                startOfLivePeriod.getTime() <= at.asMillis() &&
-                at.asMillis() <= endOfLivePeriod.getTime();
+                !startOfLivePeriod.after(at) &&
+                !at.after(endOfLivePeriod);
         return result;
     }
 
@@ -1146,11 +1131,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             int indexOfWaypoint = getRace().getCourse().getIndexOfWaypoint(startOfLeg);
             if (indexOfWaypoint == -1) {
                 throw new IllegalArgumentException("Waypoint " + startOfLeg + " not found in " + getRace().getCourse());
-            } else if (indexOfWaypoint == Util.size(getRace().getCourse().getWaypoints()) - 1) {
+            } else if (indexOfWaypoint == getRace().getCourse().getNumberOfWaypoints() - 1) {
                 throw new IllegalArgumentException("Waypoint " + startOfLeg + " isn't start of any leg in "
                         + getRace().getCourse());
             }
-            return trackedLegs.get(race.getCourse().getLegs().get(indexOfWaypoint));
+            return trackedLegs.get(race.getCourse().getLeg(indexOfWaypoint));
         } finally {
             getRace().getCourse().unlockAfterRead();
         }
@@ -1679,24 +1664,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public Set<WindSource> getWindSourcesToExclude() {
-        synchronized (windSourcesToExclude) {
-            return Collections.unmodifiableSet(windSourcesToExclude);
-        }
+        return Collections.unmodifiableSet(windSourcesToExclude.keySet());
     }
 
     @Override
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
-        Set<WindSource> old = new HashSet<>(this.windSourcesToExclude);
-        synchronized (this.windSourcesToExclude) {
-            LockUtil.lockForRead(getSerializationLock());
-            try {
-                this.windSourcesToExclude.clear();
-                for (WindSource windSourceToExclude : windSourcesToExclude) {
-                    this.windSourcesToExclude.add(windSourceToExclude);
-                }
-            } finally {
-                LockUtil.unlockAfterRead(getSerializationLock());
+        Set<WindSource> old = new HashSet<>(getWindSourcesToExclude());
+        LockUtil.lockForRead(getSerializationLock());
+        try {
+            this.windSourcesToExclude.clear();
+            for (WindSource windSourceToExclude : windSourcesToExclude) {
+                this.windSourcesToExclude.put(windSourceToExclude, this);
             }
+        } finally {
+            LockUtil.unlockAfterRead(getSerializationLock());
         }
         if (!old.equals(this.windSourcesToExclude)) {
             clearAllCachesExceptManeuvers();
@@ -1742,30 +1723,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public Wind getDirectionFromStartToNextMark(final TimePoint at) {
         Future<Wind> future;
         FutureTask<Wind> newFuture = null;
-        synchronized (directionFromStartToNextMarkCache) {
-            future = directionFromStartToNextMarkCache.get(at);
-            if (future == null) {
-                newFuture = new FutureTask<Wind>(new Callable<Wind>() {
-                    @Override
-                    public Wind call() {
-                        Wind result;
-                        Leg firstLeg = getRace().getCourse().getFirstLeg();
-                        if (firstLeg != null) {
-                            Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
-                            Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
-                            if (firstLegStart != null && firstLegEnd != null) {
-                                result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
-                                        firstLegEnd.getBearingGreatCircle(firstLegStart)));
+        future = directionFromStartToNextMarkCache.get(at);
+        if (future == null) {
+            synchronized (directionFromStartToNextMarkCache) {
+                future = directionFromStartToNextMarkCache.get(at);
+                if (future == null) {
+                    newFuture = new FutureTask<Wind>(new Callable<Wind>() {
+                        @Override
+                        public Wind call() {
+                            Wind result;
+                            Leg firstLeg = getRace().getCourse().getFirstLeg();
+                            if (firstLeg != null) {
+                                Position firstLegEnd = getApproximatePosition(firstLeg.getTo(), at);
+                                Position firstLegStart = getApproximatePosition(firstLeg.getFrom(), at);
+                                if (firstLegStart != null && firstLegEnd != null) {
+                                    result = new WindImpl(firstLegStart, at, new KnotSpeedWithBearingImpl(0.0,
+                                            firstLegEnd.getBearingGreatCircle(firstLegStart)));
+                                } else {
+                                    result = null;
+                                }
                             } else {
                                 result = null;
                             }
-                        } else {
-                            result = null;
+                            return result;
                         }
-                        return result;
-                    }
-                });
-                directionFromStartToNextMarkCache.put(at, newFuture);
+                    });
+                    directionFromStartToNextMarkCache.put(at, newFuture);
+                }
             }
         }
         if (newFuture != null) {
@@ -1839,10 +1823,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     private void loadGPSFixesForExtendedTimeRange(final TimePoint start, final TimePoint end, final boolean waitForGPSFixesToLoad) {
-        for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            loadFixesForLog(raceLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
-                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
-        }
         for (final RegattaLog regattaLog : attachedRegattaLogs.values()) {
             loadFixesForLog(regattaLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
                     /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
@@ -2062,15 +2042,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected NamedReentrantReadWriteLock getMarkPassingsLock(Iterable<MarkPassing> markPassings) {
-        synchronized (locksForMarkPassings) {
-            NamedReentrantReadWriteLock lock = locksForMarkPassings.get(markPassings);
-            if (lock == null) {
-                lock = new NamedReentrantReadWriteLock("mark passings lock for tracked race " + getRace().getName(), /* fair */
-                        false);
-                locksForMarkPassings.put(markPassings, lock);
+        final IdentityWrapper<Iterable<MarkPassing>> markPassingsIdentity = new IdentityWrapper<>(markPassings);
+        NamedReentrantReadWriteLock lock = locksForMarkPassings.get(markPassingsIdentity);
+        if (lock == null) {
+            synchronized (locksForMarkPassings) {
+                lock = locksForMarkPassings.get(markPassingsIdentity);
+                if (lock == null) {
+                    lock = new NamedReentrantReadWriteLock(
+                            "mark passings lock for tracked race " + getRace().getName(), /* fair */false);
+                    locksForMarkPassings.put(markPassingsIdentity, lock);
+                }
             }
-            return lock;
         }
+        return lock;
     }
 
     private void updateStartToNextMarkCacheInvalidationCacheListenersAfterWaypointRemoved(int zeroBasedIndex,
@@ -3202,8 +3186,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * waiters on <code>this</code> object are notified when done with adding the <code>log</code> to
      * <code>addLogToMap</code>.
      */
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(
-            final LogT log, ConcurrentHashMap<Serializable, LogT> addLogToMap, final boolean waitForGPSFixesToLoad) {
+    private void loadFixesForLog(
+            final RegattaLog log, ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final boolean waitForGPSFixesToLoad) {
         if (log != null) {
             // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
             // When this tracked race is to be serialized, wait for the loading from stores to complete.
@@ -3234,8 +3218,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            the time to use to crop the end of the time range for which to load fixes; if <code>null</code>,
      *            the end of the time range will be restricted only by the device mapping intervals
      */
-    private <LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT> void loadFixesForLog(final LogT log,
-            ConcurrentHashMap<Serializable, LogT> addLogToMap, final TimePoint startOfTimeWindowToLoad,
+    private void loadFixesForLog(final RegattaLog log,
+            ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final TimePoint startOfTimeWindowToLoad,
             final TimePoint endOfTimeWindowToLoad, final boolean waitForGPSFixesToLoad) {
         Thread t = new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
                 + log.getId()+" from "+startOfTimeWindowToLoad+" to "+endOfTimeWindowToLoad) {
@@ -3263,7 +3247,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                     logger.info("Finished loading competitor tracks for " + getRace().getName());
                     logger.info("Started loading mark tracks for " + getRace().getName());
-                    for (Mark mark : getMarksFromRaceAndLogs()) {
+                    for (Mark mark : getMarksFromRegattaLogs()) {
                         try {
                             gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
                                     log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
@@ -3311,20 +3295,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return loadingFromGPSFixStore;
     }
 
-    /**
-     * This can trigger fixes to be loaded, if there are {@link DeviceMapping}s in the {@code RaceLog}.
-     * If multiple race logs are attached, the threads that are spawned to load fixes will do so one
-     * after another, as they acquire a write lock on the {@link #loadingFromGPSFixStoreLock}.
-     */
     @Override
-    public void attachRaceLog(final RaceLog raceLog) {
-        loadFixesForLog(raceLog, attachedRaceLogs, /* wait for fixes to load */ false);
-        try {
-            // The log is attached to the tracked race by a background thread; this method wants
-            // to guarantee that the log is at least really attached to the TrackedRace before returning:
-            waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
-        } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
+    public void attachRaceLog(RaceLog raceLog) {
+        synchronized (TrackedRaceImpl.this) {
+            attachedRaceLogs.put(raceLog.getId(), raceLog);
+            notifyAll();
         }
     }
 
@@ -3920,19 +3895,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public Iterable<Mark> getMarksFromRaceAndLogs() {
-         final List<AbstractLog<?, ?>> allLogs = new ArrayList<AbstractLog<?, ?>>();
-         final List<AbstractLog<?, ?>> raceLogs = new ArrayList<>();
-         raceLogs.addAll(attachedRaceLogs.values());
-         allLogs.addAll(raceLogs);
-         allLogs.addAll(attachedRegattaLogs.values());
-         final Map<Mark, List<DeviceMapping<Mark>>> markMappings = new MultiLogAnalyzer<>(new DeviceMarkMappingFinder.Factory(),
-                 new MapWithValueCollectionReducer<>(), allLogs).analyze();
+    public Iterable<Mark> getMarksFromRegattaLogs() {
          final Set<Mark> result = new HashSet<>();
-         result.addAll(markMappings.keySet());
-         final AnalyzerFactory<Collection<Mark>> analyzerFactory = new RaceLogDefinedMarkFinder.Factory();
-         Set<Mark> marksDefinedInRaceLog = new MultiLogAnalyzer<>(analyzerFactory, new SetReducer<Mark>(), raceLogs).analyze();
-         result.addAll(marksDefinedInRaceLog);
+         for (RegattaLog log : attachedRegattaLogs.values()) {
+             result.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());
+         }
          return result;
     }
 }

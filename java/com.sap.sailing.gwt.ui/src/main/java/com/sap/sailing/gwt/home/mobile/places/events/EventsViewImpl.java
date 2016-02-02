@@ -7,11 +7,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListViewDTO;
+import com.sap.sailing.gwt.home.communication.eventlist.EventListYearDTO;
 import com.sap.sailing.gwt.home.mobile.partials.recents.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcoming;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListEventDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventlist.EventListYearDTO;
 
 public class EventsViewImpl extends Composite implements EventsView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);

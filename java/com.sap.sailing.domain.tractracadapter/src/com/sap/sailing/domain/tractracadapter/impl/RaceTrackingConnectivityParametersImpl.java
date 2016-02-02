@@ -16,6 +16,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -31,7 +32,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     private final RegattaLogStore regattaLogStore;
     private final DomainFactory domainFactory;
     private final long delayToLiveInMillis;
-    private final boolean simulateWithStartTimeNow;
+    private final Duration offsetToStartTimeOfSimulatedRace;
     private final String tracTracUsername;
     private final String tracTracPassword;
     private final String raceStatus;
@@ -40,7 +41,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
 
     public RaceTrackingConnectivityParametersImpl(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow,  boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            Duration offsetToStartTimeOfSimulatedRace,  boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             DomainFactory domainFactory, String tracTracUsername, String tracTracPassword, String raceStatus,
             String raceVisibility) {
         super();
@@ -52,7 +53,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
         this.endOfTracking = endOfTracking;
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.domainFactory = domainFactory;
-        this.simulateWithStartTimeNow = simulateWithStartTimeNow;
+        this.offsetToStartTimeOfSimulatedRace = offsetToStartTimeOfSimulatedRace;
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.tracTracUsername = tracTracUsername;
@@ -67,7 +68,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
             GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws MalformedURLException, FileNotFoundException, URISyntaxException,
             CreateModelException, SubscriberInitializationException {
         RaceTracker tracker = domainFactory.createRaceTracker(paramURL, liveURI, storedURI, courseDesignUpdateURI,
-                startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm, raceLogStore,
+                startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore,
                 regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;
@@ -77,7 +78,7 @@ public class RaceTrackingConnectivityParametersImpl implements RaceTrackingConne
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception {
         RaceTracker tracker = domainFactory.createRaceTracker(regatta, paramURL, liveURI, storedURI,
-                courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, simulateWithStartTimeNow, useInternalMarkPassingAlgorithm,
+                courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis, offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm,
                 raceLogStore, regattaLogStore, windStore, gpsFixStore, tracTracUsername, tracTracPassword, raceStatus,
                 raceVisibility, trackedRegattaRegistry, raceLogResolver);
         return tracker;

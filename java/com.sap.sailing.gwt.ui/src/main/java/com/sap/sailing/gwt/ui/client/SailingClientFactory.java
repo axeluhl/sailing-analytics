@@ -14,8 +14,6 @@ import com.sap.sse.security.ui.client.UserService;
 public interface SailingClientFactory extends ClientFactory {
     SailingServiceAsync getSailingService();
 
-    HomeServiceAsync getHomeService();
-
     MediaServiceAsync getMediaService();
     
     UserManagementServiceAsync getUserManagementService();

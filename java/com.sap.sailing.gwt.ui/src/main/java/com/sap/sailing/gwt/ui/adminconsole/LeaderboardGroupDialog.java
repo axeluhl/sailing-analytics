@@ -157,7 +157,8 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
 
     @Override
     protected LeaderboardGroupDescriptor getResult() {
-        return new LeaderboardGroupDescriptor(nameEntryField.getText(), descriptionEntryField.getText(),
+        return new LeaderboardGroupDescriptor(nameEntryField.getText().trim(), // trim the name to avoid trailing blanks in URL parameters
+                descriptionEntryField.getText(),
                 displayNameEntryField.getText().trim().isEmpty() ? null : displayNameEntryField.getText(),
                 displayLeaderboardsInReverseOrderCheckBox.getValue(),
                 useOverallLeaderboardCheckBox.getValue(),
