@@ -9,19 +9,15 @@
 	    <header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage"></header:DashboardWidgetHeaderAndNoDataMessage>
 		<g:HTMLPanel ui:field="currentStartPanel" styleName="{resources.gss.current_start_panel}">
 		</g:HTMLPanel>
-		<g:HTMLPanel ui:field="leftButton"
-			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}">
+		<g:HTMLPanel ui:field="leftButton" styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}">
 			<g:Image ui:field="leftButtonImage" styleName="{resources.gss.controll_header_button_image}" resource="{resources.left}"></g:Image>
 		</g:HTMLPanel>
-		<g:HTMLPanel ui:field="rightButton"
-			styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_right}">
+		<g:HTMLPanel ui:field="rightButton" styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_right}">
 			<g:Image ui:field="rightButtonImage" styleName="{resources.gss.controll_header_button_image}" resource="{resources.right}"></g:Image>
 		</g:HTMLPanel>
 		<g:FocusPanel ui:field="left_focus_panel" styleName="{resources.gss.left_focus_panel}"></g:FocusPanel>
-		<g:FocusPanel ui:field="right_focus_panel"
-			styleName="{resources.gss.right_focus_panel}"></g:FocusPanel>
-		<g:HTMLPanel ui:field="startanalysis_card_container"
-			styleName="{resources.gss.card_container}">
+		<g:FocusPanel ui:field="right_focus_panel" styleName="{resources.gss.right_focus_panel}"></g:FocusPanel>
+		<g:HTMLPanel ui:field="startanalysis_card_container" styleName="{resources.gss.card_container}">
 		</g:HTMLPanel>
 	</g:HTMLPanel>
 
