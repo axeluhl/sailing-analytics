@@ -163,11 +163,15 @@ public class CompetitorProviderFromRaceColumnsAndRegattaLike {
                     rc.getRaceLog(fleet).addListener(raceLogCompetitorsCacheInvalidationListener);
                 }
             }
-            // note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
+            final RegattaLog regattaLog = provider.getRegattaLike().getRegattaLog();
+            // Don't add regatta log competitors; if no race exists, the leaderboard is not considered to have any
+            // competitors. The competitors are collected from the races. Those, however, will be the regatta log
+            // competitors if the race does not define its own.
+            // Note: adding listeners is idempotent; at most one occurrence of this listener exists in the race/regatta log's
             // listeners set
             provider.addRaceColumnListener(raceColumnListener);
             // consider {@link RegattaLog} competitor changes because the RaceColumns may have added the competitors from there
-            provider.getRegattaLike().getRegattaLog().addListener(regattaLogCompetitorsCacheInvalidationListener);
+            regattaLog.addListener(regattaLogCompetitorsCacheInvalidationListener);
             allCompetitorsCache = result;
         }
         return allCompetitorsCache;

@@ -180,8 +180,8 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         for (Competitor c : compLists[1]) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), new LogEventAuthorImpl("Me", 0), 1, c));
         }
-        //expected are only the competitors in the RaceLog, because only one RaceColumn is
-        //registered, which has the competitors registered in the RaceLog.
+        // expected are only the competitors in the RaceLog, because only one RaceColumn is
+        // registered, which has the competitors registered in the RaceLog.
         assertRegattaAndRaceCompetitors(new HashSet<>(compLists[1]));
         // Now we revoke that the race log provides the competitors for R1; the competitors should then
         // snap back to those competitors taken from the regatta log for both, the rentire leaderboard

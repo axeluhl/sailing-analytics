@@ -1,8 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,47 +12,41 @@ import android.view.MenuItem;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
-import com.sap.sailing.android.buoy.positioning.app.service.MarkerService;
 import com.sap.sailing.android.buoy.positioning.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.buoy.positioning.app.util.AppPreferences;
 import com.sap.sailing.android.buoy.positioning.app.util.CheckinManager;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
+import com.sap.sailing.android.buoy.positioning.app.util.MarkerUtils;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
-import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
 import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 
 public class RegattaActivity extends AbstractRegattaActivity {
 
     private String leaderboardName;
     private String checkinDigest;
-    private List<MarkInfo> marks;
     private final String TAG = RegattaActivity.class.getName();
     private String checkinUrl;
 
-    private AppPreferences prefs;
     private MessageSendingService messageSendingService;
     private boolean messageSendingServiceBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = new AppPreferences(this);
+        AppPreferences prefs = new AppPreferences(this);
         prefs.setLastScannedQRCode(null);
         Intent intent = getIntent();
 
-        setMarks(new ArrayList<MarkInfo>());
 
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
         leaderboardName = intent.getStringExtra(getString(R.string.leaderboard_name));
 
         checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest).urlString;
-
-        setMarks(DatabaseHelper.getInstance().getMarks(this, checkinDigest));
 
         setContentView(R.layout.fragment_container);
         OpenSansToolbar toolbar = (OpenSansToolbar) findViewById(R.id.toolbar);
@@ -76,7 +67,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
         RegattaFragment regattaFragment = new RegattaFragment();
         replaceFragment(R.id.content_frame, regattaFragment);
 
-        startMarkerService();
+        MarkerUtils.withContext(this).startMarkerService(checkinUrl);
     }
 
     @Override
@@ -110,8 +101,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     protected void onDestroy() {
-        Intent intent = new Intent(this, MarkerService.class);
-        stopService(intent);
+        MarkerUtils.withContext(this).stopMarkerService();
         super.onDestroy();
     }
 
@@ -126,21 +116,20 @@ public class RegattaActivity extends AbstractRegattaActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.refresh:
-            ExLog.i(this, TAG, "Clicked REFRESH.");
-            CheckinManager manager = new CheckinManager(checkinUrl, this);
-            manager.callServerAndGenerateCheckinData();
-            return true;
-        case R.id.check_out:
-            checkOut();
-            return true;
-        case R.id.about:
-            AboutDialog aboutDialog = new AboutDialog(this);
-            aboutDialog.show();
-            return true;
-        case R.id.settings:
-            startActivity(new Intent(this, SettingActivity.class));
-            return true;
+            case R.id.refresh:
+                ExLog.i(this, TAG, "Clicked REFRESH.");
+                CheckinManager manager = new CheckinManager(checkinUrl, this);
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.check_out:
+                checkOut();
+                return true;
+            case R.id.about:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            case R.id.settings:
+                startActivity(new Intent(this, SettingActivity.class));
+                return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -156,9 +145,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
     public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
         CheckinData data = (CheckinData) checkinData;
         try {
-            DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, data.checkinDigest);
-            DatabaseHelper.getInstance().storeCheckinRow(this, data.marks, data.getLeaderboard(), data.getCheckinUrl(),
-                    data.pings);
+            DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
             getRegattaFragment().getAdapter().notifyDataSetChanged();
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
             ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
@@ -169,12 +156,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
-    }
-
-    private void startMarkerService() {
-        Intent intent = new Intent(this, MarkerService.class);
-        intent.putExtra(getString(R.string.check_in_url_key), checkinUrl);
-        startService(intent);
     }
 
     private void checkOut(){
@@ -188,14 +169,6 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     public RegattaFragment getRegattaFragment() {
         return (RegattaFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-    }
-
-    public List<MarkInfo> getMarks() {
-        return marks;
-    }
-
-    public void setMarks(List<MarkInfo> marks) {
-        this.marks = marks;
     }
 
     /**
