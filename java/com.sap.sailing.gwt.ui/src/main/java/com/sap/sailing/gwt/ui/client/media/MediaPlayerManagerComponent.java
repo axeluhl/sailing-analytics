@@ -26,7 +26,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.media.MediaTrack.Status;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Roles;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -53,7 +52,6 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -483,8 +481,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
         };
         final VideoSynchPlayer videoPlayer;
         final UserDTO currentUser = userService.getCurrentUser();
-        boolean showSynchControls = currentUser != null && (currentUser.hasRole(DefaultRoles.ADMIN.getRolename()) ||
-                currentUser.hasRole(Roles.eventmanager.getRolename()) || currentUser.hasRole(Roles.mediaeditor.getRolename()));
+        boolean showSynchControls = currentUser != null
+                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getStringPermission(),
+                        SailingPermissionsForRoleProvider.INSTANCE);
         if (videoTrack.isYoutube()) {
             videoPlayer = new VideoYoutubePlayer(videoTrack, getRaceStartTime(), showSynchControls, raceTimer);
         } else {
