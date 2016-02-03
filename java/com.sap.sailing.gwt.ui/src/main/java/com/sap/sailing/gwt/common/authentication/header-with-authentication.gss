@@ -1,0 +1,33 @@
+.header_right_wrapper {
+    display: inline-block;
+}
+.usermanagement_icon {
+    display: inline-block;
+    width: 3rem;
+    height: 3rem;
+    vertical-align: middle;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    background-image: url('images/home/loggedout.svg');
+    cursor: pointer;
+}
+.usermanagement_icon.usermanagement_open {
+	background-image: url('images/home/loggedout-open.svg');
+}
+.usermanagement_icon.usermanagement_loggedin {
+	background-image: url('images/home/loggedin.svg');
+}
+.usermanagement_icon.usermanagement_loggedin.usermanagement_open {
+	background-image: url('images/home/loggedin-open.svg');
+}
+.usermanagement_view {
+	top: 70px !important;
+    left: inherit !important;
+    right: 0 !important;
+    z-index: 10;
+    line-height: 1.333;
+}
+.usermanagement_view * {
+    font-size: 15px;
+}
