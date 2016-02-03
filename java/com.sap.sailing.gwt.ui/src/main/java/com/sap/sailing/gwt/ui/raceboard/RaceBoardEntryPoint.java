@@ -17,8 +17,6 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -87,14 +85,11 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default*/);        
         boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_SIMULATION, true /* default*/);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
-        // TODO Remove CAN_REPLAY_DURING_LIVE_RACES url parameter handling (which is used as fallback) after successful adaption of user permissions  
-        final boolean canReplayWhileLiveIsPossible = getUserService().getCurrentUser().hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), 
-                SailingPermissionsForRoleProvider.INSTANCE) || GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_CAN_REPLAY_DURING_LIVE_RACES, false);
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, true);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, canReplayWhileLiveIsPossible, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia);
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
@@ -102,8 +97,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 // This decision is made once based on the initial screen height. Resizing the window afterwards will have
                 // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
                 boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
-                checkUrlParameters(result, canReplayWhileLiveIsPossible, showMapControls,
-                        isScreenLargeEnoughToOfferChartSupport);
+                checkUrlParameters(result, showMapControls, isScreenLargeEnoughToOfferChartSupport);
             }
             
             @Override
@@ -122,7 +116,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         vp.add(new Label(message));
     }
 
-    private void checkUrlParameters(RaceboardDataDTO raceboardData, boolean canReplayWhileLiveIsPossible, boolean showMapControls,
+    private void checkUrlParameters(RaceboardDataDTO raceboardData, boolean showMapControls,
             boolean isScreenLargeEnoughToOfferChartSupport) {
         if (!raceboardData.isValidLeaderboard()) {
             createErrorPage(getStringMessages().noSuchLeaderboard());

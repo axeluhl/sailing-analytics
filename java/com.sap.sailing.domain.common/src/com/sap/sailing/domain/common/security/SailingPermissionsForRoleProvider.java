@@ -17,7 +17,9 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         } else if (Roles.eventmanager.getRolename().equals(role)) {
             return asList(Permission.MANAGE_MEDIA, Permission.MANAGE_MARK_PASSINGS);
         } else if (Roles.mediaeditor.getRolename().equals(role)) {
-            return Collections.<String>singletonList(Permission.MANAGE_MEDIA.getStringPermission());
+            return asList(Permission.MANAGE_MEDIA);
+        } else if (Roles.moderator.getRolename().equals(role)) {
+            return asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
         } else {
             result = Collections.emptyList();
         }
