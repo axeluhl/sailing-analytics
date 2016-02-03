@@ -66,7 +66,7 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
             if (placeToUse instanceof SignInPlace) {
                 return new SignInActivity(clientFactory, callback, placeController);
             } else if (placeToUse instanceof CreateAccountPlace) {
-                return new CreateAccountActivity(clientFactory, callback, placeController);
+                return new CreateAccountActivity(clientFactory, placeController);
             } else if (placeToUse instanceof PasswordRecoveryPlace) {
                 return new PasswordRecoveryActivity(clientFactory, placeController);
             } else if (placeToUse instanceof LoggedInUserInfoPlace) {

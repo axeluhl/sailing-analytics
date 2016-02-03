@@ -1,22 +1,17 @@
 package com.sap.sse.security.ui.authentication.create;
 
-import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
-
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.ui.authentication.AsyncLoginCallback;
-import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
+import com.sap.sse.security.ui.authentication.AuthenticationManager.SuccessCallback;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace.Action;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public class CreateAccountActivity extends AbstractActivity implements CreateAccountView.Presenter {
@@ -27,14 +22,11 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     private final CreateAccountFormValues values = new CreateAccountFormValues();
-    private final AuthenticationCallback callback;
 
-    public CreateAccountActivity(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
-            PlaceController placeController) {
+    public CreateAccountActivity(AuthenticationClientFactory clientFactory, PlaceController placeController) {
         this.clientFactory = clientFactory;
         this.placeController = placeController;
         this.view = clientFactory.createCreateAccountView();
-        this.callback = callback;
     }
 
     @Override
@@ -48,23 +40,12 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
     public void createAccount() {
         if (values.validate()) {
             clientFactory.getAuthenticationManager().createAccount(values.username, values.email, 
-                    values.password, values.fullName, values.company, new AsyncCallback<UserDTO>() {
+                    values.password, values.fullName, values.company, new SuccessCallback<UserDTO>() {
                 @Override
                 public void onSuccess(final UserDTO result) {
                     clientFactory.getAuthenticationManager().login(result.getName(), values.password, 
-                            new AsyncLoginCallback(view, callback, false));
+                            new LoginAfterCreatingAccountSuccessCallback());
                     placeController.goTo(new ConfirmationInfoPlace(Action.ACCOUNT_CREATED, result.getName()));
-                }
-                
-                @Override
-                public void onFailure(Throwable caught) {
-                    if (caught instanceof UserManagementException) {
-                        if (USER_ALREADY_EXISTS.equals(((UserManagementException) caught).getMessage())) {
-                            Window.alert(i18n_sec.userAlreadyExists(values.username));
-                        }
-                    } else {
-                        Window.alert(i18n_sec.errorCreatingUser(values.username, caught.getMessage()));
-                    }
                 }
             });
         }
@@ -118,6 +99,12 @@ public class CreateAccountActivity extends AbstractActivity implements CreateAcc
             view.setErrorMessage(isValid ? null : errorMessage);
             view.getCreateAccountControl().setEnabled(isValid);
             return isValid;
+        }
+    }
+    
+    private class LoginAfterCreatingAccountSuccessCallback implements SuccessCallback<SuccessInfo> {
+        @Override
+        public void onSuccess(SuccessInfo result) {
         }
     }
 

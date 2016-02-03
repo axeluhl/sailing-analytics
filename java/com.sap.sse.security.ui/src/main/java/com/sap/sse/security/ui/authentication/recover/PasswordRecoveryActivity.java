@@ -1,17 +1,13 @@
 package com.sap.sse.security.ui.authentication.recover;
 
-import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
-
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
+import com.sap.sse.security.ui.authentication.AuthenticationManager.SuccessCallback;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace;
 import com.sap.sse.security.ui.authentication.confirm.ConfirmationInfoPlace.Action;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class PasswordRecoveryActivity extends AbstractActivity implements PasswordRecoveryView.Presenter {
 
@@ -33,25 +29,11 @@ public class PasswordRecoveryActivity extends AbstractActivity implements Passwo
 
     @Override
     public void resetPassword(final String email, final String username) {
-        clientFactory.getAuthenticationManager().reqeustPasswordReset(username, email, new AsyncCallback<Void>() {
+        clientFactory.getAuthenticationManager().requestPasswordReset(username, email, new SuccessCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 String name = (username == null || username.isEmpty()) ? email : username;
                 placeController.goTo(new ConfirmationInfoPlace(Action.RESET_REQUESTED, name));
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                StringMessages i18n = StringMessages.INSTANCE;
-                if (caught instanceof UserManagementException) {
-                    if (CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL.equals(caught.getMessage())) {
-                        view.setErrorMessage(i18n.cannotResetPasswordWithoutValidatedEmail(username));
-                    } else {
-                        view.setErrorMessage(i18n.errorResettingPassword(username, caught.getMessage()));
-                    }
-                } else {
-                    view.setErrorMessage(i18n.errorDuringPasswordReset(caught.getMessage()));
-                }
             }
         });
     }
