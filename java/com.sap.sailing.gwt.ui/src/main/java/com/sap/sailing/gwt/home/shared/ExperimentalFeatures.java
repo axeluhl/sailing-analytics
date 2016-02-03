@@ -6,10 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Provide option to show races in competition format
-     */
-    public static final boolean SHOW_RACES_COMPETITION_FORMAT = true;
-    /**
      * Provide option to show the overview for regattas in multi regatta events and a navigation 
      * to the races view (competition format) for single regatta and series events on mobile devices 
      */

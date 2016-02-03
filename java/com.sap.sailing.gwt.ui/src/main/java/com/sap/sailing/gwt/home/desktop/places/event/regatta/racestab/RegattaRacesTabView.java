@@ -140,16 +140,12 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
         filterPresenter.addHandler(Navigation.SORT_LIST_FORMAT, finishedRacesList);
         
-        if (ExperimentalFeatures.SHOW_RACES_COMPETITION_FORMAT) {
-            listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
-            listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
-            RegattaCompetitionPresenter competitionPresenter = new DesktopRegattaCompetitionPresenter();
-            addRacesAction(competitionPresenter, new GetCompetitionFormatRacesAction(eventId, regattaId), Navigation.COMPETITION_FORMAT);
-            filterPresenter.addHandler(Navigation.COMPETITION_FORMAT, competitionPresenter);
-        } else {
-            listNavigationPanelUi.removeFromParent();
-            compFormatContainerUi.removeFromParent();
-        }
+        listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
+        listNavigationPanelUi.addAction(Navigation.COMPETITION_FORMAT, false);
+        RegattaCompetitionPresenter competitionPresenter = new DesktopRegattaCompetitionPresenter();
+        addRacesAction(competitionPresenter, new GetCompetitionFormatRacesAction(eventId, regattaId),
+                Navigation.COMPETITION_FORMAT);
+        filterPresenter.addHandler(Navigation.COMPETITION_FORMAT, competitionPresenter);
     }
     
     private <D extends DTO, A extends SailingAction<ResultWithTTL<D>>> void addRacesAction(
