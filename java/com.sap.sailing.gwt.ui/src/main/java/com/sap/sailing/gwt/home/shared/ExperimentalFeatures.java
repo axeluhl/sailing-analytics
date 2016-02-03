@@ -6,15 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Show overview tab for single-regatta events and series events.
-     */
-    public static final boolean SHOW_SINGLE_REGATTA_OVERVIEW = true;
-    
-    /**
-     * Show overview tab for regattas in multiregatta events.
-     */
-    public static final boolean SHOW_MULTIREGATTAEVENT_REGATTA_OVERVIEW = true;
-    /**
      * Provide option to show races in competition format
      */
     public static final boolean SHOW_RACES_COMPETITION_FORMAT = true;

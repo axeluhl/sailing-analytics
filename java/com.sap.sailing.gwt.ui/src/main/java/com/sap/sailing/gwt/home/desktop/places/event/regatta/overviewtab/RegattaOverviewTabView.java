@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -56,9 +55,9 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     @Override
     public TabView.State getState() {
         if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
-            return ExperimentalFeatures.SHOW_MULTIREGATTAEVENT_REGATTA_OVERVIEW ? State.VISIBLE : State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
+            return State.VISIBLE;
         } else {
-            return ExperimentalFeatures.SHOW_SINGLE_REGATTA_OVERVIEW ? State.VISIBLE : State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE;
+            return State.VISIBLE;
         }
     }
 
