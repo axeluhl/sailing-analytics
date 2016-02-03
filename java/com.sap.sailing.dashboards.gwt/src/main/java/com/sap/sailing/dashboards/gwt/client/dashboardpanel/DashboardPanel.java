@@ -1,13 +1,11 @@
 package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -56,20 +54,14 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     @UiField
     Carousel carousel;
 
-    @UiField
-    HTMLPanel leftwindbotcontainer;
-
-    @UiField
-    HTMLPanel rightwindbotcontainer;
+    @UiField(provided = true)
+    WindBotWidget leftWindBotWidget;
+    
+    @UiField(provided = true)
+    WindBotWidget rightWindBotWidget;
     
     @UiField(provided = true)
     StartlineAdvantagesByWindWidget startlineAdvantagesByWindComponent;
-
-    @UiField
-    public DivElement windloadinghintleft;
-
-    @UiField
-    public DivElement windloadinghintright;
 
     @UiField
     public HTMLPanel bottombar;
@@ -83,7 +75,6 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     @UiField(provided = true)
     public StartlineAdvantageByGeometryWidget startlineAdvantageByGeometryWidget;
 
-    private List<WindBotWidget> windBotComponents;
     private StringMessages stringConstants;
     DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(DashboardPanel.class.getName());
@@ -91,7 +82,8 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     public DashboardPanel(DashboardClientFactory dashboardClientFactory) {
         DashboardPanelResources.INSTANCE.style().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
-        windBotComponents = new ArrayList<WindBotWidget>();
+        leftWindBotWidget = new WindBotWidget(dashboardClientFactory);
+        rightWindBotWidget = new WindBotWidget(dashboardClientFactory);
         startanalysisComponent = new StartAnalysisWidget(this.dashboardClientFactory);
         startlineAdvantagesByWindComponent = new StartlineAdvantagesByWindWidget(this.dashboardClientFactory);
         startlineAdvantageByGeometryWidget = new StartlineAdvantageByGeometryWidget(this.dashboardClientFactory);
@@ -99,8 +91,6 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         initWidget(uiBinder.createAndBindUi(this));
         initLogos();
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-        windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
-        windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotLoadingText()+"<br>"+stringConstants.dashboardWindBotLoadingMessage());
         loadAndAddEventLogo(dashboardClientFactory.getSailingService());
         initAndAddWrongOrientationNotification();
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
@@ -128,47 +118,19 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         Document.get().getBody().appendChild(wrongDeviceOrientationNotification.getElement());
     }
 
-    private void initWindBotComponents(List<String> windBotIDs,
-            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        int windBotAddedCounterTOConsiderForPanels = 0;
-        leftwindbotcontainer.clear();
-        removeWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
-        windBotComponents.clear();
-        for (String windBotID : windBotIDs) {
-            if (windBotAddedCounterTOConsiderForPanels == 0) {
-                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
-                leftwindbotcontainer.add(leftwindBotComponent);
-                windBotComponents.add(leftwindBotComponent);
-                windloadinghintleft.getStyle().setOpacity(0.0);
-            } else if (windBotAddedCounterTOConsiderForPanels == 1) {
-                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
-                rightwindbotcontainer.add(rightwindBotComponent);
-                windBotComponents.add(rightwindBotComponent);
-                windloadinghintright.getStyle().setOpacity(0.0);
-            }
-            windBotAddedCounterTOConsiderForPanels++;
-            if (windloadinghintleft.getStyle().getOpacity() != "0.0"
-                    || windloadinghintright.getStyle().getOpacity() != "0.0") {
-                windloadinghintleft.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
-                windloadinghintright.setInnerHTML(stringConstants.dashboardWindBotNotAvailable());
-            }
-        }
-        addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
-    }
-
-    private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        for (WindBotWidget windBotComponent : windBotComponents) {
-            logger.log(Level.INFO, "Registering WindBotDataRetrieverListener");
-            windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
-        }
-    }
-
-    private void removeWindBotComponentsAsDataRetrieverListener(
-            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        for (WindBotWidget windBotComponent : windBotComponents) {
-            windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
-        }
-    }
+//    private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+//        for (WindBotWidget windBotComponent : windBotComponents) {
+//            logger.log(Level.INFO, "Registering WindBotDataRetrieverListener");
+//            windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
+//        }
+//    }
+//
+//    private void removeWindBotComponentsAsDataRetrieverListener(
+//            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+//        for (WindBotWidget windBotComponent : windBotComponents) {
+//            windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
+//        }
+//    }
     
     private void setHeaderText(String raceName) {
         this.header.getElement().setInnerText(raceName);
@@ -207,19 +169,41 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     }
     
     @Override
-    public void numberOfWindBotsReceivedChanged(List<String> windBotIDs,
-            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-        if(windBotIDs != null) {
-        logger.log(Level.INFO, "Number of available windbots changed to "+windBotIDs.size());
+    public void numberOfWindBotsReceivedChanged(List<String> windBotIDs, WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+        if (windBotIDs != null) {
+            logger.log(Level.INFO, "Number of available windbots changed to " + windBotIDs.size());
+            for (int i = 0; i < windBotIDs.size(); i++) {
+                if (i == 0) {
+                    leftWindBotWidget.setWindBotId(windBotIDs.get(i));
+                    windBotDataRetrieverProvider.addWindBotDataRetrieverListener(leftWindBotWidget);
+                }
+                if (i == 1) {
+                    rightWindBotWidget.setWindBotId(windBotIDs.get(i));
+                    windBotDataRetrieverProvider.addWindBotDataRetrieverListener(rightWindBotWidget);
+                }
+            }
         } else {
             logger.log(Level.INFO, "Number of available windbots changed. WindBots List is null");
         }
-        initWindBotComponents(windBotIDs, windBotDataRetrieverProvider);
     }
-
-    @Override
-    public void numberOfWindBotsReceivedIsZero() {
-        windloadinghintleft.setInnerText(stringConstants.dashboardWindBotNotAvailable());
-        windloadinghintright.setInnerText(stringConstants.dashboardWindBotNotAvailable());
-    }
+//    
+//    private void initWindBotComponents(List<String> windBotIDs,
+//            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
+//        int windBotAddedCounterTOConsiderForPanels = 0;
+//        removeWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
+//        windBotComponents.clear();
+//        for (String windBotID : windBotIDs) {
+//            if (windBotAddedCounterTOConsiderForPanels == 0) {
+//                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
+//                leftwindbotcontainer.add(leftwindBotComponent);
+//                windBotComponents.add(leftwindBotComponent);
+//            } else if (windBotAddedCounterTOConsiderForPanels == 1) {
+//                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
+//                rightwindbotcontainer.add(rightwindBotComponent);
+//                windBotComponents.add(rightwindBotComponent);
+//            }
+//            windBotAddedCounterTOConsiderForPanels++;
+//        }
+//        addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
+//    }
 }

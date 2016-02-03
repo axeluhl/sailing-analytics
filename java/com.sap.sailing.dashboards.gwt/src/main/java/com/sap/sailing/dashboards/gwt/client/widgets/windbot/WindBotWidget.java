@@ -53,7 +53,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
     }
     
     @UiField
-    public HTMLPanel windBotComponent;
+    HTMLPanel contentContainer;
     
     @UiField(provided = true)
     DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
@@ -103,11 +103,10 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
     private String windBotId;
     private StringMessages stringConstants;
 
-    public WindBotWidget(String windBotId, DashboardClientFactory dashboardClientFactory) {
+    public WindBotWidget(DashboardClientFactory dashboardClientFactory) {
         WindBotWidgetResources.INSTANCE.gss().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
-        this.windBotId = windBotId;
         stringConstants = StringMessages.INSTANCE;
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
@@ -116,14 +115,29 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
         trueWindSpeedVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         trueWindDirectionVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         initWidget(uiBinder.createAndBindUi(this));
-        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot()+" "+ windBotId);
+        hideContentContainer();
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot());
+        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage());
         totalWindSpeedHeader.setInnerHTML(stringConstants.dashboardTrueWindSpeed());
         totalWindDirectionHeader.setInnerHTML(stringConstants.dashboardTrueWindDirection());
-      trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
-      trueWindDirectionVerticalWindChart.addVerticalWindChartClickListener(trueWindDirectionLiveAverageComponent);
+        trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
+        trueWindDirectionVerticalWindChart.addVerticalWindChartClickListener(trueWindDirectionLiveAverageComponent);
     }
-
-    public WindTrackInfoDTO getWindTrackInfoDTOFromAndWindBotID(WindInfoForRaceDTO windInfoForRaceDTO, String id) {
+    
+    public void setWindBotId(String windBotId) {
+        this.windBotId = windBotId;
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot() + " " + windBotId);
+    }
+    
+    private void showContentContainer(){
+        contentContainer.getElement().getStyle().setOpacity(1.0);
+    }
+    
+    private void hideContentContainer(){
+        contentContainer.getElement().getStyle().setOpacity(0.0);
+    }
+    
+    private WindTrackInfoDTO getWindTrackInfoDTOFromAndWindBotID(WindInfoForRaceDTO windInfoForRaceDTO, String id) {
         WindTrackInfoDTO windTrackInfo = null;
         for (WindSource windSource : windInfoForRaceDTO.windTrackInfoByWindSource.keySet()) {
             if (windSource.getType().equals(WindSourceType.EXPEDITION) && windSource.getId() != null) {
@@ -147,6 +161,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
                 logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id " + windBotId);
                 if (windTrackInfoDTO.windFixes != null) {
                     if (windTrackInfoDTO.windFixes.size() > 0) {
+                        dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                         logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id " + windBotId);
                         SplitScheduler.get().schedule(new ScheduledCommand() {
 
@@ -176,6 +191,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
                                 updateLocationPointerCompass(windTrackInfoDTO);
                             }
                         });
+                        showContentContainer();
                     } else {
                         logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is empty");
                     }

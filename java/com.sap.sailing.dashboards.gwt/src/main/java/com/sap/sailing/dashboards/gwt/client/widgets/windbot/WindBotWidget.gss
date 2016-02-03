@@ -1,9 +1,10 @@
 @require 'theme';
 
-.wind_bot_component{
+.wind_bot_widget{
 	position: absolute;
 	height: 100%;
 	width:  100%;
+	background-color: LIGHT_GREY;
 	z-index: 5;
 }
 

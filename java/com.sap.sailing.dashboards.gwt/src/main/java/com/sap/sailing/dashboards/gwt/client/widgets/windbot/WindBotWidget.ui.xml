@@ -8,8 +8,9 @@
 
 	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidgetResources"/>
 
-	<g:HTMLPanel ui:field="windBotComponent" styleName="{resources.gss.wind_bot_component}">
+	<g:HTMLPanel styleName="{resources.gss.wind_bot_widget}">
 	    <header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage"></header:DashboardWidgetHeaderAndNoDataMessage>
+		<g:HTMLPanel ui:field="contentContainer">
 		<compass:LocationPointerCompass ui:field="locationPointerCompass"></compass:LocationPointerCompass>
 		<div ui:field="totalWindSpeedHeader" class="{resources.gss.live_average_header} {resources.gss.left}"></div>
 		<div ui:field="totalWindDirectionHeader" class="{resources.gss.live_average_header} {resources.gss.right}"></div>
@@ -30,6 +31,7 @@
 			styleName="{resources.gss.windchart_container} {resources.gss.right}">
 			<windchart:VerticalWindChart ui:field="trueWindDirectionVerticalWindChart"
 				styleName="{resources.gss.windchart}"></windchart:VerticalWindChart>
+		</g:HTMLPanel>
 		</g:HTMLPanel>
 	</g:HTMLPanel>
 </ui:UiBinder> 

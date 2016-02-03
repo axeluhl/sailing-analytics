@@ -16,7 +16,7 @@ public interface WindBotWidgetResources extends ClientBundle {
     WindBotComponentGss gss();
 
     public interface WindBotComponentGss extends CssResource {
-        String wind_bot_component();
+        String wind_bot_widget();
         String live_average_header();
         String live_average_container();
         String left();
