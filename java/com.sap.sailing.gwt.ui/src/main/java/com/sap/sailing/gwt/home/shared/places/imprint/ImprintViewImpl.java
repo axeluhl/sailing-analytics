@@ -113,9 +113,8 @@ public class ImprintViewImpl extends Composite implements ImprintView {
         homepageUi.setInnerText(component.getHomepage());
         SafeHtmlBuilder ackSB = new SafeHtmlBuilder();
         for (String ack : component.getAcknowledgements()) {
-            ackSB.appendHtmlConstant("<p>");
             ackSB.appendEscaped(ack);
-            ackSB.appendHtmlConstant("</p>");
+            ackSB.appendHtmlConstant("<br />");
         }
         acknowledgmentUi.setInnerSafeHtml(ackSB.toSafeHtml());
         licenseTextUi.setInnerText("");
