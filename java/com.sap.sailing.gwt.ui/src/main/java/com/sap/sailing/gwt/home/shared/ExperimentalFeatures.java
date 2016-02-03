@@ -70,11 +70,11 @@ public class ExperimentalFeatures {
     /**
      * Enables/disables user management on desktop by showing/hiding the respective menu in the upper right corner.
      */
-    public static final boolean SHOW_USER_MANAGEMENT_ON_DESKTOP = true;
+    public static final boolean SHOW_USER_MANAGEMENT_ON_DESKTOP = false;
     /**
      * Enables/disables user management on mobile UI by showing/hiding the respective menu item(s) in the upper right menu.
      */
-    public static final boolean SHOW_USER_MANAGEMENT_ON_MOBILE = true;
+    public static final boolean SHOW_USER_MANAGEMENT_ON_MOBILE = false;
     /**
      * Provide buttons for user management login via social services like facebook or google.
      */
