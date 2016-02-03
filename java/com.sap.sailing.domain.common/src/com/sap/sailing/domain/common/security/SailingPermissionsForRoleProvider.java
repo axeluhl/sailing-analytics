@@ -13,6 +13,10 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         final Iterable<String> result;
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
             return Collections.<String>singletonList("*");
+        } else if (Roles.eventmanager.getRolename().equals(role)) {
+            return Collections.<String>singletonList(Permission.MANAGE_MEDIA.getStringPermission());
+        } else if (Roles.mediaeditor.getRolename().equals(role)) {
+            return Collections.<String>singletonList(Permission.MANAGE_MEDIA.getStringPermission());
         } else {
             result = Collections.emptyList();
         }
