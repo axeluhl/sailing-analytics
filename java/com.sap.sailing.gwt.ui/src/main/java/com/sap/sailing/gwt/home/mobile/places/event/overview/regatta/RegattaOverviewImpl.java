@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RegattaOverviewImpl extends AbstractEventOverview {
@@ -51,11 +50,9 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupLiveRaces(Panel container) {
-        if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
-            liveRacesUi = new RegattaLiveRaces();
-            refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
-            container.add(liveRacesUi);
-        }
+        liveRacesUi = new RegattaLiveRaces();
+        refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
+        container.add(liveRacesUi);
     }
     
     private void setupMiniLeaderboard(Panel container) {
