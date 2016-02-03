@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.security;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 import com.sap.sse.security.shared.DefaultRoles;
@@ -14,12 +15,20 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
             return Collections.<String>singletonList("*");
         } else if (Roles.eventmanager.getRolename().equals(role)) {
-            return Collections.<String>singletonList(Permission.MANAGE_MEDIA.getStringPermission());
+            return asList(Permission.MANAGE_MEDIA, Permission.MANAGE_MARK_PASSINGS);
         } else if (Roles.mediaeditor.getRolename().equals(role)) {
             return Collections.<String>singletonList(Permission.MANAGE_MEDIA.getStringPermission());
         } else {
             result = Collections.emptyList();
         }
         return result;
+    }
+    
+    private Iterable<String> asList(Permission... permissions) {
+        ArrayList<String> list = new ArrayList<String>(permissions.length);
+        for (Permission permission : permissions) {
+            list.add(permission.getStringPermission());
+        }
+        return list;
     }
 }
