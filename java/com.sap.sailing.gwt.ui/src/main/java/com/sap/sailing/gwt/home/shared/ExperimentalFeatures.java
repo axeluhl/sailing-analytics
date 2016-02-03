@@ -6,10 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Provide option to show the regatta progress for single regatta and series event on mobile devices 
-     */
-    public static final boolean SHOW_REGATTA_PROGRESS_ON_MOBILE = true;
-    /**
      * Provide option to show the regattas live races for single regatta and series event on mobile devices 
      */
     public static final boolean SHOW_REGATTA_LIVE_RACES_ON_MOBILE = true;

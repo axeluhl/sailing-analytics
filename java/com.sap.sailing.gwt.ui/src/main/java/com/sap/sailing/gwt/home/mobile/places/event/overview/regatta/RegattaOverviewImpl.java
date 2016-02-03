@@ -46,10 +46,8 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     
     private void setupProgress(Panel container) {
         eventStepsUi = new EventSteps();
-        if (ExperimentalFeatures.SHOW_REGATTA_PROGRESS_ON_MOBILE) {
-            refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
-            container.add(eventStepsUi);
-        }
+        refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
+        container.add(eventStepsUi);
     }
     
     private void setupLiveRaces(Panel container) {
