@@ -238,8 +238,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 }
             }
         }
-        timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardViewConfiguration.isCanReplayDuringLiveRaces(), isScreenLargeEnoughToOfferChartSupport, selectedRaceIdentifier);
+        timePanel = new RaceTimePanel(userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
+                false, isScreenLargeEnoughToOfferChartSupport, selectedRaceIdentifier);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
     }
