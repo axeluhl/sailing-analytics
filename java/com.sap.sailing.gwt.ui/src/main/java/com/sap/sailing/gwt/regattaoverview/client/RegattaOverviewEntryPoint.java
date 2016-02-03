@@ -14,8 +14,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.common.authentication.GenericSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.theme.component.sapheader2.SAPHeader2;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
@@ -60,7 +61,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         descriptionUi.add(eventNameLabel);
         descriptionUi.add(venueNameLabel);
 
-        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi);
+        SAPHeaderWithAuthentication logoAndTitlePanel = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), descriptionUi);
+        new GenericSailingAuthentication(getUserService(), logoAndTitlePanel.getAuthenticationMenuView());
 
         logoAndTitlePanel.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(logoAndTitlePanel, 75);
