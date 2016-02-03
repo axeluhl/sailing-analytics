@@ -18,7 +18,7 @@ import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventRegattaPlace> extends Composite implements RegattaTabView<T>,
         LeaderboardUpdateListener {
     private boolean initialLeaderboardSizeCalculated = false;
-    
+
     public SharedLeaderboardRegattaTabView() {
     }
 
@@ -35,7 +35,6 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                 leaderboardName, //
                 true,
                 autoExpandLastRaceColumn);
-        leaderboardPanel.addLeaderboardUpdateListener(this);
         
         if(ElementSizeMutationObserver.isSupported()) {
             ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {

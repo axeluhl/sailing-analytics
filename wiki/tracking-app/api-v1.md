@@ -220,7 +220,7 @@ GZIP compression is a must. Bulk uploads should be chunked, e.g. per 1,000 locat
 
 Allows to retrieve team information for the team of a certain competitor
 
-**Path:** ``{competitor-id}/team``
+**Path:** ``competitors/{competitor-id}/team``
 
 **Verb:** ``GET``
 

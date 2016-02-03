@@ -2,6 +2,7 @@ package com.sap.sailing.racecommittee.app.domain.impl;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.Util;
 
@@ -19,11 +20,11 @@ public class CompetitorsWithIdImpl {
         mReason = reason;
     }
 
-    public CompetitorsWithIdImpl(long id, Util.Triple<Serializable, String, MaxPointsReason> triple) {
+    public CompetitorsWithIdImpl(long id, CompetitorResult triple) {
         mId = id;
-        mKey = triple.getA();
-        mText = triple.getB();
-        mReason = triple.getC();
+        mKey = triple.getCompetitorId();
+        mText = triple.getCompetitorDisplayName();
+        mReason = triple.getMaxPointsReason();
     }
 
     public long getId() {
