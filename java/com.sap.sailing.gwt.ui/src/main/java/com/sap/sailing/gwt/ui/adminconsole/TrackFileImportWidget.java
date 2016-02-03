@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
@@ -25,6 +27,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 
 public class TrackFileImportWidget implements IsWidget {
     private final Panel mainPanel = new VerticalPanel();
+    private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
+    private static Image loaderImage = new Image(resources.loaderGif());
     
     public TrackFileImportWidget(final TrackFileImportDeviceIdentifierTableWrapper table, StringMessages stringMessages,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
@@ -40,11 +44,13 @@ public class TrackFileImportWidget implements IsWidget {
                     @Override
                     public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
                         table.getDataProvider().getList().addAll(result);
+                        loaderImage.setResource(resources.transparentGif());
                     }
                     
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
+                        loaderImage.setResource(resources.transparentGif());
                     }
                 });
                 
@@ -66,6 +72,8 @@ public class TrackFileImportWidget implements IsWidget {
         FileUpload fileUpload = new FileUpload();
         fileUpload.setName("file");
         inFormPanel.add(fileUpload);
+        loaderImage.setResource(resources.transparentGif());
+        loaderImage.setPixelSize(16, 16);
         
         final ListBox preferredImporter = new ListBox();
         preferredImporter.setName("preferredImporter");
@@ -87,10 +95,12 @@ public class TrackFileImportWidget implements IsWidget {
 
         Button btnUpload = new Button(stringMessages.importFixes());
         inFormPanel.add(btnUpload);
+        inFormPanel.add(loaderImage);
         btnUpload.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
                 formPanel.submit();
+                loaderImage.setResource(resources.loaderGif());
             }
         });
     }

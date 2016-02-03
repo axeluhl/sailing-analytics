@@ -45,7 +45,7 @@ public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLo
                 jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getMaxPointsReason().name());
                 jsonPositionedCompetitor.put(FIELD_SCORE, positionedCompetitor.getScore());
                 jsonPositionedCompetitor.put(FIELD_COMMENT, positionedCompetitor.getComment());
-                jsonPositionedCompetitor.put(FIELD_RANK, positionedCompetitor.getOneBasedRank());
+                jsonPositionedCompetitor.put(FIELD_RANK, positionedCompetitor.getOneBasedRank()); // writes it as an int, but deserializer will fetch it as a Long
                 jsonPositionedCompetitor.put(FIELD_FINISHING_TIME_POINT_AS_MILLIS, positionedCompetitor.getFinishingTime() == null ? null : positionedCompetitor.getFinishingTime().asMillis());
                 jsonPositionedCompetitors.add(jsonPositionedCompetitor);
             }
