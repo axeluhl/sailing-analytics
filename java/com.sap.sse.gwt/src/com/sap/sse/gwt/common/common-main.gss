@@ -1,0 +1,62 @@
+.button {
+  font-size: 1rem;
+  display: inline-block;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  padding: 0.666666666666667em 2em;
+  border-radius: 0.2em;
+  background-color: #efaa00;
+  -webkit-transition: background-color 0.2s;
+     -moz-transition: background-color 0.2s;
+          transition: background-color 0.2s;
+  text-decoration: none;
+}
+.button:hover {
+  background-color: #d79900;
+  outline: none;
+  text-decoration: none;
+}
+.buttonprimary {
+  background-color: #008fcc;
+}
+.buttonprimary:hover {
+  background-color: #0081b8;
+}
+.buttonprimaryoutlined {
+  background-color: transparent;
+  padding: .533333333333333em 1.333333333333333em;
+  border: 1px solid #008fcc;
+  color: #008fcc;
+}
+.buttonprimaryoutlined:hover {
+  background-color: #0081b8;
+  color: #fff;
+}
+.buttonarrowrightwhite:after {
+  content: '';
+  display: inline-block;
+  margin-left: 0.666666666666667em;
+  width: 0.466666666666667em;
+  height: 0.8em;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAMCAYAAACulacQAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAFtJREFUeNpi+P///wEgPgzEokDMgIxBxMn/EHAVXQGIkIBKYCiAqUJXIIEsiVUBA5ojRJEUnGFiwAR/ofQvXLpQjMXpILxeOY8rEEAOegfER4DYAYhfI7sMIMAAiXvwy2upI1UAAAAASUVORK5CYII=");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.mainsection {
+  padding: 5.333333333333333em 0;
+}
+.mainsection_header {
+  text-align: center;
+  margin-bottom: 4em;
+}
+.mainsection_header p {
+  margin-top: 0;
+  font-size: 1.2em;
+}
+.mainsection_header_title {
+  margin: 0 0 0.5em;
+  font-size: 2.4em;
+  color: #008fcc;
+  text-align: center;
+}
