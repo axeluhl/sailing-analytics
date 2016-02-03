@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.google.gwt.dom.client.Document;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 /**
- * Represents the parameters for configuring the raceboard view
- * 
+ * The settings of the raceboard perspective
  * @author Frank
  *
  */
@@ -15,39 +15,37 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
     private final boolean canReplayDuringLiveRaces;
-    private final boolean showViewStreamlets;
-    private final boolean showViewStreamletColors;
-    private final boolean showViewSimulation;
+    private final boolean simulationEnabled;
+    
+    /** indicates whether it's enabled to display charts or not */
+    private final boolean chartSupportEnabled;
 
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
     public static final String PARAM_VIEW_SHOW_WINDCHART = "viewShowWindChart";
     public static final String PARAM_VIEW_SHOW_COMPETITORSCHART = "viewShowCompetitorsChart";
-    public static final String PARAM_VIEW_SHOW_MAPCONTROLS = "viewShowMapControls";
-    public static final String PARAM_VIEW_SHOW_STREAMLETS = "viewShowStreamlets";
-    public static final String PARAM_VIEW_SHOW_STREAMLET_COLORS = "viewShowStreamletColors";
-    public static final String PARAM_VIEW_SHOW_SIMULATION = "viewShowSimulation";
+    public static final String PARAM_VIEW_SIMULATION_ENABLED = "viewSimulationEnabled";
     public static final String PARAM_VIEW_COMPETITOR_FILTER = "viewCompetitorFilter";
+    public static final String PARAM_VIEW_CHART_SUPPORT_ENABLED = "viewChartSupportEnabled";
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
-
+    
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
-        /* showWindChart */false, /* showCompetitorsChart */false, /* showViewStreamlets */false, /* showViewStreamletColors */
-        false, /* showViewSimulation */false, /* canReplayDuringLiveRaces */false);
+        /* showWindChart */false, /* showCompetitorsChart */false, 
+        /* simulationEnabled */false, /* canReplayDuringLiveRaces */false, /* chartSupportEnabled */ true);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets,
-            boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean simulationEnabled, boolean canReplayDuringLiveRaces,
+            boolean chartSupportEnabled) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
-        this.showViewStreamlets = showViewStreamlets;
-        this.showViewStreamletColors = showViewStreamletColors;
-        this.showViewSimulation = showViewSimulation;
+        this.simulationEnabled = simulationEnabled;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
+        this.chartSupportEnabled = chartSupportEnabled;
     }
 
     public boolean isShowLeaderboard() {
@@ -58,16 +56,8 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return showWindChart;
     }
 
-    public boolean isShowViewStreamlets() {
-        return showViewStreamlets;
-    }
-
-    public boolean isShowViewStreamletColors() {
-        return showViewStreamletColors;
-    }
-
-    public boolean isShowViewSimulation() {
-        return showViewSimulation;
+    public boolean isSimulationEnabled() {
+        return simulationEnabled;
     }
 
     public boolean isShowCompetitorsChart() {
@@ -82,18 +72,25 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return canReplayDuringLiveRaces;
     }
 
+    public boolean isChartSupportEnabled() {
+        return chartSupportEnabled;
+    }
+
     public static RaceBoardPerspectiveSettings readSettingsFromURL() {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, false /* default */);
-        final boolean showViewStreamlets = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_STREAMLETS, false /* default */);
-        final boolean showViewStreamletColors = GwtHttpRequestUtils.getBooleanParameter(
-                PARAM_VIEW_SHOW_STREAMLET_COLORS, false /* default */);
-        final boolean showViewSimulation = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_SIMULATION, false /* default */);
+        final boolean simulationEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SIMULATION_ENABLED, false /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, null /* default */);
+        final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, false /* default */);
+        
+        // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
+        // This decision is made once based on the initial screen height. Resizing the window afterwards will have
+        // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
+        boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
+        final boolean chartSupportEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_CHART_SUPPORT_ENABLED, isScreenLargeEnoughToOfferChartSupport);
 
         return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, /* canReplayWhileLiveIsPossible */
-                false);
+                showCompetitorsChart, simulationEnabled, canReplayWhileLiveIsPossible, chartSupportEnabled);
     }
 }

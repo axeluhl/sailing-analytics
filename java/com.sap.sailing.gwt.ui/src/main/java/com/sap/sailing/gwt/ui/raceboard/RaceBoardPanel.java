@@ -43,17 +43,23 @@ import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.media.MediaPlayerLifecycle;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerSettings;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
+import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.LeaderboardFetcher;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.ExplicitRaceColumnSelectionWithPreselectedRace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
@@ -63,10 +69,12 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -103,7 +111,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private EditMarkPassingsPanel editMarkPassingPanel;
     
     /**
-     * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
+     * The component viewer
      */
     private SideBySideComponentViewer leaderboardAndMapViewer;
 
@@ -119,6 +127,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private final List<Component<?>> components;
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
+    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -128,12 +137,14 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
      */
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
+    public RaceBoardPanel(PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings, 
+            SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, RaceBoardPerspectiveSettings raceboardPerspectiveSettings,
             ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport) {
+            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
+        this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -162,9 +173,12 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
         raceMapResources.combinedWindPanelStyle().ensureInjected();
-        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
-                selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true) {
+        RaceMapLifecycle raceMapLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
+        RaceMapSettings raceMapSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceMapLifecycle);
+        
+        raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), 
+                perspectiveSettings.isSimulationEnabled(), /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -210,7 +224,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, showMapControls, isScreenLargeEnoughToOfferChartSupport, isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
@@ -224,7 +238,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             }
         }
         timePanel = new RaceTimePanel(timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardPerspectiveSettings.isCanReplayDuringLiveRaces(), isScreenLargeEnoughToOfferChartSupport, selectedRaceIdentifier);
+                raceboardPerspectiveSettings.isCanReplayDuringLiveRaces(), raceboardPerspectiveSettings.isChartSupportEnabled(), selectedRaceIdentifier);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
     }
@@ -240,19 +254,29 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
      * @param isScreenLargeEnoughToInitiallyDisplayLeaderboard TODO
      */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event, FlowPanel mainPanel,
-            boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
+            boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
+        
+        MediaPlayerLifecycle mediaPlayerLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getMediaPlayerLifecycle();
+        MediaPlayerSettings mediaPlayerSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(mediaPlayerLifecycle);
+
+        WindChartLifecycle windChartLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getWindChartLifecycle();
+        WindChartSettings windChartSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(windChartLifecycle);
+
+        MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
+        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(multiCompetitorRaceChartLifecycle);
+
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
-        if (isScreenLargeEnoughToOfferChartSupport) {
-            competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor,
+        if (perspectiveSettings.isChartSupportEnabled()) {
+            competitorChart = new MultiCompetitorRaceChart(multiCompetitorRaceChartLifecycle, sailingService, asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             componentsForSideBySideViewer.add(competitorChart);
-            windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel,
-                    new WindChartSettings(), stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
+            windChart = new WindChart(windChartLifecycle, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel,
+                    windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */
                     true);
 
             windChart.setVisible(false);
@@ -264,18 +288,18 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             componentsForSideBySideViewer.add(editMarkPassingPanel);
         }
-        mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
+        mediaPlayerManagerComponent = new MediaPlayerManagerComponent(mediaPlayerLifecycle, 
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
-                errorReporter, userAgent, this, MediaPlayerSettings.readSettingsFromURL());
+                errorReporter, userAgent, this, mediaPlayerSettings);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
                 componentsForSideBySideViewer, stringMessages, userService, editMarkPassingPanel);
         components.addAll(componentsForSideBySideViewer);
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
-        boolean showLeaderboard = getConfiguration().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+        boolean showLeaderboard = perspectiveSettings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        if (isScreenLargeEnoughToOfferChartSupport) {
-            setWindChartVisible(getConfiguration().isShowWindChart());
-            setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
+        if (perspectiveSettings.isChartSupportEnabled()) {
+            setWindChartVisible(perspectiveSettings.isShowWindChart());
+            setCompetitorChartVisible(perspectiveSettings.isShowCompetitorsChart());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
@@ -374,10 +398,6 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         return errorReporter;
     }
     
-    public RaceBoardPerspectiveSettings getConfiguration() {
-        return perspectiveSettings;
-    }
-
     @Override
     public void updatedLeaderboard(LeaderboardDTO leaderboard) {
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
@@ -460,19 +480,5 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             ((RequiresResize) child).onResize();
         }
     }
-
-    //    @Override
-//    public void setSettingsOfComponents(CompositeLifecycleSettings settingsOfComponents) {
-//        RaceMapSettings raceMapSettings = settingsOfComponents.getSettingsForType(RaceMapSettings.class);
-//        raceMap.updateSettings(raceMapSettings);
-//        LeaderboardSettings leaderboardSettings = settingsOfComponents.getSettingsForType(LeaderboardSettings.class);
-//        leaderboardPanel.updateSettings(leaderboardSettings);
-//        WindChartSettings windChartSettings = settingsOfComponents.getSettingsForType(WindChartSettings.class);
-//        windChart.updateSettings(windChartSettings);
-//        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = settingsOfComponents.getSettingsForType(MultiCompetitorRaceChartSettings.class);
-//        competitorChart.updateSettings(multiCompetitorRaceChartSettings);
-//        MediaPlayerSettings mediaPlayerSettings = settingsOfComponents.getSettingsForType(MediaPlayerSettings.class);
-//        mediaPlayerManagerComponent.updateSettings(mediaPlayerSettings);
-//    }
 }
 

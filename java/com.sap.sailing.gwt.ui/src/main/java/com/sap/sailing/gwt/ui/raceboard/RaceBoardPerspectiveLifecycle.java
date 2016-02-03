@@ -1,6 +1,7 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -15,8 +16,6 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifec
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettingsDialogComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -37,20 +36,24 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     private final MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle;
     private final MediaPlayerLifecycle mediaPlayerLifecycle;
 
+    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages) {
+        this(null, stringMessages);
+    }
+    
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
 
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
-        multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages);
+        multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, false);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         
-        componentLifecycles.add(new RaceMapLifecycle(stringMessages));
-        componentLifecycles.add(new WindChartLifecycle(stringMessages));
-        componentLifecycles.add(new LeaderboardPanelLifecycle(leaderboard, stringMessages));
-        componentLifecycles.add(new MultiCompetitorRaceChartLifecycle(stringMessages));
-        componentLifecycles.add(new MediaPlayerLifecycle(stringMessages));
+        componentLifecycles.add(raceMapLifecycle);
+        componentLifecycles.add(windChartLifecycle);
+        componentLifecycles.add(leaderboardPanelLifecycle);
+        componentLifecycles.add(multiCompetitorRaceChartLifecycle);
+        componentLifecycles.add(mediaPlayerLifecycle);
     }
     
     @Override
@@ -66,8 +69,8 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public RaceBoardPerspectiveSettings cloneSettings(RaceBoardPerspectiveSettings settings) {
         return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(),
-                settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isShowViewStreamlets(),
-                settings.isShowViewStreamletColors(), settings.isShowViewSimulation(), settings.isCanReplayDuringLiveRaces());
+                settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isSimulationEnabled(), settings.isCanReplayDuringLiveRaces(),
+                settings.isChartSupportEnabled());
     }
 
     @Override
@@ -116,6 +119,8 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         private final Timer timer;
         private final RegattaAndRaceIdentifier selectedRaceIdentifier;
         private final String leaderboardName;
+        private final String leaderboardGroupName;
+        private final UUID eventId;
         private final ErrorReporter errorReporter; 
         private final StringMessages stringMessages;
         private final UserAgentDetails userAgent;
@@ -126,6 +131,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
                 UserService userService, AsyncActionsExecutor asyncActionsExecutor,
                 Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
                 RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
+                String leaderboardGroupName, UUID eventId,
                 ErrorReporter errorReporter, StringMessages stringMessages,
                 UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
             this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
@@ -137,6 +143,8 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
             this.timer = timer;
             this.selectedRaceIdentifier = selectedRaceIdentifier;
             this.leaderboardName = leaderboardName;
+            this.leaderboardGroupName = leaderboardGroupName;
+            this.eventId = eventId;
             this.errorReporter =  errorReporter;
             this.stringMessages = stringMessages;
             this.userAgent = userAgent;
@@ -147,8 +155,8 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         public RaceBoardPerspective createComponent(RaceBoardPerspectiveSettings settings) {
             RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(settings,
                     componentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
-                    competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, errorReporter,
-                    stringMessages, userAgent, raceTimesInfoProvider);            
+                    competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, leaderboardGroupName, 
+                    eventId, errorReporter, stringMessages, userAgent, raceTimesInfoProvider);            
             return raceboardPerspective;
         }
     }

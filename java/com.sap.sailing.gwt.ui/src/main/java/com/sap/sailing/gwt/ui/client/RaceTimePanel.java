@@ -30,9 +30,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
     public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean chartSupportEnabled,
             RegattaAndRaceIdentifier selectedRaceIdentifier) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, chartSupportEnabled);
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;

@@ -43,10 +43,9 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     
     @Override
     public RaceBoardPerspectiveSettings getResult() {
-        RaceBoardPerspectiveSettings result = new RaceBoardPerspectiveSettings(/*activeCompetitorsFilterSetName*/ null, 
+        RaceBoardPerspectiveSettings result = new RaceBoardPerspectiveSettings(initialSettings.getActiveCompetitorsFilterSetName(), 
                 showLeaderboardCheckBox.getValue(), showWindChartCheckBox.getValue(), showCompetitorsChartCheckBox.getValue(),
-                /*showViewStreamlets */ false, /*showViewStreamletColors*/ false, /*showViewSimulation*/ false,
-                /*canReplayDuringLiveRaces*/ false);
+                initialSettings.isSimulationEnabled(), initialSettings.isCanReplayDuringLiveRaces(), initialSettings.isChartSupportEnabled());
         return result;
     }
     

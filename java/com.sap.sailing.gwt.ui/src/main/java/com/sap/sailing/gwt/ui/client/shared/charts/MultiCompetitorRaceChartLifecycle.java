@@ -9,6 +9,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChart,
     MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
     private final StringMessages stringMessages;
+    private final boolean hasOverallLeaderboard;
     
     public static class ConstructionParameters extends ComponentConstructionParameters<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
         public ConstructionParameters(MultiCompetitorRaceChartLifecycle componentLifecycle,
@@ -17,13 +18,14 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
         }
     }
 
-    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages) {
+    public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
         this.stringMessages = stringMessages;
+        this.hasOverallLeaderboard = hasOverallLeaderboard;
     }
 
     @Override
     public MultiCompetitorRaceChartSettingsComponent getSettingsDialogComponent(MultiCompetitorRaceChartSettings settings) {
-        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, true);
+        return new MultiCompetitorRaceChartSettingsComponent(settings, stringMessages, hasOverallLeaderboard);
     }
 
     @Override

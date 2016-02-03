@@ -58,6 +58,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
     }
 
     public class WindChartConstructorArgs implements ComponentConstructorArgs<WindChart, WindChartSettings> {
+        private final WindChartLifecycle windChartLifecycle;
         private final SailingServiceAsync sailingService; 
         private final RegattaAndRaceIdentifier selectedRaceIdentifier; 
         private final Timer timer;
@@ -68,9 +69,10 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
         private final ErrorReporter errorReporter; 
         private final boolean compactChart;
         
-        public WindChartConstructorArgs(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
+        public WindChartConstructorArgs(WindChartLifecycle windChartLifecycle, SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
                 TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
                 AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
+            this.windChartLifecycle = windChartLifecycle;
             this.sailingService = sailingService;
             this.selectedRaceIdentifier = selectedRaceIdentifier;
             this.timer = timer;
@@ -84,7 +86,7 @@ public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindCha
         
         @Override
         public WindChart createComponent(WindChartSettings newSettings) {
-            WindChart windChart = new WindChart(sailingService, selectedRaceIdentifier, timer,
+            WindChart windChart = new WindChart(windChartLifecycle, sailingService, selectedRaceIdentifier, timer,
                     timeRangeWithZoomProvider, settings, stringMessages, 
                     asyncActionsExecutor, errorReporter, compactChart);
             if (newSettings != null) {

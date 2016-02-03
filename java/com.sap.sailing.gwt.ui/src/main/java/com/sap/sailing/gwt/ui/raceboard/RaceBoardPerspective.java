@@ -1,8 +1,11 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -16,10 +19,9 @@ import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
@@ -35,66 +37,84 @@ import com.sap.sse.security.ui.client.UserService;
 public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoardPerspectiveSettings> implements LeaderboardUpdateProvider {
     private RaceBoardPerspectiveSettings settings;
     private final DockLayoutPanel dockPanel;
-    private final static int TIMEPANEL_HEIGHT = 67;
+    private final static int TIMEPANEL_COLLAPSED_HEIGHT = 67;
+    private final static int TIMEPANEL_EXPANDED_HEIGHT = 96;
     
     private final RaceBoardPerspectiveLifecycle perspectiveLifecycle; 
-    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
-    
+
+    private final RaceBoardPanel raceBoardPanel; 
+    private final FlowPanel timePanel;
+
     public RaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, 
             PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
+            String leaderboardGroupName, UUID eventId,
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         super();
         this.settings = perspectiveSettings;
         this.perspectiveLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle();
-        this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
 
-        RaceBoardPanel raceBoardPanel = createRaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor, competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, errorReporter, stringMessages, userAgent, raceTimesInfoProvider); 
-        raceBoardPanel.setSize("100%", "100%");
-        FlowPanel timePanel = createTimePanel(raceBoardPanel);
+        this.raceBoardPanel = new RaceBoardPanel(componentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
+                competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, null, /* event */null, settings,
+                errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
+        this.raceBoardPanel.setSize("100%", "100%");
+        this.timePanel = createTimePanelLayoutWrapper();
         
-        final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
-        toggleButton.setVisible(false);
-
+        boolean advanceTimePanelEnabled = true; 
+        if(advanceTimePanelEnabled) {
+            manageTimePanelToggleButton(advanceTimePanelEnabled);
+        }
+        
         dockPanel = new DockLayoutPanel(Unit.PX);
-        dockPanel.addSouth(timePanel, TIMEPANEL_HEIGHT);                     
+        dockPanel.addSouth(timePanel, TIMEPANEL_COLLAPSED_HEIGHT);                     
         dockPanel.add(raceBoardPanel);
+        dockPanel.addStyleName("dockLayoutPanel");
 
         initWidget(dockPanel);
     }
 
-    private FlowPanel createTimePanel(RaceBoardPanel raceBoardPanel) {
-        FlowPanel timeLineInnerBgPanel = new FlowPanel();
+    private void manageTimePanelToggleButton(boolean advanceTimePanelEnabled) {
+        final Button toggleButton = raceBoardPanel.getTimePanel().getAdvancedToggleButton();
+
+        if(advanceTimePanelEnabled) {
+            toggleButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    boolean advancedModeShown = raceBoardPanel.getTimePanel().toggleAdvancedMode();
+                    if (advancedModeShown) {
+                        dockPanel.setWidgetSize(timePanel, TIMEPANEL_EXPANDED_HEIGHT);
+                        toggleButton.removeStyleDependentName("Closed");
+                        toggleButton.addStyleDependentName("Open");
+                    } else {
+                        dockPanel.setWidgetSize(timePanel, TIMEPANEL_COLLAPSED_HEIGHT);
+                        toggleButton.addStyleDependentName("Closed");
+                        toggleButton.removeStyleDependentName("Open");
+                    }
+                }
+            });
+        } else {
+            toggleButton.setVisible(false);
+        }
+    }
+    
+    private FlowPanel createTimePanelLayoutWrapper() {
+        FlowPanel timeLineInnerBgPanel = new ResizableFlowPanel();
         timeLineInnerBgPanel.addStyleName("timeLineInnerBgPanel");
         timeLineInnerBgPanel.add(raceBoardPanel.getTimePanel());
         
-        FlowPanel timeLineInnerPanel = new FlowPanel();
+        FlowPanel timeLineInnerPanel = new ResizableFlowPanel();
         timeLineInnerPanel.add(timeLineInnerBgPanel);
         timeLineInnerPanel.addStyleName("timeLineInnerPanel");
         
-        FlowPanel timelinePanel = new FlowPanel();
+        FlowPanel timelinePanel = new ResizableFlowPanel();
         timelinePanel.add(timeLineInnerPanel);
         timelinePanel.addStyleName("timeLinePanel");
         
         return timelinePanel;
-    }
-
-    private RaceBoardPanel createRaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, AsyncActionsExecutor asyncActionsExecutor,
-            Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
-            RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
-            ErrorReporter errorReporter, StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
-      RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, userService, asyncActionsExecutor,
-      competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, null, /* event */null, settings,
-      errorReporter, stringMessages, userAgent, raceTimesInfoProvider, /* showMapControls */ false,
-      /* isScreenLargeEnoughToOfferChartSupport */ true);
-
-      return raceBoardPanel;
     }
 
     @Override

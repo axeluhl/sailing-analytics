@@ -37,6 +37,7 @@ import com.sap.sailing.gwt.ui.client.HasWelcomeWidget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.panels.WelcomeWidget;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -426,7 +427,7 @@ public class LeaderboardGroupPanel extends SimplePanel implements HasWelcomeWidg
         if (canReplayDuringLiveRaces) {
             linkParams.put(RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, "true");
         }
-        linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
+        linkParams.put(RaceMapSettings.PARAM_SHOW_MAPCONTROLS, Boolean.toString(showMapControls));
         linkParams.put(RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL,
                 Boolean.toString(showNavigationPanel));
         linkParams.put("regattaName", raceIdentifier.getRegattaName());

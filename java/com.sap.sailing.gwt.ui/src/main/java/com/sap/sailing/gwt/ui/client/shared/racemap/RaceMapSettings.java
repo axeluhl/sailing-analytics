@@ -7,9 +7,11 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class RaceMapSettings extends AbstractSettings {
-
+    public static final String PARAM_SHOW_MAPCONTROLS = "showMapControls";
+    
     private boolean showDouglasPeuckerPoints = false;
 
     private final Set<ManeuverType> maneuverTypesToShow;
@@ -36,6 +38,8 @@ public class RaceMapSettings extends AbstractSettings {
 
     private boolean showSimulationOverlay = false;
     
+    private boolean showMapControls = true;
+    
     /**
      * If <code>true</code>, all map contents will be transformed to a water-only environment, rotating all directions /
      * bearings / headings so that an assumed average wind direction for the race is coming from the top of the map
@@ -53,6 +57,11 @@ public class RaceMapSettings extends AbstractSettings {
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
 
+    public RaceMapSettings(boolean showMapCcontrol) {
+        this();
+        this.showMapControls = showMapCcontrol;
+    }
+
     /**
      * "Copy constructor" that produces a new settings object that equals the one passed as argument
      */
@@ -68,6 +77,7 @@ public class RaceMapSettings extends AbstractSettings {
         this.showSimulationOverlay = settings.showSimulationOverlay;
         this.showWindStreamletOverlay = settings.showWindStreamletOverlay;
         this.showWindStreamletColors = settings.showWindStreamletColors;
+        this.showMapControls = settings.showMapControls;
         this.tailLengthInMilliseconds = settings.tailLengthInMilliseconds;
         this.windUp = settings.windUp;
         this.zoomSettings = new RaceMapZoomSettings(settings.zoomSettings.getTypesToConsiderOnZoom(), settings.zoomSettings.isZoomToSelectedCompetitors());
@@ -198,5 +208,18 @@ public class RaceMapSettings extends AbstractSettings {
 
     public void setWindUp(boolean windUp) {
         this.windUp = windUp;
+    }
+
+    public boolean isShowMapControls() {
+        return showMapControls;
+    }
+
+    public void setShowMapControls(boolean showMapControls) {
+        this.showMapControls = showMapControls;
+    }
+    
+    public static RaceMapSettings readSettingsFromURL() {
+        final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, true /* default */);
+        return new RaceMapSettings(showMapControls);
     }
 }

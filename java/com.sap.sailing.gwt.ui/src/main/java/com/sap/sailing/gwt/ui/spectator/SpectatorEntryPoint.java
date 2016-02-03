@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.shared.panels.SimpleWelcomeWidget;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -33,7 +34,7 @@ public class SpectatorEntryPoint extends AbstractSailingEntryPoint implements Re
         final boolean canReplayDuringLiveRaces = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardPerspectiveSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES, /* defaultValue */ false);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(
-                RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_MAPCONTROLS, /* defaultValue */ true);
+                RaceMapSettings.PARAM_SHOW_MAPCONTROLS, /* defaultValue */ true);
         final boolean showNavigationPanel = GwtHttpRequestUtils.getBooleanParameter(
                 RaceBoardPerspectiveSettings.PARAM_VIEW_SHOW_NAVIGATION_PANEL, true /* default */);
         boolean showRaceDetails = Window.Location.getParameter("showRaceDetails") != null

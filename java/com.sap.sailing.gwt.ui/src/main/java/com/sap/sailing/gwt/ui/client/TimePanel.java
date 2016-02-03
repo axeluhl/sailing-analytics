@@ -90,12 +90,12 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
     /**
-     * @param isScreenLargeEnoughToOfferChartSupport
+     * @param chartSupportEnabled
      *            if <code>true</code>, the right padding will be set such that the time panel lines up with charts such
      *            as the competitor chart or the wind chart shown above it
      */
     public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
+            boolean canReplayWhileLiveIsPossible, boolean chartSupportEnabled) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -111,7 +111,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        if (isScreenLargeEnoughToOfferChartSupport) {
+        if (chartSupportEnabled) {
             timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
         }
         timePanelSliderFlowWrapper.add(timePanelSlider);

@@ -32,7 +32,7 @@ public class LeaderboardPanelLifecycle implements ComponentLifecycle<Leaderboard
     
     public LeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
         this.stringMessages = stringMessages;
-        this.raceList = leaderboard.getRaceList();
+        this.raceList = leaderboard != null ? leaderboard.getRaceList() : new ArrayList<RaceColumnDTO>();
     }
 
     @Override

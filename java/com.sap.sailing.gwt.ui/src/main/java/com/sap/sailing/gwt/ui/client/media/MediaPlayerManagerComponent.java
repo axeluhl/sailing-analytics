@@ -61,7 +61,7 @@ public class MediaPlayerManagerComponent implements Component<MediaPlayerSetting
         T createVideoContainer(VideoSynchPlayer videoPlayer, boolean showSynchControls, MediaServiceAsync mediaService,
                 ErrorReporter errorReporter, PlayerCloseListener playerCloseListener, PopoutListener popoutListener);
     }
-
+    
     private final SimplePanel rootPanel = new SimplePanel();
     private final UserService userService;
 
@@ -80,13 +80,15 @@ public class MediaPlayerManagerComponent implements Component<MediaPlayerSetting
     private final UserAgentDetails userAgent;
     private final PopupPositionProvider popupPositionProvider;
     private MediaPlayerSettings settings;
+    private final MediaPlayerLifecycle mediaPlayerLifecycle;
 
     private PlayerChangeListener playerChangeListener;
 
-    public MediaPlayerManagerComponent(RegattaAndRaceIdentifier selectedRaceIdentifier,
+    public MediaPlayerManagerComponent(MediaPlayerLifecycle mediaPlayerLifecycle, RegattaAndRaceIdentifier selectedRaceIdentifier,
             RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
             UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+        this.mediaPlayerLifecycle = mediaPlayerLifecycle;
         this.userService = userService;
         this.raceIdentifier = selectedRaceIdentifier;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
@@ -725,18 +727,17 @@ public class MediaPlayerManagerComponent implements Component<MediaPlayerSetting
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.videoComponentShortName();
+        return mediaPlayerLifecycle.getLocalizedShortName();
     }
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return mediaPlayerLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<MediaPlayerSettings> getSettingsDialogComponent() {
-        MediaPlayerSettings mediaPlayerSettings = new MediaPlayerSettings(settings.isAutoSelectMedia());
-        return new MediaPlayerSettingsDialogComponent(mediaPlayerSettings, stringMessages);
+        return mediaPlayerLifecycle.getSettingsDialogComponent(mediaPlayerLifecycle.cloneSettings(settings));
     }
 
     @Override

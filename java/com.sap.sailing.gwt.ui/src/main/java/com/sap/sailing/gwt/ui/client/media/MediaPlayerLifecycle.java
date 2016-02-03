@@ -69,11 +69,13 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManag
         private final UserAgentDetails userAgent;
         private final PopupPositionProvider popupPositionProvider;
         private final MediaPlayerSettings settings;
+        private final MediaPlayerLifecycle mediaPlayerLifecycle;
         
-        public MediaPlayerManagerConstructorArgs(RegattaAndRaceIdentifier selectedRaceIdentifier,
+        public MediaPlayerManagerConstructorArgs(MediaPlayerLifecycle mediaPlayerLifecycle, RegattaAndRaceIdentifier selectedRaceIdentifier,
                 RaceTimesInfoProvider raceTimesInfoProvider, Timer raceTimer, MediaServiceAsync mediaService,
                 UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
                 UserAgentDetails userAgent, PopupPositionProvider popupPositionProvider, MediaPlayerSettings settings) {
+            this.mediaPlayerLifecycle = mediaPlayerLifecycle;
             this.selectedRaceIdentifier = selectedRaceIdentifier;
             this.raceTimesInfoProvider = raceTimesInfoProvider;
             this.raceTimer = raceTimer;
@@ -88,7 +90,7 @@ public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManag
         
         @Override
         public MediaPlayerManagerComponent createComponent(MediaPlayerSettings newSettings) {
-            MediaPlayerManagerComponent mediaPlayerComponent = new MediaPlayerManagerComponent(selectedRaceIdentifier,
+            MediaPlayerManagerComponent mediaPlayerComponent = new MediaPlayerManagerComponent(mediaPlayerLifecycle, selectedRaceIdentifier,
                     raceTimesInfoProvider, raceTimer, mediaService,
                     userService, stringMessages, errorReporter,
                     userAgent, popupPositionProvider, settings);

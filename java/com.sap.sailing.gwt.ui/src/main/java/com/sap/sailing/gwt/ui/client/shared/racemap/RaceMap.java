@@ -324,6 +324,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     private RaceMapImageManager raceMapImageManager; 
 
     private final RaceMapSettings settings;
+    private final RaceMapLifecycle raceMapLifecycle;
     
     private final StringMessages stringMessages;
     
@@ -365,9 +366,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
-    private final boolean showViewStreamlets;
-    private final boolean showViewStreamletColors;
-    private final boolean showViewSimulation;
+    
+    private final boolean isSimulationEnabled;
     
     private static final String GET_POLAR_CATEGORY = "getPolar";
     
@@ -387,8 +387,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private boolean requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown;
     
-    private final boolean showMapControls;
-
     /**
      * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
      * active while auto-zooming whereas stopping them seems the better option for manual zooms.
@@ -403,18 +401,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+    public RaceMap(RaceMapLifecycle raceMapLifecycle, RaceMapSettings raceMapSettings, SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
-            boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
-            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
+            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, 
+            boolean isSimulationEnabled, boolean showHeaderPanel) {
+        this.raceMapLifecycle = raceMapLifecycle;
         this.setSize("100%", "100%");
-        this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.asyncActionsExecutor = asyncActionsExecutor;
         this.errorReporter = errorReporter;
         this.timer = timer;
+        this.isSimulationEnabled = isSimulationEnabled;
         timer.addTimeListener(this);
         raceMapImageManager = new RaceMapImageManager();
         markDTOs = new HashMap<String, MarkDTO>();
@@ -428,21 +427,18 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.competitorSelection = competitorSelection;
         this.raceCompetitorSet = new RaceCompetitorSet(competitorSelection);
         competitorSelection.addCompetitorSelectionChangeListener(this);
-        settings = new RaceMapSettings();
+        settings = raceMapSettings;
         coordinateSystem = new DelegateCoordinateSystem(new IdentityCoordinateSystem());
         fixesAndTails = new FixesAndTails(coordinateSystem);
         updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
-        this.showViewStreamlets = showViewStreamlets;
-        this.showViewStreamletColors = showViewStreamletColors;
-        this.showViewSimulation = showViewSimulation;
         this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
-        initializeData(showMapControls, showHeaderPanel);
+        initializeData(settings.isShowMapControls(), showHeaderPanel);
         combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
         trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
@@ -482,7 +478,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
-                        mapOptions = getMapOptions(showMapControls, /* wind-up */ true);
+                        mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ true);
                     } else {
                         mapOptions = null;
                     }
@@ -499,7 +495,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
         } else {
             if (map != null) {
-                mapOptions = getMapOptions(showMapControls, /* wind-up */ false);
+                mapOptions = getMapOptions(settings.isShowMapControls(), /* wind-up */ false);
             } else {
                 mapOptions = null;
             }
@@ -613,12 +609,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
                       timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
-              if (showViewStreamlets) {
-                  streamletOverlay.setColors(showViewStreamletColors);
+              if (settings.isShowWindStreamletOverlay()) {
+                  streamletOverlay.setColors(settings.isShowWindStreamletColors());
                   streamletOverlay.setVisible(true);
               }
 
-              if (showViewSimulation) {
+              if (isSimulationEnabled) {
             	  // determine availability of polar diagram
             	  setHasPolar();
                   // initialize simulation canvas
@@ -936,7 +932,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         quickRanks = raceMapDataDTO.quickRanks;
                         competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber =
                                 raceMapDataDTO.competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
-                        if (showViewSimulation && settings.isShowSimulationOverlay()) {
+                        if (isSimulationEnabled && settings.isShowSimulationOverlay()) {
                             lastLegNumber = raceMapDataDTO.coursePositions.currentLegNumber;
                         	simulationOverlay.updateLeg(Math.max(lastLegNumber, 1), /* clearCanvas */ false, raceMapDataDTO.simulationResultVersion);
                         }
@@ -2358,7 +2354,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public String getLocalizedShortName() {
-        return stringMessages.map();
+        return raceMapLifecycle.getLocalizedShortName();
     }
 
     @Override
@@ -2368,12 +2364,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     @Override
     public boolean hasSettings() {
-        return true;
+        return raceMapLifecycle.hasSettings();
     }
 
     @Override
     public SettingsDialogComponent<RaceMapSettings> getSettingsDialogComponent() {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.showViewSimulation && this.hasPolar);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages, this.isSimulationEnabled && this.hasPolar);
     }
 
     @Override

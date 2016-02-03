@@ -210,8 +210,7 @@ public class LeaderboardSettingsDialogComponent implements SettingsDialogCompone
         selectedRacesPanel.add(selectedRacesContent);
         
         // Attention: We need to consider that there are regattas with more than 30 races
-//        int racesCount = raceAllRaceColumns.size();
-        int racesCount = initialSettings.getNamesOfRaceColumnsToShow().size();
+        int racesCount = raceAllRaceColumns.size();
         if (racesCount > 0) {
             final FlowPanel explicitRaceSelectionContent = new FlowPanel();
             explicitRaceSelectionContent.ensureDebugId("ExplicitRaceSelectionPanel");
