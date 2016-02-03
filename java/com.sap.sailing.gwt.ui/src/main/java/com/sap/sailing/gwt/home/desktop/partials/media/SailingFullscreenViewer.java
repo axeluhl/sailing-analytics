@@ -6,7 +6,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Image;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
@@ -26,9 +25,7 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
                 SailingFullscreenViewer.this.toggleAutoplay();
             }
         });
-        if (ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_DESKTOP) {
-            addToolbarAction(autoRefreshControl);
-        }
+        addToolbarAction(autoRefreshControl);
     }
 
     public void show(SailingImageDTO selected, Collection<SailingImageDTO> images) {
@@ -37,11 +34,9 @@ public class SailingFullscreenViewer extends FullscreenContainer<SailingGalleryP
     }
     
     private void toggleAutoplay() {
-        if (ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_DESKTOP) {
-            if (player != null) {
-                player.toggleAutoplay();
-                autoRefreshControl.setStyleName(IS_AUTOPLAYING_STYLE, player.isAutoplaying());
-            }
+        if (player != null) {
+            player.toggleAutoplay();
+            autoRefreshControl.setStyleName(IS_AUTOPLAYING_STYLE, player.isAutoplaying());
         }
     }
 }
