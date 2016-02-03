@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 
 /**
  * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
@@ -58,9 +57,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
         
-        if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP) {
-            breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
-        }
+        breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
     }
 
     public TABVIEW getCurrentTab() {
