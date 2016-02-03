@@ -250,12 +250,7 @@ public class AppPreferences {
     }
 
     public String getServerBaseURL() {
-        String value = preferences.getString(key(R.string.preference_server_url_key), "");
-        if (value.equals("")) {
-            return "http://localhost:8889";
-        }
-
-        return value;
+        return preferences.getString(key(R.string.preference_server_url_key), null);
     }
 
     public double getWindBearingFromDirection() {

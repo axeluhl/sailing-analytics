@@ -269,8 +269,9 @@
     <string name="course">Kurs</string>
     <string name="confirm_start_time">Startzeit Bestätigen</string>
     <string name="confirm_start_mode">Startmodus Bestätigen</string>
-    <string name="login_sub_text">Bitte wählen Sie eine Regatta aus</string>
     <string name="login_text">Willkommen beim\nSAP Sailing Race Manager</string>
+    <string name="login_sub_text">Bitte wählen Sie eine Regatta aus</string>
+    <string name="login_onboarding_text">Onboarding</string>
     <string name="nav_drawer_close">Navigation-Drawer schließen</string>
     <string name="nav_drawer_open">Navigation-Drawer öffnen</string>
     <string name="sign_up">Anmelden</string>
@@ -391,8 +392,8 @@
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
     <string name="please_enter_valid_number">Bitte geben Sie eine gültige Zahl ein.</string>
     <string name="please_enter_valid_pathfinder">Bitte tragen Sie einen gültigen Pathfinder ein.</string>
-    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes(%s)</string>
-    <string name="error_scanning_qr_malformed">Fehler beim Scannen des QRCodes(Ungültige Url)</string>
+    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%s)</string>
+    <string name="error_scanning_qr_malformed">Ungültige Url</string>
     <string name="marks_w_placeholder">Kursmarkierungen: %s</string>
     <string name="error_no_course_to_copy">Kein Kurs zum Kopieren vorhanden</string>
     <string name="error_missing_second_mark">Die gewählten Anweisungen zum Vorbeifahren benötigen zwei Bojen. Bitte Wählen Sie eine zweite Boje.</string>
@@ -456,5 +457,7 @@
     <string name="reset_state_2">Zurücksetzen</string>
     <string name="reset_message_1">Soll die Liste komplett gelöscht werden?</string>
     <string name="reset_message_2">Soll die Liste zum letzten bekannten Stand zurückgesetzt werden?</string>
+    <string name="onboarding_scan">Scan QR-Code</string>
+    <string name="onboarding_input">Manuelle Eingabe</string>
 
 </resources>

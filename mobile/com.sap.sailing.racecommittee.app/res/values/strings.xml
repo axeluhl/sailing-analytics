@@ -296,6 +296,7 @@
 
     <string name="login_text">Welcome to\nSAP Sailing Race Manager</string>
     <string name="login_sub_text">Please select a regatta</string>
+    <string name="login_onboarding_text">Onboarding</string>
     <string name="sign_up">Sign Me Up</string>
     <string name="wind_display">dd</string>
     <string name="flags_abandon">Abandon</string>
@@ -414,8 +415,8 @@
     <string name="use_previous_course_dialog_message">Use previously published course design?</string>
     <string name="please_enter_valid_number">Please enter a valid number</string>
     <string name="please_enter_valid_pathfinder">Please enter a valid pathfinder</string>
-    <string name="error_scanning_qr">Error scanning QRCode(%s)</string>
-    <string name="error_scanning_qr_malformed">Error scanning QRCode(malformed url)</string>
+    <string name="error_scanning_qr">Error scanning QRCode (%s)</string>
+    <string name="error_scanning_qr_malformed">Malformed url</string>
     <string name="marks_w_placeholder">Marks: %s</string>
     <string name="error_no_course_to_copy">No course available to copy</string>
     <string name="error_missing_second_mark">The selected passing instructions require two buoys. Please select the second buoy.</string>
@@ -483,5 +484,7 @@
     <string name="reset_message_1">Do you want to clear the list?</string>
     <string name="reset_message_2">Do you want to reset to the last state?</string>
     <string name="geo_coords" translatable="false">%1$d° %2$d′ %3$.3f″</string>
+    <string name="onboarding_scan">Scan QR-Code</string>
+    <string name="onboarding_input">Manual Input</string>
 
 </resources>

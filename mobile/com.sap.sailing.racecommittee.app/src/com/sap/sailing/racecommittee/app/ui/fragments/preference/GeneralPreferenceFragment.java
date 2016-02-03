@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
 
@@ -192,10 +193,10 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
 
                 String identifier = connectionConfiguration.getA();
-                URL apkUrl = tryConvertToURL(connectionConfiguration.getB());
+                URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
 
                 if (apkUrl != null) {
-                    String serverUrl = getServerUrl(apkUrl);
+                    String serverUrl = UrlHelper.getServerUrl(apkUrl);
 
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
@@ -207,33 +208,13 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
                     new AutoUpdater(getActivity()).checkForUpdate(false);
                 } else {
-                    String toastText = getString(R.string.error_scanning_qr_malformed);
-                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
                 }
             } catch (IllegalArgumentException e) {
-                String toastText = getString(R.string.error_scanning_qr);
-                toastText = String.format(toastText, e.getMessage());
-                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, e.getMessage()), Toast.LENGTH_LONG).show();
             }
         } else {
-            String toastText = getString(R.string.error_scanning_qr);
-            toastText = String.format(toastText, "" + resultCode);
-            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    protected String getServerUrl(URL apkUrl) {
-        String protocol = apkUrl.getProtocol();
-        String host = apkUrl.getHost();
-        String port = apkUrl.getPort() == -1 ? "" : ":" + apkUrl.getPort();
-        return protocol + "://" + host + port;
-    }
-
-    private URL tryConvertToURL(String url) {
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            return null;
+            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -52,6 +53,7 @@ import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
+import com.sap.sailing.racecommittee.app.ui.fragments.LoginOnboarding;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
@@ -65,7 +67,7 @@ import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class LoginActivity extends BaseActivity
-    implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
+        implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -307,7 +309,9 @@ public class LoginActivity extends BaseActivity
         // setup the login list views fragment
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
+        transaction.replace(R.id.login_listview, loginListViews);
+        transaction.replace(R.id.login_onboarding, new LoginOnboarding());
+        transaction.commitAllowingStateLoss();
 
         new AutoUpdater(this).notifyAfterUpdate();
 
@@ -350,7 +354,11 @@ public class LoginActivity extends BaseActivity
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        resetData();
+        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
+            resetData();
+        } else {
+            slideUpBackdropDelayed();
+        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -378,7 +386,7 @@ public class LoginActivity extends BaseActivity
         showProgressSpinner();
 
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
-            .getDeviceIdentifier());
+                .getDeviceIdentifier());
 
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
 
@@ -454,13 +462,29 @@ public class LoginActivity extends BaseActivity
     }
 
     private void slideUpBackdrop() {
+        final View loginView = findViewById(R.id.login_listview);
+        loginView.setVisibility(View.GONE);
+        final View onboardingView = findViewById(R.id.login_onboarding);
+        onboardingView.setVisibility(View.GONE);
+
+        ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.GONE);
+        ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.GONE);
+
+        if (TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
+            onboardingView.setVisibility(View.VISIBLE);
+            ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.VISIBLE);
+        } else {
+            loginView.setVisibility(View.VISIBLE);
+            ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.VISIBLE);
+        }
+
         // don't slide up if already up
         if (backdrop.getY() != 0) {
             return;
         }
 
         int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
-        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_subtitle);
+        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_login);
         if (subTitle != null) {
             upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
         }
@@ -469,11 +493,14 @@ public class LoginActivity extends BaseActivity
         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                View bottomView = findViewById(R.id.login_listview);
                 int val = (Integer) valueAnimator.getAnimatedValue();
-                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
-                layoutParams.height = val;
-                bottomView.setLayoutParams(layoutParams);
+                ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
+                lpLogin.height = val;
+                loginView.setLayoutParams(lpLogin);
+
+                ViewGroup.LayoutParams lpOnboarding = onboardingView.getLayoutParams();
+                lpOnboarding.height = val;
+                onboardingView.setLayoutParams(lpOnboarding);
             }
         });
 
@@ -481,7 +508,8 @@ public class LoginActivity extends BaseActivity
         animators.add(heightAnimation);
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
-        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_subtitle)));
+        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_login)));
+        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_onboarding)));
         animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
 
         AnimatorSet animatorSet = new AnimatorSet();
@@ -522,7 +550,11 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            resetData();
+            String action = intent.getAction();
+
+            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+                resetData();
+            }
         }
     }
 
