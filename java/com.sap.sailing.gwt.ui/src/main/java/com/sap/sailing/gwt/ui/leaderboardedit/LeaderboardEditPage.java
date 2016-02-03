@@ -48,7 +48,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         title.getElement().getStyle().setFontSize(20, Unit.PX);
         title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
         title.getElement().getStyle().setMarginTop(16, Unit.PX);
-        SAPHeader2 header = new SAPHeader2(getStringMessages().sapSailingAnalytics(), title, false);
+        SAPHeader2 header = new SAPHeader2(getStringMessages().sapSailingAnalytics(), title);
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);

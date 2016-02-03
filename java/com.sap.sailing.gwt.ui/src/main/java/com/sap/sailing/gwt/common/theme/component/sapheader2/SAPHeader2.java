@@ -22,7 +22,7 @@ public class SAPHeader2 extends Composite {
     @UiField
     SimplePanel rightSideUi;
 
-    public SAPHeader2(String applicationName, Widget pageTitle, boolean startInAutoScreenMode) {
+    public SAPHeader2(String applicationName, Widget pageTitle) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));

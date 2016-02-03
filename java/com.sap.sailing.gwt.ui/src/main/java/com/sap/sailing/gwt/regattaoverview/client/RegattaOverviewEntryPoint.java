@@ -60,7 +60,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         descriptionUi.add(eventNameLabel);
         descriptionUi.add(venueNameLabel);
 
-        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi, false);
+        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi);
 
         logoAndTitlePanel.addWidgetToRightSide(clockLabel);
         containerPanel.addNorth(logoAndTitlePanel, 75);
