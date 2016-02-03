@@ -84,7 +84,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
     <profiles>
       <profile>
         <id>non-leandi</id>
@@ -117,7 +116,7 @@
           </plugins>
         </build>
       </profile>
-      
+
       <profile>
         <id>leandi-no-realsign</id>
         <activation>
@@ -136,7 +135,7 @@
           </plugins>
         </build>
       </profile>
-      
+
       <profile>
         <id>leandi-realsign</id>
         <activation>

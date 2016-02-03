@@ -60,6 +60,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     private final int UPDATE_INTERVAL_DEFAULT = 3000;
     private final int UPDATE_INTERVAL_POWERSAVE_MODE = 30000;
     private final float BATTERY_POWER_SAVE_TRESHOLD = 0.2f;
+    private boolean initialLocation;
 
     private String checkinDigest;
     private EventInfo event;
@@ -69,6 +70,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         super.onCreate();
         prefs = new AppPreferences(this);
 
+        initialLocation = true;
         // http://developer.android.com/training/location/receive-location-updates.html
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -180,6 +182,9 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onLocationChanged(Location location) {
+        if (initialLocation) {
+            storeInitialTrackingTimestamp();
+        }
         updateResendIntervalSetting();
         reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
                 location.getLatitude(), location.getLongitude(), location.getAltitude());
@@ -208,6 +213,13 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
         } catch (JSONException ex) {
             ExLog.i(this, TAG, "Error while building geolocation json " + ex.getMessage());
         }
+    }
+
+    private void storeInitialTrackingTimestamp() {
+        if (prefs.getTrackingTimerStarted() == 0) {
+            prefs.setTrackingTimerStarted(System.currentTimeMillis());
+        }
+        initialLocation = false;
     }
 
     /**
