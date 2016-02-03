@@ -10,10 +10,6 @@ public class ExperimentalFeatures {
      */
     public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
     /**
-     * Provide textbox to filter races by competitor in desktop regatta races tab
-     */
-    public static final boolean SHOW_RACES_BY_COMPETITOR_FILTER = true;
-    /**
      * Using {@link com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay} to generically render the breadcrumbs in desktop UI (currently causes styling problems).
      */
     public static final boolean USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP = true;

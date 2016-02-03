@@ -52,7 +52,6 @@ public class ListNavigationPanel<T extends ListNavigationAction> extends Composi
     
     public interface ListNavigationAction {
         String getDisplayName();
-        boolean isShowAdditionalWidget();
     }
     
     private class ActionWidget extends Label {
@@ -62,7 +61,7 @@ public class ListNavigationPanel<T extends ListNavigationAction> extends Composi
         private ActionWidget(T action) {
             super(action.getDisplayName());
             this.action = action;
-            this.displayStyle = action.isShowAdditionalWidget() ? Display.BLOCK : Display.NONE;
+            this.displayStyle = Display.BLOCK;
             this.addStyleName(CSS.regattanavigation_button());
             this.addClickHandler(new ClickHandler() {
                 @Override

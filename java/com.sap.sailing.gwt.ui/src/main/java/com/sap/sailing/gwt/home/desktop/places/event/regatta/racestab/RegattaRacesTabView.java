@@ -42,7 +42,6 @@ import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.ListNavigatio
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
@@ -56,33 +55,22 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
-/**
- * Created by pgtaboada on 25.11.14.
- */
 public class RegattaRacesTabView extends Composite implements RegattaTabView<RegattaRacesPlace> {
     
     private static final StringMessages I18N = StringMessages.INSTANCE;
     
     private enum Navigation implements ListNavigationAction {
-        SORT_LIST_FORMAT(I18N.listFormatLabel(), ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER),
-        COMPETITION_FORMAT(I18N.competitionFormatLabel(), ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER);
+        SORT_LIST_FORMAT(I18N.listFormatLabel()), COMPETITION_FORMAT(I18N.competitionFormatLabel());
         
         private final String displayName;
-        private final boolean showAdditionalWidget;
         
-        private Navigation(String displayName, boolean showAdditionalWidget) {
+        private Navigation(String displayName) {
             this.displayName = displayName;
-            this.showAdditionalWidget = showAdditionalWidget;
         }
         
         @Override
         public String getDisplayName() {
             return displayName;
-        }
-        
-        @Override
-        public boolean isShowAdditionalWidget() {
-            return showAdditionalWidget;
         }
     }
 
