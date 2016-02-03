@@ -11,6 +11,7 @@
 }
 
 .current_start_panel {
+	position: absolute;
 	height: DASHBOARD_SPACE_MEDIUM;
 	top: DASHBOARD_SPACE_MEDIUM;
 	line-height: DASHBOARD_SPACE_MEDIUM;
@@ -20,7 +21,7 @@
 	width: 100%;
 	text-align: center;
 	font-weight: bold;
-	z-index: 3;
+	z-index: 4;
 }
 
 .controll_header_button {
