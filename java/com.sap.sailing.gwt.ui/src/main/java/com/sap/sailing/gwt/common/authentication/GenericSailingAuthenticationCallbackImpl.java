@@ -5,11 +5,11 @@ import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 
-public class AuthenticationCallbackImpl implements AuthenticationCallback {
+public class GenericSailingAuthenticationCallbackImpl implements AuthenticationCallback {
     
     private final WrappedPlaceManagementController controller;
     
-    public AuthenticationCallbackImpl(WrappedPlaceManagementController controller) {
+    public GenericSailingAuthenticationCallbackImpl(WrappedPlaceManagementController controller) {
         this.controller = controller;
     }
 
@@ -20,7 +20,7 @@ public class AuthenticationCallbackImpl implements AuthenticationCallback {
 
     @Override
     public void handleUserProfileNavigation() {
-        Window.open(EntryPointLinkFactory.createUserProfileLink(), "_blank", "");
+        Window.open(SailingAuthenticationEntryPointLinkFactory.createUserProfileLink(), "_blank", "");
     }
 
 }

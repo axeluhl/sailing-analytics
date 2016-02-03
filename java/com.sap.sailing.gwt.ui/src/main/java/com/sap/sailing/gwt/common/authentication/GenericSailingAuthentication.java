@@ -24,11 +24,11 @@ public class GenericSailingAuthentication {
         EventBus eventBus = new SimpleEventBus();
         FlyoutAuthenticationView display = new GenericSailingAuthenticationView(res);
         AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
-                EntryPointLinkFactory.createEmailValidationLink(), 
-                EntryPointLinkFactory.createPasswordResetLink());
+                SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(), 
+                SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());
         AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
         WrappedPlaceManagementController userManagementController = null;
-        AuthenticationCallback callback = new AuthenticationCallbackImpl(userManagementController);
+        AuthenticationCallback callback = new GenericSailingAuthenticationCallbackImpl(userManagementController);
         userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
         new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
     }

@@ -6,7 +6,7 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
 
-public class EntryPointLinkFactory extends AbstractEntryPointLinkFactory {
+public class SailingAuthenticationEntryPointLinkFactory extends AbstractEntryPointLinkFactory {
     
     public static final String createUserProfileLink() {
         return createEntryPointLink("/gwt/Home.html#/user/profile/:", new HashMap<String, String>());
