@@ -1,21 +1,19 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
 import com.sap.sse.gwt.common.CommonSharedResources;
 
 
-public interface RaceBoardResources extends CommonSharedResources, ClientBundle {
+public interface RaceBoardResources extends CommonSharedResources {
     public static final RaceBoardResources INSTANCE = GWT.create(RaceBoardResources.class);
     
-    @Source("raceboard-main.gss")
+    @Source({CommonSharedResources.RESET, CommonSharedResources.MAIN, "raceboard-main.gss"})
     RaceBoardMainCss mainCss();
     
     @Source("raceboard-media.gss")
     RaceBoardMediaCss mediaCss();
     
-    public interface RaceBoardMainCss extends CommonMainCss, CssResource {
+    public interface RaceBoardMainCss extends CommonMainCss {
         String button();
         String buttonprimary();
         String buttonprimaryoutlined();
@@ -34,7 +32,7 @@ public interface RaceBoardResources extends CommonSharedResources, ClientBundle 
         String usermanagement_open();
     }
 
-    public interface RaceBoardMediaCss extends CommonMediaCss, CssResource {
+    public interface RaceBoardMediaCss extends CommonMediaCss {
     }
 
 }
