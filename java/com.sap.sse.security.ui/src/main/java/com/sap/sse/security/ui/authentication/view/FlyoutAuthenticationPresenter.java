@@ -1,6 +1,5 @@
 package com.sap.sse.security.ui.authentication.view;
 
-import com.google.gwt.core.client.GWT;
 import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
@@ -47,7 +46,6 @@ public class FlyoutAuthenticationPresenter implements AuthenticationMenuView.Pre
         if (flyoutAuthenticationView.isShowing()) {
             flyoutAuthenticationView.hide();
         } else {
-            GWT.debugger();
             flyoutAuthenticationView.show();
             authenticationPlaceManagementController.start();
         }
