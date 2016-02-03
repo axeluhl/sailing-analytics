@@ -6,10 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Provide option to show the media page for mobile devices 
-     */
-    public static final boolean SHOW_MEDIA_PAGE_ON_MOBILE = true;
-    /**
      * Provide button to show the competitor analytics in fullscreen view (work in progress)
      */
     public static final boolean SHOW_COMPETITOR_ANALYTICS_FULLSCREEN_VIEWER = false;
