@@ -6,11 +6,6 @@ package com.sap.sailing.gwt.home.shared;
 public class ExperimentalFeatures {
 
     /**
-     * Provide option to show the overview for regattas in multi regatta events and a navigation 
-     * to the races view (competition format) for single regatta and series events on mobile devices 
-     */
-    public static final boolean SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE = true;
-    /**
      * Provide option to show the regatta progress for single regatta and series event on mobile devices 
      */
     public static final boolean SHOW_REGATTA_PROGRESS_ON_MOBILE = true;
