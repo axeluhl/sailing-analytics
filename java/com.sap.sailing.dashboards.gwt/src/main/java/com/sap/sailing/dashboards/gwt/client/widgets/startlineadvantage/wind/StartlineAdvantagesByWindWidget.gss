@@ -16,7 +16,7 @@
 
 .advantages_on_line_chart_container {
 	position: absolute;
-	top: 150px;
+	top: 145px;
 	width: 100%;
 	bottom: 0px;
 }

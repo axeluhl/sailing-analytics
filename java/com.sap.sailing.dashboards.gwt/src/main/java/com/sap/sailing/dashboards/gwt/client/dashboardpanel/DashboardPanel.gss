@@ -62,7 +62,7 @@
 
 .startline_advantage_by_wind_container {
 	position: absolute;
-	top: 163px;
+	top: 160px;
 	right: 0px;
 	left: 0px;
 	bottom: 0%;
@@ -73,7 +73,7 @@
 	top: 0px;
 	right: 0px;
 	left: 0px;
-	height: 150px
+	height: 145px
 }
 
 .windcharthint {
