@@ -21,7 +21,8 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_MASTERDATA_IMPORT,
     MANAGE_DEVICE_CONFIGURATION,
     MANAGE_USERS,
-    MANAGE_FILE_STORAGE;
+    MANAGE_FILE_STORAGE,
+    MANAGE_MARK_PASSINGS;
 
     @Override
     public String getStringPermission() {
