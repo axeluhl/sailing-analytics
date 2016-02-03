@@ -17,7 +17,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.domain.common.security.Roles;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -32,7 +33,6 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -300,9 +300,8 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         final Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         if (associatedSplitter != null) { // if the panel is not present, the splitter may not be found
             final Button toggleButton = associatedSplitter.getToggleButton();
-            if (user != null
-                    && (user.hasRole(DefaultRoles.ADMIN.getRolename()) ||
-                        user.hasRole(Roles.eventmanager.getRolename()))) {
+            if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
+                    SailingPermissionsForRoleProvider.INSTANCE)) {
                 toggleButton.setVisible(true);
                 forceLayout();
             } else {
