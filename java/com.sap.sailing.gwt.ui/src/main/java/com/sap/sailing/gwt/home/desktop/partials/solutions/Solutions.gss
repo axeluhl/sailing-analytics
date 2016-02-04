@@ -45,7 +45,6 @@
 }
 .solutions_content {
   position: relative;
-  z-index: 2;
 }
 .solutions_content:nth-child(even) {
   background-color: #f8f8f8;

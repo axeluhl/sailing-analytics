@@ -9,7 +9,6 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecent;
 import com.sap.sailing.gwt.home.desktop.partials.eventsupcoming.EventsOverviewUpcoming;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -40,9 +39,7 @@ public class TabletAndDesktopEventsView extends AbstractEventsView {
     }
     
     private void initBreadCrumbs() {
-        if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP) {
-            breadcrumbs.getElement().getStyle().setDisplay(Display.NONE);
-        }
+        breadcrumbs.getElement().getStyle().setDisplay(Display.NONE);
         final PlaceNavigation<StartPlace> homeNavigation = navigator.getHomeNavigation();
         breadcrumbs.addBreadcrumbItem(i18n.home(), homeNavigation.getTargetUrl(), new Runnable() {
             @Override

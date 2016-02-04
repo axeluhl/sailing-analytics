@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel.FullscreenViewer;
 
 public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO>{
@@ -52,7 +51,6 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     public MobileFullscreenGallery() {
         popup.setWidget(mainPanel = uiBinder.createAndBindUi(this));
         popup.addStyleName(style.popup());
-        autoplayActionUi.setVisible(ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_MOBILE);
     }
     
     @UiHandler("closeActionUi")
@@ -62,11 +60,9 @@ public class MobileFullscreenGallery implements FullscreenViewer<SailingImageDTO
     
     @UiHandler("autoplayActionUi")
     void onAutoplayActionClicked(ClickEvent event) {
-        if (ExperimentalFeatures.SHOW_AUTOPLAY_IMAGES_ON_MOBILE) {
-            if (playerUi != null) {
-                playerUi.toggleAutoplay();
-                autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
-            }
+        if (playerUi != null) {
+            playerUi.toggleAutoplay();
+            autoplayActionUi.setStyleName(style.is_autoplaying(), playerUi.isAutoplaying());
         }
     }
     

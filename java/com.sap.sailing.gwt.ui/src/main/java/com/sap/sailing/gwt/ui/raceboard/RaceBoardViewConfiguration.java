@@ -10,7 +10,6 @@ public class RaceBoardViewConfiguration {
     private final boolean showWindChart; 
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
-    private final boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
     private final String defaultMedia;
     private final boolean showViewStreamlets;
@@ -34,11 +33,11 @@ public class RaceBoardViewConfiguration {
     public RaceBoardViewConfiguration() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewStreamletColors */ false, /* showViewSimulation */ false,
-        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
+         /* autoSelectMedia */false, null);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
             boolean autoSelectMedia, String defaultMedia) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
@@ -47,7 +46,6 @@ public class RaceBoardViewConfiguration {
         this.showViewStreamlets = showViewStreamlets;
         this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
-        this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.autoSelectMedia = autoSelectMedia;
         this.defaultMedia = defaultMedia;
     }
@@ -78,10 +76,6 @@ public class RaceBoardViewConfiguration {
 
     public String getActiveCompetitorsFilterSetName() {
         return activeCompetitorsFilterSetName;
-    }
-
-    public boolean isCanReplayDuringLiveRaces() {
-        return canReplayDuringLiveRaces;
     }
 
     public boolean isAutoSelectMedia() {
