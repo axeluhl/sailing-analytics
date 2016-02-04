@@ -62,24 +62,19 @@
         android:paddingTop="12dp">
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/accuracy"
             android:textColor="@color/white"
             android:textSize="20sp"/>
-
-        <!-- Empty view to right align the following element -->
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_accuracy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -111,23 +106,18 @@
         android:paddingTop="12dp">
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/distance"
             android:textColor="@color/white"
             android:textSize="20sp"/>
-
-        <!-- Empty view to right align the following element -->
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/marker_gps_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
             android:textColor="@color/white"
             android:textSize="20sp"
             tools:text="11,4m"/>
