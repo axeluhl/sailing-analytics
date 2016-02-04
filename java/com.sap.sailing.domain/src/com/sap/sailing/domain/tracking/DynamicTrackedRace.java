@@ -19,9 +19,22 @@ public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Mark mark, GPSFix fix);
     
     /**
+     * Inserts a <code>wind</code> fix into a {@link WindTrack} for the <code>windSource</code> if the current filtering
+     * rules accept the wind fix. Filtering applies based upon timing considerations, assuming that wind fixes are not
+     * relevant if they are outside of the tracking interval. There may be exceptions for races acting as default wind
+     * acceptors in case no other race in the regatta would accept the wind fix.
+     * 
      * @return True if the specified wind has been accepted and added to this race's wind track and database, else false.
      */
-    boolean recordWind(Wind wind, WindSource windSource);
+    default boolean recordWind(Wind wind, WindSource windSource) {
+        return recordWind(wind, windSource, /* applyFilter */ true);
+    }
+    
+    /**
+     * Like {@link #recordWind(Wind, WindSource)}, only that filtering may be disabled by setting
+     * <code>applyFilter</code> to <code>false</code>.
+     */
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
 
     void removeWind(Wind wind, WindSource windSource);
 

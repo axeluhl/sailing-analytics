@@ -14,9 +14,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     enum AlertView: Int {
         case NoCameraAvailable
     }
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
+    
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
     
@@ -29,7 +31,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // set up data source for list
         fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
-        fetchedResultsController!.performFetch(nil)
+        do {
+            try fetchedResultsController!.performFetch()
+        } catch {
+            print(error)
+        }
         
         // register for open custom URL events
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
@@ -77,8 +83,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     // MARK: - UITableViewDataSource
+    
     func resizeTable() {
-        let info = fetchedResultsController!.sections![0] as! NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![0] 
         let rows = info.numberOfObjects
         if rows < 3 {
             tableView.removeConstraint(tableViewHeight)
@@ -94,7 +101,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let info = fetchedResultsController!.sections![section] as! NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![section] 
         resizeTable()
         return info.numberOfObjects
     }
@@ -104,7 +111,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as! UITableViewCell!
+        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
         configureCell(cell, atIndexPath: indexPath)
         return cell
     }
