@@ -107,7 +107,7 @@ public class RaceStateService extends Service {
             .setSmallIcon(R.drawable.ic_directions_boat)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
             .setContentTitle(getText(R.string.service_info))
-            .setContentText(getText(R.string.service_text_no_races))
+            .setContentText(getString(R.string.service_text_no_races))
             .setContentIntent(contentIntent)
             .setColor(getResources().getColor(R.color.constant_sap_blue_1))
             .setOngoing(true);
@@ -216,8 +216,7 @@ public class RaceStateService extends Service {
 
         int numRaces = managedIntents.keySet().size();
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder
-                .setNumber(numRaces)
-                .setContentText(String.format(getString(R.string.service_text_num_races), numRaces))
+                .setContentText(getString(R.string.service_text_num_races, numRaces))
                 .build());
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
