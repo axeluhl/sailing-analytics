@@ -21,7 +21,7 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have
