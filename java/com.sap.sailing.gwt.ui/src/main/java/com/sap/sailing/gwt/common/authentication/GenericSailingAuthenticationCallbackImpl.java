@@ -5,14 +5,14 @@ import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 
-public class GenericSailingAuthenticationCallbackImpl implements AuthenticationCallback {
+class GenericSailingAuthenticationCallbackImpl implements AuthenticationCallback {
     
-    private final WrappedPlaceManagementController controller;
+    private WrappedPlaceManagementController controller;
     
-    public GenericSailingAuthenticationCallbackImpl(WrappedPlaceManagementController controller) {
+    public void setController(WrappedPlaceManagementController controller) {
         this.controller = controller;
     }
-
+    
     @Override
     public void handleSignInSuccess() {
         controller.goTo(new LoggedInUserInfoPlace());

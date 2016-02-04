@@ -3,13 +3,11 @@ package com.sap.sailing.gwt.common.authentication;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sse.gwt.common.CommonSharedResources;
-import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
@@ -22,24 +20,25 @@ public class GenericSailingAuthentication {
         this(userService, userManagementMenuView, false);
     }
     
-    public GenericSailingAuthentication(UserService userService, AuthenticationMenuView userManagementMenuView, boolean fixedPositioning) {
+    public GenericSailingAuthentication(UserService userService, AuthenticationMenuView menuView, boolean fixedPositioning) {
         res.mainCss().ensureInjected();
         
-        EventBus eventBus = new SimpleEventBus();
+        final EventBus eventBus = new SimpleEventBus();
         final FlyoutAuthenticationView display;
-        if(fixedPositioning) {
+        if (fixedPositioning) {
             display = new FixedSailingAuthenticationView(res);
-        }  else {
+        } else {
             display = new GenericSailingAuthenticationView(res);
         }
-        AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
-                SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(), 
+        final AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
+                SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(),
                 SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());
-        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
-        WrappedPlaceManagementController userManagementController = null;
-        AuthenticationCallback callback = new GenericSailingAuthenticationCallbackImpl(userManagementController);
-        userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
-        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
+        final AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
+        final GenericSailingAuthenticationCallbackImpl callback = new GenericSailingAuthenticationCallbackImpl();
+        final AuthenticationPlaceManagementController controller = new AuthenticationPlaceManagementController(
+                clientFactory, callback, display, eventBus);
+        callback.setController(controller);
+        new FlyoutAuthenticationPresenter(display, menuView, controller, eventBus, manager.getAuthenticationContext());
     }
 
 }
