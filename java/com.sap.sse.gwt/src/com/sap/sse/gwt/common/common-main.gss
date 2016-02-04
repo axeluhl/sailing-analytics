@@ -12,6 +12,10 @@
           transition: background-color 0.2s;
   text-decoration: none;
 }
+.button[disabled] {
+  cursor: not-allowed;
+  background: #cfcfcf;
+}
 .button:hover {
   background-color: #d79900;
   outline: none;
@@ -21,6 +25,7 @@
   background-color: #008fcc;
 }
 .buttonprimary:hover {
+  color: #fff;
   background-color: #0081b8;
 }
 .buttonprimaryoutlined {
