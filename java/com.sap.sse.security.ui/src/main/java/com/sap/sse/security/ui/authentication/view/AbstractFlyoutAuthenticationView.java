@@ -15,6 +15,9 @@ import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources;
 import com.sap.sse.security.ui.authentication.UserManagementResources.LocalCss;
 
+/**
+ * Abstract implementation of {@link FlyoutAuthenticationView} providing default functionality and styles. 
+ */
 public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenticationView {
     
     private static final LocalCss LOCAL_CSS = UserManagementResources.INSTANCE.css(); 
@@ -35,6 +38,11 @@ public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenti
 
     private Presenter presenter;
 
+    /**
+     * Creates a new {@link AbstractFlyoutAuthenticationView} with the given style resources.
+     * 
+     * @param res the {@link CommonSharedResources} to use
+     */
     public AbstractFlyoutAuthenticationView(CommonSharedResources res) {
         this.res = res;
         LOCAL_CSS.ensureInjected();
@@ -74,10 +82,12 @@ public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenti
         contentContainerUi.setWidget(w);
     }
     
+    @Override
     public void hide() {
         popupPanel.hide();
     }
     
+    @Override
     public boolean isShowing() {
         return popupPanel.isShowing();
     }
