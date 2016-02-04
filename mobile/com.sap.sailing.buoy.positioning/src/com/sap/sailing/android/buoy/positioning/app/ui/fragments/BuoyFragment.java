@@ -160,8 +160,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
-            accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
-                    + ")";
             if (location != null) {
                 float[] results = new float[1];
                 Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
@@ -173,8 +171,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             }
         }
 
-        ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
-        ExLog.w(getActivity(), getTag(), "Setting distance to: "+distanceText);
+        ExLog.w(getActivity(), getTag(), "Setting accuracy to: " + accuracyText);
+        ExLog.w(getActivity(), getTag(), "Setting distance to: " + distanceText);
 
         accuracyTextView.setText(accuracyText);
         distanceTextView.setText(distanceText);
