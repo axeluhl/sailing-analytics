@@ -13,6 +13,7 @@ public class AuthorizedContentDecorator extends Composite {
     
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
+    private WidgetFactory contentWidgetFactory;
     private final NotLoggedInView notLoggedInView;
     private String permissionToCheck;
     private PermissionsForRoleProvider permissionsForRoleProvider;
@@ -32,8 +33,20 @@ public class AuthorizedContentDecorator extends Composite {
         this.content = content;
     }
     
+    public void setContentWidgetFactory(WidgetFactory contentWidgetFactory) {
+        this.contentWidgetFactory = contentWidgetFactory;
+    }
+    
+    private Widget getContentWidget() {
+        if(contentWidgetFactory != null) {
+            content = contentWidgetFactory.get();
+            contentWidgetFactory = null;
+        }
+        return content;
+    }
+    
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        contentHolder.setWidget(isPermitted(userManagementContext) ? content : notLoggedInView);
+        contentHolder.setWidget(isPermitted(userManagementContext) ? getContentWidget() : notLoggedInView);
     }
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {
