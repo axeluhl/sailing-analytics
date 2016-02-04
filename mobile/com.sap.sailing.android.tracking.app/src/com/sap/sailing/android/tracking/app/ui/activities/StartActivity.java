@@ -53,14 +53,6 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog();
-        }
-    }
-
-    @Override
     public AbstractHomeFragment getHomeFragment() {
         HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
         return homeFragment;
