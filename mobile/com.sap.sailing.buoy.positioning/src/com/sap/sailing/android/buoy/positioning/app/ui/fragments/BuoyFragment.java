@@ -44,6 +44,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
+    private static final String N_A = "n/a";
     private OpenSansTextView markHeaderTextView;
     private OpenSansTextView accuracyTextView;
     private OpenSansTextView distanceTextView;
@@ -137,7 +138,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onPause() {
         super.onPause();
-        // Unsubscribe location updates for power saving
+        // Unsubscribe from location updates for power saving
         locationManager.removeUpdates(this);
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
@@ -145,29 +146,23 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void setUpTextUI(Location location) {
         MarkInfo mark = positioningActivity.getMarkInfo();
         markHeaderTextView.setText(mark.getName());
-        String accuracyText = "";
-        String distanceText = "";
+        String accuracyText = N_A;
+        String distanceText = N_A;
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
         String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
         String distanceString = getString(R.string.buoy_detail_distance);
         if (location != null) {
-            accuracyText += String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
-        } else {
-            accuracyText += "n/a";
-        }
-        MarkPingInfo markPing = positioningActivity.getMarkPing();
-        if (markPing != null) {
-            double savedLatitude = Double.parseDouble(markPing.getLatitude());
-            double savedLongitude = Double.parseDouble(markPing.getLongitude());
-            savedPosition = new LatLng(savedLatitude, savedLongitude);
-            if (location != null) {
+            accuracyText = String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
+            MarkPingInfo markPing = positioningActivity.getMarkPing();
+            if (markPing != null) {
+                double savedLatitude = Double.parseDouble(markPing.getLatitude());
+                double savedLongitude = Double.parseDouble(markPing.getLongitude());
+                savedPosition = new LatLng(savedLatitude, savedLongitude);
                 float[] results = new float[1];
                 Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
                         results);
                 float distance = results[0];
-                distanceText += String.format(distanceString, accuracyFormatter.format(distance));
-            } else {
-                distanceText += "n/a";
+                distanceText = String.format(distanceString, accuracyFormatter.format(distance));
             }
         }
 
