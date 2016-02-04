@@ -23,7 +23,7 @@ public class GenericAuthentication {
         manager = new AuthenticationManagerImpl(userService, eventBus,
                 linkFactory.createEmailValidationLink(), linkFactory.createPasswordResetLink());
         final AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
-        final GenericSailingAuthenticationCallbackImpl callback = new GenericSailingAuthenticationCallbackImpl();
+        final GenericAuthenticationCallbackImpl callback = new GenericAuthenticationCallbackImpl(linkFactory);
         final AuthenticationPlaceManagementController controller = new AuthenticationPlaceManagementController(
                 clientFactory, callback, display, eventBus);
         callback.setController(controller);
