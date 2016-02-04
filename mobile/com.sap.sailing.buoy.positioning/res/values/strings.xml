@@ -14,6 +14,8 @@
     <string name="buoy_detail_distance" translatable="false">%1$sm</string>
     <string name="accuracy">Accuracy</string>
     <string name="distance">Distance</string>
+    <string name="accuracy_detail">of GPS location</string>
+    <string name="distance_detail">to old buoy</string>
     <string name="position_set">The position has been set</string>
     <string name="no_information">No information</string>
     <string name="title_activity_settings">@string/settings</string>
