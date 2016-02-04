@@ -12,7 +12,7 @@ public class RaceTimesCalculationUtil {
     private static final long TIME_AFTER_LIVE = 5 * 60 * 1000; // 5 minutes
     public static final long MAX_TIME_AFTER_RACE_END = 1 * 60 * 1000; // 1 minutes
 
-    public static Util.Pair<Date, Date> caluclateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
+    public static Util.Pair<Date, Date> calculateRaceMinMax(Timer timer, RaceTimesInfoDTO raceTimesInfo) {
         Date min = null;
         Date max = null;
 
