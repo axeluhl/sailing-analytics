@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.common.authentication.GenericAuthentication;
+import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -294,7 +295,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private void setupUserManagementControlPanel(UserService userService) {
         mainCss.ensureInjected();
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        new GenericAuthentication(userService, userManagementMenuView, display, raceBoardResources);
+        new GenericAuthentication(userService, userManagementMenuView, display, 
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
             regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);
             userManagementMenuView.asWidget().removeFromParent();

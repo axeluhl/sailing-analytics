@@ -8,7 +8,8 @@ public class GenericSailingAuthentication extends GenericAuthentication {
     private static final CommonSharedResources res = CommonSharedResources.INSTANCE;
     
     public GenericSailingAuthentication(UserService userService, AuthenticationMenuView userManagementMenuView) {
-        super(userService, userManagementMenuView, new GenericSailingAuthenticationView(res), res);
+        super(userService, userManagementMenuView, new GenericSailingAuthenticationView(res),
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE, res);
         res.mainCss().ensureInjected();
     }
     

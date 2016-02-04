@@ -8,6 +8,7 @@ import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthenticationLinkFactory;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
@@ -18,10 +19,9 @@ public class GenericAuthentication {
     private final AuthenticationManager manager;
     
     public GenericAuthentication(UserService userService, AuthenticationMenuView menuView,
-            FlyoutAuthenticationView display, CommonSharedResources res) {
+            FlyoutAuthenticationView display, GenericAuthenticationLinkFactory linkFactory, CommonSharedResources res) {
         manager = new AuthenticationManagerImpl(userService, eventBus,
-                SailingAuthenticationEntryPointLinkFactory.INSTANCE.createEmailValidationLink(),
-                SailingAuthenticationEntryPointLinkFactory.INSTANCE.createPasswordResetLink());
+                linkFactory.createEmailValidationLink(), linkFactory.createPasswordResetLink());
         final AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
         final GenericSailingAuthenticationCallbackImpl callback = new GenericSailingAuthenticationCallbackImpl();
         final AuthenticationPlaceManagementController controller = new AuthenticationPlaceManagementController(
