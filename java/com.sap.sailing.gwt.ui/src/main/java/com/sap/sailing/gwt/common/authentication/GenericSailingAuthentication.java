@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.common.authentication;
 
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.client.UserService;
 

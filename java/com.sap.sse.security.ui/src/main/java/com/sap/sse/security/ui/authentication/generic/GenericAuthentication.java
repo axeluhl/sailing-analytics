@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic;
 
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.SimpleEventBus;
@@ -8,7 +8,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.generic.GenericAuthenticationLinkFactory;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;

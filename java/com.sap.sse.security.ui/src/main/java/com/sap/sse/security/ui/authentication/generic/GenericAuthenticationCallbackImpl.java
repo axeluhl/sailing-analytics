@@ -1,9 +1,8 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic;
 
 import com.google.gwt.user.client.Window;
 import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
-import com.sap.sse.security.ui.authentication.generic.GenericAuthenticationLinkFactory;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 
 class GenericAuthenticationCallbackImpl implements AuthenticationCallback {

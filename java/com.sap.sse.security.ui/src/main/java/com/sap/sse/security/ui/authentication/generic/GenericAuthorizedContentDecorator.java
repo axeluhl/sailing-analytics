@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic;
 
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
