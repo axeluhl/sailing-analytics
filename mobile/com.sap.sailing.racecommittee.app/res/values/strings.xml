@@ -233,6 +233,7 @@
     <string name="auto_update_version_file_url_invalid">The version file link was not valid.</string>
     <string name="auto_update_click_install">Click \'Install\' to perform the update to version %1$d.</string>
     <string name="auto_update_force_install">You already have installed the version offered by the server (version %1$d).</string>
+    <string name="auto_update_with_store">Your current version is installed from %1$s. The download from the server can\'t be installed without uninstalling the current app.</string>
     <string name="auto_update_already_up_to_date">You are already up to date!</string>
     <string name="auto_update_downloading_apk">Downloading APK from server&#8230;</string>
     <string name="auto_update_apk_link_invalid">The download link was not valid.</string>

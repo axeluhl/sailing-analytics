@@ -10,8 +10,11 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
+import com.sap.sailing.android.shared.R;
 
 public class AppUtils {
 
@@ -44,6 +47,30 @@ public class AppUtils {
         } catch (NameNotFoundException e) {
             return null;
         }
+    }
+
+    public String getInstallerPackageName() {
+        return mContext.getPackageManager().getInstallerPackageName(mContext.getPackageName());
+    }
+
+    public String getStoreName() {
+        String installer = getInstallerPackageName();
+        if (!TextUtils.isEmpty(installer)) {
+            String[] storeNames = mContext.getResources().getStringArray(R.array.store_names);
+            String[] storePackages = mContext.getResources().getStringArray(R.array.store_packages);
+            int len = storePackages.length;
+            for (int i = 0; i < len; i++) {
+                if (installer.equals(storePackages[i])) {
+                    return storeNames[i];
+                }
+            }
+        }
+
+        return mContext.getString(R.string.sideload);
+    }
+
+    public boolean isSideLoaded() {
+        return getStoreName().equals(mContext.getString(R.string.sideload));
     }
 
     /**

@@ -218,6 +218,7 @@
     <string name="auto_update_version_file_url_invalid">Link zur Versionsinformation ungültig.</string>
     <string name="auto_update_click_install">Klicke \'Installieren\' um ein Update auf Version %1$d durchzuführen.</string>
     <string name="auto_update_force_install">Es ist bereits die Server-Version installiert (Version %1$d).</string>
+    <string name="auto_update_with_store">Die aktuelle App wurde per %1$s installiert. Der Download vom Server kann nicht ohne vorherige Deinstallation der App installiert werden.</string>
     <string name="auto_update_already_up_to_date">Alles aktuell!</string>
     <string name="auto_update_downloading_apk">Downloade APK vom Server&#8230;</string>
     <string name="auto_update_apk_link_invalid">Der Downloadlink ist ungültig.</string>
