@@ -29,8 +29,8 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, getStringMessages(), userAgent);
                     leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
-                    RootPanel.get().add(initHeader());
                     RootPanel.get().add(leaderboardPanel);
+                    RootPanel.get().add(initHeader());
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }
@@ -52,7 +52,6 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
-        header.getElement().getStyle().setZIndex(19);
         return header;
     }
 }
