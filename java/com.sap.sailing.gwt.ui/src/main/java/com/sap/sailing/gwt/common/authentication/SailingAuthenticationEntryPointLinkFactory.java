@@ -5,22 +5,32 @@ import java.util.HashMap;
 import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.client.AbstractEntryPointLinkFactory;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthenticationLinkFactory;
 
-public class SailingAuthenticationEntryPointLinkFactory extends AbstractEntryPointLinkFactory {
+public final class SailingAuthenticationEntryPointLinkFactory extends AbstractEntryPointLinkFactory implements
+        GenericAuthenticationLinkFactory {
     
-    public static final String createUserProfileLink() {
+    public static final GenericAuthenticationLinkFactory INSTANCE = new SailingAuthenticationEntryPointLinkFactory();
+    
+    private SailingAuthenticationEntryPointLinkFactory() {
+    }
+    
+    @Override
+    public final String createUserProfileLink() {
         return createEntryPointLink("/gwt/Home.html#/user/profile/:", new HashMap<String, String>());
     }
     
-    public static final String createEmailValidationLink() {
+    @Override
+    public final String createEmailValidationLink() {
         return createFullQualifiedLink("/gwt/Home.html", "/user/confirmation/:MAIL_VERIFIED");
     }
     
-    public static final String createPasswordResetLink() {
+    @Override
+    public final String createPasswordResetLink() {
         return createFullQualifiedLink("/gwt/Home.html", "/user/passwordreset/:");
     }
     
-    private static String createFullQualifiedLink(String baseUrl, String hash) {
+    private String createFullQualifiedLink(String baseUrl, String hash) {
         String path = createEntryPointLink(baseUrl, new HashMap<String, String>());
         UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         for (String parameter : Window.Location.getParameterMap().keySet()) {

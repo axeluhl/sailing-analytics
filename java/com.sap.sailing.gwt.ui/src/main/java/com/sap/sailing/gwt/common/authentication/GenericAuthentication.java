@@ -20,8 +20,8 @@ public class GenericAuthentication {
     public GenericAuthentication(UserService userService, AuthenticationMenuView menuView,
             FlyoutAuthenticationView display, CommonSharedResources res) {
         manager = new AuthenticationManagerImpl(userService, eventBus,
-                SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(),
-                SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE.createEmailValidationLink(),
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE.createPasswordResetLink());
         final AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
         final GenericSailingAuthenticationCallbackImpl callback = new GenericSailingAuthenticationCallbackImpl();
         final AuthenticationPlaceManagementController controller = new AuthenticationPlaceManagementController(

@@ -20,7 +20,7 @@ class GenericSailingAuthenticationCallbackImpl implements AuthenticationCallback
 
     @Override
     public void handleUserProfileNavigation() {
-        Window.open(SailingAuthenticationEntryPointLinkFactory.createUserProfileLink(), "_blank", "");
+        Window.open(SailingAuthenticationEntryPointLinkFactory.INSTANCE.createUserProfileLink(), "_blank", "");
     }
 
 }
