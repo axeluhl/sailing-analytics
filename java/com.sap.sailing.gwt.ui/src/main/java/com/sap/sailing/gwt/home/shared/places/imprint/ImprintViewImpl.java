@@ -132,9 +132,7 @@ public class ImprintViewImpl extends Composite implements ImprintView {
     @Override
     public void showLicenseText(String text) {
         SafeHtmlBuilder sb = new SafeHtmlBuilder();
-        sb.appendHtmlConstant("<pre>");
-        sb.appendEscaped(text);
-        sb.appendHtmlConstant("</pre>");
+        sb.appendEscapedLines(text);
         licenseTextUi.setInnerSafeHtml(sb.toSafeHtml());
     }
 
