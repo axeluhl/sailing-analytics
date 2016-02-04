@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import java.text.DecimalFormat;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,13 +38,13 @@ import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
+import java.text.DecimalFormat;
+
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
     private OpenSansTextView markHeaderTextView;
-    private OpenSansTextView latitudeTextView;
-    private OpenSansTextView longitudeTextView;
     private OpenSansTextView accuracyTextView;
     private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
@@ -68,8 +66,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
         markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
-        latitudeTextView = ViewHelper.get(layout, R.id.marker_gps_latitude);
-        longitudeTextView = ViewHelper.get(layout, R.id.marker_gps_longitude);
         accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
         distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
@@ -149,21 +145,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void setUpTextUI(Location location) {
         MarkInfo mark = positioningActivity.getMarkInfo();
         markHeaderTextView.setText(mark.getName());
-        String longitudeText = "";
-        String latitudeText = "";
         String accuracyText = "";
         String distanceText = "";
-        DecimalFormat latlngFormatter = new DecimalFormat("#.######");
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
         String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
         String distanceString = getString(R.string.buoy_detail_distance);
         if (location != null) {
-            latitudeText += latlngFormatter.format(location.getLatitude());
-            longitudeText += latlngFormatter.format(location.getLongitude());
             accuracyText += String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
         } else {
-            latitudeText += "n/a";
-            longitudeText += "n/a";
             accuracyText += "n/a";
         }
         MarkPingInfo markPing = positioningActivity.getMarkPing();
@@ -171,8 +160,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             double savedLatitude = Double.parseDouble(markPing.getLatitude());
             double savedLongitude = Double.parseDouble(markPing.getLongitude());
             savedPosition = new LatLng(savedLatitude, savedLongitude);
-            latitudeText += " (" + latlngFormatter.format(savedLatitude) + ")";
-            longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
             accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
                     + ")";
             if (location != null) {
@@ -186,13 +173,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             }
         }
 
-        ExLog.w(getActivity(), getTag(), "Setting latitude to: "+latitudeText);
-        ExLog.w(getActivity(), getTag(), "Setting longitude to: "+longitudeText);
         ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
         ExLog.w(getActivity(), getTag(), "Setting distance to: "+distanceText);
-        
-        latitudeTextView.setText(latitudeText);
-        longitudeTextView.setText(longitudeText);
+
         accuracyTextView.setText(accuracyText);
         distanceTextView.setText(distanceText);
     }
