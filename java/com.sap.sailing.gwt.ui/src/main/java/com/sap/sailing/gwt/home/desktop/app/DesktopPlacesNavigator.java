@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -69,6 +70,10 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
     
+    public PlaceNavigation<ImprintPlace> getImprintNavigation() {
+        return createGlobalPlaceNavigation(new ImprintPlace());
+    }
+
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
         return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
     }

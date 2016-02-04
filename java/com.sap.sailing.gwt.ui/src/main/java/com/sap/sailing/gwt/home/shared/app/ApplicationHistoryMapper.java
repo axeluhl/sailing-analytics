@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -62,6 +63,9 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPla
         // Mobile only places:
         LatestNewsPlace.Tokenizer.class,
         MiniLeaderboardPlace.Tokenizer.class,
+        SeriesMiniOverallLeaderboardPlace.Tokenizer.class,//
+        ErrorPlace.Tokenizer.class, //
+        ImprintPlace.Tokenizer.class,
         SeriesMiniOverallLeaderboardPlace.Tokenizer.class,
         // User management places:
         UserProfileDefaultPlace.Tokenizer.class,

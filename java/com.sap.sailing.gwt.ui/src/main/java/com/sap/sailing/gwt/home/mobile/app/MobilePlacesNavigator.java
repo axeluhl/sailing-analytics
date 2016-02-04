@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -82,6 +83,10 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<AboutUsPlace> getAboutUsNavigation() {
         return createGlobalPlaceNavigation(new AboutUsPlace());
+    }
+
+    public PlaceNavigation<ImprintPlace> getImprintNavigation() {
+        return createGlobalPlaceNavigation(new ImprintPlace());
     }
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {

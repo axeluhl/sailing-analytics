@@ -22,6 +22,8 @@ import com.sap.sailing.gwt.home.shared.places.error.ErrorPlace;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintActivityProxy;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultActivityProxy;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
@@ -76,6 +78,19 @@ public class MobileActivityMapper implements ActivityMapper {
             return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
         } else if (place instanceof PasswordResetPlace) {
             return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
+        } else if (place instanceof AbstractUserProfilePlace) {
+            if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_MOBILE) {
+                return new StartActivityProxy(new StartPlace(), clientFactory);
+            }
+            return new UserProfileActivityProxy((AbstractUserProfilePlace) place, clientFactory);
+        } else if (place instanceof AuthenticationPlace) {
+            return new AuthenticationActivityProxy((AuthenticationPlace) place, clientFactory);
+        } else if (place instanceof ConfirmationPlace) {
+            return new ConfirmationActivityProxy((ConfirmationPlace) place, clientFactory);
+        } else if (place instanceof PasswordResetPlace) {
+            return new PasswordResetActivityProxy((PasswordResetPlace) place, clientFactory);
+        } else if (place instanceof ImprintPlace) {
+            return new ImprintActivityProxy((ImprintPlace) place);
         } else {
             return null;
         }
