@@ -6,16 +6,20 @@ import java.util.List;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -29,7 +33,8 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
+    public MarksPanel(final EditMarkPositionPanel parent, final MapWidget map, final CoordinateSystem coordinateSystem, 
+            final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
@@ -68,8 +73,17 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
-            public void update(int index, MarkDTO object, String value) {
-                
+            public void update(int index, final MarkDTO object, String value) {
+                new FixPositionChooser(map, map.getCenter(), coordinateSystem, "Confirm New", new Callback<Position, Exception>() {
+                    @Override
+                    public void onFailure(Exception reason) {
+                        // TODO Auto-generated method stub
+                    }
+                    @Override
+                    public void onSuccess(Position result) {
+                        parent.addMarkFix(object, parent.getTimepoint(), result);
+                    }
+                });
             }
         });
         markTable.addColumn(addFixColumn, new TextHeader(""));
