@@ -71,13 +71,11 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
-import com.sap.sse.security.ui.authentication.AuthenticationCallback;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
@@ -307,9 +305,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createEmailValidationLink(), 
                 com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createPasswordResetLink());
         AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, RaceBoardResources.INSTANCE);
-        WrappedPlaceManagementController userManagementController = null;
-        AuthenticationCallback callback = new AuthenticationCallbackImpl(userManagementController);
-        userManagementController = new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
+        AuthenticationCallbackImpl callback = new AuthenticationCallbackImpl();
+        AuthenticationPlaceManagementController userManagementController = 
+                new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
+        callback.setController(userManagementController);
         new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
             regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);

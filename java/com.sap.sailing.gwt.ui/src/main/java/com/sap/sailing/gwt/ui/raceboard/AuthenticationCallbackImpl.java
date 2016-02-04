@@ -7,9 +7,9 @@ import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 
 public class AuthenticationCallbackImpl implements AuthenticationCallback {
     
-    private final WrappedPlaceManagementController controller;
+    private WrappedPlaceManagementController controller;
     
-    public AuthenticationCallbackImpl(WrappedPlaceManagementController controller) {
+    public void setController(WrappedPlaceManagementController controller) {
         this.controller = controller;
     }
 
