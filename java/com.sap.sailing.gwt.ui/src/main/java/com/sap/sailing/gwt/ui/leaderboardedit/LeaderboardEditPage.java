@@ -9,12 +9,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.authentication.GenericAuthorizedContentDecorator;
 import com.sap.sailing.gwt.common.authentication.GenericSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 
 public class LeaderboardEditPage extends AbstractSailingEntryPoint {
     @Override
@@ -30,8 +31,14 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                     EditableLeaderboardPanel leaderboardPanel = new EditableLeaderboardPanel(sailingService, new AsyncActionsExecutor(), leaderboardName, null,
                             LeaderboardEditPage.this, getStringMessages(), userAgent);
                     leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
-                    RootPanel.get().add(leaderboardPanel);
-                    RootPanel.get().add(initHeader());
+                    
+                    SAPHeaderWithAuthentication header = initHeader();
+                    GenericSailingAuthentication genericSailingAuthentication = new GenericSailingAuthentication(getUserService(), header.getAuthenticationMenuView(), true);
+                    AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+                    authorizedContentDecorator.addContent(leaderboardPanel);
+                    
+                    RootPanel.get().add(authorizedContentDecorator);
+                    RootPanel.get().add(header);
                 } else {
                     RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
                 }
@@ -43,7 +50,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         }));
     }
 
-    private Widget initHeader() {
+    private SAPHeaderWithAuthentication initHeader() {
         Label title = new Label(getStringMessages().editScores());
         title.getElement().getStyle().setColor("white");
         title.getElement().getStyle().setFontSize(20, Unit.PX);
@@ -51,7 +58,6 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         title.getElement().getStyle().setMarginTop(16, Unit.PX);
         
         SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), title);
-        new GenericSailingAuthentication(getUserService(), header.getAuthenticationMenuView(), true);
         
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);

@@ -15,6 +15,8 @@ import com.sap.sse.security.ui.client.UserService;
 
 public class GenericSailingAuthentication {
     private static final CommonSharedResources res = CommonSharedResources.INSTANCE;
+    private final EventBus eventBus;
+    private final AuthenticationManager manager;
     
     public GenericSailingAuthentication(UserService userService, AuthenticationMenuView userManagementMenuView) {
         this(userService, userManagementMenuView, false);
@@ -23,14 +25,14 @@ public class GenericSailingAuthentication {
     public GenericSailingAuthentication(UserService userService, AuthenticationMenuView menuView, boolean fixedPositioning) {
         res.mainCss().ensureInjected();
         
-        final EventBus eventBus = new SimpleEventBus();
+        eventBus = new SimpleEventBus();
         final FlyoutAuthenticationView display;
         if (fixedPositioning) {
             display = new FixedSailingAuthenticationView(res);
         } else {
             display = new GenericSailingAuthenticationView(res);
         }
-        final AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
+        manager = new AuthenticationManagerImpl(userService, eventBus,
                 SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(),
                 SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());
         final AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, res);
@@ -41,4 +43,11 @@ public class GenericSailingAuthentication {
         new FlyoutAuthenticationPresenter(display, menuView, controller, eventBus, manager.getAuthenticationContext());
     }
 
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+    
+    public AuthenticationManager getAuthenticationManager() {
+        return manager;
+    }
 }
