@@ -170,7 +170,7 @@
     <string name="set_course_layout">Set the course layout</string>
     <string name="loading_failure">Load failure</string>
     <string name="wind_unknown">(click to set wind)</string>
-    <string name="wind_info">%2$s / %1$s kn</string>
+    <string name="wind_info">%2$s / %1$s kts</string>
     <string name="login">Login</string>
     <string name="please_select_a_login_type">Please select a login type.</string>
     <string name="race_list_filter_show_all">Show all</string>
@@ -326,10 +326,10 @@
     <string name="wind_on">Wind Sensors active</string>
     <string name="wind_set_position">Set Position</string>
     <string name="wind_enter_position">Set Your Position</string>
-    <string name="wind_kn">kn</string>
+    <string name="wind_kn">kts</string>
     <string name="wind_address_hint">Enter Address</string>
-    <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kn]]></string>
-    <string name="wind_panel"><![CDATA[from %1$.0f°\nwith %2$.1f kn]]></string>
+    <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kts]]></string>
+    <string name="wind_panel"><![CDATA[from %1$.0f°\nwith %2$.1f kts]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
