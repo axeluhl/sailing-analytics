@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.usermanagement.decorator;
+package com.sap.sse.security.ui.authentication.decorator;
 
 public interface NotLoggedInPresenter {
     void doTriggerLoginForm();

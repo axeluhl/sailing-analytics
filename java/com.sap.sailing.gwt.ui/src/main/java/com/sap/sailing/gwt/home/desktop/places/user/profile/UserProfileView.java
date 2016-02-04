@@ -9,8 +9,8 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sailing.gwt.home.shared.usermanagement.decorator.NotLoggedInPresenter;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
