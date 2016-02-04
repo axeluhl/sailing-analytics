@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatFleetDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -19,6 +18,7 @@ import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompet
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionView.RegattaCompetitionSeriesView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public abstract class RegattaCompetitionPresenter implements
         RefreshableWidget<ListResult<RaceCompetitionFormatSeriesDTO>>, 

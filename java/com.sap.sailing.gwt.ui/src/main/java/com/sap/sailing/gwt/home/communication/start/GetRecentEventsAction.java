@@ -7,13 +7,13 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.server.HomeServiceUtil.EventVisitor;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class GetRecentEventsAction implements SailingAction<ListResult<EventQuickfinderDTO>>, IsClientCacheable {
     

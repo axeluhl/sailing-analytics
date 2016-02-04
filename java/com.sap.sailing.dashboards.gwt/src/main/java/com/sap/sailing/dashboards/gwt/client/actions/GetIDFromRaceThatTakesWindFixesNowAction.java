@@ -8,8 +8,8 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * @author Alexander Ries (D062114)

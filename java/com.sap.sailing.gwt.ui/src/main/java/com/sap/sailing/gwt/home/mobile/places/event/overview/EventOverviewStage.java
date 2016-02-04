@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewS
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewVideoStageDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown.CountdownNavigationProvider;
@@ -64,8 +63,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     private class StageCountdownNavigationProvider implements CountdownNavigationProvider {
         @Override
         public PlaceNavigation<?> getRegattaNavigation(String regattaName) {
-            return ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE 
-                    ? presenter.getRegattaOverviewNavigation(regattaName) : null;
+            return presenter.getRegattaOverviewNavigation(regattaName);
         }
     }
 }
