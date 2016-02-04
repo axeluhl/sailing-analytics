@@ -10,7 +10,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.theme.component.sapheader2.SAPHeader2;
+import com.sap.sailing.gwt.common.authentication.GenericSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -48,7 +49,10 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
         title.getElement().getStyle().setFontSize(20, Unit.PX);
         title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
         title.getElement().getStyle().setMarginTop(16, Unit.PX);
-        SAPHeader2 header = new SAPHeader2(getStringMessages().sapSailingAnalytics(), title);
+        
+        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), title);
+        new GenericSailingAuthentication(getUserService(), header.getAuthenticationMenuView(), true);
+        
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);
