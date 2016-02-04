@@ -16,18 +16,25 @@ public class SAPHeaderWithAuthentication extends SAPHeader2 {
     private AuthenticationMenuView authenticationMenuView;
 
     public SAPHeaderWithAuthentication(String applicationName, Widget pageTitle) {
+        this(applicationName, pageTitle, true);
+    }
+    
+    public SAPHeaderWithAuthentication(String applicationName, Widget pageTitle, boolean withLogin) {
         super(applicationName, pageTitle);
         res.css().ensureInjected();
         
         FlowPanel rightWithAuthentication = new FlowPanel();
-        rightWrapper = new SimplePanel();
-        rightWrapper.addStyleName(res.css().header_right_wrapper());
-        rightWithAuthentication.add(rightWrapper);
+        rightWithAuthentication.addStyleName(res.css().header_right_wrapper());
+        rightWithAuthentication.setStyleName(res.css().with_login(), withLogin);
         
         Anchor authenticationMenu = new Anchor();
         authenticationMenu.addStyleName(res.css().usermanagement_icon());
         rightWithAuthentication.add(authenticationMenu);
         authenticationMenuView = new AuthenticationMenuViewImpl(authenticationMenu, res.css().usermanagement_loggedin(), res.css().usermanagement_open());
+        
+        rightWrapper = new SimplePanel();
+        rightWrapper.addStyleName(res.css().header_right_extension());
+        rightWithAuthentication.add(rightWrapper);
         
         super.addWidgetToRightSide(rightWithAuthentication);
     }

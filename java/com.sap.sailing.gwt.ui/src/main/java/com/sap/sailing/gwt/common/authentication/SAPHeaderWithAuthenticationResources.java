@@ -13,6 +13,8 @@ public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
     
     public interface RaceBoardMainCss extends CssResource {
         String header_right_wrapper();
+        String header_right_extension();
+        String with_login();
         
         String usermanagement_icon();
         String usermanagement_loggedin();
