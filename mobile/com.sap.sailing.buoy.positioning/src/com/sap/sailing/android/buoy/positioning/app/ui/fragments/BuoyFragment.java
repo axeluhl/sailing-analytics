@@ -48,6 +48,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView latitudeTextView;
     private OpenSansTextView longitudeTextView;
     private OpenSansTextView accuracyTextView;
+    private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
     private OpenSansButton resetPositionButton;
     private MapFragment mapFragment;
@@ -70,6 +71,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         latitudeTextView = ViewHelper.get(layout, R.id.marker_gps_latitude);
         longitudeTextView = ViewHelper.get(layout, R.id.marker_gps_longitude);
         accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
+        distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
 
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
@@ -150,9 +152,11 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         String longitudeText = "";
         String latitudeText = "";
         String accuracyText = "";
+        String distanceText = "";
         DecimalFormat latlngFormatter = new DecimalFormat("#.######");
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
         String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
+        String distanceString = getString(R.string.buoy_detail_distance);
         if (location != null) {
             latitudeText += latlngFormatter.format(location.getLatitude());
             longitudeText += latlngFormatter.format(location.getLongitude());
@@ -171,15 +175,26 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
             accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
                     + ")";
+            if (location != null) {
+                float[] results = new float[1];
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
+                        results);
+                float distance = results[0];
+                distanceText += String.format(distanceString, accuracyFormatter.format(distance));
+            } else {
+                distanceText += "n/a";
+            }
         }
-        
-          ExLog.w(getActivity(), getTag(), "Setting latitude to: "+latitudeText);
-          ExLog.w(getActivity(), getTag(), "Setting longitude to: "+longitudeText);
-          ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
+
+        ExLog.w(getActivity(), getTag(), "Setting latitude to: "+latitudeText);
+        ExLog.w(getActivity(), getTag(), "Setting longitude to: "+longitudeText);
+        ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
+        ExLog.w(getActivity(), getTag(), "Setting distance to: "+distanceText);
         
         latitudeTextView.setText(latitudeText);
         longitudeTextView.setText(longitudeText);
         accuracyTextView.setText(accuracyText);
+        distanceTextView.setText(distanceText);
     }
 
     @Override
