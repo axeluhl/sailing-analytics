@@ -4,6 +4,8 @@ import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -12,6 +14,8 @@ public class AuthorizedContentDecorator extends Composite {
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
     private final NotLoggedInView notLoggedInView;
+    private String permissionToCheck;
+    private PermissionsForRoleProvider permissionsForRoleProvider;
 
     public AuthorizedContentDecorator(NotLoggedInPresenter presenter, NotLoggedInView notLoggedInView) {
         this.notLoggedInView = notLoggedInView;
@@ -29,6 +33,30 @@ public class AuthorizedContentDecorator extends Composite {
     }
     
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        contentHolder.setWidget(userManagementContext.isLoggedIn() ? content : notLoggedInView);
+        contentHolder.setWidget(isPermitted(userManagementContext) ? content : notLoggedInView);
+    }
+
+    private boolean isPermitted(AuthenticationContext userManagementContext) {
+        if(!userManagementContext.isLoggedIn()) {
+            return false;
+        }
+        return permissionToCheck == null || userManagementContext.getCurrentUser().hasPermission(permissionToCheck, permissionsForRoleProvider);
+    }
+    
+    public void setPermissionsForRoleProvider(PermissionsForRoleProvider permissionsForRoleProvider) {
+        this.permissionsForRoleProvider = permissionsForRoleProvider;
+    }
+    
+    public void setPermissionToCheck(String permissionToCheck) {
+        this.permissionToCheck = permissionToCheck;
+    }
+    
+    public void setPermissionToCheck(Permission permissionToCheck) {
+        setPermissionToCheck(permissionToCheck.getStringPermission());
+    }
+    
+    public void setPermissionToCheck(Permission permissionToCheck, PermissionsForRoleProvider permissionsForRoleProvider) {
+        setPermissionToCheck(permissionToCheck);
+        setPermissionsForRoleProvider(permissionsForRoleProvider);
     }
 }
