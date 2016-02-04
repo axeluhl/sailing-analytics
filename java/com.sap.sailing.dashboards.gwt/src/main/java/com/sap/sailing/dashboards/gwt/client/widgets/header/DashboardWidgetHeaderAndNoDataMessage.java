@@ -20,8 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class DashboardWidgetHeaderAndNoDataMessage extends Composite implements HasWidgets {
 
-    private static DashboardWidgetHeaderAndNoDataMessageUiBinder uiBinder = GWT
-            .create(DashboardWidgetHeaderAndNoDataMessageUiBinder.class);
+    private static DashboardWidgetHeaderAndNoDataMessageUiBinder uiBinder = GWT.create(DashboardWidgetHeaderAndNoDataMessageUiBinder.class);
     private static final int EXTRA_WIDTH_MESSAGE = 10;
 
     interface DashboardWidgetHeaderAndNoDataMessageUiBinder extends

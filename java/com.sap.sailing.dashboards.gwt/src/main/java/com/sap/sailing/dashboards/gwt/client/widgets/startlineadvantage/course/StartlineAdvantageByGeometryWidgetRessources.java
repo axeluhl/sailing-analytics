@@ -5,16 +5,15 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
 
-public interface StartLineAdvantageByGeometryWidgetRessources extends ClientBundle {
+public interface StartlineAdvantageByGeometryWidgetRessources extends ClientBundle {
     
-    public static final StartLineAdvantageByGeometryWidgetRessources INSTANCE = GWT.create(StartLineAdvantageByGeometryWidgetRessources.class);
+    public static final StartlineAdvantageByGeometryWidgetRessources INSTANCE = GWT.create(StartlineAdvantageByGeometryWidgetRessources.class);
 
-    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartLineAdvantageByGeometryWidget.gss"})
+    @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "StartlineAdvantageByGeometryWidget.gss"})
     StartLineAdvantageByGeometryGss gss();
     
     @Shared
     public interface StartLineAdvantageByGeometryGss extends CssResource {
-        
         String start_line_advantage_by_geometry_widget();
         String advantage_maximum_live_average();
     }

@@ -49,7 +49,7 @@ public class StartlineAdvantageByGeometryWidget extends Composite implements Has
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesByWindWidget.class.getName());
     
     public StartlineAdvantageByGeometryWidget(DashboardClientFactory dashboardClientFactory) {
-        StartLineAdvantageByGeometryWidgetRessources.INSTANCE.gss().ensureInjected();
+        StartlineAdvantageByGeometryWidgetRessources.INSTANCE.gss().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.metersUnit());

@@ -4,7 +4,7 @@
 	xmlns:util="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util"
 	xmlns:header="urn:import:com.sap.sailing.dashboards.gwt.client.widgets.header">
 
-	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartLineAdvantageByGeometryWidgetRessources" />
+	<ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartlineAdvantageByGeometryWidgetRessources" />
 
 	<g:HTMLPanel styleName="{resources.gss.start_line_advantage_by_geometry_widget}">
 		<header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage"></header:DashboardWidgetHeaderAndNoDataMessage>
