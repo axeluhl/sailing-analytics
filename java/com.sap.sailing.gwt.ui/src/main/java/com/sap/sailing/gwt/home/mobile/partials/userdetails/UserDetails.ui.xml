@@ -1,0 +1,69 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+         xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+  <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+  <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+  <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+  <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetailsResources" />
+  <g:HTMLPanel>
+    <div class="{local_res.css.userdetails}">
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <form action="" method="">
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.username}' />
+              </div>
+              <input ui:field="usernameUi" type="text" disabled="disabled" class="{res.mainCss.input_input}" />
+            </div>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.name}' />
+              </div>
+              <input ui:field="nameUi" type="text" class="{res.mainCss.input_input}" />
+            </div>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.company}' />
+              </div>
+              <input ui:field="companyUi" type="text" class="{res.mainCss.input_input}" />
+            </div>
+            <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+              <ui:text from='{i18n_sec.save}' />
+            </g:Button>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.email}' />
+              </div>
+              <g:TextBox ui:field="emailUi" addStyleNames="{res.mainCss.input_input}" />
+            </div>
+            <g:Button ui:field="changeEmailUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+              <ui:text from='{i18n_sec.save}' />
+            </g:Button>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.oldPassword}' />
+              </div>
+              <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+            </div>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.password}' />
+              </div>
+              <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+            </div>
+            <div class="{res.mainCss.input}">
+              <div class="{res.mainCss.input_label}">
+                <ui:text from='{i18n_sec.passwordRepeat}' />
+              </div>
+              <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{res.mainCss.input_input}" />
+            </div>
+            <g:Button ui:field="changePasswordUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+              <ui:text from='{i18n_sec.changePassword}' />
+            </g:Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

@@ -20,8 +20,6 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
@@ -37,6 +35,8 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class LeaderboardContext {
     private static final Logger logger = Logger.getLogger(LeaderboardContext.class.getName());
@@ -101,6 +101,7 @@ public class LeaderboardContext {
                 result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
+            result.setTotalCompetitorCount(leaderboardDTO.competitors.size());
             return new ResultWithTTL<>(Duration.ONE_MINUTE.times(isLive ? 1 : 2), result);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Error loading leaderboard", e);

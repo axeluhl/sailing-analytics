@@ -29,7 +29,9 @@ import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.DefaultPermissions;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
+import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.client.IconResources;
 import com.sap.sse.security.ui.client.UserChangeEventHandler;
@@ -58,7 +60,9 @@ public class UserDetailsView extends FlowPanel {
 
     private final PermissionsForRoleProvider permissionForRoleProvider;
 
-    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages, final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider) {
+    public UserDetailsView(final UserService userService, UserDTO user, final StringMessages stringMessages,
+            final UserListDataProvider userListDataProvider, PermissionsForRoleProvider permissionsForRoleProvider,
+            Iterable<Role> additionalRoles, Iterable<Permission> additionalPermissions) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         this.stringMessages = stringMessages;
         this.permissionForRoleProvider = permissionsForRoleProvider;
@@ -68,9 +72,15 @@ public class UserDetailsView extends FlowPanel {
         for (DefaultRoles defaultRole : DefaultRoles.values()) {
             defaultRoleNames.add(defaultRole.getRolename());
         }
+        for (Role role : additionalRoles) {
+            defaultRoleNames.add(role.getRolename());
+        }
         List<String> defaultPermissionNames = new ArrayList<>();
         for (DefaultPermissions defaultPermission : DefaultPermissions.values()) {
             defaultPermissionNames.add(defaultPermission.getStringPermission());
+        }
+        for (Permission permission : additionalPermissions) {
+            defaultPermissionNames.add(permission.getStringPermission());
         }
         rolesEditor = new StringListEditorComposite(user==null?Collections.<String>emptySet():user.getRoles(), stringMessages, com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultRoleNames,
                 stringMessages.enterRoleName());

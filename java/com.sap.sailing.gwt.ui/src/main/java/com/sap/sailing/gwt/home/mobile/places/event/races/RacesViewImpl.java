@@ -40,9 +40,7 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         RegattaCompetitionPresenter competitionPresenter = new MobileRegattaCompetitionPresenter();
         RacesViewImplFilterPresenter filterPresenter = new RacesViewImplFilterPresenter(competitorFilterUi, competitionPresenter);
         refreshManager.add(filterPresenter.getRefreshableWidgetWrapper(competitionPresenter), new GetCompetitionFormatRacesAction(getEventId(), getRegattaId()));
-        if (!ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER) {
-            competitorFilterUi.removeFromParent();
-        }
+        competitorFilterUi.removeFromParent();
     }
     
     @Override

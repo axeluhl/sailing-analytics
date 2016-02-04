@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -14,6 +16,9 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements RaceTimesInfoProviderListener {
     private final RaceTimesInfoProvider raceTimesInfoProvider;
@@ -21,6 +26,15 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RegattaAndRaceIdentifier selectedRace;
     private boolean autoAdjustPlayMode;
     private RaceTimesInfoDTO lastRaceTimesInfo;
+    private boolean hasCanReplayDuringLiveRacesPermission = false;
+    private final UserService userService;
+    private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
+        @Override
+        public void onUserStatusChange(UserDTO user) {
+            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
+                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE);
+        }
+    };
 
     /**
      * When a marker update is required but min/max are not yet initialized, this flag is set. If later
@@ -28,11 +42,13 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * will be issued and the flag is cleared.
      */
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
+
     
-    public RaceTimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public RaceTimePanel(UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean chartSupportEnabled,
             RegattaAndRaceIdentifier selectedRaceIdentifier) {
         super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, chartSupportEnabled);
+        this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
@@ -40,6 +56,25 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
             raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
         }
+    }
+    
+    
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        userService.addUserStatusEventHandler(userStatusEventHandler);
+        userStatusEventHandler.onUserStatusChange(userService.getCurrentUser());
+    }
+    
+    @Override
+    protected void onUnload() {
+        super.onUnload();
+        userService.removeUserStatusEventHandler(userStatusEventHandler);
+    }
+    
+    @Override
+    protected boolean canReplayWhileLiveIsPossible() {
+        return this.hasCanReplayDuringLiveRacesPermission;
     }
     
     /**

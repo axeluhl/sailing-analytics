@@ -230,4 +230,6 @@ public interface TextMessages extends Messages {
 
     String strategySimulatorReadMore();
 
+    String impressum();
+
 }
