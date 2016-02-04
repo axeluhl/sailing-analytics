@@ -157,7 +157,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), R.id.finished_content);
+                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:

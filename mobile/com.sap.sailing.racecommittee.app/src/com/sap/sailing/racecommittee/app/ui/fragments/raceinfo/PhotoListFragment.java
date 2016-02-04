@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
@@ -99,6 +100,21 @@ public class PhotoListFragment extends BaseFragment {
                 }
             });
         }
+
+        View home = ViewHelper.get(layout, R.id.header_text);
+        if (home != null) {
+            if (getActivity().findViewById(R.id.finished_edit) == null) {
+                ViewHelper.get(layout, R.id.photo_header).setVisibility(View.GONE);
+            } else {
+                home.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    }
+                });
+            }
+        }
         return layout;
     }
 
@@ -149,7 +165,6 @@ public class PhotoListFragment extends BaseFragment {
         if (mSubmit != null) {
             mSubmit.setEnabled(mPhotos.size() != 0);
         }
-        mAdapter.notifyDataSetChanged();
     }
 
     private ArrayList<Uri> getPhotos() {

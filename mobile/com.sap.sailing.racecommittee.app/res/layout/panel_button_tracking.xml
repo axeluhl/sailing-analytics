@@ -18,7 +18,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/finished_tracking"
-            android:textAppearance="?attr/textPanelHeader" />
+            android:textAppearance="?attr/textPanelHeader"
+            android:textSize="@dimen/textSize_18"/>
 
         <ImageView
             android:id="@+id/list_lock"
