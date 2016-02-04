@@ -104,7 +104,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
         WindFixesFinder windFixesFinder = new WindFixesFinder(raceLog);
         for (RaceLogWindFixEvent raceLogWindFixEvent : windFixesFinder.analyze()) {
             Wind wind = new RaceLogWindFixDeclinationHelper().getOptionallyDeclinationCorrectedWind(raceLogWindFixEvent);
-            trackedRace.recordWind(wind, raceCommitteeWindSource);
+            trackedRace.recordWind(wind, raceCommitteeWindSource, /* applyFilter */ false);
         }
     }
 

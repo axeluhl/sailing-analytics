@@ -8,31 +8,24 @@
 
 import Foundation
 
-class AboutViewController: UIViewController, UIWebViewDelegate, UIAlertViewDelegate {
+class AboutViewController: UIViewController {
     
-    @IBOutlet weak var webView: UIWebView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var versionDescriptionLabel: UILabel!
+    @IBOutlet weak var versionLabel: UILabel!
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        webView!.loadRequest(NSURLRequest(URL: NSURL(string: "http://sapsailing.com")!))
+        super.viewDidLoad();
+        versionDescriptionLabel.text = NSLocalizedString("Version", comment: "")
+        versionLabel.text = "1.0"
     }
     
     @IBAction func done(sender: AnyObject) {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func webViewDidFinishLoad(webView: UIWebView) {
-        activityIndicator.stopAnimating()
+    @IBAction func openEULA(sender: AnyObject) {
+        let url = NSURL(string: "http://www.sap.com")!
+        UIApplication.sharedApplication().openURL(url)
     }
     
-    func wwebView(webView: UIWebView, didFailLoadWithError error: NSError) {
-        activityIndicator.hidden = true
-        let alertView = UIAlertView(title: NSLocalizedString("Couldn't load about view", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-        alertView.show()
-    }
-    
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
-    }
 }
