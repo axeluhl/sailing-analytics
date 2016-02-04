@@ -24,6 +24,11 @@ import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
@@ -69,6 +74,18 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ImprintPlace());
     }
 
+    public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
+    }
+    
+    public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
+        return createGlobalPlaceNavigation(new PasswordResetPlace());
+    }
+
     public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         MultiregattaRegattasPlace eventPlace = new MultiregattaRegattasPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);
@@ -105,4 +122,7 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace);
     }
 
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
+        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
+    }
 }

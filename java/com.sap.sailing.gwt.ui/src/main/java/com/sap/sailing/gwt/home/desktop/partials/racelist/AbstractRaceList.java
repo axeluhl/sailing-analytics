@@ -15,6 +15,8 @@ import com.google.gwt.user.cellview.client.RowStyles;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.gwt.common.theme.component.celltable.CleanCellTableResources;
+import com.sap.sailing.gwt.common.theme.component.celltable.StyledHeaderOrFooterBuilder;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -25,8 +27,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.gwt.theme.client.component.celltable.CleanCellTableResources;
-import com.sap.sse.gwt.theme.client.component.celltable.StyledHeaderOrFooterBuilder;
 
 public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends AbstractWindDTO>>
         extends Composite implements FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {

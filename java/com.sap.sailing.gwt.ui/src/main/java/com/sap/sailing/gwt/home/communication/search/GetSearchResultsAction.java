@@ -5,15 +5,15 @@ import java.net.URL;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.LeaderboardSearchResultBase;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.batching.NonBatchableAction;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.gwt.dispatch.client.system.batching.NonBatchableAction;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
  * Use this action once for each result of {@link GetSearchServerNamesAction} and once for the main server.
