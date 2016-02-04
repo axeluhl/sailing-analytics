@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -11,6 +13,7 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
@@ -26,7 +29,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider) {
+    public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
@@ -57,6 +60,19 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             }
         };
         markTable.addColumn(markNameColumn, new TextHeader("Marks"));
+        Column<MarkDTO, String> addFixColumn = new Column<MarkDTO, String>(new ButtonCell()) {
+            @Override
+            public String getValue(MarkDTO object) {
+                return "Add new fix";
+            }
+        };
+        addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
+            @Override
+            public void update(int index, MarkDTO object, String value) {
+                
+            }
+        });
+        markTable.addColumn(addFixColumn, new TextHeader(""));
         markTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
         markDataProvider.addDataDisplay(markTable);

@@ -753,3 +753,7 @@ img.openColumn {
 .Media-Select-Popup .Caption {
 	padding: 4px 10px;
 }
+
+.EditMarkPositionPopup {
+	background-color: #fff;
+}

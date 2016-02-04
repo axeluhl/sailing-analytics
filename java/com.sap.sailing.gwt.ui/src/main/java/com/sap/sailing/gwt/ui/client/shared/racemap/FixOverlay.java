@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.ui.shared.racemap.FixVectorGraphics;
 import com.sap.sse.common.Util;
 
 public class FixOverlay extends CanvasOverlayV3 {
-    private final GPSFixDTO fix;
+    private GPSFixDTO fix;
     private final FixVectorGraphics fixVectorGraphics;
     private final HashMap<Integer, Util.Pair<Double,Size>> fixScaleAndSizePerZoomCache;
     
@@ -51,6 +51,7 @@ public class FixOverlay extends CanvasOverlayV3 {
                 lastWidth = canvasWidth;
                 lastHeight = canvasHeight;
             }
+            setLatLngPosition(coordinateSystem.toLatLng(fix.position));
             Point fixPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(fix.position));
             setCanvasPosition(fixPositionInPx.getX() - canvasWidth / 2.0, fixPositionInPx.getY() - canvasHeight / 2.0);
         }
@@ -86,4 +87,31 @@ public class FixOverlay extends CanvasOverlayV3 {
 
         return new Util.Pair<Double, Size>(fixSizeScaleFactor, Size.newInstance(fixHeightInPixel * 2.0, fixHeightInPixel * 2.0));
     }
+    
+    public GPSFixDTO getGPSFixDTO() {
+        return fix;
+    }
+    
+    public void setGPSFixDTO(GPSFixDTO fix) {
+        this.fix = fix;
+        draw();
+    }
+    
+    public int getZIndex() {
+        return zIndex;
+    }
+    
+    public String getColor() {
+        return fixVectorGraphics.getColor();
+    }
+
+    public FixType getType() {
+        return fixVectorGraphics.getType();
+    }
+
+    public CoordinateSystem getCoordinateSystem() {
+        return coordinateSystem;
+    }
+    
+    
 }

@@ -28,10 +28,14 @@ import org.moxieapps.gwt.highcharts.client.labels.AxisLabelsFormatter;
 import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
+import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
@@ -41,17 +45,19 @@ import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.FixType;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.AbstractRaceChart;
@@ -62,7 +68,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -90,9 +96,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     private boolean visible;
     
-    private String leaderboardName;    
-    private String raceColumnName;
-    private String fleetName;
     private Map<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>> marks;
     private Map<MarkDTO, Polyline> polylines;
     private final ListDataProvider<MarkDTO> markDataProvider;
@@ -107,11 +110,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<MarkDTO, Polyline>();
         this.markDataProvider = new ListDataProvider<>();
-        this.marksPanel = new MarksPanel(this, markDataProvider);
+        this.marksPanel = new MarksPanel(this, markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.selectedRaceIdentifier = selectedRaceIdentifier;
-        this.leaderboardName = leaderboardName;
         this.courseMarkHandlers = new HashSet<>();
         this.selectedMarks = new HashSet<>();
         this.mapListeners = new HashSet<>();
@@ -168,68 +170,196 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         chart.addSeries(markSeries, false, false);
     }
     
+    private interface ServiceMock {
+        public Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName, String fleetName);
+        public void removeDeviceMappingForFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix);
+        public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO newFix);
+        public void editMarkFixPosition(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix, Position newPosition);
+    }
+    
+    private class ServiceMockImpl implements ServiceMock {
+        private Map<MarkDTO, List<GPSFixDTO>> markTracks;
+        
+        public ServiceMockImpl() {
+            markTracks = new HashMap<MarkDTO, List<GPSFixDTO>>();
+            MarkDTO mark = new MarkDTO("test1", "Three Fixes");
+            List<GPSFixDTO> fixes = new ArrayList<>();
+            fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99), null, new WindDTO(), null, null, false));
+            fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
+            fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
+            markTracks.put(mark, fixes);
+            mark = new MarkDTO("test2", "No Fix");
+            fixes = new ArrayList<>();
+            markTracks.put(mark, fixes);
+        }
+        
+        @Override
+        public Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName,
+                String fleetName) {
+            return markTracks;
+        }
+
+        @Override
+        public void removeDeviceMappingForFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+                GPSFixDTO fix) {
+            markTracks.get(mark).remove(fix);
+        }
+
+        @Override
+        public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+                GPSFixDTO newFix) {
+            markTracks.get(mark).add(newFix);
+        }
+
+        @Override
+        public void editMarkFixPosition(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix,
+                Position newPosition) {
+            markTracks.get(mark).get(markTracks.get(mark).indexOf(fix)).position = newPosition;
+        }
+    }
+    
+    private ServiceMock serviceMock = new ServiceMockImpl();
+    
+    private class FixPositionChooser {
+        private final Callback<Position, Exception> callback;
+        private final FixOverlay overlay;
+        private FixOverlay moveOverlay;
+        private HandlerRegistration centerChangeHandlerRegistration;
+        private PopupPanel popup;
+        
+        public FixPositionChooser(final MapWidget map, final FixOverlay overlay, final String confirmButtonText, final Callback<Position, Exception> callback) {
+            this.callback = callback;
+            this.overlay = overlay;
+            setupUIOverlay(confirmButtonText);
+        }
+        
+        private void setupUIOverlay(final String confirmButtonText) {
+            overlay.setVisible(false);
+            final GPSFixDTO oldFix = overlay.getGPSFixDTO();
+            final GPSFixDTO fix = new GPSFixDTO(oldFix.timepoint, oldFix.position, oldFix.speedWithBearing, oldFix.degreesBoatToTheWind,
+                    oldFix.tack, oldFix.legType, oldFix.extrapolated);
+            this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), overlay.getColor(), overlay.getCoordinateSystem());
+            map.panTo(overlay.getLatLngPosition());
+            centerChangeHandlerRegistration = map.addCenterChangeHandler(new CenterChangeMapHandler() {
+                @Override
+                public void onEvent(CenterChangeMapEvent event) {
+                    fix.position = raceMap.getCoordinateSystem().getPosition(map.getCenter());
+                    moveOverlay.setGPSFixDTO(fix);
+                }
+            });
+            popup = new PopupPanel(false);
+            popup.setStyleName("EditMarkPositionPopup");
+            MenuBar menu = new MenuBar(false);
+            MenuItem confirm = new MenuItem(confirmButtonText, new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    destroyUIOverlay();
+                    callback.onSuccess(overlay.getCoordinateSystem().getPosition(map.getCenter()));
+                }
+            });
+            MenuItem cancel = new MenuItem("Cancel", new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    destroyUIOverlay();
+                    callback.onFailure(null);
+                }
+            });
+            menu.addItem(confirm);
+            menu.addItem(cancel);
+            popup.setWidget(menu);
+            popup.show();
+            popup.setPopupPosition(map.getAbsoluteLeft() + map.getOffsetWidth() - popup.getOffsetWidth() - 20, 
+                    map.getAbsoluteTop() + map.getOffsetHeight() - popup.getOffsetHeight() - 20);
+        }
+        
+        private void destroyUIOverlay() {
+            moveOverlay.removeFromMap();
+            centerChangeHandlerRegistration.removeHandler();
+            popup.hide();
+            overlay.setVisible(true);
+        }
+    }
+    
     private void loadData(final Date from, final Date to) {
         if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
             setWidget(chart);
             showLoading("Loading mark fixes...");
-            if (leaderboardName != null) {
-                sailingService.getLeaderboard(leaderboardName, new AsyncCallback<StrippedLeaderboardDTO>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        //TODO
-                    }
-                    @Override
-                    public void onSuccess(StrippedLeaderboardDTO result) {
-                        raceColumnName = null;
-                        fleetName = null;
-                        FleetDTO fleet = null;
-                        for (RaceColumnDTO raceColumn : result.getRaceList()) {
-                            fleet = raceColumn.getFleet(selectedRaceIdentifier);
-                            if (fleet != null && raceColumn.getRace(fleet).getName() == selectedRaceIdentifier.getRaceName()) {
-                                raceColumnName = raceColumn.getName();
-                                fleetName = fleet.getName();
-                                break;
-                            }
-                        }
-                        if (raceColumnName != null && fleetName != null) {
-                            sailingService.getMarkTracks(leaderboardName, raceColumnName, fleetName, new AsyncCallback<Map<MarkDTO,List<GPSFixDTO>>>() {
+            Map<MarkDTO, List<GPSFixDTO>> result = serviceMock.getMarkTracks("", "", "");
+            marks = new HashMap<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>>();
+            for (final Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
+                List<Pair<GPSFixDTO, FixOverlay>> fixOverlayPairs = new ArrayList<Pair<GPSFixDTO, FixOverlay>>();
+                for (final GPSFixDTO fix : fixes.getValue()) {
+                    final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, "#505050", raceMap.getCoordinateSystem());
+                    final Pair<GPSFixDTO, FixOverlay> fixOverlayPair = new Pair<GPSFixDTO, FixOverlay>(fix, overlay);
+                    overlay.setVisible(false);
+                    overlay.addClickHandler(new ClickMapHandler() {
+                        @Override
+                        public void onEvent(ClickMapEvent event) {
+                            final PopupPanel popup = new PopupPanel(true);
+                            popup.setStyleName("EditMarkPositionPopup");
+                            MenuBar menu = new MenuBar(true);
+                            MenuItem move = new MenuItem("Move fix", new ScheduledCommand() {
                                 @Override
-                                public void onFailure(Throwable caught) {
-                                    // TODO
-                                }
-                                @Override
-                                public void onSuccess(Map<MarkDTO, List<GPSFixDTO>> result) {
-                                    marks = new HashMap<MarkDTO, List<Pair<GPSFixDTO, FixOverlay>>>();
-                                    for (Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
-                                        List<Pair<GPSFixDTO, FixOverlay>> fixOverlayPairs = new ArrayList<Pair<GPSFixDTO, FixOverlay>>();
-                                        MVCArray<LatLng> polylinePath = MVCArray.newInstance();
-                                        for (GPSFixDTO fix : fixes.getValue()) {
-                                            FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, "#505050", raceMap.getCoordinateSystem());
-                                            overlay.setVisible(false);
-                                            fixOverlayPairs.add(new Pair<GPSFixDTO, FixOverlay>(fix, overlay));
-                                            polylinePath.push(LatLng.newInstance(fix.position.getLatDeg(), fix.position.getLngDeg()));
+                                public void execute() {
+                                    new FixPositionChooser(map, overlay, "Confirm Move", new Callback<Position, Exception>() {
+                                        @Override
+                                        public void onFailure(Exception reason) {
+                                            // TODO Auto-generated method stub
                                         }
-                                        marks.put(fixes.getKey(), fixOverlayPairs);
-                                        PolylineOptions options = PolylineOptions.newInstance();
-                                        if (map != null) {
-                                            options.setMap(map);
+                                        @Override
+                                        public void onSuccess(Position result) {
+                                            serviceMock.editMarkFixPosition("", "", "", fixes.getKey(), fixOverlayPair.getA(), result);
+                                            fixOverlayPair.getA().position = result;
+                                            overlay.setGPSFixDTO(fixOverlayPair.getA());
+                                            updatePolylinePoints(fixes.getKey());
                                         }
-                                        options.setPath(polylinePath);
-                                        options.setVisible(false);
-                                        polylines.put(fixes.getKey(), Polyline.newInstance(options));
-                                    }
-                                    List<MarkDTO> markList = new ArrayList<MarkDTO>();
-                                    markList.addAll(marks.keySet());
-                                    markDataProvider.setList(markList);
-                                    hideLoading();
-                                    onSelectionChange(null);
-                                    onResize();
+                                    });
+                                    popup.hide();
                                 }
                             });
+                            MenuItem delete = new MenuItem("Delete fix", new ScheduledCommand() { // TODO: Can delete?
+                                @Override
+                                public void execute() {
+                                    serviceMock.removeDeviceMappingForFix("", "", "", fixes.getKey(), fix);
+                                    marks.get(fixes.getKey()).remove(fixOverlayPair);
+                                    overlay.removeFromMap();
+                                    updatePolylinePoints(fixes.getKey());
+                                    popup.hide();
+                                }
+                            });
+                            menu.addItem(move);
+                            menu.addItem(delete);
+                            popup.setWidget(menu);
+                            popup.setPopupPosition(overlay.getCanvas().getAbsoluteLeft() + (int) overlay.getFixScaleAndSize().getB().getWidth() / 2 + 5, 
+                                    overlay.getCanvas().getAbsoluteTop() + (int) overlay.getFixScaleAndSize().getB().getHeight() / 2 + 5);
+                            popup.show();
                         }
-                    }
-                });
+                    });
+                    fixOverlayPairs.add(fixOverlayPair);
+                }
+                marks.put(fixes.getKey(), fixOverlayPairs);
+                PolylineOptions options = PolylineOptions.newInstance();
+                if (map != null) {
+                    options.setMap(map);
+                }
+                options.setVisible(false);
+                polylines.put(fixes.getKey(), Polyline.newInstance(options));
+                updatePolylinePoints(fixes.getKey());
             }
+            List<MarkDTO> markList = new ArrayList<MarkDTO>();
+            markList.addAll(marks.keySet());
+            markDataProvider.setList(markList);
+            hideLoading();
+            onSelectionChange(null);
+            onResize();
+        }
+    }
+    
+    private void updatePolylinePoints(MarkDTO mark) {
+        MVCArray<LatLng> path = polylines.get(mark).getPath();
+        path.clear();
+        for (Pair<GPSFixDTO, FixOverlay> fix : marks.get(mark)) {
+            path.push(LatLng.newInstance(fix.getA().position.getLatDeg(), fix.getA().position.getLngDeg()));
         }
     }
     

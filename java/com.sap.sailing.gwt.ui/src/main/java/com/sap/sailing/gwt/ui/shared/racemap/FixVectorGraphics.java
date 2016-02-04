@@ -112,4 +112,8 @@ public class FixVectorGraphics {
     public FixType getType() {
         return type;
     }
+    
+    public String getColor() {
+        return color;
+    }
 }
