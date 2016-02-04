@@ -26,7 +26,12 @@ public class GenericSailingAuthentication {
         res.mainCss().ensureInjected();
         
         EventBus eventBus = new SimpleEventBus();
-        FlyoutAuthenticationView display = new GenericSailingAuthenticationView(res, fixedPositioning);
+        final FlyoutAuthenticationView display;
+        if(fixedPositioning) {
+            display = new FixedSailingAuthenticationView(res);
+        }  else {
+            display = new GenericSailingAuthenticationView(res);
+        }
         AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
                 SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(), 
                 SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());
