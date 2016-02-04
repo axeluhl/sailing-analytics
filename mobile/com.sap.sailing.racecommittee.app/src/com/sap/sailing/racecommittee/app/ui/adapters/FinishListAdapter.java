@@ -7,6 +7,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,7 +104,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public boolean onCheckCanStartDrag(ViewHolder holder, int x, int y) {
-        ExLog.i(mContext, TAG, "onCheckCanStartDrag(" + x + ", " + y);
+        ExLog.i(mContext, TAG, "onCheckCanStartDrag() called with: " + "holder = [" + holder + "], x = [" + x + "], y = [" + y + "]");
 
         // x, y --- relative from the itemView's top-left
         View containerView = holder.container;
@@ -122,7 +123,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        ExLog.i(mContext, TAG, "onMoveItem(" + fromPosition + ", " + toPosition + ")");
+        ExLog.i(mContext, TAG, "onMoveItem() called with: " + "fromPosition = [" + fromPosition + "], toPosition = [" + toPosition + "]");
 
         if (fromPosition == toPosition) {
             return;
@@ -181,7 +182,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onPerformAfterSwipeReaction(ViewHolder holder, int result, int reaction) {
-
         switch (reaction) {
             case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
                 int position = holder.getAdapterPosition();
@@ -207,7 +207,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     }
 
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
-
         public View container;
         public View dragHandle;
         public TextView position;

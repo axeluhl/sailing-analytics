@@ -67,8 +67,8 @@
             android:layout_width="@dimen/default_button_width"
             android:layout_height="@dimen/default_button_height"
             android:layout_centerInParent="true"
-            android:layout_marginTop="@dimen/default_margin_half"
-            android:layout_marginBottom="@dimen/default_margin_half"
+            android:layout_marginTop="@dimen/side_padding"
+            android:layout_marginBottom="@dimen/side_padding"
             android:text="@string/confirm_tracking_list"
             android:textSize="@dimen/textSize_18"/>
     </RelativeLayout>
@@ -78,8 +78,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_bar"
         android:layout_below="@+id/tracking_header"
-        android:background="?attr/sap_gray_black_30"
-        android:paddingTop="@dimen/side_padding">
+        android:background="?attr/sap_gray_black_30">
 
         <RelativeLayout
             android:id="@+id/panel_switcher"
