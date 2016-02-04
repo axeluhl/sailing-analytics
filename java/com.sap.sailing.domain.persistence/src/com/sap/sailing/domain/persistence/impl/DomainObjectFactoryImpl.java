@@ -156,7 +156,6 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -1972,8 +1971,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private DeviceConfigurationMatcher loadConfigurationMatcher(DBObject matcherObject) {
-        DeviceConfigurationMatcherType type = DeviceConfigurationMatcherType.valueOf(
-                matcherObject.get(FieldNames.CONFIGURATION_MATCHER_TYPE.name()).toString());
         List<String> clientIdentifiers = new ArrayList<String>();
         BasicDBList clientIdentifiersObject = (BasicDBList) matcherObject.get(FieldNames.CONFIGURATION_MATCHER_CLIENTS.name());
         if (clientIdentifiersObject != null) {
@@ -1981,7 +1978,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 clientIdentifiers.add(clientIdentifier.toString());
             }
         }
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIdentifiers);
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIdentifiers);
     }
 
     private DeviceConfiguration loadConfiguration(DBObject configObject) {

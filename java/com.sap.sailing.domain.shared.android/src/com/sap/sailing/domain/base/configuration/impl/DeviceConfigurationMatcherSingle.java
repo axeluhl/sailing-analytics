@@ -6,7 +6,6 @@ import java.util.Arrays;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sse.common.IsManagedByCache;
 
 /**
@@ -26,16 +25,6 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
         return this.clientIdentifier.equals(identifier.getClientIdentifier());
     }
 
-    @Override
-    public DeviceConfigurationMatcherType getMatcherType() {
-        return DeviceConfigurationMatcherType.SINGLE;
-    }
-
-    @Override
-    public int getMatchingRank() {
-        return getMatcherType().getRank();
-    }
-    
     public String getClientIdentifier() {
         return clientIdentifier;
     }
@@ -52,7 +41,7 @@ public class DeviceConfigurationMatcherSingle implements DeviceConfigurationMatc
 
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
-        return domainFactory.getOrCreateDeviceConfigurationMatcher(getMatcherType(), Arrays.asList(clientIdentifier));
+        return domainFactory.getOrCreateDeviceConfigurationMatcher(Arrays.asList(clientIdentifier));
     }
 
 }

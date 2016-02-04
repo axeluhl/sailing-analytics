@@ -44,7 +44,6 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
 
         assertEquals(1, Util.size(configurations));
         Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry = configurations.iterator().next();
-        assertEquals(matcher.getMatcherType(), entry.getKey().getMatcherType());
         assertNull(entry.getValue().getAllowedCourseAreaNames());
         assertNull(entry.getValue().getByNameCourseDesignerCourseNames());
         assertNull(entry.getValue().getResultsMailRecipient());
@@ -64,7 +63,6 @@ public class StoreAndLoadDeviceConfigurationsTest extends AbstractMongoDBTest {
 
         assertEquals(1, Util.size(configurations));
         Entry<DeviceConfigurationMatcher, DeviceConfiguration> entry = configurations.iterator().next();
-        assertEquals(matcher.getMatcherType(), entry.getKey().getMatcherType());
         assertNotNull(entry.getValue().getAllowedCourseAreaNames());
         assertEquals(2, entry.getValue().getAllowedCourseAreaNames().size());
         assertEquals(2, entry.getValue().getByNameCourseDesignerCourseNames().size());

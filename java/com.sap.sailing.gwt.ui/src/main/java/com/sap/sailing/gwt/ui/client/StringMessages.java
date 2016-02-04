@@ -1468,4 +1468,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String showOnlyCompetitorsOfLog();
     String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
     String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
+    String pleaseCreateAtLeastOneMappingBy();
+    String matcherType();
+    String matchingDevices();
+    String addDevice();
+    String createDeviceConfiguration();
+    String forWhichDeviceShouldConfigurationApply();
+    String create();
+    String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
 }

@@ -117,7 +117,7 @@ public class BitmapHelper {
         return drawable;
     }
 
-    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, @ColorRes int color) {
+    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {
         Drawable drawable = getDrawable(context, drawableResId);
         drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
         return drawable;

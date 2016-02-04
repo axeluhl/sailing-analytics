@@ -42,7 +42,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_btn_yellow"
+        android:background="@drawable/qr_button"
         android:text="@string/scan_qr"
         android:textAllCaps="true"
         android:textSize="18sp"

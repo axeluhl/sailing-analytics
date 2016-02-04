@@ -312,9 +312,9 @@
     <RelativeLayout
         android:id="@+id/start_tracking_box"
         android:layout_width="fill_parent"
-        android:layout_height="100dp"
+        android:layout_height="200dp"
         android:layout_above="@id/bottomLayout"
-        android:background="@color/gray">
+        android:background="@color/black">
 
         <View
             android:id="@+id/white_bar"
@@ -326,39 +326,63 @@
             android:background="@color/white_transparent"/>
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:id="@+id/event_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/regatta_button_height"
             android:layout_below="@id/white_bar"
             android:orientation="horizontal">
 
+            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+                android:id="@+id/show_event_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:padding="@dimen/regatta_button_padding"
+                android:layout_weight="1"
+                android:text="@string/show_event"
+                android:background="@drawable/rounded_btn_blue"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                tools:text="Show Event"/>
+
             <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                 android:id="@+id/show_leaderboards_button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_margin="10dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
-                android:layout_weight="0.50"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_weight="1"
                 android:background="@drawable/rounded_btn_yellow"
-                android:padding="10dp"
+                android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
                 android:textAllCaps="true"
                 android:textStyle="bold"/>
 
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/regatta_button_height"
+            android:layout_below="@+id/event_buttons">
+
             <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
                 android:id="@+id/start_tracking"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_margin="10dp"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="4dp"
-                android:layout_weight="0.50"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginLeft="@dimen/regatta_button_side_margin"
+                android:layout_marginRight="@dimen/regatta_button_side_margin"
                 android:background="@drawable/rounded_btn_green"
-                android:padding="10dp"
+                android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
                 android:textAllCaps="true"
                 android:textStyle="bold"/>
-        </LinearLayout>
+
+        </RelativeLayout>
+
     </RelativeLayout>
 
     <RelativeLayout

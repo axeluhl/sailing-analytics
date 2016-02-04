@@ -4,13 +4,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import com.github.gwtbootstrap.datetimepicker.client.ui.base.HasViewMode.ViewMode;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.logical.shared.AttachEvent;
-import com.google.gwt.event.logical.shared.AttachEvent.Handler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -25,6 +20,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -38,7 +34,7 @@ import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMappingDTO> {
+public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstrap<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
@@ -84,13 +80,12 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMapp
                         return null;
                     }
                 }, true, callback);
-
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = initTimeBox();
+        from = createDateTimeBox(new Date());
         from.setValue(null);
-        to = initTimeBox();
+        to = createDateTimeBox(new Date());
         to.setValue(null);
 
         deviceType = createListBox(false);
@@ -114,9 +109,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMapp
                         + caught.getMessage());
             }
         });
-
         deviceId = createTextBox("");
-
         itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
@@ -134,34 +127,27 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMapp
                         validate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
-
         if (mapping != null) {
             deviceId.setValue(mapping.deviceIdentifier.deviceId);
             from.setValue(mapping.from);
             to.setValue(mapping.to);
         }
-
         qrWidget = setupQRCodeWidget();
         qrWidget.generateQRCode();
-        
         this.leaderboardName = leaderboardName;
-        
         loadCompetitorsAndMarks();
-        
         events = new GenericListBox<EventDTO>(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
                 return item.getName();
             }
         });
-        
         events.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 qrWidget.generateQRCode();
             }
         });
-        
         sailingService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
             @Override
             public void onSuccess(Collection<EventDTO> result) {
@@ -207,39 +193,6 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialog<DeviceMapp
         return panel;
     }
 
-    private BetterDateTimeBox initTimeBox() {
-        final BetterDateTimeBox timeBox = new BetterDateTimeBox();
-        timeBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<Date> event) {
-                validate();
-            }
-        });
-        timeBox.addAttachHandler(new Handler() {
-            @Override
-            public void onAttachOrDetach(AttachEvent event) {
-                if (event.isAttached()) {
-                    addAutoHidePartner(timeBox.getPicker());
-                }
-            }
-        });
-        timeBox.setAutoClose(true);
-        timeBox.setStartView(ViewMode.HOUR);
-        timeBox.setFormat("dd/mm/yyyy hh:ii");
-        return timeBox;
-    }
-    
-    @Override
-    protected boolean validate() {
-        if (super.validate()){
-            qrWidget.generateQRCode();
-            return true;
-        } else {
-            qrWidget.clear();
-            return false;
-        }
-    }
-    
     private DeviceMappingQRCodeWidget setupQRCodeWidget() {
         return new DeviceMappingQRCodeWidget(stringMessages, new DeviceMappingQRCodeWidget.URLFactory() {
             @Override

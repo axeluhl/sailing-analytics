@@ -32,19 +32,7 @@
             android:layout_centerInParent="true"
             android:gravity="center"
             android:textColor="@color/white"
-            android:text="@string/initial_hyphen"
-            android:textSize="124sp"
-            android:textStyle="bold"/>
-
-        <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
-            android:id="@+id/speed_unit_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/speed_text_view"
-            android:layout_toEndOf="@+id/speed_text_view"
-            android:layout_alignBaseline="@id/speed_text_view"
-            android:text="@string/knots"
-            android:textColor="@color/white"
+            android:singleLine="true"
             android:textSize="124sp"
             android:textStyle="bold"/>
     </RelativeLayout>
