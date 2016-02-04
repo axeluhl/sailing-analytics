@@ -4,9 +4,9 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class EventStatisticsDTO implements DTO {
     private int regattasFoughtCount;
