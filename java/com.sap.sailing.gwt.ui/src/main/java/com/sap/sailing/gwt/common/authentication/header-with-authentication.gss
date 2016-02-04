@@ -7,6 +7,9 @@
 .usermanagement_icon {
 	display: none;
 }
+.fixed {
+    position: fixed !important;
+}
 .with_login>.usermanagement_icon {
     position: absolute;
     right: 0;

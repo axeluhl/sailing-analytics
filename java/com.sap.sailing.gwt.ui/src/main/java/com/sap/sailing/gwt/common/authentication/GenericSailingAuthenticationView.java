@@ -6,11 +6,12 @@ import com.sap.sse.security.ui.authentication.view.AbstractFlyoutAuthenticationV
 public class GenericSailingAuthenticationView extends AbstractFlyoutAuthenticationView {
     private static final SAPHeaderWithAuthenticationResources res = SAPHeaderWithAuthenticationResources.INSTANCE;
 
-    public GenericSailingAuthenticationView(CommonSharedResources resources) {
+    public GenericSailingAuthenticationView(CommonSharedResources resources, boolean fixedPositioning) {
         super(resources);
         res.css().ensureInjected();
         
         popupPanel.setStyleName(res.css().usermanagement_view());
+        popupPanel.setStyleName(res.css().fixed(), fixedPositioning);
     }
     
     public void show() {

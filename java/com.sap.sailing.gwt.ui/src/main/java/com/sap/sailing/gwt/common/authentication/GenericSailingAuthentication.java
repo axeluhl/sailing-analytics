@@ -19,10 +19,14 @@ public class GenericSailingAuthentication {
     private static final CommonSharedResources res = CommonSharedResources.INSTANCE;
     
     public GenericSailingAuthentication(UserService userService, AuthenticationMenuView userManagementMenuView) {
+        this(userService, userManagementMenuView, false);
+    }
+    
+    public GenericSailingAuthentication(UserService userService, AuthenticationMenuView userManagementMenuView, boolean fixedPositioning) {
         res.mainCss().ensureInjected();
         
         EventBus eventBus = new SimpleEventBus();
-        FlyoutAuthenticationView display = new GenericSailingAuthenticationView(res);
+        FlyoutAuthenticationView display = new GenericSailingAuthenticationView(res, fixedPositioning);
         AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
                 SailingAuthenticationEntryPointLinkFactory.createEmailValidationLink(), 
                 SailingAuthenticationEntryPointLinkFactory.createPasswordResetLink());

@@ -15,6 +15,7 @@ public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
         String header_right_wrapper();
         String header_right_extension();
         String with_login();
+        String fixed();
         
         String usermanagement_icon();
         String usermanagement_loggedin();
