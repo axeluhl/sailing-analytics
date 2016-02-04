@@ -156,25 +156,23 @@ public class Header extends Composite {
         @Override
         public void showNavigationPath(NavigationItem... navigationPath) {
             dropdownListExtUi.clear();
-            if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_MOBILE) {
-                for (final NavigationItem navigationItem : navigationPath) {
-                    HeaderNavigationItem headerNavItem = new HeaderNavigationItem(navigationItem.getDisplayName(), navigationItem.getTargetUrl());
-                    headerNavItem.addStyleName(local_res.css().header_navigation_nav_sublist_item());
-                    headerNavItem.addClickHandler(new ClickHandler() {
-                        
-                        @Override
-                        public void onClick(ClickEvent event) {
-                            if(LinkUtil.handleLinkClick(event.getNativeEvent().<Event>cast())) {
-                                event.preventDefault();
-                                navigationItem.run();
-                                dropdownHandler.setVisible(false);
-                            }
+            for (final NavigationItem navigationItem : navigationPath) {
+                HeaderNavigationItem headerNavItem = new HeaderNavigationItem(navigationItem.getDisplayName(),
+                        navigationItem.getTargetUrl());
+                headerNavItem.addStyleName(local_res.css().header_navigation_nav_sublist_item());
+                headerNavItem.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        if (LinkUtil.handleLinkClick(event.getNativeEvent().<Event> cast())) {
+                            event.preventDefault();
+                            navigationItem.run();
+                            dropdownHandler.setVisible(false);
                         }
-                    });
-                    dropdownListExtUi.add(headerNavItem);
-                }
-                dropdownListExtUi.getElement().getStyle().clearDisplay();
+                    }
+                });
+                dropdownListExtUi.add(headerNavItem);
             }
+            dropdownListExtUi.getElement().getStyle().clearDisplay();
         }
 
         @Override

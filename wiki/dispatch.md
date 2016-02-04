@@ -8,7 +8,7 @@ Dispatch is a communication pattern based on the command pattern.
  
 The picture below overviews the tradional dispatch approach:
   
-<img src="/wiki/images/dispatch/traditional_dispatch.png"/>
+![Traditional Dispatch](images/dispatch/traditional_dispatch.png)
 
 The main working parts of a traditional dispatch system are:
 
@@ -63,8 +63,7 @@ The GwtIncompatible annotation is required and makes it possible to place backen
 By putting the code that will be executed on the server side directly in the action class, we need to provide access to the server side services. 
 The execution is triggered directly by the receiving dispatch servlet, eliminating the need for an ActionHandler.
 
-<img src="/wiki/images/dispatch/sse_dispatch.png"/>
-
+![SSE Dispatch](images/dispatch/sse_dispatch.png)
 
 ## Server side setup
 
@@ -256,8 +255,8 @@ The Action interface explicetely declares that the server side execution may thr
     R execute(CTX ctx) throws DispatchException;
 
 Custom exceptions that should be delivered to the client should always extend the DispatchException. 
-  
-<img src="/wiki/images/dispatch/sse_exceptions.png"/>
+
+![SSE Exception](images/dispatch/sse_exceptions.png)
 
 The DispatchException creates an unique UUID String that is logged on the server side and sent to the client. 
 This way it is possible to find the server exception catched in the client code in the server logs (if logging on both ends is properly configured).
@@ -273,8 +272,7 @@ to add cross cutting concern functionality to the core dispatch system.
  
 There are currently two decorators provided by the com.sap.sse.gwt module: CachingDispatch and AutomaticBatchingDispatch.
 
-<img src="/wiki/images/dispatch/sse_dispatch_decorators.png"/>
-  
+![SSE Dispatch Decorators](images/dispatch/sse_dispatch_decorators.png)
 
 ### CachingDispatch
 
@@ -295,7 +293,7 @@ for the back and forth navigation from local cache improves navigation speed.
 The AutomaticBatchingDispatch decorator provides transparent batching: actions fired in the same event loop are 
 queued up and sent as one batch action to the server, where the actions are sequentially "unpacked" and "executed".
 
-<img src="/wiki/images/dispatch/see_batching.png"/>
+![SSE Batching](images/dispatch/sse_batching.png)
 
 This means that the order in which the action get fired is the order in which they get enqueued/ executed. 
 
@@ -305,5 +303,5 @@ low – both improvements regarding user latency experience.
 By ensuring order of execution, the application must not wait until one request/ action finishes before starting 
 the next, eliminating the need for extra roundtrips otherwise required due to the asynchronous nature of AJAX calls. 
 
-<img src="/wiki/images/dispatch/ajax-async.png"/>
+![AJAX Async](images/dispatch/ajax-async.png)
 

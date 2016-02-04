@@ -13,7 +13,6 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.desktop.partials.footer.Footer;
 import com.sap.sailing.gwt.home.desktop.partials.header.Header;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -92,12 +91,11 @@ public class TabletAndDesktopApplicationView extends Composite implements Deskto
         @Override
         public void showNavigationPath(NavigationItem... navigationPath) {
             breadcrumbsUi.clear();
-            if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP) {
-                for (NavigationItem navigationPathDisplay : navigationPath) {
-                    breadcrumbsUi.addBreadcrumbItem(navigationPathDisplay.getDisplayName(), navigationPathDisplay.getTargetUrl(), navigationPathDisplay);
-                }
-                breadcrumbWrapperUi.getStyle().clearDisplay();
+            for (NavigationItem navigationPathDisplay : navigationPath) {
+                breadcrumbsUi.addBreadcrumbItem(navigationPathDisplay.getDisplayName(),
+                        navigationPathDisplay.getTargetUrl(), navigationPathDisplay);
             }
+            breadcrumbWrapperUi.getStyle().clearDisplay();
         }
 
         @Override

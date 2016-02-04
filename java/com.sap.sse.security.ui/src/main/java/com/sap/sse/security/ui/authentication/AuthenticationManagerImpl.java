@@ -17,6 +17,14 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * Default implementation of {@link AuthenticationManager} interface, which delegates to the respective methods of 
+ * {@link UserService} or {@link UserManagementServiceAsync} provided in via constructors. Failure handling is implemented
+ * by showing an appropriate error message using the browser's default dialog box via {@link Window#alert(String)}.
+ * 
+ * @see #AuthenticationManagerImpl(WithSecurity, EventBus, String, String)
+ * @see #AuthenticationManagerImpl(UserService, EventBus, String, String)
+ */
 public class AuthenticationManagerImpl implements AuthenticationManager {
     
     private final UserManagementServiceAsync userManagementService;
@@ -37,9 +45,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      * @param eventBus
      *            the {@link EventBus} instance
      * @param emailConfirmationUrl
-     *            URL with is send to users to verify their email address
+     *            URL which is send to users to verify their email address
      * @param passwordResetUrl
-     *            URL with is send to users to reset their password
+     *            URL which is send to users to reset their password
      */
     public AuthenticationManagerImpl(WithSecurity clientFactory, EventBus eventBus,
             String emailConfirmationUrl, String passwordResetUrl) {
@@ -56,9 +64,9 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
      * @param eventBus
      *            the {@link EventBus} instance
      * @param emailConfirmationUrl
-     *            URL with is send to users to verify their email address
+     *            URL which is send to users to verify their email address
      * @param passwordResetUrl
-     *            URL with is send to users to reset their password
+     *            URL which is send to users to reset their password
      */
     public AuthenticationManagerImpl(UserService userService, EventBus eventBus, String emailConfirmationUrl,
             String passwordResetUrl) {

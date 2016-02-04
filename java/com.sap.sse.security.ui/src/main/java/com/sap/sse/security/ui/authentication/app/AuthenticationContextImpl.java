@@ -5,16 +5,28 @@ import java.util.ArrayList;
 import com.sap.sse.security.ui.shared.AccountDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * Default implementation of {@link AuthenticationContext}.
+ */
 public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", false, new ArrayList<AccountDTO>(),
             new ArrayList<String>(), new ArrayList<String>());
 
+    /**
+     * Creating an {@link AuthenticationContextImpl} containing an anonymous {@link UserDTO} object.
+     */
     public AuthenticationContextImpl() {
         this.currentUser = ANONYMOUS;
     }
 
+    /**
+     * Creating an {@link AuthenticationContextImpl} containing the given {@link UserDTO} object.
+     * 
+     * @param currentUser
+     *            the current {@link UserDTO user} object
+     */
     public AuthenticationContextImpl(UserDTO currentUser) {
         if (currentUser == null) {
             this.currentUser = ANONYMOUS;

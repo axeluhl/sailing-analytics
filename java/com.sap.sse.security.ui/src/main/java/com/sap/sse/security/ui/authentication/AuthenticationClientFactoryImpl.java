@@ -12,11 +12,23 @@ import com.sap.sse.security.ui.authentication.recover.PasswordRecoveryViewImpl;
 import com.sap.sse.security.ui.authentication.signin.SignInView;
 import com.sap.sse.security.ui.authentication.signin.SignInViewImpl;
 
+/**
+ * Default implementation of {@link AuthenticationClientFactory} using the given {@link AuthenticationManager} and
+ * creating view implementations which use the given {@link CommonSharedResources} for styling issues.
+ */
 public class AuthenticationClientFactoryImpl implements AuthenticationClientFactory {
     
     private final AuthenticationManager authenticationManager;
     private final CommonSharedResources resources;
 
+    /**
+     * Creates a new {@link AuthenticationClientFactoryImpl} instance using the given manager and resources.
+     * 
+     * @param authenticationManager
+     *            the {@link AuthenticationManager} to use
+     * @param resources
+     *            the {@link CommonSharedResources} to use
+     */
     public AuthenticationClientFactoryImpl(AuthenticationManager authenticationManager,
             CommonSharedResources resources) {
         this.authenticationManager = authenticationManager;

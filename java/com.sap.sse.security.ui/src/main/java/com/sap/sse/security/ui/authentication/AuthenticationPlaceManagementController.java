@@ -17,11 +17,24 @@ import com.sap.sse.security.ui.authentication.signin.SignInActivity;
 import com.sap.sse.security.ui.authentication.signin.SignInPlace;
 import com.sap.sse.security.ui.authentication.view.AuthenticationView;
 
+/**
+ * Controller class for wrapped authentication management, which extends and configures the
+ * {@link WrappedPlaceManagementController} It also registers an {@link AuthenticationContextEvent.Handler} at the given
+ * global {@link EventBus} to pass the respective events to the wrapped authentication management.
+ */
 public class AuthenticationPlaceManagementController extends WrappedPlaceManagementController {
     
+    /**
+     * Creates a new {@link AuthenticationPlaceManagementController} instance with the given parameters.
+     * 
+     * @param clientFactory the {@link AuthenticationClientFactory} to use
+     * @param callback the {@link AuthenticationCallback} to use
+     * @param authenticationView the {@link AuthenticationView} to use
+     * @param globalEventBus the {@link EventBus} of the application which uses the wrapped framework
+     */
     public AuthenticationPlaceManagementController(AuthenticationClientFactory clientFactory,
-            AuthenticationCallback callback, AuthenticationView userManagementView, EventBus globalEventBus) {
-        super(new Configuration(clientFactory, callback, userManagementView));
+            AuthenticationCallback callback, AuthenticationView authenticationView, EventBus globalEventBus) {
+        super(new Configuration(clientFactory, callback, authenticationView));
         globalEventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
@@ -33,14 +46,14 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
     private static class Configuration implements PlaceManagementConfiguration {
         private final AuthenticationClientFactory clientFactory;
         private final AuthenticationCallback callback;
-        private final AuthenticationView userManagementView;
+        private final AuthenticationView authenticationView;
         private PlaceController placeController;
 
-        public Configuration(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
-                AuthenticationView userManagementView) {
+        private Configuration(AuthenticationClientFactory clientFactory, AuthenticationCallback callback,
+                AuthenticationView authenticationView) {
             this.clientFactory = clientFactory;
             this.callback = callback;
-            this.userManagementView = userManagementView;
+            this.authenticationView = authenticationView;
         }
         
         @Override
@@ -50,7 +63,7 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
         
         @Override
         public AcceptsOneWidget getDisplay() {
-            return userManagementView;
+            return authenticationView;
         }
         
         @Override
@@ -88,7 +101,7 @@ public class AuthenticationPlaceManagementController extends WrappedPlaceManagem
         }
         
         private void updateViewHeading(Place placeToUse) {
-            userManagementView.setHeading(placeToUse instanceof AbstractAuthenticationPlace
+            authenticationView.setHeading(placeToUse instanceof AbstractAuthenticationPlace
                     ? ((AbstractAuthenticationPlace) placeToUse).getHeaderText() : "");
         }
 
