@@ -6,20 +6,21 @@ import com.sap.sse.security.ui.authentication.decorator.FlyoutBasedAuthorizedCon
 
 public class GenericAuthorizedContentDecorator extends FlyoutBasedAuthorizedContentDecorator {
 
-    private final GenericSailingAuthentication genericSailingAuthentication;
+    private final GenericAuthentication genericAuthentication;
     private HandlerRegistration handlerRegistration;
 
-    public GenericAuthorizedContentDecorator(GenericSailingAuthentication genericSailingAuthentication) {
-        super(genericSailingAuthentication.getEventBus(), new GenericNotLoggedInView());
-        this.genericSailingAuthentication = genericSailingAuthentication;
+    public GenericAuthorizedContentDecorator(GenericAuthentication genericAuthentication) {
+        super(genericAuthentication.getEventBus(), new GenericNotLoggedInView());
+        this.genericAuthentication = genericAuthentication;
         
     }
     
     @Override
     protected void onLoad() {
         super.onLoad();
-        setUserManagementContext(genericSailingAuthentication.getAuthenticationManager().getAuthenticationContext());
-        handlerRegistration = genericSailingAuthentication.getEventBus().addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
+        setUserManagementContext(genericAuthentication.getAuthenticationManager().getAuthenticationContext());
+        handlerRegistration = genericAuthentication.getEventBus().addHandler(AuthenticationContextEvent.TYPE, 
+                new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
                 setUserManagementContext(event.getCtx());

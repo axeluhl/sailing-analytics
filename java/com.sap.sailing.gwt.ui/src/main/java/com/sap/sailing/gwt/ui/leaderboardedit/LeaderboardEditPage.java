@@ -9,8 +9,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.GenericAuthentication;
 import com.sap.sailing.gwt.common.authentication.GenericAuthorizedContentDecorator;
-import com.sap.sailing.gwt.common.authentication.GenericSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -33,7 +34,7 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
                     leaderboardPanel.ensureDebugId("EditableLeaderboardPanel");
                     
                     SAPHeaderWithAuthentication header = initHeader();
-                    GenericSailingAuthentication genericSailingAuthentication = new GenericSailingAuthentication(getUserService(), header.getAuthenticationMenuView(), true);
+                    GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
                     AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
                     authorizedContentDecorator.addContent(leaderboardPanel);
                     
