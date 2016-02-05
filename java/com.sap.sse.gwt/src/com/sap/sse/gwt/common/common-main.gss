@@ -11,6 +11,7 @@
      -moz-transition: background-color 0.2s;
           transition: background-color 0.2s;
   text-decoration: none;
+  cursor: pointer;
 }
 .button[disabled] {
   cursor: not-allowed;
