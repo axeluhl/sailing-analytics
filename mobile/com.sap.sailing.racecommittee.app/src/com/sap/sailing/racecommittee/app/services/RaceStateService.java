@@ -105,7 +105,7 @@ public class RaceStateService extends Service {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
         notificationBuilder = new NotificationCompat.Builder(this)
             .setSmallIcon(R.drawable.ic_directions_boat)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setContentTitle(getText(R.string.service_info))
             .setContentText(getString(R.string.service_text_no_races))
             .setContentIntent(contentIntent)
