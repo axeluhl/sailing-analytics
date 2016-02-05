@@ -23,7 +23,7 @@
 .usermanagement_view {
 	top: 68px !important;
     left: inherit !important;
-    right: 0 !important;
+    right: 5px !important;
     z-index: 10;
     line-height: 1.333;
 }
