@@ -3,7 +3,6 @@
   background: #333;
   border-bottom: 4px solid #f0ab00;
   height: 75px;
-  line-height: 1,1em;
   width: 100%;
   overflow: hidden;
   vertical-align: top;
@@ -45,7 +44,6 @@
   width: 150px;
   height: 100%;
   padding: 17px 15px 0 0;
-  line-height:1,1em;
   vertical-align: top;
   text-align: right;
   border-right: 1px solid rgb(180,180,180);
