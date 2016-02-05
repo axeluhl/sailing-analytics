@@ -9,9 +9,9 @@ public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
     public static final SAPHeaderWithAuthenticationResources INSTANCE = GWT.create(SAPHeaderWithAuthenticationResources.class);
     
     @Source("header-with-authentication.gss")
-    RaceBoardMainCss css();
+    HeaderWithAuthenticationCss css();
     
-    public interface RaceBoardMainCss extends CssResource {
+    public interface HeaderWithAuthenticationCss extends CssResource {
         String header_right_wrapper();
         String header_right_extension();
         String with_login();
