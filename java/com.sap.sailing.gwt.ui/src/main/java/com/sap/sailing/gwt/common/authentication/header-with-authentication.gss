@@ -14,7 +14,7 @@
     position: absolute;
     right: 0;
     display: inline-block;
-    width: 4rem;
+    width: 4em;
     height: 100%;
     vertical-align: middle;
     background-repeat: no-repeat;
