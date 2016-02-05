@@ -13,6 +13,6 @@
     </ui:style>
     <g:HTMLPanel>
         <div ui:field="messageUi" class="{style.message}" />
-        <g:Button addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}" ui:field="buttonUi" />
+        <g:Button styleName="{res.mainCss.button} {res.mainCss.buttonprimary}" ui:field="buttonUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 
