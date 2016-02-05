@@ -959,46 +959,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // don't need the lock anymore to update DB
         if (toRename instanceof Renamable) {
             mongoObjectFactory.renameLeaderboard(oldName, newName);
-            syncGroupsAfterLeaderboardChange(toRename, true);
         }
     }
 
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
         getMongoObjectFactory().storeLeaderboard(leaderboard);
-        syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 
     @Override
     public void updateStoredRegatta(Regatta regatta) {
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
-        }
-    }
-
-    /**
-     * Checks all groups, if they contain a leaderboard with the name of the <code>updatedLeaderboard</code> and
-     * replaces the one in the group with the updated one.<br />
-     * This synchronizes things like the RaceIdentifier in the leaderboard columns.
-     */
-    private void syncGroupsAfterLeaderboardChange(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
-        boolean groupNeedsUpdate = false;
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard == updatedLeaderboard) {
-                    int index = leaderboardGroup.getIndexOf(leaderboard);
-                    leaderboardGroup.removeLeaderboard(leaderboard);
-                    leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);
-                    groupNeedsUpdate = true;
-                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                    break;
-                }
-            }
-
-            if (doDatabaseUpdate && groupNeedsUpdate) {
-                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-            }
-            groupNeedsUpdate = false;
         }
     }
 
@@ -1729,7 +1701,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * {@link RaceColumn#getRaceIdentifier(Fleet) race identifier} equals that of <code>trackedRace</code>.
      */
     private void linkRaceToConfiguredLeaderboardColumns(TrackedRace trackedRace) {
-        boolean leaderboardHasChanged = false;
         RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
         for (Leaderboard leaderboard : getLeaderboards().values()) {
             for (RaceColumn column : leaderboard.getRaceColumns()) {
@@ -1737,15 +1708,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     if (trackedRaceIdentifier.equals(column.getRaceIdentifier(fleet))
                             && column.getTrackedRace(fleet) == null) {
                         column.setTrackedRace(fleet, trackedRace);
-                        leaderboardHasChanged = true;
                         replicate(new ConnectTrackedRaceToLeaderboardColumn(leaderboard.getName(), column.getName(),
                                 fleet.getName(), trackedRaceIdentifier));
                     }
                 }
-            }
-            if (leaderboardHasChanged) {
-                // Update the corresponding groups, to keep them in sync
-                syncGroupsAfterLeaderboardChange(leaderboard, /* doDatabaseUpdate */false);
             }
         }
     }

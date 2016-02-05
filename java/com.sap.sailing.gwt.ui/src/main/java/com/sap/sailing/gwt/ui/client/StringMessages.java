@@ -1460,10 +1460,21 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
+    String topN(int n);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String profile();
     String showOnlyCompetitorsOfLog();
     String maneuverType();
     String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
     String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
+    String pleaseCreateAtLeastOneMappingBy();
+    String matcherType();
+    String matchingDevices();
+    String addDevice();
+    String createDeviceConfiguration();
+    String forWhichDeviceShouldConfigurationApply();
+    String create();
+    String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
 }

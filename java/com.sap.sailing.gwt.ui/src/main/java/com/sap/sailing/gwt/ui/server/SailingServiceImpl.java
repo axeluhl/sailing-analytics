@@ -122,7 +122,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationImpl;
-import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherMulti;
 import com.sap.sailing.domain.base.configuration.impl.DeviceConfigurationMatcherSingle;
 import com.sap.sailing.domain.base.configuration.impl.ESSConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.impl.GateStartConfigurationImpl;
@@ -178,7 +177,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -449,6 +447,7 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServiceDTO;
 import com.sap.sse.gwt.shared.filestorage.FileStorageServicePropertyErrorsDTO;
@@ -4708,7 +4707,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public DeviceConfigurationDTO getDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDto) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.type, matcherDto.clients);
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDto.clients);
         DeviceConfiguration configuration = getService().getAllDeviceConfigurations().get(matcher);
         if (configuration == null) {
             return null;
@@ -4719,37 +4718,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.type, matcherDTO.clients);
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(matcherDTO.clients);
         DeviceConfiguration configuration = convertToDeviceConfiguration(configurationDTO);
         getService().createOrUpdateDeviceConfiguration(matcher, configuration);
         return convertToDeviceConfigurationMatcherDTO(matcher);
     }
 
     @Override
-    public boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds) {
-        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(type, clientIds);
+    public boolean removeDeviceConfiguration(List<String> clientIds) {
+        DeviceConfigurationMatcher matcher = convertToDeviceConfigurationMatcher(clientIds);
         getService().removeDeviceConfiguration(matcher);
         return true;
     }
 
     private DeviceConfigurationMatcherDTO convertToDeviceConfigurationMatcherDTO(DeviceConfigurationMatcher matcher) {
         List<String> clients = new ArrayList<String>();
-        
         if (matcher instanceof DeviceConfigurationMatcherSingle) {
             clients.add(((DeviceConfigurationMatcherSingle)matcher).getClientIdentifier());
-        } else if (matcher instanceof DeviceConfigurationMatcherMulti) {
-            Util.addAll(((DeviceConfigurationMatcherMulti)matcher).getClientIdentifiers(), clients);
         }
-        
         DeviceConfigurationMatcherDTO dto = new DeviceConfigurationMatcherDTO(
-                matcher.getMatcherType(),
-                clients,  
-                matcher.getMatchingRank());
+                clients);
         return dto;
     }
 
-    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(DeviceConfigurationMatcherType type, List<String> clientIds) {
-        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(type, clientIds);
+    private DeviceConfigurationMatcher convertToDeviceConfigurationMatcher(List<String> clientIds) {
+        return baseDomainFactory.getOrCreateDeviceConfigurationMatcher(clientIds);
     }
 
     private DeviceConfigurationDTO convertToDeviceConfigurationDTO(DeviceConfiguration configuration) {
@@ -5996,12 +5989,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (raceLog != raceLogToIgnore) {
                     LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
                     CourseBase course = finder.analyze();
-                    for (Waypoint waypoint: course.getWaypoints()) {
-                        for (Mark mark : waypoint.getMarks()) {
-                            if (markIds.contains(mark.getId().toString())) {
-                                racesContainingMarksToDeleteInCourse.add(raceColumn.getName()+"/"+fleet.getName());
-                                marksAreUsedInOtherRaceLogs = true;
-                          }
+                    if (course != null) {
+                        for (Waypoint waypoint : course.getWaypoints()) {
+                            for (Mark mark : waypoint.getMarks()) {
+                                if (markIds.contains(mark.getId().toString())) {
+                                    racesContainingMarksToDeleteInCourse.add(raceColumn.getName() + "/"
+                                            + fleet.getName());
+                                    marksAreUsedInOtherRaceLogs = true;
+                                }
+                            }
                         }
                     }
                 }

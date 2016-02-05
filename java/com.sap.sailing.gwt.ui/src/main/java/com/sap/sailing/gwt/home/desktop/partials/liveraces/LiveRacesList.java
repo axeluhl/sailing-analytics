@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.user.client.ui.Composite;
-import com.sap.sailing.gwt.dispatch.client.CollectionResult;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.AbstractRaceList;
 import com.sap.sailing.gwt.home.desktop.partials.racelist.RaceListColumnFactory;
@@ -15,6 +14,7 @@ import com.sap.sailing.gwt.home.desktop.partials.racelist.SortableRaceListColumn
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
 public class LiveRacesList extends Composite {
 

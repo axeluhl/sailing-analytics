@@ -1,15 +1,15 @@
 package com.sap.sailing.gwt.home.communication.start;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.server.EventHolder;
 import com.sap.sailing.gwt.server.EventStageCandidateCalculator;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 public class GetStagedEventsAction implements SailingAction<ListResult<EventStageDTO>>, IsClientCacheable {
     private boolean useTeaserImage;

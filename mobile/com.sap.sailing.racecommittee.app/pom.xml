@@ -68,6 +68,13 @@
             <version>1.10.16</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>de.psdev.licensesdialog</groupId>
+            <artifactId>licensesdialog</artifactId>
+            <version>1.8.0</version>
+            <type>aar</type>
+        </dependency>
     </dependencies>
 
     <build>
