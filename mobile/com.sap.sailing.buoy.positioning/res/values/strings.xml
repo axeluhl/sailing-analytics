@@ -1,7 +1,7 @@
 <resources>
 
-    <string name="app_name" translatable="false">SAP Buoy Positioning App</string>
-    <string name="title_activity_start" translatable="false">Buoy Positioning App</string>
+    <string name="app_name" translatable="false">SAP Buoy Pinger</string>
+    <string name="title_activity_start" translatable="false">SAP Buoy Pinger</string>
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
     <string name="longitude" translatable="false">Lng</string>
