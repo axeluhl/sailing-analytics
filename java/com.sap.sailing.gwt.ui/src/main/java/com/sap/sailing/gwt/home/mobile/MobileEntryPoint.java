@@ -22,6 +22,7 @@ import com.sap.sse.gwt.resources.CommonControlsCSS;
 
 public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, MobileApplicationClientFactory> {
 
+
     @Override
     public void doOnModuleLoad() {
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().mobile());
@@ -45,7 +46,7 @@ public class MobileEntryPoint extends AbstractMvpEntryPoint<StringMessages, Mobi
     }
 
     private void createMobileApplication(boolean isStandaloneServer) {
-        MobileApplicationClientFactory clientFactory = new MobileApplicationClientFactory(isStandaloneServer);
+        final MobileApplicationClientFactory clientFactory = new MobileApplicationClientFactory(isStandaloneServer);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new MobileActivityMapper(clientFactory));
     }

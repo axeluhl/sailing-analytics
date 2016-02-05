@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.racelog.tracking;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
@@ -23,12 +23,12 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            AbstractLog<?, ?> log, Competitor competitor) {
+            RegattaLog log, Competitor competitor) {
     }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-            AbstractLog<?, ?> log, Mark mark) {
+            RegattaLog log, Mark mark) {
     }
 
     @Override
@@ -68,12 +68,12 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, AbstractLog<?, ?> log,
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log,
             Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
     }
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, AbstractLog<?, ?> log, Mark mark,
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
             TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
 }

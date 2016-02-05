@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.mediatab;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -33,6 +32,6 @@ public class RegattaMediaPlace extends AbstractEventRegattaPlace implements Mobi
     
     @Override
     public boolean hasMobileVersion() {
-        return ExperimentalFeatures.SHOW_MEDIA_PAGE_ON_MOBILE;
+        return true;
     }
 }

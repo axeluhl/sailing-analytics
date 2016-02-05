@@ -16,12 +16,23 @@
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/tracking_time"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:layout_alignParentTop="true"
             android:text="@string/tracking_time"/>
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            android:id="@+id/wait_for_gps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/tracking_time"
+            android:layout_toEndOf="@+id/tracking_time"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_alignParentTop="true"
+            android:text="@string/waiting_for_gps"/>
 
         <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView
             tools:ignore="InconsistentLayout"

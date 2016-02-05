@@ -1,26 +1,19 @@
 package com.sap.sailing.gwt.home.desktop.places.event.multiregatta;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.TextTransform;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
+import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,7 +29,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
 
     @UiField StringMessages i18n;
     
-    @UiField(provided = true) TabPanel<EventMultiregattaView.Presenter> tabPanelUi;
+    @UiField(provided = true) TabPanel<AbstractMultiregattaEventPlace, EventMultiregattaView.Presenter, MultiregattaTabView<AbstractMultiregattaEventPlace>> tabPanelUi;
     @UiField(provided = true) EventHeader eventHeader;
     
     private Presenter currentPresenter;
@@ -54,22 +47,7 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
         
         String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
         if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
-            Label label = new Label();
-            label.getElement().setInnerHTML(i18n.sailorInfoLongText().replace("\n", "<br />"));
-            label.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-            label.getElement().getStyle().setMarginTop(0.5, Unit.EM);
-            label.getElement().getStyle().setMarginRight(0.5, Unit.EM);
-            tabPanelUi.addTabExtension(label);
-            
-            Anchor seriesAnchor = new Anchor(i18n.sailorInfo());
-            seriesAnchor.setHref(sailorsInfoURL);
-            seriesAnchor.setTarget("_blank");
-            seriesAnchor.setStyleName(SharedResources.INSTANCE.mainCss().button());
-            seriesAnchor.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
-            Style style = seriesAnchor.getElement().getStyle();
-            style.setTextTransform(TextTransform.UPPERCASE);
-            style.setVerticalAlign(VerticalAlign.BOTTOM);
-            tabPanelUi.addTabExtension(seriesAnchor);
+            tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
         }
     }
 

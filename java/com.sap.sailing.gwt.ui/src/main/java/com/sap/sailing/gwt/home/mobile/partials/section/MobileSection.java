@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources;
 
@@ -63,6 +64,10 @@ public class MobileSection extends Composite {
         } else if (!setIsEdgeToEdgeContent) {
             sectionContentHolderUi.removeClassName(local_res.css().edgeToEdgeSectionContentHolder());
         }
+    }
+    
+    public void setBorderTop(boolean borderTop) {
+        UIObject.setStyleName(sectionHeaderHolderUi, local_res.css().sectionHeaderNoBorder(), !borderTop);
     }
     
     public Element getContentContainerElement() {

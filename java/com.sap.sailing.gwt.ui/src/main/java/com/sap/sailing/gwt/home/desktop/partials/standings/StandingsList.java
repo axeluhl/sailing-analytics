@@ -33,12 +33,14 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField DivElement itemContainerUi;
     @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
+    
+    private final boolean finished;
 
     public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
+        this.finished = finished;
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         setVisible(false);
-        headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
         if(headerNavigation == null) {
             headerArrowUi.removeFromParent();
         } else {
@@ -48,6 +50,12 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
 
     @Override
     public void setData(GetMiniLeaderboardDTO data) {
+        String headerText = finished ? i18n.results() : i18n.latestRegattaStandings();
+        int itemCount = data.getItems().size();
+        if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
+            headerText += " (" + i18n.topN(itemCount) + ")";
+        }
+        headerTitleUi.setInnerText(headerText);
         itemContainerUi.removeAllChildren();
         scoreInformationUi.removeAllChildren();
         getElement().getStyle().clearDisplay();

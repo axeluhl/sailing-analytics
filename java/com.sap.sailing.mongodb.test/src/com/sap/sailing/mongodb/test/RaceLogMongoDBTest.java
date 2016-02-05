@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.UUID;
 
 import junit.framework.Assert;
@@ -11,6 +12,8 @@ import junit.framework.Assert;
 import org.junit.Before;
 
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -37,6 +40,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 
@@ -131,6 +135,15 @@ public abstract class RaceLogMongoDBTest extends AbstractMongoDBTest {
 
     protected RegattaLogStore getRegattaLogStore() {
         return MongoRegattaLogStoreFactory.INSTANCE.getMongoRegattaLogStore(mongoObjectFactory, domainObjectFactory);
+    }
+
+    public static void assertCompetitorResultsEqual(final CompetitorResults expectedCompetitorResults, final CompetitorResults loadedCompetitorResults) {
+        assertEquals(Util.size(expectedCompetitorResults), Util.size(loadedCompetitorResults));
+        final Iterator<CompetitorResult> iExpected = expectedCompetitorResults.iterator();
+        final Iterator<CompetitorResult> iLoaded = loadedCompetitorResults.iterator();
+        while (iExpected.hasNext()) {
+            assertEquals(iExpected.next(), iLoaded.next());
+        }
     }
 
 }

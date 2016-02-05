@@ -87,7 +87,6 @@
         <module>com.sap.sse.replication</module>
         <module>com.sap.sse.threadmanager</module>
         <module>com.sap.sse.filestorage</module>
-        <module>com.sap.sse.gwt.theme</module>
         <module>com.sap.sailing.domain</module>
         <module>com.sap.sailing.geocoding</module>
         <module>com.sap.sailing.datamining</module>
@@ -476,7 +475,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2048m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
             <!--
             <userAgents>chrome</userAgents>
           -->

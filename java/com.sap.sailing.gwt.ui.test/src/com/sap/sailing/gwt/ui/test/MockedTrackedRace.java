@@ -190,12 +190,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public boolean recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
             return true;
         } else {
-        	return false;
+            return false;
         }
     }
 
@@ -686,10 +686,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog rorRaceLog) throws InterruptedException {
-    }
-
-    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 
@@ -789,5 +785,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateMarkPassingsAfterRaceLogChanges() {
     }
 }

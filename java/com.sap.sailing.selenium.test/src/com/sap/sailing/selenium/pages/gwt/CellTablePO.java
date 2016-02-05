@@ -53,7 +53,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     
     private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
     
-    protected static final String SELECTED_ROW_CSS_CLASS = "GIU0CSQDCQ"; //$NON-NLS-1$
+    protected static final String SELECTED_ROW_CSS_CLASS = "GJIHYJ4DP0"; //$NON-NLS-1$
     // Use the following line for testing with Super-Dev-Mode (SDM):
 //    protected static final String SELECTED_ROW_CSS_CLASS = "com-sap-sailing-gwt-ui-adminconsole-AdminConsoleTableResources-AdminConsoleTableStyle-cellTableSelectedRow"; //$NON-NLS-1$
     
