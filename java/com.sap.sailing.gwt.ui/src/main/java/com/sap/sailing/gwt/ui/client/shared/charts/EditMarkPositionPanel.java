@@ -79,12 +79,12 @@ import com.sap.sse.gwt.client.player.Timer;
 public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {    
     private final RaceMap raceMap;
     private final LeaderboardPanel leaderboardPanel;
-    private MarksPanel marksPanel;
+    private final MarksPanel marksPanel;
     private Series markSeries;
     private final Label noMarkSelectedLabel;
 
     private Set<HandlerRegistration> courseMarkHandlers;
-    private Set<HandlerRegistration> fixHandlers;
+    // private Set<HandlerRegistration> fixHandlers;
 
     private Set<String> selectedMarks;
 
@@ -107,6 +107,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<MarkDTO, Polyline>();
         this.markDataProvider = new ListDataProvider<>();
+        this.marksPanel = new MarksPanel(this, map, raceMap.getCoordinateSystem(), markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.selectedRaceIdentifier = selectedRaceIdentifier;
@@ -166,17 +167,24 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         chart.addSeries(markSeries, false, false);
     }
     
-    private interface ServiceMock {
-        public Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName, String fleetName);
-        public void removeDeviceMappingForFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix);
-        public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO newFix);
-        public void editMarkFixPosition(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix, Position newPosition);
+    private interface MarkPositionService {
+        // TODO: Warme worte was erwarte ich (Was soll passieren wenn kieler woche mit 1 hz getrackt und rennen ist 2 stunden lang (10000 fixes?))
+        // Muss ein Smartphone getracktes rennen sein / Methode sollte ausschließlich Fixes aus DeviceMappings anliefern
+        // Vielleicht mit too many fixes exception
+        Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName, String fleetName);
+        //boolean canEditMarkPositions
+        boolean canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix);
+        void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix);
+        void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO newFix);
+        // gestrichelte markierung in chart für timepoint an dem editiert werden
+        void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO oldFix, Position newPosition);
     }
     
-    private class ServiceMockImpl implements ServiceMock {
+    private class MarkPositionServiceMock implements MarkPositionService {
         private Map<MarkDTO, List<GPSFixDTO>> markTracks;
         
-        public ServiceMockImpl() {
+        // Versuch mit 20000 Fixes
+        public MarkPositionServiceMock() {
             markTracks = new HashMap<MarkDTO, List<GPSFixDTO>>();
             MarkDTO mark = new MarkDTO("test1", "Three Fixes");
             List<GPSFixDTO> fixes = new ArrayList<>();
@@ -194,9 +202,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 String fleetName) {
             return markTracks;
         }
+        
+        @Override
+        public boolean canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix) {
+            return true;
+        }
 
         @Override
-        public void removeDeviceMappingForFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
+        public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark,
                 GPSFixDTO fix) {
             markTracks.get(mark).remove(fix);
         }
@@ -208,13 +221,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
 
         @Override
-        public void editMarkFixPosition(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix,
+        public void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, MarkDTO mark, GPSFixDTO fix,
                 Position newPosition) {
             markTracks.get(mark).get(markTracks.get(mark).indexOf(fix)).position = newPosition;
         }
     }
     
-    private ServiceMock serviceMock = new ServiceMockImpl();
+    private MarkPositionService serviceMock = new MarkPositionServiceMock();
     
     private void loadData(final Date from, final Date to) {
         if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
@@ -298,14 +311,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     private void editMarkFix(MarkDTO mark, GPSFixDTO fix, Position newPosition) {
-        serviceMock.editMarkFixPosition("", "", "", mark, fix, newPosition);
+        serviceMock.editMarkFix("", "", "", mark, fix, newPosition);
         fix.position = newPosition;
         marks.get(mark).get(fix).setGPSFixDTO(fix);
         updatePolylinePoints(mark);
     }
     
     private void removeMarkFix(MarkDTO mark, GPSFixDTO fix) {
-        serviceMock.removeDeviceMappingForFix("", "", "", mark, fix);
+        serviceMock.removeMarkFix("", "", "", mark, fix);
         FixOverlay overlay = marks.get(mark).remove(fix);
         overlay.removeFromMap();
         updatePolylinePoints(mark);
@@ -423,7 +436,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     public void setMap(final MapWidget map) {
         this.map = map;
-        this.marksPanel = new MarksPanel(this, map, raceMap.getCoordinateSystem(), markDataProvider, stringMessages);
         for (HandlerRegistration listener : mapListeners) {
             listener.removeHandler();
         }
@@ -453,7 +465,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public Date getTimepoint() {
-       return timer.getTime();
+       return timer.getLiveTimePointAsDate();
     }
 
     @Override
