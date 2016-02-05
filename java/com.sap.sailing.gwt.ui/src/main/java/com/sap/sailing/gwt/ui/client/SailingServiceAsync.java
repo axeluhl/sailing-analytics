@@ -739,8 +739,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void copyCourseToOtherRaceLogs(Triple<String, String, String> fromTriple,
             Set<Triple<String, String, String>> toTriples, AsyncCallback<Void> callback);
 
-    void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName, AsyncCallback<Map<MarkDTO, List<GPSFixDTO>>> callback);
-
     void addMarkToRegattaLog(String leaderboardName, MarkDTO mark, AsyncCallback<Void> asyncCallback);
 
     void revokeMarkDefinitionEventInRegattaLog(String leaderboardName, MarkDTO markDTO, AsyncCallback<Void> callback);

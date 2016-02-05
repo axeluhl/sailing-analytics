@@ -6019,38 +6019,4 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         return getDeviceMappings(regattaLog);
     }
-    
-    @Override
-    public Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName, String fleetName) {
-        Map<MarkDTO, List<GPSFixDTO>> result = new HashMap<MarkDTO, List<GPSFixDTO>>();
-        RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        for (Mark mark : new RaceLogDefinedMarkFinder(raceLog).analyze()) {
-            DynamicGPSFixTrack<Mark, GPSFix> track = new DynamicGPSFixTrackImpl<Mark>(mark, 1);
-            try {
-                racingEventServiceTracker.getService().getGPSFixStore().loadMarkTrack(track, raceLog, mark);
-                track.lockForRead();
-                List<GPSFixDTO> fixes = new ArrayList<GPSFixDTO>();
-                for (GPSFix fix : track.getFixes()) {
-                    GPSFixDTO gpsFixDTO = new GPSFixDTO();
-                    gpsFixDTO.timepoint = fix.getTimePoint().asDate();
-                    gpsFixDTO.position = fix.getPosition();
-                    fixes.add(gpsFixDTO);
-                }
-                track.unlockAfterRead();
-                MarkDTO markDTO = new MarkDTO(mark.getId().toString(), mark.getName());
-                markDTO.color = mark.getColor();
-                markDTO.shape = mark.getShape();
-                markDTO.pattern = mark.getPattern();
-                markDTO.type = mark.getType();
-                result.put(markDTO, fixes);
-            } catch (TransformationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoCorrespondingServiceRegisteredException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
 }

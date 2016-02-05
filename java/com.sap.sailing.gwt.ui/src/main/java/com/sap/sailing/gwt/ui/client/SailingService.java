@@ -618,9 +618,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Collection<CompetitorDTO> getCompetitorRegistrationsInRaceLog(String leaderboardName, String raceColumnName,
             String fleetName) throws NotFoundException;
 
-    Map<MarkDTO, List<GPSFixDTO>> getMarkTracks(String leaderboardName, String raceColumnName,
-            String fleetName);
-
     Collection<CompetitorDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException;
-            String fleetName);
 }
