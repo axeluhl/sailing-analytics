@@ -33,7 +33,7 @@
 	background-image: url('images/home/loggedin-open.svg');
 }
 .usermanagement_view {
-	top: 70px !important;
+	top: 68px !important;
     left: inherit !important;
     right: 0 !important;
     z-index: 10;
