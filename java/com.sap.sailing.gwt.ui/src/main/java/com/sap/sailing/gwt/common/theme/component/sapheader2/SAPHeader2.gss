@@ -1,5 +1,5 @@
 .siteheader {
-  font-size: 15px;
+  font-size: 1rem;
   line-height: 1.333;
   background: #333;
   border-bottom: 4px solid #f0ab00;
