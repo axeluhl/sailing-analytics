@@ -229,8 +229,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
-        playSpeedBox.setWidth("25px");
-        playSpeedBox.setHeight("14px");
         playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
