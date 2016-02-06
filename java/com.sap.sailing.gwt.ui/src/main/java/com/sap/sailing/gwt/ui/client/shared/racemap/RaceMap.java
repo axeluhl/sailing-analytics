@@ -140,25 +140,24 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class RaceMap extends AbsolutePanel
-        implements TimeListener, CompetitorSelectionChangeListener, RaceTimesInfoProviderListener, TailFactory,
-        Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
+public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSelectionChangeListener,
+        RaceTimesInfoProviderListener, TailFactory, Component<RaceMapSettings>, RequiresDataInitialization, RequiresResize, QuickRankProvider {
     private static final Color LOWLIGHTED_TAIL_COLOR = new RGBColor(200, 200, 200);
     public static final String GET_RACE_MAP_DATA_CATEGORY = "getRaceMapData";
     public static final String GET_WIND_DATA_CATEGORY = "getWindData";
-
+    
     private static final String COMPACT_HEADER_STYLE = "compactHeader";
-
+    
     private MapWidget map;
-
+    
     /**
      * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
      * displayed on the map, including the orientations of any canvases such as boat icons, wind displays etc. that are
-     * embedded in the map. The coordinate systems facilitates the possibility of transformed displays such as rotated
-     * and translated versions of the map, implementing the "wind-up" view.
+     * embedded in the map. The coordinate systems facilitates the possibility of transformed displays such as
+     * rotated and translated versions of the map, implementing the "wind-up" view.
      */
     private DelegateCoordinateSystem coordinateSystem;
-
+    
     private FlowPanel headerPanel;
     private AbsolutePanel panelForLeftHeaderLabels;
     private AbsolutePanel panelForRightHeaderLabels;
@@ -179,18 +178,17 @@ public class RaceMap extends AbsolutePanel
     private Polyline finishLine;
 
     /**
-     * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the
-     * leading boat).
+     * Polyline for the advantage line (the leading line for the boats, orthogonal to the wind direction; touching the leading boat).
      */
     private Polyline advantageLine;
-
+    
     private AdvantageLineAnimator advantageTimer;
-
+    
     /**
      * The windward of two Polylines representing a triangle between startline and first mark.
      */
     private Polyline windwardStartLineMarkToFirstMarkLine;
-
+    
     /**
      * The leeward of two Polylines representing a triangle between startline and first mark.
      */
@@ -199,12 +197,12 @@ public class RaceMap extends AbsolutePanel
     private class AdvantageLineMouseOverMapHandler implements MouseOverMapHandler {
         private double trueWindAngle;
         private Date date;
-
+        
         public AdvantageLineMouseOverMapHandler(double trueWindAngle, Date date) {
             this.trueWindAngle = trueWindAngle;
             this.date = date;
         }
-
+        
         public void setTrueWindBearing(double trueWindAngle) {
             this.trueWindAngle = trueWindAngle;
         }
@@ -215,40 +213,39 @@ public class RaceMap extends AbsolutePanel
 
         @Override
         public void onEvent(MouseOverMapEvent event) {
-            map.setTitle(stringMessages.advantageLine() + " (from "
-                    + new DegreeBearingImpl(Math.round(trueWindAngle)).reverse().getDegrees() + "deg"
-                    + (date == null ? ")" : ", " + date) + ")");
+            map.setTitle(stringMessages.advantageLine()+" (from "+new DegreeBearingImpl(Math.round(trueWindAngle)).reverse().getDegrees()+"deg"+
+                    (date == null ? ")" : ", "+ date) + ")");
         }
     };
-
+    
     private AdvantageLineMouseOverMapHandler advantageLineMouseOverHandler;
-
+    
     /**
      * Polylines for the course middle lines; keys are the two control points delimiting the leg for which the
-     * {@link Polyline} value shows the course middle line. As only one course middle line is shown even if there are
-     * multiple legs using the same control points in different directions, using a {@link Set} makes this independent
-     * of the order of the two control points. If no course middle line is currently being shown for a pair of control
-     * points, the map will not contain a value for this pair.
+     * {@link Polyline} value shows the course middle line. As only one course middle line is shown even if there
+     * are multiple legs using the same control points in different directions, using a {@link Set} makes this
+     * independent of the order of the two control points. If no course middle line is currently being shown for
+     * a pair of control points, the map will not contain a value for this pair.
      */
     private final Map<Set<ControlPointDTO>, Polyline> courseMiddleLines;
 
     private final Map<SidelineDTO, Polygon> courseSidelines;
-
+    
     /**
-     * When the {@link HelpLineTypes#COURSEGEOMETRY} option is selected, little markers will be displayed on the lines
-     * that show the tooltip text in a little info box linked to the line. When the line is removed by
+     * When the {@link HelpLineTypes#COURSEGEOMETRY} option is selected, little markers will be displayed on the
+     * lines that show the tooltip text in a little info box linked to the line. When the line is removed by
      * {@link #showOrRemoveOrUpdateLine(Polyline, boolean, Position, Position, LineInfoProvider, String)}, these
-     * overlays need to be removed as well. Also, when the {@link HelpLineTypes#COURSEGEOMETRY} setting is deactivated,
-     * all these overlays need to go.
+     * overlays need to be removed as well. Also, when the {@link HelpLineTypes#COURSEGEOMETRY} setting is
+     * deactivated, all these overlays need to go.
      */
     private final Map<Polyline, SmallTransparentInfoOverlay> infoOverlaysForLinesForCourseGeometry;
-
+    
     /**
      * Wind data used to display the advantage line. Retrieved by a {@link GetWindInfoAction} execution and used in
      * {@link #showAdvantageLine(Iterable, Date)}.
      */
     private WindInfoForRaceDTO lastCombinedWindTrackInfoDTO;
-
+    
     /**
      * Manages the cached set of {@link GPSFixDTO}s for the boat positions as well as their graphical counterpart in the
      * form of {@link Polyline}s.
@@ -264,7 +261,7 @@ public class RaceMap extends AbsolutePanel
      * html5 canvases used for competitor info display on the map
      */
     private final Map<CompetitorDTO, CompetitorInfoOverlay> competitorInfoOverlays;
-
+    
     private SmallTransparentInfoOverlay countDownOverlay;
 
     /**
@@ -294,11 +291,11 @@ public class RaceMap extends AbsolutePanel
     private Map<CompetitorDTO, List<ManeuverDTO>> lastManeuverResult;
 
     private Map<CompetitorDTO, List<GPSFixDTO>> lastDouglasPeuckerResult;
-
+    
     private final CompetitorSelectionProvider competitorSelection;
-
+    
     private final RaceCompetitorSet raceCompetitorSet;
-
+    
     /**
      * Used to check if the first initial zoom to the mark markers was already done.
      */
@@ -307,8 +304,9 @@ public class RaceMap extends AbsolutePanel
     private final Timer timer;
 
     private RaceTimesInfoDTO lastRaceTimesInfo;
-
+    
     private InfoWindow lastInfoWindow = null;
+    
     /**
      * RPC calls may receive responses out of order if there are multiple calls in-flight at the same time. If the time
      * slider is moved quickly it generates many requests for boat positions quickly after each other. Sometimes,
@@ -325,94 +323,92 @@ public class RaceMap extends AbsolutePanel
      */
     private int startedProcessingRequestID;
 
-    private RaceMapImageManager raceMapImageManager;
+    private RaceMapImageManager raceMapImageManager; 
 
     private final RaceMapSettings settings;
-
+    
     private final StringMessages stringMessages;
-
+    
     private boolean isMapInitialized;
 
     private Date lastTimeChangeBeforeInitialization;
-
+    
     private int lastLegNumber;
 
     /**
-     * The last quick ranks received from a call to
-     * {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon the last
-     * {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
+     * The last quick ranks received from a call to {@link SailingServiceAsync#getQuickRanks(RaceIdentifier, Date, AsyncCallback)} upon
+     * the last {@link #timeChanged(Date, Date)} event. Therefore, the ranks listed here correspond to the {@link #timer}'s time.
      */
     private LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;
-
+    
     /**
      * Taken from {@link RaceMapDataDTO#competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber}; tells the
      * windward distances traveled and the leg numbers in which the respective competitor is.
      */
     private LinkedHashMap<CompetitorDTO, Integer> competitorsInOrderOfWindwardDistanceTraveledWithOneBasedLegNumber;
 
+
     private final CombinedWindPanel combinedWindPanel;
-
+    
     private final TrueNorthIndicatorPanel trueNorthIndicatorPanel;
-
+    
     private final AsyncActionsExecutor asyncActionsExecutor;
 
     /**
-     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during
-     * zoom/pan
+     * The map bounds as last received by map callbacks; used to determine whether to suppress the boat animation during zoom/pan
      */
     private LatLngBounds currentMapBounds; // bounds to which bounds-changed-handler compares
-    private int currentZoomLevel; // zoom-level to which bounds-changed-handler compares
-
-    private boolean autoZoomIn = false; // flags auto-zoom-in in progress
+    private int currentZoomLevel;          // zoom-level to which bounds-changed-handler compares
+    
+    private boolean autoZoomIn = false;  // flags auto-zoom-in in progress
     private boolean autoZoomOut = false; // flags auto-zoom-out in progress
-    private int autoZoomLevel; // zoom-level to which auto-zoom-in/-out is zooming
-    LatLngBounds autoZoomLatLngBounds; // bounds to which auto-zoom-in/-out is panning&zooming
-
+    private int autoZoomLevel;           // zoom-level to which auto-zoom-in/-out is zooming
+    LatLngBounds autoZoomLatLngBounds;   // bounds to which auto-zoom-in/-out is panning&zooming
+    
     private RaceSimulationOverlay simulationOverlay;
     private WindStreamletsRaceboardOverlay streamletOverlay;
     private final boolean showViewStreamlets;
     private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
-
+    
     private static final String GET_POLAR_CATEGORY = "getPolar";
-
+    
     /**
      * Tells about the availability of polar / VPP data for this race. If available, the simulation feature can be
      * offered to the user.
      */
     private boolean hasPolar;
-
+    
     private final RegattaAndRaceIdentifier raceIdentifier;
-
+    
     /**
-     * When the user requests wind-up display this may happen at a point where no mark positions are known or when no
-     * wind direction is known yet. In this case, this flag will be set, and when wind information or course mark
+     * When the user requests wind-up display this may happen at a point where no mark positions are known or when
+     * no wind direction is known yet. In this case, this flag will be set, and when wind information or course mark
      * positions are received later, this flag is checked, and if set, a {@link #updateCoordinateSystemFromSettings()}
      * call is issued to make sure that the user's request for a new coordinate system is honored.
      */
     private boolean requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown;
-
+    
     private final boolean showMapControls;
 
     /**
-     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat
-     * transitions active while auto-zooming whereas stopping them seems the better option for manual zooms.
+     * Tells whether currently an auto-zoom is in progress; this is used particularly to keep the smooth CSS boat transitions
+     * active while auto-zooming whereas stopping them seems the better option for manual zooms.
      */
     private boolean autoZoomInProgress;
-
+    
     /**
-     * Tells whether currently an orientation change is in progress; this is required handle map events during the
-     * configuration of the map during an orientation change.
+     * Tells whether currently an orientation change is in progress; this is required handle map events during the configuration of the map
+     * during an orientation change.
      */
     private boolean orientationChangeInProgress;
-
+    
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
-
+    
     public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection,
-            StringMessages stringMessages, boolean showMapControls, boolean showViewStreamlets,
-            boolean showViewStreamletColors, boolean showViewSimulation, RegattaAndRaceIdentifier raceIdentifier,
-            CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
+            boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
+            RegattaAndRaceIdentifier raceIdentifier, CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -449,25 +445,22 @@ public class RaceMap extends AbsolutePanel
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls, showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages,
-                coordinateSystem);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle,
-                stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
         // TODO bug 494: reset zoom settings to user preferences
     }
-
+    
     /**
      * The {@link WindDTO#dampenedTrueWindFromDeg} direction if {@link #lastCombinedWindTrackInfoDTO} has a
      * {@link WindSourceType#COMBINED} source which has at least one fix recorded; <code>null</code> otherwise.
      */
     private Bearing getLastCombinedTrueWindFromDirection() {
         if (lastCombinedWindTrackInfoDTO != null) {
-            for (Entry<WindSource, WindTrackInfoDTO> e : lastCombinedWindTrackInfoDTO.windTrackInfoByWindSource
-                    .entrySet()) {
+            for (Entry<WindSource, WindTrackInfoDTO> e : lastCombinedWindTrackInfoDTO.windTrackInfoByWindSource.entrySet()) {
                 if (e.getKey().getType() == WindSourceType.COMBINED) {
                     final List<WindDTO> windFixes = e.getValue().windFixes;
                     if (!windFixes.isEmpty()) {
@@ -478,7 +471,7 @@ public class RaceMap extends AbsolutePanel
         }
         return null;
     }
-
+    
     private void updateCoordinateSystemFromSettings() {
         final MapOptions mapOptions;
         orientationChangeInProgress = true;
@@ -487,8 +480,7 @@ public class RaceMap extends AbsolutePanel
             if (centerOfCourse != null) {
                 final Bearing lastCombinedTrueWindFromDirection = getLastCombinedTrueWindFromDirection();
                 if (lastCombinedTrueWindFromDirection != null) {
-                    // new equator shall point 90deg right of the "from" wind direction to make wind come from top of
-                    // map
+                    // new equator shall point 90deg right of the "from" wind direction to make wind come from top of map
                     coordinateSystem.setCoordinateSystem(new RotateAndTranslateCoordinateSystem(centerOfCourse,
                             lastCombinedTrueWindFromDirection.add(new DegreeBearingImpl(90))));
                     if (map != null) {
@@ -515,18 +507,16 @@ public class RaceMap extends AbsolutePanel
             }
             coordinateSystem.setCoordinateSystem(new IdentityCoordinateSystem());
         }
-        if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw
+        if (mapOptions != null) { // if no coordinate system change happened that affects an existing map, don't redraw 
             fixesAndTails.clearTails();
             redraw();
-            // zooming and setting options while the event loop is still working doesn't work reliably; defer until
-            // event loop returns
+            // zooming and setting options while the event loop is still working doesn't work reliably; defer until event loop returns
             Scheduler.get().scheduleDeferred(new ScheduledCommand() {
                 @Override
                 public void execute() {
                     if (map != null) {
                         map.setOptions(mapOptions);
-                        // ensure zooming to what the settings tell, or defaults if what the settings tell isn't
-                        // possible right now
+                        // ensure zooming to what the settings tell, or defaults if what the settings tell isn't possible right now
                         mapFirstZoomDone = false;
                         trueNorthIndicatorPanel.redraw();
                         orientationChangeInProgress = false;
@@ -545,116 +535,112 @@ public class RaceMap extends AbsolutePanel
         loadLibraries.add(LoadLibrary.GEOMETRY);
 
         Runnable onLoad = new Runnable() {
-            @Override
-            public void run() {
-                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
-                map = new MapWidget(mapOptions);
-                RaceMap.this.add(map, 0, 0);
-                if (showHeaderPanel) {
-                    Image sapLogo = createSAPLogo();
-                    RaceMap.this.add(sapLogo);
-                }
-                map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
-                map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
-                adjustLeftControlsIndent();
+          @Override
+          public void run() {
+              MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
+              map = new MapWidget(mapOptions);
+              RaceMap.this.add(map, 0, 0);
+              if (showHeaderPanel) {
+                  Image sapLogo = createSAPLogo();
+                  RaceMap.this.add(sapLogo);
+              }
+              map.setControls(ControlPosition.LEFT_TOP, combinedWindPanel);
+              map.setControls(ControlPosition.LEFT_TOP, trueNorthIndicatorPanel);
+              adjustLeftControlsIndent();
 
-                RaceMap.this.raceMapImageManager.loadMapIcons(map);
-                map.setSize("100%", "100%");
-                map.addZoomChangeHandler(new ZoomChangeMapHandler() {
-                    @Override
-                    public void onEvent(ZoomChangeMapEvent event) {
-                        if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
-                            // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will
-                            // restore old settings
-                            final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                            settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-                        }
-                        // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed
-                        // out too far
-                    }
-                });
-                map.addDragEndHandler(new DragEndMapHandler() {
-                    @Override
-                    public void onEvent(DragEndMapEvent event) {
-                        // stop automatic zoom after a manual drag event
-                        autoZoomIn = false;
-                        autoZoomOut = false;
-                        final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                        settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
-                    }
-                });
-                map.addIdleHandler(new IdleMapHandler() {
-                    @Override
-                    public void onEvent(IdleMapEvent event) {
-                        // the "idle"-event is raised at the end of map-animations
-                        if (autoZoomIn) {
-                            // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
-                            map.setZoom(autoZoomLevel);
-                            autoZoomIn = false;
-                        }
-                        if (autoZoomOut) {
-                            // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                            map.panTo(autoZoomLatLngBounds.getCenter());
-                            autoZoomOut = false;
-                        }
-                    }
-                });
-                map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
-                    @Override
-                    public void onEvent(BoundsChangeMapEvent event) {
-                        int newZoomLevel = map.getZoom();
-                        if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
-                            removeTransitions();
-                        }
-                        if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
-                            streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
-                        }
-                        if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
-                            simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
-                        }
-                        currentMapBounds = map.getBounds();
-                        currentZoomLevel = newZoomLevel;
-                        headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
-                    }
-                });
+              RaceMap.this.raceMapImageManager.loadMapIcons(map);
+              map.setSize("100%", "100%");
+              map.addZoomChangeHandler(new ZoomChangeMapHandler() {
+                  @Override
+                  public void onEvent(ZoomChangeMapEvent event) {
+                      if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
+                          // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
+                          final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      }
+                      // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
+                  }
+              });
+              map.addDragEndHandler(new DragEndMapHandler() {
+                  @Override
+                  public void onEvent(DragEndMapEvent event) {
+                      // stop automatic zoom after a manual drag event
+                      autoZoomIn = false;
+                      autoZoomOut = false;
+                      final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
+                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                  }
+              });
+              map.addIdleHandler(new IdleMapHandler() {
+                  @Override
+                  public void onEvent(IdleMapEvent event) {
+                      // the "idle"-event is raised at the end of map-animations
+                      if (autoZoomIn) {
+                          // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
+                          map.setZoom(autoZoomLevel);
+                          autoZoomIn = false;
+                      }
+                      if (autoZoomOut) {
+                          // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
+                          map.panTo(autoZoomLatLngBounds.getCenter());
+                          autoZoomOut = false;
+                      }
+                  }
+              });
+              map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                  @Override
+                  public void onEvent(BoundsChangeMapEvent event) {
+                      int newZoomLevel = map.getZoom(); 
+                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
+                          removeTransitions();
+                      }
+                      if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
+                      }
+                      if ((simulationOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                          simulationOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
+                      }
+                      currentMapBounds = map.getBounds();
+                      currentZoomLevel = newZoomLevel;
+                      headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                  }
+              });
+              
+              // If there was a time change before the API was loaded, reset the time
+              if (lastTimeChangeBeforeInitialization != null) {
+                  timeChanged(lastTimeChangeBeforeInitialization, null);
+                  lastTimeChangeBeforeInitialization = null;
+              }
+              // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's visible
+              streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
+                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
+              streamletOverlay.addToMap();
+              if (showViewStreamlets) {
+                  streamletOverlay.setColors(showViewStreamletColors);
+                  streamletOverlay.setVisible(true);
+              }
 
-                // If there was a time change before the API was loaded, reset the time
-                if (lastTimeChangeBeforeInitialization != null) {
-                    timeChanged(lastTimeChangeBeforeInitialization, null);
-                    lastTimeChangeBeforeInitialization = null;
-                }
-                // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's
-                // visible
-                streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier,
-                        sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
-                streamletOverlay.addToMap();
-                if (showViewStreamlets) {
-                    streamletOverlay.setColors(showViewStreamletColors);
-                    streamletOverlay.setVisible(true);
-                }
+              if (showViewSimulation) {
+            	  // determine availability of polar diagram
+            	  setHasPolar();
+                  // initialize simulation canvas
+                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
+                  simulationOverlay.addToMap();
+                  simulationOverlay.setVisible(false);
+              }
+              if (showHeaderPanel) {
+                  createHeaderPanel(map);
+              }
+              createSettingsButton(map);
 
-                if (showViewSimulation) {
-                    // determine availability of polar diagram
-                    setHasPolar();
-                    // initialize simulation canvas
-                    simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
-                            sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
-                    simulationOverlay.addToMap();
-                    simulationOverlay.setVisible(false);
-                }
-                if (showHeaderPanel) {
-                    createHeaderPanel(map);
-                }
-                createSettingsButton(map);
-
-                // Data has been initialized
-                RaceMap.this.isMapInitialized = true;
-                RaceMap.this.redraw();
-                trueNorthIndicatorPanel.redraw();
-                showAdditionalControls(map);
-            }
+              // Data has been initialized
+              RaceMap.this.isMapInitialized = true;
+              RaceMap.this.redraw();
+              trueNorthIndicatorPanel.redraw();
+              showAdditionalControls(map);
+          }
         };
-        LoadApi.go(onLoad, loadLibraries, sensor, "key=" + GoogleMapAPIKey.V3_APIKey);
+        LoadApi.go(onLoad, loadLibraries, sensor, "key="+GoogleMapAPIKey.V3_APIKey); 
     }
 
     /**
@@ -662,7 +648,7 @@ public class RaceMap extends AbsolutePanel
      */
     protected void showAdditionalControls(MapWidget map) {
     }
-
+    
     private void setHasPolar() {
         GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
         asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
@@ -1964,7 +1950,7 @@ public class RaceMap extends AbsolutePanel
         if(lastInfoWindow != null) {
             lastInfoWindow.close();
         }
-        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime());
+        GPSFixDTO latestFixForCompetitor = getBoatFix(competitorDTO, timer.getTime()); 
         // TODO find close fix where the mouse was; see BUG 470
         InfoWindowOptions options = InfoWindowOptions.newInstance();
         InfoWindow infoWindow = InfoWindow.newInstance(options);
