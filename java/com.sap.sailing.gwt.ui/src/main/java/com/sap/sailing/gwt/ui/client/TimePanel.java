@@ -269,6 +269,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playSpeedImage.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
        
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedBox.getElement().getStyle().setPadding(2, Style.Unit.PX);
