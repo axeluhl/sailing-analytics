@@ -754,8 +754,22 @@ img.openColumn {
 	padding: 4px 10px;
 }
 
-.EditMarkPositionPopup {
+.EditMarkPositionPopup table {
 	background-color: #fff;
+	border-spacing: 0;
+	border: 1px solid #aaa;
+	
+	-webkit-box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+	-moz-box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+	box-shadow: 2px 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+.EditMarkPositionPopup .gwt-MenuItem {
+	padding: 10px 15px;
+}
+
+.EditMarkPositionPopup .gwt-MenuItem-disabled {
+	background-color: #eee;
 }
 
 .EditMarkPositionConfirmCancelButtons .gwt-MenuItem {
@@ -777,7 +791,7 @@ img.openColumn {
 
 .EditMarkPositionNotification > div {
 	margin: 80px;
-	color: #f00;
+	color: #f33;
 	font-weight: bold;
 	font-size: 15px;
 	padding: 20px;

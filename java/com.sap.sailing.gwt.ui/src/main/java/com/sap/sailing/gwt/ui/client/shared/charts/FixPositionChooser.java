@@ -30,6 +30,10 @@ public class FixPositionChooser {
     private FixOverlay moveOverlay;
     private HandlerRegistration centerChangeHandlerRegistration;
     private MenuBar menu;
+
+    static class MultipleFixPositionChooserException extends Exception {
+        private static final long serialVersionUID = 8873620039193019760L;
+    }
     
     /**
      * Use this constructor when there is already a fix with an overlay. 

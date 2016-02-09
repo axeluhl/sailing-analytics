@@ -75,16 +75,20 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
                 if (parent.hasFixAtTimePoint(mark)) {
                     parent.showNotification("Please select another timepoint. There already is a fix at the timepoint of the timeslider.");
                 } else {
-                parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
-                    @Override
-                    public void onFailure(Exception reason) {
-                        // TODO Auto-generated method stub
+                    try {
+                        parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
+                            @Override
+                            public void onFailure(Exception reason) {
+                                parent.resetCurrentFixPositionChooser();
+                            }
+                            @Override
+                            public void onSuccess(Position result) {
+                                parent.addMarkFix(mark, parent.timer.getTime(), result);
+                                parent.resetCurrentFixPositionChooser();
+                            }
+                        });
+                    } catch (FixPositionChooser.MultipleFixPositionChooserException e) {
                     }
-                    @Override
-                    public void onSuccess(Position result) {
-                        parent.addMarkFix(mark, parent.timer.getTime(), result);
-                    }
-                });
                 }
             }
         });
