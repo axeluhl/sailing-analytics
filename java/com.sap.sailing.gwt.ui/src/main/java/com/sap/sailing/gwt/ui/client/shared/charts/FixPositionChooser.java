@@ -68,6 +68,7 @@ public class FixPositionChooser {
     
     // TODO: Differentiate touch and mouse somehow
     // TODO: Disable time slider
+    // TODO: Red dot in chart - PointOptions
     private FixPositionChooser(final boolean newFix, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, 
             final FixOverlay overlay, final LatLng startPos, final CoordinateSystem coordinateSystem, final String confirmButtonText, 
             final Callback<Position, Exception> callback) {

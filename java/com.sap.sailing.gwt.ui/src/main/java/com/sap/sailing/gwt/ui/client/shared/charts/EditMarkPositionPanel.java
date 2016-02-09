@@ -171,8 +171,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         chart.getYAxis().setAxisTitleText("").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
-        markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false);
-        markSeries = chart.createSeries().setType(Series.Type.SCATTER).setYAxis(0)
+        markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000");
+        markSeries = chart.createSeries().setType(Series.Type.LINE).setYAxis(0)
                 .setPlotOptions(markSeriesPlotOptions);
         chart.addSeries(markSeries, false, false);
     }
@@ -379,10 +379,20 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     private void setSeriesPoints(MarkDTO mark) {
+        double latAverage = 0;
+        double lngAverage = 0;
+        for (GPSFixDTO fix : marks.get(mark).keySet()) {
+            latAverage += fix.position.getLatDeg();
+            lngAverage += fix.position.getLngDeg();
+        }
+        latAverage /= marks.get(mark).size();
+        lngAverage /= marks.get(mark).size();
+        Position averagePosition = new DegreePosition(latAverage, lngAverage);
+        
         Point[] points = new Point[marks.get(mark).keySet().size()];
         int i = 0;
         for (GPSFixDTO fix : marks.get(mark).keySet()) {
-            points[i++] = new Point(fix.timepoint.getTime(), 1);
+            points[i++] = new Point(fix.timepoint.getTime(), fix.position.getDistance(averagePosition).getMeters());
         }
         setSeriesPoints(markSeries, points);
     }
