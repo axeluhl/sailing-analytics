@@ -1768,7 +1768,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return Math.log((1 + sine) / (1 - sine)) / 2;
     }
 
-    private int getZoomLevel(LatLngBounds bounds) {
+    public int getZoomLevel(LatLngBounds bounds) {
         int GLOBE_PXSIZE = 256; // a constant in Google's map projection
         int MAX_ZOOM = 20; // maximum zoom-level that should be automatically selected
         double LOG2 = Math.log(2.0);
