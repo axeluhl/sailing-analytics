@@ -460,5 +460,6 @@
     <string name="reset_message_2">Soll die Liste zum letzten bekannten Stand zurückgesetzt werden?</string>
     <string name="onboarding_scan">Scan QR-Code</string>
     <string name="onboarding_input">Manuelle Eingabe</string>
+    <string name="race_group">Group Race</string>
 
 </resources>

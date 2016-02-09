@@ -63,6 +63,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.TimePoint;
@@ -340,10 +341,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     public void onWindEntered(Wind windFix) {
-        TextView windValue = (TextView) findViewById(R.id.wind_value);
+        PanelButton windValue = (PanelButton) findViewById(R.id.button_wind);
         if (windFix != null) {
             if (windValue != null) {
-                windValue.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+                windValue.setPanelText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
             }
             if (mSelectedRace != null) {
                 mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, /* isMagnetic */ true);
@@ -352,7 +353,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             mWind = windFix;
         } else {
             if (windValue != null) {
-                windValue.setText(getString(R.string.wind_unknown));
+                windValue.setPanelText(getString(R.string.wind_unknown));
             }
         }
 

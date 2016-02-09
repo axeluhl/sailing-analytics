@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/panel_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/sap_gray">
+
+        <ImageView
+            android:id="@+id/marker_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:src="?attr/marker" />
+
+        <TextView
+            android:id="@+id/panel_button_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/header_margin_top"
+            android:textAppearance="?attr/textPanelHeader"
+            tools:text="@string/start_mode" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/panel_button_header">
+
+            <ImageView
+                android:id="@+id/panel_image"
+                android:layout_width="@dimen/side_button_imageSize"
+                android:layout_height="@dimen/side_button_imageSize"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                tools:src="@drawable/flag_papa_64dp"
+                tools:visibility="gone" />
+
+            <TextView
+                android:id="@+id/panel_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal"
+                android:paddingLeft="@dimen/default_padding_half"
+                android:paddingRight="@dimen/default_padding_half"
+                android:textAppearance="?attr/textPanelCaption"
+                android:visibility="gone"
+                tools:text="@string/start_procedure_line_start"
+                tools:visibility="gone" />
+
+            <Switch
+                android:id="@+id/panel_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="?attr/white"
+                android:textSize="@dimen/panel_button_caption_size"
+                android:visibility="gone"
+                tools:text="Race"
+                tools:visibility="visible" />
+        </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/panel_lock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@color/lock_background"
+            android:padding="@dimen/panel_lock_padding"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="@dimen/side_button_lockSize"
+                android:layout_height="@dimen/side_button_lockSize"
+                android:src="?attr/lock_outline" />
+        </FrameLayout>
+
+        <View
+            android:id="@+id/line_right"
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:background="?attr/black"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/line_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thin_line"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/black"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/line_left"
+            android:layout_width="@dimen/thin_line"
+            android:layout_height="match_parent"
+            android:background="?attr/black"
+            android:visibility="gone" />
+    </RelativeLayout>
+</merge>

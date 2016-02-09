@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/side_button_height"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary" />
+        android:background="?attr/sap_gray" />
 
     <FrameLayout
         android:id="@+id/panels_top"

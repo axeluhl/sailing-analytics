@@ -487,5 +487,6 @@
     <string name="geo_coords" translatable="false">%1$d° %2$d′ %3$.3f″</string>
     <string name="onboarding_scan">Scan QR-Code</string>
     <string name="onboarding_input">Manual Input</string>
+    <string name="race_group">Group Racing</string>
 
 </resources>

@@ -146,6 +146,17 @@ public abstract class BasePanelFragment extends RaceFragment {
         }
     }
 
+    protected void resetFragment(boolean isLocked, @IdRes int idRes, Class<? extends BaseFragment> cls) {
+        if (isLocked && getFragmentManager() != null) {
+            Fragment fragment = getFragmentManager().findFragmentById(idRes);
+            if (fragment != null) {
+                if (cls.getCanonicalName().equals(fragment.getClass().getCanonicalName())) {
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                }
+            }
+        }
+    }
+
     protected void replaceFragment(RaceFragment fragment) {
         replaceFragment(fragment, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, true));
     }
