@@ -31,6 +31,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
+    // TODO: Maybe write the current time into the add new fix button
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");
@@ -70,17 +71,21 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
-            public void update(int index, final MarkDTO object, String value) {
-                parent.createFixPositionChooserToAddFixToMark(object, new Callback<Position, Exception>() {
+            public void update(int index, final MarkDTO mark, String value) {
+                if (parent.hasFixAtTimePoint(mark)) {
+                    parent.showNotification("Please select another timepoint. There already is a fix at the timepoint of the timeslider.");
+                } else {
+                parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
                     @Override
                     public void onFailure(Exception reason) {
                         // TODO Auto-generated method stub
                     }
                     @Override
                     public void onSuccess(Position result) {
-                        parent.addMarkFix(object, parent.getTimepoint(), result);
+                        parent.addMarkFix(mark, parent.timer.getTime(), result);
                     }
                 });
+                }
             }
         });
         markTable.addColumn(addFixColumn, new TextHeader(""));

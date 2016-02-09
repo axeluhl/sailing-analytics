@@ -757,3 +757,29 @@ img.openColumn {
 .EditMarkPositionPopup {
 	background-color: #fff;
 }
+
+.EditMarkPositionConfirmCancelButtons .gwt-MenuItem {
+	color: #fff;
+	font-size: 15px;
+	font-weight: bold;
+	padding: 15px 25px;
+	background-color: #efab00;
+}
+
+.EditMarkPositionConfirmCancelButtons .gwt-MenuItem:hover {
+	background-color: #bf8b00;
+}
+
+.EditMarkPositionConfirmCancelButtons table {
+	border-spacing: 20px;
+	border-collapse: seperate;
+}
+
+.EditMarkPositionNotification > div {
+	margin: 80px;
+	color: #f00;
+	font-weight: bold;
+	font-size: 15px;
+	padding: 20px;
+	background-color: #fff;
+}

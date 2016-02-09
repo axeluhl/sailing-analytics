@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.moxieapps.gwt.highcharts.client.Axis;
 import org.moxieapps.gwt.highcharts.client.BaseChart;
@@ -35,6 +38,7 @@ import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.events.click.ClickMapEvent;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
@@ -45,6 +49,7 @@ import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -59,7 +64,6 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.charts.AbstractRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
@@ -70,13 +74,13 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
+import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
-import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
-import com.sap.sse.gwt.client.player.Timer;
 
 public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {    
     private final RaceMap raceMap;
@@ -95,7 +99,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     private boolean visible;
     
-    private Map<MarkDTO, Map<GPSFixDTO, FixOverlay>> marks;
+    private Map<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> marks;
     private MarkDTO selectedMark;
     private Map<MarkDTO, Polyline> polylines;
     private final ListDataProvider<MarkDTO> markDataProvider;
@@ -242,9 +246,19 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             setWidget(chart);
             showLoading("Loading mark fixes...");
             Map<MarkDTO, List<GPSFixDTO>> result = serviceMock.getMarkTracks("", "", "");
-            marks = new HashMap<MarkDTO, Map<GPSFixDTO, FixOverlay>>();
+            marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
             for (final Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
-                Map<GPSFixDTO, FixOverlay> fixOverlayMap = new HashMap<GPSFixDTO, FixOverlay>();
+                SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<GPSFixDTO, FixOverlay>(new Comparator<GPSFixDTO>() {
+                    @Override
+                    public int compare(GPSFixDTO o1, GPSFixDTO o2) {
+                        int result = 0;
+                        if (o1.timepoint.before(o2.timepoint))
+                            result = -1;
+                        if (o1.timepoint.after(o2.timepoint))
+                            result = 1;
+                        return result;
+                    }
+                });
                 PolylineOptions options = PolylineOptions.newInstance();
                 if (map != null) {
                     options.setMap(map);
@@ -271,7 +285,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                         @Override
                                         public void onFailure(Exception reason) {
                                             overlay.setVisible(true);
-                                            // TODO Auto-generated method stub
                                         }
                                         @Override
                                         public void onSuccess(Position result) {
@@ -300,7 +313,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 }
                 marks.put(fixes.getKey(), fixOverlayMap);
                 polylines.put(fixes.getKey(), polyline);
-                updatePolylinePoints(fixes.getKey()); // TODO sort polyline fixes by time
+                updatePolylinePoints(fixes.getKey());
             }
             List<MarkDTO> markList = new ArrayList<MarkDTO>();
             markList.addAll(marks.keySet());
@@ -314,7 +327,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void addMarkFix(MarkDTO mark, Date timepoint, Position fixPosition) {
         GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
         serviceMock.addMarkFix("", "", "", mark, fix);
-        FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, "#505050", raceMap.getCoordinateSystem());
+        FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem());
         marks.get(mark).put(fix, overlay);
         updatePolylinePoints(mark); // TODO: update index of fixPositionChooser
         setSeriesPoints(mark);
@@ -552,7 +565,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public void hideAllFixOverlays() {
-        for (Map.Entry<MarkDTO, Map<GPSFixDTO, FixOverlay>> mark : marks.entrySet()) {
+        for (Map.Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> mark : marks.entrySet()) {
             for (FixOverlay overlay : mark.getValue().values()) {
                 overlay.setVisible(false);
             }
@@ -572,6 +585,36 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 break;
             index++;
         }
-        return new FixPositionChooser(map, index, polylines.get(mark).getPath(), map.getCenter(), raceMap.getCoordinateSystem(), callback);
+        Polyline polyline = polylines.get(mark);
+        return new FixPositionChooser(map, index, polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(), callback);
+    }
+    
+    private com.google.gwt.user.client.Timer notificationTimer;
+    
+    public void showNotification(String message) {
+        if (notificationTimer == null || !notificationTimer.isRunning()) {
+            final HTMLPanel text = new HTMLPanel("<div>" + message + "</div>");
+            text.setStyleName("EditMarkPositionNotification");
+            map.setControls(ControlPosition.TOP_CENTER, text);
+
+            notificationTimer = new com.google.gwt.user.client.Timer(){
+                @Override
+                public void run() {
+                    text.removeFromParent();
+                }
+            };
+            notificationTimer.schedule(8000);
+        }
+    }
+
+    public boolean hasFixAtTimePoint(MarkDTO mark) {
+        boolean result = false;
+        for(GPSFixDTO fix : marks.get(mark).keySet()) {
+            if (fix.timepoint.equals(timer.getTime())) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 }

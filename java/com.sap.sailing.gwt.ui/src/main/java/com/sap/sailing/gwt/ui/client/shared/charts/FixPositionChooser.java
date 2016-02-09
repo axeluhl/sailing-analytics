@@ -5,12 +5,12 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.maps.client.events.center.CenterChangeMapEvent;
 import com.google.gwt.maps.client.events.center.CenterChangeMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -29,7 +29,7 @@ public class FixPositionChooser {
     private CoordinateSystem coordinateSystem;
     private FixOverlay moveOverlay;
     private HandlerRegistration centerChangeHandlerRegistration;
-    private PopupPanel popup;
+    private MenuBar menu;
     
     /**
      * Use this constructor when there is already a fix with an overlay. 
@@ -90,7 +90,9 @@ public class FixPositionChooser {
             this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem);
         }
         map.panTo(startPos);
-        polylinePath.insertAt(polylineFixIndex, map.getCenter());
+        if (polylinePath != null) {
+            polylinePath.insertAt(polylineFixIndex, map.getCenter());
+        }
         centerChangeHandlerRegistration = map.addCenterChangeHandler(new CenterChangeMapHandler() {
             @Override
             public void onEvent(CenterChangeMapEvent event) {
@@ -101,9 +103,8 @@ public class FixPositionChooser {
                 }
             }
         });
-        popup = new PopupPanel(false);
-        popup.setStyleName("EditMarkPositionPopup");
-        MenuBar menu = new MenuBar(false);
+        menu = new MenuBar(false);
+        menu.setStyleName("EditMarkPositionConfirmCancelButtons");
         MenuItem confirm = new MenuItem(confirmButtonText, new ScheduledCommand() {
             @Override
             public void execute() {
@@ -115,25 +116,24 @@ public class FixPositionChooser {
             @Override
             public void execute() {
                 destroyUIOverlay();
-                if (newFix) {
-                    polylinePath.removeAt(polylineFixIndex);
-                } else {
-                    polylinePath.setAt(polylineFixIndex, overlay.getLatLngPosition());
+                if (polylinePath != null) {
+                    if (newFix) {
+                        polylinePath.removeAt(polylineFixIndex);
+                    } else {
+                        polylinePath.setAt(polylineFixIndex, overlay.getLatLngPosition());
+                    }
                 }
                 callback.onFailure(null);
             }
         });
         menu.addItem(confirm);
         menu.addItem(cancel);
-        popup.setWidget(menu);
-        popup.show();
-        popup.setPopupPosition(map.getAbsoluteLeft() + map.getOffsetWidth() - popup.getOffsetWidth() - 20, 
-                map.getAbsoluteTop() + map.getOffsetHeight() - popup.getOffsetHeight() - 20);
+        map.setControls(ControlPosition.BOTTOM_CENTER, menu);
     }
     
     private void destroyUIOverlay() {
         moveOverlay.removeFromMap();
         centerChangeHandlerRegistration.removeHandler();
-        popup.hide();
+        menu.removeFromParent();
     }
 }
