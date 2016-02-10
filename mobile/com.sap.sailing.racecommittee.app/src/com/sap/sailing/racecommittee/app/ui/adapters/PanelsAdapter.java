@@ -27,11 +27,11 @@ public class PanelsAdapter extends FragmentStatePagerAdapter {
                 break;
 
             case 1:
-                fragment = SetupPanelFragment.newInstance(mArguments);
+                fragment = SetupPanelFragment.newInstance(mArguments, 0);
                 break;
 
             case 2:
-                fragment = MorePanelFragment.newInstance(mArguments);
+                fragment = SetupPanelFragment.newInstance(mArguments, 1);
                 break;
         }
 

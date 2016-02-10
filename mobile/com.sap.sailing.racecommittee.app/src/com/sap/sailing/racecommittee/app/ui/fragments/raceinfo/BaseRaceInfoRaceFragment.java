@@ -37,7 +37,7 @@ public abstract class BaseRaceInfoRaceFragment<ProcedureType extends RacingProce
 
         replaceFragment(FlagPanelFragment.newInstance(getArguments()), R.id.race_panel_flags);
         if (AppUtils.with(getActivity()).isTablet() && AppUtils.with(getActivity()).isLand()) {
-            replaceFragment(SetupPanelFragment.newInstance(getArguments()), R.id.race_panel_setup);
+            replaceFragment(SetupPanelFragment.newInstance(getArguments(), 0), R.id.race_panel_setup);
             replaceFragment(TimePanelFragment.newInstance(getArguments()), R.id.race_panel_time);
         }
     }

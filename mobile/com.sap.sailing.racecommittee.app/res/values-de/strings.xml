@@ -211,7 +211,7 @@
     <string name="golf_down">Golf</string>
     <string name="preference_regatta_specific_title">Regattakonfiguration - %1$s</string>
     <string name="preference_regatta_specific_save_title">Speichere %1$s Konfiguration</string>
-    <string name="preference_regatta_specific_save_description">Hier klicken um Regattakonfiguration für 1$s zu speichern.</string>
+    <string name="preference_regatta_specific_save_description">Hier klicken um Regattakonfiguration für %1$s zu speichern.</string>
     <string name="auto_update">Auto-Update</string>
     <string name="auto_update_checking_version">Prüfe Versionsinformation auf Server&#8230;</string>
     <string name="auto_update_downloading_version">Versuche Versionsinformation von %1$s zu erhalten</string>
@@ -460,5 +460,6 @@
     <string name="reset_message_2">Soll die Liste zum letzten bekannten Stand zurückgesetzt werden?</string>
     <string name="onboarding_scan">Scan QR-Code</string>
     <string name="onboarding_input">Manuelle Eingabe</string>
+    <string name="race_group">Group Race</string>
 
 </resources>
