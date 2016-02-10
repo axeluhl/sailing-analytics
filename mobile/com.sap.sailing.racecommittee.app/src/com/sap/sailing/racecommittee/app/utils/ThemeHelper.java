@@ -8,7 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.AttrRes;
-import android.support.annotation.ColorRes;
+import android.support.annotation.ColorInt;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
@@ -34,7 +34,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerTextColor(Context context, TimePicker timePicker, @ColorRes int color) {
+    public static void setPickerTextColor(Context context, TimePicker timePicker, @ColorInt int color) {
         NumberPicker hourPicker = getHourPicker(timePicker);
         if (hourPicker != null) {
             setPickerTextColor(context, hourPicker, color);
@@ -46,7 +46,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerTextColor(Context context, NumberPicker numberPicker, @ColorRes int color) {
+    public static void setPickerTextColor(Context context, NumberPicker numberPicker, @ColorInt int color) {
         final int count = numberPicker.getChildCount();
         for (int i = 0; i < count; i++) {
             View child = numberPicker.getChildAt(i);
@@ -68,7 +68,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerDividerColor(Context context, TimePicker timePicker, @ColorRes int color) {
+    public static void setPickerDividerColor(Context context, TimePicker timePicker, @ColorInt int color) {
         NumberPicker hourPicker = getHourPicker(timePicker);
         if (hourPicker != null) {
             setPickerDividerColor(context, hourPicker, color);
@@ -80,7 +80,7 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerDividerColor(Context context, NumberPicker numberPicker, @ColorRes int color) {
+    public static void setPickerDividerColor(Context context, NumberPicker numberPicker, @ColorInt int color) {
         try {
             ColorDrawable drawable = new ColorDrawable(color);
             Field selectionDivider = numberPicker.getClass().getDeclaredField("mSelectionDivider");
@@ -95,17 +95,17 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerColor(Context context, TimePicker timePicker, @ColorRes int textColor, @ColorRes int dividerColor) {
+    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor, @ColorInt int dividerColor) {
         setPickerTextColor(context, timePicker, textColor);
         setPickerDividerColor(context, timePicker, dividerColor);
     }
 
-    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorRes int textColor, @ColorRes int dividerColor) {
+    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor, @ColorInt int dividerColor) {
         setPickerTextColor(context, numberPicker, textColor);
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
 
-    public static int getColor(Context context, @AttrRes int colorId) {
+    public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

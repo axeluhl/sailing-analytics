@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -335,22 +337,24 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         }
 
         if (mWindSpeed != null && mCompassView != null) {
-            String numbers[] = generateNumbers();
-            ViewHelper.disableSave(mWindSpeed);
-            ThemeHelper.setPickerColor(getActivity(), mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                    .getColor(getActivity(), R.attr.sap_yellow_1));
-            mWindSpeed.setMaxValue(numbers.length - 1);
-            mWindSpeed.setMinValue(0);
-            mWindSpeed.setWrapSelectorWheel(false);
-            mWindSpeed.setDisplayedValues(numbers);
-            mWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-
+            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
             mCompassView.setDirection((float) enteredWindBearingFrom);
             mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
         } else if (mWindInputDirection != null && mWindInputSpeed != null) {
             mWindInputDirection.setText(String.valueOf((int) enteredWindBearingFrom));
             mWindInputSpeed.setText(String.format(Locale.US, "%.1f", enteredWindSpeed));
         }
+    }
+
+    private void initSpeedPicker(NumberPicker picker, @ColorInt int textColor) {
+        String numbers[] = generateNumbers();
+        ViewHelper.disableSave(picker);
+        ThemeHelper.setPickerColor(getActivity(), picker, textColor, ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
+        picker.setMaxValue(numbers.length - 1);
+        picker.setMinValue(0);
+        picker.setWrapSelectorWheel(false);
+        picker.setDisplayedValues(numbers);
+        picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
     // the map view needs java script
@@ -517,8 +521,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_course, null);
             final CompassView compassView = (CompassView) layout.findViewById(R.id.compass_view);
             if (compassView != null) {
-                if (mWindInputDirection != null) {
+                if (mWindInputDirection != null && !TextUtils.isEmpty(mWindInputDirection.getText())) {
                     compassView.setDirection(Float.valueOf(mWindInputDirection.getText().toString()));
+                } else {
+                    compassView.setDirection(0);
                 }
                 compassView.setReadOnly(true);
             }
@@ -527,7 +533,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     if (compassView != null) {
-                        float degrees = (compassView.getDirection() > 0) ? compassView.getDirection() : compassView.getDirection() + 360;
+                        float degrees = (compassView.getDirection() >= 0) ? compassView.getDirection() : compassView.getDirection() + 360;
                         mWindInputDirection.setText(String.format("%.0f", degrees));
                     }
                 }
@@ -541,7 +547,26 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
         @Override
         public void onClick(View v) {
-
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.wind_speed);
+            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_speed, null);
+            final NumberPicker speed = (NumberPicker) layout.findViewById(R.id.wind_speed);
+            initSpeedPicker(speed, getResources().getColor(R.color.black));
+            double value = 0;
+            if (!TextUtils.isEmpty(mWindInputSpeed.getText())) {
+                value = Double.valueOf(mWindInputSpeed.getText().toString());
+            }
+            speed.setValue(((int) ((value - MIN_KTS) * 2)));
+            builder.setView(layout);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    float value = (float) speed.getValue() / 2 + MIN_KTS;
+                    mWindInputSpeed.setText(String.valueOf(value));
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.show();
         }
     }
 
