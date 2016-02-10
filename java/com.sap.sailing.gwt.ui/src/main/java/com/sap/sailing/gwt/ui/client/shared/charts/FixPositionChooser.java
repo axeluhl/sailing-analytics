@@ -95,7 +95,7 @@ public class FixPositionChooser {
             this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem);
         }
         map.panTo(startPos);
-        if (polylinePath != null) {
+        if (polylinePath != null && newFix) {
             polylinePath.insertAt(polylineFixIndex, map.getCenter());
         }
         centerChangeHandlerRegistration = map.addCenterChangeHandler(new CenterChangeMapHandler() {

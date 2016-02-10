@@ -270,11 +270,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 }
                 options.setStrokeWeight(1);
                 options.setVisible(false);
-                final Polyline polyline = Polyline.newInstance(options);
+                final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
                 for (final GPSFixDTO fix : fixes.getValue()) {
                     final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem());
                     fixOverlayMap.put(fix, overlay);
-                    final int index = fixOverlayMap.size() - 1;
                     overlay.setVisible(false);
                     overlay.addClickHandler(new ClickMapHandler() {
                         @Override
@@ -287,6 +286,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                 public void execute() {
                                     overlay.setVisible(false);
                                     if (currentFixPositionChooser == null) {
+                                        int index = 0;
+                                        for (GPSFixDTO fix : marks.get(fixes.getKey()).keySet()) {
+                                            if (fix.timepoint.equals(overlay.getGPSFixDTO().timepoint))
+                                                break;
+                                            index++;
+                                        }
                                         currentFixPositionChooser = new FixPositionChooser(map, index, polyline.getPath(), overlay, new Callback<Position, Exception>() {
                                             @Override
                                             public void onFailure(Exception reason) {
@@ -349,7 +354,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         serviceMock.addMarkFix("", "", "", mark, fix);
         FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem());
         marks.get(mark).put(fix, overlay);
-        updatePolylinePoints(mark); // TODO: update index of fixPositionChooser
+        updatePolylinePoints(mark);
         setSeriesPoints(mark);
         onResize();
     }
@@ -359,6 +364,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         fix.position = newPosition;
         marks.get(mark).get(fix).setGPSFixDTO(fix);
         updatePolylinePoints(mark);
+        setSeriesPoints(mark);
+        onResize();
     }
     
     private void removeMarkFix(MarkDTO mark, GPSFixDTO fix) {
