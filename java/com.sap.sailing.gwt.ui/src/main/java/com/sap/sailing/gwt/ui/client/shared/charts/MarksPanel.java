@@ -31,7 +31,8 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    // TODO: Maybe write the current time into the add new fix button
+    // TODO: Maybe write the current time into the add new fix button 
+    // TODO: Style Add new fix button
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");

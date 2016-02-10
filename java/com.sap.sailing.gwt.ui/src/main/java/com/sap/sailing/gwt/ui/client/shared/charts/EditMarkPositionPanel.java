@@ -46,6 +46,8 @@ import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
+import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
+import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
@@ -94,7 +96,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private FixPositionChooser currentFixPositionChooser;
 
     private Set<HandlerRegistration> courseMarkHandlers;
-    // private Set<HandlerRegistration> fixHandlers;
 
     private Set<String> selectedMarks;
 
@@ -108,7 +109,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private Map<MarkDTO, Polyline> polylines;
     private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
+    
+    private Map<OverlayClickHandler, HandlerRegistration> overlayClickHandlers;
 
+    //TODO: Extend timeslider when there are fixes outside the current slider
     public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
@@ -127,6 +131,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.mapListeners = new HashSet<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         this.setVisible(false);
+        
+        this.overlayClickHandlers = new HashMap<>();
         
         chart = new Chart()
                 .setPersistent(true)
@@ -176,7 +182,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 .setPlotOptions(markSeriesPlotOptions);
         chart.addSeries(markSeries, false, false);
     }
-    //TODO: distance von schwerpunkt auf y Achse anzeigen?
     
     private interface MarkPositionService {
         // TODO: Warme worte was erwarte ich (Was soll passieren wenn kieler woche mit 1 hz getrackt und rennen ist 2 stunden lang (10000 fixes?))
@@ -246,6 +251,122 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     private MarkPositionService serviceMock = new MarkPositionServiceMock();
     
+    private boolean canRemoveMarkFix(MarkDTO mark, GPSFixDTO fix) {
+        return serviceMock.canRemoveMarkFix("", "", "", mark, fix); //TODO: Readd code for leaderBoardname, ...
+    }
+    
+    
+    
+    private class OverlayClickHandler implements ClickMapHandler {
+        private final PopupPanel popup;
+        
+        private final FixOverlay overlay;
+        
+        public OverlayClickHandler(final MarkDTO mark, final GPSFixDTO fix, final FixOverlay overlay) {
+            map.addResizeHandler(new ResizeMapHandler() {
+                @Override
+                public void onEvent(ResizeMapEvent event) {
+                    mapResize();
+                }
+            });
+            this.overlay = overlay;
+            final Polyline polyline = polylines.get(mark);
+            
+            popup = new PopupPanel(true);
+            popup.setStyleName("EditMarkPositionPopup");
+            MenuBar menu = new MenuBar(true);
+            MenuItem move = new MenuItem("Move fix", new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    overlay.setVisible(false);
+                    if (currentFixPositionChooser == null) {
+                        int index = 0;
+                        for (GPSFixDTO fixToCompare : marks.get(mark).keySet()) {
+                            if (fixToCompare.timepoint.equals(fix.timepoint))
+                                break;
+                            index++;
+                        }
+                        OverlayClickHandler.this.unregisterAll();
+                        currentFixPositionChooser = new FixPositionChooser(map, index, polyline.getPath(), overlay, new Callback<Position, Exception>() {
+                            @Override
+                            public void onFailure(Exception reason) {
+                                overlay.setVisible(true);
+                                OverlayClickHandler.this.registerAll();
+                                resetCurrentFixPositionChooser();
+                            }
+                            @Override
+                            public void onSuccess(Position result) {
+                                editMarkFix(mark, fix, result);
+                                overlay.setVisible(true);
+                                OverlayClickHandler.this.registerAll();
+                                resetCurrentFixPositionChooser();
+                            }
+                        });
+                    }
+                    popup.hide();
+                }
+            });
+            menu.addItem(move);
+            MenuItem delete;
+            if (canRemoveMarkFix(mark, fix)) { 
+                delete = new MenuItem("Delete fix", new ScheduledCommand() { 
+                    @Override
+                    public void execute() {
+                        removeMarkFix(mark, fix);
+                        popup.hide();
+                    }
+                });
+            } else {
+                delete = new MenuItem("Delete fix", new ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                    }
+                });
+                delete.setEnabled(false);
+                delete.setTitle("The deletion of this fix is currently not possible.");
+            }
+            menu.addItem(delete);
+            popup.setWidget(menu);
+        }
+        
+        @Override
+        public void onEvent(ClickMapEvent event) {
+            setPopupPosition();
+            popup.show();
+        }
+        
+        public void register() {
+            if (overlayClickHandlers.get(this) == null) {
+                HandlerRegistration registration = overlay.addClickHandler(this);
+                overlayClickHandlers.put(this, registration);
+            }
+        }
+        
+        public void unregisterAll() {
+            for (Map.Entry<OverlayClickHandler, HandlerRegistration> handler : overlayClickHandlers.entrySet()) {
+                handler.getValue().removeHandler();
+                overlayClickHandlers.put(handler.getKey(), null);
+            }
+        }
+        
+        public void registerAll() {
+            for (OverlayClickHandler handler : overlayClickHandlers.keySet()) {
+                handler.register();
+            }
+        }
+        
+        private void setPopupPosition() {
+            popup.setPopupPosition(overlay.getCanvas().getAbsoluteLeft() + (int) overlay.getFixScaleAndSize().getB().getWidth() / 2 + 5, 
+                    overlay.getCanvas().getAbsoluteTop() + (int) overlay.getFixScaleAndSize().getB().getHeight() / 2 + 5);
+        }
+        
+        public void mapResize() {
+            if (popup.isVisible()) {
+                popup.hide();
+            }
+        }
+    }
+    
     private void loadData(final Date from, final Date to) {
         if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
             setWidget(chart);
@@ -253,6 +374,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             Map<MarkDTO, List<GPSFixDTO>> result = serviceMock.getMarkTracks("", "", "");
             marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
             for (final Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
+                PolylineOptions options = PolylineOptions.newInstance();
+                if (map != null) {
+                    options.setMap(map);
+                }
+                options.setStrokeWeight(1);
+                options.setVisible(false);
+                final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
+                polylines.put(fixes.getKey(), polyline);
                 SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<GPSFixDTO, FixOverlay>(new Comparator<GPSFixDTO>() {
                     @Override
                     public int compare(GPSFixDTO o1, GPSFixDTO o2) {
@@ -264,80 +393,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                         return result;
                     }
                 });
-                PolylineOptions options = PolylineOptions.newInstance();
-                if (map != null) {
-                    options.setMap(map);
-                }
-                options.setStrokeWeight(1);
-                options.setVisible(false);
-                final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
                 for (final GPSFixDTO fix : fixes.getValue()) {
                     final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem());
                     fixOverlayMap.put(fix, overlay);
                     overlay.setVisible(false);
-                    overlay.addClickHandler(new ClickMapHandler() {
-                        @Override
-                        public void onEvent(ClickMapEvent event) {
-                            final PopupPanel popup = new PopupPanel(true);
-                            popup.setStyleName("EditMarkPositionPopup");
-                            MenuBar menu = new MenuBar(true);
-                            MenuItem move = new MenuItem("Move fix", new ScheduledCommand() { // TODO: Menu is still reachable when a fix is currently moved. // TODO: onResize of the map does nothing to the menu // TODO: Menu position should not always be bottom right
-                                @Override
-                                public void execute() {
-                                    overlay.setVisible(false);
-                                    if (currentFixPositionChooser == null) {
-                                        int index = 0;
-                                        for (GPSFixDTO fix : marks.get(fixes.getKey()).keySet()) {
-                                            if (fix.timepoint.equals(overlay.getGPSFixDTO().timepoint))
-                                                break;
-                                            index++;
-                                        }
-                                        currentFixPositionChooser = new FixPositionChooser(map, index, polyline.getPath(), overlay, new Callback<Position, Exception>() {
-                                            @Override
-                                            public void onFailure(Exception reason) {
-                                                overlay.setVisible(true);
-                                                resetCurrentFixPositionChooser();
-                                            }
-                                            @Override
-                                            public void onSuccess(Position result) {
-                                                editMarkFix(fixes.getKey(), fix, result);
-                                                overlay.setVisible(true);
-                                                resetCurrentFixPositionChooser();
-                                            }
-                                        });
-                                    }
-                                    popup.hide();
-                                }
-                            });
-                            menu.addItem(move);
-                            MenuItem delete;
-                            if (serviceMock.canRemoveMarkFix("", "", "", fixes.getKey(), fix)) { //TODO: Readd code for leaderBoardname, ...
-                                delete = new MenuItem("Delete fix", new ScheduledCommand() { 
-                                    @Override
-                                    public void execute() {
-                                        removeMarkFix(fixes.getKey(), fix);
-                                        popup.hide();
-                                    }
-                                });
-                            } else {
-                                delete = new MenuItem("Delete fix", new ScheduledCommand() {
-                                    @Override
-                                    public void execute() {
-                                    }
-                                });
-                                delete.setEnabled(false);
-                                delete.setTitle("The deletion of this fix is currently not possible.");
-                            }
-                            menu.addItem(delete);
-                            popup.setWidget(menu);
-                            popup.setPopupPosition(overlay.getCanvas().getAbsoluteLeft() + (int) overlay.getFixScaleAndSize().getB().getWidth() / 2 + 5, 
-                                    overlay.getCanvas().getAbsoluteTop() + (int) overlay.getFixScaleAndSize().getB().getHeight() / 2 + 5);
-                            popup.show();
-                        }
-                    });
+                    new OverlayClickHandler(fixes.getKey(), fix, overlay).register();
                 }
                 marks.put(fixes.getKey(), fixOverlayMap);
-                polylines.put(fixes.getKey(), polyline);
                 updatePolylinePoints(fixes.getKey());
             }
             List<MarkDTO> markList = new ArrayList<MarkDTO>();
@@ -353,6 +415,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
         serviceMock.addMarkFix("", "", "", mark, fix);
         FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem());
+        new OverlayClickHandler(mark, fix, overlay).register();
         marks.get(mark).put(fix, overlay);
         updatePolylinePoints(mark);
         setSeriesPoints(mark);
