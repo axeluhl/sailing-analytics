@@ -15,17 +15,19 @@ import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompassView extends RelativeLayout {
 
-    private CompassDirectionListener changeListener = null;
-    private RotateAnimation rotation = null;
-    private ImageView needleView = null;
-    private BackAwareEditText degreeView = null;
-    private float currentDegrees = 0.0f;
-    private Float deferredToDegrees = null;
+    private CompassDirectionListener changeListener;
+    private RotateAnimation rotation;
+    private ImageView needleView;
+    private BackAwareEditText degreeView;
+    private TextView degreeValue;
+    private float currentDegrees;
+    private Float deferredToDegrees;
 
     public CompassView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -60,6 +62,7 @@ public class CompassView extends RelativeLayout {
         super.onFinishInflate();
 
         needleView = (ImageView) findViewById(R.id.compass_view_needle);
+        degreeValue = (TextView) findViewById(R.id.compass_view_value);
         degreeView = (BackAwareEditText) findViewById(R.id.compass_view_degree);
         degreeView.setSelectAllOnFocus(true);
         degreeView.setInputDownPressedListener(new BackAwareEditText.InputDownPressedListener() {
@@ -68,6 +71,7 @@ public class CompassView extends RelativeLayout {
                 float degree = currentDegrees > 0 ? currentDegrees : currentDegrees + 360;
                 degreeView.clearFocus();
                 degreeView.setText(String.format("%.0f°", degree));
+                degreeValue.setText(degreeView.getText());
             }
         });
         degreeView.setOnKeyListener(new OnKeyListener() {
@@ -163,6 +167,7 @@ public class CompassView extends RelativeLayout {
                 degree = 0;
             }
             degreeView.setText(String.format("%.0f°", degree));
+            degreeValue.setText(degreeView.getText());
         }
     }
 
@@ -186,6 +191,17 @@ public class CompassView extends RelativeLayout {
             float toDegrees = deferredToDegrees;
             deferredToDegrees = null;
             setDirection(toDegrees);
+        }
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        degreeView.setVisibility(GONE);
+        degreeValue.setVisibility(GONE);
+
+        if (readOnly) {
+            degreeValue.setVisibility(VISIBLE);
+        } else {
+            degreeView.setVisibility(VISIBLE);
         }
     }
 

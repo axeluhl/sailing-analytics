@@ -99,11 +99,10 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
             menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
-            sendingServiceStatus = String.format(statusText,
-                    errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
+            sendingServiceStatus = String.format(statusText, errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
             ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount <= 0");
-            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, getResources().getColor(android.R.color.white)));
+            menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
             sendingServiceStatus = getString(R.string.no_event_to_be_sent);
         }
     }

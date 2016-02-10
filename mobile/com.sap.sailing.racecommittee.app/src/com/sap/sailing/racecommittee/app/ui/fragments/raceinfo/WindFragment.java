@@ -3,11 +3,13 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -57,17 +60,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class WindFragment extends BaseFragment
-        implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener,
-        OnRaceUpdatedListener {
+public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
     private final static long FIVE_SEC = 5000;
     private final static long EVERY_POSITION_CHANGE = 1000;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
-//    private final static float MAX_LOCATION_DRIFT_IN_METER = 25f; // 25 meter
-//    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -75,8 +74,6 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-    //    private View mWindOn;
-//    private View mWindOff;
     private Button mSetData;
     private CompassView mCompassView;
     private NumberPicker mWindSpeed;
@@ -89,6 +86,8 @@ public class WindFragment extends BaseFragment
     private Button mContentMapShow;
     private WebView mMapWebView;
     private Button mMapHide;
+    private ImageView mEditCourse;
+    private ImageView mEditSpeed;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
@@ -163,6 +162,15 @@ public class WindFragment extends BaseFragment
 
         mReceiver = new IsTrackedReceiver(mContentMapShow);
 
+        mEditCourse = ViewHelper.get(layout, R.id.edit_course);
+        if (mEditCourse != null) {
+            mEditCourse.setOnClickListener(new EditCourseClick());
+        }
+        mEditSpeed = ViewHelper.get(layout, R.id.edit_speed);
+        if (mEditSpeed != null) {
+            mEditSpeed.setOnClickListener(new EditSpeedClick());
+        }
+
         return layout;
     }
 
@@ -173,8 +181,7 @@ public class WindFragment extends BaseFragment
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
-            mHeaderWindSensor
-                    .setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+            mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
                             .getKnots()));
         }
 
@@ -224,8 +231,7 @@ public class WindFragment extends BaseFragment
                 long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
                 setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
                 setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
-                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils
-                        .formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)), whiteColor);
                 if (mAccuracy != null) {
                     mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
                 }
@@ -500,6 +506,43 @@ public class WindFragment extends BaseFragment
     protected void saveEntriesInPreferences(Wind wind) {
         preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
+    }
+
+    private class EditCourseClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.wind_from);
+            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_course, null);
+            final CompassView compassView = (CompassView) layout.findViewById(R.id.compass_view);
+            if (compassView != null) {
+                if (mWindInputDirection != null) {
+                    compassView.setDirection(Float.valueOf(mWindInputDirection.getText().toString()));
+                }
+                compassView.setReadOnly(true);
+            }
+            builder.setView(layout);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (compassView != null) {
+                        float degrees = (compassView.getDirection() > 0) ? compassView.getDirection() : compassView.getDirection() + 360;
+                        mWindInputDirection.setText(String.format("%.0f", degrees));
+                    }
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.show();
+        }
+    }
+
+    private class EditSpeedClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+
+        }
     }
 
     private static class IsTrackedReceiver extends BroadcastReceiver {
