@@ -22,11 +22,14 @@
 
     <color name="accuracy_red">#e94a1b</color>
     <color name="accuracy_red_light">#f4a48d</color>
-    <color name="accuracy_yellow">#f0ab00</color>
+    <color name="accuracy_yellow">@color/constant_sap_yellow_1</color>
     <color name="accuracy_yellow_light">#f7d57f</color>
     <color name="accuracy_green">#8ab54e</color>
 
     <color name="lock_background">#b4b4b4</color>
+
+    <color name="switch_track">#898989</color>
+    <color name="switch_thumb">@color/constant_sap_yellow_1</color>
 
     <!-- buoy colors -->
     <!-- color layer -->

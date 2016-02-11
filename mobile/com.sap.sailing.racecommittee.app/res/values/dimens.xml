@@ -90,6 +90,10 @@
 
     <dimen name="wind_input">55dp</dimen>
 
+    <dimen name="switch_radius">3dp</dimen>
+    <dimen name="switch_height">32dp</dimen>
+    <dimen name="switch_padding">8dp</dimen>
+
     <!-- race state dependent -->
     <!-- login -->
     <dimen name="login_text_size_small">@dimen/textSize_18</dimen>

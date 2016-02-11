@@ -59,10 +59,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:textColor="?attr/white"
-                android:textSize="@dimen/panel_button_caption_size"
+                android:checked="false"
+                android:showText="true"
+                android:textOff="@string/no"
+                android:textOn="@string/yes"
+                android:thumb="@drawable/switch_thumb"
+                android:thumbTextPadding="@dimen/switch_padding"
+                android:track="@drawable/switch_track"
                 android:visibility="gone"
-                tools:text="Race"
+                tools:targetApi="LOLLIPOP"
                 tools:visibility="visible" />
         </RelativeLayout>
 
