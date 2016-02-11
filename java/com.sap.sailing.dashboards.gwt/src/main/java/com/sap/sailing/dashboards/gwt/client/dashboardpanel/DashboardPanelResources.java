@@ -16,9 +16,6 @@ public interface DashboardPanelResources extends ClientBundle {
     @Source("com/sap/sailing/dashboards/gwt/client/images/logo_sap.png")
     ImageResource logo_sap();
     
-    @Source("com/sap/sailing/dashboards/gwt/client/images/settings.png")
-    ImageResource settings();
-    
     @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "DashboardPanel.gss"})
     DashboardGSS style();
 

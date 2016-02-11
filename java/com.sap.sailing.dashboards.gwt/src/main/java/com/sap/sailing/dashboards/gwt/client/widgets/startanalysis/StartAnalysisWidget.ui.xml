@@ -10,7 +10,7 @@
 	    <header:DashboardWidgetHeaderAndNoDataMessage ui:field="dashboardWidgetHeaderAndNoDataMessage">
 	        
 	    </header:DashboardWidgetHeaderAndNoDataMessage>
-	    <competitorselection:SettingsButtonWithSelectionIndicationLabel ui:field="settingsButtonWithSelectionIndicationLabel"></competitorselection:SettingsButtonWithSelectionIndicationLabel>
+	    <competitorselection:SettingsButtonWithSelectionIndicationLabel ui:field="selectedCompetitorWithSettingsButton"></competitorselection:SettingsButtonWithSelectionIndicationLabel>
 		<g:HTMLPanel ui:field="currentStartPanel" styleName="{resources.gss.current_start_panel}">
 		</g:HTMLPanel>
 		<g:HTMLPanel ui:field="leftButton" styleName="{resources.gss.controll_header_button} {resources.gss.controll_header_button_left}">

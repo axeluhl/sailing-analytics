@@ -5,6 +5,7 @@
 	height: DASHBOARD_SPACE_MEDIUM;
 	right: 0px;
 	top: 0px;
+	width: 200px;
 	z-index: 3;
 }
 
@@ -23,8 +24,12 @@
 	top: 0px;
 	right: DASHBOARD_SPACE_MEDIUM;
 	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
-	font-color: black;
+	color: black;
 	text-align: right;
 	line-height: DASHBOARD_SPACE_MEDIUM;
 	z-index: 3;
+}
+
+.settings_indication_label_disabled {
+	color: DARK_GREY;
 }

@@ -3,18 +3,17 @@ package com.sap.sailing.dashboards.gwt.client.popups.competitorselection.util;
 import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.dashboardpanel.DashboardPanelResources;
+import com.sap.sailing.dashboards.gwt.client.widgets.ActionPanel;
+import com.sap.sailing.dashboards.gwt.client.widgets.ActionPanel.ActionPanelListener;
 
 public class SettingsButtonWithSelectionIndicationLabel extends Composite implements HasWidgets {
 
@@ -28,27 +27,40 @@ public class SettingsButtonWithSelectionIndicationLabel extends Composite implem
     interface SettingsButtonWithSelectionIndicationLabelStyle extends CssResource {
     }
 
-    @UiField
-    FocusPanel settingsButton;
+    @UiField(provided = true)
+    ActionPanel settingsButton;
 
     @UiField
     Image settingsButtonImage;
-    
+
     @UiField
     HTMLPanel settingsIndicationLabel;
 
     public SettingsButtonWithSelectionIndicationLabel() {
         SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.gss().ensureInjected();
+        settingsButton = new ActionPanel(Event.TOUCHEVENTS, Event.ONCLICK);
         initWidget(uiBinder.createAndBindUi(this));
-        settingsButtonImage.setResource(DashboardPanelResources.INSTANCE.settings());        
+        settingsButtonImage.setResource(SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.settings());
     }
     
-    public void addClickHandlerToSettingsButton(ClickHandler clickHandler){
-        settingsButton.addClickHandler(clickHandler);
+    public void addActionListener(ActionPanelListener actionPanelListener) {
+        settingsButton.addActionPanelListener(actionPanelListener);
     }
 
     public void setSelectionIndicationTextOnLabel(String selectionIndicationText) {
-        settingsIndicationLabel.getElement().setInnerHTML(""+selectionIndicationText);
+        settingsIndicationLabel.getElement().setInnerHTML("" + selectionIndicationText);
+    }
+
+    public void disable() {
+        settingsButton.disable();
+        settingsButtonImage.setResource(SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.settingsDisabled());
+        settingsIndicationLabel.getElement().addClassName(SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.gss().settings_indication_label_disabled());
+    }
+
+    public void enable() {
+        settingsButton.enable();
+        settingsButtonImage.setResource(SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.settings());
+        settingsIndicationLabel.getElement().removeClassName(SettingsButtonWithSelectionIndicationLabelResources.INSTANCE.gss().settings_indication_label_disabled());
     }
     
     @Override
