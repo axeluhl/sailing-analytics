@@ -20,7 +20,6 @@ import com.sap.sse.common.Util;
  * A google map overlay based on a HTML5 canvas for drawing course marks (canvases) and the buoy zone if the mark is a buoy.
  */
 public class CourseMarkOverlay extends CanvasOverlayV3 {
-
     /**
      * The course mark to draw
      */
@@ -167,7 +166,8 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
         return mark;
     }
 
-    public void setMarkPosition(Position position) {
+    public void setMarkPosition(Position position, long transitionTimeInMillis) {
+        updateTransition(transitionTimeInMillis);
         this.position = position;
     }
     

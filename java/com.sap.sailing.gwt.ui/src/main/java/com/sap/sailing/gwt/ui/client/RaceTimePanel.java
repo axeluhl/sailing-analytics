@@ -210,7 +210,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * was <code>null</code> before, or extended to a later point in time.
      */
     private void updateMinMax(RaceTimesInfoDTO newRaceTimesInfo) {
-        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.caluclateRaceMinMax(timer, newRaceTimesInfo);
+        Util.Pair<Date, Date> raceMinMax = RaceTimesCalculationUtil.calculateRaceMinMax(timer, newRaceTimesInfo);
         
         Date min = raceMinMax.getA();
         Date max = raceMinMax.getB();
