@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.dashboards.gwt.client.device.Orientation;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationListener;
 import com.sap.sailing.dashboards.gwt.client.device.OrientationType;
-import com.sap.sailing.dashboards.gwt.client.visualeffects.BlurEffect;
+import com.sap.sailing.dashboards.gwt.client.visualeffects.DarkeningEffect;
 import com.sap.sse.common.Util.Pair;
 
 public class WrongDeviceOrientationNotification extends AbsolutePanel implements OrientationListener {
@@ -37,13 +37,13 @@ public class WrongDeviceOrientationNotification extends AbsolutePanel implements
     public void show() {
         this.removeStyleName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().hidden());
         this.addStyleName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().shown());
-        BlurEffect.getInstance().addToView(RootLayoutPanel.get());
+        DarkeningEffect.getInstance().addToView(RootLayoutPanel.get());
     }
 
     public void hide() {
         this.removeStyleName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().shown());
         this.addStyleName(WrongDeviceOrientationNotificationResources.INSTANCE.gss().hidden());
-        BlurEffect.getInstance().removeFromView(RootLayoutPanel.get());
+        DarkeningEffect.getInstance().removeFromView(RootLayoutPanel.get());
     }
 
     @Override

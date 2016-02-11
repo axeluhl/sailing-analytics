@@ -4,10 +4,10 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.Shared;
 
 @Shared
-public interface BlurEffectStyle extends CssResource{
+public interface DarkeningEffectStyle extends CssResource{
     
-    public String blurred();
+    public String darkened();
     
-    public String not_blurred();
+    public String not_darkened();
 }
 
