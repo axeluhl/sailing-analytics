@@ -2,6 +2,10 @@ package com.sap.sse.security.ui.authentication.decorator;
 
 import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.ProvidesResize;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.shared.Permission;
@@ -9,7 +13,7 @@ import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class AuthorizedContentDecorator extends Composite {
+public class AuthorizedContentDecorator extends Composite implements RequiresResize {
     
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
@@ -45,8 +49,34 @@ public class AuthorizedContentDecorator extends Composite {
         return content;
     }
     
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        
+        if(getParent() instanceof ProvidesResize || getParent() instanceof HeaderPanel) {
+            contentHolder.setSize("100%", "100%");
+        }
+    }
+    
+    @Override
+    public void onResize() {
+        Widget currentContentWidget = contentHolder.getWidget();
+        if(currentContentWidget instanceof RequiresResize) {
+            ((RequiresResize) currentContentWidget).onResize();
+        }
+    }
+    
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        contentHolder.setWidget(isPermitted(userManagementContext) ? getContentWidget() : notLoggedInView);
+        IsWidget isWidget = isPermitted(userManagementContext) ? getContentWidget() : notLoggedInView;
+
+        Widget widget = isWidget.asWidget();
+        if(widget instanceof RequiresResize) {
+            widget.setSize("100%", "100%");
+        }
+        contentHolder.setWidget(widget);
+        if(widget instanceof RequiresResize) {
+            ((RequiresResize) widget).onResize();
+        }
     }
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {

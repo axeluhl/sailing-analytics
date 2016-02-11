@@ -6,13 +6,20 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Roles;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
+import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsRefresher;
@@ -37,6 +44,10 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
+import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
 import com.sap.sse.security.ui.client.component.UserManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -56,6 +67,35 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
      
     private void createUI() {
+        HeaderPanel headerPanel = new HeaderPanel();
+        SAPHeaderWithAuthentication header = initHeader();
+        GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+        AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
+        authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            @Override
+            public Widget get() {
+                return createAdminConsolePanel();
+            }
+        });
+        
+        headerPanel.setHeaderWidget(header);
+        headerPanel.setContentWidget(authorizedContentDecorator);
+        RootLayoutPanel rootPanel = RootLayoutPanel.get();
+        rootPanel.add(headerPanel);
+    }
+    
+    private SAPHeaderWithAuthentication initHeader() {
+        // TODO Label title = new Label(getStringMessages().xxxx());
+        Label title = new Label("TODO: Admin Console");
+        title.getElement().getStyle().setColor("white");
+        title.getElement().getStyle().setFontSize(20, Unit.PX);
+        title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        title.getElement().getStyle().setMarginTop(16, Unit.PX);
+        
+        return new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), title);
+    }
+    
+    private Widget createAdminConsolePanel() {
         AdminConsolePanel panel = new AdminConsolePanel(getUserService(), SailingPermissionsForRoleProvider.INSTANCE, 
                 sailingService, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this, SecurityStylesheetResources.INSTANCE.css());
         BetterDateTimeBox.initialize();
@@ -244,8 +284,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         fillRegattas();
         fillLeaderboardGroups();
         fillLeaderboards();
-        RootLayoutPanel rootPanel = RootLayoutPanel.get();
-        rootPanel.add(panel);
+        
+        return panel;
     }
 
     @Override
