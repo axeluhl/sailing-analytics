@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
-import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
 
 public class Header extends Composite {
 
@@ -73,7 +73,7 @@ public class Header extends Composite {
         signOutNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signOut(), new Runnable() {
             @Override
             public void run() {
-                eventBus.fireEvent(new AuthenticationRequestEvent(false));
+                        eventBus.fireEvent(new AuthenticationSignOutRequestEvent());
             }
         });
         

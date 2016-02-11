@@ -3,11 +3,11 @@ package com.sap.sse.security.ui.authentication;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEvent.Handler> {
-    public static final Type<Handler> TYPE = new Type<AuthenticationRequestEvent.Handler>();
+public class AuthenticationSignOutRequestEvent extends GwtEvent<AuthenticationSignOutRequestEvent.Handler> {
+    public static final Type<Handler> TYPE = new Type<AuthenticationSignOutRequestEvent.Handler>();
 
     public interface Handler extends EventHandler {
-        void onUserManagementRequestEvent(AuthenticationRequestEvent event);
+        void onUserManagementSignOutRequestEvent(AuthenticationSignOutRequestEvent event);
     }
     
 
@@ -18,6 +18,6 @@ public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEv
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onUserManagementRequestEvent(this);
+        handler.onUserManagementSignOutRequestEvent(this);
     }
 }
