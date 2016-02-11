@@ -2791,4 +2791,44 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     public CoordinateSystem getCoordinateSystem() {
         return coordinateSystem;
     }
+    
+    public void hideAllHelplines() {
+        startLine.setVisible(false);
+        finishLine.setVisible(false);
+        advantageLine.setVisible(false);
+        windwardStartLineMarkToFirstMarkLine.setVisible(false);
+        leewardStartLineMarkToFirstMarkLine.setVisible(false);
+        for (Polyline courseMiddleline : courseMiddleLines.values()) {
+            courseMiddleline.setVisible(false);
+        }
+        for (Polygon courseSideline : courseSidelines.values()) {
+            courseSideline.setVisible(false);
+        }
+    }
+    
+    public void showAllHelplinesToShow() {
+        if (settings.getHelpLinesSettings().isShowAnyHelperLines()) {
+            if (startLine != null && settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINE))
+                startLine.setVisible(true);
+            if (finishLine != null && settings.getHelpLinesSettings().isVisible(HelpLineTypes.FINISHLINE))
+                finishLine.setVisible(true);
+            if (advantageLine != null && settings.getHelpLinesSettings().isVisible(HelpLineTypes.ADVANTAGELINE))
+                advantageLine.setVisible(true);
+            if (windwardStartLineMarkToFirstMarkLine != null && leewardStartLineMarkToFirstMarkLine != null &&
+                    settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE)) {
+                windwardStartLineMarkToFirstMarkLine.setVisible(true);
+                leewardStartLineMarkToFirstMarkLine.setVisible(true);
+            }
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEMIDDLELINE)) {
+                for (Polyline courseMiddleline : courseMiddleLines.values()) {
+                    courseMiddleline.setVisible(true);
+                }
+            }
+            if (settings.getHelpLinesSettings().isVisible(HelpLineTypes.COURSEGEOMETRY)) {
+                for (Polygon courseSideline : courseSidelines.values()) {
+                    courseSideline.setVisible(true);
+                }
+            }
+        }
+    }
 }

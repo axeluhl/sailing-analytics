@@ -31,8 +31,6 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    // TODO: Maybe write the current time into the add new fix button
-    // TODO: Deal with multiselection
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");
@@ -142,10 +140,14 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         }
         return list;               
     }
+    
+    public void deselectMark(MarkDTO mark) {
+        markTable.getSelectionModel().setSelected(mark, false);
+    }
 
-    public void unselectMarks() {
+    public void deselectMarks() {
         for (MarkDTO mark : markDataProvider.getList()) {
-            markTable.getSelectionModel().setSelected(mark, false);
+            deselectMark(mark);
         }
     }
 }

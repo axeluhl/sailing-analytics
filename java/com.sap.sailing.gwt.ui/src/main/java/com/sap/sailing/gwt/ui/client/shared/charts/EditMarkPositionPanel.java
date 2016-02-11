@@ -106,7 +106,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private List<OverlayClickHandler> overlayClickHandlers;
 
     //TODO: Extend timeslider when there are fixes outside the current slider
-    //TODO: Show current buoy position
+    //TODO: Select mark in table when it is clicked on on the map
     public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
@@ -124,7 +124,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.setVisible(false);
         
         this.overlayClickHandlers = new ArrayList<>();
-        
+
         chart = new Chart()
                 .setPersistent(true)
                 .setZoomType(BaseChart.ZoomType.X)
@@ -168,7 +168,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         chart.getYAxis().setAxisTitleText("").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
-        markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000");
+        markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000")
+                .setHoverStateLineWidth(1).setEnableMouseTracking(false);
         markSeries = chart.createSeries().setType(Series.Type.LINE).setYAxis(0)
                 .setPlotOptions(markSeriesPlotOptions);
         chart.addSeries(markSeries, false, false);
@@ -586,7 +587,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
         } else {
-            marksPanel.unselectMarks();
+            marksPanel.deselectMarks();
             selectedMark = null;
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
@@ -688,19 +689,25 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void onSelectionChange(SelectionChangeEvent event) {
         List<MarkDTO> selected = marksPanel.getSelectedMarks();
         if (selected.size() > 0) {
+            if (selected.size() > 1) {
+                marksPanel.deselectMark(selectedMark);
+                hideAllFixOverlays();
+                hideAllPolylines();
+                selected = marksPanel.getSelectedMarks();
+            } else if (selectedMark == selected.get(0)) {
+                return;
+            }
             selectedMark = selected.get(0);
             setWidget(chart);
             markSeries.remove();
             markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
-                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00").setLineColor("#fff").setLineWidth(2)));
+                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
+                    .setLineColor("#fff").setLineWidth(2)));
             chart.addSeries(markSeries);
             setSeriesPoints(selectedMark);
             onResize(); // redraw chart
-            for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-                if (!overlay.getKey().equals(selectedMark.getName())) {
-                    overlay.getValue().setVisible(false);
-                }
-            }
+            hideAllCourseMarkOverlaysExceptSelected();
+            raceMap.hideAllHelplines();
             for (FixOverlay overlay : marks.get(selectedMark).values()) {
                 overlay.setVisible(true);
             }
@@ -709,6 +716,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             selectedMark = null;
             setWidget(noMarkSelectedLabel);
             showAllCourseMarkOverlays();
+            raceMap.showAllHelplinesToShow();
             hideAllFixOverlays();
             hideAllPolylines();
         }
@@ -717,6 +725,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void showAllCourseMarkOverlays() {
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
             overlay.getValue().setVisible(true);
+        }
+    }
+    
+    public void hideAllCourseMarkOverlaysExceptSelected() {
+        for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
+            if (!overlay.getKey().equals(selectedMark.getName())) {
+                overlay.getValue().setVisible(false);
+            }
         }
     }
     
