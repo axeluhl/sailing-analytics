@@ -2793,11 +2793,19 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     }
     
     public void hideAllHelplines() {
-        startLine.setVisible(false);
-        finishLine.setVisible(false);
-        advantageLine.setVisible(false);
-        windwardStartLineMarkToFirstMarkLine.setVisible(false);
-        leewardStartLineMarkToFirstMarkLine.setVisible(false);
+        if (startLine != null) {
+            startLine.setVisible(false);
+        }
+        if (finishLine != null) {
+            finishLine.setVisible(false);
+        }
+        if (advantageLine != null) {
+            advantageLine.setVisible(false);
+        }
+        if (windwardStartLineMarkToFirstMarkLine != null && leewardStartLineMarkToFirstMarkLine != null) {
+            windwardStartLineMarkToFirstMarkLine.setVisible(false);
+            leewardStartLineMarkToFirstMarkLine.setVisible(false);
+        }
         for (Polyline courseMiddleline : courseMiddleLines.values()) {
             courseMiddleline.setVisible(false);
         }

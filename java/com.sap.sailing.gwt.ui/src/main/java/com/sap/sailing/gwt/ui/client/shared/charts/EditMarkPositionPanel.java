@@ -198,6 +198,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             MarkDTO mark = new MarkDTO("test1", "Three Fixes");
             mark.color = "#0f0";
             List<GPSFixDTO> fixes = new ArrayList<>();
+            fixes.add(new GPSFixDTO(new Date(1453140600000l), new DegreePosition(53.54, 9.98), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
@@ -503,6 +504,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     fixOverlayMap.put(fix, overlay);
                     overlay.setVisible(false);
                     overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
+                    
+                    if (fix.timepoint.before(timeRangeWithZoomProvider.getFromTime())) {
+                        timeRangeWithZoomProvider.setTimeRange(fix.timepoint, timeRangeWithZoomProvider.getToTime());
+                    } else if (fix.timepoint.after(timeRangeWithZoomProvider.getToTime())) {
+                        timeRangeWithZoomProvider.setTimeRange(timeRangeWithZoomProvider.getFromTime(), fix.timepoint);
+                    }
                 }
                 marks.put(fixes.getKey(), fixOverlayMap);
                 updatePolylinePoints(fixes.getKey());
