@@ -32,7 +32,9 @@ import org.moxieapps.gwt.highcharts.client.labels.XAxisLabels;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 
+import com.google.gwt.ajaxloader.client.Properties.TypeException;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapOptions;
@@ -46,8 +48,12 @@ import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
+import com.google.gwt.maps.client.events.mouseup.MouseUpMapEvent;
+import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
 import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
 import com.google.gwt.maps.client.events.resize.ResizeMapHandler;
+import com.google.gwt.maps.client.events.rightclick.RightClickMapEvent;
+import com.google.gwt.maps.client.events.rightclick.RightClickMapHandler;
 import com.google.gwt.maps.client.mvc.MVCArray;
 import com.google.gwt.maps.client.overlays.Polyline;
 import com.google.gwt.maps.client.overlays.PolylineOptions;
@@ -110,9 +116,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
     
-    private Map<OverlayClickHandler, HandlerRegistration> overlayClickHandlers;
+    private List<OverlayClickHandler> overlayClickHandlers;
 
     //TODO: Extend timeslider when there are fixes outside the current slider
+    //TODO: Show current buoy position
     public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
@@ -132,7 +139,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         this.setVisible(false);
         
-        this.overlayClickHandlers = new HashMap<>();
+        this.overlayClickHandlers = new ArrayList<>();
         
         chart = new Chart()
                 .setPersistent(true)
@@ -255,39 +262,118 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         return serviceMock.canRemoveMarkFix("", "", "", mark, fix); //TODO: Readd code for leaderBoardname, ...
     }
     
+    private static class Pixel extends JavaScriptObject {
+        protected Pixel() {
+        }
+        
+        private native int getX() /*-{
+            return this.x;
+        }-*/;
+        private native int getY() /*-{
+            return this.y;
+        }-*/;
+    }
     
-    
-    private class OverlayClickHandler implements ClickMapHandler {
+    private class OverlayClickHandler {
         private final PopupPanel popup;
+        private final MenuItem moveMenuItem;
         
         private final FixOverlay overlay;
         
+        private MouseDownMapHandler mouseDownHandler;
+        private HandlerRegistration mouseDownHandlerRegistration;
+        private RightClickMapHandler rightClickHandler;
+        private HandlerRegistration rightClickHandlerRegistration;
+        
+        private int mouseDownX;
+        private int mouseDownY;
+        private boolean mouseDown;
+        private boolean dragging;
+        
+        //Currently the big problem with the OverlayClickHandler is that you cannot reliably detect if users use a touch device
+        //and even if they don't at first they could switch from touch to mouse or the other way around. Thus, both input methods
+        //are always present. Touch users should not accidentally drag fixes, because there is a buffer.
         public OverlayClickHandler(final MarkDTO mark, final GPSFixDTO fix, final FixOverlay overlay) {
+            this.overlay = overlay;
+            final Polyline polyline = polylines.get(mark);
+            
             map.addResizeHandler(new ResizeMapHandler() {
                 @Override
                 public void onEvent(ResizeMapEvent event) {
-                    mapResize();
+                    onResizeMap(event);
                 }
             });
-            this.overlay = overlay;
-            final Polyline polyline = polylines.get(mark);
+            rightClickHandler = new RightClickMapHandler() {
+                @Override
+                public void onEvent(RightClickMapEvent event) {
+                    onRightClick(event);
+                }
+            };
+            mouseDownHandler = new MouseDownMapHandler() {
+                @Override
+                public void onEvent(MouseDownMapEvent event) {
+                    try {
+                        if (event.getProperties().getNumber("which") == 1) {
+                            mouseDownX = event.getProperties().getNumber("pageX").intValue() - map.getAbsoluteLeft();
+                            mouseDownY = event.getProperties().getNumber("pageY").intValue() - map.getAbsoluteTop();
+                            mouseDown = true;
+                            dragging = false;
+                            MapOptions options = MapOptions.newInstance(false);
+                            options.setDraggable(false);
+                            map.setOptions(options);
+                        }
+                    } catch (TypeException e) {
+                    }
+                }
+            };
+            map.addMouseMoveHandler(new MouseMoveMapHandler() {
+                @Override
+                public void onEvent(MouseMoveMapEvent event) {
+                    if (mouseDown) {
+                        int currentX = 0;
+                        int currentY = 0;
+                        try {
+                            Pixel pixel = event.getProperties().getObject("pixel").cast();
+                            currentX = pixel.getX();
+                            currentY = pixel.getY();
+                        } catch (TypeException e) {
+                        }
+                        if(!dragging && Math.sqrt(Math.pow(currentX - mouseDownX, 2) +
+                                Math.pow(currentY - mouseDownY, 2)) > 15) {
+                            dragging = true;
+                        }
+                        if (dragging) {
+                            fix.position = raceMap.getCoordinateSystem().getPosition(event.getMouseEvent().getLatLng());
+                            overlay.setGPSFixDTO(fix);
+                            polyline.getPath().setAt(getIndexOfFixInPolyline(mark, fix), event.getMouseEvent().getLatLng());
+                        }
+                    }
+                }
+            });
+            overlay.addMouseUpHandler(new MouseUpMapHandler() {
+                @Override
+                public void onEvent(MouseUpMapEvent event) {
+                    if (mouseDown) {
+                        if (dragging) {
+                            editMarkFix(mark, fix, fix.position);
+                        } else {
+                            onClick(event);
+                        }
+                        mouseDown = false;
+                    }
+                }
+            });
             
             popup = new PopupPanel(true);
             popup.setStyleName("EditMarkPositionPopup");
             MenuBar menu = new MenuBar(true);
-            MenuItem move = new MenuItem("Move fix", new ScheduledCommand() {
+            moveMenuItem = new MenuItem("Move fix", new ScheduledCommand() {
                 @Override
                 public void execute() {
                     overlay.setVisible(false);
                     if (currentFixPositionChooser == null) {
-                        int index = 0;
-                        for (GPSFixDTO fixToCompare : marks.get(mark).keySet()) {
-                            if (fixToCompare.timepoint.equals(fix.timepoint))
-                                break;
-                            index++;
-                        }
                         OverlayClickHandler.this.unregisterAll();
-                        currentFixPositionChooser = new FixPositionChooser(map, index, polyline.getPath(), overlay, new Callback<Position, Exception>() {
+                        currentFixPositionChooser = new FixPositionChooser(map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(), overlay, new Callback<Position, Exception>() {
                             @Override
                             public void onFailure(Exception reason) {
                                 overlay.setVisible(true);
@@ -306,7 +392,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     popup.hide();
                 }
             });
-            menu.addItem(move);
+            moveMenuItem.setTitle("Use a touch optimized UI to move the fix");
+            menu.addItem(moveMenuItem);
             MenuItem delete;
             if (canRemoveMarkFix(mark, fix)) { 
                 delete = new MenuItem("Delete fix", new ScheduledCommand() { 
@@ -329,28 +416,52 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             popup.setWidget(menu);
         }
         
-        @Override
-        public void onEvent(ClickMapEvent event) {
+        private int getIndexOfFixInPolyline(MarkDTO mark, GPSFixDTO fix) {
+            int index = 0;
+            for (GPSFixDTO fixToCompare : marks.get(mark).keySet()) {
+                if (fixToCompare.timepoint.equals(fix.timepoint))
+                    return index;
+                index++;
+            }
+            return index;
+        }
+        
+        public void onClick(MouseUpMapEvent event) {
             setPopupPosition();
+            moveMenuItem.setVisible(true);
             popup.show();
         }
         
-        public void register() {
-            if (overlayClickHandlers.get(this) == null) {
-                HandlerRegistration registration = overlay.addClickHandler(this);
-                overlayClickHandlers.put(this, registration);
+        public OverlayClickHandler register() {
+            if (mouseDownHandlerRegistration == null) {
+                mouseDownHandlerRegistration = overlay.addMouseDownHandler(mouseDownHandler);
             }
+            if (rightClickHandlerRegistration == null) {
+                rightClickHandlerRegistration = overlay.addRightClickHandler(rightClickHandler);
+            }
+            return this;
+        }
+        
+        public OverlayClickHandler unregister() {
+            if (mouseDownHandlerRegistration != null) {
+                mouseDownHandlerRegistration.removeHandler();
+                mouseDownHandlerRegistration = null;
+            }
+            if (rightClickHandlerRegistration != null) {
+                rightClickHandlerRegistration.removeHandler();
+                rightClickHandlerRegistration = null;
+            }
+            return this;
         }
         
         public void unregisterAll() {
-            for (Map.Entry<OverlayClickHandler, HandlerRegistration> handler : overlayClickHandlers.entrySet()) {
-                handler.getValue().removeHandler();
-                overlayClickHandlers.put(handler.getKey(), null);
+            for (OverlayClickHandler handler : overlayClickHandlers) {
+                handler.unregister();
             }
         }
         
         public void registerAll() {
-            for (OverlayClickHandler handler : overlayClickHandlers.keySet()) {
+            for (OverlayClickHandler handler : overlayClickHandlers) {
                 handler.register();
             }
         }
@@ -360,10 +471,16 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     overlay.getCanvas().getAbsoluteTop() + (int) overlay.getFixScaleAndSize().getB().getHeight() / 2 + 5);
         }
         
-        public void mapResize() {
+        public void onResizeMap(ResizeMapEvent event) {
             if (popup.isVisible()) {
                 popup.hide();
             }
+        }
+        
+        public void onRightClick(RightClickMapEvent event) {
+            setPopupPosition();
+            moveMenuItem.setVisible(false);
+            popup.show();
         }
     }
     
@@ -397,7 +514,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem());
                     fixOverlayMap.put(fix, overlay);
                     overlay.setVisible(false);
-                    new OverlayClickHandler(fixes.getKey(), fix, overlay).register();
+                    overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
                 }
                 marks.put(fixes.getKey(), fixOverlayMap);
                 updatePolylinePoints(fixes.getKey());
@@ -415,7 +532,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
         serviceMock.addMarkFix("", "", "", mark, fix);
         FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem());
-        new OverlayClickHandler(mark, fix, overlay).register();
+        overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
         marks.get(mark).put(fix, overlay);
         updatePolylinePoints(mark);
         setSeriesPoints(mark);
