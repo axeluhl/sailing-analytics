@@ -9,6 +9,10 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
+/**
+ * Default Presenter implementation for {@link UserDetailsView}.
+ *
+ */
 public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
     
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
