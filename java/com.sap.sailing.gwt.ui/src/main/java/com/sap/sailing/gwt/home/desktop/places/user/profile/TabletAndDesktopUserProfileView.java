@@ -13,7 +13,9 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionE
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.userHeader.UserHeader;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab.UserProfileDetailsTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -35,8 +37,16 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     
     @UiField(provided = true)
     UserHeader headerUi;
+    
+    @UiField
+    UserProfileDetailsTabView detailsTabUi;
 
     public TabletAndDesktopUserProfileView() {
+    }
+    
+    @Override
+    public UserDetailsView getUserDetailsView() {
+        return detailsTabUi.getUserDetailsView();
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountDetails;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
+import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDetailsPlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -34,6 +35,10 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
 
     public UserProfileDetailsTabView() {
     }
+    
+    public UserDetailsView getUserDetailsView() {
+        return accountDetailsUi;
+    }
 
     @Override
     public Class<UserProfileDetailsPlace> getPlaceClassForActivation() {
@@ -48,7 +53,7 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     @Override
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(currentPresenter);
-        accountDetailsUi = new UserAccountDetails(currentPresenter);
+        accountDetailsUi = new UserAccountDetails();
         initWidget(ourUiBinder.createAndBindUi(this));
         contentArea.setWidget(this);
     }
@@ -56,7 +61,6 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     @Override
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
         decoratorUi.setUserManagementContext(userManagementContext);
-        accountDetailsUi.setUserManagementContext(userManagementContext);
     }
 
     @Override

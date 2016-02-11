@@ -16,15 +16,14 @@ public class UserAccountDetails extends AbstractUserDetails {
     
     @UiField DivElement editImageLinkUi;
     
-    public UserAccountDetails(Presenter presenter) {
-        super(presenter);
+    public UserAccountDetails() {
         UseraccountDetailsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
     
     @Override
-    protected void userChanged(UserDTO currentUser) {
-        super.userChanged(currentUser);
+    public void setUser(UserDTO currentUser) {
+        super.setUser(currentUser);
         // TODO correct message
         editImageLinkUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available

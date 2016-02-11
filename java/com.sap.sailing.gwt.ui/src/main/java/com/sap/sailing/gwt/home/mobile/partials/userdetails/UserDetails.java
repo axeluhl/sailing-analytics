@@ -12,8 +12,7 @@ public class UserDetails extends AbstractUserDetails {
     
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
     
-    public UserDetails(Presenter presenter) {
-        super(presenter);
+    public UserDetails() {
         UserDetailsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }

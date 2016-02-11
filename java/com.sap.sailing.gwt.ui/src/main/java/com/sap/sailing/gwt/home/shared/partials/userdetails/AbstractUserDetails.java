@@ -8,19 +8,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Base view class of the user account details page. This class implements the shared logic of the desktop and mobile version of the page.
  */
-public class AbstractUserDetails extends Composite {
-    public interface Presenter {
-        void handleSaveChangesRequest(String fullName, String company);
-        void handleEmailChangeRequest(String email);
-        void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation);
-    }
+public class AbstractUserDetails extends Composite implements UserDetailsView {
     
     @UiField public InputElement usernameUi;
     @UiField public TextBox nameUi;
@@ -30,10 +24,15 @@ public class AbstractUserDetails extends Composite {
     @UiField public PasswordTextBox newPasswordUi;
     @UiField public PasswordTextBox newPasswordConfirmationUi;
     
-    protected final Presenter presenter;
+    private Presenter presenter;
     
-    public AbstractUserDetails(Presenter presenter) {
+    @Override
+    public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
+    }
+    
+    protected Presenter getPresenter() {
+        return presenter;
     }
     
     @Override
@@ -45,17 +44,16 @@ public class AbstractUserDetails extends Composite {
         setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
     }
 
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        UserDTO currentUser = userManagementContext.getCurrentUser();
-        
-        userChanged(currentUser);
-    }
-
-    protected void userChanged(UserDTO currentUser) {
+    public void setUser(UserDTO currentUser) {
         nameUi.setValue(currentUser.getFullName());
         companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
+        
+        clearPasswordFields();
+    }
+
+    public void clearPasswordFields() {
         oldPasswordUi.setValue("");
         newPasswordUi.setValue("");
         newPasswordConfirmationUi.setValue("");

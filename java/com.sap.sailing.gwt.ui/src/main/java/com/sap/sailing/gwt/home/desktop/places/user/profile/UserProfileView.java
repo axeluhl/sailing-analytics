@@ -5,7 +5,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.AbstractUserDetails;
+import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
@@ -14,7 +14,7 @@ import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
-    public interface Presenter extends AbstractUserDetails.Presenter, NotLoggedInPresenter {
+    public interface Presenter extends NotLoggedInPresenter {
         void handleTabPlaceSelection(TabView<?, ? extends Presenter> selectedActivity);
 
         SafeUri getUrl(AbstractSeriesPlace place);
@@ -41,5 +41,7 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
     void showErrorInCurrentTab(IsWidget errorView);
 
     void setUserManagementContext(AuthenticationContext userManagementContext);
+    
+    UserDetailsView getUserDetailsView();
     
 }

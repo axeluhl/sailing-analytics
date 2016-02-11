@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
 import com.sap.sailing.gwt.home.mobile.partials.userheader.UserHeader;
+import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
@@ -22,14 +23,18 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     
     public UserProfileDetailsViewImpl(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
-        userDetailsUi = new UserDetails(presenter);
+        userDetailsUi = new UserDetails();
         initWidget(uiBinder.createAndBindUi(this));
+    }
+    
+    @Override
+    public UserDetailsView getUserDetailsView() {
+        return userDetailsUi;
     }
     
     @Override
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
         userHeaderUi.setUserManagementContext(userManagementContext);
         decoratorUi.setUserManagementContext(userManagementContext);
-        userDetailsUi.setUserManagementContext(userManagementContext);
     }
 }
