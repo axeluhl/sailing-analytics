@@ -85,8 +85,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
     
     private SAPHeaderWithAuthentication initHeader() {
-        // TODO Label title = new Label(getStringMessages().xxxx());
-        Label title = new Label("TODO: Admin Console");
+        Label title = new Label(getStringMessages().administration());
         title.getElement().getStyle().setColor("white");
         title.getElement().getStyle().setFontSize(20, Unit.PX);
         title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
