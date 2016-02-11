@@ -26,7 +26,6 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
         this.notLoggedInView = notLoggedInView;
         
         notLoggedInView.setPresenter(presenter);
-        notLoggedInView.setMessage(StringMessages.INSTANCE.youAreNotSignedIn());
         notLoggedInView.setSignInText(StringMessages.INSTANCE.signIn());
         
         initWidget(contentHolder);
@@ -67,7 +66,17 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     }
     
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        IsWidget isWidget = isPermitted(userManagementContext) ? getContentWidget() : notLoggedInView;
+        boolean isAuthenticated = userManagementContext.isLoggedIn();
+        boolean isPermitted = isPermitted(userManagementContext);
+        boolean maySeeRealContent = isAuthenticated == isPermitted;
+        
+        IsWidget isWidget = maySeeRealContent ? getContentWidget() : notLoggedInView;
+        
+        if(!maySeeRealContent) {
+            String message = !isAuthenticated ? StringMessages.INSTANCE.youAreNotSignedIn() : StringMessages.INSTANCE
+                    .youDontHaveRequiredPermission();
+            notLoggedInView.setMessage(message);
+        }
 
         Widget widget = isWidget.asWidget();
         if(widget instanceof RequiresResize) {
@@ -80,9 +89,6 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     }
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {
-        if(!userManagementContext.isLoggedIn()) {
-            return false;
-        }
         return permissionToCheck == null || userManagementContext.getCurrentUser().hasPermission(permissionToCheck, permissionsForRoleProvider);
     }
     
