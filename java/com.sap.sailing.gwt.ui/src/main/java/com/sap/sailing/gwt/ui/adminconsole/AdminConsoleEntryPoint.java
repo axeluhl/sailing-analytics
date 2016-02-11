@@ -6,12 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -68,7 +65,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
      
     private void createUI() {
         HeaderPanel headerPanel = new HeaderPanel();
-        SAPHeaderWithAuthentication header = initHeader();
+        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(),
+                getStringMessages().administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(genericSailingAuthentication);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
@@ -82,16 +80,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         headerPanel.setContentWidget(authorizedContentDecorator);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
         rootPanel.add(headerPanel);
-    }
-    
-    private SAPHeaderWithAuthentication initHeader() {
-        Label title = new Label(getStringMessages().administration());
-        title.getElement().getStyle().setColor("white");
-        title.getElement().getStyle().setFontSize(20, Unit.PX);
-        title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        title.getElement().getStyle().setMarginTop(16, Unit.PX);
-        
-        return new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), title);
     }
     
     private Widget createAdminConsolePanel() {

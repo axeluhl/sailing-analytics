@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.common.theme.component.sapheader2;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -17,20 +19,33 @@ public class SAPHeader2 extends Composite {
     @UiField
     DivElement applicationNameUi;
     @UiField
-    SimplePanel pageTitleUi;
-    
+    DivElement pageTitleUi;
+    @UiField
+    DivElement titleUi;
+    @UiField
+    DivElement subTitleUi;
     @UiField
     SimplePanel rightSideUi;
 
-    public SAPHeader2(String applicationName, Widget pageTitle) {
+    public SAPHeader2(String applicationName) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
-
         initWidget(uiBinder.createAndBindUi(this));
-
         applicationNameUi.setInnerText(applicationName != null ? applicationName : "&nbsp;");
-        pageTitleUi.setWidget(pageTitle);
+    }
 
+    public void setHeaderTitle(String title) {
+        titleUi.setInnerText(title);
+    }
 
+    public void setHeaderSubTitle(String subtitle) {
+        if (subtitle == null || subtitle.isEmpty()) {
+            subTitleUi.getStyle().setDisplay(Display.NONE);
+            titleUi.getStyle().setMarginTop(14, Unit.PX);
+        } else {
+            subTitleUi.setInnerText(subtitle);
+            subTitleUi.getStyle().clearDisplay();
+            titleUi.getStyle().clearMarginTop();
+        }
     }
 
     public void addWidgetToRightSide(Widget widget) {

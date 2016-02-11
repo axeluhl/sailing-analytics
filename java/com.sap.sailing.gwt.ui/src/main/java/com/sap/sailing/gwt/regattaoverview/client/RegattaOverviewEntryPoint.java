@@ -34,11 +34,10 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
-    private final Label eventNameLabel = new Label();
-    private final Label venueNameLabel = new Label();
     private final Label clockLabel = new Label();
 
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
+    private SAPHeaderWithAuthentication siteHeader;
 
     @Override
     public void doOnModuleLoad() {
@@ -53,19 +52,14 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         rootPanel.add(containerPanel);
         containerPanel.addStyleName(RegattaOverviewResources.INSTANCE.css().container());
         
-        FlowPanel descriptionUi = new FlowPanel();
-        descriptionUi.setStyleName(style.eventDescription());
-        eventNameLabel.addStyleName(style.eventLabel());
-        venueNameLabel.addStyleName(style.venueLabel());
         clockLabel.addStyleName(style.clockLabel());
-        descriptionUi.add(eventNameLabel);
-        descriptionUi.add(venueNameLabel);
 
-        SAPHeaderWithAuthentication logoAndTitlePanel = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), descriptionUi);
-        new GenericSailingAuthentication(getUserService(), logoAndTitlePanel.getAuthenticationMenuView());
+        siteHeader = new SAPHeaderWithAuthentication(getStringMessages()
+                .sapSailingAnalytics());
+        new GenericSailingAuthentication(getUserService(), siteHeader.getAuthenticationMenuView());
 
-        logoAndTitlePanel.addWidgetToRightSide(clockLabel);
-        containerPanel.addNorth(logoAndTitlePanel, 75);
+        siteHeader.addWidgetToRightSide(clockLabel);
+        containerPanel.addNorth(siteHeader, 75);
 
         String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
         if (eventIdAsString == null) {
@@ -105,9 +99,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override
             public void onEventDTOLoaded(EventDTOLoadedEvent e) {
-                eventNameLabel.setText(e.getCurrentEvent().getName());
-                venueNameLabel.setText(e.getCurrentEvent().venue.getName());
-
+                siteHeader.setHeaderTitle(e.getCurrentEvent().getName());
+                siteHeader.setHeaderSubTitle(e.getCurrentEvent().venue.getName());
             }
         }, EventDTOLoadedEvent.TYPE);
 

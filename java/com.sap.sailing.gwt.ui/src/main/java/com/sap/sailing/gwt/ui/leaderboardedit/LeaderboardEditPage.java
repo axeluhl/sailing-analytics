@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 
 import java.util.List;
 
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.Window;
@@ -62,14 +61,8 @@ public class LeaderboardEditPage extends AbstractSailingEntryPoint {
     }
 
     private SAPHeaderWithAuthentication initHeader() {
-        Label title = new Label(getStringMessages().editScores());
-        title.getElement().getStyle().setColor("white");
-        title.getElement().getStyle().setFontSize(20, Unit.PX);
-        title.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        title.getElement().getStyle().setMarginTop(16, Unit.PX);
-        
-        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(), title);
-        
+        SAPHeaderWithAuthentication header = new SAPHeaderWithAuthentication(getStringMessages().sapSailingAnalytics(),
+                getStringMessages().editScores());
         header.getElement().getStyle().setPosition(Position.FIXED);
         header.getElement().getStyle().setTop(0, Unit.PX);
         header.getElement().getStyle().setWidth(100, Unit.PCT);

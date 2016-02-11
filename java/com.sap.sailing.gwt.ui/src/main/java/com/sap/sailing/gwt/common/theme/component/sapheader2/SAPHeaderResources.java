@@ -14,7 +14,9 @@ public interface SAPHeaderResources extends ClientBundle {
     public interface LocalCss extends CssResource {
         String siteheader();
         String siteheaderLeft();
-        String siteheaderCentered();
+        String siteHeaderTitle();
+        String siteHeaderSubTitle();
+        String siteheader2ndCol();
         String siteheaderRight();
         String logo();
         String logotitle();
