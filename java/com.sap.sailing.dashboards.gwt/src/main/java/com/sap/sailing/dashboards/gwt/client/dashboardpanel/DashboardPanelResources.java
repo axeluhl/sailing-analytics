@@ -26,8 +26,6 @@ public interface DashboardPanelResources extends ClientBundle {
         String startline_advantage_by_wind_container();
         String startline_advantage_by_geometry_container();
         String windcharthint();
-        String windloadinghint();
-        String windloadinghinttext();
         String event_logo();
     }
 }

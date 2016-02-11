@@ -62,40 +62,14 @@
 
 .windcharthint {
 	position: absolute;
-	bottom: 0px;
-	height: 15pt;
-	line-height: 15pt;
-	margin-top: 0px;
+	height: DASHBOARD_FONT_SIZE_SMALL;
+	line-height: DASHBOARD_FONT_SIZE_SMALL;
+	bottom: 3px;
 	vertical-align: middle;
-	font-size: 12pt;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
 	font-family: DASHBOARD_FONT_FAMILY;
 	width: 100%;
 	text-align: center;
-}
-
-.windloadinghint {
-	position: absolute;
-	background-color: white;
-	opacity: 0.4;
-	width: 100%;
-	height: 100%;
-	vertical-align: middle;
-	text-align: center;
-	z-index: 0;
-}
-
-.windloadinghinttext {
-	position: absolute;
-	bottom: 0px;
-	height: 15pt;
-	line-height: 15pt;
-	margin-top: 0pt;
-	vertical-align: middle;
-	font-size: 12pt;
-	font-family: DASHBOARD_FONT_FAMILY;
-	width: 100%;
-	text-align: center;
-	top: 50%;
 }
 
 .event_logo {
