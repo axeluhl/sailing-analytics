@@ -9,9 +9,11 @@
         display: inline-block;
         padding-right: 1em;
     }
-    
+    .panel {
+        padding: 2em 1em;
+    }
     </ui:style>
-    <g:HTMLPanel>
+    <g:HTMLPanel addStyleNames="{style.panel}">
         <div ui:field="messageUi" class="{style.message}" />
         <g:Button styleName="{res.mainCss.button} {res.mainCss.buttonprimary}" ui:field="buttonUi" />
     </g:HTMLPanel>
