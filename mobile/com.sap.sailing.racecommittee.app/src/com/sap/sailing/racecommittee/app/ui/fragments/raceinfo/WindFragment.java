@@ -95,8 +95,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private LocationRequest locationRequest;
     private Location mCurrentLocation;
 
-    private RacePositionsPoller positionPoller;
-
     private IsTrackedReceiver mReceiver;
 
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
@@ -191,14 +189,14 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         setupWindSpeedPicker();
         setupLayouts(false);
 
-        refreshUI();
+        refreshUI(false);
     }
 
     @Override
     public void notifyTick(TimePoint now) {
         super.notifyTick(now);
 
-        refreshUI();
+        refreshUI(true);
     }
 
     @Override
@@ -213,30 +211,34 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     /**
      * refresh location data labels and highlight missing or inaccuracy gps data
      * disable setData button if gps data is missing or inaccurate
+     * @param timeOnly updates only the time since last position
      */
-    private void refreshUI() {
+    private void refreshUI(boolean timeOnly) {
         if (isAdded()) {
             int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
             int redColor = R.color.sap_red;
-            setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
-            setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
-            setTextAndColor(mAccuracyTimestamp, null, whiteColor);
-            if (mAccuracy != null) {
-                mAccuracy.setAccuracy(-1);
+            if (!timeOnly) {
+                setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
+                setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
+                setTextAndColor(mAccuracyTimestamp, null, whiteColor);
+                if (mAccuracy != null) {
+                    mAccuracy.setAccuracy(-1);
+                }
             }
 
             mSetData.setEnabled(false);
             if (mCurrentLocation != null) {
-                double latitude = mCurrentLocation.getLatitude();
-                double longitude = mCurrentLocation.getLongitude();
-//            float accuracy = mCurrentLocation.getAccuracy();
-                long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-                setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
-                setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
-                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)), whiteColor);
-                if (mAccuracy != null) {
-                    mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                if (!timeOnly) {
+                    double latitude = mCurrentLocation.getLatitude();
+                    double longitude = mCurrentLocation.getLongitude();
+                    if (mAccuracy != null) {
+                        mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                    }
+                    setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
+                    setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
                 }
+                long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
+                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)), whiteColor);
 
                 mSetData.setEnabled(true);
             }
@@ -267,19 +269,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         apiClient.unregisterConnectionFailedListener(this);
         apiClient.unregisterConnectionCallbacks(this);
         apiClient.disconnect();
-    }
-
-    /**
-     * adds the polling for buoy data to the polled races, also registers a callback
-     */
-    private void resumePositionPoller() {
-        positionPoller = new RacePositionsPoller(getActivity());
-        positionPoller.register(getRace(), this);
-        ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
-    }
-
-    private void pausePositionPoller() {
-        positionPoller.unregisterAllAndStop();
     }
 
     /**
@@ -412,7 +401,6 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
 
         // disconnect googleApiClient and unregister position poller
         pauseApiClient();
-        pausePositionPoller();
 
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
@@ -422,9 +410,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     public void onResume() {
         super.onResume();
 
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
+
         // connect googleApiClient and register position poller
         resumeApiClient();
-        resumePositionPoller();
 
         //register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
@@ -457,7 +446,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
-        refreshUI();
+        refreshUI(false);
     }
 
     @Override
@@ -469,7 +458,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     public void onConnected(Bundle arg0) {
         LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, this);
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-        refreshUI();
+        refreshUI(false);
     }
 
     @Override

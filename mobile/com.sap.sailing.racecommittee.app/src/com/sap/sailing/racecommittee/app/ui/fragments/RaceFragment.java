@@ -91,7 +91,7 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             String raceId = getArguments().getString(AppConstants.RACE_ID_KEY);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
-                throw new IllegalStateException("Unable to obtain ManagedRace from datastore on start of " + getClass().getName());
+                throw new IllegalStateException("Unable to obtain ManagedRace " + raceId + " from datastore on start of " + getClass().getName());
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");

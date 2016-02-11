@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.views;
 import android.content.Context;
 import android.support.annotation.ColorRes;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -48,9 +49,9 @@ public class AccuracyView extends LinearLayout {
     public void setAccuracy(float accuracy) {
         if (accuracy <= 0) {
             setText(getContext().getString(R.string.not_available), getContext().getResources().getColor(R.color.sap_red));
-            setColor(mSegment01, android.R.color.transparent);
-            setColor(mSegment02, android.R.color.transparent);
-            setColor(mSegment03, android.R.color.transparent);
+            hide(mSegment01);
+            hide(mSegment02);
+            hide(mSegment03);
         } else {
             setText(getContext().getString(R.string.accuracy_value, accuracy), ThemeHelper.getColor(getContext(), R.attr.white));
             if (accuracy <= 10) {
@@ -79,6 +80,13 @@ public class AccuracyView extends LinearLayout {
     private void setColor(ImageView segment, @ColorRes int color) {
         if (segment != null) {
             segment.setBackgroundColor(getContext().getResources().getColor(color));
+            segment.setVisibility(VISIBLE);
+        }
+    }
+
+    private void hide(View view) {
+        if (view != null) {
+            view.setVisibility(GONE);
         }
     }
 }
