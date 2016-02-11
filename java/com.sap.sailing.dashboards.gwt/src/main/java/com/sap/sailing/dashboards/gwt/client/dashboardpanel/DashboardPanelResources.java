@@ -7,25 +7,20 @@ package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
  
 public interface DashboardPanelResources extends ClientBundle {
     
     public static final DashboardPanelResources INSTANCE =  GWT.create(DashboardPanelResources.class);
     
-    @Source("com/sap/sailing/dashboards/gwt/client/images/logo_sap.png")
-    ImageResource logo_sap();
-    
     @Source({"com/sap/sailing/dashboards/gwt/client/theme/theme.gss", "DashboardPanel.gss"})
     DashboardGSS style();
 
     public interface DashboardGSS extends CssResource {
-        String bar();
         String page();
+        String header();
         String collumn();
         String startanalysiscollumn();
         String collumnthree();
-        String logo();
         String right();
         String left();
         String startline_advantage_by_wind_container();
@@ -33,5 +28,6 @@ public interface DashboardPanelResources extends ClientBundle {
         String windcharthint();
         String windloadinghint();
         String windloadinghinttext();
+        String event_logo();
     }
 }

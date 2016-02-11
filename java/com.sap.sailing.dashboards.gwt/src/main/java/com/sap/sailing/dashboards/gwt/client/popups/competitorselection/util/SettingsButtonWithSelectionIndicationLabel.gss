@@ -5,7 +5,7 @@
 	height: DASHBOARD_SPACE_MEDIUM;
 	right: 0px;
 	top: 0px;
-	width: 200px;
+	width: 300px;
 	z-index: 3;
 }
 
@@ -19,7 +19,7 @@
 
 .settings_indication_label {
 	position: absolute;
-	width: 200px;
+	width: 300px;
 	height: DASHBOARD_SPACE_MEDIUM;
 	top: 0px;
 	right: DASHBOARD_SPACE_MEDIUM;

@@ -2,13 +2,17 @@ package com.sap.sailing.dashboards.gwt.client.dashboardpanel;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.Visibility;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -20,7 +24,7 @@ import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.actions.GetIDFromRaceThatIsLiveAction;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.NumberOfWindBotsChangeListener;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverProvider;
-import com.sap.sailing.dashboards.gwt.client.eventlogo.EventLogo;
+import com.sap.sailing.dashboards.gwt.client.header.DashboardHeader;
 import com.sap.sailing.dashboards.gwt.client.notifications.orientation.WrongDeviceOrientationNotification;
 import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidget;
@@ -31,6 +35,8 @@ import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.RaceIdDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 /**
  * This class contains all components of the Dashboard and the basic UI Elements of the Dashboard, like top and bottom
@@ -47,9 +53,9 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
 
     @UiField
     LayoutPanel root;
-
+    
     @UiField
-    HTMLPanel header;
+    DashboardHeader header;
 
     @UiField
     Carousel carousel;
@@ -69,6 +75,9 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     @UiField
     public HTMLPanel windcharthint;
 
+    @UiField
+    public Image eventLogo;
+    
     @UiField(provided = true)
     public StartAnalysisWidget startanalysisComponent;
     
@@ -89,26 +98,46 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
         startlineAdvantageByGeometryWidget = new StartlineAdvantageByGeometryWidget(this.dashboardClientFactory);
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
-        initLogos();
         windcharthint.getElement().setInnerText(stringConstants.dashboardWindChartHint());
-        loadAndAddEventLogo(dashboardClientFactory.getSailingService());
+        loadEventLogoAndName(dashboardClientFactory.getSailingService());
         initAndAddWrongOrientationNotification();
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
-
-    private void initLogos() {
-        Image logo = new Image();
-        logo.setResource(DashboardPanelResources.INSTANCE.logo_sap());
-        logo.getElement().addClassName(DashboardPanelResources.INSTANCE.style().logo());
-        Document.get().getBody().appendChild(logo.getElement());
-    }
     
-    private void loadAndAddEventLogo(SailingServiceAsync sailingServiceAsync){
+    private void loadEventLogoAndName(SailingServiceAsync sailingServiceAsync){
         String eventId = DashboardURLParameters.EVENT_ID.getValue();
         if (eventId != null) {
-            EventLogo eventLogo = EventLogo.getEventLogoFromEventId(sailingServiceAsync, eventId);
-            if (eventLogo != null) {
-                Document.get().getBody().appendChild(eventLogo.getElement());
+            try {
+                final UUID eventUUID = UUID.fromString(eventId);
+                logger.log(Level.INFO, "Loading EventDTO for id " + eventId);
+                sailingServiceAsync.getEventById(eventUUID, true, new AsyncCallback<EventDTO>() {
+                    @Override
+                    public void onSuccess(final EventDTO event) {
+                        logger.log(Level.INFO, "Received EventDTO");
+                        if (event != null) {
+                            final ImageDTO logo = event.getLogoImage();
+                            if (logo != null) {
+                                eventLogo.getElement().setAttribute("src", UriUtils.fromString(logo.getSourceRef()).asString());
+                            } else {
+                                eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+                            }
+                            if (event.getName() != null) {
+                                header.setEventText(event.getName());
+                                Window.setTitle("Dashboard - "+event.getName());
+                            }
+                        } else {
+                            logger.log(Level.INFO, "Received EventDTO is null");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received EventDTO, "+caught.getMessage());
+                        eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+                    }
+                });
+            } catch (IllegalArgumentException e) {
+                eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
             }
         }
     }
@@ -116,24 +145,6 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
     private void initAndAddWrongOrientationNotification(){
         WrongDeviceOrientationNotification wrongDeviceOrientationNotification = new WrongDeviceOrientationNotification();
         Document.get().getBody().appendChild(wrongDeviceOrientationNotification.getElement());
-    }
-
-//    private void addWindBotComponentsAsDataRetrieverListener(WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-//        for (WindBotWidget windBotComponent : windBotComponents) {
-//            logger.log(Level.INFO, "Registering WindBotDataRetrieverListener");
-//            windBotDataRetrieverProvider.addWindBotDataRetrieverListener(windBotComponent);
-//        }
-//    }
-//
-//    private void removeWindBotComponentsAsDataRetrieverListener(
-//            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-//        for (WindBotWidget windBotComponent : windBotComponents) {
-//            windBotDataRetrieverProvider.removeWindBotDataRetrieverListener(windBotComponent);
-//        }
-//    }
-    
-    private void setHeaderText(String raceName) {
-        this.header.getElement().setInnerText(raceName);
     }
     
     @Override
@@ -147,7 +158,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
                         public void onSuccess(RaceIdDTO result) {
                             if (result != null && result.getRaceId() != null) {
                                 logger.log(Level.INFO, "Updating UI with live race id");
-                                setHeaderText(result.getRaceId().getRaceName());
+                                header.setRaceText(result.getRaceId().getRaceName());
                             } else {
                                 logger.log(Level.INFO, "Received null for live race id");
                             }
@@ -186,24 +197,4 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
             logger.log(Level.INFO, "Number of available windbots changed. WindBots List is null");
         }
     }
-//    
-//    private void initWindBotComponents(List<String> windBotIDs,
-//            WindBotDataRetrieverProvider windBotDataRetrieverProvider) {
-//        int windBotAddedCounterTOConsiderForPanels = 0;
-//        removeWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
-//        windBotComponents.clear();
-//        for (String windBotID : windBotIDs) {
-//            if (windBotAddedCounterTOConsiderForPanels == 0) {
-//                WindBotWidget leftwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
-//                leftwindbotcontainer.add(leftwindBotComponent);
-//                windBotComponents.add(leftwindBotComponent);
-//            } else if (windBotAddedCounterTOConsiderForPanels == 1) {
-//                WindBotWidget rightwindBotComponent = new WindBotWidget(windBotID, dashboardClientFactory);
-//                rightwindbotcontainer.add(rightwindBotComponent);
-//                windBotComponents.add(rightwindBotComponent);
-//            }
-//            windBotAddedCounterTOConsiderForPanels++;
-//        }
-//        addWindBotComponentsAsDataRetrieverListener(windBotDataRetrieverProvider);
-//    }
 }

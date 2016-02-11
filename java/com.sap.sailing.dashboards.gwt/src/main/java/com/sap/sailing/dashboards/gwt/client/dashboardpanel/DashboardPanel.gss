@@ -1,18 +1,5 @@
 @require 'theme';
 
-.bar {
-	height: 100%;
-	margin-top: 20pt;
-	line-height: 15pt;
-	vertical-align: middle;
-	font-size: 15pt;
-	font-family: DASHBOARD_FONT_FAMILY;
-	width: 100%;
-	text-align: center;
-	font-weight: bold;
-	overflow: visible;
-}
-
 .page {
 	position: absolute;
 	border: none;
@@ -22,15 +9,12 @@
 	top: 0;
 	bottom: 30pt;
 	margin: 5pt;
+	margin-top: 0px;
 }
 
-.logo {
-	position: absolute;
-	width: 48pt;
-	height: 23.5pt;
-	margin-top: 17.5pt;
+.header {
+	margin-top:20px;
 	margin-left: 10pt;
-	z-index: 1;
 }
 
 .collumn {
@@ -112,4 +96,13 @@
 	width: 100%;
 	text-align: center;
 	top: 50%;
+}
+
+.event_logo {
+	position: absolute;
+	height: DASHBOARD_SPACE_MEDIUM;
+	width: auto;
+	right: 10pt;
+	bottom: 10pt;
+	z-index: 1;
 }

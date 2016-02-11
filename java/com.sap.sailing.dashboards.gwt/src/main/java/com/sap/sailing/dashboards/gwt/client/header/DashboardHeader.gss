@@ -33,12 +33,11 @@
 .race {
 	width: 100%;
 	height: DASHBOARD_FONT_SIZE_SMALL;
-	margin-top: DASHBOARD_SPACE_VERY_SMALL;
+	margin-top: 5px;
 	line-height: DASHBOARD_FONT_SIZE_SMALL;
 	vertical-align: middle;
 	font-size: DASHBOARD_FONT_SIZE_SMALL;
 	font-family: DASHBOARD_FONT_FAMILY;
 	text-align: center;
-	font-weight: bold;
 	overflow: visible;
 }
