@@ -14,7 +14,7 @@
 	overflow: visible;
 	background-color: WHITE;
 	border-bottom:solid LIGHT_GREY 1px;
-	z-index: 3;
+	z-index: 4;
 }
 
 .dashboard_widget_no_data_message_container {

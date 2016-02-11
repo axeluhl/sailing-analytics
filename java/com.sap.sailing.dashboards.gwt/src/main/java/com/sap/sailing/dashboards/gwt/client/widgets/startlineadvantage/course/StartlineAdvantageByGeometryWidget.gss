@@ -5,6 +5,8 @@
 	height: 100%;
 	width: 100%;
 	background-color: LIGHT_GREY;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+    overflow: hidden;
 }
 
 .advantage_maximum_live_average {

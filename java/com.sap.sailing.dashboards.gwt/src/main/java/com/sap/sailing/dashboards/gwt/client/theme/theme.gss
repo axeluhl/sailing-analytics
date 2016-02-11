@@ -27,3 +27,5 @@
 @def DASHBOARD_SPACE_VERY_LARGE eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_SPACE_VERY_LARGE");
 
 @def DASHBOARD_LINE_HEIGHT eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_LINE_HEIGHT");
+
+@def DASHBOARD_BORDER_RADIUS eval("com.sap.sailing.dashboards.gwt.client.theme.Sizes.DASHBOARD_BORDER_RADIUS");

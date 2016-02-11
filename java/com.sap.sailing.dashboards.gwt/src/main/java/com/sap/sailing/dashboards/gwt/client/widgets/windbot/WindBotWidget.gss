@@ -6,6 +6,8 @@
 	width:  100%;
 	background-color: LIGHT_GREY;
 	z-index: 5;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+    overflow: hidden;
 }
 
 .live_average_header {

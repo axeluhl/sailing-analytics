@@ -8,7 +8,9 @@
 	top: 0px;
 	right: 13px;
 	z-index: 5;
-	/*border-bottom-left-radius: 2em;*/
+	border-bottom-left-radius: DASHBOARD_BORDER_RADIUS;
+	border-bottom-right-radius: DASHBOARD_BORDER_RADIUS;
+	overflow:hidden;
 }
 
 .compass{

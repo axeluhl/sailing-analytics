@@ -2,12 +2,14 @@
 
 .startanalysis {
 	position: absolute;
-	overflow: hidden;
 	background-color: LIGHT_GREY;
 	left: 0pt;
 	right: 0pt;
 	top: 0pt;
 	bottom: 0pt;
+	border-radius: DASHBOARD_BORDER_RADIUS;
+    overflow: hidden;
+    z-index: 5;
 }
 
 .current_start_panel {
@@ -32,6 +34,7 @@
 	background-color: WHITE;
 	z-index: 1;
 	opacity: 0.0;
+	border-radius: DASHBOARD_BORDER_RADIUS;
 }
 
 .controll_header_button_visible {
@@ -73,11 +76,19 @@
 
 .card {
 	position: absolute;
-	display: inline;
 	width: 75%;
 	height: 100%;
-	margin-top: 1px; /*Shows otherwise small line at top edge*/
-	overflow: hidden;
+/* 	margin-top: 1px; Shows otherwise small line at top edge */
+	border-radius: DASHBOARD_BORDER_RADIUS !important;
+    overflow: hidden  !important;
+    /*
+    Chrome and Safari are having problems with border radius and animation.
+    http://stackoverflow.com/questions/14383632/webkit-border-radius-and-overflow-bug-when-using-any-animation-transition
+    */
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0)
 }
 
 .card_map_container {
