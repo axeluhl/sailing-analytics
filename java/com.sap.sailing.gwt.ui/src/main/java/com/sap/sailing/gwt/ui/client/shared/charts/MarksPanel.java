@@ -31,14 +31,13 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     private final ListDataProvider<MarkDTO> markDataProvider;    
     private final FlushableSortedCellTableWithStylableHeaders<MarkDTO> markTable;
     
-    // TODO: Maybe write the current time into the add new fix button 
-    // TODO: Style Add new fix button
+    // TODO: Maybe write the current time into the add new fix button
+    // TODO: Deal with multiselection
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
         setTitle("Marks");
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
-        markTable.getElement().getStyle().setMargin(10, Unit.PX);
-        markTable.getElement().getStyle().setProperty("minWidth", 300, Unit.PX);
+        markTable.setStyleName("EditMarkPositionMarkTable");
         SelectionCheckboxColumn<MarkDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<MarkDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),

@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -42,8 +39,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
-import com.google.gwt.maps.client.events.click.ClickMapEvent;
-import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
@@ -98,16 +93,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private Series markSeries;
     private LinePlotOptions markSeriesPlotOptions;
     private final Label noMarkSelectedLabel;
-    
-    private FixPositionChooser currentFixPositionChooser;
-
-    private Set<HandlerRegistration> courseMarkHandlers;
-
-    private Set<String> selectedMarks;
-
     private MapWidget map;
-    private Set<HandlerRegistration> mapListeners;
-
     private boolean visible;
     
     private Map<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> marks;
@@ -116,6 +102,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private final ListDataProvider<MarkDTO> markDataProvider;
     private SideBySideComponentViewer sideBySideComponentViewer;
     
+    private FixPositionChooser currentFixPositionChooser;
     private List<OverlayClickHandler> overlayClickHandlers;
 
     //TODO: Extend timeslider when there are fixes outside the current slider
@@ -133,9 +120,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.selectedRaceIdentifier = selectedRaceIdentifier;
-        this.courseMarkHandlers = new HashSet<>();
-        this.selectedMarks = new HashSet<>();
-        this.mapListeners = new HashSet<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         this.setVisible(false);
         
@@ -216,10 +200,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
-            final double COUNT = 1000;
-            for (double i = 0; i < COUNT; i++) {
-                //fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
-            }
+            //final double COUNT = 1000;
+            //for (double i = 0; i < COUNT; i++) {
+            //    fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
+            //}
             markTracks.put(mark, fixes);
             mark = new MarkDTO("test2", "No Fix");
             fixes = new ArrayList<>();
@@ -359,6 +343,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                         } else {
                             onClick(event);
                         }
+                        MapOptions options = MapOptions.newInstance(false);
+                        options.setDraggable(true);
+                        map.setOptions(options);
                         mouseDown = false;
                     }
                 }
@@ -598,8 +585,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
-            unregisterCourseMarkHandlers();
-            registerCourseMarkListeners();
         } else {
             marksPanel.unselectMarks();
             selectedMark = null;
@@ -609,35 +594,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
-            unregisterCourseMarkHandlers();
         }
         super.setVisible(this.visible);
-    }
-
-    private void unregisterCourseMarkHandlers() {
-        Iterator<HandlerRegistration> iterator = courseMarkHandlers.iterator();
-        while (iterator.hasNext()) {
-            HandlerRegistration handler = iterator.next();
-            handler.removeHandler();
-            iterator.remove();
-        }
-    }
-
-    private void registerCourseMarkListeners() {
-        if (map != null) {
-            Map<String, CourseMarkOverlay> courseMarkOverlays = raceMap.getCourseMarkOverlays();
-            for (final Map.Entry<String, CourseMarkOverlay> courseMark : courseMarkOverlays.entrySet()) {
-                courseMarkHandlers.add(courseMark.getValue().addMouseDownHandler(new MouseDownMapHandler() {
-                    @Override
-                    public void onEvent(MouseDownMapEvent event) {
-                        selectedMarks.add(courseMark.getKey());
-                        MapOptions mapOptions = MapOptions.newInstance(false);
-                        mapOptions.setDraggable(false);
-                        map.setOptions(mapOptions);
-                    }
-                }));
-            }
-        }
     }
     
     @Override
@@ -693,29 +651,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     public void setMap(final MapWidget map) {
         this.map = map;
-        for (HandlerRegistration listener : mapListeners) {
-            listener.removeHandler();
-        }
-        mapListeners.add(this.map.addMouseMoveHandler(new MouseMoveMapHandler() {
-            @Override
-            public void onEvent(MouseMoveMapEvent event) {
-                for (final String markName : selectedMarks) {
-                    CourseMarkOverlay overlay = raceMap.getCourseMarkOverlays().get(markName);
-                    if (overlay != null) {
-                        overlay.setMarkPosition(event.getMouseEvent().getLatLng());
-                    }
-                }
-            }
-        }));
-        mapListeners.add(this.map.addClickHandler(new ClickMapHandler() {
-            @Override
-            public void onEvent(ClickMapEvent event) {
-                selectedMarks.removeAll(selectedMarks);
-                MapOptions mapOptions = MapOptions.newInstance(false);
-                mapOptions.setDraggable(true);
-                map.setOptions(mapOptions);
-            }
-        }));
         for (Map.Entry<MarkDTO, Polyline> polyline : polylines.entrySet()) {
             polyline.getValue().setMap(map);
         }
