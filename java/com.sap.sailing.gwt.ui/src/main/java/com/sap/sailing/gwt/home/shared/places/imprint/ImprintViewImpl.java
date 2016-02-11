@@ -50,7 +50,7 @@ public class ImprintViewImpl extends Composite implements ImprintView {
                 if (c == null) {
                     return "--";
                 } else {
-                    return c.getName();
+                    return c.getName() + ", v." + c.getVersion();
                 }
             }
 
@@ -59,7 +59,7 @@ public class ImprintViewImpl extends Composite implements ImprintView {
                 if (c == null) {
                     appendable.append("--");
                 } else {
-                    appendable.append(c.getName());
+                    appendable.append(c.getName() + ", v." + c.getVersion());
                 }
             }
         });
