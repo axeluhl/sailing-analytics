@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +46,8 @@ import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
+import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
+import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapEvent;
 import com.google.gwt.maps.client.events.mouseup.MouseUpMapHandler;
 import com.google.gwt.maps.client.events.resize.ResizeMapEvent;
@@ -173,7 +176,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
-        chart.getYAxis().setAxisTitleText("").setOption("labels/enabled", false);
+        chart.getYAxis().setAxisTitleText("Distance from average position").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
         markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000")
@@ -274,6 +277,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         private final MenuItem moveMenuItem;
         
         private final FixOverlay overlay;
+        private FixOverlay moveOverlay;
         
         private MouseDownMapHandler mouseDownHandler;
         private HandlerRegistration mouseDownHandlerRegistration;
@@ -333,14 +337,36 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                             currentY = pixel.getY();
                         } catch (TypeException e) {
                         }
+                        final int index = getIndexOfFixInPolyline(mark, fix);
                         if(!dragging && Math.sqrt(Math.pow(currentX - mouseDownX, 2) +
                                 Math.pow(currentY - mouseDownY, 2)) > 15) {
                             dragging = true;
+                            overlay.setVisible(false);
+                            setRedPoint(index);
+                            moveOverlay = new FixOverlay(map, overlay.getZIndex(), overlay.getGPSFixDTO(), overlay.getType(),
+                                    "#f00", raceMap.getCoordinateSystem());
+                            moveOverlay.addMouseUpHandler(new MouseUpMapHandler() {
+                                @Override
+                                public void onEvent(MouseUpMapEvent event) {
+                                    editMarkFix(mark, fix, fix.position);
+                                    overlay.setVisible(true);
+                                    resetPointColor(index);
+                                    moveOverlay.removeFromMap();
+                                    moveOverlay = null;
+                                    
+                                    MapOptions options = MapOptions.newInstance(false);
+                                    options.setDraggable(true);
+                                    map.setOptions(options);
+                                    mouseDown = false;
+                                }
+                            });
                         }
                         if (dragging) {
                             fix.position = raceMap.getCoordinateSystem().getPosition(event.getMouseEvent().getLatLng());
                             overlay.setGPSFixDTO(fix);
-                            polyline.getPath().setAt(getIndexOfFixInPolyline(mark, fix), event.getMouseEvent().getLatLng());
+                            moveOverlay.setGPSFixDTO(fix);
+                            updateRedPoint(index);
+                            polyline.getPath().setAt(index, event.getMouseEvent().getLatLng());
                         }
                     }
                 }
@@ -349,10 +375,26 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 @Override
                 public void onEvent(MouseUpMapEvent event) {
                     if (mouseDown) {
+                        if (!dragging) {
+                            onClick(event);
+                        }
+                        MapOptions options = MapOptions.newInstance(false);
+                        options.setDraggable(true);
+                        map.setOptions(options);
+                        mouseDown = false;
+                    }
+                }
+            });
+            map.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                @Override
+                public void onEvent(MouseOutMapEvent event) {
+                    if (mouseDown) {
                         if (dragging) {
                             editMarkFix(mark, fix, fix.position);
-                        } else {
-                            onClick(event);
+                            overlay.setVisible(true);
+                            resetPointColor(getIndexOfFixInPolyline(mark, fix));
+                            moveOverlay.removeFromMap();
+                            moveOverlay = null;
                         }
                         MapOptions options = MapOptions.newInstance(false);
                         options.setDraggable(true);
@@ -482,6 +524,29 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
     }
     
+    public void setRedPoint(Point[] points, int index) {
+        points[index].setMarker(new Marker().setFillColor("#f00"));
+    }
+    
+    public void setRedPoint(int index) {
+        Point[] points = markSeries.getPoints();
+        setRedPoint(points, index);
+        setSeriesPoints(markSeries, points);
+    }
+    
+    public void updateRedPoint(int index) {
+        Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
+        setRedPoint(points, index);
+        setSeriesPoints(markSeries, points);
+        chart.redraw();
+    }
+    
+    public void resetPointColor(int index) {
+        Point[] points = markSeries.getPoints();
+        points[index].setMarker(new Marker().setFillColor(selectedMark.color));
+        setSeriesPoints(markSeries, points);
+    }
+    
     private void loadData(final Date from, final Date to) {
         if (selectedRaceIdentifier != null && from != null && to != null && marks == null) {
             setWidget(chart);
@@ -577,23 +642,27 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
     }
     
-    private void setSeriesPoints(MarkDTO mark) {
+    public Point[] getSeriesPoints(Collection<GPSFixDTO> fixes) {
         double latAverage = 0;
         double lngAverage = 0;
-        for (GPSFixDTO fix : marks.get(mark).keySet()) {
+        for (GPSFixDTO fix : fixes) {
             latAverage += fix.position.getLatDeg();
             lngAverage += fix.position.getLngDeg();
         }
-        latAverage /= marks.get(mark).size();
-        lngAverage /= marks.get(mark).size();
+        latAverage /= fixes.size();
+        lngAverage /= fixes.size();
         Position averagePosition = new DegreePosition(latAverage, lngAverage);
         
-        Point[] points = new Point[marks.get(mark).keySet().size()];
+        Point[] points = new Point[fixes.size()];
         int i = 0;
-        for (GPSFixDTO fix : marks.get(mark).keySet()) {
+        for (GPSFixDTO fix : fixes) {
             points[i++] = new Point(fix.timepoint.getTime(), fix.position.getDistance(averagePosition).getMeters());
         }
-        setSeriesPoints(markSeries, points);
+        return points;
+    }
+    
+    private void setSeriesPoints(MarkDTO mark) {
+        setSeriesPoints(markSeries, getSeriesPoints(marks.get(mark).keySet()));
     }
 
     public void setVisible(boolean visible) {
@@ -651,8 +720,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             }
         }
         chart.setSizeToMatchContainer();
-        // it's important here to recall the redraw method, otherwise the bug fix for wrong checkbox positions (nativeAdjustCheckboxPosition)
-        // in the BaseChart class would not be called 
         chart.redraw();
     }
 
