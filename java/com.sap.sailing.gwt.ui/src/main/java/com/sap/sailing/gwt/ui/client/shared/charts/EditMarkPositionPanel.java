@@ -237,10 +237,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453144400000l), new DegreePosition(53.53, 10.01), null, new WindDTO(), null, null, false));
-            final double COUNT = 250;
-            for (double i = 0; i < COUNT; i++) {
-                fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
-            }
+            //final double COUNT = 250;
+            //for (double i = 0; i < COUNT; i++) {
+            //    fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
+            //}
             markTracks.put(mark, fixes);
             mark = new MarkDTO("test2", "No Fix");
             fixes = new ArrayList<>();
