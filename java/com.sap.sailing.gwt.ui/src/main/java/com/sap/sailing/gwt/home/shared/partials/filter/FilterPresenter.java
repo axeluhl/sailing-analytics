@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.sap.sailing.gwt.dispatch.client.DTO;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public abstract class FilterPresenter<T, C extends Comparable<C>> {
     private final Filter<T> alwaysMatchingFilter = new Filter<T>() {

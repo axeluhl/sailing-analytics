@@ -3,15 +3,16 @@
 <module>
 	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
 
-	<inherits name="com.sap.sailing.gwt.dispatch.Dispatch" />
+	<inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
 	
 	<!-- Other module inherits -->
-	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
+	
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	<inherits name="com.sap.sse.security.ui.Authentication" />
 	
 	<!-- Highcharts API -->
 	<inherits name='com.sap.sse.gwt.Highcharts' />

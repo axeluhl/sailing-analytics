@@ -9,8 +9,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
@@ -21,6 +19,8 @@ import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class GetRegattasAndLiveRacesForEventAction implements SailingAction<ResultWithTTL<RegattasAndLiveRacesDTO>>,
         IsClientCacheable {
