@@ -100,12 +100,12 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             leaderboard.refresh();
             List<LeaderboardEntry> allEntries = table.getEntries();
             LeaderboardEntry findelJens = table.getEntry("8875");
-            Integer points = findelJens.getPointsForRace(String.format("R%s", i + 1));
+            Integer points = findelJens.getPointsForRace(String.format("D%s", i + 1));
             Integer rank = findelJens.getTotalRank();
             // Assertions
             assertThat("Number of competitors does not match",
                     allEntries.size(), equalTo(28));
-            assertThat("Points for race 'R" + (i + 1) + "' do not match for competitor '8875' (Findel, Jens)",
+            assertThat("Points for race 'D" + (i + 1) + "' do not match for competitor '8875' (Findel, Jens)",
                     points, equalTo(expectedPointsForFindelJens[i]));
             assertThat("Total rank after " + (i + 1) + " race(s) does not match for competitor '8875' (Findel, Jens)",
                     rank, equalTo(expectedRankForFindelJens[i]));
@@ -136,13 +136,13 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
-        seriesDialog.deleteRace("R3");
+        seriesDialog.deleteRace("D3");
         seriesDialog.pressOk(true);
         // Now we can check the result with our expectation
         leaderboardWindow.switchToWindow();
         leaderboard.refresh();
-        assertThat("Race names do not match after deletion of race 'R3'",
-                table.getRaceNames(), equalTo(Arrays.asList("R1", "R2", "R4", "R5")));
+        assertThat("Race names do not match after deletion of race 'D3'",
+                table.getRaceNames(), equalTo(Arrays.asList("D1", "D2", "D4", "D5")));
     }
     
     @Ignore("This test belongs to bug 1892 and currently fails. It is currently enabled on branch bug1892.")
@@ -175,15 +175,15 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         RegattaStructureManagementPanelPO regattaStructure = adminConsole.goToRegattaStructure();
         RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
-        seriesDialog.renameRace("R1", "Q");
+        seriesDialog.renameRace("D1", "Q");
         seriesDialog.pressOk(true);
         
         // Now we can check the result with our expectation
         leaderboardWindow.switchToWindow();
         leaderboard.refresh();
         List<String> races = table.getRaceNames();
-        assertThat("Race names do not match after renaming race 'R1' to 'Q'",
-                races, equalTo(Arrays.asList("Q", "R2", "R3", "R4", "R5")));
+        assertThat("Race names do not match after renaming race 'D1' to 'Q'",
+                races, equalTo(Arrays.asList("Q", "D2", "D3", "D4", "D5")));
     }
     
     private void configureLeaderboard() {
