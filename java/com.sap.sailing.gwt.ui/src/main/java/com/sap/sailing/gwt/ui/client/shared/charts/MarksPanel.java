@@ -61,33 +61,30 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
                 return object.getName();
             }
         };
-        markTable.addColumn(markNameColumn, new TextHeader("Marks"));
+        markTable.addColumn(markNameColumn, new TextHeader(stringMessages.marks()));
         Column<MarkDTO, String> addFixColumn = new Column<MarkDTO, String>(new ButtonCell()) {
             @Override
             public String getValue(MarkDTO object) {
-                return "Add new fix";
+                return stringMessages.addNewFix();
             }
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 if (parent.hasFixAtTimePoint(mark)) {
-                    parent.showNotification("Please select another timepoint. There already is a fix at the timepoint of the timeslider.", NotificationType.ERROR);
+                    parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
                 } else {
-                    try {
-                        parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
-                            @Override
-                            public void onFailure(Exception reason) {
-                                parent.resetCurrentFixPositionChooser();
-                            }
-                            @Override
-                            public void onSuccess(Position result) {
-                                parent.addMarkFix(mark, parent.timer.getTime(), result);
-                                parent.resetCurrentFixPositionChooser();
-                            }
-                        });
-                    } catch (FixPositionChooser.MultipleFixPositionChooserException e) {
-                    }
+                    parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
+                        @Override
+                        public void onFailure(Exception reason) {
+                            parent.resetCurrentFixPositionChooser();
+                        }
+                        @Override
+                        public void onSuccess(Position result) {
+                            parent.addMarkFix(mark, parent.timer.getTime(), result);
+                            parent.resetCurrentFixPositionChooser();
+                        }
+                    });
                 }
             }
         });

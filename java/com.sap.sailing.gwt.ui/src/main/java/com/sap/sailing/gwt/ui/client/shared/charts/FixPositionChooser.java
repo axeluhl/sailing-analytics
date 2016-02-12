@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.util.List;
+
+import org.moxieapps.gwt.highcharts.client.Point;
+
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -13,6 +17,7 @@ import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -30,29 +35,28 @@ public class FixPositionChooser {
     private FixOverlay moveOverlay;
     private HandlerRegistration centerChangeHandlerRegistration;
     private MenuBar menu;
-
-    static class MultipleFixPositionChooserException extends Exception {
-        private static final long serialVersionUID = 8873620039193019760L;
-    }
+    private final EditMarkPositionPanel editMarkPositionPanel;
     
     /**
      * Use this constructor when there is already a fix with an overlay. 
      * This constructor will automatically assume that an existing fix is moved.
+     * @param editMarkPositionPanel
      * @param map
      * @param polylineFixIndex Position of the fix in the polyline path
      * @param polylinePath
      * @param overlay
      * @param callback
      */
-    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final FixOverlay overlay, 
+    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final StringMessages stringMessages, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final FixOverlay overlay, 
             final Callback<Position, Exception> callback) {
-        this(editMarkPositionPanel, false, map, polylineFixIndex, polylinePath, overlay, overlay.getLatLngPosition(), overlay.getCoordinateSystem(), 
-                "Confirm Move", callback);
+        this(editMarkPositionPanel, stringMessages, false, map, polylineFixIndex, polylinePath, overlay, overlay.getLatLngPosition(), overlay.getCoordinateSystem(), 
+                stringMessages.confirmMove(), callback);
     }
     
     /**
      * Use this constructor when you want to add a fix and not move one.
      * This constructor will automatically assume that there is no existing fix.
+     * @param editMarkPositionPanel
      * @param map
      * @param polylineFixIndex Position of the fix in the polyline path
      * @param polylinePath
@@ -60,17 +64,15 @@ public class FixPositionChooser {
      * @param coordinateSystem
      * @param callback
      */
-    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final LatLng startPos, 
+    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final StringMessages stringMessages, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final LatLng startPos, 
             final CoordinateSystem coordinateSystem, final Callback<Position, Exception> callback) {
-        this(editMarkPositionPanel, true, map, polylineFixIndex, polylinePath, null, startPos, coordinateSystem, 
-                "Confirm New", callback);
+        this(editMarkPositionPanel, stringMessages, true, map, polylineFixIndex, polylinePath, null, startPos, coordinateSystem, 
+                stringMessages.confirmNewFix(), callback);
     }
     
-    // TODO: Differentiate touch and mouse somehow
-    // TODO: Red dot in chart - PointOptions
     // The problem of not knowing if it is a touchscreen or mouse the user is currently using, applies to this class too.
-    // Both input methods are implemented.
-    private FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final boolean newFix, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, 
+    // The touch optimized input is currently implemented, because mouse users can use it more easily than the other way around.
+    private FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final StringMessages stringMessages, final boolean newFix, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, 
             final FixOverlay overlay, final LatLng startPos, final CoordinateSystem coordinateSystem, final String confirmButtonText, 
             final Callback<Position, Exception> callback) {
         this.callback = callback;
@@ -81,7 +83,8 @@ public class FixPositionChooser {
         this.overlay = overlay;
         this.startPos = startPos;
         this.coordinateSystem = coordinateSystem;
-        editMarkPositionPanel.showNotification("Select a fix position by dragging the red dot or the map. Then confirm or cancel with the buttons below.");
+        this.editMarkPositionPanel = editMarkPositionPanel;
+        this.editMarkPositionPanel.showNotification(stringMessages.selectAFixPositionBy());
         setupUIOverlay(confirmButtonText);
     }
     
@@ -93,13 +96,14 @@ public class FixPositionChooser {
                     oldFix.tack, oldFix.legType, oldFix.extrapolated);
             this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), "#f00", coordinateSystem);
         } else {
-            fix = new GPSFixDTO(null, coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
+            fix = new GPSFixDTO(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
             this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem);
         }
         map.panTo(startPos);
         if (polylinePath != null && newFix) {
             polylinePath.insertAt(polylineFixIndex, map.getCenter());
         }
+        setRedPointInChart(fix);
         centerChangeHandlerRegistration = map.addCenterChangeHandler(new CenterChangeMapHandler() {
             @Override
             public void onEvent(CenterChangeMapEvent event) {
@@ -108,6 +112,7 @@ public class FixPositionChooser {
                 if (polylinePath != null) {
                     polylinePath.setAt(polylineFixIndex, map.getCenter());
                 }
+                setRedPointInChart(fix);
             }
         });
         menu = new MenuBar(false);
@@ -116,21 +121,14 @@ public class FixPositionChooser {
             @Override
             public void execute() {
                 destroyUIOverlay();
+                cleanupChart();
                 callback.onSuccess(coordinateSystem.getPosition(map.getCenter()));
             }
         });
         MenuItem cancel = new MenuItem("Cancel", new ScheduledCommand() {
             @Override
             public void execute() {
-                destroyUIOverlay();
-                if (polylinePath != null) {
-                    if (newFix) {
-                        polylinePath.removeAt(polylineFixIndex);
-                    } else {
-                        polylinePath.setAt(polylineFixIndex, overlay.getLatLngPosition());
-                    }
-                }
-                callback.onFailure(null);
+                cancel();
             }
         });
         menu.addItem(confirm);
@@ -142,5 +140,37 @@ public class FixPositionChooser {
         moveOverlay.removeFromMap();
         centerChangeHandlerRegistration.removeHandler();
         menu.removeFromParent();
+    }
+    
+    private void cleanupChart() {
+        editMarkPositionPanel.updateRedPoint(polylineFixIndex);
+        editMarkPositionPanel.resetPointColor(polylineFixIndex);
+        editMarkPositionPanel.redrawChart();
+    }
+    
+    private void setRedPointInChart(GPSFixDTO fix) {
+        List<GPSFixDTO> fixes = editMarkPositionPanel.getMarkFixes();
+        if (newFix) {
+            fixes.add(polylineFixIndex, fix);
+        } else {
+            fixes.set(polylineFixIndex, fix);
+        }
+        Point[] points = editMarkPositionPanel.getSeriesPoints(fixes);
+        editMarkPositionPanel.setRedPoint(points, polylineFixIndex);
+        editMarkPositionPanel.setSeriesPoints(points);
+        editMarkPositionPanel.redrawChart();
+    }
+    
+    public void cancel() {
+        destroyUIOverlay();
+        cleanupChart();
+        if (polylinePath != null) {
+            if (newFix) {
+                polylinePath.removeAt(polylineFixIndex);
+            } else {
+                polylinePath.setAt(polylineFixIndex, overlay.getLatLngPosition());
+            }
+        }
+        callback.onFailure(null);
     }
 }

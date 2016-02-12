@@ -1450,39 +1450,41 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private void showStartLineToFirstMarkTriangle(final CoursePositionsDTO courseDTO){
         final List<Position> startMarkPositions = courseDTO.getStartMarkPositions();
-        final Position windwardStartLinePosition = startMarkPositions.get(0);
-        final Position leewardStartLinePosition = startMarkPositions.get(1);
-        final Position firstMarkPosition = courseDTO.waypointPositions.get(1);
-        windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
-                stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                        .format(windwardStartLinePosition.getDistance(firstMarkPosition)
-                                .getMeters())));
-        leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
-                stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
-                        .format(leewardStartLinePosition.getDistance(firstMarkPosition)
-                                .getMeters())));
-        final LineInfoProvider windwardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
-            @Override
-            public String getLineInfo() {
-                return windwardStartLineMarkToFirstMarkLineText.toString();
-            }
-        };
-        final LineInfoProvider leewardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
-            @Override
-            public String getLineInfo() {
-                return leewardStartLineMarkToFirstMarkLineText.toString();
-            }
-        };
-        windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
-                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
-                        && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
-                windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
-                "grey");
-        leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
-                (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
-                        && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
-                leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
-                "grey");
+        if (startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1) {
+            final Position windwardStartLinePosition = startMarkPositions.get(0);
+            final Position leewardStartLinePosition = startMarkPositions.get(1);
+            final Position firstMarkPosition = courseDTO.waypointPositions.get(1);
+            windwardStartLineMarkToFirstMarkLineText.replace(0, windwardStartLineMarkToFirstMarkLineText.length(),
+                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                            .format(windwardStartLinePosition.getDistance(firstMarkPosition)
+                                    .getMeters())));
+            leewardStartLineMarkToFirstMarkLineText.replace(0, leewardStartLineMarkToFirstMarkLineText.length(),
+                    stringMessages.startLineToFirstMarkTriangle(numberFormatOneDecimal
+                            .format(leewardStartLinePosition.getDistance(firstMarkPosition)
+                                    .getMeters())));
+            final LineInfoProvider windwardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
+                @Override
+                public String getLineInfo() {
+                    return windwardStartLineMarkToFirstMarkLineText.toString();
+                }
+            };
+            final LineInfoProvider leewardStartLineMarkToFirstMarkLineInfoProvider = new LineInfoProvider() {
+                @Override
+                public String getLineInfo() {
+                    return leewardStartLineMarkToFirstMarkLineText.toString();
+                }
+            };
+            windwardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(windwardStartLineMarkToFirstMarkLine, /* showLine */
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
+                            && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
+                    windwardStartLinePosition, firstMarkPosition, windwardStartLineMarkToFirstMarkLineInfoProvider,
+                    "grey");
+            leewardStartLineMarkToFirstMarkLine = showOrRemoveOrUpdateLine(leewardStartLineMarkToFirstMarkLine, /* showLine */
+                    (settings.getHelpLinesSettings().isVisible(HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE))
+                            && startMarkPositions.size() > 1 && courseDTO.waypointPositions.size() > 1,
+                    leewardStartLinePosition, firstMarkPosition, leewardStartLineMarkToFirstMarkLineInfoProvider,
+                    "grey");
+        }
     }
 
     private final StringBuilder startLineAdvantageText = new StringBuilder();
@@ -1656,47 +1658,49 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     private Polyline showOrRemoveOrUpdateLine(Polyline lineToShowOrRemoveOrUpdate, final boolean showLine,
             final Position position1DTO, final Position position2DTO, final LineInfoProvider lineInfoProvider, String lineColorRGB) {
-        if (showLine) {
-            LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
-            LatLng courseMiddleLinePoint2 = coordinateSystem.toLatLng(position2DTO);
-            final MVCArray<LatLng> pointsAsArray;
-            if (lineToShowOrRemoveOrUpdate == null) {
-                PolylineOptions options = PolylineOptions.newInstance();
-                options.setClickable(true);
-                options.setGeodesic(true);
-                options.setStrokeColor(lineColorRGB);
-                options.setStrokeWeight(1);
-                options.setStrokeOpacity(1.0);
-                pointsAsArray = MVCArray.newInstance();
-                lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
-                lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
-                lineToShowOrRemoveOrUpdate.setMap(map);
-                Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
-                lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
-                    @Override
-                    public void onEvent(MouseOverMapEvent event) {
-                        map.setTitle(lineInfoProvider.getLineInfo());
-                    }
-                });
-                lineToShowOrRemoveOrUpdateHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
-                    @Override
-                    public void onEvent(MouseOutMapEvent event) {
-                        map.setTitle("");
-                    }
-                });
+        if (position1DTO != null && position2DTO != null) {
+            if (showLine) {
+                LatLng courseMiddleLinePoint1 = coordinateSystem.toLatLng(position1DTO);
+                LatLng courseMiddleLinePoint2 = coordinateSystem.toLatLng(position2DTO);
+                final MVCArray<LatLng> pointsAsArray;
+                if (lineToShowOrRemoveOrUpdate == null) {
+                    PolylineOptions options = PolylineOptions.newInstance();
+                    options.setClickable(true);
+                    options.setGeodesic(true);
+                    options.setStrokeColor(lineColorRGB);
+                    options.setStrokeWeight(1);
+                    options.setStrokeOpacity(1.0);
+                    pointsAsArray = MVCArray.newInstance();
+                    lineToShowOrRemoveOrUpdate = Polyline.newInstance(options);
+                    lineToShowOrRemoveOrUpdate.setPath(pointsAsArray);
+                    lineToShowOrRemoveOrUpdate.setMap(map);
+                    Hoverline lineToShowOrRemoveOrUpdateHoverline = new Hoverline(lineToShowOrRemoveOrUpdate, options, this);
+                    lineToShowOrRemoveOrUpdate.addMouseOverHandler(new MouseOverMapHandler() {
+                        @Override
+                        public void onEvent(MouseOverMapEvent event) {
+                            map.setTitle(lineInfoProvider.getLineInfo());
+                        }
+                    });
+                    lineToShowOrRemoveOrUpdateHoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
+                        @Override
+                        public void onEvent(MouseOutMapEvent event) {
+                            map.setTitle("");
+                        }
+                    });
+                } else {
+                    pointsAsArray = lineToShowOrRemoveOrUpdate.getPath();
+                    pointsAsArray.removeAt(1);
+                    pointsAsArray.removeAt(0);
+                }
+                adjustInfoOverlayForVisibleLine(lineToShowOrRemoveOrUpdate, position1DTO, position2DTO, lineInfoProvider);
+                pointsAsArray.insertAt(0, courseMiddleLinePoint1);
+                pointsAsArray.insertAt(1, courseMiddleLinePoint2);
             } else {
-                pointsAsArray = lineToShowOrRemoveOrUpdate.getPath();
-                pointsAsArray.removeAt(1);
-                pointsAsArray.removeAt(0);
-            }
-            adjustInfoOverlayForVisibleLine(lineToShowOrRemoveOrUpdate, position1DTO, position2DTO, lineInfoProvider);
-            pointsAsArray.insertAt(0, courseMiddleLinePoint1);
-            pointsAsArray.insertAt(1, courseMiddleLinePoint2);
-        } else {
-            if (lineToShowOrRemoveOrUpdate != null) {
-                lineToShowOrRemoveOrUpdate.setMap(null);
-                adjustInfoOverlayForRemovedLine(lineToShowOrRemoveOrUpdate);
-                lineToShowOrRemoveOrUpdate = null;
+                if (lineToShowOrRemoveOrUpdate != null) {
+                    lineToShowOrRemoveOrUpdate.setMap(null);
+                    adjustInfoOverlayForRemovedLine(lineToShowOrRemoveOrUpdate);
+                    lineToShowOrRemoveOrUpdate = null;
+                }
             }
         }
         return lineToShowOrRemoveOrUpdate;
