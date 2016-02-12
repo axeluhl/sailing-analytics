@@ -886,6 +886,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
         selectedMark = mark;
         if (marksFromToTimes.get(selectedMark) != null) {
+            // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
             timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
         }
         setWidget(chart);
