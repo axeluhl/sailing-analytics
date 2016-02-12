@@ -39,6 +39,8 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
 import com.google.gwt.maps.client.controls.ControlPosition;
+import com.google.gwt.maps.client.events.click.ClickMapEvent;
+import com.google.gwt.maps.client.events.click.ClickMapHandler;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapEvent;
 import com.google.gwt.maps.client.events.mousedown.MouseDownMapHandler;
 import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
@@ -77,6 +79,7 @@ import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -95,6 +98,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private final Label noMarkSelectedLabel;
     private MapWidget map;
     private boolean visible;
+    private List<HandlerRegistration> courseMarkClickHandlers;
+    
+    private Map<MarkDTO, Pair<Date, Date>> marksFromToTimes;
+    private Date raceFromTime;
+    private Date raceToTime;
     
     private Map<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> marks;
     private MarkDTO selectedMark;
@@ -105,8 +113,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private FixPositionChooser currentFixPositionChooser;
     private List<OverlayClickHandler> overlayClickHandlers;
 
-    //TODO: Extend timeslider when there are fixes outside the current slider
-    //TODO: Select mark in table when it is clicked on on the map
     public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
@@ -114,12 +120,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
-        this.polylines = new HashMap<MarkDTO, Polyline>();
+        this.polylines = new HashMap<>();
         this.markDataProvider = new ListDataProvider<>();
         this.marksPanel = new MarksPanel(this, markDataProvider, stringMessages);
         this.noMarkSelectedLabel = new Label("Please select a mark from the list on the left.");
         this.noMarkSelectedLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         this.selectedRaceIdentifier = selectedRaceIdentifier;
+        this.courseMarkClickHandlers = new ArrayList<>();
+        this.marksFromToTimes = new HashMap<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         this.setVisible(false);
         
@@ -198,10 +206,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             MarkDTO mark = new MarkDTO("test1", "Three Fixes");
             mark.color = "#0f0";
             List<GPSFixDTO> fixes = new ArrayList<>();
-            fixes.add(new GPSFixDTO(new Date(1453140600000l), new DegreePosition(53.54, 9.98), null, new WindDTO(), null, null, false));
+            fixes.add(new GPSFixDTO(new Date(1453110600000l), new DegreePosition(53.54, 9.98), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
             fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
+            fixes.add(new GPSFixDTO(new Date(1453144400000l), new DegreePosition(53.53, 10.01), null, new WindDTO(), null, null, false));
             //final double COUNT = 1000;
             //for (double i = 0; i < COUNT; i++) {
             //    fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
@@ -245,7 +254,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private MarkPositionService serviceMock = new MarkPositionServiceMock();
     
     private boolean canRemoveMarkFix(MarkDTO mark, GPSFixDTO fix) {
-        return serviceMock.canRemoveMarkFix("", "", "", mark, fix); //TODO: Readd code for leaderBoardname, ...
+        return serviceMock.canRemoveMarkFix("", "", "", mark, fix);
     }
     
     private static class Pixel extends JavaScriptObject {
@@ -362,7 +371,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     overlay.setVisible(false);
                     if (currentFixPositionChooser == null) {
                         OverlayClickHandler.this.unregisterAll();
-                        currentFixPositionChooser = new FixPositionChooser(map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(), overlay, new Callback<Position, Exception>() {
+                        currentFixPositionChooser = new FixPositionChooser(EditMarkPositionPanel.this, map, getIndexOfFixInPolyline(mark, fix), polyline.getPath(), overlay, new Callback<Position, Exception>() {
                             @Override
                             public void onFailure(Exception reason) {
                                 overlay.setVisible(true);
@@ -479,7 +488,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             showLoading("Loading mark fixes...");
             Map<MarkDTO, List<GPSFixDTO>> result = serviceMock.getMarkTracks("", "", "");
             marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
+            raceFromTime = timeRangeWithZoomProvider.getFromTime();
+            raceToTime = timeRangeWithZoomProvider.getToTime();
             for (final Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
+                Date fromTime = raceFromTime;
+                Date toTime = raceToTime;
                 PolylineOptions options = PolylineOptions.newInstance();
                 if (map != null) {
                     options.setMap(map);
@@ -505,14 +518,15 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     overlay.setVisible(false);
                     overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
                     
-                    if (fix.timepoint.before(timeRangeWithZoomProvider.getFromTime())) {
-                        timeRangeWithZoomProvider.setTimeRange(fix.timepoint, timeRangeWithZoomProvider.getToTime());
-                    } else if (fix.timepoint.after(timeRangeWithZoomProvider.getToTime())) {
-                        timeRangeWithZoomProvider.setTimeRange(timeRangeWithZoomProvider.getFromTime(), fix.timepoint);
+                    if (fromTime.after(fix.timepoint)) {
+                        fromTime = fix.timepoint;
+                    } else if (toTime.before(fix.timepoint)) {
+                        toTime = fix.timepoint;
                     }
                 }
                 marks.put(fixes.getKey(), fixOverlayMap);
                 updatePolylinePoints(fixes.getKey());
+                marksFromToTimes.put(fixes.getKey(), new Pair<Date, Date>(fromTime, toTime));
             }
             List<MarkDTO> markList = new ArrayList<MarkDTO>();
             markList.addAll(marks.keySet());
@@ -532,6 +546,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         updatePolylinePoints(mark);
         setSeriesPoints(mark);
         onResize();
+        showNotification("Fix successfully added.", NotificationType.SUCCESS);
     }
     
     private void editMarkFix(MarkDTO mark, GPSFixDTO fix, Position newPosition) {
@@ -541,6 +556,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         updatePolylinePoints(mark);
         setSeriesPoints(mark);
         onResize();
+        showNotification("Fix position successfully edited.", NotificationType.SUCCESS);
     }
     
     private void removeMarkFix(MarkDTO mark, GPSFixDTO fix) {
@@ -550,6 +566,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         updatePolylinePoints(mark);
         setSeriesPoints(mark);
         onResize();
+        showNotification("Fix successfully removed.", NotificationType.SUCCESS);
     }
     
     private void updatePolylinePoints(MarkDTO mark) {
@@ -592,6 +609,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 sideBySideComponentViewer.setLeftComponent(marksPanel);
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(false);
             }
+            for (final CourseMarkOverlay overlay : raceMap.getCourseMarkOverlays().values()) {
+                courseMarkClickHandlers.add(overlay.addClickHandler(new ClickMapHandler() {
+                    @Override
+                    public void onEvent(ClickMapEvent event) {
+                        marksPanel.select(overlay.getMark());
+                    }
+                }));
+            }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
         } else {
             marksPanel.deselectMarks();
@@ -599,6 +624,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
                 sideBySideComponentViewer.setLeftComponentToggleButtonVisible(true);
+            }
+            for (HandlerRegistration registration : courseMarkClickHandlers) {
+                registration.removeHandler();
             }
             raceMap.unregisterAllCourseMarkInfoWindowClickHandlers();
             raceMap.registerAllCourseMarkInfoWindowClickHandlers();
@@ -701,10 +729,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 hideAllFixOverlays();
                 hideAllPolylines();
                 selected = marksPanel.getSelectedMarks();
+                setWidget(noMarkSelectedLabel);
             } else if (selectedMark == selected.get(0)) {
                 return;
             }
             selectedMark = selected.get(0);
+            if (marksFromToTimes.get(selectedMark) != null) {
+                timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
+            }
             setWidget(chart);
             markSeries.remove();
             markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
@@ -721,6 +753,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             polylines.get(selectedMark).setVisible(true);
         } else {
             selectedMark = null;
+            if (raceFromTime != null && raceToTime != null) {
+                timeRangeWithZoomProvider.setTimeRange(raceFromTime, raceToTime);
+            }
             setWidget(noMarkSelectedLabel);
             showAllCourseMarkOverlays();
             raceMap.showAllHelplinesToShow();
@@ -735,7 +770,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
     }
     
-    public void hideAllCourseMarkOverlaysExceptSelected() {
+    public void hideAllCourseMarkOverlaysExceptSelected() { 
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
             if (!overlay.getKey().equals(selectedMark.getName())) {
                 overlay.getValue().setVisible(false);
@@ -775,7 +810,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             index++;
         }
         Polyline polyline = polylines.get(mark);
-        currentFixPositionChooser = new FixPositionChooser(map, index, polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(), callback);
+        currentFixPositionChooser = new FixPositionChooser(this, map, index, polyline != null ? polyline.getPath() : null, map.getCenter(), raceMap.getCoordinateSystem(), callback);
         return currentFixPositionChooser;
     }
     
@@ -785,20 +820,31 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     private com.google.gwt.user.client.Timer notificationTimer;
     
+    public enum NotificationType {
+        INFO,
+        ERROR,
+        SUCCESS
+    }
+    
     public void showNotification(String message) {
-        if (notificationTimer == null || !notificationTimer.isRunning()) {
-            final HTMLPanel text = new HTMLPanel("<div>" + message + "</div>");
-            text.setStyleName("EditMarkPositionNotification");
-            map.setControls(ControlPosition.TOP_CENTER, text);
-
-            notificationTimer = new com.google.gwt.user.client.Timer(){
-                @Override
-                public void run() {
-                    text.removeFromParent();
-                }
-            };
-            notificationTimer.schedule(8000);
+        showNotification(message, NotificationType.INFO);
+    }
+    
+    public void showNotification(String message, NotificationType type) {
+        if (notificationTimer != null && notificationTimer.isRunning()) {
+            notificationTimer.run();
         }
+        final HTMLPanel text = new HTMLPanel("<div style = \" color: " + (type == NotificationType.ERROR ? "#c00" : type == NotificationType.SUCCESS ? "#0c0" : "#000") + "\">" + message + "</div>");
+        text.setStyleName("EditMarkPositionNotification");
+        map.setControls(ControlPosition.TOP_CENTER, text);
+
+        notificationTimer = new com.google.gwt.user.client.Timer(){
+            @Override
+            public void run() {
+                text.removeFromParent();
+            }
+        };
+        notificationTimer.schedule(5000);
     }
 
     public boolean hasFixAtTimePoint(MarkDTO mark) {

@@ -179,20 +179,22 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
     }
 
     protected void changeMinMaxAndExtremesInterval(Date minTimepoint, Date maxTimepoint, boolean redraw) {
-        XAxis xAxis = chart.getXAxis();
-        if (minTimepoint != null) {
-            xAxis.setMin(minTimepoint.getTime());
-        }
-        if (maxTimepoint != null) {
-            xAxis.setMax(maxTimepoint.getTime());
-        }
-        if (minTimepoint != null && maxTimepoint != null) {
-            xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
-            long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
-            xAxis.setTickInterval(tickInterval);
-        }
-        if (redraw) {
-            chart.redraw();
+        if (chart != null) {
+            XAxis xAxis = chart.getXAxis();
+            if (minTimepoint != null) {
+                xAxis.setMin(minTimepoint.getTime());
+            }
+            if (maxTimepoint != null) {
+                xAxis.setMax(maxTimepoint.getTime());
+            }
+            if (minTimepoint != null && maxTimepoint != null) {
+                xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
+                long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
+                xAxis.setTickInterval(tickInterval);
+            }
+            if (redraw) {
+                chart.redraw();
+            }
         }
     }
 

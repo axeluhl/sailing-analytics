@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel.NotificationType;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
@@ -71,7 +72,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 if (parent.hasFixAtTimePoint(mark)) {
-                    parent.showNotification("Please select another timepoint. There already is a fix at the timepoint of the timeslider.");
+                    parent.showNotification("Please select another timepoint. There already is a fix at the timepoint of the timeslider.", NotificationType.ERROR);
                 } else {
                     try {
                         parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
@@ -149,5 +150,9 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         for (MarkDTO mark : markDataProvider.getList()) {
             deselectMark(mark);
         }
+    }
+
+    public void select(MarkDTO mark) {
+        markTable.getSelectionModel().setSelected(mark, true);
     }
 }

@@ -44,9 +44,9 @@ public class FixPositionChooser {
      * @param overlay
      * @param callback
      */
-    public FixPositionChooser(final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final FixOverlay overlay, 
+    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final FixOverlay overlay, 
             final Callback<Position, Exception> callback) {
-        this(false, map, polylineFixIndex, polylinePath, overlay, overlay.getLatLngPosition(), overlay.getCoordinateSystem(), 
+        this(editMarkPositionPanel, false, map, polylineFixIndex, polylinePath, overlay, overlay.getLatLngPosition(), overlay.getCoordinateSystem(), 
                 "Confirm Move", callback);
     }
     
@@ -60,17 +60,17 @@ public class FixPositionChooser {
      * @param coordinateSystem
      * @param callback
      */
-    public FixPositionChooser(final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final LatLng startPos, 
+    public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final LatLng startPos, 
             final CoordinateSystem coordinateSystem, final Callback<Position, Exception> callback) {
-        this(true, map, polylineFixIndex, polylinePath, null, startPos, coordinateSystem, 
+        this(editMarkPositionPanel, true, map, polylineFixIndex, polylinePath, null, startPos, coordinateSystem, 
                 "Confirm New", callback);
     }
     
     // TODO: Differentiate touch and mouse somehow
-    // TODO: Disable time slider
     // TODO: Red dot in chart - PointOptions
-    // TODO: Show info bubble on what to do
-    private FixPositionChooser(final boolean newFix, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, 
+    // The problem of not knowing if it is a touchscreen or mouse the user is currently using, applies to this class too.
+    // Both input methods are implemented.
+    private FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final boolean newFix, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, 
             final FixOverlay overlay, final LatLng startPos, final CoordinateSystem coordinateSystem, final String confirmButtonText, 
             final Callback<Position, Exception> callback) {
         this.callback = callback;
@@ -81,6 +81,7 @@ public class FixPositionChooser {
         this.overlay = overlay;
         this.startPos = startPos;
         this.coordinateSystem = coordinateSystem;
+        editMarkPositionPanel.showNotification("Select a fix position by dragging the red dot or the map. Then confirm or cancel with the buttons below.");
         setupUIOverlay(confirmButtonText);
     }
     

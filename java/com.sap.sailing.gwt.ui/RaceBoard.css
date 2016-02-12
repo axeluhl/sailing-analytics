@@ -778,7 +778,7 @@ img.openColumn {
 	font-weight: bold;
 	padding: 15px 25px;
 	background-color: #efab00;
-	border: 1px solid #e5e5e5;
+	border: 1px solid gray;
 }
 
 .EditMarkPositionConfirmCancelButtons .gwt-MenuItem:hover {
@@ -792,11 +792,12 @@ img.openColumn {
 
 .EditMarkPositionNotification > div {
 	margin: 80px;
-	color: #f33;
-	font-weight: bold;
 	font-size: 15px;
 	padding: 20px;
+	max-width: 500px;
+	text-align: center;
 	background-color: #fff;
+	line-height: 130%;
 }
 
 .EditMarkPositionMarkTable {
@@ -810,7 +811,7 @@ img.openColumn {
 	width: 100%;
 	font-size: 12px;
 	font-weight: bold;
-	border: 1px solid #e5e5e5;
+	border: 1px solid gray;
 	background-color: #efab00;
 	padding: 7px;
 	color: #fff;
