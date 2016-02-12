@@ -117,6 +117,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
@@ -715,12 +716,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void removeTransitions() {
         // remove the canvas animations for boats
-        for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+        for (CanvasOverlayV3 boatOverlay : RaceMap.this.getBoatOverlays().values()) {
             boatOverlay.removeCanvasPositionAndRotationTransition();
         }
         // remove the canvas animations for the info overlays of the selected boats
         for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
             infoOverlay.removeCanvasPositionAndRotationTransition();
+        }
+        for (CourseMarkOverlay markOverlay : courseMarkOverlays.values()) {
+            markOverlay.removeCanvasPositionAndRotationTransition();
         }
         // remove the advantage line animation
         if (advantageTimer != null) {
@@ -958,7 +962,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             updateCoordinateSystemFromSettings();
                         }
                         // Do mark specific actions
-                        showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                        showCourseMarksOnMap(raceMapDataDTO.coursePositions, transitionTimeInMillis);
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
@@ -1084,7 +1088,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
        
-    private void showCourseMarksOnMap(CoursePositionsDTO courseDTO) {
+    private void showCourseMarksOnMap(CoursePositionsDTO courseDTO, long transitionTimeInMillis) {
         if (map != null && courseDTO != null) {
             WaypointDTO endWaypointForCurrentLegNumber = null;
             if(courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {
@@ -1109,7 +1113,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         registerCourseMarkInfoWindowClickHandler(markDTO.getName());
                         courseMarkOverlay.addToMap();
                     } else {
-                        courseMarkOverlay.setMarkPosition(markDTO.position);
+                        courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
                         courseMarkOverlay.setSelected(isSelected);
@@ -1276,7 +1280,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             if (!updateTailsOnly) {
                 for (CompetitorDTO unusedBoatCanvasCompetitorDTO : competitorDTOsOfUnusedBoatCanvases) {
-                    BoatOverlay boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
+                    CanvasOverlayV3 boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
                     boatCanvas.removeFromMap();
                     boatOverlays.remove(unusedBoatCanvasCompetitorDTO);
                 }
@@ -2308,7 +2312,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 while (i.hasNext()) {
                     Entry<CompetitorDTO, BoatOverlay> next = i.next();
                     if (!next.getKey().equals(competitor)) {
-                        BoatOverlay boatOverlay = next.getValue();
+                        CanvasOverlayV3 boatOverlay = next.getValue();
                         boatOverlay.removeFromMap();
                         fixesAndTails.removeTail(next.getKey());
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
