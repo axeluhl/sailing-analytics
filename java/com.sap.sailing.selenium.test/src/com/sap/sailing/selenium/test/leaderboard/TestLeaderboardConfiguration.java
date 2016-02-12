@@ -60,7 +60,7 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
             String raceName = String.format(RACE, i);
             TrackableRaceDescriptor trackableRace = new TrackableRaceDescriptor(EVENT,  raceName, BOAT_CLASS);
             TrackedRaceDescriptor trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, raceName);
-            RaceDescriptor leaderboardRace = new RaceDescriptor(String.format("R%s", i), "Default", false, false, 0);
+            RaceDescriptor leaderboardRace = new RaceDescriptor(String.format("D%s", i), "Default", false, false, 0);
             
             this.trackableRaces.add(trackableRace);
             this.trackedRaces.add(trackedRace);

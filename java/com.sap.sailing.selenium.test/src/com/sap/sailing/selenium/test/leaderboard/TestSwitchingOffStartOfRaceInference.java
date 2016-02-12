@@ -54,7 +54,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRace = new TrackableRaceDescriptor(EVENT,  RACE, BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
-        this.raceColumn = new RaceDescriptor("R3", "Default", false, false, 0.0);
+        this.raceColumn = new RaceDescriptor("D3", "Default", false, false, 0.0);
         clearState(getContextRoot());
         super.setUp();
         adminConsole = configureRegattaAndLeaderboard();
@@ -69,10 +69,10 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
         LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
         List<String> races = leaderboardTable.getRaceNames();
-        assertThat("Expected only R3", races, equalTo(Arrays.asList("R3")));
-        int r3ColumnIndex = leaderboardTable.getColumnIndex("R3");
+        assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
+        int d3ColumnIndex = leaderboardTable.getColumnIndex("D3");
         for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(r3ColumnIndex);
+            String raceColumnContent = e.getColumnContent(d3ColumnIndex);
             assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
         }
         adminConsoleWindow.switchToWindow();
@@ -85,7 +85,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardWindow.switchToWindow();
         leaderboard.refresh();
         for (LeaderboardEntry e : leaderboardTable.getEntries()) {
-            String raceColumnContent = e.getColumnContent(r3ColumnIndex);
+            String raceColumnContent = e.getColumnContent(d3ColumnIndex);
             assertEquals("", raceColumnContent); // all competitors have an empty score because there is no start time anymore
         }
         leaderboardWindow.close();
