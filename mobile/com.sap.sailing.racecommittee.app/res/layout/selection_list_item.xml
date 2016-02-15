@@ -57,6 +57,24 @@
             android:visibility="gone"
             tools:src="@drawable/flag_papa_48dp"
             tools:visibility="visible" />
+
+        <Switch
+            android:id="@+id/item_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:layout_marginRight="@dimen/side_padding"
+            android:layout_toLeftOf="@id/item_icon"
+            android:checked="false"
+            android:showText="true"
+            android:textOff="@string/no"
+            android:textOn="@string/yes"
+            android:thumb="@drawable/switch_thumb"
+            android:thumbTextPadding="@dimen/switch_padding"
+            android:track="@drawable/switch_track"
+            android:visibility="gone"
+            tools:targetApi="LOLLIPOP" />
     </RelativeLayout>
 
     <View

@@ -16,8 +16,10 @@ import android.view.ViewGroup;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.ESSRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.rrs26.RRS26RacingProcedure;
 import com.sap.sailing.domain.common.Wind;
@@ -43,12 +45,14 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
     public static final String START_TIME = "startTime";
     public static final String DEPENDENT_RACE = "dependentRace";
     public static final String START_TIME_DIFF = "startTimeDiff";
+    public static final String RACE_GROUP = "raceGroup";
 
     private static final String TAG = MainScheduleFragment.class.getName();
 
     private SelectionAdapter mAdapter;
     private ArrayList<SelectionItem> mItems;
     private SelectionItem mItemStartTime;
+    private SelectionItem mItemRaceGroup;
     private SelectionItem mItemStartWind;
 
     private String mStartTimeString;
@@ -123,7 +127,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace(), getActivity()));
             }
         };
-        SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, runnable);
+        SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, false, false, runnable);
         if (getRaceState().getCourseDesign() != null) {
             courseItem.setValue(getCourseName());
         }
@@ -137,7 +141,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(WindFragment.newInstance(START_MODE_PRESETUP));
             }
         };
-        mItemStartWind = new SelectionItem(getString(R.string.wind), null, null, runnable);
+        mItemStartWind = new SelectionItem(getString(R.string.wind), null, null, false, false, runnable);
         mItems.add(mItemStartWind);
     }
 
@@ -150,7 +154,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     openFragment(StartProcedureFragment.newInstance(START_MODE_PRESETUP));
                 }
             };
-            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, runnableProcedure));
+            mItems.add(new SelectionItem(getString(R.string.start_procedure), mRacingProcedureType.toString(), null, false, false, runnableProcedure));
             if (RacingProcedureType.RRS26.equals(mRacingProcedureType)) {
                 // LineStart
                 RRS26RacingProcedure procedure = getRaceState().getTypedRacingProcedure();
@@ -162,7 +166,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                     }
                 };
                 Drawable drawable = FlagsResources.getFlagDrawable(getActivity(), flag.name(), mFlagSize);
-                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, runnableMode));
+                mItems.add(new SelectionItem(getString(R.string.start_mode), flag.name(), drawable, false, false, runnableMode));
             } else if (RacingProcedureType.GateStart.equals(mRacingProcedureType)) {
                 // GateStart
                 GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
@@ -173,7 +177,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartPathFinderFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, runnablePathfinder));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_pathfinder), procedure.getPathfinder(), null, false, false, runnablePathfinder));
 
                     Runnable runnableTiming = new Runnable() {
                         @Override
@@ -181,8 +185,15 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper
-                        .getGateTiming(getActivity(), procedure), null, runnableTiming));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper.getGateTiming(getActivity(), procedure), null, false, false, runnableTiming));
+                }
+            } else if (RacingProcedureType.ESS.equals(mRacingProcedureType)) {
+                // Extreme Sailing Series
+                ESSRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
+                if (procedure != null) {
+                    boolean checked = getArguments().getBoolean(RACE_GROUP, getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
+                    mItemRaceGroup = new SelectionItem(getString(R.string.race_group), null, null, true, checked, null);
+                    mItems.add(mItemRaceGroup);
                 }
             }
         }
@@ -216,7 +227,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                 openFragment(StartTimeFragment.newInstance(getArguments()));
             }
         };
-        mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, runnable);
+        mItemStartTime = new SelectionItem(getString(R.string.start_time), mStartTimeString, null, false, false, runnable);
         mItems.add(mItemStartTime);
     }
 
@@ -251,6 +262,10 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
         TimePoint now = MillisecondsTimePoint.now();
         getRaceState().setRacingProcedure(now, mRacingProcedureType);
+        if (RacingProcedureType.ESS.equals(mRacingProcedureType) && mItemRaceGroup != null) {
+            getRaceState().setAdditionalScoringInformationEnabled(MillisecondsTimePoint.now(), /*enable*/ mItemRaceGroup.isChecked(),
+                    AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE);
+        }
         if (mStartTimeDiff == null && mRaceId == null) {
             getRaceState().forceNewStartTime(now, mStartTime);
         } else {
@@ -311,6 +326,9 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         args.putSerializable(START_TIME, mStartTime);
         args.putSerializable(START_TIME_DIFF, mStartTimeDiff);
         args.putSerializable(DEPENDENT_RACE, mRaceId);
+        if (mItemRaceGroup != null) {
+            args.putBoolean(RACE_GROUP, mItemRaceGroup.isChecked());
+        }
 
         getFragmentManager().beginTransaction().replace(R.id.racing_view_container, fragment).commitAllowingStateLoss();
     }

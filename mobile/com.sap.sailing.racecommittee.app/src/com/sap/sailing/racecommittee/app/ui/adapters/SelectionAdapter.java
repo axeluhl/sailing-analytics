@@ -5,7 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -47,13 +49,27 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.View
                 }
             }
         });
+        holder.icon.setVisibility(View.VISIBLE);
         holder.caption.setText(item.getCaption());
         holder.value.setText(item.getValue());
+        holder.mSwitch.setVisibility(View.GONE);
+        holder.mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                item.setChecked(isChecked);
+            }
+        });
         holder.drawable.setImageDrawable(null);
         holder.drawable.setVisibility(View.GONE);
-        if (item.getDrawable() != null) {
-            holder.drawable.setImageDrawable(item.getDrawable());
-            holder.drawable.setVisibility(View.VISIBLE);
+        if (!item.isSwitch()) {
+            if (item.getDrawable() != null) {
+                holder.drawable.setImageDrawable(item.getDrawable());
+                holder.drawable.setVisibility(View.VISIBLE);
+            }
+        } else {
+            holder.icon.setVisibility(View.INVISIBLE);
+            holder.mSwitch.setChecked(item.isChecked());
+            holder.mSwitch.setVisibility(View.VISIBLE);
         }
 
         if (AppUtils.with(mContext).is10inch() && AppUtils.with(mContext).isLand()) {
@@ -80,14 +96,18 @@ public class SelectionAdapter extends RecyclerView.Adapter<SelectionAdapter.View
         public TextView caption;
         public ImageView drawable;
         public TextView value;
+        public Switch mSwitch;
+        public ImageView icon;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
+            icon = ViewHelper.get(itemView, R.id.item_icon);
             layout = ViewHelper.get(itemView, R.id.selection);
             caption = ViewHelper.get(itemView, R.id.item_caption);
             drawable = ViewHelper.get(itemView, R.id.item_flag);
             value = ViewHelper.get(itemView, R.id.item_value);
+            mSwitch = ViewHelper.get(itemView, R.id.item_switch);
         }
     }
 }
