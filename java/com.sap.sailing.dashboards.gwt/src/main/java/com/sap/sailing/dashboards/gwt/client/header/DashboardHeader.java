@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class DashboardHeader extends Composite implements HasWidgets {
 
@@ -34,6 +35,7 @@ public class DashboardHeader extends Composite implements HasWidgets {
         DashboardHeaderResources.INSTANCE.gss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         sapLogo.setResource(DashboardHeaderResources.INSTANCE.sapLogo());
+        setEventText(StringMessages.INSTANCE.dashboardHeader());
     }
     
     public void setEventText(String eventName) {
