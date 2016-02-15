@@ -37,19 +37,19 @@ public class RaceMapImageManager {
      */
     protected ImageTransformer windSensorIconTransformer;
 
-    protected Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> maneuverIconsForTypeAndTargetTack;
+    protected Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> maneuverIconsForTypeAndDirectionIndicatingColor;
 
     private static RaceMapResources resources = GWT.create(RaceMapResources.class);
 
     public RaceMapImageManager() {
-        maneuverIconsForTypeAndTargetTack = new HashMap<Util.Pair<ManeuverType, ManeuverColor>, Marker>();
+        maneuverIconsForTypeAndDirectionIndicatingColor = new HashMap<Util.Pair<ManeuverType, ManeuverColor>, Marker>();
         trueNorthIndicatorIconTransformer = new ImageTransformer(resources.trueNorthIndicatorIcon());
         combinedWindIconTransformer = new ImageTransformer(resources.combinedWindIcon());
         windSensorIconTransformer = new ImageTransformer(resources.expeditionWindIcon());
     }
 
     /**
-     * Loads the map overlay icons The method can only be called after the map is loaded. The {@link #maneuverIconsForTypeAndTargetTack} map
+     * Loads the map overlay icons The method can only be called after the map is loaded. The {@link #maneuverIconsForTypeAndDirectionIndicatingColor} map
      * is filled for all combinations of {@link ManeuverType maneuver types} and {@link ManeuverColor colors}.
      */
     public void loadMapIcons(MapWidget map) {
@@ -61,10 +61,10 @@ public class RaceMapImageManager {
             Marker icon;
             for (ManeuverType maneuver : maneuvers) {
                 icon = createMarker(resources.maneuverMarkerRed());
-                maneuverIconsForTypeAndTargetTack
+                maneuverIconsForTypeAndDirectionIndicatingColor
                         .put(new Util.Pair<ManeuverType, ManeuverColor>(maneuver, ManeuverColor.RED), icon);
                 icon = createMarker(resources.maneuverMarkerGreen());
-                maneuverIconsForTypeAndTargetTack
+                maneuverIconsForTypeAndDirectionIndicatingColor
                         .put(new Util.Pair<ManeuverType, ManeuverColor>(maneuver, ManeuverColor.GREEN), icon);
             }
         }

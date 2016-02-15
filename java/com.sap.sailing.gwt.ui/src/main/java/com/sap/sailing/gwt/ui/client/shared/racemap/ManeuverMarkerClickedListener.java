@@ -19,8 +19,9 @@ public class ManeuverMarkerClickedListener implements ClickMapHandler {
 
     @Override
     public void onEvent(ClickMapEvent event) {
-        if (racemap.getLastInfoWindow() != null) {
-            racemap.getLastInfoWindow().close();
+        final InfoWindow lastInfoWindow = racemap.getLastInfoWindow();
+        if (lastInfoWindow != null) {
+            lastInfoWindow.close();
         }
         LatLng where = racemap.getCoordinateSystem().toLatLng(maneuver.position);
         InfoWindowOptions options = InfoWindowOptions.newInstance();

@@ -2209,7 +2209,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
         LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
-        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack
+        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
                 .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
         MarkerOptions options = MarkerOptions.newInstance();
         options.setIcon(maneuverMarker.getIcon_MarkerImage());
@@ -2793,11 +2793,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     public void setLastInfoWindow(InfoWindow infoWindow) {
         lastInfoWindow = infoWindow;
-
     }
 
     public InfoWindow getLastInfoWindow() {
         return lastInfoWindow;
     }
-
 }
