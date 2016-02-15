@@ -143,11 +143,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     }
 
     public void setBoatFix(GPSFixDTO boatFix, long timeForPositionTransitionMillis) {
-        if (timeForPositionTransitionMillis == -1) {
-            removeCanvasPositionAndRotationTransition();
-        } else {
-            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
-        }
+        updateTransition(timeForPositionTransitionMillis);
         this.boatFix = boatFix;
     }
 
