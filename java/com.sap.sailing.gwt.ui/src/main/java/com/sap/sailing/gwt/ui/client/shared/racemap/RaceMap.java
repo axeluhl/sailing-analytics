@@ -2787,15 +2787,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         return null;
     }
 
-    public DelegateCoordinateSystem getCoordinateSystem() {
+    DelegateCoordinateSystem getCoordinateSystem() {
         return coordinateSystem;
     }
 
-    public void setLastInfoWindow(InfoWindow infoWindow) {
+    void setLastInfoWindow(InfoWindow infoWindow) {
         lastInfoWindow = infoWindow;
     }
 
-    public InfoWindow getLastInfoWindow() {
+    InfoWindow getLastInfoWindow() {
         return lastInfoWindow;
     }
 }
