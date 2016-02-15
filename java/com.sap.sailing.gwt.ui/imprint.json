@@ -673,7 +673,7 @@
                 "RouteConverter is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.",
                 "RouteConverter is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details."
             ],
-            "key": "GPL2.0"
+            "key": "ASL2.0"
         },
         {
             "name": "Simple Logging Facade for Java (SLF4J)",
@@ -746,10 +746,6 @@
         {
             "key": "JDOML",
             "file": "jdoml.txt"
-        },
-        {
-            "key": "GPL2.0",
-            "file": "gpl2.0.txt"
         }
     ]
 }
