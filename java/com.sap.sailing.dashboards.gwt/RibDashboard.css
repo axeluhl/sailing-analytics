@@ -1,10 +1,11 @@
+
 .mgwt-Carousel-Indicator {
-	width: 12.5pt;
-	height: 12.5pt;
+	width: 10px;
+	height: 10px;
 	background-color: #666666;
-	border-radius: 0pt;
-	margin: 5pt;
-	margin-bottom: 12.5pt;
+	border-radius: 5px;
+	margin: 5px;
+	margin-bottom: 20px;
 }
 
 .mgwt-Carousel-Indicator-active {
