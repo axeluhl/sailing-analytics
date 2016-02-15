@@ -71,11 +71,12 @@ public abstract class MartinAbstractMarkPassingTest extends OnlineTracTracBasedT
 
     public void setUp() throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
-        String raceID = "357c700a-9d9a-11e0-85be-406186cbf87c";
+        String raceID = "event_20110609_KielerWoch-505_Race_2";
         if (!loadData(raceID) && !forceReload) {
             System.out.println("Downloading new data from the web.");
             this.setUp("event_20110609_KielerWoch",
-            /* raceId */raceID, new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
+            /* raceId */raceID, /* liveUri */ null, /* storedUri */ null,
+            new ReceiverType[] { ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS,
                     ReceiverType.RACECOURSE, ReceiverType.RAWPOSITIONS });
             OnlineTracTracBasedTest.fixApproximateMarkPositionsForWindReadOut(getTrackedRace(),
                     new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()));
