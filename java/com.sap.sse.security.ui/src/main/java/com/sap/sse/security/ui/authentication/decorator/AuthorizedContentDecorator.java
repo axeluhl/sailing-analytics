@@ -11,9 +11,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.shared.Permission;
 import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
-public class AuthorizedContentDecorator extends Composite implements RequiresResize {
+public class AuthorizedContentDecorator extends Composite implements RequiresResize, NeedsAuthenticationContext {
     
     private final SimplePanel contentHolder = new SimplePanel();
     private Widget content;
@@ -65,6 +66,12 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
         }
     }
     
+    @Override
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        setUserManagementContext(authenticationContext);
+    }
+    
+    // TODO remove
     public void setUserManagementContext(AuthenticationContext userManagementContext) {
         boolean isAuthenticated = userManagementContext.isLoggedIn();
         boolean isPermitted = isPermitted(userManagementContext);
