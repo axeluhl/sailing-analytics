@@ -7,8 +7,9 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
-public class UserHeader extends Composite {
+public class UserHeader extends Composite implements NeedsAuthenticationContext {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     interface MyUiBinder extends UiBinder<Widget, UserHeader> {
@@ -21,12 +22,13 @@ public class UserHeader extends Composite {
     public UserHeader() {
         initWidget(uiBinder.createAndBindUi(this));
     }
-
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
+    
+    @Override
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         UserHeaderResources.INSTANCE.css().ensureInjected();
         imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
-        nameUi.setInnerText(userManagementContext.getUserTitle());
-        usernameUi.setInnerText(userManagementContext.getUserSubtitle());
+        nameUi.setInnerText(authenticationContext.getUserTitle());
+        usernameUi.setInnerText(authenticationContext.getUserSubtitle());
     }
 }

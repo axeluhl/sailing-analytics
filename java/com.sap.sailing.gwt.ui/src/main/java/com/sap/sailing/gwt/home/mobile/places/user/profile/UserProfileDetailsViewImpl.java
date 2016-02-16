@@ -33,8 +33,8 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     }
     
     @Override
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        userHeaderUi.setUserManagementContext(userManagementContext);
-        decoratorUi.setUserManagementContext(userManagementContext);
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        userHeaderUi.setAuthenticationContext(authenticationContext);
+        decoratorUi.setAuthenticationContext(authenticationContext);
     }
 }

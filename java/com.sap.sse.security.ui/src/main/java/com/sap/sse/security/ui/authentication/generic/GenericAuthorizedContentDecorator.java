@@ -18,12 +18,12 @@ public class GenericAuthorizedContentDecorator extends FlyoutBasedAuthorizedCont
     @Override
     protected void onLoad() {
         super.onLoad();
-        setUserManagementContext(genericAuthentication.getAuthenticationManager().getAuthenticationContext());
+        setAuthenticationContext(genericAuthentication.getAuthenticationManager().getAuthenticationContext());
         handlerRegistration = genericAuthentication.getEventBus().addHandler(AuthenticationContextEvent.TYPE, 
                 new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                setUserManagementContext(event.getCtx());
+                setAuthenticationContext(event.getCtx());
             }
         });
     }

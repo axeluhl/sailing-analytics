@@ -64,9 +64,9 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     }
     
     @Override
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        headerUi.setUserManagementContext(userManagementContext);
-        tabPanelUi.getCurrentTab().setUserManagementContext(userManagementContext);
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        headerUi.setAuthenticationContext(authenticationContext);
+        tabPanelUi.getCurrentTab().setAuthenticationContext(authenticationContext);
     }
 
     @SuppressWarnings("unchecked")

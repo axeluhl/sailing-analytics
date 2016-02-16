@@ -8,9 +8,10 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.shared.UserDTO;
 
-public class UserHeader extends Composite {
+public class UserHeader extends Composite implements NeedsAuthenticationContext {
 
     interface MyUiBinder extends UiBinder<Widget, UserHeader> {
     }
@@ -28,16 +29,17 @@ public class UserHeader extends Composite {
         titleUi.setInnerText("testuser");
         subtitleUi.setInnerText("jennifer@auchnichtwennduderletztemenschauferdenwaerts.looser");
     }
-
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        UserDTO currentUser = userManagementContext.getCurrentUser();
+    
+    @Override
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        UserDTO currentUser = authenticationContext.getCurrentUser();
         // TODO correct message
         imageUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available
         imageUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
         
-        titleUi.setInnerText(userManagementContext.getUserTitle());
-        subtitleUi.setInnerText(userManagementContext.getUserSubtitle());
+        titleUi.setInnerText(authenticationContext.getUserTitle());
+        subtitleUi.setInnerText(authenticationContext.getUserSubtitle());
     }
 
 }

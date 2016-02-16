@@ -54,12 +54,12 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
-        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+        currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                currentView.setUserManagementContext(event.getCtx());
+                currentView.setAuthenticationContext(event.getCtx());
             }
         });
     }

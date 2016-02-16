@@ -68,13 +68,8 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-        setUserManagementContext(authenticationContext);
-    }
-    
-    // TODO remove
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        boolean isAuthenticated = userManagementContext.isLoggedIn();
-        boolean isPermitted = isPermitted(userManagementContext);
+        boolean isAuthenticated = authenticationContext.isLoggedIn();
+        boolean isPermitted = isPermitted(authenticationContext);
         boolean maySeeRealContent = isAuthenticated && isPermitted;
         
         IsWidget isWidget = maySeeRealContent ? getContentWidget() : notLoggedInView;

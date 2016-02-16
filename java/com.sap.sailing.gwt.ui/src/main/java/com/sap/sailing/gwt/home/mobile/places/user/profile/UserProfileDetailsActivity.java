@@ -23,7 +23,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         panel.setWidget(currentView);
-        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+        currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
         userDetailsPresenter = new UserDetailsPresenter(currentView.getUserDetailsView(),
                 clientFactory.getAuthenticationManager(), clientFactory.getUserManagementService(), clientFactory
@@ -32,7 +32,7 @@ public class UserProfileDetailsActivity extends AbstractActivity implements User
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                currentView.setUserManagementContext(event.getCtx());
+                currentView.setAuthenticationContext(event.getCtx());
                 userDetailsPresenter.setAuthenticationContext(event.getCtx());
             }
         });

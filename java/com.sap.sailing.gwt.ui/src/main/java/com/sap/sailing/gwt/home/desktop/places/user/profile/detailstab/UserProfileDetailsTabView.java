@@ -34,10 +34,10 @@ public class UserProfileDetailsTabView extends Composite implements UserProfileT
     public void start(UserProfileDetailsPlace myPlace, AcceptsOneWidget contentArea) {
         contentArea.setWidget(view);
     }
-
+    
     @Override
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        currentPresenter.setAuthenticationContext(userManagementContext);
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        currentPresenter.setAuthenticationContext(authenticationContext);
     }
 
     @Override
