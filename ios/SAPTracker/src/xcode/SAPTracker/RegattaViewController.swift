@@ -61,6 +61,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // set values
         navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
+
+        openEventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
         
         // set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
