@@ -64,7 +64,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
         return currentTab;
     }
     
-    @UiChild
+    @UiChild(limit = 1)
     public void addHeader(Widget widget) {
         additionalHeader.setWidget(widget);
     }
