@@ -2877,10 +2877,6 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
     
-    DelegateCoordinateSystem getCoordinateSystem() {
-        return coordinateSystem;
-    }
-
     void setLastInfoWindow(InfoWindow infoWindow) {
         lastInfoWindow = infoWindow;
     }
