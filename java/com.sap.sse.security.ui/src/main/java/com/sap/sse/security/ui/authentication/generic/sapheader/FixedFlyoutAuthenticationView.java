@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic.sapheader;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -10,11 +10,11 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.sap.sse.gwt.common.CommonSharedResources;
 
-public class FixedSailingAuthenticationView extends GenericSailingAuthenticationView {
+public class FixedFlyoutAuthenticationView extends GenericFlyoutAuthenticationView {
     
     private HandlerRegistration resizeHandlerRegistration;
 
-    public FixedSailingAuthenticationView(CommonSharedResources resources) {
+    public FixedFlyoutAuthenticationView(CommonSharedResources resources) {
         super(resources);
 
         popupPanel.addStyleName(res.css().fixed());

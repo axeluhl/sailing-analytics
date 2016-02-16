@@ -1,13 +1,12 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic.sapheader;
 
 import com.sap.sse.gwt.common.CommonSharedResources;
-import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthenticationResources;
 import com.sap.sse.security.ui.authentication.view.AbstractFlyoutAuthenticationView;
 
-public class GenericSailingAuthenticationView extends AbstractFlyoutAuthenticationView {
+public class GenericFlyoutAuthenticationView extends AbstractFlyoutAuthenticationView {
     protected static final SAPHeaderWithAuthenticationResources res = SAPHeaderWithAuthenticationResources.INSTANCE;
 
-    public GenericSailingAuthenticationView(CommonSharedResources resources) {
+    public GenericFlyoutAuthenticationView(CommonSharedResources resources) {
         super(resources);
         res.css().ensureInjected();
         
