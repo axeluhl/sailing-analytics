@@ -5,6 +5,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.userheader.AbstractUserHeader;
 
+/**
+ * Desktop implementation of {@link AbstractUserHeader}.
+ */
 public class UserHeader extends AbstractUserHeader {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 

@@ -5,6 +5,9 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.userheader.AbstractUserHeader;
 
+/**
+ * Mobile (smartphone) implementation of {@link AbstractUserHeader}.
+ */
 public class UserHeader extends AbstractUserHeader {
     interface MyUiBinder extends UiBinder<Widget, UserHeader> {
     }
