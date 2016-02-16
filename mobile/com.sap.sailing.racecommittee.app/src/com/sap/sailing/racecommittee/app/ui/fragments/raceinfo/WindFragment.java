@@ -18,9 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -31,6 +34,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ScreenHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
@@ -43,13 +47,15 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
 import com.sap.sailing.racecommittee.app.ui.views.AccuracyView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
 import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
 import com.sap.sailing.racecommittee.app.utils.GeoUtils;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -60,6 +66,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnRaceUpdatedListener {
@@ -77,6 +85,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
     private Button mSetData;
+    private Button mSetDataMulti;
     private CompassView mCompassView;
     private NumberPicker mWindSpeed;
     private TextView mLatitude;
@@ -96,6 +105,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     private Location mCurrentLocation;
 
     private IsTrackedReceiver mReceiver;
+
+    private List<ManagedRace> mSelectedRaces;
+    private List<ManagedRace> mManagedRaces;
+    private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
 
     public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
@@ -141,6 +154,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         // mWindOff = ViewHelper.get(layout, R.id.wind_off);
         // mWindOn = ViewHelper.get(layout, R.id.wind_on);
         mSetData = ViewHelper.get(layout, R.id.set_data);
+        mSetDataMulti = ViewHelper.get(layout, R.id.set_data_multi);
         mCompassView = ViewHelper.get(layout, R.id.compass_view);
         mWindSpeed = ViewHelper.get(layout, R.id.wind_speed);
         mLatitude = ViewHelper.get(layout, R.id.latitude_value);
@@ -227,6 +241,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             }
 
             mSetData.setEnabled(false);
+            mSetDataMulti.setEnabled(false);
             if (mCurrentLocation != null) {
                 if (!timeOnly) {
                     double latitude = mCurrentLocation.getLatitude();
@@ -241,6 +256,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                 setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)), whiteColor);
 
                 mSetData.setEnabled(true);
+                mSetDataMulti.setEnabled(true);
             }
         }
     }
@@ -288,6 +304,14 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                 @Override
                 public void onClick(View v) {
                     onSendClick();
+                }
+            });
+        }
+        if (mSetDataMulti != null) {
+            mSetDataMulti.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showWindDialog();
                 }
             });
         }
@@ -410,6 +434,12 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     public void onResume() {
         super.onResume();
 
+        mRacesByGroup = ((RacingActivity)getActivity()).getRacesByGroup();
+
+        mManagedRaces = RaceHelper.getManagedRacesAsList(mRacesByGroup, getRace());
+
+        mSelectedRaces = new ArrayList<>();
+
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
 
         // connect googleApiClient and register position poller
@@ -499,6 +529,100 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     protected void saveEntriesInPreferences(Wind wind) {
         preferences.setWindBearingFromDirection(wind.getBearing().reverse().getDegrees());
         preferences.setWindSpeed(wind.getKnots());
+    }
+
+    private void showWindDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(getString(R.string.wind_select_race));
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                for (ManagedRace race : mSelectedRaces) {
+                    race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(), true);
+                }
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setView(setupDialogView());
+        builder.show();
+    }
+
+    private View setupDialogView(){
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View view = inflater.inflate(R.layout.wind_multiple_dialog, null);
+        ListView racesList = (ListView) view.findViewById(R.id.wind_races_list);
+        racesList.setAdapter(new WindAdapter(getActivity(), mManagedRaces));
+        racesList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        racesList.setOnItemClickListener(new ItemClickListener());
+        preselectRacesInDialog(racesList);
+
+        ViewGroup.LayoutParams layoutParams = racesList.getLayoutParams();
+        layoutParams.height = 49 * mManagedRaces.size();
+        int screenHeight = (int)(ScreenHelper.on(getActivity()).getScreenHeight() * 0.65);
+        if (layoutParams.height > screenHeight) {
+            layoutParams.height = screenHeight;
+        }
+        view.setLayoutParams(layoutParams);
+
+        return view;
+    }
+
+    private void preselectRacesInDialog(ListView racesList) {
+        mSelectedRaces.clear();
+        mSelectedRaces.addAll(RaceHelper.getPreSelectedRaces(mRacesByGroup, getRace()));
+        for(int index = 0; index < mManagedRaces.size(); index++){
+            ManagedRace race = mManagedRaces.get(index);
+            if (race != null){
+                racesList.setItemChecked(index, mSelectedRaces.contains(race));
+            }
+        }
+    }
+
+    private static class WindAdapter extends ArrayAdapter<ManagedRaceItem> {
+
+        private static List<ManagedRaceItem> wrap(List<ManagedRace> races) {
+            List<ManagedRaceItem> wrapped = new ArrayList<>();
+            for (ManagedRace race : races) {
+                wrapped.add(new ManagedRaceItem(race));
+            }
+            return wrapped;
+        }
+
+        public WindAdapter(Context context, List<ManagedRace> races) {
+            super(context, R.layout.wind_list_item, wrap(races));
+        }
+
+    }
+
+    private static class ManagedRaceItem {
+
+        private RaceGroupSeriesFleet group;
+        private ManagedRace race;
+
+        public ManagedRaceItem(ManagedRace race) {
+            this.race = race;
+            this.group = new RaceGroupSeriesFleet(race);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s - %s", group.getDisplayName(true), race.getRaceName());
+        }
+
+    }
+
+    private class ItemClickListener implements AdapterView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            ManagedRace race = mManagedRaces.get(position);
+            if(mSelectedRaces.contains(race)){
+                mSelectedRaces.remove(race);
+            }
+            else {
+                mSelectedRaces.add(race);
+            }
+        }
     }
 
     private class EditCourseClick implements View.OnClickListener {

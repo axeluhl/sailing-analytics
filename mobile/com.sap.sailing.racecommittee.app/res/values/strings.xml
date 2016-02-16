@@ -322,6 +322,7 @@
     <string name="wind_speed">Speed</string>
     <string name="wind_position">Position</string>
     <string name="wind_set_data">Set Wind Data</string>
+    <string name="wind_set_data_multi">Set Wind Data (Multi)</string>
     <string name="wind_off">No Wind Sensors</string>
     <string name="wind_on">Wind Sensors active</string>
     <string name="wind_set_position">Set Position</string>
@@ -488,5 +489,6 @@
     <string name="onboarding_scan">Scan QR-Code</string>
     <string name="onboarding_input">Manual Input</string>
     <string name="race_group">Group Racing</string>
+    <string name="wind_select_race">Select Race</string>
 
 </resources>
