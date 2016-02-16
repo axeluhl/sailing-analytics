@@ -8,6 +8,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.userdetails.AbstractUserDetails;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * Desktop implementation of {@link AbstractUserDetails}.
+ */
 public class UserAccountDetails extends AbstractUserDetails {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
