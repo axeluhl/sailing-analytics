@@ -74,8 +74,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
         try {
-            if (!DatabaseHelper.getInstance().markLeaderboardCombnationAvailable(getActivity(),
-                    checkinData.checkinDigest)) {
+            if (!DatabaseHelper.getInstance().markLeaderboardCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinData.checkinDigest);
             }
             DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.marks,

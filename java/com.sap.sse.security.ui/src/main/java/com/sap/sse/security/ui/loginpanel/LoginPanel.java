@@ -77,6 +77,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
+                                /* fullName */ null, /* company */ null,
                                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override

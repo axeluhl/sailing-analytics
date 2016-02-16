@@ -1,145 +1,528 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <artifactId>workspace</artifactId>
-        <groupId>com.sap.sailing</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <artifactId>workspace</artifactId>
+    <groupId>com.sap.sailing</groupId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
 
-    <artifactId>mobile</artifactId>
-    <packaging>pom</packaging>
+  <artifactId>mobile</artifactId>
+  <packaging>pom</packaging>
 
-    <modules>
-<!--
-        <module>com.sap.sailing.racecommittee.app</module>
-        <module>com.sap.sailing.android.shared</module>
-        <module>com.sap.sailing.adnroid.buoy.positioning.app</module>
-        <module>com.sap.sailing.android.tracking.app</module>
--->
-    </modules>
+  <modules>
+    <module>com.sap.sailing.android.shared</module>
+    <module>com.sap.sailing.racecommittee.app</module>
+    <module>com.sap.sailing.android.tracking.app</module>
+    <module>com.sap.sailing.buoy.positioning</module>
+  </modules>
 
-    <properties>
+  <properties>
     <!-- used to copy android apps to the static web dir (auto-update functionality) -->
-        <!-- relative dir as seen from the child modules -->
-        <additional-deployment-dir>../../java/com.sap.sailing.www/apps</additional-deployment-dir>
-        <!-- redefine in child poms -->
-        <additional-deployment-version-file></additional-deployment-version-file>
-        <app-version></app-version>
-    </properties>
-    
-    <dependencyManagement>
-        <dependencies>
-            <!-- needed on remote repository -->
-            <dependency>
-                <groupId>android</groupId>
-                <artifactId>android</artifactId>
-                <version>4.4.2_r4</version>
-                <scope>provided</scope>
-            </dependency>
+    <!-- relative dir as seen from the child modules -->
+    <additional-deployment-dir>../../java/com.sap.sailing.www/apps</additional-deployment-dir>
+    <!-- redefine in child poms -->
+    <additional-deployment-version-file></additional-deployment-version-file>
+    <app-version></app-version>
+    <android.support.version>22.2.1</android.support.version>
+    <play.services.version>7.5.0</play.services.version>
 
-               <!-- needed on remote repository -->
-            <dependency>
-                  <groupId>android.support</groupId>
-                  <artifactId>compatibility-v4</artifactId>
-                  <version>19</version>
-            </dependency>
-            </dependencies>
-    </dependencyManagement>
+    <sign.keystore>../android-keystore/STG-debug.jks</sign.keystore>
+    <sign.alias>stg_debug</sign.alias>
+    <sign.storepass>stg_debug</sign.storepass>
+    <sign.keypass>stg_debug</sign.keypass>
+  </properties>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                    <artifactId>android-maven-plugin</artifactId>
-            <version>3.9.0-rc.1</version>
-            <configuration>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${android.api.groupId}</groupId>
+        <artifactId>android</artifactId>
+        <version>${android.api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>appcompat-v7</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>support-v4</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.android.support</groupId>
+        <artifactId>recyclerview-v7</artifactId>
+        <version>${android.support.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android.gms</groupId>
+        <artifactId>play-services-location</artifactId>
+        <version>${play.services.version}</version>
+        <type>aar</type>
+      </dependency>
+      <dependency>
+        <groupId>com.google.android.gms</groupId>
+        <artifactId>play-services-gcm</artifactId>
+        <version>${play.services.version}</version>
+        <type>aar</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/assets</directory>
+        <filtering>true</filtering>
+        <targetPath>${project.build.directory}/filteredassets</targetPath>
+        <includes>
+            <include>build.info</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/assets</directory>
+        <filtering>false</filtering>
+        <targetPath>${project.build.directory}/filteredassets</targetPath>
+        <excludes>
+            <exclude>build.info</exclude>
+        </excludes>
+      </resource>
+    </resources>
+        <plugins>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.2.0</version>
+                <configuration>
+                    <verbose>true</verbose>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.simpligility.maven.plugins</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+          <configuration>
+            <resourceDirectory>res</resourceDirectory>
+            <assetsDirectory>${project.build.directory}/filteredassets</assetsDirectory>
+            <sourceDirectories>
+              <sourceDirectory>${project.basedir}/src</sourceDirectory>
+            </sourceDirectories>
+            <failOnDuplicatePackages>false</failOnDuplicatePackages>
+            <failOnNonStandardStructure>false</failOnNonStandardStructure>
+            <failOnConflictingLayouts>false</failOnConflictingLayouts>
+            <failOnDuplicatePackages>false</failOnDuplicatePackages>
+            <undeployBeforeDeploy>true</undeployBeforeDeploy>
+            <extractDuplicates>true</extractDuplicates>
+            <release>false</release>
+            <outputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</outputApk>
+            <proguard>
+              <!-- Someone needs to look into this - quite hard to find a configuration that doesnt break everything -->
+              <skip>true</skip>
+              <configs>
+                <config>${env.ANDROID_HOME}/tools/proguard/proguard-android.txt</config>
+                <config>${project.basedir}/proguard-project.txt</config>
+                <config>${project.basedir}/../proguard-mobile.txt</config>
+              </configs>
+            </proguard>
+            <zipalign>
+              <skip>false</skip>
+              <inputApk>${project.build.directory}/${project.build.finalName}-unaligned.apk</inputApk>
+              <outputApk>${project.build.directory}/${project.build.finalName}.apk</outputApk>
+            </zipalign>
+            <excludeJarResources>
+              <!-- Prevents *-sources.jar to be distributed with the APK -->
+              <excludeJarResource>^.*-sources.jar$</excludeJarResource>
+              <excludeJarResource>^android.*.jar$</excludeJarResource>
+            </excludeJarResources>
+            <dex>
+              <jvmArguments>
+                <jvmArgument>-Xms1024m</jvmArgument>
+                <jvmArgument>-Xmx2048m</jvmArgument>
+              </jvmArguments>
+            </dex>
+            <classesJarExcludes>
+              <classesJarExclude>*.jar</classesJarExclude>
+              <classesJarExclude>generated-sources/**</classesJarExclude>
+              <classesJarExclude>maven-archiver/**</classesJarExclude>
+              <classesJarExclude>sourcebundle-l10n-gen/**</classesJarExclude>
+              <classesJarExclude>p2*</classesJarExclude>
+              <classesJarExclude>MANIFEST.MF</classesJarExclude>
+              <classesJarExclude>*.ap_</classesJarExclude>
+              <classesJarExclude>local-artifacts.properties</classesJarExclude>
+              <classesJarExclude>android/**</classesJarExclude>
+              <classesJarExclude>com/google/**</classesJarExclude>
+              <classesJarExclude>**/R.class</classesJarExclude>
+              <classesJarExclude>**/R$*.class</classesJarExclude>
+            </classesJarExcludes>
             <sdk>
-                <platform>19</platform>
+              <platform>22</platform>
             </sdk>
-            </configuration>
-                    <extensions>true</extensions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.8</version>
-                    <executions>
-                    <execution>
-                        <id>copy-installed</id>
-                        <phase>install</phase>
-                        <goals>
-                        <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                        <artifactItems>
-                            <artifactItem>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>${project.artifactId}</artifactId>
-                            <version>${project.version}</version>
-                            <type>${project.packaging}</type>
-                            </artifactItem>
-                        </artifactItems>
-                        <outputDirectory>${additional-deployment-dir}</outputDirectory>
-                        <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>1.3</version>
-                    <executions>
-                    <execution>
-                        <id>generate-version</id>
-                        <phase>install</phase>
-                        <goals>
-                        <goal>run</goal>
-                        </goals>
-                        <configuration>
-                        <tasks>
-                            <property name="target.dir" value="${additional-deployment-dir}" />
-                            <property name="target.name" value="${additional-deployment-version-file}" />
+            <sign>
+              <debug>false</debug>
+            </sign>
+          </configuration>
+          <executions>
+            <execution>
+              <id>alignApk</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>zipalign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jarsigner-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+              <id>signing</id>
+              <goals>
+                <goal>sign</goal>
+                <goal>verify</goal>
+              </goals>
+              <phase>package</phase>
+              <inherited>true</inherited>
+              <configuration>
+                <removeExistingSignatures>true</removeExistingSignatures>
+                <archive>${project.build.directory}/${project.build.finalName}-unaligned.apk</archive>
+                <keystore>${sign.keystore}</keystore>
+                <alias>${sign.alias}</alias>
+                <storepass>${sign.storepass}</storepass>
+                <keypass>${sign.keypass}</keypass>
+                <verbose>true</verbose>
+                <arguments>
+                  <argument>-sigalg</argument><argument>MD5withRSA</argument>
+                  <argument>-digestalg</argument><argument>SHA1</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.9.1</version>
+        </plugin>
+         <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <nonFilteredFileExtensions>
+            <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+            <nonFilteredFileExtension>pdf</nonFilteredFileExtension>
+          </nonFilteredFileExtensions>
+        </configuration>
+      </plugin>
         
-                            <echo file="${target.dir}/${target.name}" message="${project.build.finalName}.apk=${app-version}" />
-                            <echo message="Version file generated in ${target.dir}/${target.name}." />
-                        </tasks>
-                        </configuration>
-                    </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
-                    <configuration>
-                    <filesets>
-                        <fileset>
-                        <directory>${additional-deployment-dir}</directory>
-                        <includes>
-                            <include>${project.build.finalName}.apk</include>
-                            <include>${additional-deployment-version-file}</include>
-                        </includes>
-                        <excludes>
-                            <exclude>*.gitignore</exclude>
-                        </excludes>
-                        <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.3</version>
+              </plugin>
+        </plugins>
+      </pluginManagement>
     </build>
-</project>
+
+    <profiles>
+      <profile>
+        <!-- activate with parameter '-P non-leandi-release'-->
+        <id>non-leandi-release</id>
+        <activation>
+          <activeByDefault>false</activeByDefault>
+        </activation>
+        <properties>
+          <sign.keystore>../android-keystore/STG.jks</sign.keystore>
+          <sign.alias></sign.alias>
+          <sign.storepass></sign.storepass>
+          <sign.keypass></sign.keypass>
+        </properties>
+
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                  <release>true</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      
+      <profile>
+        <id>leandi-release</id>
+        <activation>
+          <property>
+            <name>ldi.releaseBuild</name>
+            <value>true</value>
+          </property>
+        </activation>
+
+        <build>
+          <pluginManagement>
+            <plugins>
+              <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                  <release>true</release>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      
+      <profile>
+        <id>leandi</id>
+        <activation>
+          <property>
+            <name>ldi.releaseBuild</name>
+          </property>
+        </activation>
+        <dependencies>
+          <dependency>
+            <!-- This dependency simply ensures, that the Android SDK installation is completed on Lean DI before anything else is being built. -->
+            <groupId>com.sap.sailing</groupId>
+            <artifactId>install-android-sdk</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+            <type>pom</type>
+          </dependency>
+        </dependencies>
+      </profile>
+      
+      <profile>
+        <id>non-leandi</id>
+        <activation>
+          <property>
+            <name>!ldi.releaseBuild</name>
+          </property>
+        </activation>
+        <build>
+          <pluginManagement>
+            <plugins>
+            
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                  <execution>
+                    <id>copy-installed</id>
+                    <phase>install</phase>
+                    <goals>
+                      <goal>copy</goal>
+                    </goals>
+                    <configuration>
+                      <artifactItems>
+                        <artifactItem>
+                          <groupId>${project.groupId}</groupId>
+                          <artifactId>${project.artifactId}</artifactId>
+                          <version>${project.version}</version>
+                          <type>${project.packaging}</type>
+                        </artifactItem>
+                      </artifactItems>
+                      <outputDirectory>${additional-deployment-dir}</outputDirectory>
+                      <stripVersion>true</stripVersion>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                  <execution>
+                    <id>generate-version</id>
+                    <phase>install</phase>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                    <configuration>
+                      <tasks>
+                        <property name="target.dir" value="${additional-deployment-dir}" />
+                        <property name="target.name" value="${additional-deployment-version-file}" />
+      
+                        <echo file="${target.dir}/${target.name}" message="${project.build.finalName}.apk=${app-version}" />
+                        <echo message="Version file generated in ${target.dir}/${target.name}." />
+                      </tasks>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+              <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                  <filesets>
+                    <fileset>
+                      <directory>${additional-deployment-dir}</directory>
+                      <includes>
+                        <include>${project.build.finalName}.apk</include>
+                        <include>${additional-deployment-version-file}</include>
+                      </includes>
+                      <excludes>
+                        <exclude>*.gitignore</exclude>
+                      </excludes>
+                      <followSymlinks>false</followSymlinks>
+                    </fileset>
+                  </filesets>
+                </configuration>
+              </plugin>
+            </plugins>
+          </pluginManagement>
+        </build>
+      </profile>
+      
+        <profile>
+            <!-- This turns SAP specific signing on. -->
+            <id>leandi-realsign</id>
+            <activation>
+                <property>
+                    <name>ldi.releaseType</name>
+                    <value>customer</value>
+                </property>
+            </activation>
+            <build>
+              <pluginManagement>
+                <plugins>
+                    
+                    <plugin>
+                        <groupId>com.sap.prd.codesign</groupId>
+                        <artifactId>com.sap.prd.codesign.maven-jarsigner-plugin</artifactId>
+                        
+                        <configuration>
+                            <signingTech>ANDROID</signingTech>
+                            <archiveDirectory>${project.build.directory}</archiveDirectory>
+                            <processMainArtifact>false</processMainArtifact>
+                            <processAttachedArtifacts>false</processAttachedArtifacts>
+                            <removeExistingSignatures>true</removeExistingSignatures>
+                            <includes>
+                                <include>${project.build.finalName}-unaligned.apk</include>
+                            </includes>
+                        </configuration>
+                        
+                        <executions>
+                            
+                            <execution>
+                                <id>sign</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                            
+                        </executions>
+                        
+                    </plugin>
+                    <!-- 
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            
+                            <execution>
+                                <id>zip-apk</id>
+                                <phase>integration-test</phase>
+                                
+                                <configuration>
+                                    <tasks>
+                                        <zip
+                                            file="${project.build.directory}/${project.build.finalName}.zip">
+                                            <fileset dir="${project.build.directory}"
+                                            includes="${project.artifactId}.apk" />
+                                        </zip>
+                                    </tasks>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}.zip
+                                            </file>
+                                            <type>zip </type>
+                                            <classifier>smp</classifier>
+                                        </artifact>
+                                        
+                                        TODO implement
+                                        <artifact>
+                                            <file>${project.build.directory}/AndroidMarketMetadata.zip
+                                            </file>
+                                            <type>zip </type>
+                                            <classifier>AndroidMetadata</classifier>
+                                        </artifact>
+                                        
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                            
+                            
+                        </executions>
+                    </plugin> -->
+                </plugins>
+              </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+  </project>

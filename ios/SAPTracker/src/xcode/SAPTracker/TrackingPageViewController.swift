@@ -17,8 +17,8 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
     override func viewDidLoad() {
         dataSource = self
         page1 = storyboard!.instantiateViewControllerWithIdentifier("Timer") as? TimerViewController
-        page2 = storyboard!.instantiateViewControllerWithIdentifier("Speed") as? UIViewController
-        page3 = storyboard!.instantiateViewControllerWithIdentifier("Heading") as? UIViewController
+        page2 = storyboard!.instantiateViewControllerWithIdentifier("Speed")
+        page3 = storyboard!.instantiateViewControllerWithIdentifier("Heading")
         setViewControllers([page1!], direction: UIPageViewControllerNavigationDirection.Forward, animated: false, completion: nil)
     }
     
@@ -34,16 +34,15 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
             return nil
     }
     
-    func pageViewController(pageViewController: UIPageViewController,
-        viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
-            if (viewController == page1) {
-                return page2
-            } else if (viewController == page2) {
-                return page3
-            } else if (viewController == page3) {
-                return page1
-            }
-            return nil
+    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
+        if (viewController == page1) {
+            return page2
+        } else if (viewController == page2) {
+            return page3
+        } else if (viewController == page3) {
+            return page1
+        }
+        return nil
     }
     
     func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
@@ -53,4 +52,5 @@ class TrackingPageViewController : UIPageViewController, UIPageViewControllerDat
     func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
         return 0
     }
+    
 }

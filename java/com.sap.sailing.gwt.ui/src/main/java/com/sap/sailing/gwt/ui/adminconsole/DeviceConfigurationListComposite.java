@@ -1,13 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.Comparator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -22,7 +19,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 
-public class DeviceConfigurationListComposite extends Composite {
+public abstract class DeviceConfigurationListComposite extends Composite {
 
     protected static AdminConsoleTableResources tableResource = GWT.create(AdminConsoleTableResources.class);
     
@@ -61,12 +58,12 @@ public class DeviceConfigurationListComposite extends Composite {
         refreshableConfigurationSelectionModel = new RefreshableMultiSelectionModel<>(new EntityIdentityComparator<DeviceConfigurationMatcherDTO>() {
             @Override
             public boolean representSameEntity(DeviceConfigurationMatcherDTO dto1, DeviceConfigurationMatcherDTO dto2) {
-                return Util.equalsWithNull(dto1.type.name(), dto2.type.name());
+                return Util.equalsWithNull(dto1.clients, dto2.clients);
             }
 
             @Override
             public int hashCode(DeviceConfigurationMatcherDTO t) {
-                return t.type.name() == null ? 0 : t.type.name().hashCode();
+                return t.clients == null ? 0 : t.clients.hashCode();
             }
         }, configurationsDataProvider);
         configurationTable.setSelectionModel(refreshableConfigurationSelectionModel);
@@ -102,50 +99,7 @@ public class DeviceConfigurationListComposite extends Composite {
         });
     }
 
-    protected CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable() {
-        CellTable<DeviceConfigurationMatcherDTO> table = new CellTable<DeviceConfigurationMatcherDTO>(
-                /* pageSize */10000, tableResource);
-        configurationsDataProvider.addDataDisplay(table);
-        table.setWidth("100%");
-
-        ListHandler<DeviceConfigurationMatcherDTO> columnSortHandler = 
-                new ListHandler<DeviceConfigurationMatcherDTO>(configurationsDataProvider.getList());
-        table.addColumnSortHandler(columnSortHandler);
-
-        TextColumn<DeviceConfigurationMatcherDTO> identifierTypeColumn = 
-                new TextColumn<DeviceConfigurationMatcherDTO>() {
-            @Override
-            public String getValue(DeviceConfigurationMatcherDTO identifier) {
-                return identifier.type.name();
-            }
-        };
-        identifierTypeColumn.setSortable(true);
-        columnSortHandler.setComparator(identifierTypeColumn, new Comparator<DeviceConfigurationMatcherDTO>() {
-            @Override
-            public int compare(DeviceConfigurationMatcherDTO r1, DeviceConfigurationMatcherDTO r2) {
-                return new Integer(r1.rank).compareTo(r2.rank);
-            }
-        });
-
-        TextColumn<DeviceConfigurationMatcherDTO> identifierNameColumn = 
-                new TextColumn<DeviceConfigurationMatcherDTO>() {
-            @Override
-            public String getValue(DeviceConfigurationMatcherDTO identifier) {
-                return DeviceConfigurationPanel.renderIdentifiers(identifier.clients, stringMessages);
-            }
-        };
-        identifierNameColumn.setSortable(true);
-        columnSortHandler.setComparator(identifierNameColumn, new Comparator<DeviceConfigurationMatcherDTO>() {
-            @Override
-            public int compare(DeviceConfigurationMatcherDTO r1, DeviceConfigurationMatcherDTO r2) {
-                return r1.toString().compareTo(r2.toString());
-            }
-        });
-
-        table.addColumn(identifierTypeColumn, stringMessages.matcher());
-        table.addColumn(identifierNameColumn, stringMessages.device());
-        return table;
-    }
+    abstract protected CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable();
     
     public RefreshableMultiSelectionModel<DeviceConfigurationMatcherDTO> getSelectionModel() {
         return refreshableConfigurationSelectionModel;

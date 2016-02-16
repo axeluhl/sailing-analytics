@@ -22,6 +22,8 @@ import com.sap.sse.gwt.resources.CommonControlsCSS;
 import com.sap.sse.gwt.resources.Highcharts;
 
 public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, DesktopClientFactory> {
+
+
     @Override
     public void doOnModuleLoad() {
         Document.get().getBody().addClassName(SharedResources.INSTANCE.mainCss().desktop());
@@ -46,7 +48,7 @@ public class DesktopEntryPoint extends AbstractMvpEntryPoint<StringMessages, Des
     }
 
     private void createDesktopApplication(boolean isStandaloneServer) {
-        DesktopClientFactory clientFactory = new TabletAndDesktopApplicationClientFactory(isStandaloneServer);
+        final DesktopClientFactory clientFactory = new TabletAndDesktopApplicationClientFactory(isStandaloneServer);
         ApplicationHistoryMapper applicationHistoryMapper = GWT.create(ApplicationHistoryMapper.class);
         initMvp(clientFactory, applicationHistoryMapper, new DesktopActivityMapper(clientFactory));
     }

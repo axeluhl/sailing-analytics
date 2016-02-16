@@ -7,6 +7,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.mgt.SecurityManager;
+import org.osgi.framework.BundleContext;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
@@ -16,6 +17,14 @@ import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 
+/**
+ * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
+ * {@link BundleContext#registerService(Class, Object, java.util.Dictionary)} and can be discovered by other bundles.
+ * 
+ * @author Axel Uhl (D043530)
+ * @author Benjamin Ebling
+ *
+ */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
 
     SecurityManager getSecurityManager();
@@ -42,11 +51,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
+    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException;
+    
+    void updateUserProperties(String username, String fullName, String company) throws UserManagementException;
 
     User createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException;
 
