@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.theme.component.sapheader2;
+package com.sap.sse.gwt.client.sapheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
@@ -8,7 +8,7 @@ import com.google.gwt.resources.client.ImageResource;
 public interface SAPHeaderResources extends ClientBundle {
     public static final SAPHeaderResources INSTANCE = GWT.create(SAPHeaderResources.class);
 
-    @Source("SAPHeader2.gss")
+    @Source("SAPHeader.gss")
     LocalCss css();
 
     public interface LocalCss extends CssResource {

@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.theme.component.sapheader2;
+package com.sap.sse.gwt.client.sapheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -10,10 +10,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SAPHeader2 extends Composite {
+public class SAPHeader extends Composite {
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 
-    interface SAPHeaderUiBinder extends UiBinder<Widget, SAPHeader2> {
+    interface SAPHeaderUiBinder extends UiBinder<Widget, SAPHeader> {
     }
 
     @UiField
@@ -27,7 +27,7 @@ public class SAPHeader2 extends Composite {
     @UiField
     SimplePanel rightSideUi;
 
-    public SAPHeader2(String applicationName) {
+    public SAPHeader(String applicationName) {
         SAPHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         applicationNameUi.setInnerText(applicationName != null ? applicationName : "&nbsp;");

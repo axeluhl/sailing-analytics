@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic.sapheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

@@ -1,14 +1,14 @@
-package com.sap.sailing.gwt.common.authentication;
+package com.sap.sse.security.ui.authentication.generic.sapheader;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.theme.component.sapheader2.SAPHeader2;
+import com.sap.sse.gwt.client.sapheader.SAPHeader;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
-public class SAPHeaderWithAuthentication extends SAPHeader2 {
+public class SAPHeaderWithAuthentication extends SAPHeader {
     private static final SAPHeaderWithAuthenticationResources res = SAPHeaderWithAuthenticationResources.INSTANCE;
     
     private final SimplePanel rightWrapper;

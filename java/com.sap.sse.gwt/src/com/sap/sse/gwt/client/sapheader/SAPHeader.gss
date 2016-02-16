@@ -52,6 +52,7 @@
   margin: 0px;
   display: inline-block;
 }
+
 .logotitle {
   display: inline-block;
   color: #f6f9fc;

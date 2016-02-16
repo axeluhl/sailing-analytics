@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
-import com.sap.sailing.gwt.common.authentication.SAPHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -20,6 +19,7 @@ import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorat
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDecorator;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class LeaderboardEditPage extends AbstractSailingEntryPoint {
     @Override
