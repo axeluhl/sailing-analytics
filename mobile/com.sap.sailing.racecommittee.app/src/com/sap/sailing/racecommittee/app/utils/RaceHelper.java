@@ -10,10 +10,16 @@ import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class RaceHelper {
     public static String getRaceName(@Nullable ManagedRace race) {
@@ -198,5 +204,45 @@ public class RaceHelper {
 
     private static String getDefaultDelimiter(String delimiter) {
         return delimiter == null ? " - " : delimiter;
+    }
+
+    public static List<ManagedRace> getManagedRacesAsList(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace){
+        List<ManagedRace> races = new ArrayList<>();
+        // Find the race group for which the
+        String raceGroupName = "";
+        if (currentRace != null) {
+            raceGroupName = getRaceGroupName(currentRace);
+            raceGroupName += getSeriesName(currentRace.getSeries());
+            raceGroupName += getFleetName(currentRace.getFleet());
+        }
+        for (RaceGroupSeriesFleet raceGroupSeriesFleet : racesByGroup.keySet()) {
+            String currentGroup = getRaceGroupName(raceGroupSeriesFleet.getRaceGroup());
+            currentGroup += getSeriesName(raceGroupSeriesFleet.getSeries());
+            currentGroup += getFleetName(raceGroupSeriesFleet.getFleet());
+            if (currentGroup.equals(raceGroupName)) {
+                List<ManagedRace> matchingRaces = racesByGroup.get(raceGroupSeriesFleet);
+                races.addAll(matchingRaces);
+            }
+        }
+        return races;
+    }
+
+    public static List<ManagedRace> getPreSelectedRaces(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace){
+        List<ManagedRace> managedRaces = getManagedRacesAsList(racesByGroup, currentRace);
+        List<ManagedRace> preselectedRaces = new ArrayList<>();
+        for(ManagedRace race : managedRaces){
+            if (race != null) {
+                RaceLogRaceStatus status = race.getState().getStatus();
+                boolean check = status != null && (status.equals(RaceLogRaceStatus.PRESCHEDULED) ||
+                        status.equals(RaceLogRaceStatus.SCHEDULED) ||
+                        status.equals(RaceLogRaceStatus.STARTPHASE) ||
+                        status.equals(RaceLogRaceStatus.RUNNING) ||
+                        status.equals(RaceLogRaceStatus.FINISHING));
+                if (check) {
+                    preselectedRaces.add(race);
+                }
+            }
+        }
+        return preselectedRaces;
     }
 }

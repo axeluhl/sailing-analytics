@@ -297,6 +297,7 @@
     <string name="wind_on">Windsensoren aktiv</string>
     <string name="wind_position">Position</string>
     <string name="wind_set_data">Winddaten setzen</string>
+    <string name="wind_set_data_multi">Winddaten setzen (Multi)</string>
     <string name="wind_set_position">Position Setzen</string>
     <string name="wind_speed">Geschwindigkeit</string>
     <string name="wind_kn">kn</string>
@@ -461,5 +462,6 @@
     <string name="onboarding_scan">Scan QR-Code</string>
     <string name="onboarding_input">Manuelle Eingabe</string>
     <string name="race_group">Group Race</string>
+    <string name="wind_select_race">Select Race</string>
 
 </resources>

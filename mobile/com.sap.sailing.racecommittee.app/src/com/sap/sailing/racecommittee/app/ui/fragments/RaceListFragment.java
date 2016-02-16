@@ -361,6 +361,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         super.onStop();
     }
 
+    public LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> getRacesByGroup() {
+        return mRacesByGroup;
+    }
+
     private void registerOnAllRaces() {
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().addChangedListener(stateListener);

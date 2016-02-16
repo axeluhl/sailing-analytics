@@ -3,6 +3,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
@@ -49,6 +51,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -437,6 +440,13 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         if (mRaceList != null) {
             mRaceList.openDrawer();
         }
+    }
+
+    public LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> getRacesByGroup() {
+        if (mRaceList != null) {
+            return mRaceList.getRacesByGroup();
+        }
+        return null;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
