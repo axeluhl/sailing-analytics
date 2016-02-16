@@ -2,6 +2,13 @@
 
 On sapsailing.com, we have a security certificate installed. For root users its key is visible at `/etc/pki/tls/private/star_sapsailing_com.key`. The certicicate is at `/etc/pki/tls/certs/star_sapsailing_com.crt`. To enable SSL on a server, the module `mod_ssl` needs to be installed. Use ``yum install mod_ssl``.
 
+The `/etc/httpd/conf/httpd.conf` file must contain the following in order to ensure that the `ServerName` setting is respected for selecting the appropriate `VirtualHost` element:
+
+<pre>
+    NameVirtualHost *:80
+    NameVirtualHost *:443
+</pre>
+
 When this is done, the server can use the following sequence of directives inside a &lt;VirtualHost&gt; element:
 
 <pre>
