@@ -275,7 +275,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             components.add(editMarkPassingPanel);
-            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, stringMessages);
+            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
+                    asyncActionsExecutor, errorReporter);
             raceMap.setEditMarkPositionPanel(editMarkPositionPanel);
             components.add(editMarkPositionPanel);
         }
@@ -283,7 +284,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
         this.setupUserManagementControlPanel(userService);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {

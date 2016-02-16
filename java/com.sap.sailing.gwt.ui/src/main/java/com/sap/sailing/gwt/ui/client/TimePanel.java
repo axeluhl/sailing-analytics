@@ -528,6 +528,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {

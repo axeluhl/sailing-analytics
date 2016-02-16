@@ -7,6 +7,7 @@ public class HighchartsInjectingEntryPoint implements EntryPoint {
     @Override
     public void onModuleLoad() {
         GWT.log("Inject highcharts");
-        Highcharts.ensureInjected();
+        //Highcharts.ensureInjected();
+        Highstock.ensureInjected();
     }
 }

@@ -1478,4 +1478,20 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String create();
     String thereIsAlreadyAConfigurationForThisDevice();
     String enterDeviceIdentifierName();
+    String marks();
+    String addNewFix();
+    String pleaseSelectOtherTimepoint();
+    String confirmMove();
+    String confirmNewFix();
+    String selectAFixPositionBy();
+    String pleaseSelectAMark();
+    String markFixes();
+    String distanceFromAveragePosition();
+    String useATouchOptimizedUI();
+    String deleteFix();
+    String theDeletionOfThisFix();
+    String loadingMarkFixes();
+    String fixSuccessfullyAdded();
+    String fixPositionSuccessfullyEdited();
+    String fixSuccessfullyRemoved();
 }
