@@ -29,7 +29,6 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.common.configuration.DeviceConfigurationMatcherType;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -436,7 +435,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     DeviceConfigurationMatcherDTO createOrUpdateDeviceConfiguration(DeviceConfigurationMatcherDTO matcherDTO, DeviceConfigurationDTO configurationDTO);
 
-    boolean removeDeviceConfiguration(DeviceConfigurationMatcherType type, List<String> clientIds);
+    boolean removeDeviceConfiguration(List<String> clientIds);
 
     boolean setStartTimeAndProcedure(RaceLogSetStartTimeAndProcedureDTO dto);
     

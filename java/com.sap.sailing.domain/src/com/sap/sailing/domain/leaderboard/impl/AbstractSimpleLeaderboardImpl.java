@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.InvalidatesLeaderboardCache;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -1205,6 +1206,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 leaderboardDTOCache.invalidate(this);
             }
         }
+    }
+
+    @Override
+    public void regattaLogEventAdded(RegattaLogEvent event) {
+        getRaceColumnListeners().notifyListenersAboutRegattaLogEventAdded(event);
     }
 
     @Override

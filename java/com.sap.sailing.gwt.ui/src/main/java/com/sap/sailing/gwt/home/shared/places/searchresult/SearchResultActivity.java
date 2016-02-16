@@ -4,12 +4,12 @@ import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.StringsResult;
 import com.sap.sailing.gwt.home.communication.search.GetSearchResultsAction;
 import com.sap.sailing.gwt.home.communication.search.GetSearchServerNamesAction;
 import com.sap.sailing.gwt.home.communication.search.SearchResultDTO;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.StringsResult;
 
 public class SearchResultActivity extends AbstractActivity {
    
@@ -28,9 +28,9 @@ public class SearchResultActivity extends AbstractActivity {
         if (searchResultPlace.getSearchText() != null && !searchResultPlace.getSearchText().isEmpty()) {
             final String searchText = searchResultPlace.getSearchText();
             view.setSearchText(searchText);
-            GetSearchServerNamesAction action = new GetSearchServerNamesAction();
             searchOnServer(panel, view, new GetSearchResultsAction(searchText));
-            clientFactory.getDispatch().execute(action, new ActivityCallback<StringsResult>(clientFactory, panel) {
+            clientFactory.getDispatch().execute(new GetSearchServerNamesAction(),
+                    new ActivityCallback<StringsResult>(clientFactory, panel) {
                 @Override
                 public void onSuccess(StringsResult result) {
                     for (String serverName : result.getValues()) {

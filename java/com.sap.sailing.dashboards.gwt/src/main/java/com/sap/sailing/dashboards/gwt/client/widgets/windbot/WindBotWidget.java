@@ -23,11 +23,11 @@ import com.sap.sailing.dashboards.gwt.shared.MovingAverage;
 import com.sap.sailing.dashboards.gwt.shared.WindType;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.gwt.dispatch.client.batching.SplitScheduler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sse.gwt.dispatch.client.system.batching.SplitScheduler;
 
 /**
  * The class is an actual widget on the dashboard and shows the measured data of wind bot in a race. It contains a

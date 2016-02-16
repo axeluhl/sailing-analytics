@@ -28,6 +28,7 @@ public interface HeaderResources extends ClientBundle {
         String header_navigation_nav_list();
         String header_navigation_nav_list_item();
         String header_navigation_icon();
+        String header_navigation_iconsignedin();
         String header_navigation_nav_sublist_item();
     }
 }

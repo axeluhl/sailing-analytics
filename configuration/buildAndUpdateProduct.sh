@@ -181,7 +181,11 @@ done
 
 ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
 echo INSTALL goes to $ACDIR
-extra="${extra} -Dgwt.workers=${GWT_WORKERS}"
+echo TMP will be used for java.io.tmpdir and is $TMP
+if [ "$TMP" = "" ]; then
+  export TMP=/tmp
+fi
+extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
 
 shift $((OPTIND-1))
 

@@ -41,7 +41,7 @@ public class MobileApplicationView extends Composite implements ApplicationTopLe
     SimplePanel mainContentPanel;
 
     public MobileApplicationView(MobilePlacesNavigator placeNavigator, EventBus eventBus) {
-        headerPanel = new Header(placeNavigator);
+        headerPanel = new Header(placeNavigator, eventBus);
         footerPanel = new Footer(placeNavigator);
         initWidget(uiBinder.createAndBindUi(this));
         eventBus.addHandler(PlaceChangeEvent.TYPE, new PlaceChangeEvent.Handler() {

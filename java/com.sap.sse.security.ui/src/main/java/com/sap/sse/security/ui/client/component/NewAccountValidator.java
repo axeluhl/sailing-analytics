@@ -33,7 +33,7 @@ public class NewAccountValidator {
 
     private String validatePasswords(String password, String passwordRepeat) {
         final String result;
-        if (password.length() < MINIMUM_PASSWORD_LENGTH) {
+        if (password == null || password.length() < MINIMUM_PASSWORD_LENGTH) {
             result = stringMessages.passwordMustHaveAtLeastNCharacters(MINIMUM_PASSWORD_LENGTH);
         } else if (!password.equals(passwordRepeat)) {
             result = stringMessages.passwordsDontMatch();
@@ -45,7 +45,7 @@ public class NewAccountValidator {
 
     private String validateUsername(String username) {
         final String result;
-        if (username.length() < MINIMUM_USERNAME_LENGTH) {
+        if (username == null || username.length() < MINIMUM_USERNAME_LENGTH) {
             result = stringMessages.usernameMustHaveAtLeastNCharacters(MINIMUM_USERNAME_LENGTH);
         } else {
             result = null;
