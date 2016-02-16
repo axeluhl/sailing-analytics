@@ -13,12 +13,13 @@ import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsPresenter;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
@@ -55,14 +56,9 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         currentView.navigateTabsTo(currentPlace);
         currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
 
-
-        final UserDetailsPresenter userDetailsPresenter = new UserDetailsPresenter(currentView.getUserDetailsView(),
-                clientFactory.getAuthenticationManager(), clientFactory.getUserManagementService(), homePlacesNavigator
-                        .getMailVerifiedConfirmationNavigation().getTargetUrl());
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                userDetailsPresenter.setAuthenticationContext(event.getCtx());
                 currentView.setUserManagementContext(event.getCtx());
             }
         });
@@ -98,5 +94,21 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public void doTriggerLoginForm() {
         clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
+    }
+    
+    @Override
+    public AuthenticationManager getAuthenticationManager() {
+        return clientFactory.getAuthenticationManager();
+    }
+    
+    @Override
+    public String getMailVerifiedUrl() {
+        return homePlacesNavigator
+                .getMailVerifiedConfirmationNavigation().getTargetUrl();
+    }
+    
+    @Override
+    public UserManagementServiceAsync getUserManagementService() {
+        return clientFactory.getUserManagementService();
     }
 }

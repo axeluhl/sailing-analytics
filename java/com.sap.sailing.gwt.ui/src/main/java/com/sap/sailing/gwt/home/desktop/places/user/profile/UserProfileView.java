@@ -5,12 +5,13 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES extends UserProfileView.Presenter> extends IsWidget {
 
@@ -22,6 +23,12 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
         
         PlaceNavigation<StartPlace> getHomeNavigation();
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation();
+
+        AuthenticationManager getAuthenticationManager();
+
+        UserManagementServiceAsync getUserManagementService();
+
+        String getMailVerifiedUrl();
     }
     
     /**
@@ -41,7 +48,4 @@ public interface UserProfileView<PLACE extends AbstractUserProfilePlace, PRES ex
     void showErrorInCurrentTab(IsWidget errorView);
 
     void setUserManagementContext(AuthenticationContext userManagementContext);
-    
-    UserDetailsView getUserDetailsView();
-    
 }
