@@ -10,6 +10,17 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Generic header widget that is designed with a SAP logo and SAP color scheme.
+ * 
+ * The header has the following elements:
+ * <ul>
+ *   <li>SAP Logo with an application title (like "Sailing Analytics")</li>
+ *   <li>Page title</li>
+ *   <li>Optional Subtitle</li>
+ *   <li>Optional widget to show on the right side of the header</li>
+ * </ul>
+ */
 public class SAPHeader extends Composite {
     private static SAPHeaderUiBinder uiBinder = GWT.create(SAPHeaderUiBinder.class);
 

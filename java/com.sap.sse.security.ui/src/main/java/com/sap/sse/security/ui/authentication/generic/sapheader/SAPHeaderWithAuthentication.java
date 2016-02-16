@@ -5,9 +5,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.sapheader.SAPHeader;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
 
+/**
+ * {@link SAPHeader} which is decorated by a authentication control on the right side. This is typically ised to
+ * integrate with {@link GenericAuthentication}.
+ */
 public class SAPHeaderWithAuthentication extends SAPHeader {
     private static final SAPHeaderWithAuthenticationResources res = SAPHeaderWithAuthenticationResources.INSTANCE;
     
@@ -45,6 +50,9 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
         rightWrapper.add(widget);
     }
     
+    /**
+     * @return the {@link AuthenticationMenuView} associated with the authentication control on the right side of the header.
+     */
     public AuthenticationMenuView getAuthenticationMenuView() {
         return authenticationMenuView;
     }
