@@ -12,7 +12,11 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
- * Base view class of the user account details page. This class implements the shared logic of the desktop and mobile version of the page.
+ * Base view class of the user account details page. This class implements the shared logic of the desktop and mobile
+ * version of the page.
+ * 
+ * {@link UiField}s and {@link UiHandler}s are intentionally marked as public to make it visible to UiBinder in concrete
+ * subclasses. These fields should not be accessed manually.
  */
 public class AbstractUserDetails extends Composite implements UserDetailsView {
     
