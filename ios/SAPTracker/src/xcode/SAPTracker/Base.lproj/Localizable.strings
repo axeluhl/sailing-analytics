@@ -14,6 +14,11 @@
 "Cannot read QR codes with this device." = "Cannot read QR codes with this device.";
 "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either." = "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either.";
 "OK" = "OK";
+/* EULA */
+"EULA_title" = "EULA";
+"EULA_content" = "By using this App you confirm to accept the SAP SE end user license agreement.";
+"EULA_view" = "Read EULA";
+"EULA_confirm" = "Confirm";
 /* AcceptTermsViewController */
 "You must accept the terms to use this app." = "You must accept the terms to use this app.";
 /* AboutViewController */

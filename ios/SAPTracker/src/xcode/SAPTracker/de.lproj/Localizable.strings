@@ -14,6 +14,11 @@
 "Cannot read QR codes with this device." = "Cannot read QR codes with this device.";
 "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either." = "Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.";
 "OK" = "OK";
+/* EULA */
+"EULA_title" = "Endbenutzer Lizenzvereinbarung";
+"EULA_content" = "Mit der Verwendung dieser App stimmen Sie den Datenschutzbestimmungen der SAP SE zu.";
+"EULA_view" = "Anzeigen";
+"EULA_confirm" = "Zustimmen";
 /* AcceptTermsViewController */
 "You must accept the terms to use this app." = "Sie müssen die AGB annehmen, um diese App verwenden zu können.";
 /* AboutViewController */

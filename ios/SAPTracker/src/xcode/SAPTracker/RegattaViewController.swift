@@ -37,6 +37,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var minutesLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
     @IBOutlet weak var leaderBoardButton: UIButton!
+    @IBOutlet weak var openEventButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var leaderBoardButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var announcementsLabel: PaddedLabel!
@@ -183,6 +184,15 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
     }
     
+    @IBAction func showEvent(sender: UIButton) {
+        let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
+        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
+
+        let url = "\(serverUrl)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(eventId)"
+        UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+    }
+
+
     // MARK: - Menu
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
