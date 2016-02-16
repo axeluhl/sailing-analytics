@@ -12,8 +12,8 @@
               <div ui:field="imageUi" class="{local_res.css.userheader_intro_logo_image}"></div>
             </div>
             <div class="{local_res.css.userheader_intro_title}">
-              <div ui:field="nameUi" class="{local_res.css.userheader_intro_title_realname}" />
-              <div ui:field="usernameUi" class="{local_res.css.userheader_intro_title_username}" />
+              <div ui:field="titleUi" class="{local_res.css.userheader_intro_title_realname}" />
+              <div ui:field="subtitleUi" class="{local_res.css.userheader_intro_title_username}" />
             </div>
           </div>
         </div>
