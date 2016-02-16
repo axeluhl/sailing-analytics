@@ -1,7 +1,7 @@
 .header_right_wrapper {
     height: 100%;
 }
-.with_login>.header_right_extension {
+.header_right_extension {
 	margin-right: 4em;
 }
 .usermanagement_icon {
@@ -10,7 +10,7 @@
 .fixed {
     position: fixed !important;
 }
-.with_login>.usermanagement_icon {
+.usermanagement_icon {
     position: absolute;
     right: 0;
     display: inline-block;

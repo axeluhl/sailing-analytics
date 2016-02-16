@@ -31,7 +31,6 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
         
         FlowPanel rightWithAuthentication = new FlowPanel();
         rightWithAuthentication.addStyleName(res.css().header_right_wrapper());
-        rightWithAuthentication.addStyleName(res.css().with_login());
         
         Anchor authenticationMenu = new Anchor();
         authenticationMenu.addStyleName(res.css().usermanagement_icon());

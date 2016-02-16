@@ -14,7 +14,6 @@ public interface SAPHeaderWithAuthenticationResources extends ClientBundle {
     public interface HeaderWithAuthenticationCss extends CssResource {
         String header_right_wrapper();
         String header_right_extension();
-        String with_login();
         String fixed();
         
         String usermanagement_icon();
