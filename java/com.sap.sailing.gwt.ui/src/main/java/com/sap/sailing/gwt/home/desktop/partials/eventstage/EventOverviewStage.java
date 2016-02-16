@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MediaCss;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageContentDTO;
 import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageDTO;
@@ -31,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.partials.message.Message;
 import com.sap.sailing.gwt.home.shared.partials.video.Video;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public class EventOverviewStage extends Composite {
     

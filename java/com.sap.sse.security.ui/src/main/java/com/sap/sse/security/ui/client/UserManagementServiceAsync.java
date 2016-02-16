@@ -17,7 +17,7 @@ public interface UserManagementServiceAsync {
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
-    void createSimpleUser(String name, String email, String password, String validationBaseURL, AsyncCallback<UserDTO> callback);
+    void createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL, AsyncCallback<UserDTO> callback);
 
     void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword, AsyncCallback<Void> callback);
 

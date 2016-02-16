@@ -3,17 +3,18 @@ package com.sap.sailing.gwt.common.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sse.gwt.common.CommonSharedResources;
 
-public interface SharedResources extends ClientBundle {
+public interface SharedResources extends ClientBundle, CommonSharedResources {
     public static final SharedResources INSTANCE = GWT.create(SharedResources.class);
 
-    @Source("com/sap/sailing/gwt/home/main.gss")
+    @Source("main.gss")
     MainCss mainCss();
 
-    @Source("com/sap/sailing/gwt/home/media.gss")
+    @Source("media.gss")
     MediaCss mediaCss();
 
-    public interface MainCss extends CssResource{
+    public interface MainCss extends CssResource, CommonMainCss {
         String mobile();
         String desktop();
         String wrapper();
@@ -27,6 +28,7 @@ public interface SharedResources extends ClientBundle {
         String buttonstrong();
         String buttoninactive();
         String buttonprimary();
+        String buttonprimaryoutlined();
         String buttonred();
         String buttonrefresh();
         String buttonarrowdown();
@@ -40,6 +42,11 @@ public interface SharedResources extends ClientBundle {
         String mainsection_header();
         String mainsection_header_title();
         String mainsection_navigation();
+        String input();
+        String input_label();
+        String input_input();
+        String input_inputerror();
+        String input_errortext();
         String lightbox();
         String lightbox_overlay();
         String lightbox_content();
@@ -70,7 +77,7 @@ public interface SharedResources extends ClientBundle {
         String fleetcorner();
     }
 
-    public interface MediaCss extends CssResource{
+    public interface MediaCss extends CssResource, CommonMediaCss {
         String grid();
         String stackenblochen();
         String column();

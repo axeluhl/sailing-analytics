@@ -97,6 +97,12 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
         finishSetUp(receiverTypes);
     }
 
+    protected void setUp(String regattaName, String raceId, URI liveUri, URI storedUri, ReceiverType... receiverTypes)
+            throws MalformedURLException, IOException, InterruptedException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
+        finishSetUp(receiverTypes);
+    }
 
     private void finishSetUp(ReceiverType... receiverTypes) throws InterruptedException {
         assertEquals(getExpectedEventName(), getTracTracEvent().getName());
@@ -208,9 +214,16 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest {
 
     protected void setUpWithoutLaunchingController(String regattaName, String raceId) throws FileNotFoundException, MalformedURLException,
             URISyntaxException, SubscriberInitializationException, CreateModelException {
-        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/clientparams.php?event="+regattaName+"&race="+raceId);
         final URI liveUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_LIVE) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_LIVE);
         final URI storedUri = tractracTunnel ? new URI("tcp://"+tractracTunnelHost+":"+TracTracConnectionConstants.PORT_TUNNEL_STORED) : new URI("tcp://" + TracTracConnectionConstants.HOST_NAME + ":" + TracTracConnectionConstants.PORT_STORED);
+        setUpWithoutLaunchingController(regattaName, raceId, liveUri, storedUri);
+    }
+
+
+    protected void setUpWithoutLaunchingController(String regattaName, String raceId, final URI liveUri,
+            final URI storedUri) throws MalformedURLException, FileNotFoundException, URISyntaxException,
+            SubscriberInitializationException, CreateModelException {
+        final URL paramUrl = new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+regattaName+"/"+raceId+".txt");
         setUpWithoutLaunchingController(paramUrl, liveUri, storedUri);
     }
 

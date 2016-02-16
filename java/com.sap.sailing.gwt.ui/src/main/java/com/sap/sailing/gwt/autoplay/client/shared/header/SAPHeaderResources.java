@@ -21,6 +21,6 @@ public interface SAPHeaderResources extends ClientBundle {
         String pagetitle();
     }
     
-    @Source("com/sap/sailing/gwt/home/images/logo-small@2x.png")
+    @Source("logo-small@2x.png")
     ImageResource logo();
 }
