@@ -502,7 +502,7 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
-            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_MORE);
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST);
             switch (toggleMarker(container, markerId)) {
                 case LEVEL_NORMAL:
                     sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
@@ -542,7 +542,20 @@ public class FlagPanelFragment extends BasePanelFragment {
         }
 
         private void toggleFragment() {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST);
+            switch (toggleMarker(container, markerId)) {
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
 
+                case LEVEL_TOGGLED:
+                    replaceFragment(MoreFlagsFragment.FinishTimeFragment.newInstance(1));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            }
+            disableToggle(container, markerId);
         }
     }
 
@@ -565,8 +578,10 @@ public class FlagPanelFragment extends BasePanelFragment {
                         uncheckMarker(mPostponeFlags);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
                         uncheckMarker(mCourseFlags);
-                    } else if (AppConstants.INTENT_ACTION_TOGGLE_MORE.equals(data)) {
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_FIRST.equals(data)) {
                         uncheckMarker(mBlueFirstFlag);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_BLUE_LAST.equals(data)) {
+                        uncheckMarker(mBlueLastFlag);
                     } else {
                         uncheckMarker(new View(context));
                     }

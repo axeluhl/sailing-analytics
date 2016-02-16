@@ -48,7 +48,8 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_POSTPONE = "postpone";
     public final static String INTENT_ACTION_TOGGLE_ABANDON = "abandon";
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
-    public final static String INTENT_ACTION_TOGGLE_MORE = "more";
+    public final static String INTENT_ACTION_TOGGLE_BLUE_FIRST = "more";
+    public final static String INTENT_ACTION_TOGGLE_BLUE_LAST = "blue_last";
 
     public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
     public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";
