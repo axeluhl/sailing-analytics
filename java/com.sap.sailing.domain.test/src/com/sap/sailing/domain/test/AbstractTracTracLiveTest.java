@@ -70,7 +70,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     public void setUp() throws MalformedURLException, IOException, InterruptedException, URISyntaxException, SubscriberInitializationException, ParseException, CreateModelException {
         final String eventID = "event_20110505_SailingTea";
         final String raceID = "bd8c778e-7c65-11e0-8236-406186cbf87c";
-        setUp(getParamURL(eventID, raceID), getLiveURI(), getStoredURI());
+        setUp(getParamURL(eventID, raceID), /* liveURI */ null, /* storedURI */ null);
     }
 
     public static URI getStoredURI() throws URISyntaxException {
@@ -82,8 +82,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     }
 
     public static URL getParamURL(final String eventID, final String raceID) throws MalformedURLException {
-        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/event_20110505_SailingTea/clientparams.php?event="+eventID+
-                "&race="+raceID);
+        return new URL("http://" + TracTracConnectionConstants.HOST_NAME + "/events/"+eventID+"/"+raceID+".txt");
     }
     
     protected IEventSubscriber getEventSubscriber() {
@@ -99,11 +98,16 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()));
         this.race = race;
         ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
-        eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
-        raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
+        if (storedUri == null) {
+            eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());
+            raceSubscriber = subscriberFactory.createRaceSubscriber(race);
+        } else {
+            eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent(), liveUri, storedUri);
+            raceSubscriber = subscriberFactory.createRaceSubscriber(race, liveUri, storedUri);
+        }
         assertNotNull(race);
         // Initialize data controller using live and stored data sources
-        if (storedUri.toString().startsWith("file:")) {
+        if (storedUri != null && storedUri.toString().startsWith("file:")) {
             try {
                 URI oldStoredUri = storedUri;
                 storedUri = new URI(storedUri.toString().replaceFirst("file:/([^/])", "file:////$1"));

@@ -15,6 +15,31 @@ It contains also some files:
 
  - test.sh -> script that compiles the code in the src folder, creates the test.jar library and execute the code of the example.
  - Manifest.txt -> manifest used to create the test.jar file
+ 
+********************************************
+************* TracAPI 3.1.5 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 17/02/2016
+Build number: 11948
+
+ 1) Bugs
+ 
+ - The bug of the previous release (3.1.2) was not fixed.
+ 
+********************************************
+************* TracAPI 3.1.4 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 15/02/2016
+Build number: 11938
+
+ 1) Bugs
+ 
+ - An infinity loop has been detected in the thread that sends the application
+ messages (Repored by Axel Uhl, 12/02/2016) 
 
 ********************************************
 ************* TracAPI 3.1.3 ****************
@@ -26,7 +51,7 @@ Build number: 11888
 
  1) Bugs
  
- - The bug of the previous release (3.1.3) was not fixed.
+ - The bug of the previous release (3.1.2) was not fixed.
 
 ********************************************
 ************* TracAPI 3.1.2 ****************
