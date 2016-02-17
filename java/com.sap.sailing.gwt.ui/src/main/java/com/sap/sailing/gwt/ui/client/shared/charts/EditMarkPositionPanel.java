@@ -176,7 +176,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
-        chart.getYAxis().setAxisTitleText(stringMessages.distanceFromAveragePosition()).setOption("labels/enabled", false);
+        chart.getYAxis().setAxisTitleText(stringMessages.distanceFromAveragePosition() + " (" + stringMessages.metersUnit() + ")").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
         markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000")
@@ -828,6 +828,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     @Override
     protected Button createSettingsButton() {
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        settingsButton.setVisible(false);
         return settingsButton;
     }
 
