@@ -856,14 +856,31 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             currentFixPositionChooser.cancel();
             currentFixPositionChooser = null;
         }
-        if (selected.size() > 0) {
-            MarkDTO mark;
-            if (selected.size() > 1) {
-                mark = selected.get(0).equals(selectedMark) ? selected.get(1) : selected.get(0);
-            } else {
-                mark = selected.get(0);
+        if (selected.size() > 1) {
+            hideAllFixOverlays();
+            hideAllPolylines();
+            setWidget(noMarkSelectedLabel);
+            marksPanel.deselectMark(selectedMark);
+        } else if (selected.size() > 0) {
+            selectedMark = selected.get(0);
+            if (marksFromToTimes.get(selectedMark) != null) {
+                // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
+                timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
             }
-            setSelectedMark(selected.size() > 1, mark);
+            setWidget(chart);
+            markSeries.remove();
+            markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
+                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
+                    .setLineColor("#fff").setLineWidth(2)));
+            chart.addSeries(markSeries);
+            setSeriesPoints(selectedMark);
+            onResize(); // redraw chart
+            hideAllCourseMarkOverlaysExceptSelected();
+            raceMap.hideAllHelplines();
+            for (FixOverlay overlay : marks.get(selectedMark).values()) {
+                overlay.setVisible(true);
+            }
+            polylines.get(selectedMark).setVisible(true);
         } else {
             selectedMark = null;
             if (raceFromTime != null && raceToTime != null) {
@@ -875,34 +892,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             hideAllFixOverlays();
             hideAllPolylines();
         }
-    }
-    
-    private void setSelectedMark(boolean otherWasPrevSelected, MarkDTO mark) {
-        if (otherWasPrevSelected) {
-            marksPanel.deselectMark(selectedMark);
-            hideAllFixOverlays();
-            hideAllPolylines();
-            setWidget(noMarkSelectedLabel);
-        }
-        selectedMark = mark;
-        if (marksFromToTimes.get(selectedMark) != null) {
-            // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
-            timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
-        }
-        setWidget(chart);
-        markSeries.remove();
-        markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
-                new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
-                .setLineColor("#fff").setLineWidth(2)));
-        chart.addSeries(markSeries);
-        setSeriesPoints(selectedMark);
-        onResize(); // redraw chart
-        hideAllCourseMarkOverlaysExceptSelected();
-        raceMap.hideAllHelplines();
-        for (FixOverlay overlay : marks.get(selectedMark).values()) {
-            overlay.setVisible(true);
-        }
-        polylines.get(selectedMark).setVisible(true);
     }
     
     public void showAllCourseMarkOverlays() {
