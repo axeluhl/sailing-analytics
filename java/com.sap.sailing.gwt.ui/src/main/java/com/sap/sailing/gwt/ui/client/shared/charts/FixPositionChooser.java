@@ -150,15 +150,17 @@ public class FixPositionChooser {
     
     private void setRedPointInChart(GPSFixDTO fix) {
         List<GPSFixDTO> fixes = editMarkPositionPanel.getMarkFixes();
-        if (newFix) {
-            fixes.add(polylineFixIndex, fix);
-        } else {
-            fixes.set(polylineFixIndex, fix);
+        if (fixes != null) {
+            if (newFix) {
+                fixes.add(polylineFixIndex, fix);
+            } else {
+                fixes.set(polylineFixIndex, fix);
+            }
+            Point[] points = editMarkPositionPanel.getSeriesPoints(fixes);
+            editMarkPositionPanel.setRedPoint(points, polylineFixIndex);
+            editMarkPositionPanel.setSeriesPoints(points);
+            editMarkPositionPanel.redrawChart();
         }
-        Point[] points = editMarkPositionPanel.getSeriesPoints(fixes);
-        editMarkPositionPanel.setRedPoint(points, polylineFixIndex);
-        editMarkPositionPanel.setSeriesPoints(points);
-        editMarkPositionPanel.redrawChart();
     }
     
     public void cancel() {

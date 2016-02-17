@@ -573,25 +573,29 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public void setRedPoint(int index) {
         Point[] points = markSeries.getPoints();
-        setRedPoint(points, index);
-        setSeriesPoints(markSeries, points);
+        if (points.length > index) {
+            setRedPoint(points, index);
+            setSeriesPoints(markSeries, points);
+        }
     }
     
     public void updateRedPoint(int index) {
-        Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
-        if (points.length > index) {
-            setRedPoint(points, index);
+        if (selectedMark != null) {
+            Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
+            if (points.length > index) {
+                setRedPoint(points, index);
+                setSeriesPoints(markSeries, points);
+                chart.redraw();
+            }
         }
-        setSeriesPoints(markSeries, points);
-        chart.redraw();
     }
     
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
             points[index].setMarker(new Marker().setFillColor(selectedMark.color));
+            setSeriesPoints(markSeries, points);
         }
-        setSeriesPoints(markSeries, points);
     }
     
     private void loadData(final Date from, final Date to) {
@@ -989,8 +993,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public List<GPSFixDTO> getMarkFixes() {
+        if (selectedMark != null) {
         List<GPSFixDTO> set = new ArrayList<GPSFixDTO>();
         set.addAll(marks.get(selectedMark).keySet());
         return set;
+        } else {
+            return null;
+        }
     }
 }
