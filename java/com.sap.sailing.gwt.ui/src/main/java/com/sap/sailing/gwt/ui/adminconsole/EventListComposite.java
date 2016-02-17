@@ -446,9 +446,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void ok(final EventDTO newEvent) {
                 createNewEvent(newEvent);
-                if (newEvent.getLeaderboardGroups().isEmpty()){
-                    //show simple Dialog
-                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>(){
+                if (newEvent.getLeaderboardGroups().isEmpty()) {
+                    // show simple Dialog
+                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
                         @Override
                         public void ok(Void editedObject) {
                             openLeaderboardGroupCreationDialog(existingLeaderboardGroups, newEvent);
@@ -480,15 +480,14 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                                     @Override
                                     public void onSuccess(LeaderboardGroupDTO newGroup) {
                                         newEvent.addLeaderboardGroup(newGroup);
-                                        //just use newEvent twice as id and name didn't change
+                                        // just use newEvent twice as id and name didn't change
                                         EventDTO matchingEvent = null;
-                                        for (EventDTO event: allEvents) {
-                                            if (event.getName().equals(newEvent.getName())){
+                                        for (EventDTO event : allEvents) {
+                                            if (event.getName().equals(newEvent.getName())) {
                                                 matchingEvent = event;
                                             }
                                         }
-                                        
-                                        if(matchingEvent != null){
+                                        if (matchingEvent != null) {
                                             updateEvent(matchingEvent, newEvent);
                                         } else {
                                             errorReporter.reportError("Could not find the event with name "+newEvent.getName()+" to which the leaderboardgroup should be added");
@@ -501,7 +500,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public void cancel() {
             }
         });
-
         leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName());
         leaderboardGroupCreateDialog.show();
     }
