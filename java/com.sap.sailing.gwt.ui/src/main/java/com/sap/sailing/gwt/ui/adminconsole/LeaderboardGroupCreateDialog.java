@@ -27,5 +27,6 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
     public void setFieldsBasedOnEventName(String name) {
         nameEntryField.setText(name);
         descriptionEntryField.setText(name);
+        validate();
     }
 }
