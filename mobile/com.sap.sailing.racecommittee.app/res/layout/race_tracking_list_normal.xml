@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@string/tracking_list"
+                android:text="@string/tracking_list_01"
                 android:textAppearance="?attr/textHeader"/>
         </LinearLayout>
 
@@ -126,9 +126,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/panel_switcher"
-            android:paddingLeft="@dimen/side_padding"
-            android:paddingRight="@dimen/side_padding">
+            android:layout_above="@id/panel_switcher">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/list_positioning_chosen"

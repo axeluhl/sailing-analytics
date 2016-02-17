@@ -21,7 +21,7 @@
             android:layout_marginLeft="@dimen/default_margin_half"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/availableFinishingCompetitors"
+            android:text="@string/tracking_list_01"
             android:textAppearance="?attr/textNormal"/>
 
         <Space
@@ -34,7 +34,7 @@
             android:layout_marginRight="@dimen/default_margin_half"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/tracking_list"
+            android:text="@string/tracking_list_02"
             android:textAppearance="?attr/textNormal"/>
     </LinearLayout>
 
@@ -67,7 +67,8 @@
         android:layout_marginLeft="@dimen/side_padding"
         android:layout_marginRight="@dimen/side_padding"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginBottom="@dimen/default_margin_half">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_positioning_all"

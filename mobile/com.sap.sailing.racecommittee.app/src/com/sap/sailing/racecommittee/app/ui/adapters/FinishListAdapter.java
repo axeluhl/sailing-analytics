@@ -7,7 +7,6 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.impl.CompetitorsWithIdImpl;
+import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
@@ -30,23 +29,17 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     private final static String TAG = FinishListAdapter.class.getName();
 
     private Context mContext;
-    private List<Competitor> mCompetitors;
-    private ArrayList<CompetitorsWithIdImpl> mCompetitor;
+    private ArrayList<CompetitorResultWithIdImpl> mCompetitor;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, ArrayList<CompetitorsWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, ArrayList<CompetitorResultWithIdImpl> competitor) {
+        setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
-        setHasStableIds(true);
     }
 
     public void setListener(FinishEvents listener) {
         mListener = listener;
-    }
-
-    public void setCompetitors(Collection<Competitor> competitors) {
-        mCompetitors = new ArrayList<>();
-        mCompetitors.addAll(competitors);
     }
 
     @Override
@@ -57,24 +50,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        CompetitorsWithIdImpl item = mCompetitor.get(position);
+        CompetitorResultWithIdImpl item = mCompetitor.get(position);
 
-        if (item.getReason().equals(MaxPointsReason.NONE)) {
+        if (item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
             holder.position.setText(String.valueOf(position + 1));
         } else {
-            holder.position.setText(item.getReason().name());
+            holder.position.setText(item.getMaxPointsReason().name());
         }
-        String name = "";
-        for (Competitor competitor : mCompetitors) {
-            if (competitor.getId() == item.getKey()) {
-                if (competitor.getBoat() != null) {
-                    name = competitor.getBoat().getSailID() + " - ";
-                }
-                break;
-            }
-        }
-        name += item.getText();
-        holder.competitor.setText(name);
+        holder.competitor.setText(item.getCompetitorDisplayName());
 
         int dragState = holder.getDragStateFlags();
 
@@ -104,8 +87,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public boolean onCheckCanStartDrag(ViewHolder holder, int x, int y) {
-        ExLog.i(mContext, TAG, "onCheckCanStartDrag() called with: " + "holder = [" + holder + "], x = [" + x + "], y = [" + y + "]");
-
         // x, y --- relative from the itemView's top-left
         View containerView = holder.container;
         View dragHandleView = holder.dragHandle;
@@ -123,13 +104,11 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        ExLog.i(mContext, TAG, "onMoveItem() called with: " + "fromPosition = [" + fromPosition + "], toPosition = [" + toPosition + "]");
-
         if (fromPosition == toPosition) {
             return;
         }
 
-        CompetitorsWithIdImpl item = mCompetitor.get(fromPosition);
+        CompetitorResultWithIdImpl item = mCompetitor.get(fromPosition);
         mCompetitor.remove(item);
         mCompetitor.add(toPosition, item);
         if (mListener != null) {
@@ -201,9 +180,9 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     public interface FinishEvents {
         void afterMoved();
 
-        void onItemRemoved(CompetitorsWithIdImpl item);
+        void onItemRemoved(CompetitorResultWithIdImpl item);
 
-        void onLongClick(CompetitorsWithIdImpl item);
+        void onLongClick(CompetitorResultWithIdImpl item);
     }
 
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {

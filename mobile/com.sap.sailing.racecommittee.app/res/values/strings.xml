@@ -108,7 +108,8 @@
     <string name="retry">Retry</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="tracking_list">Tracking List</string>
+    <string name="tracking_list_01">Competitor List</string>
+    <string name="tracking_list_02">Tracking List</string>
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
@@ -490,5 +491,6 @@
     <string name="onboarding_input">Manual Input</string>
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
+    <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$s</string>
 
 </resources>
