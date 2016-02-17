@@ -5,21 +5,36 @@
     android:layout_height="@dimen/navigation_drawer_cell_height"
     android:background="?attr/sap_gray">
 
-    <ImageView
-        android:id="@+id/protest_image"
+    <LinearLayout
+        android:id="@+id/protest_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginRight="@dimen/default_margin"
-        tools:src="@drawable/flag_bravo_48dp" />
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/protest_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            tools:src="@drawable/flag_bravo_48dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/protest_time"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="3dp"
+            android:textAppearance="?attr/textPanelCaption"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/delimiter_line"
         android:layout_width="@dimen/thin_line"
         android:layout_height="match_parent"
-        android:layout_toLeftOf="@id/protest_image"
+        android:layout_toLeftOf="@id/protest_layout"
         android:background="?attr/black" />
 
     <ImageView
