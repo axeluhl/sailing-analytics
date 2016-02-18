@@ -40,6 +40,7 @@ public class Footer extends Composite {
     }
 
     @UiField Anchor changeLanguageLink;
+    @UiField AnchorElement imprintAnchorLink;
     @UiField DivElement languageSelectionDiv;
     @UiField(provided = true) ValueListBox<Pair<String, String>> changeLanguageList = new ValueListBox<Pair<String,String>>(new Renderer<Pair<String, String>>() {
         @Override
@@ -72,6 +73,7 @@ public class Footer extends Composite {
         releaseNotesNavigation = navigator.getWhatsNewNavigation(WhatsNewNavigationTabs.SailingAnalytics);
 
         initWidget(uiBinder.createAndBindUi(this));
+        navigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
         
         updateUI();
         DOM.sinkEvents(mobileUi, Event.ONCLICK);

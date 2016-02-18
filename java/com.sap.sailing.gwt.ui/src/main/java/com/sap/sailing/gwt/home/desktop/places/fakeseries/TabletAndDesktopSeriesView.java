@@ -30,7 +30,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<SeriesView.Presenter> tabPanelUi;
+    TabPanel<AbstractSeriesTabPlace, SeriesView.Presenter, SeriesTabView<AbstractSeriesTabPlace>> tabPanelUi;
     
     @UiField(provided = true)
     SeriesHeader seriesHeader;

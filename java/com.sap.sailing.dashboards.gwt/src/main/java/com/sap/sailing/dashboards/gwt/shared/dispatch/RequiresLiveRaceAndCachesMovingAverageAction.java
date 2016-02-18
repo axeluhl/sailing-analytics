@@ -2,7 +2,7 @@ package com.sap.sailing.dashboards.gwt.shared.dispatch;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.dashboards.gwt.shared.MovingAveragesCache;
-import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * @author Alexander Ries (D062114)

@@ -1,6 +1,6 @@
 package com.sap.sailing.dashboards.gwt.shared.dto;
 
-import com.sap.sailing.gwt.dispatch.client.Result;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
 /**
  * @author Alexander Ries (D062114)
