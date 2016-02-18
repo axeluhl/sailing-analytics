@@ -7,13 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,10 +21,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
-import com.sap.sse.gwt.client.breadcrumb.BreadcrumbPane;
 
 /**
- * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
+ * Defines the basic Layout of tabbed pages with tabs, an optional header and a content area.
  * <p/>
  * Created by pgtaboada on 25.11.14.
  */
@@ -44,8 +40,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
     SimplePanel tabContentPanelUi;
     @UiField
     TabBar tabBar;
-    @UiField BreadcrumbPane breadcrumbs;
-    @UiField DivElement breadcrumbsContainer;
     @UiField FlowPanel tabExtension;
     private TABVIEW currentTab;
     
@@ -57,8 +51,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
         this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
-        
-        breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
     }
 
     public TABVIEW getCurrentTab() {
@@ -165,14 +157,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      */
     public void overrideCurrentContentInTab(IsWidget widget) {
         tabContentPanelUi.setWidget(widget);
-    }
-
-    public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
-    }
-    
-    public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
     }
 
     public HandlerRegistration addTabPanelPlaceSelectionEventHandler(TabPanelPlaceSelectionEvent.Handler handler) {

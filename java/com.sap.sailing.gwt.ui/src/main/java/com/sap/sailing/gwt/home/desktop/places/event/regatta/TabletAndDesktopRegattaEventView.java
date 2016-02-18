@@ -53,7 +53,6 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         eventHeader = new EventHeader(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
-        initBreadCrumbs();
         
         if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
@@ -100,28 +99,6 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, EventRegattaView.Presenter>) e.getSelectedActivity());
-    }
-
-    private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
-        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
-            addBreadCrumbItem(currentPresenter.getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
-        }
-        addBreadCrumbItem(currentPresenter.getEventDTO().getLocationOrDisplayName(), currentPresenter.getCurrentEventNavigation());
-        
-        if(currentPresenter.showRegattaMetadata()) {
-            addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), currentPresenter.getCurrentRegattaOverviewNavigation());
-        }
-    }
-
-    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
-        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
-            @Override
-            public void run() {
-                placeNavigation.goToPlace();
-            }
-        });
     }
 
     @Override
