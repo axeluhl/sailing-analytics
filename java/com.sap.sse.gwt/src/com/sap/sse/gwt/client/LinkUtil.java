@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client;
+package com.sap.sse.gwt.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;

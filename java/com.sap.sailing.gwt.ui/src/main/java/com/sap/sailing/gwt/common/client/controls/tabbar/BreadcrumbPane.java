@@ -11,7 +11,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sse.gwt.client.LinkUtil;
 
 /**
  * @author zhorvath
