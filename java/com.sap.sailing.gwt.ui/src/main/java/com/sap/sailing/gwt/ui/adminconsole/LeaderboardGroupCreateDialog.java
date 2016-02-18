@@ -23,4 +23,10 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         displayLeaderboardsInReverseOrderCheckBox.setValue(false);
         useOverallLeaderboardCheckBox.setValue(false);
     }
+
+    public void setFieldsBasedOnEventName(String name) {
+        nameEntryField.setText(name);
+        descriptionEntryField.setText(name);
+        validate();
+    }
 }
