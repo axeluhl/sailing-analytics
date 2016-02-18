@@ -16,8 +16,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sse.gwt.client.LinkUtil;
 
 /**
@@ -28,12 +26,13 @@ import com.sap.sse.gwt.client.LinkUtil;
  */
 public class TabBar extends Widget implements HasSelectionHandlers<Class<Place>> {
 
-    private final MainCss style = SharedResources.INSTANCE.mainCss();
+    private final TabBarResources.LocalCss style = TabBarResources.INSTANCE.css();
 
     private final List<Class<Place>> knownPlaceClasses = new ArrayList<>();
     private final DivElement tabBarDiv;
     
     public TabBar() {
+        style.ensureInjected();
         tabBarDiv = Document.get().createDivElement();
         tabBarDiv.addClassName(style.navbar());
 

@@ -18,10 +18,6 @@ public interface SharedResources extends ClientBundle, CommonSharedResources {
         String mobile();
         String desktop();
         String wrapper();
-        String navbar();
-        String navbar_button();
-        String navbar_buttonhidden();
-        String navbar_buttonactive();
         String button();
         String buttontextonly();
         String buttonsmall();
