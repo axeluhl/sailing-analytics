@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.common.client.controls.tabbar;
+package com.sap.sse.gwt.client.breadcrumb;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.AnchorElement;

@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
+import com.sap.sse.gwt.client.breadcrumb.BreadcrumbPane;
 
 /**
  * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
