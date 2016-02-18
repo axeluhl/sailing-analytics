@@ -51,7 +51,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final ListBox courseAreaListBox;
     protected final ListBox sailingEventsListBox;
     protected final CheckBox useStartTimeInferenceCheckBox;
-    private final ListEditorComposite<SeriesDTO> seriesEditor;
+    protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
 
     protected final List<EventDTO> existingEvents;

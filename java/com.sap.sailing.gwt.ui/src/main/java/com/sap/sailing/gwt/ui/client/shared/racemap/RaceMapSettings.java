@@ -51,8 +51,7 @@ public class RaceMapSettings extends AbstractSettings {
     private boolean windUp = false;
 
     public RaceMapSettings() {
-        // empty default settings; don't show maneuvers by default
-        maneuverTypesToShow = new HashSet<ManeuverType>();
+        this.maneuverTypesToShow = getDefaultManeuvers();
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
@@ -217,7 +216,15 @@ public class RaceMapSettings extends AbstractSettings {
     public void setShowMapControls(boolean showMapControls) {
         this.showMapControls = showMapControls;
     }
-    
+
+    private HashSet<ManeuverType> getDefaultManeuvers() {
+        HashSet<ManeuverType> types = new HashSet<ManeuverType>();
+        types.add(ManeuverType.JIBE);
+        types.add(ManeuverType.TACK);
+        types.add(ManeuverType.PENALTY_CIRCLE);
+        return types;
+    }
+
     public static RaceMapSettings readSettingsFromURL() {
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(PARAM_SHOW_MAPCONTROLS, true /* default */);
         return new RaceMapSettings(showMapControls);

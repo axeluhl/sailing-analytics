@@ -32,6 +32,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
@@ -41,6 +42,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -48,6 +50,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -433,7 +436,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
 
     private void openCreateEventDialog() {
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventListDataProvider.getList());
-        List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
+        final List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), existingLeaderboardGroups,
                 sailingService, stringMessages, new DialogCallback<EventDTO>() {
@@ -442,11 +445,56 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
 
             @Override
-            public void ok(EventDTO newEvent) {
-                createNewEvent(newEvent);
+            public void ok(final EventDTO newEvent) {
+                createNewEvent(newEvent, existingLeaderboardGroups);
             }
         });
         dialog.show();
+    }
+    
+    /**
+     * @param newEvent the new event as created by the server, already including a valid {@link EventBaseDTO#id} value.
+     */
+    private void openLeaderboardGroupCreationDialog(final List<LeaderboardGroupDTO> existingLeaderboardGroups, final EventDTO newEvent) {
+        LeaderboardGroupCreateDialog leaderboardGroupCreateDialog = new LeaderboardGroupCreateDialog(existingLeaderboardGroups, stringMessages, new DialogCallback<LeaderboardGroupDialog.LeaderboardGroupDescriptor>() {
+            @Override
+            public void ok(final LeaderboardGroupDescriptor newGroup) {
+                sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+                        newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
+                        newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
+                                new AsyncCallback<LeaderboardGroupDTO>() {
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        errorReporter.reportError("Error trying to create new leaderboard group" + newGroup.getName()
+                                                + ": " + t.getMessage());
+                                    }
+                                    @Override
+                                    public void onSuccess(LeaderboardGroupDTO newGroup) {
+                                        newEvent.addLeaderboardGroup(newGroup);
+                                        // fillEvents() will have replaced newEvent in allEvents by a new copy coming from the server which
+                                        // doesn't know about the new leaderboard group yet. An updateEvent call will link the leaderboard group
+                                        // to the event on the server
+                                        EventDTO matchingEvent = null;
+                                        for (EventDTO event : allEvents) {
+                                            if (event.id.equals(newEvent.id)) {
+                                                matchingEvent = event;
+                                            }
+                                        }
+                                        if (matchingEvent != null) {
+                                            updateEvent(matchingEvent, newEvent);
+                                        } else {
+                                            errorReporter.reportError("Could not find the event with name "+newEvent.getName()+" to which the leaderboardgroup should be added");
+                                        }
+                                    }
+                                }));
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+        leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName());
+        leaderboardGroupCreateDialog.show();
     }
 
     private void openEditEventDialog(final EventDTO selectedEvent) {
@@ -548,7 +596,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         return new Pair<List<CourseAreaDTO>, List<CourseAreaDTO>>(courseAreasToAdd, courseAreasToRemove);
     }
 
-    private void createNewEvent(final EventDTO newEvent) {
+    private void createNewEvent(final EventDTO newEvent, final List<LeaderboardGroupDTO> existingLeaderboardGroups) {
         List<String> courseAreaNames = new ArrayList<String>();
         for (CourseAreaDTO courseAreaDTO : newEvent.venue.getCourseAreas()) {
             courseAreaNames.add(courseAreaDTO.getName());
@@ -562,8 +610,21 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
 
             @Override
-            public void onSuccess(EventDTO newEvent) {
+            public void onSuccess(final EventDTO newEvent) {
                 fillEvents();
+                if (newEvent.getLeaderboardGroups().isEmpty()) {
+                    // show simple Dialog
+                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
+                        @Override
+                        public void ok(Void editedObject) {
+                            openLeaderboardGroupCreationDialog(existingLeaderboardGroups, newEvent);
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    }).show();
+                }
             }
         });
     }
