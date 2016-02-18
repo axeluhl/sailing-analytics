@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
@@ -38,6 +39,8 @@ public class RaceMapImageManager {
 
     protected Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> maneuverIconsForTypeAndDirectionIndicatingColor;
 
+    private static RaceMapResources resources = GWT.create(RaceMapResources.class);
+    
     public RaceMapImageManager(RaceMapResources resources) {
         maneuverIconsForTypeAndDirectionIndicatingColor = new HashMap<Util.Pair<ManeuverType, ManeuverColor>, Marker>();
         trueNorthIndicatorIconTransformer = new ImageTransformer(resources.trueNorthIndicatorIcon());
