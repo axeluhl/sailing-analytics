@@ -21,7 +21,9 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
@@ -74,7 +76,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -89,6 +90,7 @@ import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
@@ -2011,6 +2013,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
         return vPanel;
     }
+    
+    public Widget getInfoWindowContent(ManeuverDTO maneuver) {
+        SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
+        SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverType(),
+                ManeuverTypeFormatter.format(maneuver.type, stringMessages)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(),
+                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
+                ((int) maneuver.directionChangeInDegrees) + " " + stringMessages.degreesShort() + " ("
+                        + ((int) before.bearingInDegrees) + " " + stringMessages.degreesShort() + " -> "
+                        + ((int) after.bearingInDegrees) + " " + stringMessages.degreesShort() + ")"));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.speedChange(),
+                NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "
+                        + stringMessages.knotsUnit() + " ("
+                        + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " " + stringMessages.knotsUnit()
+                        + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
+                        + stringMessages.knotsUnit() + ")"));
+        return vPanel;
+    }
 
     private Widget getInfoWindowContent(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
@@ -2178,19 +2201,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
-                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
-                        MarkerOptions options = MarkerOptions.newInstance();
-                        options.setTitle(maneuver.toString(stringMessages));
-                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
-                        Marker marker = Marker.newInstance(options);
-                        marker.setPosition(latLng);
-                        maneuverMarkers.add(marker);
-                        marker.setMap(map);
+                        createAndAddMarkerOfManeuver(maneuver);
                     }
                 }
             }
         }
+    }
+
+    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
+        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
+        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
+                .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
+        MarkerOptions options = MarkerOptions.newInstance();
+        options.setIcon(maneuverMarker.getIcon_MarkerImage());
+        Marker marker = Marker.newInstance(options);
+        marker.setPosition(latLng);
+        marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
+        marker.addClickHandler(new ManeuverMarkerClickedListener(this, maneuver));
+        maneuverMarkers.add(marker);
+        marker.setMap(map);
     }
 
     /**
@@ -2757,5 +2786,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected String getLeftControlsIndentStyle() {
         return null;
+    }
+
+    DelegateCoordinateSystem getCoordinateSystem() {
+        return coordinateSystem;
+    }
+
+    void setLastInfoWindow(InfoWindow infoWindow) {
+        lastInfoWindow = infoWindow;
+    }
+
+    InfoWindow getLastInfoWindow() {
+        return lastInfoWindow;
     }
 }

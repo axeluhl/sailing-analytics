@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
-import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.util.TypedValue;
 import android.view.View;
