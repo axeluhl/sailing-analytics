@@ -58,6 +58,7 @@ public class StartlineAdvantageByGeometryWidget extends Composite implements Has
         initWidget(uiBinder.createAndBindUi(this));
         hideDataDisplayContainer();
         dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartlineAdvantageByGeometryHeader());
+        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
     

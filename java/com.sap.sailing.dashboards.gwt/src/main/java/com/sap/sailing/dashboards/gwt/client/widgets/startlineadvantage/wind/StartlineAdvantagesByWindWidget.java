@@ -67,6 +67,7 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
         initWidget(uiBinder.createAndBindUi(this));
         hideDataDisplayContainer();
         dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartlineAdvantagesByWindHeader());
+        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByWindAvailableMessage());
         dataDisplayContainer.getElement().getStyle().setOpacity(0.0);
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
@@ -83,6 +84,7 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
                         public void onSuccess(StartlineAdvantagesWithMaxAndAverageDTO result) {
                             logger.log(Level.INFO, "Received StartlineAdvantagesWithMaxAndAverageDTO");
                             if (result != null && result.maximum != null && result.average != null) {
+                                dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                                 logger.log(Level.INFO, "Updating UI with StartlineAdvantagesWithMaxAndAverageDTO");
                                 startlineAdvantagesOnLineChart.setStartlineAdvantagesAndConfidences(result.distanceToRCBoatToStartlineAdvantage, result.distanceToRCBoatToConfidence);
                                 advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(
