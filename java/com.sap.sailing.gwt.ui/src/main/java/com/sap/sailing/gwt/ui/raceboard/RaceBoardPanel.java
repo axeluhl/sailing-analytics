@@ -293,6 +293,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
+            competitorChart.updateSettings(multiCompetitorRaceChartSettings);
             componentsForSideBySideViewer.add(competitorChart);
             windChart = new WindChart(windChartLifecycle, sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel,
                     windChartSettings, stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */

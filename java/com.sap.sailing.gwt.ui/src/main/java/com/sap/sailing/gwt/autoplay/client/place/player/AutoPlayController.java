@@ -58,7 +58,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
    
     // raceboard perspective related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
-    private boolean showRaceDetails;
     
     private final PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
     private final PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
@@ -80,7 +79,6 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         this.errorReporter = errorReporter;
         this.autoPlayerConfiguration = autoPlayerConfiguration;
         this.userAgent = userAgent;
-        this.showRaceDetails = showRaceDetails;
         this.playerView = playerView;
         this.leaderboardPerspectiveLifecycleAndSettings = leaderboardPerspectiveLifecycleAndSettings;
         this.raceboardPerspectiveLifecycleAndSettings = raceboardPerspectiveLifecycleAndSettings;
