@@ -492,5 +492,7 @@
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
     <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$s</string>
+    <string name="get_started">Getting Started</string>
+    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
 
 </resources>

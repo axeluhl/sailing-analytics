@@ -79,7 +79,6 @@
         <item name="create">@drawable/ic_create_light</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>
-        <item name="corner">@drawable/corner_light</item>
         <item name="course_triangle_48dp">@drawable/course_triangle_48dp_light</item>
         <item name="course_triangle_64dp">@drawable/course_triangle_64dp_light</item>
         <item name="course_updown_48dp">@drawable/course_updown_48dp_light</item>

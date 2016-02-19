@@ -19,7 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
@@ -508,6 +508,7 @@ public class LoginActivity extends BaseActivity
         animators.add(heightAnimation);
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
+        animators.add(getAlphaAnimator(findViewById(R.id.gradient)));
         animators.add(getAlphaAnimator(findViewById(R.id.backdrop_login)));
         animators.add(getAlphaAnimator(findViewById(R.id.backdrop_onboarding)));
         animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
@@ -520,11 +521,11 @@ public class LoginActivity extends BaseActivity
         animatorSet.start();
     }
 
-    private ObjectAnimator getAlphaAnimator(@Nullable Object target) {
+    private ObjectAnimator getAlphaAnimator(@NonNull Object target) {
         return ObjectAnimator.ofFloat(target, "alpha", 0f, 1f);
     }
 
-    private ObjectAnimator getAlphaRevAnimator(@Nullable Object target) {
+    private ObjectAnimator getAlphaRevAnimator(@NonNull Object target) {
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
