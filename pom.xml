@@ -13,7 +13,7 @@
            <artifactId>ios-parent</artifactId>
            <version>1.14.2</version>
         </parent>
-    <profiles>
+      <profiles>
         <profile>
             <id>with-mobile</id>
             <activation>
