@@ -9,16 +9,19 @@ import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel.NotificationType;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
+import com.sap.sailing.gwt.ui.client.shared.controls.SortableColumn;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -55,17 +58,37 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
                 markTable);
         markTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         markTable.setColumnWidth(selectionCheckboxColumn, 27, Unit.PX);
-        Column<MarkDTO, String> markNameColumn = new Column<MarkDTO, String>(new TextCell()) {
+        SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
                 return object.getName();
             }
+
+            @Override
+            public InvertibleComparator<MarkDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return null;
+            }
         };
         markTable.addColumn(markNameColumn, new TextHeader(stringMessages.marks()));
-        Column<MarkDTO, String> addFixColumn = new Column<MarkDTO, String>(new ButtonCell()) {
+        SortableColumn<MarkDTO, String> addFixColumn = new SortableColumn<MarkDTO, String>(new ButtonCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
                 return stringMessages.addNewFix();
+            }
+
+            @Override
+            public InvertibleComparator<MarkDTO> getComparator() {
+                return null;
+            }
+
+            @Override
+            public Header<?> getHeader() {
+                return null;
             }
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {

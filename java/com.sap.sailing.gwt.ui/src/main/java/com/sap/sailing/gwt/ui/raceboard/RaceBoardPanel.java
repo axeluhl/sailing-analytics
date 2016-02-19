@@ -270,15 +270,15 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             components.add(windChart);
-            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
-                    stringMessages, competitorSelectionProvider, errorReporter, timer);
-            editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
-            editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-            components.add(editMarkPassingPanel);
-            editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
-                    asyncActionsExecutor, errorReporter);
-            components.add(editMarkPositionPanel);
         }
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
+                stringMessages, competitorSelectionProvider, errorReporter, timer);
+        editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+        components.add(editMarkPassingPanel);
+        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
+                asyncActionsExecutor, errorReporter);
+        components.add(editMarkPositionPanel);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,

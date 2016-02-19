@@ -2844,10 +2844,14 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             leewardStartLineMarkToFirstMarkLine.setVisible(false);
         }
         for (Polyline courseMiddleline : courseMiddleLines.values()) {
-            courseMiddleline.setVisible(false);
+            if (courseMiddleline != null) {
+                courseMiddleline.setVisible(false);
+            }
         }
         for (Polygon courseSideline : courseSidelines.values()) {
-            courseSideline.setVisible(false);
+            if (courseSideline != null) {
+                courseSideline.setVisible(false);
+            }
         }
     }
     

@@ -176,7 +176,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 return dateFormatHoursMinutes.format(new Date(axisLabelsData.getValueAsLong()));
             }
         }));
-        chart.getYAxis().setAxisTitleText(stringMessages.distanceFromAveragePosition()).setOption("labels/enabled", false);
+        chart.getYAxis().setAxisTitleText(stringMessages.distanceFromAveragePosition() + " (" + stringMessages.metersUnit() + ")").setOption("labels/enabled", false);
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
         markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000")
@@ -573,25 +573,29 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public void setRedPoint(int index) {
         Point[] points = markSeries.getPoints();
-        setRedPoint(points, index);
-        setSeriesPoints(markSeries, points);
+        if (points.length > index) {
+            setRedPoint(points, index);
+            setSeriesPoints(markSeries, points);
+        }
     }
     
     public void updateRedPoint(int index) {
-        Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
-        if (points.length > index) {
-            setRedPoint(points, index);
+        if (selectedMark != null) {
+            Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
+            if (points.length > index) {
+                setRedPoint(points, index);
+                setSeriesPoints(markSeries, points);
+                chart.redraw();
+            }
         }
-        setSeriesPoints(markSeries, points);
-        chart.redraw();
     }
     
     public void resetPointColor(int index) {
         Point[] points = markSeries.getPoints();
         if (points.length > index) {
             points[index].setMarker(new Marker().setFillColor(selectedMark.color));
+            setSeriesPoints(markSeries, points);
         }
-        setSeriesPoints(markSeries, points);
     }
     
     private void loadData(final Date from, final Date to) {
@@ -828,6 +832,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     @Override
     protected Button createSettingsButton() {
         Button settingsButton = SettingsDialog.createSettingsButton(this, stringMessages);
+        settingsButton.setVisible(false);
         return settingsButton;
     }
 
@@ -856,14 +861,31 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             currentFixPositionChooser.cancel();
             currentFixPositionChooser = null;
         }
-        if (selected.size() > 0) {
-            MarkDTO mark;
-            if (selected.size() > 1) {
-                mark = selected.get(0).equals(selectedMark) ? selected.get(1) : selected.get(0);
-            } else {
-                mark = selected.get(0);
+        if (selected.size() > 1) {
+            hideAllFixOverlays();
+            hideAllPolylines();
+            setWidget(noMarkSelectedLabel);
+            marksPanel.deselectMark(selectedMark);
+        } else if (selected.size() > 0) {
+            selectedMark = selected.get(0);
+            if (marksFromToTimes.get(selectedMark) != null) {
+                // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
+                timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
             }
-            setSelectedMark(selected.size() > 1, mark);
+            setWidget(chart);
+            markSeries.remove();
+            markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
+                    new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
+                    .setLineColor("#fff").setLineWidth(2)));
+            chart.addSeries(markSeries);
+            setSeriesPoints(selectedMark);
+            onResize(); // redraw chart
+            hideAllCourseMarkOverlaysExceptSelected();
+            raceMap.hideAllHelplines();
+            for (FixOverlay overlay : marks.get(selectedMark).values()) {
+                overlay.setVisible(true);
+            }
+            polylines.get(selectedMark).setVisible(true);
         } else {
             selectedMark = null;
             if (raceFromTime != null && raceToTime != null) {
@@ -875,34 +897,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             hideAllFixOverlays();
             hideAllPolylines();
         }
-    }
-    
-    private void setSelectedMark(boolean otherWasPrevSelected, MarkDTO mark) {
-        if (otherWasPrevSelected) {
-            marksPanel.deselectMark(selectedMark);
-            hideAllFixOverlays();
-            hideAllPolylines();
-            setWidget(noMarkSelectedLabel);
-        }
-        selectedMark = mark;
-        if (marksFromToTimes.get(selectedMark) != null) {
-            // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
-            timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
-        }
-        setWidget(chart);
-        markSeries.remove();
-        markSeries.setPlotOptions(markSeriesPlotOptions.setMarker(
-                new Marker().setFillColor(selectedMark.color != null ? selectedMark.color : "#efab00")
-                .setLineColor("#fff").setLineWidth(2)));
-        chart.addSeries(markSeries);
-        setSeriesPoints(selectedMark);
-        onResize(); // redraw chart
-        hideAllCourseMarkOverlaysExceptSelected();
-        raceMap.hideAllHelplines();
-        for (FixOverlay overlay : marks.get(selectedMark).values()) {
-            overlay.setVisible(true);
-        }
-        polylines.get(selectedMark).setVisible(true);
     }
     
     public void showAllCourseMarkOverlays() {
@@ -999,8 +993,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public List<GPSFixDTO> getMarkFixes() {
+        if (selectedMark != null) {
         List<GPSFixDTO> set = new ArrayList<GPSFixDTO>();
         set.addAll(marks.get(selectedMark).keySet());
         return set;
+        } else {
+            return null;
+        }
     }
 }
