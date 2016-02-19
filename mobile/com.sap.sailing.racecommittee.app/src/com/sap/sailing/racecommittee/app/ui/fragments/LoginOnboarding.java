@@ -10,12 +10,16 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -36,6 +40,20 @@ public class LoginOnboarding extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.login_onboarding, container, false);
+
+        TextView link = ViewHelper.get(layout, R.id.get_started);
+        if (link != null) {
+            SpannableString string = new SpannableString(link.getText());
+            string.setSpan(new UnderlineSpan(), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            link.setText(string);
+            link.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.get_started_url)));
+                    startActivity(intent);
+                }
+            });
+        }
 
         Button scan = ViewHelper.get(layout, R.id.scanQr);
         if (scan != null) {

@@ -463,5 +463,7 @@
     <string name="onboarding_input">Manuelle Eingabe</string>
     <string name="race_group">Group Race</string>
     <string name="wind_select_race">Select Race</string>
+    <string name="get_started">Getting Started</string>
+    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
 
 </resources>
