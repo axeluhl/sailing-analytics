@@ -37,6 +37,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     @IBOutlet weak var minutesLabel: UILabel!
     @IBOutlet weak var lastSyncLabel: UILabel!
     @IBOutlet weak var leaderBoardButton: UIButton!
+    @IBOutlet weak var openEventButton: UIButton!
     @IBOutlet weak var startTrackingButton: UIButton!
     @IBOutlet weak var leaderBoardButtonHeight: NSLayoutConstraint!
     @IBOutlet weak var announcementsLabel: PaddedLabel!
@@ -51,8 +52,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     /* Setup date formatter for last sync. */
     required init(coder aDecoder: NSCoder) {
         dateFormatter = NSDateFormatter()
-        dateFormatter.timeStyle = NSDateFormatterStyle.ShortStyle
-        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.dateFormat = "MMM d, yyyy, h:mm a" // As per request - see mail 19.02.2016
         super.init(coder: aDecoder)!
     }
     
@@ -60,6 +60,8 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         
         // set values
         navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
+
+        openEventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
         
         // set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
@@ -131,7 +133,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // reset views
         lastSyncLabel.hidden = true
         if DataManager.sharedManager.selectedCheckIn!.lastSyncDate != nil {
-            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
+            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + " " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
         }
@@ -183,6 +185,15 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         }
     }
     
+    @IBAction func showEvent(sender: UIButton) {
+        let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
+        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
+
+        let url = "\(serverUrl)/gwt/Home.html?navigationTab=Regattas#EventPlace:eventId=\(eventId)"
+        UIApplication.sharedApplication().openURL(NSURL(string: url)!)
+    }
+
+
     // MARK: - Menu
     
     @IBAction func showMenuActionSheet(sender: AnyObject) {
