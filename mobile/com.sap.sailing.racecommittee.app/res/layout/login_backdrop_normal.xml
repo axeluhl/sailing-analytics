@@ -35,62 +35,70 @@
         android:textColor="@color/constant_white"
         android:textSize="@dimen/textSize_40" />
 
-    <LinearLayout
-        android:id="@+id/button_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="@dimen/default_margin_half"
-        android:alpha="0"
-        android:orientation="horizontal"
-        tools:alpha="1">
-
-        <ImageView
-            android:id="@+id/more"
-            style="?attr/round"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginRight="@dimen/default_margin_half"
-            android:src="@drawable/ic_more_vert_white_48dp" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/backdrop_login"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/button_bar"
-        android:alpha="0"
-        android:drawableLeft="@drawable/ic_assignment_white_48dp"
-        android:drawablePadding="@dimen/default_padding_half"
-        android:gravity="center_vertical"
-        android:paddingBottom="@dimen/default_padding_half"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:paddingTop="@dimen/default_padding"
-        android:text="@string/login_sub_text"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_40" />
+        android:layout_height="wrap_content"
+        android:background="@color/constant_black_transparent"
+        android:id="@+id/gradient"
+        android:alpha="0">
 
-    <TextView
-        android:id="@+id/backdrop_onboarding"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/button_bar"
-        android:alpha="0"
-        android:drawableLeft="@drawable/ic_assignment_white_48dp"
-        android:drawablePadding="@dimen/default_padding_half"
-        android:gravity="center_vertical"
-        android:paddingBottom="@dimen/default_padding_half"
-        android:paddingLeft="@dimen/default_padding_half"
-        android:paddingRight="@dimen/default_padding_half"
-        android:paddingTop="@dimen/default_padding"
-        android:text="@string/login_onboarding_text"
-        android:textColor="@color/constant_white"
-        android:textSize="@dimen/textSize_40" />
+        <LinearLayout
+            android:id="@+id/button_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:orientation="horizontal"
+            tools:alpha="1"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true">
+
+            <ImageView
+                android:id="@+id/more"
+                style="?attr/round"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="@dimen/default_margin_half"
+                android:src="@drawable/ic_more_vert_white_48dp"
+                android:layout_marginBottom="@dimen/default_margin_half" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/backdrop_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@id/button_bar"
+            android:alpha="0"
+            android:drawableLeft="@drawable/ic_assignment_white_48dp"
+            android:drawablePadding="@dimen/default_padding_half"
+            android:gravity="center_vertical"
+            android:paddingBottom="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding_half"
+            android:paddingRight="@dimen/default_padding_half"
+            android:paddingTop="@dimen/default_padding"
+            android:text="@string/login_sub_text"
+            android:textColor="@color/constant_white"
+            android:textSize="@dimen/textSize_40" />
+
+        <TextView
+            android:id="@+id/backdrop_onboarding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_toLeftOf="@id/button_bar"
+            android:alpha="0"
+            android:drawableLeft="@drawable/ic_assignment_white_48dp"
+            android:drawablePadding="@dimen/default_padding_half"
+            android:gravity="center_vertical"
+            android:paddingBottom="@dimen/default_padding_half"
+            android:paddingLeft="@dimen/default_padding_half"
+            android:paddingRight="@dimen/default_padding_half"
+            android:paddingTop="@dimen/default_padding"
+            android:text="@string/login_onboarding_text"
+            android:textColor="@color/constant_white"
+            android:textSize="@dimen/textSize_40" />
+    </RelativeLayout>
 
     <View
         android:id="@+id/line"
