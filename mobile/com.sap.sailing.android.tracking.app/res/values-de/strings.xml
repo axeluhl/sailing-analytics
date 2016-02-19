@@ -77,5 +77,6 @@
     <string name="preferences">Einstellungen</string>
     <string name="tracking_notification_text">Tracking läuft für %s</string>
     <string name="waiting_for_gps">Warte auf GPS-Signal</string>
+    <string name="upload_in_progress">Wird hochgeladen...</string>
 
 </resources>
