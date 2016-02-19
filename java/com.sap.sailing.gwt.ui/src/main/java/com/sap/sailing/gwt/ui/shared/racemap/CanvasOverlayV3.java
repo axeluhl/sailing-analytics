@@ -100,7 +100,7 @@ public abstract class CanvasOverlayV3 {
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
         canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
-        if(canvasId != null) {
+        if (canvasId != null) {
             canvas.getElement().setId(canvasId);
         }
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());

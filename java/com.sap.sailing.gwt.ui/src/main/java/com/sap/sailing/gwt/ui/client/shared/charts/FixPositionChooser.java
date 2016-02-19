@@ -89,10 +89,10 @@ public class FixPositionChooser {
             final GPSFixDTO oldFix = overlay.getGPSFixDTO();
             fix = new GPSFixDTO(oldFix.timepoint, oldFix.position, oldFix.speedWithBearing, oldFix.degreesBoatToTheWind,
                     oldFix.tack, oldFix.legType, oldFix.extrapolated);
-            this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), "#f00", coordinateSystem);
+            this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         } else {
             fix = new GPSFixDTO(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
-            this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem);
+            this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         }
         map.panTo(startPos);
         if (polylinePath != null && newFix) {

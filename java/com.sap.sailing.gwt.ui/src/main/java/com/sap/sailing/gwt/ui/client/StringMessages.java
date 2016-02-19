@@ -1499,4 +1499,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String fixSuccessfullyAdded();
     String fixPositionSuccessfullyEdited();
     String fixSuccessfullyRemoved();
+    String dragToChangePosition();
+    String moveFix();
 }

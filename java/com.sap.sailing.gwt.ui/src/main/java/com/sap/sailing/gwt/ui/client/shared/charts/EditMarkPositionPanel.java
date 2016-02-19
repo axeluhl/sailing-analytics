@@ -121,7 +121,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     private FixPositionChooser currentFixPositionChooser;
     private List<OverlayClickHandler> overlayClickHandlers;
 
-    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel, 
+    public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
@@ -335,9 +335,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         private final FixOverlay overlay;
         private FixOverlay moveOverlay;
         
-        private MouseDownMapHandler mouseDownHandler;
+        private final MouseDownMapHandler mouseDownHandler;
         private HandlerRegistration mouseDownHandlerRegistration;
-        private RightClickMapHandler rightClickHandler;
+        private final RightClickMapHandler rightClickHandler;
         private HandlerRegistration rightClickHandlerRegistration;
         
         private int mouseDownX;
@@ -402,7 +402,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                             overlay.setVisible(false);
                             setRedPoint(index);
                             moveOverlay = new FixOverlay(map, overlay.getZIndex(), overlay.getGPSFixDTO(), overlay.getType(),
-                                    "#f00", raceMap.getCoordinateSystem());
+                                    "#f00", raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                             moveOverlay.addMouseUpHandler(new MouseUpMapHandler() {
                                 @Override
                                 public void onEvent(MouseUpMapEvent event) {
@@ -465,7 +465,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             popup = new PopupPanel(true);
             popup.setStyleName("EditMarkPositionPopup");
             MenuBar menu = new MenuBar(true);
-            moveMenuItem = new MenuItem("Move fix", new ScheduledCommand() {
+            moveMenuItem = new MenuItem(stringMessages.moveFix(), new ScheduledCommand() {
                 @Override
                 public void execute() {
                     overlay.setVisible(false);
@@ -492,7 +492,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             });
             moveMenuItem.setTitle(stringMessages.useATouchOptimizedUI());
             menu.addItem(moveMenuItem);
-            MenuItem delete;
+            final MenuItem delete;
             if (canRemoveMarkFix(mark, fix)) { 
                 delete = new MenuItem(stringMessages.deleteFix(), new ScheduledCommand() { 
                     @Override
@@ -642,7 +642,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     }
                 });
                 for (final GPSFixDTO fix : fixes.getValue()) {
-                    final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem());
+                    final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                     fixOverlayMap.put(fix, overlay);
                     overlay.setVisible(false);
                     overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
@@ -668,7 +668,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void addMarkFix(MarkDTO mark, Date timepoint, Position fixPosition) {
         GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
         serviceMock.addMarkFix("", "", "", mark, fix);
-        FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem());
+        FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
         overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
         marks.get(mark).put(fix, overlay);
         updatePolylinePoints(mark);

@@ -21,12 +21,13 @@ public class FixOverlay extends CanvasOverlayV3 {
     private Double lastHeight;
     private Double lastScaleFactor;
     
-    public FixOverlay(MapWidget map, int zIndex, GPSFixDTO fixDTO, FixType type, String color, CoordinateSystem coordinateSystem) {
+    public FixOverlay(MapWidget map, int zIndex, GPSFixDTO fixDTO, FixType type, String color, CoordinateSystem coordinateSystem, String tooltip) {
         super(map, zIndex, coordinateSystem);
         fix = fixDTO;
         fixVectorGraphics = new FixVectorGraphics(type, color);
         fixScaleAndSizePerZoomCache = new HashMap<Integer, Util.Pair<Double,Size>>();
         setCanvasSize(50, 50);
+        getCanvas().setTitle(tooltip);
     }
 
     @Override
