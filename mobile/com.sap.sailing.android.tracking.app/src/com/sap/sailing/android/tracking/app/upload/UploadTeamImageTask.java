@@ -85,7 +85,7 @@ public class UploadTeamImageTask extends AsyncTask<String, Void, UploadResult> {
             }
         } catch (IOException e) {
             uploadResult.resultCode = ERROR_IO;
-            uploadResult.resultMessage = "Error uploading image: " + e.getLocalizedMessage();
+            uploadResult.resultMessage = context.getString(R.string.upload_io_error) + e.getLocalizedMessage();
             ExLog.e(context, TAG, uploadResult.resultCode + ": " + uploadResult.resultMessage);
         } finally {
             safeClose(outputStream);
