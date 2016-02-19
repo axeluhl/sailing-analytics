@@ -37,6 +37,7 @@ import com.google.gwt.ajaxloader.client.Properties.TypeException;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapOptions;
@@ -96,7 +97,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {    
+public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {
     private final RaceMap raceMap;
     private final LeaderboardPanel leaderboardPanel;
     private final MarksPanel marksPanel;
@@ -377,6 +378,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                             map.setOptions(options);
                         }
                     } catch (TypeException e) {
+                        GWT.log("Exception trying to obtain pageX or pageY property on event "+event, e);
                     }
                 }
             };
@@ -391,9 +393,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                             currentX = pixel.getX();
                             currentY = pixel.getY();
                         } catch (TypeException e) {
+                            GWT.log("Exception trying to obtain pixel property on event "+event, e);
                         }
                         final int index = getIndexOfFixInPolyline(mark, fix);
-                        if(!dragging && Math.sqrt(Math.pow(currentX - mouseDownX, 2) +
+                        if (!dragging && Math.sqrt(Math.pow(currentX - mouseDownX, 2) +
                                 Math.pow(currentY - mouseDownY, 2)) > 15) {
                             dragging = true;
                             overlay.setVisible(false);

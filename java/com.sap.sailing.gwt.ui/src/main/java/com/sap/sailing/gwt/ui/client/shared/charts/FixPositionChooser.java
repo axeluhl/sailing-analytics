@@ -27,15 +27,16 @@ public class FixPositionChooser {
     private final Callback<Position, Exception> callback;
     private final MapWidget map;
     private final boolean newFix;
-    private int polylineFixIndex;
-    private MVCArray<LatLng> polylinePath;
-    private LatLng startPos;
-    private FixOverlay overlay;
-    private CoordinateSystem coordinateSystem;
+    private final int polylineFixIndex;
+    private final MVCArray<LatLng> polylinePath;
+    private final LatLng startPos;
+    private final FixOverlay overlay;
+    private final CoordinateSystem coordinateSystem;
     private FixOverlay moveOverlay;
     private HandlerRegistration centerChangeHandlerRegistration;
     private MenuBar menu;
     private final EditMarkPositionPanel editMarkPositionPanel;
+    private final StringMessages stringMessages;
     
     /**
      * Use this constructor when there is already a fix with an overlay. 
@@ -56,13 +57,6 @@ public class FixPositionChooser {
     /**
      * Use this constructor when you want to add a fix and not move one.
      * This constructor will automatically assume that there is no existing fix.
-     * @param editMarkPositionPanel
-     * @param map
-     * @param polylineFixIndex Position of the fix in the polyline path
-     * @param polylinePath
-     * @param startPos
-     * @param coordinateSystem
-     * @param callback
      */
     public FixPositionChooser(final EditMarkPositionPanel editMarkPositionPanel, final StringMessages stringMessages, final MapWidget map, final int polylineFixIndex, final MVCArray<LatLng> polylinePath, final LatLng startPos, 
             final CoordinateSystem coordinateSystem, final Callback<Position, Exception> callback) {
@@ -76,6 +70,7 @@ public class FixPositionChooser {
             final FixOverlay overlay, final LatLng startPos, final CoordinateSystem coordinateSystem, final String confirmButtonText, 
             final Callback<Position, Exception> callback) {
         this.callback = callback;
+        this.stringMessages = stringMessages;
         this.map = map;
         this.newFix = newFix;
         this.polylineFixIndex = polylineFixIndex;
@@ -125,7 +120,7 @@ public class FixPositionChooser {
                 callback.onSuccess(coordinateSystem.getPosition(map.getCenter()));
             }
         });
-        MenuItem cancel = new MenuItem("Cancel", new ScheduledCommand() {
+        MenuItem cancel = new MenuItem(stringMessages.cancel(), new ScheduledCommand() {
             @Override
             public void execute() {
                 cancel();
