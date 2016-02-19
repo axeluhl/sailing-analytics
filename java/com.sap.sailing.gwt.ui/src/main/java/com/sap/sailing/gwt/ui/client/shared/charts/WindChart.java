@@ -543,12 +543,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
         }
      }
 
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
-
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();

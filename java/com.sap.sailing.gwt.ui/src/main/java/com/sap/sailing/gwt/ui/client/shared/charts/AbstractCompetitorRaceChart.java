@@ -630,12 +630,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         }
     }
 
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
-
     @Override
     public void onResize() {
         chart.setSizeToMatchContainer();

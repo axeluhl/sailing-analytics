@@ -844,12 +844,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
     }
     
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
-
     public void setComponentViewer(SideBySideComponentViewer sideBySideComponentViewer) {
         this.sideBySideComponentViewer = sideBySideComponentViewer;
     }

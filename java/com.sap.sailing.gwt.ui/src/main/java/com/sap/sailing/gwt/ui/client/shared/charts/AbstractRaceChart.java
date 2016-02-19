@@ -231,4 +231,10 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
     public void onTimeZoomReset() {
         resetMinMaxAndExtremesInterval(true);
     }
+
+    protected void updateTimePlotLine(Date date) {
+        chart.getXAxis().removePlotLine(timePlotLine);
+        timePlotLine.setValue(date.getTime());
+        chart.getXAxis().addPlotLines(timePlotLine);
+    }
 }
