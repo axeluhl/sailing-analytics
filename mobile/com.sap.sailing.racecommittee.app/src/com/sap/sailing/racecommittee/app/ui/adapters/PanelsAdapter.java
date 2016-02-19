@@ -5,7 +5,6 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentStatePagerAdapter;
 
-import com.sap.sailing.racecommittee.app.ui.fragments.panels.MorePanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 
