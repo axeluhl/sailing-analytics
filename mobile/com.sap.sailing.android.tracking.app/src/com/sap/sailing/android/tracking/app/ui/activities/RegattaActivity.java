@@ -1,15 +1,10 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -80,6 +75,7 @@ public class RegattaActivity extends AbstractRegattaActivity
     private String checkinDigest;
     private CheckinManager manager;
     private AppPreferences prefs;
+    private File pictureFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -311,7 +307,7 @@ public class RegattaActivity extends AbstractRegattaActivity
      * @param image
      */
     private void storeImageAndSendToServer(Bitmap image, String fileName, boolean sendToServer) {
-        File pictureFile = getImageFile(fileName);
+        pictureFile = getImageFile(fileName);
         if (pictureFile == null) {
             Log.d(TAG, "Error creating media file, check storage permissions: ");// e.getMessage());
             return;
@@ -603,8 +599,8 @@ public class RegattaActivity extends AbstractRegattaActivity
 
     @Override
     public void onUploadTaskStarted() {
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
-        linearLayout.setVisibility(View.VISIBLE);
+        hideRetryUploadLayout();
+        showUploadProgressLayout();
     }
 
     @Override
@@ -614,8 +610,38 @@ public class RegattaActivity extends AbstractRegattaActivity
 
     @Override
     public void onUploadTaskFinished(UploadResult uploadResult) {
+        hideUploadProgressLayout();
+        if (uploadResult.resultCode != 200) {
+            showRetryUploadLayout();
+        }
+        Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
+    }
+
+    public void retryUpload(View view) {
+        if (pictureFile != null) {
+            sendTeamImageToServer(pictureFile);
+        } else {
+            hideRetryUploadLayout();
+        }
+    }
+
+    private void showUploadProgressLayout() {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
+        linearLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void hideUploadProgressLayout() {
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
         linearLayout.setVisibility(View.GONE);
-        Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
+    }
+
+    private void showRetryUploadLayout() {
+        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
+        linearLayout1.setVisibility(View.VISIBLE);
+    }
+
+    private void hideRetryUploadLayout() {
+        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
+        linearLayout1.setVisibility(View.GONE);
     }
 }
