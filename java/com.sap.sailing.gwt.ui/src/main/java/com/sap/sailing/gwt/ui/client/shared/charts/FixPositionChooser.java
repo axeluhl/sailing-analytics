@@ -115,7 +115,7 @@ public class FixPositionChooser {
                 setRedPointInChart(fix);
             }
         });
-        menu = new MenuBar(false);
+        menu = new MenuBar(/* vertical */ false);
         menu.setStyleName("EditMarkPositionConfirmCancelButtons");
         MenuItem confirm = new MenuItem(confirmButtonText, new ScheduledCommand() {
             @Override
@@ -133,7 +133,7 @@ public class FixPositionChooser {
         });
         menu.addItem(confirm);
         menu.addItem(cancel);
-        map.setControls(ControlPosition.BOTTOM_CENTER, menu);
+        map.setControls(ControlPosition.BOTTOM_LEFT, menu);
     }
     
     private void destroyUIOverlay() {

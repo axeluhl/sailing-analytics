@@ -776,7 +776,7 @@ img.openColumn {
 	color: #fff;
 	font-size: 15px;
 	font-weight: bold;
-	padding: 15px 25px;
+	padding: 5px 5px;
 	background-color: #efab00;
 	border: 1px solid gray;
 }
@@ -786,7 +786,7 @@ img.openColumn {
 }
 
 .EditMarkPositionConfirmCancelButtons table {
-	border-spacing: 20px;
+	border-spacing: 10px;
 	border-collapse: seperate;
 }
 
