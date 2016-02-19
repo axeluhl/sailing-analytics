@@ -10,7 +10,7 @@ import com.sap.sse.common.Util;
  */
 public class DeviceConfigurationQRCodeUtils {
 
-    private static final String fragmentKey = "identifier";
+    public static final String fragmentKey = "identifier";
 
     public static String composeQRContent(String deviceIdentifier, String apkUrl) {
         // poor man's uri fragment encoding: ' ' as '%20'

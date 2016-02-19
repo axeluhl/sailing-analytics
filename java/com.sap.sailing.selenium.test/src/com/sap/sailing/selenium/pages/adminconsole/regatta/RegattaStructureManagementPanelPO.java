@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
 public class RegattaStructureManagementPanelPO extends PageArea {
-    public static final String DEFAULT_SERIES_NAME = "Default"; //$NON-NLS-1$
+    public static final String DEFAULT_SERIES_NAME = "DefaultSelenium"; //$NON-NLS-1$
     
     @FindBy(how = BySeleniumId.class, using = "AddRegattaButton")
     WebElement addRegattaButton;

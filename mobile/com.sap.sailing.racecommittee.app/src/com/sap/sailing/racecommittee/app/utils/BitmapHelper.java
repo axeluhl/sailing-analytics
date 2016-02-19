@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.AttrRes;
-import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -104,22 +106,23 @@ public class BitmapHelper {
         }
     }
 
-    // @SuppressWarnings, but it is handled correctly
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static Drawable getDrawable(Context context, @DrawableRes int id) {
-        Drawable drawable;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawable = context.getDrawable(id);
-        } else {
-            drawable = context.getResources().getDrawable(id);
-        }
+    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableResId);
+        drawable = DrawableCompat.wrap(drawable).mutate();
+        DrawableCompat.setTint(drawable, color);
         return drawable;
     }
 
-    public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {
-        Drawable drawable = getDrawable(context, drawableResId);
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        return drawable;
+    public static Bitmap toBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

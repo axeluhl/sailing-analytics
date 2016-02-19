@@ -1,20 +1,24 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.lists;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
+import com.sap.sailing.racecommittee.app.domain.LoginType;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
+import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
-
-import java.util.ArrayList;
 
 public class PositionListFragment extends LoggableListFragment {
 
@@ -48,7 +52,14 @@ public class PositionListFragment extends LoggableListFragment {
             values.add(getString(R.string.login_type_viewer));
         }
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getBaseContext(), R.layout.login_list_item, R.id.list_item, values);
+        final List<CheckedItem> items = new ArrayList<>();
+        for (String displayedText : values) {
+            CheckedItem item = new CheckedItem();
+            item.setText(displayedText);
+            items.add(item);
+        }
+
+        final CheckedItemAdapter adapter = new CheckedItemAdapter(getActivity(), items);
         setListAdapter(adapter);
 
         host = (PositionSelectedListenerHost) getActivity();
@@ -58,34 +69,38 @@ public class PositionListFragment extends LoggableListFragment {
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        setStyleClicked(view);
-
+        ListAdapter adapter = listView.getAdapter();
+        if (adapter instanceof CheckedItemAdapter) {
+            CheckedItemAdapter checkedItemAdapter = (CheckedItemAdapter) adapter;
+            checkedItemAdapter.setCheckedPosition(position);
+            checkedItemAdapter.notifyDataSetChanged();
+        }
         LoginType selectedLoginType;
         switch (position) {
-        // see loginTypeDescriptions for the indices of the login types
-        case 0:
-            selectedLoginType = LoginType.OFFICER;
-            preferences.setSendingActive(true);
-            author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_START, 0);
-            break;
-        case 1:
-            selectedLoginType = LoginType.OFFICER;
-            preferences.setSendingActive(true);
-            author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_FINISH, 1);
-            break;
-        case 2:
-            selectedLoginType = LoginType.OFFICER;
-            preferences.setSendingActive(true);
-            author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_SHORE_CONTROL, 2);
-            break;
-        case 3:
-            selectedLoginType = LoginType.VIEWER;
-            preferences.setSendingActive(false);
-            author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_VIEWER, 3);
-            break;
-        default:
-            selectedLoginType = LoginType.NONE;
-            break;
+            // see loginTypeDescriptions for the indices of the login types
+            case 0:
+                selectedLoginType = LoginType.OFFICER;
+                preferences.setSendingActive(true);
+                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_START, 0);
+                break;
+            case 1:
+                selectedLoginType = LoginType.OFFICER;
+                preferences.setSendingActive(true);
+                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_OFFICER_FINISH, 1);
+                break;
+            case 2:
+                selectedLoginType = LoginType.OFFICER;
+                preferences.setSendingActive(true);
+                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_SHORE_CONTROL, 2);
+                break;
+            case 3:
+                selectedLoginType = LoginType.VIEWER;
+                preferences.setSendingActive(false);
+                author = new LogEventAuthorImpl(AppConstants.AUTHOR_TYPE_VIEWER, 3);
+                break;
+            default:
+                selectedLoginType = LoginType.NONE;
+                break;
         }
         preferences.setAuthor(author);
         ExLog.i(getActivity(), PositionListFragment.class.getName(), "Logging in as: " + selectedLoginType + "->" + author);

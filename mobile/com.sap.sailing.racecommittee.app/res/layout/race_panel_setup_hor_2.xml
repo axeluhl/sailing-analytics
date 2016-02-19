@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_course"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:buttonHeader="@string/course"
+            app:buttonType="typeValue"
+            app:linePosition="right"/>
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_wind"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:buttonHeader="@string/wind"
+            app:buttonType="typeValue" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/black" />
+</RelativeLayout>
