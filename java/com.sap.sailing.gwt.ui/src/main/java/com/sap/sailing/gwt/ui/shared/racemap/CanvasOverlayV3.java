@@ -408,4 +408,12 @@ public abstract class CanvasOverlayV3 {
     public MapCanvasProjection getMapProjection() {
         return mapProjection;
     }
+
+    protected void updateTransition(long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionAndRotationTransition();
+        } else {
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
+        }
+    }
 }

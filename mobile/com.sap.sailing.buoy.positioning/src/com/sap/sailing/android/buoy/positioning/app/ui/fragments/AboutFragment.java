@@ -38,7 +38,7 @@ public class AboutFragment extends BaseFragment {
         view.findViewById(R.id.eula_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EulaHelper.openEulaPage(getActivity());
+                EulaHelper.with(getActivity()).openEulaPage();
             }
         });
         OpenSansTextView versionTextView = (OpenSansTextView) view.findViewById(R.id.system_information_application_version);

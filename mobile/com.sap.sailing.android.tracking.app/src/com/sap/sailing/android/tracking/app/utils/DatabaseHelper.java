@@ -267,7 +267,7 @@ public class DatabaseHelper {
      *            SHA-256 digest of QR-code string
      * @return combination available or not
      */
-    public boolean eventLeaderboardCompetitorCombnationAvailable(Context context, String checkinDigest) {
+    public boolean eventLeaderboardCompetitorCombinationAvailable(Context context, String checkinDigest) {
         ContentResolver cr = context.getContentResolver();
         String sel = AnalyticsDatabase.Tables.LEADERBOARDS + "." + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ? "
             + "AND " + AnalyticsDatabase.Tables.COMPETITORS + "." + Competitor.COMPETITOR_CHECKIN_DIGEST + " = ? "

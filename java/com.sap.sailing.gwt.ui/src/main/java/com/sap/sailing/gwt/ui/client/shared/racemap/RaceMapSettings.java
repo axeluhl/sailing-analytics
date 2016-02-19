@@ -10,6 +10,8 @@ import com.sap.sse.common.settings.AbstractSettings;
 
 public class RaceMapSettings extends AbstractSettings {
 
+    private static final Set<ManeuverType> DEFAULT_SHOWN_MANEUVER = getDefaultManeuvers();
+
     private boolean showDouglasPeuckerPoints = false;
 
     private final Set<ManeuverType> maneuverTypesToShow;
@@ -47,12 +49,10 @@ public class RaceMapSettings extends AbstractSettings {
     private boolean windUp = false;
 
     public RaceMapSettings() {
-        // empty default settings; don't show maneuvers by default
-        maneuverTypesToShow = new HashSet<ManeuverType>();
+        maneuverTypesToShow = DEFAULT_SHOWN_MANEUVER;
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
-
     /**
      * "Copy constructor" that produces a new settings object that equals the one passed as argument
      */
@@ -159,7 +159,7 @@ public class RaceMapSettings extends AbstractSettings {
     public void setHelpLinesSettings(RaceMapHelpLinesSettings helpLinesSettings) {
         this.helpLinesSettings = helpLinesSettings;
     }
-    
+
     public boolean getTransparentHoverlines() {
         return this.transparentHoverlines;
     }
@@ -199,4 +199,13 @@ public class RaceMapSettings extends AbstractSettings {
     public void setWindUp(boolean windUp) {
         this.windUp = windUp;
     }
+    
+    private static HashSet<ManeuverType> getDefaultManeuvers() {
+        HashSet<ManeuverType> types = new HashSet<ManeuverType>();
+        types.add(ManeuverType.JIBE);
+        types.add(ManeuverType.TACK);
+        types.add(ManeuverType.PENALTY_CIRCLE);
+        return types;
+    }
+
 }

@@ -1,7 +1,5 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
-import java.text.DecimalFormat;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,14 +38,16 @@ import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
 
+import java.text.DecimalFormat;
+
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
+    private static final String N_A = "n/a";
     private OpenSansTextView markHeaderTextView;
-    private OpenSansTextView latitudeTextView;
-    private OpenSansTextView longitudeTextView;
     private OpenSansTextView accuracyTextView;
+    private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
     private OpenSansButton resetPositionButton;
     private MapFragment mapFragment;
@@ -67,9 +67,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
         markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
-        latitudeTextView = ViewHelper.get(layout, R.id.marker_gps_latitude);
-        longitudeTextView = ViewHelper.get(layout, R.id.marker_gps_longitude);
         accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
+        distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
 
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
@@ -139,7 +138,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onPause() {
         super.onPause();
-        // Unsubscribe location updates for power saving
+        // Unsubscribe from location updates for power saving
         locationManager.removeUpdates(this);
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
@@ -147,39 +146,31 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void setUpTextUI(Location location) {
         MarkInfo mark = positioningActivity.getMarkInfo();
         markHeaderTextView.setText(mark.getName());
-        String longitudeText = "";
-        String latitudeText = "";
-        String accuracyText = "";
-        DecimalFormat latlngFormatter = new DecimalFormat("#.######");
+        String accuracyText = N_A;
+        String distanceText = N_A;
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");
         String accuracyString = getString(R.string.buoy_detail_accuracy_ca);
+        String distanceString = getString(R.string.buoy_detail_distance);
         if (location != null) {
-            latitudeText += latlngFormatter.format(location.getLatitude());
-            longitudeText += latlngFormatter.format(location.getLongitude());
-            accuracyText += String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
-        } else {
-            latitudeText += "n/a";
-            longitudeText += "n/a";
-            accuracyText += "n/a";
+            accuracyText = String.format(accuracyString, accuracyFormatter.format(location.getAccuracy()));
+            MarkPingInfo markPing = positioningActivity.getMarkPing();
+            if (markPing != null) {
+                double savedLatitude = Double.parseDouble(markPing.getLatitude());
+                double savedLongitude = Double.parseDouble(markPing.getLongitude());
+                savedPosition = new LatLng(savedLatitude, savedLongitude);
+                float[] results = new float[1];
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
+                        results);
+                float distance = results[0];
+                distanceText = String.format(distanceString, accuracyFormatter.format(distance));
+            }
         }
-        MarkPingInfo markPing = positioningActivity.getMarkPing();
-        if (markPing != null) {
-            double savedLatitude = Double.parseDouble(markPing.getLatitude());
-            double savedLongitude = Double.parseDouble(markPing.getLongitude());
-            savedPosition = new LatLng(savedLatitude, savedLongitude);
-            latitudeText += " (" + latlngFormatter.format(savedLatitude) + ")";
-            longitudeText += " (" + latlngFormatter.format(savedLongitude) + ")";
-            accuracyText += " (" + String.format(accuracyString, accuracyFormatter.format(markPing.getAccuracy()))
-                    + ")";
-        }
-        
-          ExLog.w(getActivity(), getTag(), "Setting latitude to: "+latitudeText);
-          ExLog.w(getActivity(), getTag(), "Setting longitude to: "+longitudeText);
-          ExLog.w(getActivity(), getTag(), "Setting accuracy to: "+accuracyText);
-        
-        latitudeTextView.setText(latitudeText);
-        longitudeTextView.setText(longitudeText);
+
+        ExLog.w(getActivity(), getTag(), "Setting accuracy to: " + accuracyText);
+        ExLog.w(getActivity(), getTag(), "Setting distance to: " + distanceText);
+
         accuracyTextView.setText(accuracyText);
+        distanceTextView.setText(distanceText);
     }
 
     @Override
