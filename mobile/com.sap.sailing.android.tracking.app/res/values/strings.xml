@@ -19,6 +19,9 @@
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>
     <string name="add_team_photo">Add Team Photo</string>
+    <string name="upload_in_progress">Uploading…</string>
+    <string name="upload_retry">Retry upload</string>
+    <string name="upload_io_error">Error uploading image: </string>
     <string name="do_you_want_to_choose_existing_img_or_take_a_new_one">Do you want to use an existing image or take a new one?</string>
     <string name="existing_image">Existing</string>
     <string name="take_photo">Take Photo</string>
