@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
+import java.net.URL;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,9 +27,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
