@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.cell.client.ButtonCell;
@@ -92,9 +93,10 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             }
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
+            final Date timePoint = parent.timer.getTime();
             @Override
             public void update(int index, final MarkDTO mark, String value) {
-                if (parent.hasFixAtTimePoint(mark)) {
+                if (parent.hasFixAtTimePoint(mark, timePoint)) {
                     parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
                 } else {
                     parent.createFixPositionChooserToAddFixToMark(mark, new Callback<Position, Exception>() {
@@ -104,7 +106,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
                         }
                         @Override
                         public void onSuccess(Position result) {
-                            parent.addMarkFix(mark, parent.timer.getTime(), result);
+                            parent.addMarkFix(mark, timePoint, result);
                             parent.resetCurrentFixPositionChooser();
                         }
                     });

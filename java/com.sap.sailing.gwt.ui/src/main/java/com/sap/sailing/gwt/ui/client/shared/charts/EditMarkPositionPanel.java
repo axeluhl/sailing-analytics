@@ -986,10 +986,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         notificationTimer.schedule(5000);
     }
 
-    public boolean hasFixAtTimePoint(MarkDTO mark) {
+    public boolean hasFixAtTimePoint(MarkDTO mark, Date timePoint) {
         boolean result = false;
-        for(GPSFixDTO fix : marks.get(mark).keySet()) {
-            if (fix.timepoint.equals(timer.getTime())) {
+        for (GPSFixDTO fix : marks.get(mark).keySet()) {
+            if (fix.timepoint.equals(timePoint)) {
                 result = true;
                 break;
             }
