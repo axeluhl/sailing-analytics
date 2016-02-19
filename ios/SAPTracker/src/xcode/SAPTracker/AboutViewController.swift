@@ -28,8 +28,7 @@ class AboutViewController: UIViewController {
     }
     
     @IBAction func openEULA(sender: AnyObject) {
-        let url = NSURL(string: "http://www.sap.com")!
-        UIApplication.sharedApplication().openURL(url)
+        UIApplication.sharedApplication().openURL(URLs.EULA)
     }
     
 }
