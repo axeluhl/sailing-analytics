@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class CreateDefaultRegattaLeaderboardDialog extends DataEntryDialog<RegattaIdentifier>{
+public class CreateDefaultRegattaLeaderboardDialog extends DataEntryDialog<RegattaIdentifier> {
 
     private RegattaDTO regatta;
     
