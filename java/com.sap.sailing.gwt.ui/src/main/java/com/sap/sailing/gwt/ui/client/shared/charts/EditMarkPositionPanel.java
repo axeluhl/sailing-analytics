@@ -35,6 +35,9 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -623,12 +626,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<GPSFixDTO, FixOverlay>(new Comparator<GPSFixDTO>() {
                     @Override
                     public int compare(GPSFixDTO o1, GPSFixDTO o2) {
-                        int result = 0;
-                        if (o1.timepoint.before(o2.timepoint))
-                            result = -1;
-                        if (o1.timepoint.after(o2.timepoint))
-                            result = 1;
-                        return result;
+                        return o1.timepoint.compareTo(o2.timepoint);
                     }
                 });
                 for (final GPSFixDTO fix : fixes.getValue()) {
@@ -636,7 +634,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     fixOverlayMap.put(fix, overlay);
                     overlay.setVisible(false);
                     overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
-                    
                     if (fromTime.after(fix.timepoint)) {
                         fromTime = fix.timepoint;
                     } else if (toTime.before(fix.timepoint)) {
@@ -710,7 +707,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         Point[] points = new Point[fixes.size()];
         int i = 0;
         for (GPSFixDTO fix : fixes) {
-            points[i++] = new Point(fix.timepoint.getTime(), fix.position.getDistance(averagePosition).getMeters());
+            final double metersFromAverage = fix.position.getDistance(averagePosition).getMeters();
+            points[i] = new Point(fix.timepoint.getTime(), metersFromAverage);
+            points[i].setTitle(DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(fix.timepoint)+", "+NumberFormat.getFormat("0.0").format(metersFromAverage)+"m");
+            i++;
         }
         return points;
     }
