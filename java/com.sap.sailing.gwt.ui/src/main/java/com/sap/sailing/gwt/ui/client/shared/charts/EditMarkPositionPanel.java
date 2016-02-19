@@ -20,6 +20,9 @@ import org.moxieapps.gwt.highcharts.client.Credits;
 import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 import org.moxieapps.gwt.highcharts.client.Point;
 import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTip;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
+import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -35,8 +38,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapOptions;
 import com.google.gwt.maps.client.MapWidget;
@@ -136,9 +137,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         this.marksFromToTimes = new HashMap<>();
         this.getEntryWidget().setTitle(stringMessages.editMarkPositions());
         this.setVisible(false);
-        
         this.overlayClickHandlers = new ArrayList<>();
-
         chart = new Chart()
                 .setPersistent(true)
                 .setZoomType(BaseChart.ZoomType.X)
@@ -155,21 +154,18 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 .setChartTitle(new ChartTitle().setText(stringMessages.markFixes()))
                 .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
                 .setPersistent(true);
-        
         chart.setClickEventHandler(new ChartClickEventHandler() {
             @Override
             public boolean onClick(ChartClickEvent chartClickEvent) {
                 return EditMarkPositionPanel.this.onClick(chartClickEvent);
             }
         });
-        
         chart.setSelectionEventHandler(new ChartSelectionEventHandler() {
             @Override
             public boolean onSelection(ChartSelectionEvent chartSelectionEvent) {
                 return EditMarkPositionPanel.this.onXAxisSelectionChange(chartSelectionEvent);
             }
         });
-        
         chart.getXAxis().setType(Axis.Type.DATE_TIME)
                 .setMaxZoom(60 * 1000) // 1 minute
                 .setAxisTitleText(stringMessages.time());
@@ -183,10 +179,23 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1)
                 .setDashStyle(DashStyle.SOLID);
         markSeriesPlotOptions = new LinePlotOptions().setSelected(true).setShowInLegend(false).setLineWidth(1).setColor("#000")
-                .setHoverStateLineWidth(1).setEnableMouseTracking(false);
+                .setHoverStateLineWidth(1).setEnableMouseTracking(true);
         markSeries = chart.createSeries().setType(Series.Type.LINE).setYAxis(0)
-                .setPlotOptions(markSeriesPlotOptions);
+                .setPlotOptions(markSeriesPlotOptions).setName(stringMessages.distanceFromAveragePosition());
         chart.addSeries(markSeries, false, false);
+        chart.setToolTip(new ToolTip().setEnabled(true).setFormatter(new ToolTipFormatter() {
+            @Override
+            public String format(ToolTipData toolTipData) {
+                final String seriesName = toolTipData.getSeriesName();
+                if (seriesName.equals(stringMessages.time())) {
+                    return "<b>" + seriesName + ":</b> " + dateFormat.format(new Date(toolTipData.getXAsLong()))
+                            + "<br/>(" + stringMessages.clickChartToSetTime() + ")";
+                } else {
+                    return "<b>" + (dateFormat.format(new Date(toolTipData.getXAsLong()))) + "</b>: "
+                                 + NumberFormat.getFormat("0.0").format(toolTipData.getYAsDouble()) + " m";
+                }
+            }
+        }));
     }
     
     public class MarkTrackDTO {
@@ -709,7 +718,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         for (GPSFixDTO fix : fixes) {
             final double metersFromAverage = fix.position.getDistance(averagePosition).getMeters();
             points[i] = new Point(fix.timepoint.getTime(), metersFromAverage);
-            points[i].setTitle(DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(fix.timepoint)+", "+NumberFormat.getFormat("0.0").format(metersFromAverage)+"m");
             i++;
         }
         return points;
