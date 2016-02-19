@@ -6,6 +6,10 @@
   Copyright (c) 2015 com.sap.sailing. All rights reserved.
 */
 /* HomeViewController */
+"Header" = "Set Up GPS Tracker";
+"Scan Code" = "Scan QR Code";
+"No Code" = "Don’t Have a QR Code?";
+"QR found" = "The QR code can be found on your registration confirmation";
 "Settings" = "Settings";
 "About" = "About";
 "Cancel" = "Cancel";

@@ -203,6 +203,9 @@
                     </navigationItem>
                     <connections>
                         <outlet property="activityIndicatorView" destination="3y9-Us-aIu" id="NSb-XJ-NZ9"/>
+                        <outlet property="bottomNote" destination="OqX-q3-43s" id="dYC-gI-KoQ"/>
+                        <outlet property="btnNoCode" destination="Fp0-61-7he" id="DWs-iF-M4w"/>
+                        <outlet property="btnScan" destination="Ieu-ch-jeI" id="FWs-OF-b4i"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
                         <outlet property="tableViewHeight" destination="yuo-wx-0A1" id="pFK-q1-1DI"/>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
@@ -1359,13 +1362,13 @@
         <image name="DE.png" width="64" height="64"/>
         <image name="camera" width="24" height="24"/>
         <image name="edit" width="33" height="33"/>
-        <image name="home_bg" width="434" height="289"/>
+        <image name="home_bg" width="980" height="653"/>
         <image name="profile_placeholder" width="360" height="256"/>
         <image name="scan_white" width="214" height="214"/>
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="QMa-LQ-D8c"/>
+        <segue reference="Xxn-jp-xEB"/>
     </inferredMetricsTieBreakers>
 </document>

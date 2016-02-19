@@ -19,6 +19,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         static let acceptedTerms = "acceptedTerms"
     }
     
+    @IBOutlet weak var bottomNote: PaddedLabel!
+    @IBOutlet weak var btnScan: UIButton!
+    @IBOutlet weak var btnNoCode: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
@@ -47,6 +50,11 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "checkEULA:", name: UIApplicationWillEnterForegroundNotification, object: nil)
 
         checkEULA(NSNotification.init(name: "", object: nil))
+
+        navigationItem.title = NSLocalizedString("Header", comment: "")
+        bottomNote.text = NSLocalizedString("QR found", comment: "")
+        btnScan.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
+        btnNoCode.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
 
         // add logo to top left
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))

@@ -52,8 +52,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     /* Setup date formatter for last sync. */
     required init(coder aDecoder: NSCoder) {
         dateFormatter = NSDateFormatter()
-        dateFormatter.timeStyle = NSDateFormatterStyle.ShortStyle
-        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        dateFormatter.dateFormat = "MMM d, yyyy, h:mm a" // As per request - see mail 19.02.2016
         super.init(coder: aDecoder)!
     }
     
@@ -134,7 +133,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         // reset views
         lastSyncLabel.hidden = true
         if DataManager.sharedManager.selectedCheckIn!.lastSyncDate != nil {
-            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
+            lastSyncLabel.text = NSLocalizedString("Last sync", comment: "") + " " + dateFormatter.stringFromDate(DataManager.sharedManager.selectedCheckIn!.lastSyncDate!)
         } else {
             lastSyncLabel.text = nil
         }
