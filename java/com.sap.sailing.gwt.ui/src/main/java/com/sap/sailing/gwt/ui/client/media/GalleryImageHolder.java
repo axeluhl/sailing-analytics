@@ -10,7 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
+import com.sap.sse.gwt.client.media.ImageDTO;
 
 public class GalleryImageHolder extends Widget implements HasClickHandlers {
 
@@ -22,7 +22,7 @@ public class GalleryImageHolder extends Widget implements HasClickHandlers {
     @UiField
     DivElement imageHolderUi;
 
-    public GalleryImageHolder(SailingImageDTO video) {
+    public GalleryImageHolder(ImageDTO video) {
         setElement(uiBinder.createAndBindUi(this));
         imageHolderUi.getStyle().setBackgroundImage("url(\"" + video.getSourceRef() + "\")");
         

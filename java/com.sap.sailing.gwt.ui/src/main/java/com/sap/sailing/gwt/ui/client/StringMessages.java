@@ -325,7 +325,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -361,7 +361,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String successfullyUpdatedScores();
     String errorUpdatingScoresForLeaderboard(String leaderboardName, String message);
     String maneuverTypesToShowWhenCompetitorIsClicked();
-    String simulateWithStartTimeNow();
+    String simulateAsLiveRace();
+    String simulateWithOffset();
     String boatClassDoesNotMatchSelectedRegatta(String boatClass);
     String regattaExistForSelectedBoatClass();
     String reload();
@@ -415,6 +416,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSchemeLowPointForLeagueOverallLeaderboard();
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
+    String scoringSchemeHighPointEssOverall12();
+    String scoringSchemeHighPointEssOverall12Description();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight();
+    String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -436,7 +441,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String overallDetailsToShow();
     String hhmmssUnit();
     String actionAddWindData();
-    String valueMustBeBetweenMinMax(String name, String minValue, String maxValue);
+    String valueMustBeBetweenMinMax(String name, int minValue, int maxValue);
+    String valueMustBeGreaterThan(String name, String minValue);
     String optional();
     String pleaseEnterAValue();
     String latitude();
@@ -503,6 +509,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String sideToWhichMarkAtLegStartWasRounded();
     String raceIsLive(String raceName);
     String racesAreLive(String raceNames);
+    String regattaIsLive(String regattaName);
+    String regattasAreLive(String regattaNames);
     String scoringSchemeHighPointFirstGetsOne();
     String scoringSchemeHighPointFirstGetsTen();
     String knotsUnit();
@@ -1107,6 +1115,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String timeZone();
     String eventOfficialWebsiteURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
@@ -1438,10 +1447,39 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String registerCompetitorsOnRace();
+    String doYouWantToRegisterCompetitorsDirectlyOnTheRace();
+    String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+    String warningDirectCompetitorRegistration();
+    String warningRegattaCompetitorRegistration();
+    String competitorRegistrationsOnRaceDisabled();
+    String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
     String pleaseSelect();
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
+    String topN(int n);
+    String transparentBufferLineOnHover();
+    String bufferLineStrokeWeight();
+    String profile();
+    String showOnlyCompetitorsOfLog();
+    String maneuverType();
+    String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
+    String pleaseCreateAtLeastOneMappingBy();
+    String createDefaultLeaderboardGroup();
+    String matcherType();
+    String matchingDevices();
+    String addDevice();
+    String createDeviceConfiguration();
+    String forWhichDeviceShouldConfigurationApply();
+    String create();
+    String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
+    String pleaseSelectALeaderboardGroup();
+    String linkLeaderboardToLeaderboardGroupOfEvent();
+    String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
+    String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
 }

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -29,18 +30,23 @@ public class PlainResultsPresenter extends AbstractResultsPresenterWithDataProvi
     @Override
     protected void internalShowNumberResult(Map<GroupKey, Number> resultValues) {
         QueryResultDTO<?> result = getCurrentResult();
-        
-        StringBuilder resultsBuilder = new StringBuilder("<b>" + result.getResultSignifier() + "</b></ br>");
-        resultsBuilder.append("<table>");
+        SafeHtmlBuilder resultsBuilder = new SafeHtmlBuilder();
+        resultsBuilder.appendHtmlConstant("<b>");
+        resultsBuilder.appendEscaped(result.getResultSignifier());
+        resultsBuilder.appendHtmlConstant("</b></ br>");
+        resultsBuilder.appendHtmlConstant("<table>");
         for (GroupKey key : getSortedKeys(result)) {
-            resultsBuilder.append("<tr>");
-            resultsBuilder.append("<td><b>" + key.toString() + "</b>:</td>");
-            resultsBuilder.append("<td>" + resultValues.get(key).doubleValue() + "</td>");
-            resultsBuilder.append("</tr>");
+            resultsBuilder.appendHtmlConstant("<tr>");
+            resultsBuilder.appendHtmlConstant("<td><b>");
+            resultsBuilder.appendEscaped(key.toString());
+            resultsBuilder.appendHtmlConstant("</b>:</td>");
+            resultsBuilder.appendHtmlConstant("<td>");
+            resultsBuilder.append(resultValues.get(key).doubleValue());
+            resultsBuilder.appendHtmlConstant("</td>");
+            resultsBuilder.appendHtmlConstant("</tr>");
         }
-        resultsBuilder.append("</table>");
-        
-        resultsLabel.setHTML(resultsBuilder.toString());
+        resultsBuilder.appendHtmlConstant("</table>");
+        resultsLabel.setHTML(resultsBuilder.toSafeHtml().asString());
     }
     
     private Iterable<GroupKey> getSortedKeys(QueryResultDTO<?> result) {

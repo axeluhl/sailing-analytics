@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -24,6 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -195,24 +198,25 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-
-        Grid formGrid = new Grid(8, 2);
+        Grid formGrid = new Grid(9, 2);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
         formGrid.setWidget(1, 1, descriptionEntryField);
         formGrid.setWidget(2, 0, new Label(stringMessages.venue() + ":"));
         formGrid.setWidget(2, 1, venueEntryField);
-        formGrid.setWidget(3, 0, new Label(stringMessages.startDate() + ":"));
-        formGrid.setWidget(3, 1, startDateBox);
-        formGrid.setWidget(4, 0, new Label(stringMessages.endDate() + ":"));
-        formGrid.setWidget(4, 1, endDateBox);
-        formGrid.setWidget(5, 0, new Label(stringMessages.isPublic() + ":"));
-        formGrid.setWidget(5, 1, isPublicCheckBox);
-        formGrid.setWidget(6, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
-        formGrid.setWidget(6, 1, officialWebsiteURLEntryField);
-        formGrid.setWidget(7, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
-        formGrid.setWidget(7, 1, sailorsInfoWebsiteURLEntryField);
+        formGrid.setWidget(3, 0, new Label(stringMessages.timeZone() + ":"));
+        formGrid.setWidget(3, 1, new Label(DateAndTimeFormatterUtil.getClientTimeZoneAsGMTString()));
+        formGrid.setWidget(4, 0, new Label(stringMessages.startDate() + ":"));
+        formGrid.setWidget(4, 1, startDateBox);
+        formGrid.setWidget(5, 0, new Label(stringMessages.endDate() + ":"));
+        formGrid.setWidget(5, 1, endDateBox);
+        formGrid.setWidget(6, 0, new Label(stringMessages.isPublic() + ":"));
+        formGrid.setWidget(6, 1, isPublicCheckBox);
+        formGrid.setWidget(7, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
+        formGrid.setWidget(7, 1, officialWebsiteURLEntryField);
+        formGrid.setWidget(8, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + ":"));
+        formGrid.setWidget(8, 1, sailorsInfoWebsiteURLEntryField);
 
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("500px");
@@ -228,7 +232,6 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     @Override
     public void show() {
         super.show();
-        nameEntryField.setFocus(true);
+        Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { nameEntryField.setFocus(true); }});
     }
-
 }

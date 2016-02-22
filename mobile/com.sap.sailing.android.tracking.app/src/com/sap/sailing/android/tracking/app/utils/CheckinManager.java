@@ -36,11 +36,13 @@ public class CheckinManager {
     private CheckinDataActivity activity;
     private AppPreferences prefs;
     private String url;
+    private boolean update;
 
-    public CheckinManager(String url, CheckinDataActivity activity) {
+    public CheckinManager(String url, CheckinDataActivity activity, boolean update) {
         this.activity = activity;
         this.url = url;
         prefs = new AppPreferences(activity);
+        this.update = update;
     }
 
     public void callServerAndGenerateCheckinData() {
@@ -103,7 +105,7 @@ public class CheckinManager {
 
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
         NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsnchronously(getLeaderboardRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+            .executeHttpJsonRequestAsync(getLeaderboardRequest, new NetworkHelper.NetworkHelperSuccessListener() {
 
                 @Override
                 public void performAction(JSONObject response) {
@@ -139,7 +141,7 @@ public class CheckinManager {
     }
 
     private void getEventFromServer(final String leaderboardName, HttpGetRequest getEventRequest, final URLData urlData) {
-        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsnchronously(getEventRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+        NetworkHelper.getInstance(activity).executeHttpJsonRequestAsync(getEventRequest, new NetworkHelper.NetworkHelperSuccessListener() {
 
             @Override
             public void performAction(JSONObject response) {
@@ -187,7 +189,7 @@ public class CheckinManager {
 
     private void getCompetitorFromServer(HttpGetRequest getCompetitorRequest, final URLData urlData, final String leaderboardName) {
         NetworkHelper.getInstance(activity)
-            .executeHttpJsonRequestAsnchronously(getCompetitorRequest, new NetworkHelper.NetworkHelperSuccessListener() {
+            .executeHttpJsonRequestAsync(getCompetitorRequest, new NetworkHelper.NetworkHelperSuccessListener() {
 
                 @Override
                 public void performAction(JSONObject response) {
@@ -218,6 +220,7 @@ public class CheckinManager {
 
     private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName) {
         CheckinData data = new CheckinData();
+        data.setUpdate(update);
         data.competitorName = urlData.competitorName;
         data.competitorId = urlData.competitorId;
         data.competitorSailId = urlData.competitorSailId;

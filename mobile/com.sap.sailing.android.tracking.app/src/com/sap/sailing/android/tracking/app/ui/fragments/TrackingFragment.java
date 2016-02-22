@@ -3,7 +3,6 @@ package com.sap.sailing.android.tracking.app.ui.fragments;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -16,9 +15,9 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivity;
+import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQuality;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
@@ -43,9 +42,6 @@ public class TrackingFragment extends BaseFragment {
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.fragment_tracking, container, false);
 
         prefs = new AppPreferences(getActivity());
-        if (prefs.getTrackingTimerStarted() == 0) {
-            prefs.setTrackingTimerStarted(System.currentTimeMillis());
-        }
 
         return view;
     }
@@ -118,10 +114,10 @@ public class TrackingFragment extends BaseFragment {
 
             if (quality == GPSQuality.noSignal) {
                 textView.setText(getString(R.string.tracking_status_no_gps_signal));
-                textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+                textView.setTextColor(getResources().getColor(R.color.sap_red));
             } else {
                 textView.setText(getString(R.string.tracking_status_tracking));
-                textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+                textView.setTextColor(getResources().getColor(R.color.sap_green));
             }
         }
     }
@@ -129,7 +125,7 @@ public class TrackingFragment extends BaseFragment {
     /**
      * Update UI and tell user if app is caching or sending fixes to api
      *
-     * @param apiIsReachable
+     * @param apiConnectivity
      */
     public void setAPIConnectivityStatus(final APIConnectivity apiConnectivity) {
         if (isAdded()) {
@@ -141,21 +137,21 @@ public class TrackingFragment extends BaseFragment {
                     if (apiConnectivity == APIConnectivity.transmissionSuccess) {
                         if (prefs.getEnergySavingEnabledByUser()) {
                             textView.setText(getString(R.string.tracking_mode_battery_saving));
-                            textView.setTextColor(Color.parseColor(getString(R.color.sap_yellow)));
+                            textView.setTextColor(getResources().getColor(R.color.sap_yellow));
                         } else {
                             textView.setText(getString(R.string.tracking_mode_live));
-                            textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+                            textView.setTextColor(getResources().getColor(R.color.sap_green));
                         }
 
                     } else if (apiConnectivity == APIConnectivity.noAttempt) {
                         textView.setText(getString(R.string.tracking_mode_offline));
-                        textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+                        textView.setTextColor(getResources().getColor(R.color.sap_green));
                     } else if (apiConnectivity == APIConnectivity.transmissionError) {
                         textView.setText(getString(R.string.tracking_mode_api_error));
-                        textView.setTextColor(Color.parseColor(getString(R.color.sap_red)));
+                        textView.setTextColor(getResources().getColor(R.color.sap_red));
                     } else {
                         textView.setText(getString(R.string.tracking_mode_caching));
-                        textView.setTextColor(Color.parseColor(getString(R.color.sap_green)));
+                        textView.setTextColor(getResources().getColor(R.color.sap_green));
                     }
                 }
             });
@@ -203,8 +199,7 @@ public class TrackingFragment extends BaseFragment {
     public void setGPSQualityAndAcurracy(GPSQuality quality, float gpsAccurracy) {
         if (isAdded()) {
             Activity activity = getActivity();
-            SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity
-                    .findViewById(R.id.gps_quality_indicator);
+            SignalQualityIndicatorView indicatorView = (SignalQualityIndicatorView) activity.findViewById(R.id.gps_quality_indicator);
             indicatorView.setSignalQuality(quality.toInt());
 
             TextView accuracyTextView = (TextView) getActivity().findViewById(R.id.gps_accuracy_label);

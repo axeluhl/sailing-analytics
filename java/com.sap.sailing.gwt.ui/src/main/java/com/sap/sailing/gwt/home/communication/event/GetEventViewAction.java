@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -22,8 +21,9 @@ import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sse.common.media.ImageDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.shared.media.ImageDescriptor;
 
 public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClientCacheable {
     private static final Logger logger = Logger.getLogger(GetEventViewAction.class.getName());

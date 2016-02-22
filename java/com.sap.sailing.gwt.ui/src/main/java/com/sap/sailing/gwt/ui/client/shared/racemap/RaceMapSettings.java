@@ -10,6 +10,8 @@ import com.sap.sse.common.settings.AbstractSettings;
 
 public class RaceMapSettings extends AbstractSettings {
 
+    private static final Set<ManeuverType> DEFAULT_SHOWN_MANEUVER = getDefaultManeuvers();
+
     private boolean showDouglasPeuckerPoints = false;
 
     private final Set<ManeuverType> maneuverTypesToShow;
@@ -19,6 +21,10 @@ public class RaceMapSettings extends AbstractSettings {
     private RaceMapZoomSettings zoomSettings;
 
     private RaceMapHelpLinesSettings helpLinesSettings;
+    
+    private boolean transparentHoverlines = false; // as discussed with Stefan on 2015-12-08
+    
+    private int hoverlineStrokeWeight = 15; // as discussed with Stefan on 2015-12-08
 
     private long tailLengthInMilliseconds = 100000l;
 
@@ -43,18 +49,18 @@ public class RaceMapSettings extends AbstractSettings {
     private boolean windUp = false;
 
     public RaceMapSettings() {
-        // empty default settings; don't show maneuvers by default
-        maneuverTypesToShow = new HashSet<ManeuverType>();
+        maneuverTypesToShow = DEFAULT_SHOWN_MANEUVER;
         this.zoomSettings = new RaceMapZoomSettings();
         this.helpLinesSettings = new RaceMapHelpLinesSettings();
     }
-
     /**
      * "Copy constructor" that produces a new settings object that equals the one passed as argument
      */
     public RaceMapSettings(RaceMapSettings settings) {
         this.buoyZoneRadiusInMeters = settings.buoyZoneRadiusInMeters;
         this.helpLinesSettings = new RaceMapHelpLinesSettings(settings.getHelpLinesSettings().getVisibleHelpLineTypes());
+        this.transparentHoverlines = settings.transparentHoverlines;
+        this.hoverlineStrokeWeight = settings.hoverlineStrokeWeight;
         this.maneuverTypesToShow = settings.maneuverTypesToShow;
         this.showDouglasPeuckerPoints = settings.showDouglasPeuckerPoints;
         this.showOnlySelectedCompetitors = settings.showOnlySelectedCompetitors;
@@ -154,6 +160,22 @@ public class RaceMapSettings extends AbstractSettings {
         this.helpLinesSettings = helpLinesSettings;
     }
 
+    public boolean getTransparentHoverlines() {
+        return this.transparentHoverlines;
+    }
+    
+    public void setTransparentHoverlines(boolean transparentHoverlines) {
+        this.transparentHoverlines = transparentHoverlines;
+    }
+    
+    public int getHoverlineStrokeWeight() {
+        return this.hoverlineStrokeWeight;
+    }
+    
+    public void setHoverlineStrokeWeight(int hoverlineStrokeWeight) {
+        this.hoverlineStrokeWeight = hoverlineStrokeWeight;
+    }
+
     public boolean isShowSelectedCompetitorsInfo() {
         return showSelectedCompetitorsInfo;
     }
@@ -177,4 +199,13 @@ public class RaceMapSettings extends AbstractSettings {
     public void setWindUp(boolean windUp) {
         this.windUp = windUp;
     }
+    
+    private static HashSet<ManeuverType> getDefaultManeuvers() {
+        HashSet<ManeuverType> types = new HashSet<ManeuverType>();
+        types.add(ManeuverType.JIBE);
+        types.add(ManeuverType.TACK);
+        types.add(ManeuverType.PENALTY_CIRCLE);
+        return types;
+    }
+
 }

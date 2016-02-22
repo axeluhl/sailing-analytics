@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +11,8 @@ import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,8 +30,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.gwt.dispatch.client.exceptions.DispatchException;
-import com.sap.sailing.gwt.dispatch.client.exceptions.ServerDispatchException;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -44,14 +43,18 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.MediaDescriptor;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.media.VideoDescriptor;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
+import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.MediaDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 public final class HomeServiceUtil {
+    private static final Logger logger = Logger.getLogger(HomeServiceUtil.class.getName());
+
     public interface EventVisitor {
         void visit(EventBase event, boolean onRemoteServer, URL baseURL);
     }
@@ -92,18 +95,11 @@ public final class HomeServiceUtil {
     }
     
     public static EventState calculateEventState(EventBase event) {
-        return calculateEventState(event.isPublic(), event.getStartDate().asDate(), event.getEndDate().asDate());
-    }
-    
-    public static EventState calculateEventState(boolean isPublic, Date startDate, Date endDate) {
-        Date now = new Date();
-        if(now.compareTo(startDate) < 0) {
-            if(isPublic) {
-                return EventState.UPCOMING;
-            }
-            return EventState.PLANNED;
+        TimePoint now = MillisecondsTimePoint.now();
+        if (now.before(event.getStartDate())) {
+            return event.isPublic() ? EventState.UPCOMING : EventState.PLANNED;
         }
-        if(now.compareTo(endDate) > 0) {
+        if (now.after(event.getEndDate())) {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
@@ -541,7 +537,9 @@ public final class HomeServiceUtil {
         try {
             return new URL(url.getProtocol(), url.getHost(), url.getPort(), /* file */"");
         } catch (MalformedURLException e) {
-            throw new ServerDispatchException(e);
+            ServerDispatchException dispatchException = new ServerDispatchException(e);
+            logger.log(Level.SEVERE, "Uncaught server exception id: " + dispatchException.getExceptionId(), e);
+            throw dispatchException;
         }
     }
 

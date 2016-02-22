@@ -1,15 +1,10 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -43,7 +38,6 @@ import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
-import com.sap.sailing.android.shared.ui.dialogs.AboutDialog;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -52,6 +46,10 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
+import com.sap.sailing.android.tracking.app.upload.UploadResponseHandler;
+import com.sap.sailing.android.tracking.app.upload.UploadResult;
+import com.sap.sailing.android.tracking.app.upload.UploadTeamImageTask;
+import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.BitmapHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
@@ -60,11 +58,13 @@ import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorInfo;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
-public class RegattaActivity extends AbstractRegattaActivity implements RegattaFragment.FragmentWatcher {
+public class RegattaActivity extends AbstractRegattaActivity
+        implements RegattaFragment.FragmentWatcher, UploadResponseHandler {
 
     private final static String TAG = RegattaActivity.class.getName();
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
     private final static String FLAG_IMAGE_FILENAME_PREFIX = "flagImage_";
+
 
     public EventInfo event;
     public CompetitorInfo competitor;
@@ -75,6 +75,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     private String checkinDigest;
     private CheckinManager manager;
     private AppPreferences prefs;
+    private File pictureFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +90,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         checkinDigest = intent.getStringExtra(getString(R.string.checkin_digest));
 
         checkinUrl = DatabaseHelper.getInstance().getCheckinUrl(this, checkinDigest);
-        manager = new CheckinManager(checkinUrl.urlString, this);
+        manager = new CheckinManager(checkinUrl.urlString, this, false);
 
         competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
         event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
@@ -144,28 +145,26 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_settings:
-            ExLog.i(this, TAG, "Clicked SETTINGS.");
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-        case R.id.options_menu_checkout:
-            ExLog.i(this, TAG, "Clicked CHECKOUT.");
-            checkout();
-            return true;
-        case R.id.options_menu_add_team_image:
-            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-            return true;
-        case R.id.options_menu_refresh:
-            manager.callServerAndGenerateCheckinData();
-            return true;
-        case R.id.options_menu_info:
-            ExLog.i(this, TAG, "Clicked INFO.");
-            AboutDialog dialog = new AboutDialog(this);
-            dialog.show();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+            case R.id.options_menu_settings:
+                ExLog.i(this, TAG, "Clicked SETTINGS.");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.options_menu_checkout:
+                ExLog.i(this, TAG, "Clicked CHECKOUT.");
+                checkout();
+                return true;
+            case R.id.options_menu_add_team_image:
+                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+                return true;
+            case R.id.options_menu_refresh:
+                manager.callServerAndGenerateCheckinData();
+                return true;
+            case R.id.options_menu_info:
+                AboutHelper.showInfoActivity(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -260,7 +259,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             sb.append(prefs.getServerCompetiorTeamPath(competitor.id));
 
             HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(new URL(sb.toString()), this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
                     try {
@@ -308,7 +307,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
      * @param image
      */
     private void storeImageAndSendToServer(Bitmap image, String fileName, boolean sendToServer) {
-        File pictureFile = getImageFile(fileName);
+        pictureFile = getImageFile(fileName);
         if (pictureFile == null) {
             Log.d(TAG, "Error creating media file, check storage permissions: ");// e.getMessage());
             return;
@@ -354,7 +353,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         }
         final String uploadURLStr = event.server
                 + prefs.getServerUploadTeamImagePath().replace("{competitor_id}", competitor.id);
-        new UploadTeamImageTask(imageFile).execute(uploadURLStr);
+        new UploadTeamImageTask(this, imageFile, this).execute(uploadURLStr);
     }
 
     /**
@@ -427,79 +426,6 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         setUpView();
     }
 
-    private class UploadTeamImageTask extends AsyncTask<String, Void, String> {
-        File imageFile;
-        String uploadUrl;
-
-        public UploadTeamImageTask(File imageFile) {
-            this.imageFile = imageFile;
-        }
-
-        protected String doInBackground(String... urls) {
-            uploadUrl = urls[0];
-            DataOutputStream outputStream = null;
-            FileInputStream imageInputStream = null;
-            BufferedReader reader = null;
-            try {
-                if (imageFile != null) {
-                    URL url = new URL(uploadUrl);
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setUseCaches(false);
-                    urlConnection.setDoOutput(true);
-                    urlConnection.setRequestMethod("POST");
-                    urlConnection.setRequestProperty("Content-Type", "image/jpeg");
-                    outputStream = new DataOutputStream(urlConnection.getOutputStream());
-
-                    int nRead;
-                    byte[] data = new byte[2048];
-                    imageInputStream = new FileInputStream(imageFile);
-                    while ((nRead = imageInputStream.read(data, 0, data.length)) != -1) {
-                        outputStream.write(data, 0, nRead);
-                    }
-                    imageInputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
-                    Log.d(TAG, "Image upload response: " + urlConnection.getResponseCode());
-                    if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        reader = new BufferedReader(new InputStreamReader((urlConnection.getInputStream())));
-                        StringBuilder builder = new StringBuilder();
-                        String output;
-                        while ((output = reader.readLine()) != null) {
-                            builder.append(output);
-                        }
-                        Log.d(TAG, "Response body: " + builder.toString());
-                    }
-                    urlConnection.disconnect();
-                }
-            } catch (IOException e) {
-                ExLog.e(RegattaActivity.this, TAG, "Error uploading image: " + e.getLocalizedMessage());
-                cancel(true);
-            } finally {
-                if (outputStream != null) {
-                    RegattaActivity.this.safeClose(outputStream);
-                }
-                if (imageInputStream != null) {
-                    RegattaActivity.this.safeClose(imageInputStream);
-                }
-                if (reader != null) {
-                    RegattaActivity.this.safeClose(reader);
-                }
-            }
-            return "";
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            Toast.makeText(RegattaActivity.this, getString(R.string.error_sending_team_image_to_server),
-                    Toast.LENGTH_LONG).show();
-        }
-
-        protected void onPostExecute(String result) {
-            // do something
-        }
-    }
-
     private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, File> {
         ImageView bmImage;
         String downloadUrl;
@@ -526,7 +452,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
             try {
                 in = new java.net.URL(downloadUrl).openStream();
                 imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
-                if (!imageFile.exists()){
+                if (!imageFile.exists()) {
                     imageFile.createNewFile();
                 }
                 outputStream = new FileOutputStream(imageFile);
@@ -539,7 +465,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 outputStream.close();
                 in.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download image file " + imageFile);
             } finally {
                 if (in != null) {
                     safeClose(in);
@@ -582,7 +508,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
                 InputStream in = new java.net.URL(downloadUrl).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                e.printStackTrace();
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl+": "+e.getMessage());
             }
             return mIcon11;
         }
@@ -629,7 +555,7 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
         try {
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(),
                     this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsnchronously(request,
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
                     new NetworkHelperSuccessListener() {
 
                         @Override
@@ -669,5 +595,53 @@ public class RegattaActivity extends AbstractRegattaActivity implements RegattaF
     @Override
     protected int getOptionsMenuResId() {
         return R.menu.options_menu_with_checkout;
+    }
+
+    @Override
+    public void onUploadTaskStarted() {
+        hideRetryUploadLayout();
+        showUploadProgressLayout();
+    }
+
+    @Override
+    public void onUploadCancelled() {
+        Toast.makeText(this, getString(R.string.error_sending_team_image_to_server), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onUploadTaskFinished(UploadResult uploadResult) {
+        hideUploadProgressLayout();
+        if (uploadResult.resultCode != 200) {
+            showRetryUploadLayout();
+        }
+        Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
+    }
+
+    public void retryUpload(View view) {
+        if (pictureFile != null) {
+            sendTeamImageToServer(pictureFile);
+        } else {
+            hideRetryUploadLayout();
+        }
+    }
+
+    private void showUploadProgressLayout() {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
+        linearLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void hideUploadProgressLayout() {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
+        linearLayout.setVisibility(View.GONE);
+    }
+
+    private void showRetryUploadLayout() {
+        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
+        linearLayout1.setVisibility(View.VISIBLE);
+    }
+
+    private void hideRetryUploadLayout() {
+        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
+        linearLayout1.setVisibility(View.GONE);
     }
 }

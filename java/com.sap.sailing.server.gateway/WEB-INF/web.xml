@@ -39,16 +39,7 @@
     <dispatcher>INCLUDE</dispatcher>
     <dispatcher>ERROR</dispatcher>
   </filter-mapping>
-  
-   	<servlet>
-		<servlet-name>AdminApp</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.AdminApp</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>AdminApp</servlet-name>
-		<url-pattern>/admin</url-pattern>
-	</servlet-mapping>
-	
+
 	<servlet>
 		<servlet-name>RCConfiguration</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.rc.ConfigurationJsonGetServlet</servlet-class>
@@ -113,16 +104,6 @@
 	</servlet-mapping>
 		
 	<!-- RACE COMMITTEE END -->
-
-	<servlet>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaAndRaceDataJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattaAndRaceDataJsonGetServlet</servlet-name>
-		<url-pattern>/moderator</url-pattern>
-	</servlet-mapping>
-
 	<servlet>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<servlet-class>com.sap.sailing.server.gateway.impl.ExpeditionThroughHttpPostServlet</servlet-class>
@@ -130,86 +111,6 @@
 	<servlet-mapping>
 		<servlet-name>ExpeditionThroughHttpPostServlet</servlet-name>
 		<url-pattern>/expedition</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>EventsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EventsJsonGetServlet</servlet-name>
-		<url-pattern>/events</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>EventRaceStatesServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.EventRaceStatesJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EventRaceStatesServlet</servlet-name>
-		<url-pattern>/eventRaceStates</url-pattern>
-	</servlet-mapping>
-		
-	<servlet>
-		<servlet-name>RegattasJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattasJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattasJsonGetServlet</servlet-name>
-		<url-pattern>/regattas</url-pattern>
-	</servlet-mapping>
-	<servlet>
-		<servlet-name>RegattaJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.RegattaJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RegattaJsonGetServlet</servlet-name>
-		<url-pattern>/regatta</url-pattern>
-	</servlet-mapping>
-	
-	<servlet>
-		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardsJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboards</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
-		<servlet-class> com.sap.sailing.server.gateway.impl.LeaderboardJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboard</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardGroupJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboardgroup</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.LeaderboardGroupsJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>LeaderboardGroupsJsonGetServlet</servlet-name>
-		<url-pattern>/leaderboardgroups</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<servlet-class>com.sap.sailing.server.gateway.impl.WindJsonGetServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>WindJsonGetServlet</servlet-name>
-		<url-pattern>/wind</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

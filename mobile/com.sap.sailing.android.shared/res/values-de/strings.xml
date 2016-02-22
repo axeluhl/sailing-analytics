@@ -32,4 +32,15 @@
     <string name="your_regattas">Ihre Regattas:</string>
     <string name="options_refresh">Aktualisieren</string>
 
+    <!-- Eula -->
+    <string name="eula_title">Endbenutzer Lizenzvereinbarung</string>
+    <string name="eula_message">Mit der Verwendung dieser App stimmen Sie den Datenschutzbestimmungen der SAP SE zu. Die Datenschutzbestimmungen finden Sie hier.</string>
+    <string name="eula_confirm">Zustimmen</string>
+    <string name="linked_eula_message_part">hier</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">Über diese App</string>
+    <string name="eula">Datenschutz</string>
+    <string name="licence_information">Lizenzhinweise</string>
+
 </resources>

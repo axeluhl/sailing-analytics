@@ -21,7 +21,13 @@ public interface RaceMapResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/wind_expedition.png")
     ImageResource expeditionWindIcon();
-    
+
+    @Source("com/sap/sailing/gwt/ui/client/images/maneuver_red.png")
+    ImageResource maneuverMarkerRed();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/maneuver_green.png")
+    ImageResource maneuverMarkerGreen();
+
     @Source("CombinedWindPanel.css")
     CombinedWindPanelStyle combinedWindPanelStyle();
 }

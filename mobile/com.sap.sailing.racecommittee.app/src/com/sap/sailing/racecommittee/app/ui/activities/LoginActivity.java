@@ -19,8 +19,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -32,6 +33,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
@@ -46,12 +49,13 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
+import com.sap.sailing.racecommittee.app.ui.fragments.LoginOnboarding;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.EventListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.PositionListFragment;
@@ -60,11 +64,10 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelec
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class LoginActivity extends BaseActivity
-    implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
+        implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -163,6 +166,7 @@ public class LoginActivity extends BaseActivity
         intent.putExtra(AppConstants.COURSE_AREA_UUID_KEY, mSelectedCourseAreaUUID);
         intent.putExtra(AppConstants.EventIdTag, mSelectedEventId);
         startActivity(intent);
+        finish();
     }
 
     private Serializable selectEvent(EventBase event) {
@@ -248,7 +252,6 @@ public class LoginActivity extends BaseActivity
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.event_fragment, EventListFragment.newInstance());
         transaction.commitAllowingStateLoss();
-
     }
 
     public ItemSelectedListener<CourseArea> getCourseAreaSelectionListener() {
@@ -278,6 +281,13 @@ public class LoginActivity extends BaseActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
+        String[] addresses = NetworkHelper.getInstance(this).getLocalIpAddress();
+        if (addresses != null) {
+            int len = addresses.length;
+            for (int i = 0; i < len; i++) {
+                ExLog.i(this, TAG, "IP-Addresses: " + addresses[i]);
+            }
+        }
 
         // This is required to reactivate the loader manager after configuration change (screen rotation)
         getLoaderManager();
@@ -292,8 +302,6 @@ public class LoginActivity extends BaseActivity
             switchToRacingActivity();
         }
 
-        ThemeHelper.setTheme(this);
-
         setContentView(R.layout.login_view);
 
         mReceiver = new IntentReceiver();
@@ -301,7 +309,9 @@ public class LoginActivity extends BaseActivity
         // setup the login list views fragment
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.replace(R.id.login_listview, loginListViews).commitAllowingStateLoss();
+        transaction.replace(R.id.login_listview, loginListViews);
+        transaction.replace(R.id.login_onboarding, new LoginOnboarding());
+        transaction.commitAllowingStateLoss();
 
         new AutoUpdater(this).notifyAfterUpdate();
 
@@ -309,6 +319,10 @@ public class LoginActivity extends BaseActivity
         backdrop = findViewById(R.id.login_view_backdrop);
         if (backdrop != null) {
             backdrop.setOnClickListener(new BackdropClick());
+        }
+
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
     }
 
@@ -340,8 +354,11 @@ public class LoginActivity extends BaseActivity
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_RESET);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
+            resetData();
+        } else {
+            slideUpBackdropDelayed();
+        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -350,6 +367,7 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
+
     }
 
     @Override
@@ -368,7 +386,7 @@ public class LoginActivity extends BaseActivity
         showProgressSpinner();
 
         DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
-            .getDeviceIdentifier());
+                .getDeviceIdentifier());
 
         LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
 
@@ -444,13 +462,29 @@ public class LoginActivity extends BaseActivity
     }
 
     private void slideUpBackdrop() {
+        final View loginView = findViewById(R.id.login_listview);
+        loginView.setVisibility(View.GONE);
+        final View onboardingView = findViewById(R.id.login_onboarding);
+        onboardingView.setVisibility(View.GONE);
+
+        ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.GONE);
+        ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.GONE);
+
+        if (TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
+            onboardingView.setVisibility(View.VISIBLE);
+            ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.VISIBLE);
+        } else {
+            loginView.setVisibility(View.VISIBLE);
+            ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.VISIBLE);
+        }
+
         // don't slide up if already up
         if (backdrop.getY() != 0) {
             return;
         }
 
         int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
-        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_subtitle);
+        View subTitle = ViewHelper.get(backdrop, R.id.backdrop_login);
         if (subTitle != null) {
             upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
         }
@@ -459,11 +493,14 @@ public class LoginActivity extends BaseActivity
         heightAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                View bottomView = findViewById(R.id.login_listview);
                 int val = (Integer) valueAnimator.getAnimatedValue();
-                ViewGroup.LayoutParams layoutParams = bottomView.getLayoutParams();
-                layoutParams.height = val;
-                bottomView.setLayoutParams(layoutParams);
+                ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
+                lpLogin.height = val;
+                loginView.setLayoutParams(lpLogin);
+
+                ViewGroup.LayoutParams lpOnboarding = onboardingView.getLayoutParams();
+                lpOnboarding.height = val;
+                onboardingView.setLayoutParams(lpOnboarding);
             }
         });
 
@@ -471,22 +508,36 @@ public class LoginActivity extends BaseActivity
         animators.add(heightAnimation);
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
-        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_subtitle)));
+        animators.add(getAlphaAnimator(findViewById(R.id.gradient)));
+        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_login)));
+        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_onboarding)));
         animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animators);
         animatorSet.setDuration(getResources().getInteger(android.R.integer.config_longAnimTime));
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.addListener(new AnimatorSetListener());
         animatorSet.start();
     }
 
-    private ObjectAnimator getAlphaAnimator(@Nullable Object target) {
+    private ObjectAnimator getAlphaAnimator(@NonNull Object target) {
         return ObjectAnimator.ofFloat(target, "alpha", 0f, 1f);
     }
 
-    private ObjectAnimator getAlphaRevAnimator(@Nullable Object target) {
+    private ObjectAnimator getAlphaRevAnimator(@NonNull Object target) {
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
+    }
+
+    private void resetData() {
+        setupDataManager();
+
+        addEventListFragment();
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.replace(R.id.area_fragment, new Fragment());
+        transaction.replace(R.id.position_fragment, new Fragment());
+        transaction.commit();
     }
 
     private class BackdropClick implements View.OnClickListener {
@@ -500,14 +551,48 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            setupDataManager();
+            String action = intent.getAction();
 
-            addEventListFragment();
+            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+                resetData();
+            }
+        }
+    }
 
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.area_fragment, new Fragment());
-            transaction.replace(R.id.position_fragment, new Fragment());
-            transaction.commit();
+    private class AnimatorSetListener implements Animator.AnimatorListener {
+
+        private View submit;
+
+        private AnimatorSetListener() {
+            submit = findViewById(R.id.login_submit);
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            setAlpha(submit, 0f);
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (submit != null) {
+                submit.animate().alpha(1f).setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+            setAlpha(submit, 0f);
+        }
+
+        private void setAlpha(View view, float alpha) {
+            if (view != null) {
+                view.setAlpha(alpha);
+            }
         }
     }
 }

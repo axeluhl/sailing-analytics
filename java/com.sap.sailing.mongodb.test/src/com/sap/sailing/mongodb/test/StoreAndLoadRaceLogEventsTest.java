@@ -33,22 +33,13 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRevokeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogCloseOpenEndedDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceCompetitorMappingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogRegisterCompetitorEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogCloseOpenEndedDeviceMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDefineMarkEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTrackingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
@@ -57,8 +48,6 @@ import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServiceFinderFactory;
-import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -183,47 +172,6 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
     }
 
     @Test
-    public void testStoreAndLoadDeviceCompetitorMappingEvent() {
-        DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-        Competitor mappedTo = DomainFactory.INSTANCE.getOrCreateCompetitor("abc", "abc", null, null, null, null, null, /* timeOnTimeFactor */
-                null, /* timeOnDistanceAllowancePerNauticalMile */null);
-        TimePoint from = new MillisecondsTimePoint(20);
-        TimePoint to = new MillisecondsTimePoint(30);
-        RaceLogDeviceCompetitorMappingEvent expectedEvent = new RaceLogDeviceCompetitorMappingEventImpl(
-                expectedEventTime, expectedEventTime, author, expectedId, expectedPassId,
-                mappedTo, device, from, to);
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogDeviceCompetitorMappingEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(device, actualEvent.getDevice());
-        assertEquals(from, actualEvent.getFrom());
-        assertEquals(to, actualEvent.getTo());
-        assertEquals(mappedTo, actualEvent.getMappedTo());
-    }
-
-    @Test
-    public void testStoreAndLoadDeviceMarkMappingEvent() {
-        DeviceIdentifier device = new SmartphoneImeiIdentifier("a");
-        Mark mappedTo = DomainFactory.INSTANCE.getOrCreateMark("abc", "abc");
-        TimePoint from = new MillisecondsTimePoint(20);
-        TimePoint to = new MillisecondsTimePoint(30);
-        RaceLogDeviceMarkMappingEvent expectedEvent = new RaceLogDeviceMarkMappingEventImpl(
-                expectedEventTime, expectedEventTime, author, expectedId, expectedPassId,
-                mappedTo, device, from, to);
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogDeviceMarkMappingEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(device, actualEvent.getDevice());
-        assertEquals(from, actualEvent.getFrom());
-        assertEquals(to, actualEvent.getTo());
-        assertEquals(mappedTo, actualEvent.getMappedTo());
-    }
-
-    @Test
     public void testStoreAndLoadDenoteForTrackingEvent() {
         String raceName = "race";
         BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
@@ -272,33 +220,6 @@ public class StoreAndLoadRaceLogEventsTest extends AbstractMongoDBTest {
 
         assertBaseFields(expectedEvent, actualEvent);
         assertEquals(expectedEvent.getCompetitor(), actualEvent.getCompetitor());
-    }
-
-    @Test
-    public void testStoreAndLoadDefineMarkEvent() {
-        RaceLogDefineMarkEvent expectedEvent = new RaceLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                expectedEventTime, author, expectedId, expectedPassId,
-                DomainFactory.INSTANCE.getOrCreateMark("mytestmark"));
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogDefineMarkEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(expectedEvent.getMark(), actualEvent.getMark());
-    }
-
-    @Test
-    public void testStoreAndLoadCloseOpenDeviceMappingEvent() {
-        RaceLogCloseOpenEndedDeviceMappingEvent expectedEvent = new RaceLogCloseOpenEndedDeviceMappingEventImpl(
-                expectedEventTime, expectedEventTime, author, expectedId, expectedPassId, UUID.randomUUID(),
-                new MillisecondsTimePoint(49));
-
-        DBObject dbObject = mongoFactory.storeRaceLogEntry(logIdentifier, expectedEvent);
-        RaceLogCloseOpenEndedDeviceMappingEvent actualEvent = loadEvent(dbObject);
-
-        assertBaseFields(expectedEvent, actualEvent);
-        assertEquals(expectedEvent.getDeviceMappingEventId(), actualEvent.getDeviceMappingEventId());
-        assertEquals(expectedEvent.getClosingTimePoint(), actualEvent.getClosingTimePoint());
     }
 
     /**

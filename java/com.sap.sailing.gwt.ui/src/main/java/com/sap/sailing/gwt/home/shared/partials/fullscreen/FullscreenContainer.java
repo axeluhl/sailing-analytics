@@ -37,6 +37,7 @@ public class FullscreenContainer<T extends Widget> {
         String popup();
         String toolbarInfo();
         String toolbarAction();
+        String toolbarBusyIndicator();
         String content();
         String contentBorder();
     }
@@ -88,7 +89,12 @@ public class FullscreenContainer<T extends Widget> {
         widget.addStyleName(style.toolbarAction());
         toolbarUi.add(widget);
     }
-    
+
+    public void addToolbarBusyIndicator(Widget widget) {
+        widget.addStyleName(style.toolbarBusyIndicator());
+        toolbarUi.add(widget);
+    }
+
     public void addToolbarInfo(Widget widget) {
         widget.addStyleName(style.toolbarInfo());
         toolbarUi.add(widget);

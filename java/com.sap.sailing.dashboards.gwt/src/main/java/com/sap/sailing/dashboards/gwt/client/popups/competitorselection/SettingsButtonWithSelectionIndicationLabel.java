@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.RibDashboardImageResources;
+import com.sap.sailing.dashboards.gwt.client.dashboardpanel.DashboardPanelResources;
 
 public class SettingsButtonWithSelectionIndicationLabel extends Composite {
 
@@ -38,7 +38,7 @@ public class SettingsButtonWithSelectionIndicationLabel extends Composite {
 
     public SettingsButtonWithSelectionIndicationLabel() {
         initWidget(uiBinder.createAndBindUi(this));
-        settingsButtonImage.setResource(RibDashboardImageResources.INSTANCE.settings());        
+        settingsButtonImage.setResource(DashboardPanelResources.INSTANCE.settings());        
     }
     
     public void addClickHandlerToSettingsButton(ClickHandler clickHandler){

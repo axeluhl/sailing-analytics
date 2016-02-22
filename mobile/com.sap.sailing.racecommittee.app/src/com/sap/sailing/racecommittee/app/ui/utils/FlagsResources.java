@@ -1,14 +1,16 @@
 package com.sap.sailing.racecommittee.app.ui.utils;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.support.v4.content.ContextCompat;
+
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.util.ArrayList;
 
 public class FlagsResources {
 
@@ -17,7 +19,7 @@ public class FlagsResources {
         String flag;
         String outline = "flag_shape_XX_outline_" + size + "dp";
 
-        switch (Flags.valueOf(res)) {
+        switch (Flags.valueOf(res.toUpperCase(Locale.US))) {
         case ALPHA:
             flag = "flag_alpha_" + size + "dp";
             outline = outline.replace("XX", "03");
@@ -25,7 +27,7 @@ public class FlagsResources {
 
         case AP:
             flag = "flag_ap_" + size + "dp";
-            outline = outline.replace("XX", "02");
+            outline = outline.replace("XX", "01");
             break;
 
         case BLACK:
@@ -89,7 +91,7 @@ public class FlagsResources {
             break;
 
         case INDIA_ZULU:
-            flag = "flag_india_zulu_" + AppPreferences.on(context).getTheme();
+            flag = "flag_india_zulu_96dp_" + AppPreferences.on(context).getTheme();
             outline = null; // because of custom xml
             break;
 
@@ -142,7 +144,7 @@ public class FlagsResources {
         ArrayList<Drawable> layers = new ArrayList<>();
         for (Integer resId : drawables) {
             if (resId != 0) {
-                layers.add(BitmapHelper.getDrawable(context, resId));
+                layers.add(ContextCompat.getDrawable(context, resId));
             }
         }
         return new LayerDrawable(layers.toArray(new Drawable[layers.size()]));

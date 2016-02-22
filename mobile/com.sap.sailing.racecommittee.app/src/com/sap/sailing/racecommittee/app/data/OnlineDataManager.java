@@ -121,7 +121,7 @@ public class OnlineDataManager extends DataManager {
 
                 // ExLog.i(context, TAG, "getEventsLoader created new loader...");
 
-                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/events", null);
+                URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/api/v1/events", null);
                 return new OnlineDataLoader<Collection<EventBase>>(context,
                     url, parser, handler);
             }
