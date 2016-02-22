@@ -38,8 +38,10 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
     SimplePanel additionalHeader;
     @UiField
     SimplePanel tabContentPanelUi;
+    
+    // Should be TabBar<Class<PLACE>> but UiBinder causes weired generics errors related to the @UiHandler that would have a nested generic too. 
     @UiField
-    TabBar tabBar;
+    TabBar<Class<?>> tabBar;
     @UiField FlowPanel tabExtension;
     private TABVIEW currentTab;
     
@@ -70,7 +72,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      * @param title
      *            The label for the tab.
      */
-    @SuppressWarnings("unchecked")
     @UiChild
     public void addTabContent(final TABVIEW tab, String title) {
         GWT.log("Adding TAB: " + title);
@@ -83,7 +84,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
 
         if(tab.getState() == State.VISIBLE) {
             String link = "#" + historyMapper.getToken(tab.placeToFire());
-            tabBar.addTab(title, (Class<Place>) classForActivation, link);
+            tabBar.addTab(title, classForActivation, link);
         }
     }
 
@@ -94,7 +95,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      * @param event
      */
     @UiHandler("tabBar")
-    void onTabSelection(SelectionEvent<Class<Place>> event) {
+    void onTabSelection(SelectionEvent<Class<?>> event) {
 
         TabView<?, PRESENTER> selectedTabActivity = knownTabs.get(event.getSelectedItem());
         if (selectedTabActivity != null) {
@@ -142,7 +143,9 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
                 // TODO better error handling
                 logger.log(Level.SEVERE, "Error while initializing Tab for place " + placeToGo.getClass().getName(), e);
             }
-            tabBar.select(placeToGo);
+            @SuppressWarnings("unchecked")
+            final Class<PLACE> placeClass = (Class<PLACE>) placeToGo.getClass();
+            tabBar.select(placeClass);
 
             currentTab = newTab;
 
