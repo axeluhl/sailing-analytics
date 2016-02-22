@@ -5,8 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -21,7 +23,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemClick {
 
-    public static AbortFlagsFragment newInstance(Flags flag) {
+    private final static String HEADER_TEXT = "headerText";
+
+    public static AbortFlagsFragment newInstance(Flags flag, String headerText) {
         if (flag != Flags.AP && flag != Flags.NOVEMBER) {
             throw new IllegalArgumentException("The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
         }
@@ -29,6 +33,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         AbortFlagsFragment fragment = new AbortFlagsFragment();
         Bundle args = new Bundle();
         args.putString(AppConstants.FLAG_KEY, flag.name());
+        args.putString(HEADER_TEXT, headerText);
         fragment.setArguments(args);
         return fragment;
     }
@@ -37,10 +42,26 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.flag_list, container, false);
 
-        ListView listView = (ListView) layout.findViewById(R.id.listView);
+        ListView listView = ViewHelper.get(layout, R.id.listView);
         if (listView != null) {
             Flags flag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
             listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
+        }
+
+        TextView headerText = ViewHelper.get(layout, R.id.header_text);
+        if (headerText != null) {
+            headerText.setText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+        }
+
+        View headerLayout = ViewHelper.get(layout, R.id.header_layout);
+        if (headerLayout != null) {
+            headerLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                }
+            });
         }
 
         return layout;

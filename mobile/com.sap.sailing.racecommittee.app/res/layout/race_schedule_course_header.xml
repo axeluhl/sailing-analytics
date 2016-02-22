@@ -3,35 +3,37 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/selector_header_height"
-    android:background="?sap_gray">
+    android:background="?attr/sap_gray"
+    android:clickable="true">
 
     <LinearLayout
         android:id="@+id/header_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin"
-        android:layout_marginStart="@dimen/default_margin"
+        android:layout_marginLeft="@dimen/side_padding"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/header_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:src="?chevron_left_24dp"/>
+            android:layout_gravity="center_vertical"
+            android:src="?attr/chevron_left_24dp"/>
 
         <TextView
+            android:id="@+id/header_caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="@string/course"
-            android:textAppearance="?textNormal"/>
+            android:textAppearance="?attr/textHeader"/>
     </LinearLayout>
 
     <View
         android:id="@+id/line_top"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/thick_line"
+        android:layout_height="@dimen/unscheduled_header_line"
         android:layout_alignParentBottom="true"
-        android:background="?black"/>
+        android:background="?attr/black"/>
 </RelativeLayout>

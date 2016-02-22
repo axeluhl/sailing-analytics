@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/sap_gray_black_30"
+    android:minHeight="@dimen/listView_row_min_height">
+
+    <ImageView
+        android:id="@+id/checked_item_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:visibility="gone"
+        tools:src="@drawable/flag_papa_64dp"
+        tools:visibility="visible"/>
+
+    <ImageView
+        android:id="@+id/checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:paddingRight="@dimen/side_padding"
+        android:src="?attr/check_18dp"
+        android:visibility="invisible"
+        tools:visibility="visible"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
+        android:layout_toLeftOf="@id/checked"
+        android:layout_toRightOf="@id/checked_item_image">
+
+        <TextView
+            android:id="@+id/list_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textColor="?attr/white"
+            android:textSize="@dimen/checked_item_text"
+            tools:text="ListItem"/>
+
+        <TextView
+            android:id="@+id/list_item_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/list_item"
+            android:textColor="?attr/sap_light_gray"
+            android:textSize="@dimen/checked_item_small_text"
+            android:visibility="gone"
+            tools:text="ListItemSubtitle"
+            tools:visibility="visible"/>
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
+        android:background="?attr/sap_gray"/>
+</RelativeLayout>

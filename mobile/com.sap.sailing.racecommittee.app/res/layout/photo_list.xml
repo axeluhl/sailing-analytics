@@ -5,45 +5,80 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <FrameLayout
+        android:id="@+id/photo_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:background="?attr/sap_gray"
+        android:clickable="false">
+
+        <LinearLayout
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/header_back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="?attr/chevron_left_24dp"/>
+
+            <TextView
+                android:id="@+id/header_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/finished_list"
+                android:textAppearance="?attr/textHeader"/>
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_gravity="bottom"
+            android:background="?attr/black"/>
+    </FrameLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/photo_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"/>
+        android:layout_weight="4"
+        android:paddingTop="@dimen/side_padding"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <ImageView
                 android:id="@+id/photo_button"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_centerInParent="true"
+                android:layout_width="@dimen/photo_shutter_size"
+                android:layout_height="@dimen/photo_shutter_size"
+                android:layout_gravity="center"
                 android:background="@drawable/round_button_outline"
-                android:padding="@dimen/default_padding"
-                android:src="?photo_camera_48dp"/>
-        </RelativeLayout>
+                android:padding="@dimen/default_padding_half"
+                android:src="?attr/photo_camera"/>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <Button
-                android:id="@+id/submit_button"
-                style="?buttonSolidSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/send_photos" />
-        </RelativeLayout>
+            <include layout="@layout/photo_list_button"/>
+        </FrameLayout>
     </LinearLayout>
 </LinearLayout>

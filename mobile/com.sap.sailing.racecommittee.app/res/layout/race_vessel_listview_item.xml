@@ -47,7 +47,7 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:layout_marginRight="@dimen/default_margin"
-        android:src="?check_18dp" />
+        android:src="?attr/check_18dp" />
 
     <TextView
         android:id="@+id/vessel_crew"

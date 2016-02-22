@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -7,20 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorsWithIdImpl;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
@@ -48,7 +50,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_positioning_draggable_item, parent, false);
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_tracking_list_draggable_item, parent, false);
         return new ViewHolder(layout);
     }
 
@@ -62,7 +64,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             holder.position.setText(item.getReason().name());
         }
         String name = "";
-        for (Competitor competitor: mCompetitors) {
+        for (Competitor competitor : mCompetitors) {
             if (competitor.getId() == item.getKey()) {
                 if (competitor.getBoat() != null) {
                     name = competitor.getBoat().getSailID() + " - ";
@@ -101,7 +103,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public boolean onCheckCanStartDrag(ViewHolder holder, int x, int y) {
-        ExLog.i(mContext, TAG, "onCheckCanStartDrag(" + x + ", " + y);
+        ExLog.i(mContext, TAG, "onCheckCanStartDrag() called with: " + "holder = [" + holder + "], x = [" + x + "], y = [" + y + "]");
 
         // x, y --- relative from the itemView's top-left
         View containerView = holder.container;
@@ -120,7 +122,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        ExLog.i(mContext, TAG, "onMoveItem(" + fromPosition + ", " + toPosition + ")");
+        ExLog.i(mContext, TAG, "onMoveItem() called with: " + "fromPosition = [" + fromPosition + "], toPosition = [" + toPosition + "]");
 
         if (fromPosition == toPosition) {
             return;
@@ -149,15 +151,15 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     public void onSetSwipeBackground(ViewHolder viewHolder, int type) {
         int bgRes = 0;
         switch (type) {
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
-            bgRes = R.attr.swipe_idle;
-            break;
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
-            bgRes = R.attr.swipe_left;
-            break;
-        case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
-            bgRes = R.attr.swipe_right;
-            break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
+                bgRes = R.attr.swipe_idle;
+                break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
+                bgRes = R.attr.swipe_left;
+                break;
+            case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
+                bgRes = R.attr.swipe_right;
+                break;
         }
 
         viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
@@ -168,31 +170,30 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public int onSwipeItem(ViewHolder viewHolder, int result) {
         switch (result) {
-        case RecyclerViewSwipeManager.RESULT_SWIPED_LEFT:
-        case RecyclerViewSwipeManager.RESULT_SWIPED_RIGHT:
-            return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM;
+            case RecyclerViewSwipeManager.RESULT_SWIPED_LEFT:
+            case RecyclerViewSwipeManager.RESULT_SWIPED_RIGHT:
+                return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM;
 
-        default:
-            return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_DEFAULT;
+            default:
+                return RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_DEFAULT;
         }
     }
 
     @Override
     public void onPerformAfterSwipeReaction(ViewHolder holder, int result, int reaction) {
-
         switch (reaction) {
-        case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
-            int position = holder.getAdapterPosition();
+            case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
+                int position = holder.getAdapterPosition();
 
-            if (mListener != null) {
-                mListener.onItemRemoved(mCompetitor.get(position));
-                mCompetitor.remove(position);
-                notifyItemRemoved(position);
-            }
-            break;
+                if (mListener != null) {
+                    mListener.onItemRemoved(mCompetitor.get(position));
+                    mCompetitor.remove(position);
+                    notifyItemRemoved(position);
+                }
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -205,7 +206,6 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     }
 
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
-
         public View container;
         public View dragHandle;
         public TextView position;
@@ -215,13 +215,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         public ViewHolder(View itemView) {
             super(itemView);
 
-            itemView.setOnLongClickListener(this);
-
-            container = itemView.findViewById(R.id.container);
-            dragHandle = itemView.findViewById(R.id.drag_handle);
-            position = (TextView) itemView.findViewById(R.id.position);
-            vesselId = (TextView) itemView.findViewById(R.id.vessel_id);
-            competitor = (TextView) itemView.findViewById(R.id.competitor);
+            container = ViewHelper.get(itemView, R.id.container);
+            dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
+            vesselId = ViewHelper.get(itemView, R.id.vessel_id);
+            competitor = ViewHelper.get(itemView, R.id.competitor);
+            position = ViewHelper.get(itemView, R.id.position);
+            if (position != null) {
+                position.setOnLongClickListener(this);
+            }
         }
 
         @Override
