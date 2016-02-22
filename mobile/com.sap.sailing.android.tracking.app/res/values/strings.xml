@@ -14,7 +14,7 @@
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leader board</string>
     <string name="title_activity_event">Event</string>
-    <string name="title_activity_start">Setup GPS-Tracker</string>
+    <string name="title_activity_start">Set Up GPS Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
     <string name="do_you_really_want_to_stop_tracking">Do you really want to stop tracking?</string>

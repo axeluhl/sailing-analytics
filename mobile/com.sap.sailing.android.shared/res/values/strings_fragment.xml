@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="scan_qr">Scan QR-Code</string>
-    <string name="scan_hint">The QR-code can be found on your confirmation of participation</string>
+    <string name="scan_qr">Scan QR Code</string>
+    <string name="scan_hint">The QR Code can be found on your confirmation of participation</string>
     <string name="no_qr_code">Don\'t Have a QR Code?</string>
 </resources>
