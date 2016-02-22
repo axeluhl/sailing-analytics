@@ -25,8 +25,8 @@ public class StartActivity extends AbstractStartActivity {
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
 
-        if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showEulaDialog(this);
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog(R.style.Base_Theme_AppCompat_Dialog_Alert);
         }
     }
 

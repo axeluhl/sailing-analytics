@@ -9,7 +9,7 @@ import com.sap.sailing.racecommittee.app.R;
 
 public class CourseFragmentMap extends CourseFragment {
 
-    public static CourseFragmentMap newInstance(int startMode) {
+    public static CourseFragmentMap newInstance(@START_MODE_VALUES int startMode) {
         CourseFragmentMap fragment = new CourseFragmentMap();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);

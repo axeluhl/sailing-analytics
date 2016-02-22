@@ -1,15 +1,20 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -30,6 +35,8 @@ public class PreferenceActivity extends AppCompatActivity {
     public static final String EXTRA_SHOW_FRAGMENT = "SHOW_FRAGMENT";
     public static final String EXTRA_SHOW_FRAGMENT_ARGUMENTS = "SHOW_FRAGMENT_ARGUMENTS";
     private static final String TAG = PreferenceActivity.class.getName();
+
+    private boolean mIsRedirected = false;
 
     public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
         // reset temp preferences
@@ -72,8 +79,8 @@ public class PreferenceActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        AppUtils.lockOrientation(this);
         ThemeHelper.setTheme(this);
-
         setContentView(R.layout.preference_view);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -87,6 +94,8 @@ public class PreferenceActivity extends AppCompatActivity {
             }
         }
 
+        disableStatusBarTranslucent();
+        setStatusBarColor();
         Fragment fragment = null;
         if (getIntent() != null && getIntent().getExtras() != null) {
             Bundle bundle = getIntent().getExtras();
@@ -104,6 +113,7 @@ public class PreferenceActivity extends AppCompatActivity {
                 if (bundle.containsKey(EXTRA_SHOW_FRAGMENT_ARGUMENTS)) {
                     Bundle info = bundle.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
                     if (info != null) {
+                        mIsRedirected = true;
                         // sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
                         String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
                         String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
@@ -116,6 +126,23 @@ public class PreferenceActivity extends AppCompatActivity {
             fragment = MainPreferenceFragment.newInstance();
         }
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void disableStatusBarTranslucent() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void setStatusBarColor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(getResources().getColor(R.color.settings_navbar));
+        }
     }
 
     @Override
@@ -143,4 +170,7 @@ public class PreferenceActivity extends AppCompatActivity {
         }
     }
 
+    public boolean isRedirected() {
+        return mIsRedirected;
+    }
 }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <ListView
+        android:id="@+id/protest_time_races_list"
+        android:layout_width="400dp"
+        android:layout_height="match_parent"
+        android:verticalSpacing="2dp"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX="@integer/picker_scale"
+        android:scaleY="@integer/picker_scale"
+        android:layout_marginLeft="@dimen/default_margin_twice"
+        android:paddingRight="@dimen/default_padding"
+        android:paddingLeft="@dimen/default_padding">
+
+        <include
+            android:id="@+id/protest_time_time_picker"
+            layout="@layout/time_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </RelativeLayout>
+</LinearLayout>
