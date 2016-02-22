@@ -37,21 +37,25 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerEventPath(String eventId) {
-        return context.getString(R.string.preference_server_event_path, "/events").replace("{event_id}", eventId);
+        return context.getString(R.string.preference_server_event_path).replace("{event_id}", eventId);
+    }
+
+    public String getServerEventUrl(String eventId) {
+        return context.getString(R.string.preference_server_event_url, eventId);
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace(
+        return context.getString(R.string.preference_server_leaderboard_path).replace(
                 "{leaderboard_name}", leaderboardName);
     }
 
     public String getServerCompetitorPath(String competitorId) {
-        return context.getString(R.string.preference_server_competitor_path, "/competitors").replace("{competitor_id}",
+        return context.getString(R.string.preference_server_competitor_path).replace("{competitor_id}",
                 competitorId);
     }
 
     public String getServerCompetiorTeamPath(String competitorId){
-        return context.getString(R.string.preference_server_team_info_path, "/competitors").replace("{competitor_id}",
+        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
             competitorId);
     }
 

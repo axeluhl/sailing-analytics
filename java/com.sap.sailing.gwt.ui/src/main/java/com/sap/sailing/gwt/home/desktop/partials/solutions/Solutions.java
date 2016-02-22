@@ -80,7 +80,7 @@ public class Solutions extends Composite {
 
         sapInSailingNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SapInSailing);
         sailingAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingAnalytics);
-        raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommiteeApp);
+        raceCommitteeAppNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.RaceCommitteeApp);
         postRaceAnalyticsNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.PostRaceAnalytics);
         trainingDiaryNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.TrainingDiary);
         sailingSimulatorNavigation = placesNavigator.getSolutionsNavigation(SolutionsNavigationTabs.SailingSimulator);
@@ -115,7 +115,7 @@ public class Solutions extends Composite {
     
     @UiHandler("raceAnchor")
     public void scrollToRace(ClickEvent e) {
-        scrollToView(SolutionsNavigationTabs.RaceCommiteeApp);
+        scrollToView(SolutionsNavigationTabs.RaceCommitteeApp);
         handleClickEventWithLocalNavigation(e, raceCommitteeAppNavigation);
     }
 
@@ -148,14 +148,17 @@ public class Solutions extends Composite {
     }
 
     private void scrollToView(SolutionsNavigationTabs navigationTab) {
-        switch (navigationTab) {
+        if (navigationTab == null) {
+            sapInSailingDiv.scrollIntoView();
+        } else {
+            switch (navigationTab) {
             case SapInSailing:
                 sapInSailingDiv.scrollIntoView();
                 break;
             case SailingAnalytics:
                 sailingAnalyticsDiv.scrollIntoView();
                 break;
-            case RaceCommiteeApp:
+            case RaceCommitteeApp:
                 raceDiv.scrollIntoView();
                 break;
             case PostRaceAnalytics:
@@ -167,6 +170,7 @@ public class Solutions extends Composite {
             case SailingSimulator:
                 simulatorDiv.scrollIntoView();
                 break;
+            }
         }
     }
     

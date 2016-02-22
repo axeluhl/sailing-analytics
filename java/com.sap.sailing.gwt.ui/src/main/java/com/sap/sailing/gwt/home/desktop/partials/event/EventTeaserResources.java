@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.desktop.partials.event;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 
 public interface EventTeaserResources extends ClientBundle {
     public static final EventTeaserResources INSTANCE = GWT.create(EventTeaserResources.class);
@@ -27,6 +26,4 @@ public interface EventTeaserResources extends ClientBundle {
         String eventteaser_location();
     }
     
-    @Source("com/sap/sailing/gwt/home/images/default_event_photo.jpg")
-    ImageResource defaultEventPhotoImage();
 }

@@ -124,10 +124,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -158,6 +158,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     }
                 }
             }.start();
+        } else {
+            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        }
+    }
+    
+    @Override
+    public void updateUserProperties(final String username, String fullName, String company) throws UserManagementException {
+        final Subject subject = SecurityUtils.getSubject();
+        // the signed-in subject has role ADMIN or is changing own user
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            getSecurityService().updateUserProperties(username, fullName, company);
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -288,7 +299,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
+        userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
+                user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 

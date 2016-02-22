@@ -21,7 +21,7 @@ public abstract class AbstractSpeedImpl implements Speed {
     
     @Override
     public Duration getDuration(Distance distance) {
-        return new MillisecondsDurationImpl((long) (1000 * distance.getMeters() / getMetersPerSecond()));
+        return distance == null ? null : new MillisecondsDurationImpl((long) (1000 * distance.getMeters() / getMetersPerSecond()));
     }
 
     @Override

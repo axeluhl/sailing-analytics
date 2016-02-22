@@ -41,6 +41,7 @@ public class Footer extends Composite {
     private MobilePlacesNavigator placeNavigator;
 
     @UiField Anchor changeLanguageLink;
+    @UiField AnchorElement imprintAnchorLink;
     @UiField DivElement languageSelectionDiv;
     @UiField AnchorElement desktopUi;
 
@@ -67,6 +68,7 @@ public class Footer extends Composite {
         FooterResources.INSTANCE.css().ensureInjected();
 
         initWidget(uiBinder.createAndBindUi(this));
+        placeNavigator.getImprintNavigation().configureAnchorElement(imprintAnchorLink);
         
         updateUI();
         DOM.sinkEvents(desktopUi, Event.ONCLICK);

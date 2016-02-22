@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.PassingInstruction;
@@ -31,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.shared.ControlPointDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -84,11 +86,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(CellTable<StrippedLeaderboardDTO> leaderboardTable, AdminConsoleTableResources tableResources) {
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
+            AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 leaderboardList.getList());
         SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
-                leaderboardTable, tableResources, leaderboardColumnListHandler);
+                leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
         TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
@@ -273,17 +276,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             });
                         }
                     }).show();
-
-                } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RaceLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter, leaderboardName, raceColumnName, fleetName, new DialogCallback<Void>() {
-                        @Override
-                        public void ok(Void editedObject) {
-                        }
-
-                        @Override
-                        public void cancel() {
-                        }
-                    }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
                     List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
@@ -329,6 +321,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         trackWind = new CheckBox(stringMessages.trackWind());
         correctWindDirectionForDeclination = new CheckBox(stringMessages.declinationCheckbox());
         startTrackingButton = new Button(stringMessages.startTracking());
+        startTrackingButton.ensureDebugId("StartTrackingButton");
         startTrackingButton.setEnabled(false);
         racesPanel.add(trackWind);
         racesPanel.add(correctWindDirectionForDeclination);
@@ -391,7 +384,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             selectedLeaderBoardPanel.setVisible(false);
             trackedRacesCaptionPanel.setVisible(false);
         }
-        raceColumnTableSelectionModel.clear();
     }
 
     
@@ -577,8 +569,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final String result;
         RegattaDTO regatta = null;
         if (getSelectedLeaderboard().regattaName != null) {
-        if (allRegattas != null) {
-            for (RegattaDTO i : allRegattas) {
+            if (allRegattas != null) {
+                for (RegattaDTO i : allRegattas) {
                     if (getSelectedLeaderboard().regattaName.equals(i.getName())) {
                         regatta = i;
                         break;
@@ -594,7 +586,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     new AsyncCallback<Iterable<CompetitorDTO>>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            GWT.log("Error while searching BoatClass.");
+                            GWT.log("Error while searching boat class");
                             showWithBoatClass.showWithBoatClass(null);
                         }
                         

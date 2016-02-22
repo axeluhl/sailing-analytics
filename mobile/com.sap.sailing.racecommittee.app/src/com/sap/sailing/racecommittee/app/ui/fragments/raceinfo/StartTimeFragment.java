@@ -9,9 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import android.content.Intent;
+import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -54,13 +55,10 @@ import com.sap.sse.common.util.NaturalComparator;
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
-    public static final int MODE_SETUP = 0;
-    public static final int MODE_1 = 1;
     public static final int MODE_TIME_PANEL = 2;
 
-    private static final String START_MODE = "startMode";
     private static final int FUTURE_DAYS = 25;
-    private static final int PAST_DAYS = -3;
+    private static final int PAST_DAYS = 3;
     private static final int MAX_DIFF_MIN = 60;
     private static final String ZERO_TIME = "-00:00:00";
     private static final int ABSOLUTE = 0;
@@ -112,7 +110,7 @@ public class StartTimeFragment extends BaseFragment
     }
 
     public static StartTimeFragment newInstance(Bundle extraArgs) {
-        StartTimeFragment fragment = newInstance(MODE_SETUP);
+        StartTimeFragment fragment = newInstance(START_MODE_PRESETUP);
         Bundle args = fragment.getArguments();
         if (extraArgs != null) {
             args.putAll(extraArgs);
@@ -205,69 +203,77 @@ public class StartTimeFragment extends BaseFragment
             }
         };
         Calendar time = Calendar.getInstance();
-        if (getView() != null) {
-            if (getArguments() != null) {
-                switch (getArguments().getInt(START_MODE, MODE_SETUP)) {
-                    case MODE_1:
-                        View header = ViewHelper.get(getView(), R.id.header_text);
-                        if (header != null) {
-                            header.setOnClickListener(this);
-                        }
-                        View back = ViewHelper.get(getView(), R.id.header_back);
-                        if (back != null) {
-                            back.setVisibility(View.VISIBLE);
-                        }
-                        break;
+        if (getView() != null && getArguments() != null) {
+            View header = ViewHelper.get(getView(), R.id.header);
+            View back = ViewHelper.get(getView(), R.id.header_back);
+            View text = ViewHelper.get(getView(), R.id.header_text);
+            switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+                case START_MODE_PLANNED:
+                    if (back != null) {
+                        back.setVisibility(View.VISIBLE);
+                    }
+                    if (text != null) {
+                        text.setOnClickListener(this);
+                    }
+                    break;
 
-                    case MODE_TIME_PANEL:
-                        if (getRace() != null && getRaceState() != null) {
-                            mStartTime = getRaceState().getStartTime();
-                            if (mStartTime != null) {
-                                time.setTime(mStartTime.asDate());
-                            }
-                        }
-                        View frame = ViewHelper.get(getView(), R.id.header);
-                        if (frame != null) {
-                            frame.setVisibility(View.GONE);
-                        }
-
-                        StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
-                        if (result != null && result.isDependentStartTime()) {
-                            mStartTimeOffset = result.getStartTimeDiff();
-                            mRaceId = Util.get(result.getRacesDependingOn(), 0);
-                        }
-                        break;
-
-                    default: // MODE_SETUP
-                        mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                case MODE_TIME_PANEL:
+                    if (getRace() != null && getRaceState() != null) {
+                        mStartTime = getRaceState().getStartTime();
                         if (mStartTime != null) {
                             time.setTime(mStartTime.asDate());
                         }
-                        mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
-                        mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
-
-                        View syncButtons = ViewHelper.get(getView(), R.id.buttonBar);
-                        if (syncButtons != null) {
-                            syncButtons.setVisibility(View.GONE);
+                    }
+                    if (AppUtils.with(getActivity()).isLand()) {
+                        if (header != null) {
+                            header.setVisibility(View.GONE);
                         }
-                        break;
-                }
-            }
+                    } else {
+                        if (back != null) {
+                            back.setVisibility(View.VISIBLE);
+                        }
+                        if (text != null) {
+                            text.setOnClickListener(this);
+                        }
+                    }
 
-            if (mRaceId == null && mStartTimeOffset == null) {
-                showTab(ABSOLUTE);
-            } else {
-                showTab(RELATIVE);
-            }
+                    StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
+                    if (result != null && result.isDependentStartTime()) {
+                        mStartTimeOffset = result.getStartTimeDiff();
+                        mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                    }
+                    break;
 
-            initViewsAbsolute(time);
-            initViewsRelative();
+                default: // MODE_SETUP
+                    mStartTime = (TimePoint) getArguments().getSerializable(MainScheduleFragment.START_TIME);
+                    if (mStartTime != null) {
+                        time.setTime(mStartTime.asDate());
+                    }
+                    mStartTimeOffset = (Duration) getArguments().getSerializable(MainScheduleFragment.START_TIME_DIFF);
+                    mRaceId = (SimpleRaceLogIdentifier) getArguments().getSerializable(MainScheduleFragment.DEPENDENT_RACE);
+
+                    View syncButtons = ViewHelper.get(getView(), R.id.buttonBar);
+                    if (syncButtons != null) {
+                        syncButtons.setVisibility(View.GONE);
+                    }
+                    break;
+            }
         }
+
+        if (mRaceId == null && mStartTimeOffset == null) {
+            showTab(ABSOLUTE);
+        } else {
+            showTab(RELATIVE);
+        }
+
+        initViewsAbsolute(time);
+        initViewsRelative();
     }
 
     private void initViewsRelative() {
         mTimeOffset = ViewHelper.get(getView(), R.id.time_offset);
         if (mTimeOffset != null) {
+            ViewHelper.disableSave(mTimeOffset);
             ThemeHelper.setPickerColor(getActivity(), mTimeOffset, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mTimeOffset.setMinValue(0);
@@ -391,8 +397,7 @@ public class StartTimeFragment extends BaseFragment
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     mRaceAdapter.setSelected(position);
                     String leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition()).getA();
-                    @SuppressWarnings("unchecked")
-                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
@@ -411,13 +416,11 @@ public class StartTimeFragment extends BaseFragment
             for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
                 Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
                 if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
-                    @SuppressWarnings("unchecked")
-                    Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
+                    @SuppressWarnings("unchecked") Util.Pair<String, String> fleet = ((Util.Pair<String, String>) mFleet.getSelectedItem());
                     if (fleet == null) {
                         fleet = new Util.Pair<>(LeaderboardNameConstants.DEFAULT_FLEET_NAME, null);
                     }
-                    if (races.getFleet().getName().equals(fleet.getA()) || LeaderboardNameConstants.DEFAULT_FLEET_NAME
-                        .equals(races.getFleet().getName())) {
+                    if (races.getFleet().getName().equals(fleet.getA())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
                             if (!getRace().equals(race)) {
                                 Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
@@ -447,11 +450,12 @@ public class StartTimeFragment extends BaseFragment
     private void initViewsAbsolute(Calendar time) {
         mDatePicker = ViewHelper.get(getView(), R.id.start_date_picker);
         if (mDatePicker != null) {
+            ViewHelper.disableSave(mDatePicker);
             ThemeHelper.setPickerColor(getActivity(), mDatePicker, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mDatePicker.setOnValueChangedListener(this);
-            TimeUtils.initDatePicker(getActivity(), mDatePicker, time, PAST_DAYS, FUTURE_DAYS);
-            mDatePicker.setValue(Math.abs(PAST_DAYS));
+            TimeUtils.initDatePicker(getActivity(), mDatePicker, time, -PAST_DAYS, FUTURE_DAYS);
+            mDatePicker.setValue(PAST_DAYS);
         }
         mTimePicker = ViewHelper.get(getView(), R.id.start_time_picker);
         if (mTimePicker != null) {
@@ -461,7 +465,7 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setIs24HourView(true);
             int hours = time.get(Calendar.HOUR_OF_DAY);
             int minutes = time.get(Calendar.MINUTE);
-            if (getArguments() != null && getArguments().getInt(START_MODE, MODE_SETUP) != MODE_TIME_PANEL && mRaceId == null
+            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) != MODE_TIME_PANEL && mRaceId == null
                 && mStartTimeOffset == null) {
                 // In 10 minutes from now, but always a 5-minute-mark.
                 time.add(Calendar.MINUTE, 10);
@@ -568,7 +572,7 @@ public class StartTimeFragment extends BaseFragment
         } else {
             id = R.drawable.nav_drawer_tab_button_dark;
         }
-        Drawable drawable = BitmapHelper.getDrawable(getActivity(), id);
+        Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
         switch (tab) {
             case RELATIVE:
                 if (mRelative != null) {
@@ -651,7 +655,12 @@ public class StartTimeFragment extends BaseFragment
                 break;
 
             case R.id.header_text:
-                changeFragment();
+                if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
+                    changeFragment();
+                } else {
+                    sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                }
                 break;
 
             default:
@@ -680,7 +689,7 @@ public class StartTimeFragment extends BaseFragment
         Calendar newTime = (Calendar) today.clone();
         newTime.setTime(mStartTime.asDate());
 
-        int days = TimeUtils.daysBetween(today, newTime) + Math.abs(PAST_DAYS);
+        int days = TimeUtils.daysBetween(today, newTime) + PAST_DAYS;
 
         if (mDatePicker != null) {
             mDatePicker.setValue(days);
@@ -694,7 +703,7 @@ public class StartTimeFragment extends BaseFragment
     private TimePoint getPickerTime() {
         Calendar calendar = Calendar.getInstance();
         if (mDatePicker != null) {
-            calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() + PAST_DAYS);
+            calendar.add(Calendar.DAY_OF_MONTH, mDatePicker.getValue() - PAST_DAYS);
         }
         if (mTimePicker != null) {
             calendar.set(Calendar.HOUR_OF_DAY, mTimePicker.getCurrentHour());
@@ -720,8 +729,9 @@ public class StartTimeFragment extends BaseFragment
         Bundle args = getRecentArguments();
         RacingProcedureType procedureType = getRaceState().getTypedRacingProcedure().getType();
         getRaceState().setRacingProcedure(now, procedureType);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
         if (getArguments() != null && startTime != null) {
-            if (getArguments().getInt(START_MODE, MODE_SETUP) != MODE_SETUP) {
+            if (getArguments().getInt(START_MODE, START_MODE_PRESETUP) != START_MODE_PRESETUP) {
                 if (startTimeDiff == null && identifier == null) {
                     // absolute start time
                     getRaceState().forceNewStartTime(now, startTime);
@@ -730,7 +740,7 @@ public class StartTimeFragment extends BaseFragment
                     getRaceState().forceNewDependentStartTime(now, startTimeDiff, identifier);
                 }
                 fragment = RaceFlagViewerFragment.newInstance();
-                viewId = R.id.race_frame;
+                viewId = R.id.race_content;
             }
             args.putAll(getArguments());
             args.putSerializable(MainScheduleFragment.START_TIME, startTime);
@@ -738,8 +748,11 @@ public class StartTimeFragment extends BaseFragment
             args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, identifier);
         }
         fragment.setArguments(args);
-        getFragmentManager().beginTransaction().replace(viewId, fragment).commit();
-        Intent intent = new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
-        BroadcastManager.getInstance(getActivity()).addIntent(intent);
+        transaction.replace(viewId, fragment);
+        transaction.commit();
+        sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        if (getActivity().findViewById(R.id.race_edit) != null) {
+            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        }
     }
 }

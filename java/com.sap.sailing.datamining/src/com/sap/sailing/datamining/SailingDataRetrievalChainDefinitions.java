@@ -47,6 +47,7 @@ public class SailingDataRetrievalChainDefinitions {
                 leaderboardRetrieverChainDefinition, HasTrackedRaceContext.class, "RaceSailingDomainRetrieverChain");
         trackedRaceRetrieverChainDefinition.endWith(LeaderboardRetrievalProcessor.class, TrackedRaceRetrievalProcessor.class,
                 HasTrackedRaceContext.class, "Race");
+        dataRetrieverChainDefinitions.add(trackedRaceRetrieverChainDefinition);
 
         final DataRetrieverChainDefinition<RacingEventService, HasMarkPassingContext> markPassingRetrieverChainDefinition = new SimpleDataRetrieverChainDefinition<>(
                 trackedRaceRetrieverChainDefinition, HasMarkPassingContext.class, "MarkPassingSailingDomainRetrieverChain");

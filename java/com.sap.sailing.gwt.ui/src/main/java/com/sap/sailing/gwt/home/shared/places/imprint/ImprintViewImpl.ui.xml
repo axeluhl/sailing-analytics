@@ -1,0 +1,57 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:cell="urn:import:com.google.gwt.user.cellview.client"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
+    <ui:with field="res"
+        type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
+        .outerPanel {
+            margin-top: 20px;
+        }
+        
+        .listbox {
+            display: block;
+            width: 100%;
+            height: 3em;
+            line-height: 2em;
+            
+            font-size: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+            margin-top: 40px;
+        }
+        .owner {
+           margin-top: 50px;
+        }
+        .homepage {
+            display: block;
+            margin-top: 40px;
+        }
+        .acknowledgment {
+            margin-top: 40px;
+            display: block;
+            overflow: auto;
+            font-size: smaller;
+        }
+        .licenseText {
+            display: block;
+            margin: 50px 10px;
+            padding: 10px 10px;
+            
+        }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {style.outerPanel}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+            <a href="http://www.sap.com/about/legal/impressum.html"><ui:text from='{i18n.footerLegal}' /></a>
+            <g:ValueListBox ui:field="componentListUi"
+                styleName="{style.listbox}" />
+            <h1 ui:field="nameUi" class="{style.owner}"/>
+            <h2 ui:field="ownerUi" class="{style.owner}"/>
+            <a ui:field="homepageUi" class="{style.homepage}"/>
+            <div ui:field="acknowledgmentUi" class="{style.acknowledgment}"/>
+            <div ui:field="licenseTextUi" class="{style.licenseText}"/>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>    

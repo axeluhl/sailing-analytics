@@ -62,8 +62,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private User loadUser(DBObject userDBObject) {
-        String name = (String) userDBObject.get(FieldNames.User.NAME.name());
-        String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
+        final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
+        final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
+        final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
+        final String company = (String) userDBObject.get(FieldNames.User.COMPANY.name());
         Boolean emailValidated = (Boolean) userDBObject.get(FieldNames.User.EMAIL_VALIDATED.name());
         String passwordResetSecret = (String) userDBObject.get(FieldNames.User.PASSWORD_RESET_SECRET.name());
         String validationSecret = (String) userDBObject.get(FieldNames.User.VALIDATION_SECRET.name());
@@ -83,7 +85,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        User result = new User(name, email, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
+        User result = new User(name, email, fullName, company, emailValidated==null?false:emailValidated, passwordResetSecret, validationSecret, accounts.values());
         for (String role : roles) {
             result.addRole(role);
         }

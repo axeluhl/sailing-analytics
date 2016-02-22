@@ -27,17 +27,20 @@ start_servers() {
 	MEMORY_PER_INSTANCE_IN_MB=`cat /proc/meminfo  | grep MemTotal | awk '{printf("%i\n", ($2 / 1024 * 0.75 - 1500) / '$NUMBER_OF_INSTANCES' );}'`
 	echo "Using ${MEMORY_PER_INSTANCE_IN_MB}MB as default heap size per instance."
 	for conf in $JAVA_START_INSTANCES; do
-		echo "Checking for amazon update..."
+		echo "Checking for amazon update..." >>/var/log/sailing.out
 		echo "MEMORY=\"${MEMORY_PER_INSTANCE_IN_MB}m\"" >>$SERVERS_DIR/$conf/env.sh
 		su - sailing -c "cd $SERVERS_DIR/$conf && $GIT_REPOSITORY/java/target/refreshInstance.sh auto-install" 2>>/var/log/sailing.err >>/var/log/sailing.out
 		(
 			# execute env.sh in a subshell which now has the same set of variables that the server will see
 			source $SERVERS_DIR/$conf/env.sh
-			echo "Starting Java server $conf"
+			echo "Starting Java server \"$conf\"" >>/var/log/sailing.out
 			su - sailing -c "cd $SERVERS_DIR/$conf && ./start" 2>>/var/log/sailing.err >>/var/log/sailing.out
 			server_name="`echo $SERVER_NAME | tr [A-Z] [a-z]`"
-			echo "Appending macro invocation to $APACHE_CONFIR_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
-			echo "Use Event $server_name.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
+			echo "Appending macro invocation to $APACHE_CONFIG_DIR/001-events.conf to map ${server_name}.sapsailing.com to event with ID $EVENT_ID with server running on local port $SERVER_PORT..." >>/var/log/sailing.out
+			echo "Use Event ${server_name}.sapsailing.com \"$EVENT_ID\" 127.0.0.1 $SERVER_PORT" >>$APACHE_CONFIG_DIR/001-events.conf
+			HTTP_LOGROTATE=/etc/logrotate.d/httpd
+			echo "Patching $HTTP_LOGROTATE so that old logs go to /var/log/old/$SERVER_NAME/$INSTANCE_IP4" >>/var/log/sailing.out
+			sed -i -e "s/\/var\/log\/old\/\([^/]*\)\/\([^/ ]*\)/\/var\/log\/old\/$SERVER_NAME\/$INSTANCE_IP4/" $HTTP_LOGROTATE
 			# terminating the subshell will forget all the variable assignments brought in by env.sh, clearing for the next server instance
 		)
 		RETVAL=$?

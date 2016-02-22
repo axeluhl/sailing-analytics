@@ -16,7 +16,7 @@ import AVFoundation
     optional func qrCodeCancel()
 }
 
-class QRCodeManager: NSObject, UIAlertViewDelegate {
+class QRCodeManager : NSObject, UIAlertViewDelegate {
     
     enum AlertView: Int {
         case IncorrectQRCode, AcceptMapping, ServerError
@@ -27,6 +27,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     private var eventDictionary: [String: AnyObject]?
     private var leaderBoardDictionary: [String: AnyObject]?
     private var competitorDictionary: [String: AnyObject]?
+    private var teamImageURL: String?
     
     init(delegate: QRCodeManagerDelegate) {
         self.delegate = delegate
@@ -48,21 +49,21 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
     }
 
     class func setUpCaptureSession(delegate: AVCaptureMetadataOutputObjectsDelegate?) -> (session: AVCaptureSession!, output: AVCaptureMetadataOutput!) {
-        var device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
-        
-        var writeError : NSError? = nil
-        var input = AVCaptureDeviceInput.deviceInputWithDevice(device, error: &writeError) as? AVCaptureDeviceInput
-        
-        var output = AVCaptureMetadataOutput()
-        output.setMetadataObjectsDelegate(delegate, queue: dispatch_get_main_queue())
-        
+        let device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+        let output = AVCaptureMetadataOutput()
         let session = AVCaptureSession()
-        session.canSetSessionPreset(AVCaptureSessionPresetHigh)
-        if session.canAddInput(input) {
-            session.addInput(input)
-        }
-        if session.canAddOutput(output) {
-            session.addOutput(output)
+        do {
+            let input = try AVCaptureDeviceInput(device: device);
+            output.setMetadataObjectsDelegate(delegate, queue: dispatch_get_main_queue())
+            session.canSetSessionPreset(AVCaptureSessionPresetHigh)
+            if session.canAddInput(input) {
+                session.addInput(input)
+            }
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+            }
+        } catch {
+            print(error)
         }
         return (session, output)
     }
@@ -80,7 +81,7 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         
         self.delegate.activityIndicatorView?.startAnimating()
 
-        var checkIn = DataManager.sharedManager.getCheckIn(qrcodeData!.eventId!, leaderBoardName: qrcodeData!.leaderBoardName!, competitorId: qrcodeData!.competitorId!)
+        let checkIn = DataManager.sharedManager.getCheckIn(qrcodeData!.eventId!, leaderBoardName: qrcodeData!.leaderBoardName!, competitorId: qrcodeData!.competitorId!)
         
         // already checked in
         if checkIn != nil {
@@ -106,16 +107,24 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
                                 
                                 // get competitor
                                 success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
-                                    self.delegate.activityIndicatorView?.stopAnimating()
-                                    
-                                    self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-                                    let competitorName = (self.competitorDictionary!["name"]) as! String
-                                    let leaderBoardName = (self.leaderBoardDictionary!["name"]) as! String
-                                    let sailId = (self.competitorDictionary!["sailID"]) as! String
-                                    var title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
-                                    let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
-                                    alertView.tag = AlertView.AcceptMapping.rawValue;
-                                    alertView.show()
+
+                                    APIManager.sharedManager.teamImage(self.qrcodeData!.competitorId, result: { (imageUrl) -> Void in
+
+                                        self.delegate.activityIndicatorView?.stopAnimating()
+
+                                        self.competitorDictionary = competitorResponseObject as? [String: AnyObject]
+
+                                        self.teamImageURL = imageUrl
+
+                                        let competitorName = (self.competitorDictionary!["name"]) as! String
+                                        let leaderBoardName = (self.leaderBoardDictionary!["name"]) as! String
+                                        let sailId = (self.competitorDictionary!["sailID"]) as! String
+                                        let title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""), competitorName, leaderBoardName, sailId)
+                                        let alertView = UIAlertView(title: title, message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))
+                                        alertView.tag = AlertView.AcceptMapping.rawValue;
+                                        alertView.show()
+                                    })
+
                                 }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                                     self.delegate.activityIndicatorView?.stopAnimating()
                                     let title = String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), self.qrcodeData!.competitorId!)
@@ -173,16 +182,17 @@ class QRCodeManager: NSObject, UIAlertViewDelegate {
         checkIn.leaderBoardName = self.qrcodeData!.leaderBoardName!
         checkIn.competitorId = self.qrcodeData!.competitorId!
         checkIn.lastSyncDate = NSDate()
-        
+        checkIn.imageUrl = teamImageURL
+
         APIManager.sharedManager.checkIn(leaderBoardName, competitorId: competitorId, deviceUuid: DeviceUDIDManager.UDID, pushDeviceId: "", fromMillis: fromMillis,
             success: { (AFHTTPRequestOperation operation, AnyObject eventResponseObject) -> Void in
                 
                 // create core data objects
-                var event = DataManager.sharedManager.newEvent(checkIn)
+                let event = DataManager.sharedManager.newEvent(checkIn)
                 event.initWithDictionary(self.eventDictionary!)
-                var leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
+                let leaderBoard = DataManager.sharedManager.newLeaderBoard(checkIn)
                 leaderBoard.initWithDictionary(self.leaderBoardDictionary!)
-                var competitor = DataManager.sharedManager.newCompetitor(checkIn)
+                let competitor = DataManager.sharedManager.newCompetitor(checkIn)
                 competitor.initWithDictionary(self.competitorDictionary!)
                 DataManager.sharedManager.saveContext()
 

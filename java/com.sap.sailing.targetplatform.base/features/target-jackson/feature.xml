@@ -62,14 +62,14 @@
          unpack="false"/>
 
    <plugin
-         id="jackson-core-lgpl"
+         id="jackson-core-asl"
          download-size="0"
          install-size="0"
          version="1.9.13"
          unpack="false"/>
 
    <plugin
-         id="jackson-mapper-lgpl"
+         id="jackson-mapper-asl"
          download-size="0"
          install-size="0"
          version="1.9.13"

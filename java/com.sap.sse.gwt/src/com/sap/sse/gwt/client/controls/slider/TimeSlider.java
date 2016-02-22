@@ -26,7 +26,9 @@ public class TimeSlider extends SliderBar {
     private List<TickPosition> calculatedTimeTicks;
     
     private boolean isZoomed;
-
+    
+    private int visibleLabelsInterval = 1;
+    
     private final int TICKCOUNT = 10;
 
     public TimeSlider() {
@@ -84,7 +86,7 @@ public class TimeSlider extends SliderBar {
                 int tickLeftOffset = lineLeftOffset + (int) pos - (tickWidth / 2);
                 tickLeftOffset = Math.min(tickLeftOffset, lineLeftOffset + lineWidth - tickWidth);
                 tick.getStyle().setLeft(tickLeftOffset, Unit.PX);
-                tick.getStyle().setVisibility(Visibility.VISIBLE);
+                tick.getStyle().setVisibility(isTickInVisibleRange(tickPosition) ? Visibility.VISIBLE : Visibility.HIDDEN);
             }
         }
 
@@ -106,7 +108,7 @@ public class TimeSlider extends SliderBar {
         int lineWidth = lineElement.getOffsetWidth();
             // Create the labels or make them visible
             Double previousValue = null;
-            for (int i = 0; i < calculatedTimeTicks.size(); i++) {
+            for (int i = 0, ticksInVisibleRange = 0; i < calculatedTimeTicks.size(); i++) {
                 TickPosition tickPosition = calculatedTimeTicks.get(i);
                 Element label = null;
                 if (i < tickLabelElements.size()) {
@@ -142,7 +144,8 @@ public class TimeSlider extends SliderBar {
                     labelLeftOffset = Math.min(labelLeftOffset, lineLeftOffset + lineWidth - labelWidth);
                     labelLeftOffset = Math.max(labelLeftOffset, lineLeftOffset);
                     label.getStyle().setLeft(labelLeftOffset, Unit.PX);
-                    label.getStyle().setVisibility(Visibility.VISIBLE);
+                    boolean visible = isTickInVisibleRange(tickPosition) && ticksInVisibleRange++ % visibleLabelsInterval == 0;
+                    label.getStyle().setVisibility(visible ? Visibility.VISIBLE : Visibility.HIDDEN);
                 }
                 previousValue = value;
             }
@@ -151,6 +154,11 @@ public class TimeSlider extends SliderBar {
             for (int i = calculatedTimeTicks.size(); i < tickLabelElements.size(); i++) {
                 tickLabelElements.get(i).getStyle().setDisplay(Display.NONE);
             }
+    }
+    
+    private boolean isTickInVisibleRange(TickPosition tickPosition) {
+        long tickValue = tickPosition.getPosition().getTime(); 
+        return tickValue >= minValue && tickValue <= maxValue;
     }
 
     public void clearMarkersAndLabelsAndTicks() {
@@ -244,5 +252,11 @@ public class TimeSlider extends SliderBar {
 
     public void setZoomed(boolean isZoomed) {
         this.isZoomed = isZoomed;
+    }
+
+    @Override
+    public void onResize() {
+        visibleLabelsInterval = (TICKCOUNT / Math.max(getOffsetWidth() / 35, 1)) + 1;
+        super.onResize();
     }
 }

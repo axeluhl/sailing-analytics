@@ -35,5 +35,6 @@ public class ResilientActivity extends LoggableActivity {
     protected void fadeActivity(Intent intent) {
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
     }
 }
