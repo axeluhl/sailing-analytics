@@ -16,7 +16,11 @@ class AboutViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad();
         versionDescriptionLabel.text = NSLocalizedString("Version", comment: "")
-        versionLabel.text = "1.0"
+        if let text = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String {
+            versionLabel.text = text
+        } else {
+            versionLabel.text = "-"
+        }
     }
     
     @IBAction func done(sender: AnyObject) {
@@ -24,8 +28,7 @@ class AboutViewController: UIViewController {
     }
     
     @IBAction func openEULA(sender: AnyObject) {
-        let url = NSURL(string: "http://www.sap.com")!
-        UIApplication.sharedApplication().openURL(url)
+        UIApplication.sharedApplication().openURL(URLs.EULA)
     }
     
 }
