@@ -51,8 +51,7 @@
     <!-- Eula -->
     <string name="eula_title">EULA</string>
     <string name="eula_message">By using this App you confirm to accept the SAP SE end user license agreement. Please read this EULA here.</string>
-    <string name="confirm">Confirm</string>
-    <string name="skip">Skip</string>
+    <string name="eula_confirm">Confirm</string>
     <string name="linked_eula_message_part">here</string>
 
     <!-- About this app -->

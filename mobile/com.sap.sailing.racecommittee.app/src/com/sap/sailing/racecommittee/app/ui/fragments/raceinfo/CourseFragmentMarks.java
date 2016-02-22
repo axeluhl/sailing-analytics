@@ -5,20 +5,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.InMemoryDataStore;
@@ -44,33 +45,30 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.ElementLongClick;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseElementAdapter.EventListener;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseListDataElement;
 import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter;
-import com.sap.sailing.racecommittee.app.ui.adapters.coursedesign.CourseMarkAdapter.MarkClick;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.CourseMarksDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.ESSMarkImageHelper;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class CourseFragmentMarks extends CourseFragment implements MarkClick, ElementLongClick, EventListener {
+public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
 
+    private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
     private RecyclerViewTouchActionGuardManager mGuardManager;
-    private ReadonlyDataManager mDataManager;
     private ArrayList<CourseListDataElementWithIdImpl> mHistory;
     private ArrayList<CourseListDataElementWithIdImpl> mElements;
     private ArrayList<Mark> mMarks;
     private RecyclerView mHistoryCourse;
     private RecyclerView mCurrentCourse;
-    private RecyclerView mMarkGrid;
     private CourseElementAdapter mHistoryAdapter;
-    private RecyclerView.Adapter<CourseElementAdapter.ViewHolder> mCourseAdapter;
-    private CourseMarkAdapter mMarkAdapter;
+    private RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> mCourseAdapter;
+    private CourseMarksDialogFragment mMarksDialog;
     private int mId;
+    private Button mReset;
 
     public CourseFragmentMarks() {
         super();
@@ -81,7 +79,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mMarks = new ArrayList<>();
     }
 
-    public static CourseFragmentMarks newInstance(int startMode) {
+    public static CourseFragmentMarks newInstance(@START_MODE_VALUES int startMode) {
         CourseFragmentMarks fragment = new CourseFragmentMarks();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -91,52 +89,79 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
+        View layout = inflater.inflate(R.layout.race_schedule_course_marks, container, false);
 
-        LinearLayout headerText = ViewHelper.get(view, R.id.header_text);
-        if (headerText != null) {
-            headerText.setOnClickListener(new View.OnClickListener() {
-
+        mReset = (Button) layout.findViewById(R.id.resetCourse);
+        if (mReset != null) {
+            mReset.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+                    builder.setTitle(mReset.getText());
+                    if (mReset.getTag() != null) {
+                        builder.setMessage(getString(R.string.reset_message_1));
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mElements.clear();
+                                mCourseAdapter.notifyDataSetChanged();
+                                mReset.setText(R.string.reset_state_2);
+                                mReset.setTag(null);
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.no, null);
+                    } else {
+                        builder.setMessage(getString(R.string.reset_message_2));
+                        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (getRace().getCourseDesign() != null && !getString(R.string.unpublished_course).equals(getRace().getCourseDesign().getName())) {
+                                    fillCourseElement();
+                                } else {
+                                    copyPreviousToNewCourseDesign();
+                                }
+                            }
+                        });
+                        builder.setNegativeButton(android.R.string.no, null);
+                    }
+                    builder.show();
                 }
             });
         }
 
-        mHistoryCourse = (RecyclerView) view.findViewById(R.id.previous_course);
+        mHistoryCourse = (RecyclerView) layout.findViewById(R.id.previous_course);
         if (mHistoryCourse != null) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mHistoryCourse.setLayoutManager(layoutManager);
 
-            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(), false);
+            mHistoryAdapter = new CourseElementAdapter(getActivity(), mHistory, ESSMarkImageHelper.getInstance(getActivity()), false);
             mHistoryCourse.setAdapter(mHistoryAdapter);
         }
 
-        mCurrentCourse = (RecyclerView) view.findViewById(R.id.new_course);
+        mCurrentCourse = ViewHelper.get(layout, R.id.new_course);
         if (mCurrentCourse != null) {
             mGuardManager = new RecyclerViewTouchActionGuardManager();
             mGuardManager.setInterceptVerticalScrollingWhileAnimationRunning(true);
             mGuardManager.setEnabled(true);
 
             mDragDropManager = new RecyclerViewDragDropManager();
-            NinePatchDrawable drawable = (NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z3);
+            NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
             mDragDropManager.setDraggingItemShadowDrawable(drawable);
 
             mSwipeManager = new RecyclerViewSwipeManager();
 
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
-            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(), true);
-            adapter.setListener(this);
+            CourseElementAdapter adapter = new CourseElementAdapter(getActivity(), mElements, ESSMarkImageHelper.getInstance(getActivity()), true);
+            adapter.setItemClickListener(this);
             adapter.setEventListener(this);
 
             @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
+            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> dragAdapter = mDragDropManager.createWrappedAdapter(adapter);
             mCourseAdapter = dragAdapter;
 
             @SuppressWarnings("unchecked")
-            RecyclerView.Adapter<CourseElementAdapter.ViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
+            RecyclerView.Adapter<CourseElementAdapter.ItemViewHolder> swipeManager = mSwipeManager.createWrappedAdapter(mCourseAdapter);
             mCourseAdapter = swipeManager;
 
             mCurrentCourse.setLayoutManager(layoutManager);
@@ -144,7 +169,8 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mCurrentCourse.setItemAnimator(new SwipeDismissItemAnimator());
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) BitmapHelper.getDrawable(getActivity(), R.drawable.material_shadow_z1)));
+                mCurrentCourse.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) ContextCompat
+                        .getDrawable(getActivity(), R.drawable.material_shadow_z1)));
             }
 
             mGuardManager.attachRecyclerView(mCurrentCourse);
@@ -152,17 +178,7 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mDragDropManager.attachRecyclerView(mCurrentCourse);
         }
 
-        mMarkGrid = (RecyclerView) view.findViewById(R.id.assets);
-        if (mMarkGrid != null) {
-            GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
-            mMarkGrid.setLayoutManager(layoutManager);
-
-            mMarkAdapter = new CourseMarkAdapter(getActivity(), mMarks, ESSMarkImageHelper.getInstance());
-            mMarkAdapter.setListener(this);
-            mMarkGrid.setAdapter(mMarkAdapter);
-        }
-
-        return view;
+        return layout;
     }
 
     @Override
@@ -179,57 +195,77 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         fillPreviousCourseElementsWithLastPublishedCourseDesign();
 
         if (getView() != null) {
-            Button takePreviousButton = (Button) getView().findViewById(R.id.takeHistoryCourse);
-            takePreviousButton.setOnClickListener(new View.OnClickListener() {
+            if (getView().findViewById(R.id.course_layout) != null) {
+                if (!mHistory.isEmpty() && mElements.isEmpty()) {
+                    copyPreviousToNewCourseDesign();
+                    if (mReset != null) {
+                        mReset.setText(getString(R.string.reset_state_1));
+                        mReset.setTag(mReset);
+                    }
+                }
+            }
 
-                @Override
-                public void onClick(View arg0) {
-                    if (!mHistory.isEmpty()) {
-                        if (!mElements.isEmpty()) {
-                            createUsePreviousCourseDialog();
+            Button takePrevious = (Button) getView().findViewById(R.id.takeHistoryCourse);
+            if (takePrevious != null) {
+                takePrevious.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View arg0) {
+                        if (!mHistory.isEmpty()) {
+                            if (!mElements.isEmpty()) {
+                                createUsePreviousCourseDialog();
+                            } else {
+                                copyPreviousToNewCourseDesign();
+                            }
                         } else {
-                            copyPreviousToNewCourseDesign();
-                        }
-                    } else {
-                        String toastText = getString(R.string.error_no_course_to_copy);
-                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-
-            Button publishButton = (Button) getView().findViewById(R.id.publishCourse);
-            publishButton.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View arg0) {
-                    try {
-                        CourseBase courseData = convertCourseElementsToACourseData();
-                        sendCourseDataAndDismiss(courseData);
-                    } catch (IllegalStateException ex) {
-                        if (ex.getMessage().equals("Missing second mark")) {
-                            String toastText = getString(R.string.error_missing_second_mark);
-                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                        } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
-                            String toastText = getString(R.string.error_missing_passing_instructions);
+                            String toastText = getString(R.string.error_no_course_to_copy);
                             Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                         }
-
-                    } catch (IllegalArgumentException ex) {
-                        String toastText = getString(R.string.error_no_way_point);
-                        Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                     }
-                }
-            });
+                });
+            }
 
-            Button unpublishButton = (Button) getView().findViewById(R.id.unpublishCourse);
-            unpublishButton.setOnClickListener(new View.OnClickListener() {
+            Button publish = (Button) getView().findViewById(R.id.publishCourse);
+            if (publish != null) {
+                publish.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View arg0) {
-                    CourseBase emptyCourse = new CourseDataImpl("Unpublished course design");
-                    sendCourseDataAndDismiss(emptyCourse);
-                }
-            });
+                    @Override
+                    public void onClick(View arg0) {
+                        try {
+                            CourseBase courseData;
+                            if (mElements.isEmpty() && getView().findViewById(R.id.course_layout) != null) {
+                                courseData = new CourseDataImpl(getString(R.string.unpublished_course));
+                            } else {
+                                courseData = convertCourseElementsToACourseData();
+                            }
+                            sendCourseDataAndDismiss(courseData);
+                        } catch (IllegalStateException ex) {
+                            if (ex.getMessage().equals("Missing second mark")) {
+                                String toastText = getString(R.string.error_missing_second_mark);
+                                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                            } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                                String toastText = getString(R.string.error_missing_passing_instructions);
+                                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                            }
+                        } catch (IllegalArgumentException ex) {
+                            String toastText = getString(R.string.error_no_way_point);
+                            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+
+            Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
+            if (unpublish != null) {
+                unpublish.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View arg0) {
+                        CourseBase emptyCourse = new CourseDataImpl(getString(R.string.unpublished_course));
+                        sendCourseDataAndDismiss(emptyCourse);
+                    }
+                });
+            }
         }
     }
 
@@ -267,11 +303,6 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
             mCurrentCourse = null;
         }
 
-        if (mMarkGrid != null) {
-            mMarkGrid.setAdapter(null);
-            mMarkGrid = null;
-        }
-
         if (mCourseAdapter != null) {
             WrapperAdapterUtils.releaseAll(mCourseAdapter);
             mCourseAdapter = null;
@@ -280,26 +311,20 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         super.onDestroy();
     }
 
-    private void fillCourseElement() {
-        mElements.clear();
-        mElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
-        mCourseAdapter.notifyDataSetChanged();
-    }
-
     private void loadMarks() {
         Loader<?> marksLoader = getLoaderManager()
-            .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    String toastText = getString(R.string.marks_w_placeholder);
-                    Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG).show();
-                }
+                .restartLoader(0, null, mDataManager.createMarksLoader(getRace(), new LoadClient<Collection<Mark>>() {
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        String toastText = getString(R.string.marks_w_placeholder);
+                        Toast.makeText(getActivity(), String.format(toastText, reason.toString()), Toast.LENGTH_LONG).show();
+                    }
 
-                @Override
-                public void onLoadSucceeded(Collection<Mark> data, boolean isCached) {
-                    onLoadMarksSucceeded(data);
-                }
-            }));
+                    @Override
+                    public void onLoadSucceeded(Collection<Mark> data, boolean isCached) {
+                        onLoadMarksSucceeded(data);
+                    }
+                }));
         marksLoader.forceLoad();
     }
 
@@ -307,7 +332,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         mMarks.clear();
         mMarks.addAll(data);
         Collections.sort(mMarks, new NaturalNamedComparator());
-        mMarkAdapter.notifyDataSetChanged();
+    }
+
+    private void fillCourseElement() {
+        mElements.clear();
+        mElements.addAll(convertCourseDesignToCourseElements(getRace().getCourseDesign()));
+        mCourseAdapter.notifyDataSetChanged();
     }
 
     protected List<CourseListDataElementWithIdImpl> convertCourseDesignToCourseElements(CourseBase courseData) {
@@ -338,31 +368,65 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     }
 
     @Override
-    public void onItemLongClick(CourseListDataElementWithIdImpl element) {
-        createPassingInstructionDialog(element);
-        mCourseAdapter.notifyDataSetChanged();
+    public void onItemEditClick(int type, CourseListDataElementWithIdImpl element) {
+        switch (type) {
+            case CourseElementAdapter.TOUCH_TYPE_AREA:
+                createPassingInstructionDialog(element);
+                mCourseAdapter.notifyDataSetChanged();
+                break;
+
+            default:
+                showMarkDialog(type, element);
+        }
     }
 
     @Override
-    public void onItemClick(Mark mark) {
-        if (mElements.isEmpty()) {
-            addNewCourseElementToList(mark);
-        } else {
-            CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
-            if (twoMarksCourseElement != null) {
-                twoMarksCourseElement.setRightMark(mark);
-                mCourseAdapter.notifyDataSetChanged();
-            } else {
-                addNewCourseElementToList(mark);
-            }
+    public void onAddItemClick() {
+        showMarkDialog(CourseElementAdapter.TOUCH_TYPE_AREA, null);
+    }
+
+    private void showMarkDialog(int type, CourseListDataElementWithIdImpl element) {
+        FragmentManager manager = getFragmentManager();
+        mMarksDialog = CourseMarksDialogFragment.newInstance(mMarks, element, type);
+        mMarksDialog.setListener(this);
+        mMarksDialog.show(manager, "course_marks");
+    }
+
+    @Override
+    public void onItemClick(Mark mark, int type, CourseListDataElementWithIdImpl element) {
+        switch (type) {
+            case CourseElementAdapter.TOUCH_LEFT_AREA:
+                element.setLeftMark(mark);
+                break;
+
+            case CourseElementAdapter.TOUCH_RIGHT_AREA:
+                element.setRightMark(mark);
+                break;
+
+            default:
+                if (mElements.isEmpty()) {
+                    addNewCourseElementToList(mark);
+                } else {
+                    CourseListDataElement twoMarksCourseElement = getFirstTwoMarksCourseElementWithoutRightMark();
+                    if (twoMarksCourseElement != null) {
+                        twoMarksCourseElement.setRightMark(mark);
+                    } else {
+                        addNewCourseElementToList(mark);
+                    }
+                }
+                break;
+        }
+        mCourseAdapter.notifyDataSetChanged();
+        if (mMarksDialog.isVisible()) {
+            mMarksDialog.dismiss();
         }
     }
 
     private CourseListDataElement getFirstTwoMarksCourseElementWithoutRightMark() {
         for (CourseListDataElement courseElement : mElements) {
             if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
-                && courseElement.getRightMark() == null) {
+                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))
+                    && courseElement.getRightMark() == null) {
                 return courseElement;
             }
         }
@@ -375,6 +439,14 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         courseElement.setLeftMark(mark);
         createPassingInstructionDialog(courseElement);
         mId++;
+        setResetButton();
+    }
+
+    private void setResetButton() {
+        if (mReset != null && mReset.getTag() != null) {
+            mReset.setText(R.string.reset_state_1);
+            mReset.setTag(null);
+        }
     }
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
@@ -390,6 +462,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
     protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement, PassingInstruction pickedDirection) {
         courseElement.setPassingInstructions(pickedDirection);
+        if (!PassingInstruction.Gate.equals(pickedDirection) && !PassingInstruction.Line.equals(pickedDirection)) {
+            courseElement.setRightMark(null);
+        }
         if (!mElements.contains(courseElement)) {
             mElements.add(courseElement);
         }
@@ -407,7 +482,9 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
         if (previousCourseData != null) {
             mHistory.clear();
             mHistory.addAll(convertCourseDesignToCourseElements(previousCourseData));
-            mHistoryAdapter.notifyDataSetChanged();
+            if (mHistoryAdapter != null) {
+                mHistoryAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -445,12 +522,12 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
 
         for (CourseListDataElement courseElement : mElements) {
             if ((courseElement.getPassingInstructions().equals(PassingInstruction.Gate) || courseElement.getPassingInstructions()
-                .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
+                    .equals(PassingInstruction.Line) || courseElement.getPassingInstructions().equals(PassingInstruction.Offset))) {
                 if (courseElement.getRightMark() != null) {
                     String cpwtmName =
-                        "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
+                            "ControlPointWithTwoMarks " + courseElement.getLeftMark().getName() + " / " + courseElement.getRightMark().getName();
                     ControlPointWithTwoMarks cpwtm = new ControlPointWithTwoMarksImpl(courseElement.getLeftMark(), courseElement
-                        .getRightMark(), cpwtmName);
+                            .getRightMark(), cpwtmName);
                     Waypoint waypoint = new WaypointImpl(cpwtm, courseElement.getPassingInstructions());
 
                     waypoints.add(waypoint);
@@ -487,19 +564,19 @@ public class CourseFragmentMarks extends CourseFragment implements MarkClick, El
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
         getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
         saveChangedCourseDesignInCache(courseDesign);
-        switch (getArguments().getInt(START_MODE, 0)) {
-            case 1:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+        switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
+            case START_MODE_PRESETUP:
+                openMainScheduleFragment();
                 break;
 
-            default:
-                openMainScheduleFragment();
+            case START_MODE_PLANNED:
+                sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
         }
     }
 
     @Override
     public void onItemRemoved(int position) {
-        // do nothing - later maybe show "undo" or something
+        setResetButton();
     }
 }

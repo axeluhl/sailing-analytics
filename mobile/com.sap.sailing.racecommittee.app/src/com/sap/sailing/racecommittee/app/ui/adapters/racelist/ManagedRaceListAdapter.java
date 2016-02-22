@@ -22,7 +22,6 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
@@ -31,7 +30,6 @@ import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
@@ -48,7 +46,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     private final static String TAG = ManagedRaceListAdapter.class.getName();
-    private final static int FLAG_SIZE = 48;
     private final Object mLockObject = new Object();
     private List<RaceListDataType> mAllViewItems;
     private RaceFilter mFilter;
@@ -73,6 +70,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private ImageView has_dependent_races;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
+    private ViewGroup panel_left;
+    private ViewGroup panel_right;
+    private int flag_size;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
         super(context, 0);
@@ -82,6 +82,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
+        flag_size = getContext().getResources().getInteger(R.integer.flag_size);
     }
 
     @Override
@@ -146,7 +147,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             } else {
                 fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
             }
-            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), FLAG_SIZE));
+            protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -161,13 +162,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
-                    convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20));
+//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20)));
 
                     if (race.isUpdateIndicatorVisible()) {
                         race.setUpdateIndicatorVisible(false);
                     }
                 } else {
-                    convertView.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray));
+//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray)));
 
                     if (race.isUpdateIndicatorVisible()) {
                         update_badge.setVisibility(View.VISIBLE);
@@ -175,10 +176,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 }
             }
 
-            // TODO refactor this into RaceHelper
-            if (!TextUtils.isEmpty(race.getRaceName())) {
-                race_name.setText(race.getRaceName());
-            }
+            race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
+
             RaceGroupSeriesFleet fleet = race.getFleet();
             if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
                 if (!TextUtils.isEmpty(race_name.getText())) {
@@ -208,7 +207,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                     StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
-                        has_dependent_races.setVisibility(View.VISIBLE);
+//                        has_dependent_races.setVisibility(View.VISIBLE);
                     }
                 }
                 if (state.getFinishedTime() != null) {
@@ -216,23 +215,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     race_finished.setVisibility(View.VISIBLE);
                     race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
                 }
+                setDependingText(race);
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     switch (race.getRace().getStatus()) {
                         case PRESCHEDULED:
+                            panel_right.setVisibility(View.GONE);
                             race_scheduled.setVisibility(View.GONE);
                             race_unscheduled.setVisibility(View.GONE);
-                            if (depends_on != null) {
-                                StartTimeFinder stf = new StartTimeFinder(new AndroidRaceLogResolver(), race.getRace().getRaceLog());
-                                StartTimeFinderResult result = stf.analyze();
-                                if (result != null && result.isDependentStartTime()) {
-                                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
-                                    ManagedRace tmp = DataManager.create(getContext()).getDataStore().getRace(identifier);
-                                    depends_on.setText(getContext()
-                                        .getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
-                                            .getRaceName(tmp, " / ")));
-                                    depends_on.setVisibility(View.VISIBLE);
-                                }
-                            }
                             break;
 
                         default:
@@ -249,6 +238,19 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             updateFlag(race.getRace(), now);
         }
         return convertView;
+    }
+
+    private void setDependingText(RaceListDataTypeRace race) {
+        if (depends_on != null) {
+            StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
+            if (result != null && result.isDependentStartTime()) {
+                SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                ManagedRace depending_race = DataManager.create(getContext()).getDataStore().getRace(identifier);
+                depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
+                    .getShortReverseRaceName(depending_race, " / ", race.getRace())));
+                depends_on.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -274,13 +276,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     private void findViews(View layout) {
+        panel_left = ViewHelper.get(layout, R.id.panel_left);
+        panel_right = ViewHelper.get(layout, R.id.panel_right);
         marker = ViewHelper.get(layout, R.id.race_marker);
         current_flag = ViewHelper.get(layout, R.id.current_flag);
         update_badge = ViewHelper.get(layout, R.id.update_badge);
         race_flag = ViewHelper.get(layout, R.id.race_flag);
         time = ViewHelper.get(layout, R.id.time);
         race_name = ViewHelper.get(layout, R.id.race_name);
-        race_finished = ViewHelper.get(layout, R.id.race_finshed);
+        race_finished = ViewHelper.get(layout, R.id.race_finished);
         race_started = ViewHelper.get(layout, R.id.race_started);
         race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
         race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
@@ -294,6 +298,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     private void resetValues(View layout) {
         if (layout != null) {
+            if (panel_left != null) {
+                panel_left.setVisibility(View.VISIBLE);
+            }
+            if (panel_right != null) {
+                panel_right.setVisibility(View.VISIBLE);
+            }
             if (update_badge != null) {
                 update_badge.setVisibility(View.GONE);
             }
@@ -364,7 +374,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
 
                     if (isNext != 0) {
-                        flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), FLAG_SIZE);
+                        flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), flag_size);
                         switch (isNext) {
                             case 1:
                                 if (nextPole.isDisplayed()) {
@@ -388,7 +398,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         } else {
             TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
             if (now.before(flagDown)) {
-                flag = FlagsResources.getFlagDrawable(getContext(), Flags.XRAY.name(), FLAG_SIZE);
+                flag = FlagsResources.getFlagDrawable(getContext(), Flags.XRAY.name(), flag_size);
                 arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
                 timer = TimeUtils.formatDuration(now, flagDown);
             }
