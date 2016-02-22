@@ -23,7 +23,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
-        android:name="com.sap.sailing.android.shared.application.LoggableApplication"
+        android:name=".SailInSightApp"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"

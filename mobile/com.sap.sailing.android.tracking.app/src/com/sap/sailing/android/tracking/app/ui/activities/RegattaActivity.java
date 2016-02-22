@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -45,6 +46,7 @@ import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessLis
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
+import com.sap.sailing.android.tracking.app.SailInSightApp;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.upload.UploadResponseHandler;
 import com.sap.sailing.android.tracking.app.upload.UploadResult;
@@ -76,10 +78,13 @@ public class RegattaActivity extends AbstractRegattaActivity
     private CheckinManager manager;
     private AppPreferences prefs;
     private File pictureFile;
+    private SailInSightApp app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        app = (SailInSightApp) getApplication();
         prefs = new AppPreferences(this);
         Intent intent = getIntent();
 
@@ -185,16 +190,6 @@ public class RegattaActivity extends AbstractRegattaActivity
         });
     }
 
-    // TODO What's this code? Is it still needed?
-    // private void flagImageUpdated() {
-    // runOnUiThread(new Runnable() {
-    // @Override
-    // public void run() {
-    // ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
-    // }
-    // });
-    // }
-
     @Override
     protected void onResume() {
         RegattaFragment regattaFragment = getRegattaFragment();
@@ -211,22 +206,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         TextView sailIdTextView = (TextView) findViewById(R.id.sail_id);
         sailIdTextView.setText(competitor.sailId);
 
-        // TODO What's this code? Is it still needed?
-        // ImageView flagImageView = (ImageView)findViewById(R.id.flag_image);
-        // String flagStr = String.format("%s.png", countryCode);
-        // String uri = "@drawable/" + competitor.countryCode.toLowerCase(Locale.getDefault());
-        //
-        // int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-        //
-        // try {
-        // Drawable res = getResources().getDrawable(imageResource);
-        // flagImageView.setImageDrawable(res);
-        // } catch (Exception e) {
-        // e.printStackTrace();
-        // }
-
         getRegattaFragment().setChangePhotoButtonHidden(true);
-        // ExLog.w(this, TAG, "Event Image URL: " + event.imageUrl);
 
         ImageView imageView = (ImageView) findViewById(R.id.userImage);
         Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
@@ -249,7 +229,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         }
     }
 
-    public void askServerAboutTeamImageUrl(final ImageView imageView){
+    public void askServerAboutTeamImageUrl(final ImageView imageView) {
         try {
             URL url = new URL(checkinUrl.urlString);
             StringBuilder sb = new StringBuilder("http://");
@@ -265,10 +245,9 @@ public class RegattaActivity extends AbstractRegattaActivity
                     try {
                         String teamImageUri = response.getString("imageUri");
                         if (teamImageUri != null) {
-                            new DownloadLeaderboardImageTask(imageView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,teamImageUri);
+                            new DownloadLeaderboardImageTask(imageView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, teamImageUri);
                         }
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         ExLog.e(getApplicationContext(), TAG, "Error: Failed to get teamImageURL: " + e.getMessage());
                     }
                 }
@@ -276,13 +255,13 @@ public class RegattaActivity extends AbstractRegattaActivity
                 @Override
                 public void performAction(NetworkHelperError e) {
                     ExLog.e(getApplicationContext(), TAG,
-                        "Error: Failed to get teamImageURL: " + e.getMessage());
+                            "Error: Failed to get teamImageURL: " + e.getMessage());
                 }
             });
 
         } catch (MalformedURLException e) {
             ExLog.e(this, TAG,
-                "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
@@ -338,8 +317,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         }
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap image = BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
-        return image;
+        return BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
     }
 
     /**
@@ -362,7 +340,6 @@ public class RegattaActivity extends AbstractRegattaActivity
      * @return
      */
     public File getImageFile(String fileName) {
-
         File mediaStorageDir = getMediaStorageDir();
 
         File mediaFile;
@@ -371,27 +348,26 @@ public class RegattaActivity extends AbstractRegattaActivity
         return mediaFile;
     }
 
-    public void deleteImageFile(String fileName) {
+    public boolean deleteImageFile(String fileName) {
         File mediaStorageDir = getMediaStorageDir();
 
         File mediaFile;
         String mImageName = "MI_" + fileName + ".png";
         mediaFile = new File(mediaStorageDir.getPath() + File.separator + mImageName);
 
-        mediaFile.delete();
+        return mediaFile.delete();
     }
 
     public File getMediaStorageDir() {
         File mediaStorageDir;
 
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            mediaStorageDir = new File(Environment.getExternalStorageDirectory() + "/Android/data/"
-                    + getApplicationContext().getPackageName() + "/Files");
+            mediaStorageDir = getExternalFilesDir(null);
         } else {
             mediaStorageDir = getApplicationContext().getCacheDir();
         }
 
-        if (!mediaStorageDir.exists()) {
+        if (mediaStorageDir != null && !mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 return null;
             }
@@ -424,104 +400,6 @@ public class RegattaActivity extends AbstractRegattaActivity
     @Override
     public void onViewCreated() {
         setUpView();
-    }
-
-    private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, File> {
-        ImageView bmImage;
-        String downloadUrl;
-        ProgressDialog dialog;
-
-        public DownloadLeaderboardImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = new ProgressDialog(bmImage.getContext(), R.style.Base_Theme_AppCompat_Dialog);
-            dialog.setCancelable(false);
-            dialog.setMessage(getString(R.string.download_team_image_message));
-            dialog.show();
-        }
-
-        protected File doInBackground(String... urls) {
-            downloadUrl = urls[0];
-            File imageFile = null;
-            InputStream in = null;
-            FileOutputStream outputStream = null;
-            try {
-                in = new java.net.URL(downloadUrl).openStream();
-                imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
-                if (!imageFile.exists()) {
-                    imageFile.createNewFile();
-                }
-                outputStream = new FileOutputStream(imageFile);
-                int read = 0;
-                byte[] bytes = new byte[1024];
-
-                while ((read = in.read(bytes)) != -1) {
-                    outputStream.write(bytes, 0, read);
-                }
-                outputStream.close();
-                in.close();
-            } catch (Exception e) {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download image file " + imageFile);
-            } finally {
-                if (in != null) {
-                    safeClose(in);
-                }
-                if (outputStream != null) {
-                    safeClose(outputStream);
-                }
-            }
-            return imageFile;
-        }
-
-        protected void onPostExecute(File result) {
-            if (result != null && result.exists()) {
-                bmImage.setImageBitmap(BitmapHelper.getBitmapFromFile(result, bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight()));
-                userImageUpdated();
-            } else {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
-            }
-            dialog.cancel();
-        }
-    }
-
-    private class DownloadFlagImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-        String countryCode;
-        String downloadUrl;
-
-        public DownloadFlagImageTask(ImageView bmImage, String countryCode) {
-            this.bmImage = bmImage;
-            this.countryCode = countryCode;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            downloadUrl = urls[0];
-            Bitmap mIcon11 = null;
-
-            System.out.println("URL DISPLAY: " + downloadUrl);
-
-            try {
-                InputStream in = new java.net.URL(downloadUrl).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl+": "+e.getMessage());
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            System.out.println("RESULT: " + result);
-            if (result != null) {
-                bmImage.setImageBitmap(result);
-                storeImageAndSendToServer(result, getFlagImageFileName(countryCode), false);
-            } else {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download flag image at url " + downloadUrl);
-            }
-        }
     }
 
     private String getLeaderboardImageFileName(String leaderboardName) {
@@ -611,13 +489,19 @@ public class RegattaActivity extends AbstractRegattaActivity
     @Override
     public void onUploadTaskFinished(UploadResult uploadResult) {
         hideUploadProgressLayout();
-        if (uploadResult.resultCode != 200) {
+        if (uploadResult.resultCode != HttpURLConnection.HTTP_OK) {
+            app.setUploadImage(leaderboard.name, pictureFile);
             showRetryUploadLayout();
+            Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
+        } else {
+            app.removeUploadImage(leaderboard.name);
         }
-        Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
     }
 
     public void retryUpload(View view) {
+        if (app.isLastUploadFailed(leaderboard.name)) {
+            pictureFile = app.getUploadImage(leaderboard.name);
+        }
         if (pictureFile != null) {
             sendTeamImageToServer(pictureFile);
         } else {
@@ -625,23 +509,129 @@ public class RegattaActivity extends AbstractRegattaActivity
         }
     }
 
-    private void showUploadProgressLayout() {
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
-        linearLayout.setVisibility(View.VISIBLE);
+    public void showUploadProgressLayout() {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.upload_progress);
+        if (layout != null) {
+            layout.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void hideUploadProgressLayout() {
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.upload_progress);
-        linearLayout.setVisibility(View.GONE);
+    public void hideUploadProgressLayout() {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.upload_progress);
+        if (layout != null) {
+            layout.setVisibility(View.GONE);
+        }
     }
 
-    private void showRetryUploadLayout() {
-        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
-        linearLayout1.setVisibility(View.VISIBLE);
+    public void showRetryUploadLayout() {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.retry_upload);
+        if (layout != null) {
+            layout.setVisibility(View.VISIBLE);
+        }
     }
 
-    private void hideRetryUploadLayout() {
-        LinearLayout linearLayout1 = (LinearLayout) findViewById(R.id.retry_upload);
-        linearLayout1.setVisibility(View.GONE);
+    public void hideRetryUploadLayout() {
+        LinearLayout layout = (LinearLayout) findViewById(R.id.retry_upload);
+        if (layout != null) {
+            layout.setVisibility(View.GONE);
+        }
+    }
+
+    private class DownloadLeaderboardImageTask extends AsyncTask<String, Void, File> {
+        ImageView bmImage;
+        String downloadUrl;
+        ProgressDialog dialog;
+
+        public DownloadLeaderboardImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(bmImage.getContext(), R.style.Base_Theme_AppCompat_Dialog);
+            dialog.setCancelable(false);
+            dialog.setMessage(getString(R.string.download_team_image_message));
+            dialog.show();
+        }
+
+        protected File doInBackground(String... urls) {
+            downloadUrl = urls[0];
+            File imageFile = null;
+            InputStream in = null;
+            FileOutputStream outputStream = null;
+            try {
+                in = new java.net.URL(downloadUrl).openStream();
+                imageFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
+                if (!imageFile.exists()) {
+                    imageFile.createNewFile();
+                }
+                outputStream = new FileOutputStream(imageFile);
+                int read;
+                byte[] bytes = new byte[1024];
+
+                while ((read = in.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                }
+                outputStream.close();
+                in.close();
+            } catch (Exception e) {
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download image file " + imageFile);
+            } finally {
+                if (in != null) {
+                    safeClose(in);
+                }
+                if (outputStream != null) {
+                    safeClose(outputStream);
+                }
+            }
+            return imageFile;
+        }
+
+        protected void onPostExecute(File result) {
+            if (result != null && result.exists()) {
+                bmImage.setImageBitmap(BitmapHelper.getBitmapFromFile(result, bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight()));
+                userImageUpdated();
+            } else {
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
+            }
+            dialog.cancel();
+        }
+    }
+
+    private class DownloadFlagImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+        String countryCode;
+        String downloadUrl;
+
+        public DownloadFlagImageTask(ImageView bmImage, String countryCode) {
+            this.bmImage = bmImage;
+            this.countryCode = countryCode;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            downloadUrl = urls[0];
+            Bitmap mIcon11 = null;
+
+            System.out.println("URL DISPLAY: " + downloadUrl);
+
+            try {
+                InputStream in = new java.net.URL(downloadUrl).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl + ": " + e.getMessage());
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            System.out.println("RESULT: " + result);
+            if (result != null) {
+                bmImage.setImageBitmap(result);
+                storeImageAndSendToServer(result, getFlagImageFileName(countryCode), false);
+            } else {
+                ExLog.e(RegattaActivity.this, TAG, "Failed to download flag image at url " + downloadUrl);
+            }
+        }
     }
 }
