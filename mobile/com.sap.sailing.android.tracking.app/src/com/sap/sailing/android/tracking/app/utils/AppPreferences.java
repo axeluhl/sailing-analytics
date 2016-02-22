@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
@@ -10,8 +11,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 public class AppPreferences extends BaseAppPreferences {
 
+    private final SharedPreferences pref;
+
     public AppPreferences(Context context) {
         super(context);
+
+        pref = context.getSharedPreferences("failed_uploads", Context.MODE_PRIVATE);
     }
 
     public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
@@ -152,5 +157,17 @@ public class AppPreferences extends BaseAppPreferences {
     public void setMessageResendInterval(int interval) {
         preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval)
                 .commit();
+    }
+
+    public boolean hasFailedUpload(String key) {
+        return pref.getBoolean(key, false);
+    }
+
+    public void setFailedUpload(String key) {
+        pref.edit().putBoolean(key, true).commit();
+    }
+
+    public void removeFailedUpload(String key) {
+        pref.edit().remove(key).commit();
     }
 }

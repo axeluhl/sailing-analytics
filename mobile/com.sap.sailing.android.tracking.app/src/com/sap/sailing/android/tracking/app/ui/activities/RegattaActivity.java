@@ -46,7 +46,6 @@ import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessLis
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.SailInSightApp;
 import com.sap.sailing.android.tracking.app.ui.fragments.RegattaFragment;
 import com.sap.sailing.android.tracking.app.upload.UploadResponseHandler;
 import com.sap.sailing.android.tracking.app.upload.UploadResult;
@@ -67,7 +66,6 @@ public class RegattaActivity extends AbstractRegattaActivity
     private final static String LEADERBOARD_IMAGE_FILENAME_PREFIX = "leaderboardImage_";
     private final static String FLAG_IMAGE_FILENAME_PREFIX = "flagImage_";
 
-
     public EventInfo event;
     public CompetitorInfo competitor;
     public LeaderboardInfo leaderboard;
@@ -78,13 +76,11 @@ public class RegattaActivity extends AbstractRegattaActivity
     private CheckinManager manager;
     private AppPreferences prefs;
     private File pictureFile;
-    private SailInSightApp app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        app = (SailInSightApp) getApplication();
         prefs = new AppPreferences(this);
         Intent intent = getIntent();
 
@@ -490,17 +486,17 @@ public class RegattaActivity extends AbstractRegattaActivity
     public void onUploadTaskFinished(UploadResult uploadResult) {
         hideUploadProgressLayout();
         if (uploadResult.resultCode != HttpURLConnection.HTTP_OK) {
-            app.setUploadImage(leaderboard.name, pictureFile);
+            prefs.setFailedUpload(leaderboard.name);
             showRetryUploadLayout();
             Toast.makeText(this, uploadResult.resultCode + ": " + uploadResult.resultMessage, Toast.LENGTH_LONG).show();
         } else {
-            app.removeUploadImage(leaderboard.name);
+            prefs.removeFailedUpload(leaderboard.name);
         }
     }
 
     public void retryUpload(View view) {
-        if (app.isLastUploadFailed(leaderboard.name)) {
-            pictureFile = app.getUploadImage(leaderboard.name);
+        if (prefs.hasFailedUpload(leaderboard.name)) {
+            pictureFile = getImageFile(getLeaderboardImageFileName(leaderboard.name));
         }
         if (pictureFile != null) {
             sendTeamImageToServer(pictureFile);
