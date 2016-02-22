@@ -37,11 +37,11 @@
     <string name="existing_image">Auswählen</string>
     <string name="take_photo">Foto aufnehmen</string>
     <string name="add_photo_select">Foto</string>
-    <string name="checking_in">Checke ein..</string>
-    <string name="checking_out">Checke aus..</string>
-    <string name="getting_event">Hole Event-Daten..</string>
-    <string name="getting_leaderboard">Hole Leaderboard-Daten..</string>
-    <string name="getting_competitor">Hole Teilnehmer-Daten..</string>
+    <string name="checking_in">Checke ein&#8230;</string>
+    <string name="checking_out">Checke aus&#8230;</string>
+    <string name="getting_event">Hole Event-Daten&#8230;</string>
+    <string name="getting_leaderboard">Hole Leaderboard-Daten&#8230;</string>
+    <string name="getting_competitor">Hole Teilnehmer-Daten&#8230;</string>
     <string name="error">Fehler</string>
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
     <string name="error_sending_team_image_to_server">Fehler: Konnte Team-Foto nicht an den server senden.</string>
@@ -77,7 +77,7 @@
     <string name="preferences">Einstellungen</string>
     <string name="tracking_notification_text">Tracking läuft für %s</string>
     <string name="waiting_for_gps">Warte auf GPS-Signal</string>
-    <string name="upload_in_progress">Wird hochgeladen...</string>
+    <string name="upload_in_progress">Wird hochgeladen&#8230;</string>
     <string name="upload_io_error">Fehler beim Hochladen: </string>
     <string name="upload_retry">Fehler beim Hochladen.\nZum Wiederholen hier tippen.</string>
 
