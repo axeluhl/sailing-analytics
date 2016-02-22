@@ -79,6 +79,6 @@
     <string name="waiting_for_gps">Warte auf GPS-Signal</string>
     <string name="upload_in_progress">Wird hochgeladen...</string>
     <string name="upload_io_error">Fehler beim Hochladen: </string>
-    <string name="upload_retry">Hochladen wiederholen</string>
+    <string name="upload_retry">Fehler beim Hochladen.\nZum Wiederholen hier tippen.</string>
 
 </resources>
