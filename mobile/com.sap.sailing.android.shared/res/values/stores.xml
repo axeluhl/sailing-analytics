@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="store_packages" translatable="false">
+        <item>com.android.vending</item>
+        <item>com.amazon.venezia</item>
+        <item>com.sec.android.app.samsungsapps</item>
+    </string-array>
+
+    <string name="sideload" translatable="false">Sideload</string>
+
+    <string-array name="store_names" translatable="false">
+        <item>Google PlayStore</item>
+        <item>Amazon App Store</item>
+        <item>Galaxy Apps</item>
+    </string-array>
+
+</resources>

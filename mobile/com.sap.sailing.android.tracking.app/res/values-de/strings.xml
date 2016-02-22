@@ -4,7 +4,7 @@
     <string name="no">Nein</string>
     <string name="empty"></string>
     <string name="tracking_time">Tracking Zeit</string>
-    <string name="app_name">SAP Sailing Tracking App</string>
+    <string name="app_name">SAP Sail inSight</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="options_menu_checkout">Checkout</string>
     <string name="options_add_team_photo">Team Foto hinzufügen</string>
@@ -14,8 +14,8 @@
     <string name="device_identifier">Geräte-ID</string>
     <string name="stop_tracking">Stoppe Tracking</string>
     <string name="start_tracking">Starte Tracking</string>
-    <string name="tracker_started">SAP Sailing Tracker gestartet</string>
-    <string name="tracker_stopped">SAP Sailing Tracker gestoppt</string>
+    <string name="tracker_started">SAP Sail inSight gestartet</string>
+    <string name="tracker_stopped">SAP Sail inSight gestoppt</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_event">Event</string>
@@ -77,5 +77,8 @@
     <string name="preferences">Einstellungen</string>
     <string name="tracking_notification_text">Tracking läuft für %s</string>
     <string name="waiting_for_gps">Warte auf GPS-Signal</string>
+    <string name="upload_in_progress">Wird hochgeladen...</string>
+    <string name="upload_io_error">Fehler beim Hochladen: </string>
+    <string name="upload_retry">Hochladen wiederholen</string>
 
 </resources>

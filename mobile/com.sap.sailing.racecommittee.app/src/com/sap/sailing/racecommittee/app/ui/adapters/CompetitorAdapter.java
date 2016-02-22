@@ -25,7 +25,7 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_positioning_competitor_item, parent, false);
+        View layout = LayoutInflater.from(mContext).inflate(R.layout.race_tracking_list_competitor_item, parent, false);
         return new ViewHolder(layout);
     }
 

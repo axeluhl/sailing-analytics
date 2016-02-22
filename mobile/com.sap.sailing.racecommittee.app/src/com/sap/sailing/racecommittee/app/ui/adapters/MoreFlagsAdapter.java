@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,6 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
@@ -69,7 +69,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
             if (!TextUtils.isEmpty(item.file_name)) {
                 int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
                 if (flagResId != 0) {
-                    flagImage.setImageDrawable(BitmapHelper.getDrawable(mContext, flagResId));
+                    flagImage.setImageDrawable(ContextCompat.getDrawable(mContext, flagResId));
                     flagImage.setVisibility(View.VISIBLE);
                 }
             } else if (item.flag != null) {

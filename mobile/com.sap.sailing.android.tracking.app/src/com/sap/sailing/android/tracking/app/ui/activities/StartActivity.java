@@ -37,8 +37,8 @@ public class StartActivity extends AbstractStartActivity {
         replaceFragment(R.id.content_frame, new HomeFragment());
         refreshDatabase();
 
-        if (!EulaHelper.isEulaAccepted(this)) {
-            EulaHelper.showTrackingEulaDialog(this);
+        if (!EulaHelper.with(this).isEulaAccepted()) {
+            EulaHelper.with(this).showEulaDialog();
         }
     }
 
@@ -93,7 +93,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData data) {
-        if (data != null && data instanceof CheckinData) {
+        if(data != null && data instanceof CheckinData) {
             CheckinData checkinData = (CheckinData) data;
             if (!checkinData.isUpdate()) {
                 getHomeFragment().displayUserConfirmationScreen(data);
@@ -104,13 +104,12 @@ public class StartActivity extends AbstractStartActivity {
     }
 
     private void updateRegatta(AbstractCheckinData data) {
-        if (data instanceof CheckinData) {
+        if (data instanceof CheckinData)
+        {
             CheckinData checkinData = (CheckinData) data;
             try {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
-                DatabaseHelper.getInstance()
-                    .storeCheckinRow(this, checkinData.getEvent(), checkinData.getCompetitor(), checkinData.getLeaderboard(), checkinData
-                        .getCheckinUrl());
+                DatabaseHelper.getInstance().storeCheckinRow(this, checkinData.getEvent(), checkinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
             } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                 ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                 displayDatabaseError();
@@ -120,7 +119,7 @@ public class StartActivity extends AbstractStartActivity {
 
     private void refreshDatabase() {
         List<String> checkinUrls = DatabaseHelper.getInstance().getCheckinUrls(this);
-        for (String checkinUrl : checkinUrls) {
+        for(String checkinUrl : checkinUrls) {
             CheckinManager manager = new CheckinManager(checkinUrl, this, true);
             manager.callServerAndGenerateCheckinData();
         }
