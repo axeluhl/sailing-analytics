@@ -26,7 +26,7 @@ public abstract class AbstractStartActivity extends CheckinDataActivity {
             setSupportActionBar(toolbar);
             toolbar.hideSubtitle();
             toolbar.setTitleSize(20);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             toolbar.setPadding(20, 0, 0, 0);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
