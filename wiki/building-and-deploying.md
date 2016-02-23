@@ -101,7 +101,7 @@ Also note that once released to Nexus, the next release build will have to use a
         mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=x.y.z
 ```
 
-Make sure to replace `x.y.z` by the version to which you want to set your files. Then remember to uncomment the `&lt;parent&gt;` specification again.
+Make sure to replace `x.y.z` by the version to which you want to set your files. Then remember to uncomment the `<parent>` specification again.
 
 In order to get the Android release branch merged into the ``rel-x.y`` branch, the same process as explained above for the merge of iOS branches into ``fa/rel-x.y`` is required. In particular, this means that a Java Correction Workbench Correction Request [needs to be created](https://css.wdf.sap.corp/sap/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture&newCMComponentName=SV-COE-MSO-CDP) and the latest commit to be pushed to ``refs/for/rel-x.y`` needs to be amended so that it contains a valid ``Change-Id:`` and ``CR-Id:`` line. Then, the commit needs to be voted on. Other than for the MiOS branches under ``fa/rel-x.y`` it seems to be required that _another_ committer votes with +2 to enable a merge. Once this has been done, the blue ``Submit`` button will appear on your change page (something like [https://git.wdf.sap.corp/#/c/1436212/](https://git.wdf.sap.corp/#/c/1436212/)) that you can use to technically get the commit merged into the ``rel-x.y`` branch.
 
