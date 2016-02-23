@@ -3,6 +3,8 @@ package com.sap.sailing.domain.persistence.impl;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -581,6 +583,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             videos.add(videoObject);
         }
         eventDBObject.put(FieldNames.EVENT_VIDEOS.name(), videos);
+        BasicDBList sailorsInfoWebsiteURLs = new BasicDBList();
+        for(Map.Entry<Locale, URL> sailorsInfoWebsite : event.getSailorsInfoWebsiteURLs().entrySet()) {
+            DBObject sailorsInfoWebsiteObject = createSailorsInfoWebsiteObject(sailorsInfoWebsite.getKey(), sailorsInfoWebsite.getValue());
+            sailorsInfoWebsiteURLs.add(sailorsInfoWebsiteObject);
+        }
+        eventDBObject.put(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name(), sailorsInfoWebsiteURLs);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
@@ -1475,6 +1483,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             tags.add(tag);
         }
         result.put(FieldNames.VIDEO_TAGS.name(), tags);
+        return result;
+    }
+    
+    private DBObject createSailorsInfoWebsiteObject(Locale locale, URL url) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.SAILORS_INFO_URL.name(), url.toString());
+        result.put(FieldNames.SAILORS_INFO_LOCALE.name(), locale != null ? locale.toLanguageTag() : null);
         return result;
     }
 }

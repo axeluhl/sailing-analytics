@@ -93,6 +93,12 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     Map<Locale, URL> getSailorsInfoWebsiteURLs();
     
     void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs);
+    
+    void addSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL);
+    
+    boolean hasSailorsInfoWebsiteURL(Locale locale);
+    
+    void removeSailorsInfoWebsiteURL(Locale locale);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 

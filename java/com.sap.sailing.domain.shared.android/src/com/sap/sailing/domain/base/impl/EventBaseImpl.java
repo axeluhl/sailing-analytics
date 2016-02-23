@@ -196,11 +196,7 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
-        if(sailorsInfoWebsiteURL == null) {
-            this.sailorsInfoWebsiteURLs.remove(null);
-        } else {
-            this.sailorsInfoWebsiteURLs.put(null, sailorsInfoWebsiteURL);
-        }
+        addSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
     }
     
     @Override
@@ -214,6 +210,25 @@ public abstract class EventBaseImpl implements EventBase {
         if(sailorsInfoWebsiteURLs != null) {
             this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
         }
+    }
+
+    @Override
+    public void addSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL) {
+        if(sailorsInfoWebsiteURL == null) {
+            this.sailorsInfoWebsiteURLs.remove(locale);
+        } else {
+            this.sailorsInfoWebsiteURLs.put(locale, sailorsInfoWebsiteURL);
+        }
+    }
+
+    @Override
+    public void removeSailorsInfoWebsiteURL(Locale locale) {
+        this.sailorsInfoWebsiteURLs.remove(locale);
+    }
+
+    @Override
+    public boolean hasSailorsInfoWebsiteURL(Locale locale) {
+        return this.sailorsInfoWebsiteURLs.containsKey(locale);
     }
 
     @Override
