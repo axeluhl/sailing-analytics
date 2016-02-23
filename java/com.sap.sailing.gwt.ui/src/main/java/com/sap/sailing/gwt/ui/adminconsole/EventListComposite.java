@@ -528,7 +528,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.getDescription(),
                 updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
                 updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
-                updatedEvent.getOfficialWebsiteURL(), updatedEvent.getSailorsInfoWebsiteURL(),
+                updatedEvent.getOfficialWebsiteURL(),
+                Collections.<String, String> singletonMap(null, updatedEvent.getSailorsInfoWebsiteURL()),
                 updatedEvent.getImages(), updatedEvent.getVideos(),
                 new AsyncCallback<EventDTO>() {
             @Override
