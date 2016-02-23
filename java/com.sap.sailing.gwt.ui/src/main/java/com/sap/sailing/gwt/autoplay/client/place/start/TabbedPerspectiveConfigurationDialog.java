@@ -11,12 +11,12 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
  */
 public class TabbedPerspectiveConfigurationDialog extends CompositeLifecycleTabbedSettingsDialog {
 
-    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?,?> perspectiveLifecycle,
+    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?> perspectiveLifecycle,
             CompositeLifecycleSettings perspectiveComponentsLifeyclesAndSettings) {
         super(stringConstants, perspectiveComponentsLifeyclesAndSettings, perspectiveLifecycle.getPerspectiveName());
     }
 
-    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?,?> perspectiveLifecycle, 
+    public TabbedPerspectiveConfigurationDialog(StringMessages stringConstants, PerspectiveLifecycle<?,?,?> perspectiveLifecycle, 
             CompositeLifecycleSettings perspectiveComponentsLifeyclesAndSettings, DialogCallback<CompositeLifecycleSettings> callback) {
         super(stringConstants, perspectiveComponentsLifeyclesAndSettings, perspectiveLifecycle.getPerspectiveName(), callback);
     }

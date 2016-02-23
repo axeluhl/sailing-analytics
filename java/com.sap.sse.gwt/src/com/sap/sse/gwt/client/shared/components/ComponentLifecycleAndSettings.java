@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.sap.sse.common.settings.Settings;
 
-public class ComponentLifecycleAndSettings<ComponentLifecycleType extends ComponentLifecycle<?, SettingsType, ?,?>, SettingsType extends Settings> {
+public class ComponentLifecycleAndSettings<ComponentLifecycleType extends ComponentLifecycle<?, SettingsType, ?>, SettingsType extends Settings> {
     private final ComponentLifecycleType componentLifecycle;
     private SettingsType settings;
 

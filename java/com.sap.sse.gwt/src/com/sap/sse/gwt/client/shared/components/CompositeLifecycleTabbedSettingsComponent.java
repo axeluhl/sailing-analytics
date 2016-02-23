@@ -44,7 +44,7 @@ public class CompositeLifecycleTabbedSettingsComponent implements Component<Comp
         }
     }
 
-    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> void updateSettings(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
+    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> void updateSettings(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
 //        componentLifecycleAndSettings.getA().updateSettings(componentLifecycleAndSettings.getB());
     }
 

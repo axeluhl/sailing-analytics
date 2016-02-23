@@ -21,9 +21,9 @@ public class CompositeLifecycleSettings extends AbstractSettings {
 //        }
 //    }
 //
-    public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<?,S,?,?> componentLifecycle) {
+    public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<?,S,?> componentLifecycle) {
         S result = null;
-        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
+        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
         if(componentLifecycleAndSettings != null) {
             result = componentLifecycleAndSettings.getSettings();
         }
@@ -31,7 +31,7 @@ public class CompositeLifecycleSettings extends AbstractSettings {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> findComponentLifecycleAndSettings(ComponentLifecycle<?,S,?,?> componentLifecycle) {
+    public <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> findComponentLifecycleAndSettings(ComponentLifecycle<?,S,?> componentLifecycle) {
         ComponentLifecycleAndSettings<C,S> result = null;
         for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle() == componentLifecycle) {

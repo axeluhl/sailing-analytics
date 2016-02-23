@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 
 public class CompositeLifecycleTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeLifecycleSettings> {
     
-    public class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<?,SettingsType,?,?>, SettingsType extends Settings> {
+    public class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<?,SettingsType,?>, SettingsType extends Settings> {
         private ComponentLifecycleAndSettings<ComponentLifecycleType, SettingsType> componentLifecycleAndSettings;
         private SettingsDialogComponent<SettingsType> dialogComponent;
 
@@ -42,7 +42,7 @@ public class CompositeLifecycleTabbedSettingsDialogComponent implements Settings
         }
     }
 
-    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleWithSettingsAndDialogComponent<C,S> createComponentLifecycleAndDialogComponent(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
+    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleWithSettingsAndDialogComponent<C,S> createComponentLifecycleAndDialogComponent(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
         S settings = componentLifecycleAndSettings.getSettings();
         return new ComponentLifecycleWithSettingsAndDialogComponent<C,S>(componentLifecycleAndSettings, componentLifecycleAndSettings.getComponentLifecycle().getSettingsDialogComponent(settings));
     }
@@ -67,7 +67,7 @@ public class CompositeLifecycleTabbedSettingsDialogComponent implements Settings
         return new CompositeLifecycleSettings(settings);
     }
 
-    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> getComponentAndSettings(ComponentLifecycleWithSettingsAndDialogComponent<C,S> component) {
+    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> getComponentAndSettings(ComponentLifecycleWithSettingsAndDialogComponent<C,S> component) {
         return new ComponentLifecycleAndSettings<C,S>(component.getComponentLifecycleAndSettings().getComponentLifecycle(), component.getDialogComponent().getResult());
     }
 

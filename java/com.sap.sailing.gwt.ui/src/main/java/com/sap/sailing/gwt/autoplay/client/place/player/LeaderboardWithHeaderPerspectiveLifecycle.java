@@ -17,8 +17,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponen
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspective, 
-    LeaderboardWithHeaderPerspectiveSettings, LeaderboardPerspectiveSettingsDialogComponent,
-    LeaderboardWithHeaderPerspectiveLifecycle.ConstructorArgs> {
+    LeaderboardWithHeaderPerspectiveSettings, LeaderboardPerspectiveSettingsDialogComponent> {
 
     private final SAPHeaderLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
@@ -59,7 +58,6 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return true;
     }
 
-
     public SAPHeaderLifecycle getSapHeaderLifecycle() {
         return sapHeaderLifecycle;
     }
@@ -68,46 +66,4 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return leaderboardPanelLifecycle;
     }
 
-    @Override
-    public LeaderboardWithHeaderPerspective createComponent(ConstructorArgs leaderboardPerspectiveConstructorArgs,
-            LeaderboardWithHeaderPerspectiveSettings settings) {
-        return leaderboardPerspectiveConstructorArgs.createComponent(settings);
-    }
-
-    
-    public static class ConstructorArgs implements PerspectiveConstructorArgs<LeaderboardWithHeaderPerspective, LeaderboardWithHeaderPerspectiveSettings> {
-        private final PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> componentLifecyclesAndSettings;
-        private final SailingServiceAsync sailingService;
-        private final AsyncActionsExecutor asyncActionsExecutor;
-        private final CompetitorSelectionProvider competitorSelectionProvider;
-        private final Timer timer;
-        private final String leaderboardName;
-        private final ErrorReporter errorReporter;
-        private final StringMessages stringMessages;
-        private final UserAgentDetails userAgent;
-        private boolean startInFullScreenMode;
-        
-        public ConstructorArgs(PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> componentLifecyclesAndSettings,
-                SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-                CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
-                String leaderboardName, ErrorReporter errorReporter, StringMessages stringMessages,
-                UserAgentDetails userAgent, boolean startInFullScreenMode) {
-            this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
-            this.sailingService = sailingService;
-            this.asyncActionsExecutor = asyncActionsExecutor;
-            this.competitorSelectionProvider = competitorSelectionProvider;
-            this.timer = timer;
-            this.leaderboardName = leaderboardName;
-            this.errorReporter = errorReporter;
-            this.stringMessages = stringMessages;
-            this.userAgent = userAgent;
-            this.startInFullScreenMode = startInFullScreenMode;
-        }
-        
-        @Override
-        public LeaderboardWithHeaderPerspective createComponent(LeaderboardWithHeaderPerspectiveSettings settings) {
-            return new LeaderboardWithHeaderPerspective(settings, componentLifecyclesAndSettings, sailingService, asyncActionsExecutor,
-                    competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, userAgent, startInFullScreenMode);
-        }
-    }
 }

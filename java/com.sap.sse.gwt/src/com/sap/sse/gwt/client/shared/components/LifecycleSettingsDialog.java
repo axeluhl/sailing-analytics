@@ -9,7 +9,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class LifecycleSettingsDialog<SettingsType extends Settings> extends DataEntryDialog<SettingsType> {
     private final SettingsDialogComponent<SettingsType> settingsDialogComponent;
 
-    public LifecycleSettingsDialog(final ComponentLifecycle<? ,SettingsType, ?, ?> componentLifecycle, SettingsDialogComponent<SettingsType> dialogComponent,
+    public LifecycleSettingsDialog(final ComponentLifecycle<? ,SettingsType, ?> componentLifecycle, SettingsDialogComponent<SettingsType> dialogComponent,
             StringMessages stringMessages, DialogCallback<SettingsType> callback) {
         this(componentLifecycle, dialogComponent, stringMessages, /* animationEnabled */ true, callback);
     }
@@ -20,7 +20,7 @@ public class LifecycleSettingsDialog<SettingsType extends Settings> extends Data
      * operate on a different instance as the one used for displaying, hence not allowing the validator to use the UI
      * elements, neither for update nor read.
      */
-    private LifecycleSettingsDialog(final ComponentLifecycle<?, SettingsType, ?, ?> componentLifecycle,
+    private LifecycleSettingsDialog(final ComponentLifecycle<?, SettingsType, ?> componentLifecycle,
             SettingsDialogComponent<SettingsType> dialogComponent, StringMessages stringMessages,
             boolean animationEnabled, final DialogCallback<SettingsType> callback) {
         super(stringMessages.settingsForComponent(componentLifecycle.getLocalizedShortName()), null, stringMessages.ok(),

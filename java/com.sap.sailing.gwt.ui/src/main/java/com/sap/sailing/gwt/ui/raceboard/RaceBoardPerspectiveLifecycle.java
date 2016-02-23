@@ -26,8 +26,7 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspective, 
-    RaceBoardPerspectiveSettings, RaceBoardPerspectiveSettingsDialogComponent,
-    RaceBoardPerspectiveLifecycle.ConstructorArgs> {
+    RaceBoardPerspectiveSettings, RaceBoardPerspectiveSettingsDialogComponent> {
 
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
@@ -101,63 +100,5 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     public MediaPlayerLifecycle getMediaPlayerLifecycle() {
         return mediaPlayerLifecycle;
-    }
-    
-    @Override
-    public RaceBoardPerspective createComponent(ConstructorArgs raceboardPerspectiveConstructorArgs,
-            RaceBoardPerspectiveSettings settings) {
-        return raceboardPerspectiveConstructorArgs.createComponent(settings);
-    }
-
-    public static class ConstructorArgs implements PerspectiveConstructorArgs<RaceBoardPerspective, RaceBoardPerspectiveSettings> {
-        private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
-        private final SailingServiceAsync sailingService;
-        private final MediaServiceAsync mediaService;
-        private final UserService userService;
-        private final AsyncActionsExecutor asyncActionsExecutor;
-        private final Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats;
-        private final Timer timer;
-        private final RegattaAndRaceIdentifier selectedRaceIdentifier;
-        private final String leaderboardName;
-        private final String leaderboardGroupName;
-        private final UUID eventId;
-        private final ErrorReporter errorReporter; 
-        private final StringMessages stringMessages;
-        private final UserAgentDetails userAgent;
-        private final RaceTimesInfoProvider raceTimesInfoProvider;
-        
-        public ConstructorArgs(PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings,
-                SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-                UserService userService, AsyncActionsExecutor asyncActionsExecutor,
-                Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
-                RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
-                String leaderboardGroupName, UUID eventId,
-                ErrorReporter errorReporter, StringMessages stringMessages,
-                UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
-            this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
-            this.sailingService = sailingService;
-            this.mediaService = mediaService;
-            this.userService = userService;
-            this.asyncActionsExecutor = asyncActionsExecutor; 
-            this.competitorsAndTheirBoats = competitorsAndTheirBoats;
-            this.timer = timer;
-            this.selectedRaceIdentifier = selectedRaceIdentifier;
-            this.leaderboardName = leaderboardName;
-            this.leaderboardGroupName = leaderboardGroupName;
-            this.eventId = eventId;
-            this.errorReporter =  errorReporter;
-            this.stringMessages = stringMessages;
-            this.userAgent = userAgent;
-            this.raceTimesInfoProvider = raceTimesInfoProvider; 
-        }
-        
-        @Override
-        public RaceBoardPerspective createComponent(RaceBoardPerspectiveSettings settings) {
-            RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(settings,
-                    componentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
-                    competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, leaderboardGroupName, 
-                    eventId, errorReporter, stringMessages, userAgent, raceTimesInfoProvider);            
-            return raceboardPerspective;
-        }
     }
 }

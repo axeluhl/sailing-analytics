@@ -12,15 +12,12 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @param <P> the perspective type
  * @param <S> the settings type
  * @param <SDP> the settings dialog component type
- * @param <PCA> the perspective contructor arguments type
  */
-public interface PerspectiveLifecycle<P extends Perspective<S>, S extends Settings, SDP extends SettingsDialogComponent<S>, 
-    PCA extends PerspectiveConstructorArgs<P, S>> extends ComponentLifecycle<P, S, SDP, PCA> {
-    Iterable<ComponentLifecycle<?,?,?,?>> getComponentLifecycles();
+public interface PerspectiveLifecycle<P extends Perspective<S>, S extends Settings, SDP extends SettingsDialogComponent<S>>
+    extends ComponentLifecycle<P, S, SDP> {
+    Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles();
     
     CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings();
-    
-    P createComponent(PCA PerspectiveConstructorArgs, S settings);
     
     String getPerspectiveName();
 }

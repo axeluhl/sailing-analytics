@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 
-public class PerspectiveLifecycleAndComponentSettings<PerspectiveLifecycleType extends PerspectiveLifecycle<?, ?, ?,?>> {
+public class PerspectiveLifecycleAndComponentSettings<PerspectiveLifecycleType extends PerspectiveLifecycle<?,?,?>> {
     private final PerspectiveLifecycleType perspectiveLifecycle;
     private CompositeLifecycleSettings componentSettings;
 

@@ -30,7 +30,7 @@ public class CompositeLifecycleValidator implements Validator<CompositeLifecycle
         return result.toString();
     }
 
-    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> String getErrorMessage(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
+    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> String getErrorMessage(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
         Validator<S> validator = (Validator<S>) validatorsMappedByComponentLifecycle.get(componentLifecycleAndSettings.getComponentLifecycle());

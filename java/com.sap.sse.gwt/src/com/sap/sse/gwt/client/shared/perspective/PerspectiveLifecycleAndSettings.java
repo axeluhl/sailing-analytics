@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 
-public class PerspectiveLifecycleAndSettings<PerspectiveLifecycleType extends PerspectiveLifecycle<?, SettingsType, ?,?>, SettingsType extends Settings> {
+public class PerspectiveLifecycleAndSettings<PerspectiveLifecycleType extends PerspectiveLifecycle<?, SettingsType, ?>, SettingsType extends Settings> {
     private final PerspectiveLifecycleType perspectiveLifecycle;
     private SettingsType settings;
 

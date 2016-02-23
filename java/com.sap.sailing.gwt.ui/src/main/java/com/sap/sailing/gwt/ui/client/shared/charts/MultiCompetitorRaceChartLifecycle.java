@@ -2,22 +2,13 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.shared.components.ComponentConstructionParameters;
-import com.sap.sse.gwt.client.shared.components.ComponentConstructorArgs;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
 public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<MultiCompetitorRaceChart,
-    MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
+    MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent> {
     private final StringMessages stringMessages;
     private final boolean hasOverallLeaderboard;
     
-    public static class ConstructionParameters extends ComponentConstructionParameters<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings, MultiCompetitorRaceChartSettingsComponent, MultiCompetitorRaceChartLifecycle.MultiCompetitorRaceChartConstructorArgs> {
-        public ConstructionParameters(MultiCompetitorRaceChartLifecycle componentLifecycle,
-                MultiCompetitorRaceChartConstructorArgs componentConstructorArgs, MultiCompetitorRaceChartSettings settings) {
-            super(componentLifecycle, componentConstructorArgs, settings);
-        }
-    }
-
     public MultiCompetitorRaceChartLifecycle(StringMessages stringMessages, boolean hasOverallLeaderboard) {
         this.stringMessages = stringMessages;
         this.hasOverallLeaderboard = hasOverallLeaderboard;
@@ -49,21 +40,4 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     public boolean hasSettings() {
         return true;
     }
-
-    @Override
-    public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartConstructorArgs componentConstructorArgs,
-            MultiCompetitorRaceChartSettings settings) {
-        return componentConstructorArgs.createComponent(settings);
-    }
-
-    public class MultiCompetitorRaceChartConstructorArgs implements ComponentConstructorArgs<MultiCompetitorRaceChart, MultiCompetitorRaceChartSettings> {
-        public MultiCompetitorRaceChartConstructorArgs() {
-        }
-        
-        @Override
-        public MultiCompetitorRaceChart createComponent(MultiCompetitorRaceChartSettings newSettings) {
-            return null;
-        }
-    }
-
 }

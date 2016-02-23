@@ -14,10 +14,10 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @author Frank
  *
  */
-public abstract class AbstractPerspectiveLifecycle<P extends Perspective<SettingsType>, SettingsType extends Settings, SDP extends SettingsDialogComponent<SettingsType>, PCA extends PerspectiveConstructorArgs<P, SettingsType>>
-    implements PerspectiveLifecycle<P, SettingsType, SDP, PCA> {
+public abstract class AbstractPerspectiveLifecycle<P extends Perspective<SettingsType>, SettingsType extends Settings, SDP extends SettingsDialogComponent<SettingsType>>
+    implements PerspectiveLifecycle<P, SettingsType, SDP> {
 
-    protected final List<ComponentLifecycle<?,?,?,?>> componentLifecycles;
+    protected final List<ComponentLifecycle<?,?,?>> componentLifecycles;
     
     public AbstractPerspectiveLifecycle() {
         componentLifecycles = new ArrayList<>();
@@ -26,31 +26,25 @@ public abstract class AbstractPerspectiveLifecycle<P extends Perspective<Setting
     @Override
     public CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
         List<ComponentLifecycleAndSettings<?,?>> lifecyclesAndSettings = new ArrayList<>();
-        for(ComponentLifecycle<?,?,?,?> componentLifecycle: componentLifecycles) {
+        for(ComponentLifecycle<?,?,?> componentLifecycle: componentLifecycles) {
             lifecyclesAndSettings.add(createComponentLifecycleAndSettings(componentLifecycle));
         }
         CompositeLifecycleSettings compositeSettings = new CompositeLifecycleSettings(lifecyclesAndSettings);
         return compositeSettings;
     }
 
-    private <C extends ComponentLifecycle<?,S,?,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> createComponentLifecycleAndSettings(C componentLifecycle) {
+    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> createComponentLifecycleAndSettings(C componentLifecycle) {
         S defaultSettings = componentLifecycle.createDefaultSettings();
         ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings = new ComponentLifecycleAndSettings<>(componentLifecycle, defaultSettings);
         return componentLifecycleAndSettings;
     }
     
-    public Iterable<ComponentLifecycle<?,?,?,?>> getComponentLifecycles() {
+    public Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles() {
         return componentLifecycles;
     }
 
     @Override
     public String getPerspectiveName() {
         return getLocalizedShortName();
-    }
-
-    @Override
-    public P createComponent(PCA PerspectiveConstructorArgs, SettingsType settings) {
-        // not implemented
-        return null;
     }
 }

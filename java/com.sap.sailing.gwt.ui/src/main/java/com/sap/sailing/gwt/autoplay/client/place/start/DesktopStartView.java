@@ -157,7 +157,7 @@ public class DesktopStartView extends Composite implements StartView {
         dialog.show();
     }
     
-    private void openPerspectiveComponentSettingsDialog(final PerspectiveLifecycle<?,?,?,?> perspectiveLifecycle,
+    private void openPerspectiveComponentSettingsDialog(final PerspectiveLifecycle<?,?,?> perspectiveLifecycle,
             final PerspectiveLifecycleAndComponentSettings<?> perspectiveComponentsLifeyclesAndSettings) {
         TabbedPerspectiveConfigurationDialog dialog = new TabbedPerspectiveConfigurationDialog(StringMessages.INSTANCE,
                 perspectiveLifecycle, perspectiveComponentsLifeyclesAndSettings.getComponentSettings(), new DialogCallback<CompositeLifecycleSettings>() {
@@ -218,7 +218,7 @@ public class DesktopStartView extends Composite implements StartView {
         screenConfigurationUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
-    private <C extends Perspective<S>, PLC extends PerspectiveLifecycle<?,S,?,?>, S extends Settings> void createPerspectiveSettingsUI(final PerspectiveLifecycleAndSettings<PLC,S> perspectiveLifecycleAndSettings,
+    private <C extends Perspective<S>, PLC extends PerspectiveLifecycle<?,S,?>, S extends Settings> void createPerspectiveSettingsUI(final PerspectiveLifecycleAndSettings<PLC,S> perspectiveLifecycleAndSettings,
             final PerspectiveLifecycleAndComponentSettings<?> perspectiveComponentsLifeyclesAndSettings,
             FlowPanel perspectiveSettingsPanel) { 
         perspectiveSettingsPanel.clear();
@@ -239,7 +239,7 @@ public class DesktopStartView extends Composite implements StartView {
         perspectiveComponentSettingsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openPerspectiveComponentSettingsDialog((PerspectiveLifecycle<?, ?, ?, ?>) perspectiveLifecycleAndSettings.getPerspectiveLifecycle(),
+                openPerspectiveComponentSettingsDialog((PerspectiveLifecycle<?,?,?>) perspectiveLifecycleAndSettings.getPerspectiveLifecycle(),
                         perspectiveComponentsLifeyclesAndSettings);
             }
         });

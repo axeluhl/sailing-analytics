@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderSettings;
 import com.sap.sailing.gwt.autoplay.client.shared.oldleaderboard.OldLeaderboard;
 import com.sap.sailing.gwt.common.client.CSS3Util;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
-import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
@@ -232,17 +231,18 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer, 
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent) {
-        CompetitorSelectionModel selectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true);
-
         LeaderboardPanelLifecycle leaderboardPanelLifecycle = perspectiveLifecycle.getLeaderboardPanelLifecycle();
         LeaderboardSettings leaderboardSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(leaderboardPanelLifecycle);
 
-        LeaderboardPanelLifecycle.ConstructorArgsV1 v1 = new LeaderboardPanelLifecycle.ConstructorArgsV1(
-                sailingService, asyncActionsExecutor, leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
-                selectionModel, timer, /* leaderboardGroupName */"", leaderboardName, errorReporter,
-                stringMessages, userAgent, /*showRaceDetails */false);
+        LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
+                leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,
+                competitorSelectionProvider, timer, /* leaderboardGroupName */"",
+                leaderboardName, errorReporter, stringMessages,
+                userAgent, /*showRaceDetails */false, /* competitorSearchTextBox */ null, /* showRegattaRank */
+                /* showSelectionCheckbox */false, /* raceTimesInfoProvider */null, false, /* autoExpandLastRaceColumn */
+                /* adjustTimerDelay */true, /*autoApplyTopNFilter*/ false, false);
 
-        return v1.createComponent(leaderboardSettings);
+        return leaderboardPanel;
     }
 
 }
