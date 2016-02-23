@@ -1,4 +1,4 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
 
     <color name="white">#FFFFFF</color>
     <color name="white_transparent">#55FFFFFF</color>
@@ -9,6 +9,6 @@
 
     <color name="colorPrimary">@color/gray</color>
     <color name="colorPrimaryDark">@color/colorPrimary</color>
-    <color name="colorAccent">@color/green</color>
+    <color name="colorAccent">@color/sap_yellow</color>
 
 </resources>

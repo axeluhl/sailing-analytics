@@ -1,11 +1,17 @@
 package com.sap.sailing.racecommittee.app;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -13,13 +19,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.*;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.sap.sailing.racecommittee.app.domain.LoginType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -71,11 +76,11 @@ public class AppPreferences {
 
     protected final SharedPreferences preferences;
     protected AppPreferences(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
     public AppPreferences(Context context, String preferenceName) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
     }
 
@@ -139,8 +144,7 @@ public class AppPreferences {
     }
 
     public boolean getGateStartHasAdditionalGolfDownTime() {
-        return preferences.getBoolean(
-                key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), true);
+        return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), true);
     }
 
     public boolean getGateStartHasPathfinder() {
@@ -246,12 +250,7 @@ public class AppPreferences {
     }
 
     public String getServerBaseURL() {
-        String value = preferences.getString(key(R.string.preference_server_url_key), "");
-        if (value.equals("")) {
-            return "http://localhost:8889";
-        }
-
-        return value;
+        return preferences.getString(key(R.string.preference_server_url_key), null);
     }
 
     public double getWindBearingFromDirection() {
@@ -275,8 +274,8 @@ public class AppPreferences {
     }
 
     public boolean isSendingActive() {
-        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), context
-            .getResources().getBoolean(R.bool.preference_isSendingActive_default));
+        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), context.getResources()
+            .getBoolean(R.bool.preference_isSendingActive_default));
     }
 
     protected String key(int keyId) {
@@ -430,8 +429,8 @@ public class AppPreferences {
     }
 
     public boolean isOfflineMode() {
-        return preferences.getBoolean(context.getString(R.string.preference_offline_key),
-                context.getResources().getBoolean(R.bool.preference_offline_default));
+        return preferences.getBoolean(context.getString(R.string.preference_offline_key), context.getResources()
+            .getBoolean(R.bool.preference_offline_default));
     }
 
     public boolean isDependentRacesAllowed() {
@@ -445,7 +444,7 @@ public class AppPreferences {
     }
 
     public String getTheme() {
-        return preferences.getString(context.getString(R.string.preference_theme_key),
-                context.getResources().getString(R.string.preference_theme_default));
+        return preferences.getString(context.getString(R.string.preference_theme_key), context.getResources()
+            .getString(R.string.preference_theme_default));
     }
 }

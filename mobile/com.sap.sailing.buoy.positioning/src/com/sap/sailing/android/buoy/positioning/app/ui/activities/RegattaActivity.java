@@ -59,7 +59,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             toolbar.setPadding(20, 0, 0, 0);
             toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             getSupportActionBar().setTitle(leaderboardName);

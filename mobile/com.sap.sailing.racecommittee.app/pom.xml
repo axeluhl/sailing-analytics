@@ -27,6 +27,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.android.support</groupId>
+            <artifactId>support-v13</artifactId>
+            <type>aar</type>
+        </dependency>
+
+        <dependency>
             <groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
             <artifactId>advrecyclerview</artifactId>
             <version>0.6.2</version>
