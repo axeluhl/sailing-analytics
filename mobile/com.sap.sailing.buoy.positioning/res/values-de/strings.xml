@@ -5,7 +5,7 @@
     <string name="marks">Kursmarkierungen</string>
     <string name="set_position">Position setzen</string>
     <string name="reset_position">Position zurücksetzen</string>
-    <string name="getting_marks">Empfangen der Markierungen..</string>
+    <string name="getting_marks">Empfangen der Markierungen&#8230;</string>
     <string name="set">Gesetzt</string>
     <string name="not_set">Nicht gesetzt</string>
     <string name="mark_list_accuracy">(Genauigkeit ca. %1$sm)</string>
