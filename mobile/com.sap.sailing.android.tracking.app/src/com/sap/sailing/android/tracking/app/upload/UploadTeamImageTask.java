@@ -1,13 +1,5 @@
 package com.sap.sailing.android.tracking.app.upload;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.tracking.app.R;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.DataOutputStream;
@@ -17,6 +9,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.tracking.app.R;
 
 /**
  * Uploads an image to the server.
