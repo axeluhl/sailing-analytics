@@ -81,7 +81,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final FlowPanel timePanelInnerWrapper;
 
     /** 
-     * the minimum time the slider extends it's time when the end of the slider is reached
+     * the minimum time the slider extends its time when the end of the slider is reached
      */
     private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
     private boolean advancedModeShown;
