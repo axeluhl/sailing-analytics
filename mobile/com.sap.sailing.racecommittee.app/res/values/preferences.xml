@@ -76,7 +76,9 @@
     <bool name="preference_racing_procedure_league_hasxray_default">false</bool>
 
     <string name="preference_regatta_specific_save_key" translatable="false">basicIndividualRecall</string>
-    
+    <string name="preference_heading_with_declination_subtracted_key" translatable="false">preferenceHeadingWithDeclinationSubtracted</string>
+    <bool name="preference_heading_with_declination_subtracted_default">true</bool>
+
     <!-- override android.shared default value -->
     <string name="app_folder" translatable="false">racecommittee</string>
     <bool name="preference_isSendingActive_default">false</bool>

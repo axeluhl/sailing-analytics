@@ -447,4 +447,9 @@ public class AppPreferences {
         return preferences.getString(context.getString(R.string.preference_theme_key), context.getResources()
             .getString(R.string.preference_theme_default));
     }
+
+    public boolean isMagnetic() {
+        return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
+                context.getResources().getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
+    }
 }
