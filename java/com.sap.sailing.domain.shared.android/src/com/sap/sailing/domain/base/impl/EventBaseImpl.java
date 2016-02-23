@@ -230,6 +230,17 @@ public abstract class EventBaseImpl implements EventBase {
     public boolean hasSailorsInfoWebsiteURL(Locale locale) {
         return this.sailorsInfoWebsiteURLs.containsKey(locale);
     }
+    
+    @Override
+    public URL getSailorsInfoWebsiteURLOrFallback(Locale locale) {
+        final URL result;
+        if(hasSailorsInfoWebsiteURL(locale)) {
+            result = this.sailorsInfoWebsiteURLs.get(locale);
+        } else {
+            result = this.sailorsInfoWebsiteURLs.get(null);
+        }
+        return result;
+    }
 
     @Override
     public Iterable<ImageDescriptor> getImages() {
