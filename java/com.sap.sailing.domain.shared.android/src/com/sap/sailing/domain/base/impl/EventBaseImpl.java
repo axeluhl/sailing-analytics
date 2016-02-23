@@ -5,7 +5,9 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -36,7 +38,7 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint startDate;
     private TimePoint endDate;
     private URL officialWebsiteURL;
-    private URL sailorsInfoWebsiteURL;
+    private Map<Locale, URL> sailorsInfoWebsiteURLs;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
 
@@ -57,6 +59,7 @@ public abstract class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.images = new ConcurrentLinkedQueue<ImageDescriptor>();
         this.videos = new ConcurrentLinkedQueue<VideoDescriptor>();
+        this.sailorsInfoWebsiteURLs = Collections.synchronizedMap(new HashMap<Locale, URL>());
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -66,6 +69,9 @@ public abstract class EventBaseImpl implements EventBase {
         }
         if (videos == null) {
             videos = new ConcurrentLinkedQueue<VideoDescriptor>();
+        }
+        if (sailorsInfoWebsiteURLs == null) {
+            sailorsInfoWebsiteURLs = Collections.synchronizedMap(new HashMap<Locale, URL>());
         }
     }
 
@@ -185,12 +191,29 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public URL getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURL;
+        return sailorsInfoWebsiteURLs.get(null);
     }
 
     @Override
     public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
+        if(sailorsInfoWebsiteURL == null) {
+            this.sailorsInfoWebsiteURLs.remove(null);
+        } else {
+            this.sailorsInfoWebsiteURLs.put(null, sailorsInfoWebsiteURL);
+        }
+    }
+    
+    @Override
+    public Map<Locale, URL> getSailorsInfoWebsiteURLs() {
+        return Collections.unmodifiableMap(sailorsInfoWebsiteURLs);
+    }
+    
+    @Override
+    public void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs) {
+        this.sailorsInfoWebsiteURLs.clear();
+        if(sailorsInfoWebsiteURLs != null) {
+            this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
+        }
     }
 
     @Override

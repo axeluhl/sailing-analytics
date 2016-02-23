@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Renamable;
@@ -88,6 +89,10 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     URL getSailorsInfoWebsiteURL();
     
     void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL);
+    
+    Map<Locale, URL> getSailorsInfoWebsiteURLs();
+    
+    void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 
