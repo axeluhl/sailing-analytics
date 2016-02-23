@@ -41,7 +41,7 @@
         <View
             android:id="@+id/line_top"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/unscheduled_header_line"
+            android:layout_height="@dimen/header_line"
             android:layout_alignParentBottom="true"
             android:background="?attr/black"/>
     </RelativeLayout>

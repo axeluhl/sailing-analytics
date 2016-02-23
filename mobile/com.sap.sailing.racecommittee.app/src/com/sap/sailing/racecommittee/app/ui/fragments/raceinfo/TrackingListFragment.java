@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -40,6 +39,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -62,7 +62,7 @@ public class TrackingListFragment extends BaseFragment
     private ArrayList<CompetitorResultWithIdImpl> mFinishedData;
     private ArrayList<Competitor> mCompetitorData;
     private int mId = 0;
-    private TextView mHeader;
+    private HeaderLayout mHeader;
 
     public TrackingListFragment() {
         mCompetitorData = new ArrayList<>();
@@ -79,7 +79,7 @@ public class TrackingListFragment extends BaseFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_tracking_list, container, false);
 
-        mHeader = ViewHelper.get(layout, R.id.header_caption);
+        mHeader = ViewHelper.get(layout, R.id.header);
 
         mDots = new ArrayList<>();
         mPanels = new ArrayList<>();
@@ -104,9 +104,9 @@ public class TrackingListFragment extends BaseFragment
             btnNext.setOnClickListener(this);
         }
 
-        View home = ViewHelper.get(layout, R.id.header_text);
-        if (home != null) {
-            home.setOnClickListener(new View.OnClickListener() {
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -116,7 +116,6 @@ public class TrackingListFragment extends BaseFragment
         }
 
         if (getArguments().getInt(START_MODE, 0) != 0) {
-            View header = ViewHelper.get(layout, R.id.tracking_header);
             if (header != null) {
                 header.setVisibility(View.GONE);
             }
@@ -436,11 +435,11 @@ public class TrackingListFragment extends BaseFragment
         if (mHeader != null) {
             switch (mActivePage) {
                 case 0:
-                    mHeader.setText(R.string.tracking_list_01);
+                    mHeader.setHeaderText(R.string.tracking_list_01);
                     break;
 
                 default:
-                    mHeader.setText(R.string.tracking_list_02);
+                    mHeader.setHeaderText(R.string.tracking_list_02);
             }
         }
         mConfirm.setEnabled(mActivePage != 0 || mDots.size() == 0);
