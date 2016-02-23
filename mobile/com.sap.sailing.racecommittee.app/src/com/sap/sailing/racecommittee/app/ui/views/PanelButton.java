@@ -9,6 +9,7 @@ import android.support.annotation.StringRes;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -24,9 +25,10 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
     public final static int LEVEL_TOGGLED = 1;
 
     private View mLayer;
-    private TextView mHeader;
     private View mLock;
+    private TextView mHeader;
 
+    private View mContent;
     private TextView mText;
     private ImageView mImage;
     private Switch mSwitch;
@@ -59,6 +61,7 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
         }
 
         mLayer = findViewById(R.id.panel_layer);
+        mContent = findViewById(R.id.panel_content);
 
         mHeader = (TextView) findViewById(R.id.panel_button_header);
         setHeader(a.getString(R.styleable.PanelButton_buttonHeader));
@@ -102,9 +105,12 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
     public void setLock(boolean show) {
         if (mLock != null) {
             mLock.setVisibility(show ? VISIBLE : GONE);
-            if (mLayer != null) {
-                mLayer.setAlpha(show ? .5f : 1f);
-            }
+        }
+        if (mHeader != null) {
+            mHeader.setAlpha(show ? .5f : 1f);
+        }
+        if (mContent != null) {
+            mContent.setAlpha(show ? .5f : 1f);
         }
     }
 
