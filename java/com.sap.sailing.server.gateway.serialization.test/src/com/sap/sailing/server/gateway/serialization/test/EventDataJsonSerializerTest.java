@@ -9,6 +9,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import org.json.simple.JSONObject;
@@ -43,6 +46,7 @@ public class EventDataJsonSerializerTest {
     protected final TimePoint expectedEndDate = new MillisecondsTimePoint(new Date());
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
+    protected final Map<Locale, URL> expectedSailorsInfoWebsiteURLs;
     protected final URL expectedLogoImageURL;
     protected final LeaderboardGroup expectedLeaderboardGroup = mock(LeaderboardGroup.class);
     
@@ -54,6 +58,9 @@ public class EventDataJsonSerializerTest {
     public EventDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
+        expectedSailorsInfoWebsiteURLs = new HashMap<>();
+        expectedSailorsInfoWebsiteURLs.put(null, new URL("http://sailorinfo.some-sailing-event.com"));
+        expectedSailorsInfoWebsiteURLs.put(Locale.GERMAN, new URL("http://sailorinfo-de.some-sailing-event.com"));
     }
     
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
@@ -66,6 +73,8 @@ public class EventDataJsonSerializerTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
+        when(event.getSailorsInfoWebsiteURLs()).thenReturn(expectedSailorsInfoWebsiteURLs);
+        when(event.getSailorsInfoWebsiteURL(null)).thenReturn(expectedSailorsInfoWebsiteURLs.get(null));
         when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
@@ -103,6 +112,9 @@ public class EventDataJsonSerializerTest {
                 expectedOfficialWebsiteURL,
                 new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
         assertEquals(
+                expectedSailorsInfoWebsiteURLs.get(null),
+                new URL((String) result.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL)));
+        assertEquals(
                 expectedLogoImageURL,
                 new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
         assertEquals(
@@ -129,6 +141,7 @@ public class EventDataJsonSerializerTest {
         assertEquals(expectedLeaderboardGroup.getDisplayName(), deserializedEvent.getLeaderboardGroups().iterator().next().getDisplayName());
         assertEquals(expectedLeaderboardGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
         assertEquals(expectedLeaderboardGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
+        assertEquals(expectedSailorsInfoWebsiteURLs, new HashMap<Locale, URL>(deserializedEvent.getSailorsInfoWebsiteURLs()));
     }
 
     @Test

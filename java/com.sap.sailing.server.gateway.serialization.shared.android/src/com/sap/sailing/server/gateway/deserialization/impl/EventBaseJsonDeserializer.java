@@ -93,6 +93,18 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             readImageAndVideoURLsFromLegacyServer(eventJson, result);
             
         }
+        JSONArray sailorsInfoWebsiteURLsJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URLS);
+        if(sailorsInfoWebsiteURLsJson != null) {
+            for (Object sailorsInfoWebsiteURLJson : sailorsInfoWebsiteURLsJson) {
+                JSONObject sailorsInfoWebsiteURLJsonObject = (JSONObject) sailorsInfoWebsiteURLJson;
+                String localeString = (String) sailorsInfoWebsiteURLJsonObject.get(EventBaseJsonSerializer.FIELD_LOCALE);
+                result.addSailorsInfoWebsiteURL(localeString == null ? null : new Locale(localeString),  Helpers.getURLField(sailorsInfoWebsiteURLJsonObject, EventBaseJsonSerializer.FIELD_URL));
+            } 
+        }
+        URL sailorsInfoWebsiteURL = Helpers.getURLField(eventJson, EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL);
+        if(sailorsInfoWebsiteURL != null && !result.hasSailorsInfoWebsiteURL(null)) {
+            result.addSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
+        }
         return result;
     }
 
