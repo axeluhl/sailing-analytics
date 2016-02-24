@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -238,7 +239,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
         windDirectionInDegColumn.setSortable(true);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        rawWindFixesTable = new CellTable<WindDTO>(/* pageSize */10000, tableRes);
+        rawWindFixesTable = new BaseCelltable<WindDTO>(/* pageSize */10000, tableRes);
         rawWindFixesTable.addColumn(timeColumn, "Time");
         rawWindFixesTable.addColumn(speedInKnotsColumn, "Speed (kn)");
         rawWindFixesTable.addColumn(windDirectionInDegColumn, "From (deg)");

@@ -15,6 +15,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.gwt.ui.datamining.FilterSelectionChangedListener;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
 
 public class FilterableSelectionTable<ContentType extends Serializable> {
@@ -35,7 +36,7 @@ public class FilterableSelectionTable<ContentType extends Serializable> {
         
         allData = new ArrayList<ContentType>();
         
-        table = new CellTable<>(Integer.MAX_VALUE);
+        table = new BaseCelltable<>(Integer.MAX_VALUE);
         table.setWidth("100%");
         table.setAutoHeaderRefreshDisabled(true);
         table.setAutoFooterRefreshDisabled(true);

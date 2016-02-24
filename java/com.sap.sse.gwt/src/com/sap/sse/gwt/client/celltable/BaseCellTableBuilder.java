@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.client.shared.controls;
+package com.sap.sse.gwt.client.celltable;
 
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.dom.builder.shared.DivBuilder;
@@ -24,7 +24,7 @@ import com.google.gwt.view.client.SelectionModel;
  *
  * @param <T>
  */
-public class AriaCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
+public class BaseCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
     private final String evenRowStyle;
     private final String oddRowStyle;
     private final String selectedRowStyle;
@@ -35,7 +35,7 @@ public class AriaCellTableBuilder<T> extends AbstractCellTableBuilder<T> {
     private final String lastColumnStyle;
     private final String selectedCellStyle;
 
-    public AriaCellTableBuilder(AbstractCellTable<T> cellTable) {
+    public BaseCellTableBuilder(AbstractCellTable<T> cellTable) {
         super(cellTable);
 
         // Cache styles for faster access.
