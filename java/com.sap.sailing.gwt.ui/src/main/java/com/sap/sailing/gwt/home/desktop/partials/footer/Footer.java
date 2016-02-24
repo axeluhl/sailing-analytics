@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.footer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,11 +25,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sailing.gwt.common.client.GWTLocaleUtil;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.SwitchingEntryPoint;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 public class Footer extends Composite {
@@ -107,17 +108,17 @@ public class Footer extends Composite {
     }
     
     private void updateUI() {
-        Set<String> availableLocales = new HashSet<String>(Arrays.asList(LocaleInfo.getAvailableLocaleNames()));
-        availableLocales.remove("default");
+        final Iterable<String> availableLocales = GWTLocaleUtil.getAvailableLocales();
+        final int localeCount = Util.size(availableLocales);
         
-        if(availableLocales.size() <= 1) {
+        if(localeCount <= 1) {
             // only current language (or removed default) available
             changeLanguageLink.removeFromParent();
             changeLanguageList.removeFromParent();
             languageSelectionDiv.removeFromParent();
             return;
         }
-        if(availableLocales.size() == 2) {
+        if(Util.size(availableLocales) == 2) {
             changeLanguageList.removeFromParent();
             // current language + one we can switch to
             for(String localeName : availableLocales) {
