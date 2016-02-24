@@ -95,13 +95,13 @@ The Android release branch holds the changes required to run a successful Androi
 
 We have various branches on which Android mobile app features are being developed. Ultimately, they should be merged into the ``master`` branch from where they get merged into the Android release branch. A so-called "Customer release" build can be triggered for the Android release branch on a [central Jenkins instance](https://veldirelease.wdf.sap.corp:8443/hudson/job/sapsailingcapture/). However, it is important to know that the LeanDI build profile will make sure that the version specified in the ``pom.xml`` descriptors matches in its major and minor version with a ``rel-x.y`` branch name in the central git repository at ``git.wdf.sap.corp``. For example, if the ``pom.xml`` files specify a ``1.4.0`` version, the commit to be built needs to be contained in a branch called ``rel-1.4``.
 
-In order to upgrade all `pom.xml` and `MANIFEST.MF` files to a new release, uncomment the `&lt;parent&gt;` specification in the top-level `pom.xml` file in the workspace root. Then execute the following command:
+Also note that once released to Nexus, the next release build will have to use at least an incremented micro version, such as 1.4.1. In order to change all versions in all `MANIFEST.MF` and `pom.xml` files consistently, the Tycho `set-version` plugin can be used. For this, first comment out the `<parent>` definition in the top-level `pom.xml` file which points to `com.sap.ldi/ldi-parent/8.0.0` or else you will get error messages that this component cannot be found (it is only found when the build is run on a central Jenkins instance that sees the Nexus repository at the right place). Then, issue the following command, setting the version number as required:
 
 ```
         mvn -Dtycho.mode=maven org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=x.y.z
 ```
 
-Make sure to replace `x.y.z` by the version to which you want to set your files. Then remember to uncomment the `&lt;parent&gt;` specification again.
+Make sure to replace `x.y.z` by the version to which you want to set your files. Then remember to uncomment the `<parent>` specification again.
 
 In order to get the Android release branch merged into the ``rel-x.y`` branch, the same process as explained above for the merge of iOS branches into ``fa/rel-x.y`` is required. In particular, this means that a Java Correction Workbench Correction Request [needs to be created](https://css.wdf.sap.corp/sap/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture&newCMComponentName=SV-COE-MSO-CDP) and the latest commit to be pushed to ``refs/for/rel-x.y`` needs to be amended so that it contains a valid ``Change-Id:`` and ``CR-Id:`` line. Then, the commit needs to be voted on. Other than for the MiOS branches under ``fa/rel-x.y`` it seems to be required that _another_ committer votes with +2 to enable a merge. Once this has been done, the blue ``Submit`` button will appear on your change page (something like [https://git.wdf.sap.corp/#/c/1436212/](https://git.wdf.sap.corp/#/c/1436212/)) that you can use to technically get the commit merged into the ``rel-x.y`` branch.
 
