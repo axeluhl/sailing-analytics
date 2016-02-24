@@ -232,6 +232,11 @@ public abstract class EventBaseImpl implements EventBase {
     }
     
     @Override
+    public URL getSailorsInfoWebsiteURL(Locale locale) {
+        return this.sailorsInfoWebsiteURLs.get(locale);
+    }
+    
+    @Override
     public URL getSailorsInfoWebsiteURLOrFallback(Locale locale) {
         final URL result;
         if(hasSailorsInfoWebsiteURL(locale)) {
