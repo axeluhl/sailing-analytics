@@ -94,7 +94,7 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     
     void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs);
     
-    void addSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL);
+    void setSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL);
     
     boolean hasSailorsInfoWebsiteURL(Locale locale);
     

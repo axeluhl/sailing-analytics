@@ -1057,7 +1057,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 String localeRaw = (String) sailorsInfoWebsiteDBObject.get(FieldNames.SAILORS_INFO_LOCALE.name());
                 if(url != null) {
                     Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
-                    result.addSailorsInfoWebsiteURL(locale, url);
+                    result.setSailorsInfoWebsiteURL(locale, url);
                 }
             }
         }
@@ -2177,10 +2177,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 // The englich/international version with "/en" suffix (e.g. http://sailorsinfo.travemuender-woche.com/en)
                 if(!event.hasSailorsInfoWebsiteURL(null)) {
                     final String englishURL = sailorsInfoWebSiteURLAsString + (sailorsInfoWebSiteURLAsString.endsWith("/") ? "" : "/") + "en";
-                    event.addSailorsInfoWebsiteURL(null, new URL(englishURL));
+                    event.setSailorsInfoWebsiteURL(null, new URL(englishURL));
                 }
                 if(!event.hasSailorsInfoWebsiteURL(Locale.GERMAN)) {
-                    event.addSailorsInfoWebsiteURL(Locale.GERMAN, new URL(sailorsInfoWebSiteURLAsString));
+                    event.setSailorsInfoWebsiteURL(Locale.GERMAN, new URL(sailorsInfoWebSiteURLAsString));
                 }
             } catch (MalformedURLException e) {
                 logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+event.getName()+". Ignoring this URL.");

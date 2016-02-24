@@ -196,7 +196,7 @@ public abstract class EventBaseImpl implements EventBase {
 
     @Override
     public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
-        addSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
+        setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
     }
     
     @Override
@@ -213,7 +213,7 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public void addSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL) {
+    public void setSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL) {
         if(sailorsInfoWebsiteURL == null) {
             this.sailorsInfoWebsiteURLs.remove(locale);
         } else {

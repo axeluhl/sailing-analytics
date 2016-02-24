@@ -148,8 +148,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.addSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
-        event.addSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
+        event.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
