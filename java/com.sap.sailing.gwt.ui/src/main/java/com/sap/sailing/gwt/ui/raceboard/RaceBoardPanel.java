@@ -42,6 +42,8 @@ import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimePanelLifecycle;
+import com.sap.sailing.gwt.ui.client.RaceTimePanelSettings;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -105,10 +107,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private final UUID eventId;
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
-    private RaceBoardPerspectiveSettings perspectiveSettings;
+    private final RaceBoardPerspectiveSettings perspectiveSettings;
     private String raceBoardName;
         
-    private RaceTimePanel timePanel;
+    private final RaceTimePanel timePanel;
     private final Timer timer;
     private final UserAgentDetails userAgent;
     private final CompetitorSelectionProvider competitorSelectionProvider;
@@ -193,7 +195,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         RaceMapLifecycle raceMapLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
         RaceMapSettings raceMapSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceMapLifecycle);
-        
+
+        RaceTimePanelLifecycle raceTimePanelLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
+        RaceTimePanelSettings raceTimePanelSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceTimePanelLifecycle);
+
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), 
                 perspectiveSettings.isSimulationEnabled(), /* showHeaderPanel */ true) {
@@ -256,8 +261,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
                 }
             }
         }
-        timePanel = new RaceTimePanel(userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                raceboardPerspectiveSettings.isCanReplayDuringLiveRaces(), raceboardPerspectiveSettings.isChartSupportEnabled(), selectedRaceIdentifier);
+        timePanel = new RaceTimePanel(raceTimePanelLifecycle, userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
+                raceboardPerspectiveSettings.isCanReplayDuringLiveRaces(), raceboardPerspectiveSettings.isChartSupportEnabled(),
+                selectedRaceIdentifier);
+        timePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
     }
