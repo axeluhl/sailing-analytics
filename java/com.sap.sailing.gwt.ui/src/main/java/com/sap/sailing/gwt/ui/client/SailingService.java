@@ -314,7 +314,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String sailorsInfoWebsiteURL, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLStrings, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
     
     void removeEvent(UUID eventId);
 
