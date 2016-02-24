@@ -15,6 +15,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.InvertibleComparator;
+import com.sap.sailing.gwt.ui.client.shared.controls.AriaCellTableBuilder;
 
 public class SortedCellTable<T> extends CellTable<T> {
 
@@ -50,6 +51,7 @@ public class SortedCellTable<T> extends CellTable<T> {
 
     public SortedCellTable(int pageSize, CellTable.Resources resources) {
         super(pageSize, resources);
+        setTableBuilder(new AriaCellTableBuilder<T>(this));
         dataProvider = new ListDataProvider<T>();
         dataProvider.addDataDisplay(this);
         columnSortHandler = new ListHandler<T>(dataProvider.getList()) {

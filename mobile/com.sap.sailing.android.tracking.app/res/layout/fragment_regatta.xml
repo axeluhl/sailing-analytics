@@ -92,23 +92,17 @@
             android:onClick="retryUpload"
             tools:visibility="visible">
 
-            <ImageButton
-                android:id="@+id/retry_upload_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:contentDescription="@string/upload_retry"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:src="@drawable/ic_action_navigation_refresh"/>
-
             <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
                 android:id="@+id/retry_upload_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:drawableLeft="@drawable/ic_action_navigation_refresh"
+                android:drawablePadding="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:paddingLeft="8dp"
                 android:text="@string/upload_retry"
                 android:textColor="@color/white"/>
         </LinearLayout>

@@ -330,7 +330,7 @@
     <string name="wind_kn">kts</string>
     <string name="wind_address_hint">Enter Address</string>
     <string name="wind_sensor"><![CDATA[at %1$s / from %2$.0f° / %3$.1f kts]]></string>
-    <string name="wind_panel"><![CDATA[from %1$.0f°\nwith %2$.1f kts]]></string>
+    <string name="wind_panel"><![CDATA[From %1$.0f°\nwith %2$.1f kts]]></string>
     <string name="wind_no_data">No Data</string>
 
     <string name="time_up">Up in #TIME#</string>
@@ -486,7 +486,7 @@
     <string name="reset_message_1">Do you want to clear the list?</string>
     <string name="reset_message_2">Do you want to reset to the last state?</string>
     <string name="geo_coords" translatable="false">%1$d° %2$d′ %3$.3f″</string>
-    <string name="onboarding_scan">Scan QR-Code</string>
+    <string name="onboarding_scan">Scan QR Code</string>
     <string name="onboarding_input">Manual Input</string>
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
