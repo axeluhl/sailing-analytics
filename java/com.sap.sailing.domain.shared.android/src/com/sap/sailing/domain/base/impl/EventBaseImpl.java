@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,6 +19,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.concurrent.CopyOnWriteHashMap;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -38,7 +38,7 @@ public abstract class EventBaseImpl implements EventBase {
     private TimePoint startDate;
     private TimePoint endDate;
     private URL officialWebsiteURL;
-    private Map<Locale, URL> sailorsInfoWebsiteURLs;
+    private CopyOnWriteHashMap<Locale, URL> sailorsInfoWebsiteURLs;
     private ConcurrentLinkedQueue<ImageDescriptor> images;
     private ConcurrentLinkedQueue<VideoDescriptor> videos;
 
@@ -59,7 +59,7 @@ public abstract class EventBaseImpl implements EventBase {
         this.isPublic = isPublic;
         this.images = new ConcurrentLinkedQueue<ImageDescriptor>();
         this.videos = new ConcurrentLinkedQueue<VideoDescriptor>();
-        this.sailorsInfoWebsiteURLs = Collections.synchronizedMap(new HashMap<Locale, URL>());
+        this.sailorsInfoWebsiteURLs = new CopyOnWriteHashMap<>("lock for sailorsInfoWebsiteURLs of event " + id.toString());
     }
     
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
@@ -71,7 +71,7 @@ public abstract class EventBaseImpl implements EventBase {
             videos = new ConcurrentLinkedQueue<VideoDescriptor>();
         }
         if (sailorsInfoWebsiteURLs == null) {
-            sailorsInfoWebsiteURLs = Collections.synchronizedMap(new HashMap<Locale, URL>());
+            this.sailorsInfoWebsiteURLs = new CopyOnWriteHashMap<>("lock for sailorsInfoWebsiteURLs of event " + id.toString());
         }
     }
 
@@ -206,10 +206,7 @@ public abstract class EventBaseImpl implements EventBase {
     
     @Override
     public void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs) {
-        this.sailorsInfoWebsiteURLs.clear();
-        if(sailorsInfoWebsiteURLs != null) {
-            this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
-        }
+        this.sailorsInfoWebsiteURLs.set(sailorsInfoWebsiteURLs);
     }
 
     @Override
