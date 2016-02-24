@@ -22,6 +22,7 @@ public class DashboardHeader extends Composite implements HasWidgets {
 
     interface SettingsButtonWithSelectionIndicationLabelStyle extends CssResource {
     }
+    
     @UiField
     Image sapLogo;
 
@@ -30,22 +31,33 @@ public class DashboardHeader extends Composite implements HasWidgets {
     
     @UiField
     DivElement race;
+    
+    private DashboardHeaderResources dashboardHeaderResources = DashboardHeaderResources.INSTANCE;
+    private String eventName;
+    private String raceName;
 
     public DashboardHeader() {
-        DashboardHeaderResources.INSTANCE.gss().ensureInjected();
+        dashboardHeaderResources.gss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         sapLogo.setResource(DashboardHeaderResources.INSTANCE.sapLogo());
-        setEventText(StringMessages.INSTANCE.dashboardHeader());
+        event.setInnerHTML(StringMessages.INSTANCE.dashboardHeader());
     }
     
-    public void setEventText(String eventName) {
+    
+    
+    public void setEventName(String eventName) {
+        this.eventName = eventName;
         event.setInnerHTML(eventName);
     }
-    
-    public void setRaceText(String raceName) {
-        race.setInnerHTML(raceName);        
+
+
+
+    public void setRaceName(String raceName) {
+        this.event.addClassName(dashboardHeaderResources.gss().event_shared_space());
+        this.raceName = raceName;
+        race.setInnerHTML(raceName);      
     }
-    
+
     @Override
     public void add(Widget w) {
         throw new UnsupportedOperationException("The method add(Widget w) is not supported.");

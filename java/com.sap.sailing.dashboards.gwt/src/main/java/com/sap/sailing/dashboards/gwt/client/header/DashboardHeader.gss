@@ -11,7 +11,7 @@
 
 .event_race_container {
 	position: absolute;
-	height: DASHBOARD_FONT_SIZE_MEDIUM;
+	height: DASHBOARD_SPACE_MEDIUM;
 	width: 100%;
 	top: 0px;
 	color: LIGHT_TEXT_COLOR;
@@ -19,15 +19,21 @@
 
 .event {
 	width: 100%;
-	height: DASHBOARD_FONT_SIZE_MEDIUM;
-	top: DASHBOARD_SPACE_VERY_SMALL;
-	line-height: DASHBOARD_FONT_SIZE_MEDIUM;
+	height: DASHBOARD_SPACE_MEDIUM;
+	top: 0px;
+	line-height: DASHBOARD_SPACE_MEDIUM;
 	vertical-align: middle;
 	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
 	font-family: DASHBOARD_FONT_FAMILY;
 	text-align: center;
 	font-weight: bold;
 	overflow: visible;
+}
+
+.event_shared_space {
+	height: DASHBOARD_FONT_SIZE_MEDIUM;
+	top: DASHBOARD_SPACE_VERY_SMALL;
+	line-height: DASHBOARD_FONT_SIZE_MEDIUM;
 }
 
 .race {

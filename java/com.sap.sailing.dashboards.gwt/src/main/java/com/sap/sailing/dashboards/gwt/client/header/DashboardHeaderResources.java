@@ -23,6 +23,7 @@ public interface DashboardHeaderResources extends ClientBundle {
         String sap_logo();
         String event_race_container();
         String event();
+        String event_shared_space();
         String race();
     }
 }

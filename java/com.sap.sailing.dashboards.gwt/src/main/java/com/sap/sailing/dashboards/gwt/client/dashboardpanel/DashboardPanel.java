@@ -122,7 +122,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
                                 eventLogo.getElement().getStyle().setVisibility(Visibility.HIDDEN);
                             }
                             if (event.getName() != null) {
-                                header.setEventText(event.getName());
+                                header.setEventName(event.getName());
                                 Window.setTitle("Dashboard - "+event.getName());
                             }
                         } else {
@@ -158,7 +158,7 @@ public class DashboardPanel extends Composite implements NumberOfWindBotsChangeL
                         public void onSuccess(RaceIdDTO result) {
                             if (result != null && result.getRaceId() != null) {
                                 logger.log(Level.INFO, "Updating UI with live race id");
-                                header.setRaceText(result.getRaceId().getRaceName());
+                                header.setRaceName(result.getRaceId().getRaceName());
                             } else {
                                 logger.log(Level.INFO, "Received null for live race id");
                             }
