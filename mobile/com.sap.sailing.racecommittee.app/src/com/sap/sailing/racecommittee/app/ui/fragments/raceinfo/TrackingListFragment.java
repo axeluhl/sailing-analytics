@@ -39,6 +39,7 @@ import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
+import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -49,7 +50,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class TrackingListFragment extends BaseFragment
-    implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener {
+        implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener {
 
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -254,21 +255,21 @@ public class TrackingListFragment extends BaseFragment
         }
 
         Loader<?> competitorLoaders = getLoaderManager().initLoader(0, null,
-            dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
+                dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 
-                @Override
-                public void onLoadFailed(Exception reason) {
-                    Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
-                    if (isAdded()) {
-                        onLoadCompetitorsSucceeded(data);
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        Toast.makeText(getActivity(), getString(R.string.competitor_load_error, reason.toString()), Toast.LENGTH_LONG).show();
                     }
-                }
 
-            }));
+                    @Override
+                    public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
+                        if (isAdded()) {
+                            onLoadCompetitorsSucceeded(data);
+                        }
+                    }
+
+                }));
         // Force load to get non-cached remote competitors...
         competitorLoaders.forceLoad();
     }
@@ -328,7 +329,7 @@ public class TrackingListFragment extends BaseFragment
         }
         name += " - " + competitor.getName();
         mFinishedData.add(
-            new CompetitorResultWithIdImpl(mId, competitor.getId(), name, mFinishedData.size() + 1, MaxPointsReason.NONE,
+                new CompetitorResultWithIdImpl(mId, competitor.getId(), name, mFinishedData.size() + 1, MaxPointsReason.NONE,
                     /* score */ null, /* finishingTime */ null, /* comment */ null));
         mId++;
         mFinishedAdapter.notifyDataSetChanged();
@@ -368,13 +369,42 @@ public class TrackingListFragment extends BaseFragment
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         final CharSequence[] maxPointsReasons = getAllMaxPointsReasons();
         builder.setTitle(R.string.select_penalty_reason)
-            .setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int position) {
-                    setMaxPointsReasonForItem(item, maxPointsReasons[position]);
-                    mFinishedAdapter.notifyDataSetChanged();
+                .setItems(maxPointsReasons, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int position) {
+                        setMaxPointsReasonForItem(item, maxPointsReasons[position]);
+                        mFinishedAdapter.notifyDataSetChanged();
+                    }
+                });
+        builder.show();
+    }
+
+    @Override
+    public void onEditItem(final CompetitorResultWithIdImpl item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(item.getCompetitorDisplayName());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mFinishedAdapter.getItemCount());
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CompetitorResultWithIdImpl newData = layout.getValue();
+                int index = mFinishedData.indexOf(item);
+                if (item.getOneBasedRank() != newData.getOneBasedRank()) {
+                    int newPos = newData.getOneBasedRank();
+                    if (newPos > 0) {
+                        newPos -= 1;
+                    }
+                    mFinishedData.remove(index);
+                    mFinishedData.add(newPos, newData);
+                } else {
+                    replaceItemInPositioningList(index, item, newData);
                 }
-            });
-        builder.create().show();
+                mFinishedAdapter.notifyDataSetChanged();
+                getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
     }
 
     private CharSequence[] getAllMaxPointsReasons() {
@@ -388,7 +418,7 @@ public class TrackingListFragment extends BaseFragment
     protected void setMaxPointsReasonForItem(CompetitorResultWithIdImpl item, CharSequence maxPointsReasonName) {
         MaxPointsReason maxPointsReason = MaxPointsReason.valueOf(maxPointsReasonName.toString());
         CompetitorResultWithIdImpl newItem = new CompetitorResultWithIdImpl(item.getId(), item.getCompetitorId(), item.getCompetitorDisplayName(),
-            item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item.getComment());
+                item.getOneBasedRank(), maxPointsReason, item.getScore(), item.getFinishingTime(), item.getComment());
         int currentIndexOfItem = mFinishedData.indexOf(item);
         replaceItemInPositioningList(currentIndexOfItem, item, newItem);
 

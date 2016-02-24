@@ -1,10 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.layouts;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
@@ -26,12 +24,7 @@ public class HeaderLayout extends RelativeLayout {
     }
 
     public HeaderLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public HeaderLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
 
         inflate(context, R.layout.header_view, this);
 

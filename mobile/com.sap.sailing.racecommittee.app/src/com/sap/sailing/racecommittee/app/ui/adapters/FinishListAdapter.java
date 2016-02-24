@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -15,18 +11,16 @@ import android.widget.TextView;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
-import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
+import java.util.ArrayList;
 
-    private final static String TAG = FinishListAdapter.class.getName();
+public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
     private Context mContext;
     private ArrayList<CompetitorResultWithIdImpl> mCompetitor;
@@ -183,11 +177,14 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         void onItemRemoved(CompetitorResultWithIdImpl item);
 
         void onLongClick(CompetitorResultWithIdImpl item);
+
+        void onEditItem(CompetitorResultWithIdImpl item);
     }
 
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
         public View container;
         public View dragHandle;
+        public View editItem;
         public TextView position;
         public TextView vesselId;
         public TextView competitor;
@@ -197,6 +194,17 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
             container = ViewHelper.get(itemView, R.id.container);
             dragHandle = ViewHelper.get(itemView, R.id.drag_handle);
+            editItem = ViewHelper.get(itemView, R.id.edit_item);
+            if (editItem != null) {
+                editItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mListener != null) {
+                            mListener.onEditItem(mCompetitor.get(getAdapterPosition()));
+                        }
+                    }
+                });
+            }
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
             position = ViewHelper.get(itemView, R.id.position);
