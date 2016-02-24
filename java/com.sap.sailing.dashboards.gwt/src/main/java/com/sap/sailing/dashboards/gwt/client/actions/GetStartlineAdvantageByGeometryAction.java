@@ -1,5 +1,7 @@
 package com.sap.sailing.dashboards.gwt.client.actions;
 
+import java.util.UUID;
+
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.StartlineAdvantageByGeometryCalculator;
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
@@ -20,6 +22,8 @@ public class GetStartlineAdvantageByGeometryAction extends RequiresLiveRaceAndCa
     public GetStartlineAdvantageByGeometryAction(String leaderboardName) {
         super(leaderboardName);
     }
+    
+    private static final String MOVING_AVERAGE_CACHE_KEY = UUID.randomUUID().toString();
 
     @Override
     @GwtIncompatible
@@ -35,14 +39,14 @@ public class GetStartlineAdvantageByGeometryAction extends RequiresLiveRaceAndCa
         Double average = null;
         if (startlineAdvantageByGeometry != null) {
             super.addValueToMovingAverage(startlineAdvantageByGeometry.doubleValue(), dashboardDispatchContext.getMovingAveragesCache());
-            average = dashboardDispatchContext.getMovingAveragesCache().getValueForKey(getKeyForMovingAverage());
+            average = dashboardDispatchContext.getMovingAveragesCache().getValueForKey(uniqueMovingAverageCacheKey());
         }
         result.average = average;
         return result;
     }
 
     @Override
-    protected String getKeyForMovingAverage() {
-        return super.getLeaderboardName();
+    protected String uniqueMovingAverageCacheKey() {
+        return MOVING_AVERAGE_CACHE_KEY;
     }
 }

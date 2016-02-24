@@ -52,12 +52,17 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
     
     @UiField
     HTMLPanel dataDisplayContainer;
-    
-    public DashboardClientFactory dashboardClientFactory;
+
+    private GetStartlineAdvantagesByWindAction getStartlineAdvantagesByWindAction;
+    private DashboardClientFactory dashboardClientFactory;
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesByWindWidget.class.getName());
     
     public StartlineAdvantagesByWindWidget(DashboardClientFactory dashboardClientFactory) {
         StartlineAdvantagesByWindWidgetResources.INSTANCE.gss().ensureInjected();
+        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
+        if (leaderboardNameParameterValue != null) {
+            getStartlineAdvantagesByWindAction = new GetStartlineAdvantagesByWindAction(leaderboardNameParameterValue);
+        }
         this.dashboardClientFactory = dashboardClientFactory;
         dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.metersUnit());
@@ -74,10 +79,8 @@ public class StartlineAdvantagesByWindWidget extends Composite implements HasWid
     
     private void loadData() {
         logger.log(Level.INFO, "Executing GetStartlineAdvantagesAction");
-        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
-        if (leaderboardNameParameterValue != null) {
-            dashboardClientFactory.getDispatch().execute(
-                    new GetStartlineAdvantagesByWindAction(leaderboardNameParameterValue),
+        if (getStartlineAdvantagesByWindAction != null) {
+            dashboardClientFactory.getDispatch().execute(getStartlineAdvantagesByWindAction,
                     new AsyncCallback<StartlineAdvantagesWithMaxAndAverageDTO>() {
 
                         @Override

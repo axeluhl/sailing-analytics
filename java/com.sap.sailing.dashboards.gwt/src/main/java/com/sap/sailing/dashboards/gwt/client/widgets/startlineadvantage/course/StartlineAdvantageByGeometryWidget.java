@@ -35,81 +35,97 @@ public class StartlineAdvantageByGeometryWidget extends Composite implements Has
 
     interface StartlineAdvantageByGeometryWidgetUiBinder extends UiBinder<Widget, StartlineAdvantageByGeometryWidget> {
     }
-    
+
     @UiField(provided = true)
     DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
-    
+
     @UiField(provided = true)
     LiveAverageComponent advantageMaximumLiveAverage;
-    
+
     @UiField
     HTMLPanel contentContainer;
 
-    public DashboardClientFactory dashboardClientFactory;
+    private DashboardClientFactory dashboardClientFactory;
+    private GetStartlineAdvantageByGeometryAction getStartlineAdvantageByGeometryAction;
     private static final Logger logger = Logger.getLogger(StartlineAdvantagesByWindWidget.class.getName());
-    
+
     public StartlineAdvantageByGeometryWidget(DashboardClientFactory dashboardClientFactory) {
         StartlineAdvantageByGeometryWidgetRessources.INSTANCE.gss().ensureInjected();
+        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
+        if (leaderboardNameParameterValue != null) {
+            this.getStartlineAdvantageByGeometryAction = new GetStartlineAdvantageByGeometryAction(leaderboardNameParameterValue);
+        }
         this.dashboardClientFactory = dashboardClientFactory;
         dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         advantageMaximumLiveAverage = new LiveAverageComponent(StringMessages.INSTANCE.metersUnit());
         advantageMaximumLiveAverage.liveLabel.setInnerHTML(StringMessages.INSTANCE.dashboardLiveWind());
-        advantageMaximumLiveAverage.averageLabel.setInnerHTML("<p>"+StringMessages.INSTANCE.dashboardAverageWind()+"</p><p>"+StringMessages.INSTANCE.dashboardAverageWindMinutes(15)+"</p>");
+        advantageMaximumLiveAverage.averageLabel.setInnerHTML("<p>" + StringMessages.INSTANCE.dashboardAverageWind()
+                + "</p><p>" + StringMessages.INSTANCE.dashboardAverageWindMinutes(15) + "</p>");
         initWidget(uiBinder.createAndBindUi(this));
         hideDataDisplayContainer();
-        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartlineAdvantageByGeometryHeader());
-        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE
+                .dashboardStartlineAdvantageByGeometryHeader());
+        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(
+                StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(),
+                StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
-    
-    private void showDataDisplayContainer(){
+
+    private void showDataDisplayContainer() {
         contentContainer.getElement().getStyle().setOpacity(1.0);
     }
-    
-    private void hideDataDisplayContainer(){
+
+    private void hideDataDisplayContainer() {
         contentContainer.getElement().getStyle().setOpacity(0.0);
     }
-    
+
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        String leaderboardNameParameterValue = DashboardURLParameters.LEADERBOARD_NAME.getValue();
-        if (leaderboardNameParameterValue != null) {
-            dashboardClientFactory.getDispatch().execute(
-                    new GetStartlineAdvantageByGeometryAction(leaderboardNameParameterValue),
+        if (getStartlineAdvantageByGeometryAction != null) {
+            dashboardClientFactory.getDispatch().execute(getStartlineAdvantageByGeometryAction,
                     new AsyncCallback<StartLineAdvantageDTO>() {
 
                         @Override
                         public void onFailure(Throwable caught) {
                             logger.log(Level.INFO, "Failed to received startline advantage by geometry");
                             hideDataDisplayContainer();
-                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
+                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(
+                                    StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(),
+                                    StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
                         }
 
                         @Override
                         public void onSuccess(StartLineAdvantageDTO result) {
                             if (result.startLineAdvantage != null) {
-                                logger.log(Level.INFO, "Updating UI with  RibDashboardRaceInfoDTO.startLineAdvantageDTO");
-                                advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(result.startLineAdvantage.doubleValue()));
-                                advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(result.average.doubleValue()));
+                                logger.log(Level.INFO,
+                                        "Updating UI with  RibDashboardRaceInfoDTO.startLineAdvantageDTO");
+                                advantageMaximumLiveAverage.setLiveValue(NumberFormat.getFormat("#0.0").format(
+                                        result.startLineAdvantage.doubleValue()));
+                                advantageMaximumLiveAverage.setAverageValue(NumberFormat.getFormat("#0.0").format(
+                                        result.average.doubleValue()));
                                 showDataDisplayContainer();
                                 dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                             } else {
                                 logger.log(Level.INFO, "RibDashboardRaceInfoDTO.startLineAdvantageDTO is 0");
                                 hideDataDisplayContainer();
-                                dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
+                                dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(
+                                        StringMessages.INSTANCE
+                                                .dashboardNoStartlineAdvantagesByGeometryAvailableHeader(),
+                                        StringMessages.INSTANCE
+                                                .dashboardNoStartlineAdvantagesByGeometryAvailableMessage());
                             }
                         }
                     });
         }
     }
-    
+
     @Override
     public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
         if (dashboardClientFactory != null) {
             dashboardClientFactory.getDashboardFiveSecondsTimer().addTimeListener(this);
         }
     }
-    
+
     @Override
     public void add(Widget w) {
         throw new UnsupportedOperationException("The method add(Widget w) is not supported.");
