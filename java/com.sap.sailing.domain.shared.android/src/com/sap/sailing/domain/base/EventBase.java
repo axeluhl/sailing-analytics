@@ -90,16 +90,43 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     
     void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL);
     
+    /**
+     * Returns a mapping of Locales to URLs where the URLs are meant as an external web site containing sailor related
+     * information like protests, official results, etc.
+     * The default, language independent URL has {@code null} as key.
+     * 
+     * @return the URLs of an external web site containing sailor related information like protests, official results,
+     *         etc.
+     */
     Map<Locale, URL> getSailorsInfoWebsiteURLs();
     
     void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs);
     
+    /**
+     * Sets a sailorsInfoWebsiteURL for the given locale
+     */
     void setSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL);
     
+    /**
+     * Checks if there is a sailorsInfoWebsiteURL available for the given locale.
+     * 
+     * @param locale a locale or null
+     * @return true if there is a sailorsInfoWebsiteURL available for the given locale
+     */
     boolean hasSailorsInfoWebsiteURL(Locale locale);
     
+    /**
+     * @param locale a locale to get the associated sailors info website URL for
+     * @return the URL of an external web site containing sailor related information like protests, official results, etc.
+     *  or <code>null</code> if such a site does not exist for the given locale or its URL is not known.
+     */
     URL getSailorsInfoWebsiteURL(Locale locale);
     
+    /**
+     * Gets the sailorsInfoWebsiteURL for the given locale. If there is no sailorsInfoWebsiteURL for the specific locale
+     * but there is a default sailorsInfoWebsiteURL available, this one is returned.
+     * So this method returns the best available sailorsInfoWebsiteURL for a user who uses the given locale.
+     */
     URL getSailorsInfoWebsiteURLOrFallback(Locale locale);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
