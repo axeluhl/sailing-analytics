@@ -33,9 +33,7 @@ public class DashboardHeader extends Composite implements HasWidgets {
     DivElement race;
     
     private DashboardHeaderResources dashboardHeaderResources = DashboardHeaderResources.INSTANCE;
-    private String eventName;
-    private String raceName;
-
+    
     public DashboardHeader() {
         dashboardHeaderResources.gss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -43,18 +41,12 @@ public class DashboardHeader extends Composite implements HasWidgets {
         event.setInnerHTML(StringMessages.INSTANCE.dashboardHeader());
     }
     
-    
-    
     public void setEventName(String eventName) {
-        this.eventName = eventName;
         event.setInnerHTML(eventName);
     }
 
-
-
     public void setRaceName(String raceName) {
         this.event.addClassName(dashboardHeaderResources.gss().event_shared_space());
-        this.raceName = raceName;
         race.setInnerHTML(raceName);      
     }
 
