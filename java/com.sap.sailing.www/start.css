@@ -76,37 +76,6 @@ a:hover {
 	font-size: 18px;
 }
 
-.yield_content .keyVisual {
-	height: 240px;
-	position: relative;
-	background: white;
-}
-
-.yield_content .keyVisual .infoBox {
-	width: 502px;
-	height: 100px;
-	background: #999999;
-	position: absolute;
-	right: 0;
-	bottom: 0;
-	padding: 10px;
-}
-
-.yield_content .keyVisual .infoBox p {
-	color: white;
-	font-size: 12px;
-}
-
-.yield_content .keyVisual .infoBox a {
-	text-decoration: none;
-	float: right;
-	background: #fcb913;
-	color: white;
-	font-size: 18px;
-	font-family: 'Open Sans', Arial, Verdana, sans-serif;
-	padding: 6px 12px 6px 12px;
-}
-
 .yield_content .mainContent {
 	padding: 0 10px 10px 10px;
 	background: white;
@@ -142,7 +111,7 @@ a:hover {
 	height: 80px;
 }
 
-footer {
+.footer {
 	color: white;
 	width: 940px;
 	height: 20px;
