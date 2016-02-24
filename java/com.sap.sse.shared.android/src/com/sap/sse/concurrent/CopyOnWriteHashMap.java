@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * {@link HashMap} that implements concurrent behavior for write operations by doing the changes in a copy of an inner map and swapping the inner map afterwards.
  * 
- * Read operations are in general non blocking to be aware that the inner state could have changed on subsequent read operations.
+ * Read operations are in general non blocking. Be aware that the inner state could have changed on subsequent read operations.
  *
  * @param <K> The key object type
  * @param <V> The value object type
@@ -18,14 +18,20 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V> {
     /**
      * Lock object use to guard write operations.
      */
-    private final NamedReentrantReadWriteLock lock = new NamedReentrantReadWriteLock("lock for CopyOnWriteHashMap", true);
+    private final NamedReentrantReadWriteLock lock;
     private Map<K, V> wrappedMap;
     
     public CopyOnWriteHashMap() {
+        this("lock for CopyOnWriteHashMap");
+    }
+    
+    public CopyOnWriteHashMap(String lockName) {
+        lock = new NamedReentrantReadWriteLock(lockName, true);
         wrappedMap = new HashMap<>();
     }
     
-    public CopyOnWriteHashMap(Map<? extends K, ? extends V> initialValues) {
+    public CopyOnWriteHashMap(String lockName, Map<? extends K, ? extends V> initialValues) {
+        lock = new NamedReentrantReadWriteLock(lockName, true);
         wrappedMap = new HashMap<>(initialValues);
     }
     
