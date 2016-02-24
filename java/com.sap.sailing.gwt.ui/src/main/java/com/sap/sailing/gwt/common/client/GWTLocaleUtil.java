@@ -8,6 +8,7 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.sap.sse.common.Util;
 
 public final class GWTLocaleUtil {
+    private static final String NO_LOCALE_TEXT = "---";
     
     private GWTLocaleUtil() {
     }
@@ -30,4 +31,10 @@ public final class GWTLocaleUtil {
         return Util.size(getAvailableLocalesAndDefault());
     }
 
+    public static String getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(String localeNameOrNull) {
+        if (localeNameOrNull == null || localeNameOrNull.isEmpty()) {
+            return NO_LOCALE_TEXT;
+        }
+        return LocaleInfo.getLocaleNativeDisplayName(localeNameOrNull) + " ["+localeNameOrNull+"]";
+    }
 }

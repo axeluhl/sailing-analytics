@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.GWTLocaleUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
@@ -25,7 +26,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
-    private static final String NO_LOCALE_TEXT = "---";
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -77,11 +77,9 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.vimeo.name());
         
         localeListBox = createListBox(false);
-        localeListBox.addItem(NO_LOCALE_TEXT, "");
-        localeListBox.addItem("English", "en");
-        localeListBox.addItem("German", "de");
-        localeListBox.addItem("Russian", "ru");
-        localeListBox.addItem("Chinese", "zh");
+        for(String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
+            localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
+        }
         
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
