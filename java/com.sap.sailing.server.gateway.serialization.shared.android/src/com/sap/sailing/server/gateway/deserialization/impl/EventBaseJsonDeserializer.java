@@ -98,6 +98,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             for (Object sailorsInfoWebsiteURLJson : sailorsInfoWebsiteURLsJson) {
                 JSONObject sailorsInfoWebsiteURLJsonObject = (JSONObject) sailorsInfoWebsiteURLJson;
                 String localeString = (String) sailorsInfoWebsiteURLJsonObject.get(EventBaseJsonSerializer.FIELD_LOCALE);
+                // TODO use Locale.forLanguageTag(localeRaw) -> only possible with Android API Level 21
                 result.addSailorsInfoWebsiteURL(localeString == null ? null : new Locale(localeString),  Helpers.getURLField(sailorsInfoWebsiteURLJsonObject, EventBaseJsonSerializer.FIELD_URL));
             } 
         }

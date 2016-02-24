@@ -169,6 +169,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
 
     private void addSailorsInfoWebsiteURL(Locale locale, URL url, JSONArray jsonSailorsInfoWebsiteURLs) {
         JSONObject jsonSailorsInfoWebsiteURL = new JSONObject();
+        // TODO use toLanguageTag() when deserializer can use Locale.forLanguageTag()
         jsonSailorsInfoWebsiteURL.put(FIELD_LOCALE, locale != null ? locale.getLanguage() : null);
         jsonSailorsInfoWebsiteURL.put(FIELD_URL, url.toString());
         jsonSailorsInfoWebsiteURLs.add(jsonSailorsInfoWebsiteURL);
