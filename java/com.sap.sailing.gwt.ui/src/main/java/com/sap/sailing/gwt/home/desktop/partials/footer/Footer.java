@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.footer;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
@@ -131,7 +131,7 @@ public class Footer extends Composite {
             return;
         }
         changeLanguageLink.removeFromParent();
-        Set<Pair<String, String>> values = new HashSet<>();
+        Collection<Pair<String, String>> values = new ArrayList<>();
         Pair<String, String> selectedValue = null;
         for(String localeName : availableLocales) {
             Pair<String, String> value = new Pair<String, String>(localeName, LocaleInfo.getLocaleNativeDisplayName(localeName));
