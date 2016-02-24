@@ -150,9 +150,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             }
         };
         final Button backToLivePlayButton = timePanel.getBackToLiveButton();
-        final TimePanelSettings timePanelSettings = timePanel.getSettings();
-        timePanelSettings.setRefreshInterval(refreshInterval);
-        timePanel.updateSettings(timePanelSettings);
+        timePanel.updateSettings(new TimePanelSettings(refreshInterval));
         raceMapResources.combinedWindPanelStyle().ensureInjected();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorBoats);
         final CompetitorSelectionProvider competitorSelection;

@@ -562,8 +562,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @SuppressWarnings("unchecked")
     public T getSettings() {
-        TimePanelSettings result = new TimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
+        TimePanelSettings result = new TimePanelSettings(timer.getRefreshInterval());
         return (T) result;
     }
 

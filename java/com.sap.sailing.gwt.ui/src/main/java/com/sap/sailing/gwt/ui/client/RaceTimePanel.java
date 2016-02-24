@@ -104,9 +104,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public RaceTimePanelSettings getSettings() {
-        RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
+        RaceTimePanelSettings result = new RaceTimePanelSettings(timer.getRefreshInterval());
         return result;
     }
 
