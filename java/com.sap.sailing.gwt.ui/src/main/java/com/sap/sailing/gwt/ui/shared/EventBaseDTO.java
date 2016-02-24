@@ -105,18 +105,8 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         return sailorsInfoWebsiteURLs;
     }
     
-    @Deprecated
-    public String getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURLs.get(null);
-    }
-    
     public String getSailorsInfoWebsiteURL(String locale) {
         return sailorsInfoWebsiteURLs.get(locale);
-    }
-    
-    @Deprecated
-    public void setSailorsInfoWebsiteURL(String url) {
-        setSailorsInfoWebsiteURL(null, url);
     }
     
     public void setSailorsInfoWebsiteURL(String locale, String url) {
