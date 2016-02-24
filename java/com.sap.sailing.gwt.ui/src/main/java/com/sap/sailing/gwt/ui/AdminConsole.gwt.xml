@@ -44,9 +44,11 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<extend-property name="locale" values="en,de,zh,ru" />
+	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+	<!-- AdminConsole inherits the default sailing locale configuration but only activates de and en permutations.
+	     With this, all default sailing locales are included in GWT'2 LocaleInfo.
+	     So we can populate UI elements in the AdminConsole with all locales without the need to really support all those locales for users of the AdminConsole. -->
 	<set-property name="locale" value="en,de"/>
-	<set-property-fallback name="locale" value="en"/>
 	
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
