@@ -1,6 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import android.app.Activity;
@@ -9,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
@@ -24,41 +24,42 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     private static int requestCodeQRCode = 45392;
-    
-    private Preference identifierPreference;
-    private Preference serverUrlPreference;
-    
+
+    private EditTextPreference identifierPreference;
+    private EditTextPreference serverUrlPreference;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preference_general);
-        
+
         setupConnection();
         setupPolling();
         setupGeneral();
         setupDeveloperOptions();
     }
+
     protected void setupGeneral() {
         setupLanguageButton();
         setupCourseAreasList();
-        
+
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
         bindPreferenceToListEntry(findPreference(R.string.preference_theme_key), getString(R.string.preference_theme_default));
         addOnPreferenceChangeListener(findPreference(R.string.preference_theme_key), new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),R.style.AppTheme_AlertDialog);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
                 builder.setTitle(getString(R.string.theme_changed_title));
                 builder.setMessage(R.string.theme_changed_message);
-                builder.setPositiveButton(getString(android.R.string.ok),null);
+                builder.setPositiveButton(getString(android.R.string.ok), null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 return true;
@@ -75,7 +76,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
     protected void setupDeveloperOptions() {
         PreferenceScreen screen = getPreferenceScreen();
-        PreferenceCategory category = (PreferenceCategory)findPreference(getString(R.string.preference_developer_key));
+        PreferenceCategory category = findPreference(R.string.preference_developer_key);
         if (!BuildConfig.DEBUG) {
             if (screen != null && category != null) {
                 screen.removePreference(category);
@@ -109,7 +110,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
     }
 
     private void setupServerUrlBox() {
-        serverUrlPreference = findPreference(getString(R.string.preference_server_url_key));
+        serverUrlPreference = findPreference(R.string.preference_server_url_key);
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -118,10 +119,6 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 builder.setMessage(getString(R.string.url_refresh_message));
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.create().show();
-                // reset all data because it's all dependent on the server url
-                DataManager dataManager = (DataManager) DataManager.create(getActivity());
-                dataManager.resetAll();
-                // TODO force a reload of the app now!
                 return true;
             }
         });
@@ -159,9 +156,9 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         Preference preference = findPreference(R.string.preference_language_key);
         preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
-            public boolean onPreferenceClick(Preference preference) { 
+            public boolean onPreferenceClick(Preference preference) {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");            
+                intent.setClassName("com.android.settings", "com.android.settings.LanguageSettings");
                 startActivity(intent);
                 return true;
             }
@@ -174,68 +171,49 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             startActivityForResult(intent, requestCodeQRCode);
             return true;
-        } catch (Exception e) {    
+        } catch (Exception e) {
             Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-            Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+            Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
             startActivity(marketIntent);
         }
         return false;
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != requestCodeQRCode) {
             super.onActivityResult(requestCode, resultCode, data);
             return;
         }
-        
+
         if (resultCode == Activity.RESULT_OK) {
             String content = data.getStringExtra("SCAN_RESULT");
             try {
                 Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
-                
+
                 String identifier = connectionConfiguration.getA();
-                URL apkUrl = tryConvertToURL(connectionConfiguration.getB());
-                
+                URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
+
                 if (apkUrl != null) {
-                    String serverUrl = getServerUrl(apkUrl);
-                    
+                    String serverUrl = UrlHelper.getServerUrl(apkUrl);
+
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
                     preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
-                    
+
                     identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
+                    serverUrlPreference.setText(serverUrl);
                     serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
-                    
+
                     new AutoUpdater(getActivity()).checkForUpdate(false);
                 } else {
-                    String toastText = getString(R.string.error_scanning_qr_malformed);
-                    Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
                 }
             } catch (IllegalArgumentException e) {
-                String toastText = getString(R.string.error_scanning_qr);
-                toastText = String.format(toastText, e.getMessage());
-                Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, e.getMessage()), Toast.LENGTH_LONG).show();
             }
         } else {
-            String toastText = getString(R.string.error_scanning_qr);
-            toastText = String.format(toastText, "" + resultCode);
-            Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    protected String getServerUrl(URL apkUrl) {
-        String protocol = apkUrl.getProtocol();
-        String host = apkUrl.getHost();
-        String port = apkUrl.getPort() == -1 ? "" : ":" + apkUrl.getPort();
-        return protocol + "://" + host + port;
-    }
-    
-    private URL tryConvertToURL(String url) {
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            return null;
+            Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
     }
 }

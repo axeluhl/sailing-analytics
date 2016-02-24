@@ -289,8 +289,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
      Notification notification = new NotificationCompat.Builder(this)
      .setContentTitle(getText(R.string.app_name))
      .setContentText(getString(R.string.tracking_notification_text, event.name)).setContentIntent(pi)
-         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
-         .setSmallIcon(R.drawable.ic_launcher)
+         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+         .setSmallIcon(R.drawable.ic_directions_boat)
          .setOngoing(true).build();
          notificationManager.notify(NOTIFICATION_ID, notification);
      }

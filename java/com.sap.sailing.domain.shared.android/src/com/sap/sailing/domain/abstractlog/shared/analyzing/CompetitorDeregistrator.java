@@ -17,7 +17,7 @@ import com.sap.sse.common.Util;
  * Generates events that close the events that are responsible for the {@link #mapping} that is passed to the
  * constructor.
  * 
- * @author Jan Broﬂ
+ * @author Jan Bross
  *
  */
 public class CompetitorDeregistrator<LogT extends AbstractLog<EventT, VisitorT>, EventT extends AbstractLogEvent<VisitorT>, VisitorT>

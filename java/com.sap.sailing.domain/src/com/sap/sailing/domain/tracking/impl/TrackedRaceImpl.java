@@ -511,7 +511,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateWindTrack(trackBasedWindSource, delayForWindEstimationCacheInvalidation));
         competitorRankings = createCompetitorRankingsCache();
         competitorRankingsLocks = createCompetitorRankingsLockMap();
-        if (useInternalMarkPassingAlgorithm){
+        if (useInternalMarkPassingAlgorithm) {
             markPassingCalculator = createMarkPassingCalculator();
             this.trackedRegatta.addRaceListener(new RaceListener() {
                 @Override

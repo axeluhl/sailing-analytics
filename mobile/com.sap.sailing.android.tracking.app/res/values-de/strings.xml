@@ -4,7 +4,7 @@
     <string name="no">Nein</string>
     <string name="empty"></string>
     <string name="tracking_time">Tracking Zeit</string>
-    <string name="app_name">SAP Sailing Tracking App</string>
+    <string name="app_name">SAP Sail InSight</string>
     <string name="options_menu_settings">Einstellungen</string>
     <string name="options_menu_checkout">Checkout</string>
     <string name="options_add_team_photo">Team Foto hinzufügen</string>
@@ -14,8 +14,8 @@
     <string name="device_identifier">Geräte-ID</string>
     <string name="stop_tracking">Stoppe Tracking</string>
     <string name="start_tracking">Starte Tracking</string>
-    <string name="tracker_started">SAP Sailing Tracker gestartet</string>
-    <string name="tracker_stopped">SAP Sailing Tracker gestoppt</string>
+    <string name="tracker_started">SAP Sail InSight gestartet</string>
+    <string name="tracker_stopped">SAP Sail InSight gestoppt</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leaderboard</string>
     <string name="title_activity_event">Event</string>
@@ -37,11 +37,11 @@
     <string name="existing_image">Auswählen</string>
     <string name="take_photo">Foto aufnehmen</string>
     <string name="add_photo_select">Foto</string>
-    <string name="checking_in">Checke ein..</string>
-    <string name="checking_out">Checke aus..</string>
-    <string name="getting_event">Hole Event-Daten..</string>
-    <string name="getting_leaderboard">Hole Leaderboard-Daten..</string>
-    <string name="getting_competitor">Hole Teilnehmer-Daten..</string>
+    <string name="checking_in">Checke ein&#8230;</string>
+    <string name="checking_out">Checke aus&#8230;</string>
+    <string name="getting_event">Hole Event-Daten&#8230;</string>
+    <string name="getting_leaderboard">Hole Leaderboard-Daten&#8230;</string>
+    <string name="getting_competitor">Hole Teilnehmer-Daten&#8230;</string>
     <string name="error">Fehler</string>
     <string name="error_could_not_complete_operation_on_server_try_again">Konnte Operation nicht durchführen. Bitte versuchen Sie es noch einmal.</string>
     <string name="error_sending_team_image_to_server">Fehler: Konnte Team-Foto nicht an den server senden.</string>
@@ -77,5 +77,8 @@
     <string name="preferences">Einstellungen</string>
     <string name="tracking_notification_text">Tracking läuft für %s</string>
     <string name="waiting_for_gps">Warte auf GPS-Signal</string>
+    <string name="upload_in_progress">Wird hochgeladen&#8230;</string>
+    <string name="upload_io_error">Fehler beim Hochladen: </string>
+    <string name="upload_retry">Fehler beim Hochladen.\nZum Wiederholen hier tippen.</string>
 
 </resources>

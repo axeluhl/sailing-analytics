@@ -98,6 +98,28 @@ public class APIManager: NSObject {
         let urlString = baseUrlString + "/competitors/\(competitorId)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
+
+    /* Get team */
+    public func getTeam(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let urlString = baseUrlString + "/competitors/\(competitorId)/team"
+        manager!.GET(urlString, parameters: nil, success: success, failure: failure)
+    }
+
+    public func teamImage(competitorId: String!, result: (imageUrl: String?) -> Void) {
+        getTeam(competitorId, success: { (AFHTTPRequestOperation operation, AnyObject teamResponseObject) -> Void in
+
+            if let team = teamResponseObject as? [String: AnyObject],
+                let imageUrl = team["imageUri"] as? String {
+                result(imageUrl: imageUrl)
+            } else {
+                result(imageUrl: nil)
+            }
+
+        }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+            // No image & that's ok
+            result(imageUrl: nil)
+        })
+    }
     
     /* Map a device to competitor. */
     public func checkIn(leaderBoardName: String!, competitorId: String!, deviceUuid: String!, pushDeviceId: String!, fromMillis: Int64!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
