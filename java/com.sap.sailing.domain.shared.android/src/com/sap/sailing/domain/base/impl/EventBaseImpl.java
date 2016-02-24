@@ -222,11 +222,6 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public void removeSailorsInfoWebsiteURL(Locale locale) {
-        this.sailorsInfoWebsiteURLs.remove(locale);
-    }
-
-    @Override
     public boolean hasSailorsInfoWebsiteURL(Locale locale) {
         return this.sailorsInfoWebsiteURLs.containsKey(locale);
     }

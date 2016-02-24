@@ -100,8 +100,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     
     URL getSailorsInfoWebsiteURL(Locale locale);
     
-    void removeSailorsInfoWebsiteURL(Locale locale);
-    
     URL getSailorsInfoWebsiteURLOrFallback(Locale locale);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
