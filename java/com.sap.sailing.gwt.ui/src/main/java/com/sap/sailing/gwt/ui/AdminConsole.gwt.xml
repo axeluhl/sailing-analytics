@@ -44,7 +44,7 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<extend-property name="locale" values="en,de" />
+	<extend-property name="locale" values="en,de,zh,ru" />
 	<set-property name="locale" value="en,de"/>
 	<set-property-fallback name="locale" value="en"/>
 	
