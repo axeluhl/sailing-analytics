@@ -46,19 +46,20 @@ public class ActionPanel extends AbsolutePanel {
         listeners.remove(actionPanelListener);
     }
 
-    private void notifyActionPanelListenerAboutTriggeredEvent(Event event) {
+    private void notifyActionPanelListenerAboutTriggeredEvent() {
         for (ActionPanelListener actionPanelListener : listeners) {
-            actionPanelListener.eventTriggered(event);
+            actionPanelListener.eventTriggered();
         }
     }
 
     @Override
     public void onBrowserEvent(Event event) {
-        notifyActionPanelListenerAboutTriggeredEvent(event);
-        super.onBrowserEvent(event);
+        if (this.eventsList.contains(event.getTypeInt())) {
+            notifyActionPanelListenerAboutTriggeredEvent();
+        }
     }
 
     public interface ActionPanelListener {
-        public void eventTriggered(Event event);
+        public void eventTriggered();
     }
 }

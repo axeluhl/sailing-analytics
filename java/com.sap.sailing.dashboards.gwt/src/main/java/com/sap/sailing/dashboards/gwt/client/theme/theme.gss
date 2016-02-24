@@ -2,11 +2,14 @@
  
 /*Colors*/
 @def WHITE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.WHITE");
+@def BLACK eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.BLACK");
 @def LIGHT_GREY eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_GREY");
 @def DARK_GREY eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_GREY");
 @def LIGHT_TEXT_COLOR eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_TEXT_COLOR");
 @def DARK_TEXT_COLOR eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_TEXT_COLOR");
 @def DARK_BLUE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.DARK_BLUE");
+@def BUTTON_BACKGROUND eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.BUTTON_BACKGROUND");
+@def BUTTON_BACKGROUND_ACTIVE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.BUTTON_BACKGROUND_ACTIVE");
 @def LIGHT_BLUE eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.LIGHT_GREY");
 @def YELLOW eval("com.sap.sailing.dashboards.gwt.client.theme.Colors.YELLOW");
 

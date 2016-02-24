@@ -1,5 +1,6 @@
 package com.sap.sailing.dashboards.gwt.client.theme;
 
+
 /**
  * @author Alexander Ries (D062114)
  *

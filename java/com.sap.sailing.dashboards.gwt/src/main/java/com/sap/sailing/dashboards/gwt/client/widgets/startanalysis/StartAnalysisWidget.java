@@ -15,8 +15,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Cookies;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
@@ -202,7 +200,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     @Override
                     public void onSuccess(StartAnalysesDTO result) {
                         logger.log(Level.INFO, "Received startanalysis list");
-                        if (result != null && !result.getStartAnalyses().isEmpty()) {
+                        if (result != null && !result.getStartAnalyses().isEmpty() && result.getStartAnalyses().size() > 0) {
                             dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                             if (displayedStartAnalysisForDifferentCompetitorToRequestedOne()) {
                                 removeAllStartAnalysisCards();
@@ -297,17 +295,8 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         selectedCompetitorWithSettingsButton.addActionListener(new ActionPanel.ActionPanelListener() {
 
             @Override
-            public void eventTriggered(Event event) {
-                switch (DOM.eventGetType(event)) {
-                case Event.ONTOUCHEND: {
-                    loadCompetitorsAndShowCompetitorSelectionPopup();
-                    break;
-                }
-                case Event.ONCLICK: {
-                    loadCompetitorsAndShowCompetitorSelectionPopup();
-                    return;
-                }
-                }
+            public void eventTriggered() {
+                loadCompetitorsAndShowCompetitorSelectionPopup();
             }
         });
     }
