@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -127,17 +128,17 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
 
     @Override
     public Set<K> keySet() {
-        return wrappedMap.keySet();
+        return Collections.unmodifiableSet(wrappedMap.keySet());
     }
 
     @Override
     public Collection<V> values() {
-        return wrappedMap.values();
+        return Collections.unmodifiableCollection(wrappedMap.values());
     }
 
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
-        return wrappedMap.entrySet();
+        return Collections.unmodifiableSet(wrappedMap.entrySet());
     }
 
     /**
