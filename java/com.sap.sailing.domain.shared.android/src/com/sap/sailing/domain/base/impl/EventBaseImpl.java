@@ -28,7 +28,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 
 public abstract class EventBaseImpl implements EventBase {
-    private static final long serialVersionUID = -5749964088848611074L;
+    private static final long serialVersionUID = -4055554853909324357L;
 
     private String name;
     private String description;
