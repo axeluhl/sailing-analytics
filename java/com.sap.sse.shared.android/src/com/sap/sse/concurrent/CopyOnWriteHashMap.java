@@ -158,4 +158,30 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
             LockUtil.unlockAfterWrite(lock);
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((wrappedMap == null) ? 0 : wrappedMap.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        @SuppressWarnings("rawtypes")
+        CopyOnWriteHashMap other = (CopyOnWriteHashMap) obj;
+        if (wrappedMap == null) {
+            if (other.wrappedMap != null)
+                return false;
+        } else if (!wrappedMap.equals(other.wrappedMap))
+            return false;
+        return true;
+    }
 }
