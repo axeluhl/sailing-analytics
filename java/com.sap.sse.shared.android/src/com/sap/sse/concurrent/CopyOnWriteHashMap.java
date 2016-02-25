@@ -128,16 +128,19 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
 
     @Override
     public Set<K> keySet() {
+        // Returning an unmodifiable instance prevents unlocked concurrent modifications
         return Collections.unmodifiableSet(wrappedMap.keySet());
     }
 
     @Override
     public Collection<V> values() {
+        // Returning an unmodifiable instance prevents unlocked concurrent modifications
         return Collections.unmodifiableCollection(wrappedMap.values());
     }
 
     @Override
     public Set<java.util.Map.Entry<K, V>> entrySet() {
+        // Returning an unmodifiable instance prevents unlocked concurrent modifications
         return Collections.unmodifiableSet(wrappedMap.entrySet());
     }
 
