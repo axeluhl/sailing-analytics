@@ -1,5 +1,9 @@
 package com.sap.sse.concurrent;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +17,12 @@ import java.util.Set;
  * @param <K> The key object type
  * @param <V> The value object type
  */
-public class CopyOnWriteHashMap<K, V> implements Map<K, V> {
-    
+public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
+    private static final long serialVersionUID = -5618926487507116463L;
     /**
      * Lock object use to guard write operations.
      */
-    private final NamedReentrantReadWriteLock lock;
+    private transient NamedReentrantReadWriteLock lock;
     private Map<K, V> wrappedMap;
     
     public CopyOnWriteHashMap() {
@@ -33,6 +37,19 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V> {
     public CopyOnWriteHashMap(String lockName, Map<? extends K, ? extends V> initialValues) {
         lock = new NamedReentrantReadWriteLock(lockName, true);
         wrappedMap = new HashMap<>(initialValues);
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+        stream.writeObject(lock.getName());
+    }
+    
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        final String lockName = (String) ois.readObject();
+        if (lock == null) {
+            lock = new NamedReentrantReadWriteLock(lockName, true);
+        }
     }
     
     @Override
