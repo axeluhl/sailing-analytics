@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.AbstractLogDTO;
 import com.sap.sailing.gwt.ui.shared.AbstractLogEventDTO;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends AbstractLogEventDTO> extends DataEntryDialog<R> {
@@ -35,7 +36,7 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
         selectionModel = new SingleSelectionModel<E>();
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceLogEventsTable = new CellTable<E>(/* pageSize */10000, tableRes);
+        raceLogEventsTable = new BaseCelltable<E>(/* pageSize */10000, tableRes);
         raceLogEventsTable.ensureDebugId("TrackedRacesTable");
         raceLogEventsTable.setSelectionModel(selectionModel);
 

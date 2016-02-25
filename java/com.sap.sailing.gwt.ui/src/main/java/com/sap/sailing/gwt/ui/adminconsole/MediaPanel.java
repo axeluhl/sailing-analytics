@@ -52,6 +52,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -158,7 +159,7 @@ public class MediaPanel extends FlowPanel {
         // Set a key provider that provides a unique key for each contact. If key is
         // used to identify contacts when fields (such as the name and address)
         // change.
-        mediaTracksTable = new CellTable<MediaTrack>(1000, tableResources);
+        mediaTracksTable = new BaseCelltable<MediaTrack>(1000, tableResources);
         mediaTracksTable.setWidth("100%");
 
         // Attach a column sort handler to the ListDataProvider to sort the list.

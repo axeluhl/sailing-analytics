@@ -12,6 +12,7 @@ import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class StartAnalysisStartRankTable extends AbsolutePanel {
 
@@ -29,7 +30,7 @@ public class StartAnalysisStartRankTable extends AbsolutePanel {
 
         CellTable.Resources tableRes = GWT.create(StartAnalysisStartRankTableStyleResource.class);
         
-        table = new CellTable<StartAnalysisCompetitorDTO>(1, tableRes);
+        table = new BaseCelltable<StartAnalysisCompetitorDTO>(1, tableRes);
         table.getElement().getStyle().setWidth(100, Unit.PCT);
         table.setSkipRowHoverStyleUpdate(true);
         table.setSkipRowHoverCheck(true);
