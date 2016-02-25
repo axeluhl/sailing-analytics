@@ -24,7 +24,7 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
      * Lock object use to guard write operations.
      */
     private transient NamedReentrantReadWriteLock lock;
-    private Map<K, V> wrappedMap;
+    private volatile Map<K, V> wrappedMap;
     
     public CopyOnWriteHashMap() {
         this("lock for CopyOnWriteHashMap");
