@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -76,7 +77,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new CellTable<String>(/* pageSize */10000, tableRes);
+        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
         final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
         refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null, filteredAccounts);
         allAccounts.setSelectionModel(refreshableAccountsSelectionModel);

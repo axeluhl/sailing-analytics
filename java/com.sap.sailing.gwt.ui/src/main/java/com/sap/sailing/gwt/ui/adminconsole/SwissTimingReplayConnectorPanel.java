@@ -40,6 +40,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -184,7 +185,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceStartTrackingColumn.setSortable(true);
         boatClassNamesColumn.setSortable(true);
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingReplayRaceDTO>(/* pageSize */ 10000, tableRes);
+        raceTable = new BaseCelltable<SwissTimingReplayRaceDTO>(/* pageSize */10000, tableRes);
         raceTable.addColumn(raceNameColumn, stringMessages.race());
         raceTable.addColumn(regattaNameColumn, "RSC");
         raceTable.addColumn(boatClassNamesColumn, stringMessages.boatClass());
