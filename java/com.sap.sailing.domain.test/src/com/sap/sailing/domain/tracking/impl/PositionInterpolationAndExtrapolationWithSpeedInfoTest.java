@@ -19,20 +19,20 @@ public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends Posi
     @Before
     public void setUp() {
         super.setUp();
-        track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 8000);
+        setTrack(new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 8000));
         speed = new KnotSpeedWithBearingImpl(6 /* knots */, Bearing.NORTH);
     }
     
     @Test
     public void testEmptyTrack() {
-        assertNull(track.getEstimatedPosition(now, /* extrapolate */ true));
-        assertNull(track.getEstimatedPosition(now, /* extrapolate */ false));
+        assertNull(getTrack().getEstimatedPosition(now, /* extrapolate */ true));
+        assertNull(getTrack().getEstimatedPosition(now, /* extrapolate */ false));
     }
     
     @Test
     public void testFixBeforeNow() {
         final GPSFixMoving fixBeforeNow = new GPSFixMovingImpl(p1, now.minus(Duration.ONE_HOUR), speed);
-        track.add(fixBeforeNow);
+        getTrack().add(fixBeforeNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1.translateGreatCircle(speed.getBearing(), speed.travel(now.minus(Duration.ONE_HOUR), now)), /* extrapolate */ true);
     }
@@ -40,7 +40,7 @@ public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends Posi
     @Test
     public void testFixAfterNow() {
         GPSFixMoving fixAfterNow = new GPSFixMovingImpl(p1, now.plus(Duration.ONE_HOUR), speed);
-        track.add(fixAfterNow);
+        getTrack().add(fixAfterNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1.translateGreatCircle(speed.getBearing().reverse() /* travel backwards */, speed.travel(now.minus(Duration.ONE_HOUR), now)), /* extrapolate */ true);
     }
@@ -48,7 +48,7 @@ public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends Posi
     @Test
     public void testExactMatch() {
         GPSFixMoving fixNow = new GPSFixMovingImpl(p1, now, speed);
-        track.add(fixNow);
+        getTrack().add(fixNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1, /* extrapolate */ true);
     }
@@ -56,9 +56,9 @@ public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends Posi
     @Test
     public void testInBetween() {
         GPSFixMoving fixBeforeNow = new GPSFixMovingImpl(p1, now.minus(Duration.ONE_HOUR), speed);
-        track.add(fixBeforeNow);
+        getTrack().add(fixBeforeNow);
         GPSFixMoving fixAfterNow = new GPSFixMovingImpl(p2, now.plus(Duration.ONE_HOUR), speed);
-        track.add(fixAfterNow);
+        getTrack().add(fixAfterNow);
         Position middle = p1.translateGreatCircle(p1.getBearingGreatCircle(p2), p1.getDistance(p2).scale(0.5));
         assertPos(middle, /* extrapolate */ false);
         assertPos(middle, /* extrapolate */ true);

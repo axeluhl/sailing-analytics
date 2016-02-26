@@ -9,7 +9,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class PositionInterpolationAndExtrapolationTest<FixType extends GPSFix> {
-    protected GPSFixTrackImpl<Object, FixType> track;
+    private GPSFixTrackImpl<Object, FixType> track;
     protected TimePoint now;
     protected Position p1;
     protected Position p2;
@@ -21,6 +21,14 @@ public abstract class PositionInterpolationAndExtrapolationTest<FixType extends 
     }
     
     protected void assertPos(Position p, boolean extrapolate) {
-        assertEquals(p, track.getEstimatedPosition(now, extrapolate));
+        assertEquals(p, getTrack().getEstimatedPosition(now, extrapolate));
+    }
+
+    protected GPSFixTrackImpl<Object, FixType> getTrack() {
+        return track;
+    }
+
+    protected void setTrack(GPSFixTrackImpl<Object, FixType> track) {
+        this.track = track;
     }
 }

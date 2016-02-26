@@ -13,19 +13,24 @@ public class PositionInterpolationAndExtrapolationWithoutSpeedInfoTest extends P
     @Before
     public void setUp() {
         super.setUp();
-        track = new GPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 8000);
+        setTrack(new DynamicGPSFixTrackImpl<>(new Object(), /* millisecondsOverWhichToAverage */ 8000));
+    }
+    
+    @Override
+    protected DynamicGPSFixTrackImpl<Object> getTrack() {
+        return (DynamicGPSFixTrackImpl<Object>) super.getTrack();
     }
     
     @Test
     public void testEmptyTrack() {
-        assertNull(track.getEstimatedPosition(now, /* extrapolate */ true));
-        assertNull(track.getEstimatedPosition(now, /* extrapolate */ false));
+        assertNull(getTrack().getEstimatedPosition(now, /* extrapolate */ true));
+        assertNull(getTrack().getEstimatedPosition(now, /* extrapolate */ false));
     }
     
     @Test
     public void testFixBeforeNow() {
         GPSFix fixBeforeNow = new GPSFixImpl(p1, now.minus(Duration.ONE_HOUR));
-        track.add(fixBeforeNow);
+        getTrack().add(fixBeforeNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1, /* extrapolate */ true);
     }
@@ -33,7 +38,7 @@ public class PositionInterpolationAndExtrapolationWithoutSpeedInfoTest extends P
     @Test
     public void testFixAfterNow() {
         GPSFix fixAfterNow = new GPSFixImpl(p1, now.plus(Duration.ONE_HOUR));
-        track.add(fixAfterNow);
+        getTrack().add(fixAfterNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1, /* extrapolate */ true);
     }
@@ -41,7 +46,7 @@ public class PositionInterpolationAndExtrapolationWithoutSpeedInfoTest extends P
     @Test
     public void testExactMatch() {
         GPSFix fixNow = new GPSFixImpl(p1, now);
-        track.add(fixNow);
+        getTrack().add(fixNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1, /* extrapolate */ true);
     }
@@ -49,9 +54,9 @@ public class PositionInterpolationAndExtrapolationWithoutSpeedInfoTest extends P
     @Test
     public void testInBetweenFallsBackToPreviousPosition() {
         GPSFix fixBeforeNow = new GPSFixImpl(p1, now.minus(Duration.ONE_HOUR));
-        track.add(fixBeforeNow);
+        getTrack().add(fixBeforeNow);
         GPSFix fixAfterNow = new GPSFixImpl(p2, now.plus(Duration.ONE_HOUR));
-        track.add(fixAfterNow);
+        getTrack().add(fixAfterNow);
         assertPos(p1, /* extrapolate */ false);
         assertPos(p1, /* extrapolate */ true);
     }
