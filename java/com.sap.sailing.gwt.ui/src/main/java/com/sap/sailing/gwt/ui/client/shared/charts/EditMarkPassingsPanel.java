@@ -42,6 +42,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -111,7 +112,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
                 enableButtons();
             }
         });
-        wayPointSelectionTable = new CellTable<Util.Pair<Integer, Date>>();
+        wayPointSelectionTable = new BaseCelltable<Util.Pair<Integer, Date>>();
         wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
             public SafeHtml getValue(final Util.Pair<Integer, Date> object) {
