@@ -477,27 +477,41 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
                 // no fix at all; cannot determine a position
                 result = null;
             } else {
+                // only one fix valid; extrapolate or use unchanged
                 result = getEstimatedPosition(timePoint, firstFixAtOrAfter, extrapolate);
             }
         } else {
             if (firstFixAtOrAfter == null) {
+                // only one fix valid; extrapolate or use unchanged
                 result = getEstimatedPosition(timePoint, lastFixAtOrBefore, extrapolate);
             } else {
                 // both fixes are valid; interpolate between the two; extrapolate plays no role in this case
-                final SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
-                Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
-                result = lastFixAtOrBefore.getPosition().translateGreatCircle(
-                        estimatedSpeed.getBearing(), distance);
+                result = getEstimatedPositionBetweenTwoValidFixes(timePoint, lastFixAtOrBefore, firstFixAtOrAfter);
             }
         }
         return result;
+    }
+
+    /**
+     * This type of track returns a fix position up to the time point of the next fix. Therefore, {@code lastFixAtOrBefore.getPosition()}
+     * is returned by this implementation. Note that subclasses may choose to interpolate in some way.
+     * 
+     * @param lastFixAtOrBefore must not be {@code null} and must have a time point at or before {@code timePoint}
+     * @param firstFixAtOrAfter must not be {@code null} and must have a time point at or after {@code timePoint}
+     */
+    protected Position getEstimatedPositionBetweenTwoValidFixes(TimePoint timePoint, FixType lastFixAtOrBefore, FixType firstFixAtOrAfter) {
+        assert lastFixAtOrBefore != null;
+        assert firstFixAtOrAfter != null;
+        assert !timePoint.before(lastFixAtOrBefore.getTimePoint());
+        assert !timePoint.after(firstFixAtOrAfter.getTimePoint());
+        return lastFixAtOrBefore.getPosition();
     }
     
     /**
      * When extrapolation is requested and the fix has a {@link GPSFixMoving#getSpeed() speed}, the fix's position is
      * translated based on that speed to {@code timePoint}. Otherwise, the fix's position is returned unchanged.
      */
-    protected Position getEstimatedPosition(TimePoint timePoint, FixType fix, boolean extrapolate) {
+    private Position getEstimatedPosition(TimePoint timePoint, FixType fix, boolean extrapolate) {
         assert fix != null;
         final Position result;
         if (extrapolate && fix instanceof GPSFixMoving) {
@@ -515,14 +529,6 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         return maxSpeedCache.getMaxSpeed(from, to);
     }
 
-    private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
-        assert fix1 != null && fix2 != null;
-        final Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
-        return new KnotSpeedWithBearingImpl(distance.inTime(fix1.getTimePoint().until(fix2.getTimePoint())).getKnots(),
-                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
-    }
-
-    
     /**
      * Returns the smoothened fixes (see {@link #getInternalFixes()}), type-cast such that it's a set of {@link GPSFix}
      * objects
