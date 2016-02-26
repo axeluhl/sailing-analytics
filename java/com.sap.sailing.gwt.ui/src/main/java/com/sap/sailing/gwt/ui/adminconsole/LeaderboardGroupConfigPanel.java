@@ -53,6 +53,7 @@ import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -449,7 +450,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         //Create table for leaderboard groups
         groupsProvider = new ListDataProvider<LeaderboardGroupDTO>();
         ListHandler<LeaderboardGroupDTO> leaderboardGroupsListHandler = new ListHandler<LeaderboardGroupDTO>(groupsProvider.getList());
-        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableRes);
+        groupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000, tableRes);
         groupsTable.ensureDebugId("LeaderboardGroupsCellTable");
         groupsFilterablePanel = new LabeledAbstractFilterablePanel<LeaderboardGroupDTO>(filterLeaderboardGroupsLbl, availableLeaderboardGroups, groupsTable, groupsProvider) {
             @Override

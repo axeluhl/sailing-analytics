@@ -69,6 +69,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -263,7 +264,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         } else {
             sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
-        table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
+        table = new BaseCelltable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
         tableHolder.setWidget(table);
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.addDataDisplay(table);
