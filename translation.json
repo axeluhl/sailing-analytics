@@ -28,7 +28,10 @@
                "sourceFolderPath":"java/com.sap.sse.datamining/resources/stringmessages",
                "sourceFilters":[  
                   "StringMessages*.properties"
-               ]
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             }
          ]
       },
@@ -39,7 +42,10 @@
                "sourceFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage",
                "sourceFilters":[  
                   "StringMessages*.properties"
-               ]
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             }
          ]
       },
@@ -50,7 +56,10 @@
                "sourceFolderPath":"java/com.sap.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n",
                "sourceFilters":[  
                   "StringMessages*.properties"
-               ]
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             }
          ]
       }
