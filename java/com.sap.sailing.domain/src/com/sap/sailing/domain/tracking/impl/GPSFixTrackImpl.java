@@ -472,35 +472,40 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         assert firstFixAtOrAfter == null || !timePoint.after(firstFixAtOrAfter.getTimePoint());
         final Position result;
         // TODO bug #346: compute a confidence value for the position returned based on time difference between fix(es) and timePoint; consider using Taylor approximation of more fixes around timePoint to predict and weigh position
-        if (lastFixAtOrBefore != null && lastFixAtOrBefore == firstFixAtOrAfter) {
-            result = lastFixAtOrBefore.getPosition(); // exact match; how unlikely is that?
-        } else {
-            if (lastFixAtOrBefore == null && firstFixAtOrAfter != null) {
-                // TODO shouldn't this extrapolate into the past if extrapolate==true?
-                result = firstFixAtOrAfter.getPosition(); // asking for time point before first fix: return first fix's position
-            } else if (firstFixAtOrAfter == null && !extrapolate) {
-                result = lastFixAtOrBefore == null ? null : lastFixAtOrBefore.getPosition();
+        if (lastFixAtOrBefore == null) {
+            if (firstFixAtOrAfter == null) {
+                // no fix at all; cannot determine a position
+                result = null;
             } else {
-                assert (lastFixAtOrBefore != null || firstFixAtOrAfter == null) && (firstFixAtOrAfter != null || extrapolate);
-                SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
-                if (estimatedSpeed == null) {
-                    if (lastFixAtOrBefore != null) {
-                        result = lastFixAtOrBefore.getPosition();
-                    } else {
-                        result = null;
-                    }
-                } else {
-                    if (lastFixAtOrBefore != null) {
-                        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
-                        result = lastFixAtOrBefore.getPosition().translateGreatCircle(
-                                estimatedSpeed.getBearing(), distance);
-                    } else {
-                        // firstFixAtOrAfter can't be null because otherwise no speed could have been estimated
-                        // TODO shouldn't this extrapolate into the past if extrapolate==true?
-                        result = firstFixAtOrAfter.getPosition();
-                    }
-                }
+                result = getEstimatedPosition(timePoint, firstFixAtOrAfter, extrapolate);
             }
+        } else {
+            if (firstFixAtOrAfter == null) {
+                result = getEstimatedPosition(timePoint, lastFixAtOrBefore, extrapolate);
+            } else {
+                // both fixes are valid; interpolate between the two; extrapolate plays no role in this case
+                final SpeedWithBearing estimatedSpeed = estimateSpeed(lastFixAtOrBefore, firstFixAtOrAfter);
+                Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+                result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                        estimatedSpeed.getBearing(), distance);
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * When extrapolation is requested and the fix has a {@link GPSFixMoving#getSpeed() speed}, the fix's position is
+     * translated based on that speed to {@code timePoint}. Otherwise, the fix's position is returned unchanged.
+     */
+    protected Position getEstimatedPosition(TimePoint timePoint, FixType fix, boolean extrapolate) {
+        assert fix != null;
+        final Position result;
+        if (extrapolate && fix instanceof GPSFixMoving) {
+            final SpeedWithBearing estimatedSpeed = ((GPSFixMoving) fix).getSpeed();
+            Distance distance = estimatedSpeed.travel(fix.getTimePoint(), timePoint);
+            result = fix.getPosition().translateGreatCircle(estimatedSpeed.getBearing(), distance);
+        } else {
+            result = fix.getPosition();
         }
         return result;
     }
@@ -511,26 +516,10 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     private SpeedWithBearing estimateSpeed(FixType fix1, FixType fix2) {
-        final SpeedWithBearing speed;
-        if (fix1 == null) {
-            if (fix2 instanceof GPSFixMoving) {
-                speed = ((GPSFixMoving) fix2).getSpeed();
-            } else {
-                speed = null;
-            }
-        } else if (fix2 == null) {
-            if (fix1 instanceof GPSFixMoving) {
-                speed = ((GPSFixMoving) fix1).getSpeed();
-            } else {
-                speed = null;
-            }
-        } else {
-            Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
-            long millis = Math.abs(fix1.getTimePoint().asMillis() - fix2.getTimePoint().asMillis());
-            speed = new KnotSpeedWithBearingImpl(distance.getNauticalMiles() / (millis / 1000. / 3600.),
-                    fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
-        }
-        return speed;
+        assert fix1 != null && fix2 != null;
+        final Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+        return new KnotSpeedWithBearingImpl(distance.inTime(fix1.getTimePoint().until(fix2.getTimePoint())).getKnots(),
+                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
     }
 
     
