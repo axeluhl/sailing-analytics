@@ -166,11 +166,6 @@
                                     <autoStart>true</autoStart>
                                 </bundle>
                                 <bundle>
-                                    <id>com.sap.sailing.www.events</id>
-                                    <level>4</level>
-                                    <autoStart>true</autoStart>
-                                </bundle>
-                                <bundle>
                                     <id>com.sap.sailing.datamining.shared</id>
                                     <level>4</level>
                                     <autoStart>true</autoStart>

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class CompetitorTable extends AbsolutePanel {
 
@@ -30,7 +31,7 @@ public class CompetitorTable extends AbsolutePanel {
     private void initTable(List<CompetitorDTO> competitorNames) {
         CellTable.Resources tableRes = GWT.create(CompetitorTableStyleResource.class);
 
-        table = new CellTable<CompetitorDTO>(15, tableRes);
+        table = new BaseCelltable<CompetitorDTO>(15, tableRes);
         table.getElement().getStyle().setWidth(100, Unit.PCT);
         table.setSkipRowHoverStyleUpdate(true);
         table.setSkipRowHoverCheck(true);
