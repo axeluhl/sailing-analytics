@@ -86,4 +86,3 @@ SAP is at the center of today’s technology revolution, developing innovations 
 ### TracTrac Workshop in Kopenhagen
 
 * [[TracTrac Workshop in October 2013 in Kopenhagen|wiki/TracTracWorkshop2013]]
-
