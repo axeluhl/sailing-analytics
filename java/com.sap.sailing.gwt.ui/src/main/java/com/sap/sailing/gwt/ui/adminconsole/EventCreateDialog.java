@@ -39,5 +39,7 @@ public class EventCreateDialog extends EventDialog {
         isPublicCheckBox.setValue(false);
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
+        // add default course area
+        courseAreaNameList.setValue(Collections.singletonList("Default"));
     }
 }

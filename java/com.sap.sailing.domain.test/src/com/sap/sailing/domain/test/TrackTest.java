@@ -51,6 +51,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.DistanceCache;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
+import com.sap.sailing.domain.tracking.impl.GPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.MaxSpeedCache;
 import com.sap.sailing.domain.tracking.impl.TrackImpl;
 import com.sap.sse.common.Duration;
@@ -854,18 +855,18 @@ public class TrackTest {
      */
     @Test
     public void testMoreFrequentDistanceComputationThanGPSFixReception() {
-        DynamicGPSFixTrack<Object, GPSFix> track = new DynamicGPSFixTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
+        DynamicGPSFixTrack<Object, GPSFixMoving> track = new DynamicGPSFixMovingTrackImpl<Object>(new Object(), /* millisecondsOverWhichToAverage */ 30000l);
         final int timeBetweenFixesInMillis = 1000;
         Bearing bearing = new DegreeBearingImpl(123);
-        Speed speed = new KnotSpeedImpl(7);
+        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(7, bearing);
         Position p = new DegreePosition(0, 0);
         final TimePoint now = MillisecondsTimePoint.now();
         TimePoint start = now;
         final int steps = 10;
         TimePoint next = null;
-        GPSFix fix = null;
+        GPSFixMoving fix = null;
         for (int i=0; i<steps; i++) {
-            fix = new GPSFixImpl(p, start);
+            fix = new GPSFixMovingImpl(p, start, speed);
             track.addGPSFix(fix);
             next = start.plus(timeBetweenFixesInMillis);
             p = p.translateGreatCircle(bearing, speed.travel(start, next));
@@ -880,7 +881,7 @@ public class TrackTest {
         assertEquals(distance1, distance3); // no progress after time point "next" because no further fixes are known
         assertEquals(distance1, distance4); // no progress after time point "next" because no further fixes are known
         // now add one more fix
-        fix = new GPSFixImpl(p, start);
+        fix = new GPSFixMovingImpl(p, start, speed);
         track.addGPSFix(fix);
         Distance distance1_new = track.getDistanceTraveled(now, next.minus(timeBetweenFixesInMillis));
         Distance distance2_new = track.getDistanceTraveled(now, next.minus(2*timeBetweenFixesInMillis/3));

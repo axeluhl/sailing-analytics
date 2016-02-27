@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,13 +30,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.EventActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.android.shared.util.LocationHelper;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -78,6 +80,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         setLeaderboardImageHeight(view);
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        AppPreferences prefs = new AppPreferences(getActivity());
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        if (prefs.hasFailedUpload(activity.leaderboard.name)) {
+            activity.showRetryUploadLayout();
+        }
     }
 
     private void setLeaderboardImageHeight(View view){

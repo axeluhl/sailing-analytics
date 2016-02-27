@@ -47,6 +47,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.CollapsablePanel;
@@ -264,7 +265,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
         };
         groupsStartDateColumn.setSortable(true);
         
-        groupsTable = new CellTable<LeaderboardGroupDTO>(10000, tableResources);
+        groupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000, tableResources);
         groupsTable.setWidth("100%");
         groupsSelectionModel = new SingleSelectionModel<LeaderboardGroupDTO>();
         groupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
@@ -390,7 +391,7 @@ public class LeaderboardGroupOverviewPanel extends FormPanel {
             }
         };
         
-        leaderboardsTable = new CellTable<StrippedLeaderboardDTO>(10000, tableResources);
+        leaderboardsTable = new BaseCelltable<StrippedLeaderboardDTO>(10000, tableResources);
         leaderboardsTable.setWidth("100%");
         leaderboardsSelectionModel = new SingleSelectionModel<StrippedLeaderboardDTO>();
         leaderboardsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
