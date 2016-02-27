@@ -11,6 +11,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
+import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.Duration;
 
 public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends PositionInterpolationAndExtrapolationTest<GPSFixMoving> {
@@ -23,6 +24,11 @@ public class PositionInterpolationAndExtrapolationWithSpeedInfoTest extends Posi
         speed = new KnotSpeedWithBearingImpl(6 /* knots */, Bearing.NORTH);
     }
     
+    @Override
+    protected DynamicGPSFixTrack<Object, GPSFixMoving> getTrack() {
+        return (DynamicGPSFixTrack<Object, GPSFixMoving>) super.getTrack();
+    }
+
     @Test
     public void testEmptyTrack() {
         assertNull(getTrack().getEstimatedPosition(now, /* extrapolate */ true));
