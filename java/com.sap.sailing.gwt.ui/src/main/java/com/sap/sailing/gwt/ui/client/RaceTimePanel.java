@@ -142,18 +142,46 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     /**
      * If and only if the {@link #selectedRace}'s timing is described by the {@link #raceTimesInfoProvider} and
-     * according to the timing the current live time point is after the start of tracking or at least after three
-     * minutes before the race, and the current live time point is not after the end of tracking then live mode will be
-     * made possible (<code>true</code> will be returned).
+     * according to the timing the current live time point is after the start of tracking or at least after
+     * {@link RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START} minutes before the race, and the current live time
+     * point is not after the end of tracking then live mode will be made possible (<code>true</code> will be returned).<p>
+     * 
+     * Bug 3482: when startOfTracking and endOfTracking are both {@code null} it would be good to check for the
+     * {@link RaceTimesInfoDTO#newestTrackingEvent} and {@link RaceTimesInfoDTO#endOfRace} values to see if---with
+     * a little leeway---an end for the live period may be determined. Without this logic, such races would remain
+     * live until the end of time.
      */
     @Override
     protected boolean isLiveModeToBeMadePossible() {
         long liveTimePointInMillis = timer.getLiveTimePointInMillis();
         RaceTimesInfoDTO lastRaceTimesInfo = raceTimesInfoProvider != null ? raceTimesInfoProvider.getRaceTimesInfo(selectedRace) : null;
-        return lastRaceTimesInfo != null &&
+        final boolean isLiveModeToBeMadePossible;
+        if (lastRaceTimesInfo != null &&
+                // check that we're after startOfTracking or startOfRace minus some leeway:
                 ((lastRaceTimesInfo.startOfTracking != null && liveTimePointInMillis > lastRaceTimesInfo.startOfTracking.getTime()) ||
-                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START)) &&
-                 (lastRaceTimesInfo.endOfTracking == null || liveTimePointInMillis <= lastRaceTimesInfo.endOfTracking.getTime());
+                 (lastRaceTimesInfo.startOfRace != null && liveTimePointInMillis > lastRaceTimesInfo.startOfRace.getTime() - RaceTimesCalculationUtil.MIN_TIME_BEFORE_RACE_START))) {
+            // now check that we cannot know about an end time or are reasonably before it;
+            // we don't know about the end time if startOfTracking is valid but endOfTracking is not;
+            // neither do we know about the end time if both, startOfTracking and endOfTracking are null
+            // and we have neither a valid newestTrackingEvent nor an endOfRace value; if we do, we would
+            // have to be before the later one plus some leeway.
+            final Date endTimeOfLivePeriod;
+            if (lastRaceTimesInfo.startOfTracking == null && lastRaceTimesInfo.endOfTracking == null) {
+                Date latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.newestTrackingEvent;
+                if (latestOfNewestTrackingEventAndEndOfRace == null || (lastRaceTimesInfo.endOfRace != null && lastRaceTimesInfo.endOfRace.after(latestOfNewestTrackingEventAndEndOfRace))) {
+                    latestOfNewestTrackingEventAndEndOfRace = lastRaceTimesInfo.endOfRace;
+                }
+                endTimeOfLivePeriod = latestOfNewestTrackingEventAndEndOfRace == null ? null :
+                    new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
+            } else {
+                endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
+            }
+            isLiveModeToBeMadePossible = endTimeOfLivePeriod == null /* meaning we don't know an end time */ ||
+                                         endTimeOfLivePeriod.getTime() >= liveTimePointInMillis;
+        } else {
+            isLiveModeToBeMadePossible = false;
+        }
+        return isLiveModeToBeMadePossible;
     }
     
     @Override
