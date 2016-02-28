@@ -1,9 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
-import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
-
-import java.text.SimpleDateFormat;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -35,6 +31,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import java.text.SimpleDateFormat;
+
+import static com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed.NO_START_TIME_SET;
+
 public class TimePanelFragment extends BasePanelFragment {
 
     public final static String TOGGLED = "toggled";
@@ -48,7 +48,6 @@ public class TimePanelFragment extends BasePanelFragment {
     private TextView mCurrentTime;
     private TextView mHeaderTime;
     private TextView mTimeStart;
-    private TextView mTimeFinish;
     private ImageView mLinkIcon;
     private Boolean mLinkedRace = null;
 
@@ -76,7 +75,6 @@ public class TimePanelFragment extends BasePanelFragment {
 
         mTimeLock = ViewHelper.get(layout, R.id.time_start_lock);
         mCurrentTime = ViewHelper.get(layout, R.id.current_time);
-        mTimeFinish = ViewHelper.get(layout, R.id.time_finish);
         mHeaderTime = ViewHelper.get(layout, R.id.timer_text);
         mTimeStart = ViewHelper.get(layout, R.id.time_start);
         mLinkIcon = ViewHelper.get(layout, R.id.linked_race);
@@ -100,6 +98,8 @@ public class TimePanelFragment extends BasePanelFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
+        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -135,10 +135,6 @@ public class TimePanelFragment extends BasePanelFragment {
                 }
             }
 
-            if (mTimeFinish != null) {
-                mTimeFinish.setVisibility(View.VISIBLE);
-            }
-
             if (mHeaderTime != null && startTime != null) {
                 String time;
                 int resId;
@@ -160,7 +156,8 @@ public class TimePanelFragment extends BasePanelFragment {
                 if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
                     SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
-                    mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
+                    mHeaderTime
+                            .setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getRaceName(race, " / ")));
                 }
             }
         }
@@ -171,10 +168,10 @@ public class TimePanelFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (view != null) {
+        if (isAdded() && view != null) {
             if (!view.equals(mRaceHeader)) {
-                resetFragment(mTimeLock, R.id.race_frame, StartTimeFragment.class);
-                setMarkerLevel(mRaceHeader, R.id.time_marker, 0);
+                resetFragment(mTimeLock, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartTimeFragment.class);
+                setMarkerLevel(mRaceHeader, R.id.time_marker, LEVEL_NORMAL);
             }
         }
     }
@@ -182,35 +179,35 @@ public class TimePanelFragment extends BasePanelFragment {
     private void checkStatus() {
         switch (getRace().getStatus()) {
             case UNSCHEDULED:
-                changeVisibility(mTimeLock, View.GONE);
+                changeVisibility(mTimeLock, null, View.GONE);
                 break;
 
             case PRESCHEDULED:
-                changeVisibility(mTimeLock, View.GONE);
+                changeVisibility(mTimeLock, null, View.GONE);
                 break;
 
             case SCHEDULED:
-                changeVisibility(mTimeLock, View.GONE);
+                changeVisibility(mTimeLock, null, View.GONE);
                 break;
 
             case STARTPHASE:
-                changeVisibility(mTimeLock, View.GONE);
+                changeVisibility(mTimeLock, null, View.GONE);
                 break;
 
             case RUNNING:
-                changeVisibility(mTimeLock, View.VISIBLE);
+                changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
 
             case FINISHING:
-                changeVisibility(mTimeLock, View.VISIBLE);
+                changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
 
             case FINISHED:
-                changeVisibility(mTimeLock, View.VISIBLE);
+                changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
 
             default:
-                changeVisibility(mTimeLock, View.VISIBLE);
+                changeVisibility(mTimeLock, null, View.VISIBLE);
                 break;
         }
     }
@@ -272,6 +269,17 @@ public class TimePanelFragment extends BasePanelFragment {
                     } else {
                         uncheckMarker(view);
                     }
+                }
+            }
+
+            view = getActivity().findViewById(R.id.race_panel_time);
+            if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
+                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                    view.setVisibility(View.GONE);
+                }
+
+                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                    view.setVisibility(View.VISIBLE);
                 }
             }
         }

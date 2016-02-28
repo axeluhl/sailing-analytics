@@ -38,7 +38,7 @@ public class WindHelper {
             URL serverUrl = UrlHelper.generateUrl(getBaseUrl(context), path, params);
 
             HttpGetRequest request = new HttpGetRequest(serverUrl, context);
-            NetworkHelper.getInstance(context).executeHttpJsonRequestAsnchronously(request, new NetworkHelper.NetworkHelperSuccessListener() {
+            NetworkHelper.getInstance(context).executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {
                     Intent notifyTrackedIntent = new Intent();

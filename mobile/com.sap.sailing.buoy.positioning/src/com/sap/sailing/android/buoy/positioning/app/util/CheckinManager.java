@@ -110,7 +110,7 @@ public class CheckinManager {
     }
 
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
-        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsnchronously(getLeaderboardRequest,
+        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getLeaderboardRequest,
                 new NetworkHelper.NetworkHelperSuccessListener() {
                     @Override
                     public void performAction(JSONObject response) {
@@ -149,7 +149,7 @@ public class CheckinManager {
     }
 
     private void getMarksFromServer(final String leaderboardName, HttpGetRequest getMarksRequest, final URLData urlData) {
-        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsnchronously(getMarksRequest,
+        NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
                     @Override

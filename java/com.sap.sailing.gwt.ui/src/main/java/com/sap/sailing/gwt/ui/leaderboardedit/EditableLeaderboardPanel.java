@@ -67,6 +67,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSortableColumnWithMinMax;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -682,7 +683,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
 
     private CellTable<CompetitorDTO> createSuppressedCompetitorsTable() {
         final Resources tableResources = GWT.create(AdminConsoleTableResources.class);
-        CellTable<CompetitorDTO> result = new CellTable<CompetitorDTO>(10000, tableResources);
+        CellTable<CompetitorDTO> result = new BaseCelltable<CompetitorDTO>(10000, tableResources);
         suppressedCompetitorsShown.addDataDisplay(result);
         final SuppressedSailIDColumn suppressedSailIDColumn = new SuppressedSailIDColumn();
         suppressedSailIDColumn.setSortable(true);

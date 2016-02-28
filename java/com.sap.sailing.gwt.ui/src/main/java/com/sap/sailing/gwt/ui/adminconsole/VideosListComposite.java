@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -125,7 +126,7 @@ public class VideosListComposite extends Composite {
     }
 
     private CellTable<VideoDTO> createVideosTable() {
-        CellTable<VideoDTO> table = new CellTable<VideoDTO>(/* pageSize */10000, tableRes);
+        CellTable<VideoDTO> table = new BaseCelltable<VideoDTO>(/* pageSize */10000, tableRes);
         videoListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
 

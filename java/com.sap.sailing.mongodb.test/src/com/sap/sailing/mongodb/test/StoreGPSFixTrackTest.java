@@ -12,10 +12,10 @@ import com.mongodb.DB;
 import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceCompetitorMappingEventImpl;
-import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Mark;
@@ -86,14 +86,14 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
         DeviceIdentifier device2 = new SmartphoneImeiIdentifier("b");
         store.storeFix(device2, fix4);
         
-        RaceLog raceLog = new RaceLogImpl("racelog");
-        raceLog.add(new RaceLogDeviceCompetitorMappingEventImpl(time0, author, 0, comp, device1, time0, time1));
-        raceLog.add(new RaceLogDeviceMarkMappingEventImpl(time0, author, 0, mark, device2, time0, time1));
+        RegattaLog regattaLog = new RegattaLogImpl("racelog");
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(time0, author, comp, device1, time0, time1));
+        regattaLog.add(new RegattaLogDeviceMarkMappingEventImpl(time0, author, mark, device2, time0, time1));
         
         DynamicGPSFixMovingTrackImpl<Competitor> track1 = new DynamicGPSFixMovingTrackImpl<>(comp, 0);
-        store.loadCompetitorTrack(track1, raceLog, comp);
+        store.loadCompetitorTrack(track1, regattaLog, comp);
         DynamicGPSFixTrackImpl<Mark> track2 = new DynamicGPSFixTrackImpl<>(mark, 0);
-        store.loadMarkTrack(track2, raceLog, mark);
+        store.loadMarkTrack(track2, regattaLog, mark);
         track1.lockForRead();
         assertEquals(2, Util.size(track1.getRawFixes()));
         assertTrue(track1.getFirstRawFix() instanceof GPSFixMoving);

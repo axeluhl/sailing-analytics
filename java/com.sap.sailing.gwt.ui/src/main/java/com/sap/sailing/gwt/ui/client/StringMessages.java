@@ -1447,12 +1447,39 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String registerCompetitorsOnRace();
+    String doYouWantToRegisterCompetitorsDirectlyOnTheRace();
+    String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+    String warningDirectCompetitorRegistration();
+    String warningRegattaCompetitorRegistration();
+    String competitorRegistrationsOnRaceDisabled();
+    String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
     String pleaseSelect();
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
+    String topN(int n);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String profile();
+    String showOnlyCompetitorsOfLog();
+    String maneuverType();
+    String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
+    String pleaseCreateAtLeastOneMappingBy();
+    String createDefaultLeaderboardGroup();
+    String matcherType();
+    String matchingDevices();
+    String addDevice();
+    String createDeviceConfiguration();
+    String forWhichDeviceShouldConfigurationApply();
+    String create();
+    String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
+    String pleaseSelectALeaderboardGroup();
+    String linkLeaderboardToLeaderboardGroupOfEvent();
+    String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
+    String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
 }

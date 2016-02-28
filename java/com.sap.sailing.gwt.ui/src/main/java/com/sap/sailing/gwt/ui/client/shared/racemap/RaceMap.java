@@ -21,7 +21,9 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.maps.client.LoadApi;
 import com.google.gwt.maps.client.LoadApi.LoadLibrary;
 import com.google.gwt.maps.client.MapOptions;
@@ -74,7 +76,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -89,6 +90,7 @@ import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
 import com.sap.sailing.gwt.ui.client.ClientResources;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.RequiresDataInitialization;
@@ -116,6 +118,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
 import com.sap.sailing.gwt.ui.shared.racemap.RaceSimulationOverlay;
@@ -711,12 +714,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private void removeTransitions() {
         // remove the canvas animations for boats
-        for (BoatOverlay boatOverlay : RaceMap.this.getBoatOverlays().values()) {
+        for (CanvasOverlayV3 boatOverlay : RaceMap.this.getBoatOverlays().values()) {
             boatOverlay.removeCanvasPositionAndRotationTransition();
         }
         // remove the canvas animations for the info overlays of the selected boats
         for (CompetitorInfoOverlay infoOverlay : competitorInfoOverlays.values()) {
             infoOverlay.removeCanvasPositionAndRotationTransition();
+        }
+        for (CourseMarkOverlay markOverlay : courseMarkOverlays.values()) {
+            markOverlay.removeCanvasPositionAndRotationTransition();
         }
         // remove the advantage line animation
         if (advantageTimer != null) {
@@ -954,7 +960,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                             updateCoordinateSystemFromSettings();
                         }
                         // Do mark specific actions
-                        showCourseMarksOnMap(raceMapDataDTO.coursePositions);
+                        showCourseMarksOnMap(raceMapDataDTO.coursePositions, transitionTimeInMillis);
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
@@ -1080,7 +1086,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
     }
        
-    private void showCourseMarksOnMap(CoursePositionsDTO courseDTO) {
+    private void showCourseMarksOnMap(CoursePositionsDTO courseDTO, long transitionTimeInMillis) {
         if (map != null && courseDTO != null) {
             WaypointDTO endWaypointForCurrentLegNumber = null;
             if(courseDTO.currentLegNumber > 0 && courseDTO.currentLegNumber <= courseDTO.totalLegsCount) {
@@ -1104,7 +1110,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         markDTOs.put(markDTO.getName(), markDTO);
                         courseMarkOverlay.addToMap();
                     } else {
-                        courseMarkOverlay.setMarkPosition(markDTO.position);
+                        courseMarkOverlay.setMarkPosition(markDTO.position, transitionTimeInMillis);
                         courseMarkOverlay.setShowBuoyZone(settings.getHelpLinesSettings().isVisible(HelpLineTypes.BUOYZONE));
                         courseMarkOverlay.setBuoyZoneRadiusInMeter(settings.getBuoyZoneRadiusInMeters());
                         courseMarkOverlay.setSelected(isSelected);
@@ -1271,7 +1277,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             }
             if (!updateTailsOnly) {
                 for (CompetitorDTO unusedBoatCanvasCompetitorDTO : competitorDTOsOfUnusedBoatCanvases) {
-                    BoatOverlay boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
+                    CanvasOverlayV3 boatCanvas = boatOverlays.get(unusedBoatCanvasCompetitorDTO);
                     boatCanvas.removeFromMap();
                     boatOverlays.remove(unusedBoatCanvasCompetitorDTO);
                 }
@@ -2006,6 +2012,27 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         vPanel.add(createInfoWindowLabelAndValue(stringMessages.position(), formatPosition(markDTO.position.getLatDeg(), markDTO.position.getLngDeg())));
         return vPanel;
     }
+    
+    public Widget getInfoWindowContent(ManeuverDTO maneuver) {
+        SpeedWithBearingDTO before = maneuver.speedWithBearingBefore;
+        SpeedWithBearingDTO after = maneuver.speedWithBearingAfter;
+        VerticalPanel vPanel = new VerticalPanel();
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverType(),
+                ManeuverTypeFormatter.format(maneuver.type, stringMessages)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.time(),
+                DateTimeFormat.getFormat(PredefinedFormat.TIME_FULL).format(maneuver.timepoint)));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.directionChange(),
+                ((int) maneuver.directionChangeInDegrees) + " " + stringMessages.degreesShort() + " ("
+                        + ((int) before.bearingInDegrees) + " " + stringMessages.degreesShort() + " -> "
+                        + ((int) after.bearingInDegrees) + " " + stringMessages.degreesShort() + ")"));
+        vPanel.add(createInfoWindowLabelAndValue(stringMessages.speedChange(),
+                NumberFormat.getDecimalFormat().format(after.speedInKnots - before.speedInKnots) + " "
+                        + stringMessages.knotsUnit() + " ("
+                        + NumberFormat.getDecimalFormat().format(before.speedInKnots) + " " + stringMessages.knotsUnit()
+                        + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
+                        + stringMessages.knotsUnit() + ")"));
+        return vPanel;
+    }
 
     private Widget getInfoWindowContent(WindSource windSource, WindTrackInfoDTO windTrackInfoDTO) {
         WindDTO windDTO = windTrackInfoDTO.windFixes.get(0);
@@ -2173,19 +2200,25 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 List<ManeuverDTO> maneuversForCompetitor = maneuvers.get(competitorDTO);
                 for (ManeuverDTO maneuver : maneuversForCompetitor) {
                     if (settings.isShowManeuverType(maneuver.type)) {
-                        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
-                        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndTargetTack.get(new com.sap.sse.common.Util.Pair<ManeuverType, Tack>(maneuver.type, maneuver.newTack));
-                        MarkerOptions options = MarkerOptions.newInstance();
-                        options.setTitle(maneuver.toString(stringMessages));
-                        options.setIcon(maneuverMarker.getIcon_MarkerImage());
-                        Marker marker = Marker.newInstance(options);
-                        marker.setPosition(latLng);
-                        maneuverMarkers.add(marker);
-                        marker.setMap(map);
+                        createAndAddMarkerOfManeuver(maneuver);
                     }
                 }
             }
         }
+    }
+
+    private void createAndAddMarkerOfManeuver(ManeuverDTO maneuver) {
+        LatLng latLng = coordinateSystem.toLatLng(maneuver.position);
+        Marker maneuverMarker = raceMapImageManager.maneuverIconsForTypeAndDirectionIndicatingColor
+                .get(new Pair<ManeuverType, ManeuverColor>(maneuver.type, ManeuverColor.getManeuverColor(maneuver)));
+        MarkerOptions options = MarkerOptions.newInstance();
+        options.setIcon(maneuverMarker.getIcon_MarkerImage());
+        Marker marker = Marker.newInstance(options);
+        marker.setPosition(latLng);
+        marker.setTitle(ManeuverTypeFormatter.format(maneuver.type, stringMessages));
+        marker.addClickHandler(new ManeuverMarkerClickedListener(this, maneuver));
+        maneuverMarkers.add(marker);
+        marker.setMap(map);
     }
 
     /**
@@ -2274,7 +2307,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 while (i.hasNext()) {
                     Entry<CompetitorDTO, BoatOverlay> next = i.next();
                     if (!next.getKey().equals(competitor)) {
-                        BoatOverlay boatOverlay = next.getValue();
+                        CanvasOverlayV3 boatOverlay = next.getValue();
                         boatOverlay.removeFromMap();
                         fixesAndTails.removeTail(next.getKey());
                         i.remove(); // only this way a ConcurrentModificationException while looping can be avoided
@@ -2752,5 +2785,17 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected String getLeftControlsIndentStyle() {
         return null;
+    }
+
+    DelegateCoordinateSystem getCoordinateSystem() {
+        return coordinateSystem;
+    }
+
+    void setLastInfoWindow(InfoWindow infoWindow) {
+        lastInfoWindow = infoWindow;
+    }
+
+    InfoWindow getLastInfoWindow() {
+        return lastInfoWindow;
     }
 }

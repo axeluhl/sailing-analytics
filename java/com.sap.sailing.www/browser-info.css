@@ -1,52 +1,4 @@
 @import url(sailing-fontface-1.0.cache.css);
- body {
-  font-family: Arial, Verdana, sans-serif;
-  margin: 0;
-  padding: 0 0 50px 0;
-  background: #ebebec;
-}
-.LogoAndTitlePanel {
-  height: 68px;
-  font-family: Arial, Verdana, sans-serif;
-  position: fixed;
-  width: 100%;
-  top: 0;
-    /*background-image: url(../images/white_gradient_header.png), url(../images/header_bg_modern.png);
-  background-position: center top, 0 0;
-  background-repeat: no-repeat, repeat-x;
-  */
-    background: url(images/header_bg_modern.png) 0 0 repeat-x;
-  box-shadow: 0 0 20px #858585;
-  -moz-box-shadow: 0 0 20px #858585;
-  -webkit-box-shadow: 0 0 20px #858585;
-}
-h1, h2, h3, h4 {
-  font-weight: bold;
-}
-.LogoAndTitlePanel:after {
-  content:" ";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
-}
-.RaceBoardHeaderPanel {
-  margin: 0 12px 14px 12px;
-}
-.sapLogo {
-  float: left;
-  margin: 13px 0 0 12px;
-}
-.sailingAnalyticsLabelPanel {
-  margin: 10px 0 0 0;
-}
-.sailingAnalyticsLabel {
-  float: left;
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 15px 0 0 0;
-}
 a {
   color: #A1A1A1;
   text-decoration: none;
@@ -64,11 +16,6 @@ a:hover {
   color: #f0ab00;
   margin: 0 0 15px 0;
   font-weight: normal;
-}
-#content {
-  margin: 100px auto 0;
-  width: 600px;
-  text-align: center;
 }
 .follow-text {
   color: #666;

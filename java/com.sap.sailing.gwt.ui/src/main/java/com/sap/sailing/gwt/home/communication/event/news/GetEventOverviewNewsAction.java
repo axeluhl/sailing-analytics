@@ -6,9 +6,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
-import com.sap.sailing.gwt.dispatch.client.ListResult;
-import com.sap.sailing.gwt.dispatch.client.ResultWithTTL;
-import com.sap.sailing.gwt.dispatch.client.caching.IsClientCacheable;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
@@ -17,6 +14,9 @@ import com.sap.sailing.news.EventNewsItem;
 import com.sap.sailing.news.impl.InfoEventNewsItem;
 import com.sap.sailing.news.impl.LeaderboardUpdateNewsItem;
 import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
+import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
 public class GetEventOverviewNewsAction implements SailingAction<ResultWithTTL<ListResult<NewsEntryDTO>>>, IsClientCacheable {
     private UUID eventId;

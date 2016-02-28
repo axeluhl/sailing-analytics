@@ -1,19 +1,23 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
 import java.util.Date;
+import java.util.List;
 
 import android.content.pm.PackageInfo;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.LicenseHelper;
 import com.sap.sailing.racecommittee.app.R;
+
+import de.psdev.licensesdialog.LicensesDialog;
+import de.psdev.licensesdialog.model.Notices;
 
 public class SystemInformationActivityHelper {
     private final SendingServiceAwareActivity activity;
@@ -25,6 +29,7 @@ public class SystemInformationActivityHelper {
         setupCompileView();
         setupInstalledView();
         setupPersistenceView();
+        setupAboutButtons();
     }
 
     /**
@@ -32,16 +37,22 @@ public class SystemInformationActivityHelper {
      */
     public void updateSendingServiceInformation() {
         TextView statusView = (TextView) activity.findViewById(R.id.system_information_persistence_status);
-        ListView waitingView = (ListView) activity.findViewById(R.id.system_information_persistence_waiting);
+        TextView waitingView = (TextView) activity.findViewById(R.id.system_information_persistence_waiting);
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
-            String statusText = activity.getString(R.string.events_waiting_to_be_sent);
             String never = activity.getString(R.string.never);
-            statusView.setText(String.format(statusText, activity.sendingService.getDelayedIntentsCount(),
-                lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
-            waitingView.setAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_1,
-                activity.sendingService.getDelayedIntentsContent()));
+            List<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
+            String waitingEvents = "";
+            int waitingEventsSize = delayedIntentsContent.size();
+            for (int index = 0; index < waitingEventsSize; index++) {
+                waitingEvents += delayedIntentsContent.get(index);
+                if (!(index == waitingEventsSize - 1)) {
+                    waitingEvents += "\n";
+                }
+            }
+            waitingView.setText(waitingEvents);
         } else {
             statusView.setText(activity.getString(R.string.generic_error));
         }
@@ -89,8 +100,38 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
-                DateFormat.getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
+                .getTimeFormat(activity).format(installDate)));
         }
+    }
+
+    private void setupAboutButtons() {
+        Button eulaButton = (Button) activity.findViewById(R.id.eula_button);
+        Button licenceButton = (Button) activity.findViewById(R.id.licence_button);
+        eulaButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EulaHelper.with(activity).openEulaPage();
+            }
+        });
+        licenceButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showLicenceDialog();
+            }
+        });
+    }
+
+    private void showLicenceDialog() {
+        Notices notices = new Notices();
+        LicenseHelper licenseHelper = new LicenseHelper();
+        notices.addNotice(licenseHelper.getAndroidSupportNotice());
+        notices.addNotice(licenseHelper.getAdvancedRecyclerViewNotice());
+        notices.addNotice(licenseHelper.getJsonSimpleNotice());
+        notices.addNotice(licenseHelper.getDialogNotice());
+        LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
+        builder.setTitle(activity.getString(R.string.licence_information));
+        builder.setNotices(notices);
+        builder.build().show();
     }
 }

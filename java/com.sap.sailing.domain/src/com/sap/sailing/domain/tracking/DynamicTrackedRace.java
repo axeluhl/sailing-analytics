@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.tracking;
 
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Mark;
@@ -16,9 +19,22 @@ public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Mark mark, GPSFix fix);
     
     /**
+     * Inserts a <code>wind</code> fix into a {@link WindTrack} for the <code>windSource</code> if the current filtering
+     * rules accept the wind fix. Filtering applies based upon timing considerations, assuming that wind fixes are not
+     * relevant if they are outside of the tracking interval. There may be exceptions for races acting as default wind
+     * acceptors in case no other race in the regatta would accept the wind fix.
+     * 
      * @return True if the specified wind has been accepted and added to this race's wind track and database, else false.
      */
-    boolean recordWind(Wind wind, WindSource windSource);
+    default boolean recordWind(Wind wind, WindSource windSource) {
+        return recordWind(wind, windSource, /* applyFilter */ true);
+    }
+    
+    /**
+     * Like {@link #recordWind(Wind, WindSource)}, only that filtering may be disabled by setting
+     * <code>applyFilter</code> to <code>false</code>.
+     */
+    boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter);
 
     void removeWind(Wind wind, WindSource windSource);
 
@@ -34,13 +50,28 @@ public interface DynamicTrackedRace extends TrackedRace {
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
 
     /**
-     * Updates all mark passings for <code>competitor</code> for this race. The
-     * mark passings must be provided in the order of the race's course and in
-     * increasing time stamps. Calling this method replaces all previous mark passings
-     * for this race for <code>competitor</code> and ensures that the "leaderboard"
-     * and all other derived information are updated accordingly. 
+     * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the
+     * order of the race's course and in increasing time stamps. Calling this method replaces all previous mark passings
+     * for this race for <code>competitor</code> and ensures that the "leaderboard" and all other derived information
+     * are updated accordingly.
+     * <p>
+     * 
+     * When an attached {@link RaceLog} has a {@link RaceLogFinishPositioningConfirmedEvent} that sets a
+     * {@link CompetitorResult#getFinishingTime() finishing time} for a competitor, it will be used to override the
+     * {@link MarkPassing#getTimePoint() time point} of the finishing waypoint's mark passing or, if no mark passing for
+     * the finishing waypoint exists yet for that competitor, create one. This can, in particular, be helpful when
+     * determining the time sailed for the {@code competitor} in order to determine the calculated time after applying
+     * any handicap rules and metrics.<p>
      */
     void updateMarkPassings(Competitor competitor, Iterable<MarkPassing> markPassings);
+    
+    /**
+     * When there is a significant change in the race logs attached to this race, such as adding another race log or
+     * removing a race log or switching to another pass in one of the race logs attached, the effects on the
+     * valid {@link RaceLogFinishPositioningConfirmedEvent} are analyzed, and if relevant, the mark passings
+     * for the finish line that are affected will be {@link #updateMarkPassings(Competitor, Iterable) updated}.
+     */
+    void updateMarkPassingsAfterRaceLogChanges();
 
     /**
      * Sets the start time as received from the tracking infrastructure. This isn't necessarily

@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.List;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.sap.sse.common.Util;
 
@@ -18,5 +19,20 @@ public class UrlHelper {
             }
         }
         return new URL(builder.build().toString());
+    }
+
+    public static String getServerUrl(URL url) {
+        String protocol = url.getProtocol();
+        String host = url.getHost();
+        String port = url.getPort() == -1 ? "" : ":" + url.getPort();
+        return protocol + "://" + host + port;
+    }
+
+    public static @Nullable URL tryConvertToURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 }

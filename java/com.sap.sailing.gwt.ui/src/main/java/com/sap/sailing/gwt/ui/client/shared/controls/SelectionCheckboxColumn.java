@@ -32,7 +32,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
  * the {@link SelectionCheckboxColumn} will be refreshed correctly when the selection changes or the
  * {@link ListDataProvider} has new elements. Clients should also ensure that the {@link Flushable} and the
  * {@link ListDataProvider} are not <code>null</code>; otherwise the {@link RefreshableMultiSelectionModel selection model}
- * won´t work correctly. The {@link Flushable} interface is used to ensure that the selection state is displayed
+ * wonï¿½t work correctly. The {@link Flushable} interface is used to ensure that the selection state is displayed
  * correctly by {@link SelectionCheckboxColumn}. To ensure this, the {@link Flushable#flush()} method is called after
  * every selection state change.
  * <p>

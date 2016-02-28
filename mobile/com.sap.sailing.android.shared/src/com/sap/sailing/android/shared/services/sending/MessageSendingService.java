@@ -313,7 +313,9 @@ public class MessageSendingService extends Service implements MessageSendingList
                 }
             }
             lastSuccessfulSend = Calendar.getInstance().getTime();
-            serviceLogger.onMessageSentSuccessful();
+            if (serviceLogger != null) {
+                serviceLogger.onMessageSentSuccessful();
+            }
             
             String callbackClassString = intent.getStringExtra(CALLBACK_CLASS);
             ServerReplyCallback callback = null;

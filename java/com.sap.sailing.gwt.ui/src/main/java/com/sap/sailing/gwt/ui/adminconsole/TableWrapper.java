@@ -30,6 +30,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
     protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
+    protected final StringMessages stringMessages;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListHandler<T> columnSortHandler;
@@ -48,6 +49,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
+        this.stringMessages = stringMessages;
         table = new FlushableCellTable<T>(10000, tableRes);
         table.ensureDebugId("WrappedTable");
         this.dataProvider = new ListDataProvider<T>();

@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_cell_height">
-
-    <ImageView
-        android:id="@+id/header_marker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_margin="@dimen/default_margin_half"
-        android:src="?play_arrow_36dp"
-        android:visibility="gone"/>
+    android:layout_height="@dimen/navigation_drawer_cell_height"
+    android:background="?attr/sap_gray">
 
     <ImageView
         android:id="@+id/protest_image"
@@ -20,16 +11,31 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/default_margin"
         android:layout_marginRight="@dimen/default_margin"
-        tools:src="@drawable/flag_bravo_48dp"/>
+        tools:src="@drawable/flag_bravo_48dp" />
+
+    <ImageView
+        android:id="@+id/delimiter_line"
+        android:layout_width="@dimen/thin_line"
+        android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/protest_image"
+        android:background="?attr/black" />
+
+    <ImageView
+        android:id="@+id/bottom_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/black" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/default_margin_half"
-        android:layout_toEndOf="@id/header_marker"
-        android:layout_toStartOf="@id/protest_image"
+        android:layout_marginLeft="@dimen/navigation_drawer_text_margin"
+        android:layout_marginRight="@dimen/navigation_drawer_text_margin"
+        android:layout_toLeftOf="@id/delimiter_line"
         android:orientation="vertical">
 
         <TextView
@@ -37,15 +43,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textAppearance="?textNormal"
-            tools:text="Extreme 40"/>
+            android:textAppearance="?attr/textNormal"
+            tools:text="Extreme 40" />
 
         <TextView
             android:id="@+id/fleet_series"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:textAppearance="?textSmall"
-            tools:text="Day 1 - Yellow"/>
+            android:maxLines="2"
+            android:textAppearance="?attr/textSmall"
+            tools:text="Day 1\nYellow" />
     </LinearLayout>
 </RelativeLayout>

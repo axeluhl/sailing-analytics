@@ -11,6 +11,8 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -103,6 +105,14 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
             List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
         super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(),
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+        SeriesDTO series = new SeriesDTO();
+        series.setName("Default");
+        series.setMedal(false);
+        series.setStartsWithZeroScore(false);
+        series.setSplitFleetContiguousScoring(false);
+        series.setFirstColumnIsNonDiscardableCarryForward(false);
+        series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
+        seriesEditor.setValue(Collections.singleton(series));
     }
 
     @Override

@@ -106,4 +106,8 @@ public class PlaceNavigation<T extends Place> {
         });
     }
     
+    public String getFullQualifiedUrl() {
+        return Window.Location.createUrlBuilder().setHash(getTargetUrl()).buildString();
+    }
+    
 }
