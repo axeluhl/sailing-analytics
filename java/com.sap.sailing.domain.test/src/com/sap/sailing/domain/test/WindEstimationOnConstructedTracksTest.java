@@ -198,7 +198,7 @@ public class WindEstimationOnConstructedTracksTest extends StoredTrackBasedTest 
         Wind wind = getTrackedRace().getWind(null, checkTime, getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
         Position newWindwardMarkPosition = leewardGatePosition.translateGreatCircle(wind.getBearing(), d);
         getTrackedRace().getOrCreateTrack(windwardMark.getMarks().iterator().next()).addGPSFix(
-                new GPSFixImpl(newWindwardMarkPosition, checkTime));
+                new GPSFixImpl(newWindwardMarkPosition, fixTime));
         assertEquals(LegType.DOWNWIND, firstLeg.getLegType(fixTime));
         Wind estimatedWindDirectionDownwind = track.getAveragedWind(/* position */ null, checkTime);
         assertNotNull(estimatedWindDirectionDownwind);

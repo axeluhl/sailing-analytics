@@ -21,7 +21,9 @@ import com.sap.sse.common.Util;
  * A track records the {@link GPSFix}es received for an object of type
  * <code>ItemType</code>. It allows clients to ask for a position at any given
  * {@link TimePoint} and interpolates the fixed positions to obtain an estimate
- * of the position at the time requested.
+ * of the position at the time requested. The method used to interpolate may vary
+ * between different implementation classes. The default implementation is to
+ * fall back to the last fix at or before the time point requested.
  * 
  * @author Axel Uhl (d043530)
  * 
