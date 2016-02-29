@@ -1055,7 +1055,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 DBObject sailorsInfoWebsiteDBObject = (DBObject) sailorsInfoWebsiteObject;
                 URL url = loadURL(sailorsInfoWebsiteDBObject, FieldNames.SAILORS_INFO_URL);
                 String localeRaw = (String) sailorsInfoWebsiteDBObject.get(FieldNames.SAILORS_INFO_LOCALE.name());
-                if(url != null) {
+                if (url != null) {
                     Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
                     result.setSailorsInfoWebsiteURL(locale, url);
                 }
@@ -2169,24 +2169,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
 
     private boolean loadLegacySailorsInfoWebsiteURL(Event event, DBObject eventDBObject) {
-        String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
+        final boolean modified;
+        final String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
         if (sailorsInfoWebSiteURLAsString != null) {
             try {
                 // The legacy sailors info URL (only used at Kieler/Travemuender Woche events) used to have 2 localized versions:
-                // The german version with no suffix (e.g. http://sailorsinfo.travemuender-woche.com)
-                // The englich/international version with "/en" suffix (e.g. http://sailorsinfo.travemuender-woche.com/en)
-                if(!event.hasSailorsInfoWebsiteURL(null)) {
+                // The German version with no suffix (e.g. http://sailorsinfo.travemuender-woche.com)
+                // The English/international version with "/en" suffix (e.g. http://sailorsinfo.travemuender-woche.com/en)
+                if (!event.hasSailorsInfoWebsiteURL(null)) {
                     final String englishURL = sailorsInfoWebSiteURLAsString + (sailorsInfoWebSiteURLAsString.endsWith("/") ? "" : "/") + "en";
                     event.setSailorsInfoWebsiteURL(null, new URL(englishURL));
                 }
-                if(!event.hasSailorsInfoWebsiteURL(Locale.GERMAN)) {
+                if (!event.hasSailorsInfoWebsiteURL(Locale.GERMAN)) {
                     event.setSailorsInfoWebsiteURL(Locale.GERMAN, new URL(sailorsInfoWebSiteURLAsString));
                 }
             } catch (MalformedURLException e) {
                 logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+event.getName()+". Ignoring this URL.");
             }
-            return true;
+            modified = true;
+        } else {
+            modified = false;
         }
-        return false;
+        return modified;
     }
 }
