@@ -28,7 +28,7 @@ public class UserAccountDetails extends AbstractUserDetails {
     public void setUser(UserDTO currentUser) {
         super.setUser(currentUser);
         // TODO correct message
-        editImageLinkUi.setTitle("TODO picture of: " + currentUser.getName());
+//        editImageLinkUi.setTitle("TODO picture of: " + currentUser.getName());
         // TODO use image from user when field is available
         editImageLinkUi.getStyle().setBackgroundImage("url(images/home/userdefault.svg)");
     }
