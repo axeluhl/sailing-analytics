@@ -91,7 +91,6 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         // if we read an event with data in the old image/video format we need migrate them
         if(Util.size(result.getImages()) == 0 && Util.size(result.getVideos()) == 0) {
             readImageAndVideoURLsFromLegacyServer(eventJson, result);
-            
         }
         JSONArray sailorsInfoWebsiteURLsJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URLS);
         if (sailorsInfoWebsiteURLsJson != null) {

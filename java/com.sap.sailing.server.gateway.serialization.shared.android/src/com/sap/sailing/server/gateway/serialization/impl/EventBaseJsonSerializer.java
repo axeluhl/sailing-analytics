@@ -98,7 +98,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         }
         result.put(FIELD_VIDEOS, jsonVideos);
         JSONArray jsonSailorsInfoWebsiteURLs = new JSONArray();
-        for(Map.Entry<Locale, URL> entry: event.getSailorsInfoWebsiteURLs().entrySet()) {
+        for (Map.Entry<Locale, URL> entry: event.getSailorsInfoWebsiteURLs().entrySet()) {
             addSailorsInfoWebsiteURL(entry.getKey(), entry.getValue(), jsonSailorsInfoWebsiteURLs);
         }
         result.put(FIELD_SAILORS_INFO_WEBSITE_URLS, jsonSailorsInfoWebsiteURLs);
