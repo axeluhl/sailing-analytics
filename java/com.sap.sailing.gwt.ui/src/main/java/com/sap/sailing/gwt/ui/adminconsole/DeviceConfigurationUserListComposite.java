@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class DeviceConfigurationUserListComposite extends DeviceConfigurationListComposite {
 
@@ -19,7 +20,7 @@ public class DeviceConfigurationUserListComposite extends DeviceConfigurationLis
     
     @Override
     protected CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable() {
-        CellTable<DeviceConfigurationMatcherDTO> table = new CellTable<DeviceConfigurationMatcherDTO>(
+        CellTable<DeviceConfigurationMatcherDTO> table = new BaseCelltable<DeviceConfigurationMatcherDTO>(
                 /* pageSize */10000, tableResource);
         configurationsDataProvider.addDataDisplay(table);
         table.setWidth("100%");
