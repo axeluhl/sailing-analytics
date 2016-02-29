@@ -310,11 +310,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Pair<Integer, Integer> resolveImageDimensions(String imageUrlAsString) throws Exception;
     
     EventDTO updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
-            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLs,
+            VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName,
             Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
 
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
-            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLStrings, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
+            boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos) throws Exception;
     
     void removeEvent(UUID eventId);
 
