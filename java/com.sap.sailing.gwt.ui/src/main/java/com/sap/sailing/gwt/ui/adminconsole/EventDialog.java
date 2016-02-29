@@ -222,13 +222,12 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(7, 0, new Label(stringMessages.eventOfficialWebsiteURL() + ":"));
         formGrid.setWidget(7, 1, officialWebsiteURLEntryField);
         int rowIndex = 8;
-        for(Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            String suffix = sailorsInfoWebsiteUrlEntry.getKey() == null ? "" : " ["+sailorsInfoWebsiteUrlEntry.getKey()+"]";
+        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
+            String suffix = "["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
             formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + suffix + ":"));
             formGrid.setWidget(rowIndex, 1, sailorsInfoWebsiteUrlEntry.getValue());
             rowIndex++;
         }
-
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
         tabPanel.setHeight("500px");
         panel.add(tabPanel);
