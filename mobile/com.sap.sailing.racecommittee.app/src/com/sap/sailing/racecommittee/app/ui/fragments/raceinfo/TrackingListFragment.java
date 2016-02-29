@@ -379,25 +379,28 @@ public class TrackingListFragment extends BaseFragment
     }
 
     @Override
-    public void onEditItem(final CompetitorResultWithIdImpl item) {
+    public void onEditItem(final CompetitorResultWithIdImpl item, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, mFinishedAdapter.getItemCount());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, position, mFinishedAdapter.getItemCount());
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                CompetitorResultWithIdImpl newData = layout.getValue();
+                CompetitorResultWithIdImpl newItem = layout.getValue();
                 int index = mFinishedData.indexOf(item);
-                if (item.getOneBasedRank() != newData.getOneBasedRank()) {
-                    int newPos = newData.getOneBasedRank();
+                if (item.getMaxPointsReason() != newItem.getMaxPointsReason() && item.getMaxPointsReason() == MaxPointsReason.NONE) {
+                    mFinishedData.remove(item);
+                    mFinishedData.add(mFinishedData.size(), newItem);
+                } else if (item.getOneBasedRank() != newItem.getOneBasedRank()) {
+                    int newPos = newItem.getOneBasedRank();
                     if (newPos > 0) {
                         newPos -= 1;
                     }
-                    mFinishedData.remove(index);
-                    mFinishedData.add(newPos, newData);
+                    mFinishedData.remove(item);
+                    mFinishedData.add(newPos, newItem);
                 } else {
-                    replaceItemInPositioningList(index, item, newData);
+                    replaceItemInPositioningList(index, item, newItem);
                 }
                 mFinishedAdapter.notifyDataSetChanged();
                 getRaceState().setFinishPositioningListChanged(MillisecondsTimePoint.now(), getCompetitorResults());

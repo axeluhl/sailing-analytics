@@ -178,7 +178,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
         void onLongClick(CompetitorResultWithIdImpl item);
 
-        void onEditItem(CompetitorResultWithIdImpl item);
+        void onEditItem(CompetitorResultWithIdImpl item, int position);
     }
 
     public class ViewHolder extends BaseDraggableSwipeViewHolder implements View.OnLongClickListener {
@@ -200,7 +200,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                     @Override
                     public void onClick(View v) {
                         if (mListener != null) {
-                            mListener.onEditItem(mCompetitor.get(getAdapterPosition()));
+                            mListener.onEditItem(mCompetitor.get(getAdapterPosition()), getAdapterPosition() + 1);
                         }
                     }
                 });

@@ -41,12 +41,12 @@ public class CompetitorEditLayout extends FrameLayout {
     private NumberPicker mSeconds;
     private EditText mComment;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos) {
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
         super(context);
-        init(competitor, maxPos);
+        init(competitor, currentPos, maxPos);
     }
 
-    private void init(CompetitorResultWithIdImpl competitor, int maxPos) {
+    private void init(CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
         View layout = LayoutInflater.from(getContext()).inflate(R.layout.race_tracking_list_competitor_edit, this, false);
 
         mCompetitor = competitor;
@@ -79,7 +79,7 @@ public class CompetitorEditLayout extends FrameLayout {
             StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(maxPos));
             mPosition.setAdapter(positionAdapter);
             mPosition.setOnItemSelectedListener(new SpinnerSelectedListener(positionAdapter));
-            mPosition.setSelection(mCompetitor.getOneBasedRank());
+            mPosition.setSelection(currentPos);
         }
 
         mPenalty = ViewHelper.get(layout, R.id.competitor_penalty);
