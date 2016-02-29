@@ -6,10 +6,10 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 
 public class CompetitorResultWithIdImpl extends CompetitorResultImpl {
-
+    private static final long serialVersionUID = 4373611281142932067L;
+    
     private long mId;
 
     public CompetitorResultWithIdImpl(long id, CompetitorResult result) {
