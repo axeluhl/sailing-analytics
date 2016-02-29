@@ -41,6 +41,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
@@ -252,7 +253,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceStatusColumn.setSortable(true);
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceTable = new CellTable<SwissTimingRaceRecordDTO>(/* pageSize */ 10000, tableRes);
+        raceTable = new BaseCelltable<SwissTimingRaceRecordDTO>(/* pageSize */10000, tableRes);
         raceTable.addColumn(regattaNameColumn, stringConstants.regatta());
         raceTable.addColumn(seriesNameColumn, stringConstants.series());
         raceTable.addColumn(raceNameColumn, stringConstants.name());

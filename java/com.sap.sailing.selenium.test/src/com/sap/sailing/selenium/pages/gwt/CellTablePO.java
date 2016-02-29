@@ -52,11 +52,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     private static final String SORTING_INDICATOR_XPATH = ".//div/div/img";
     
     private static final String LOADING_ANIMATION_XPATH = "./td/div/div/div/img";
-    
-    protected static final String SELECTED_ROW_CSS_CLASS = "IJ2OUNB-Jc-C"; //$NON-NLS-1$
-    // Use the following line for testing with Super-Dev-Mode (SDM):
-//    protected static final String SELECTED_ROW_CSS_CLASS = "com-sap-sailing-gwt-ui-adminconsole-AdminConsoleTableResources-AdminConsoleTableStyle-cellTableSelectedRow"; //$NON-NLS-1$
-    
+
     private static final String LOADING_ANIMATION_IMAGE = "data:image/gif;base64," +               //$NON-NLS-1$
             "R0lGODlhKwALAPEAAP///0tKSqampktKSiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGx" +  //$NON-NLS-1$
             "vYWQuaW5mbwAh+QQJCgAAACwAAAAAKwALAAACMoSOCMuW2diD88UKG95W88uF4DaGWFmhZid93pq+pwxnLUnXh8" +  //$NON-NLS-1$
@@ -75,6 +71,7 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
             "iVBORw0KGgoAAAANSUhEUgAAAAsAAAAHCAYAAADebrddAAAAiklEQVR42mPIrewMya3oup5X2XkeiC/nVXRezgV" +  //$NON-NLS-1$
             "iEDu3vPMskH0BROeVdqkyJNTXcwAlDgDxfwxcAaWrOpsYYCC/qlUcKPgMLlnZBcWd/4E272BAB0DdjkDJf2AFFR" +  //$NON-NLS-1$
             "BTgfTj4uIeEQZsAKigHmE6EJd32DDgA0DF20FOyK/sqmIgBEDWAhVPwyYHAJAqZIiNwsHKAAAAAElFTkSuQmCC\")"; //$NON-NLS-1$
+    public static final String ARIA_ROLE_SELECTED = "aria-selected";
     
 //    @FindBy(how = ByTagName.class, using = HEAD_TAG_NAME)
 //    private WebElement head;

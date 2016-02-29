@@ -9,6 +9,8 @@ import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
@@ -51,6 +53,32 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
     @Override
     public boolean add(GPSFixMoving fix) {
         return super.add(new CompactGPSFixMovingImpl(fix));
+    }
+
+    /**
+     * Interpolates linearly between the two fixes based on their time difference and distance. This
+     * intentionally ignores the {@link GPSFixMoving#getSpeed() speed values} provided by the fixes
+     * themselves for performance reasons.
+     */
+    @Override
+    protected Position getEstimatedPositionBetweenTwoValidFixes(TimePoint timePoint, GPSFixMoving lastFixAtOrBefore, GPSFixMoving firstFixAtOrAfter) {
+        assert lastFixAtOrBefore != null;
+        assert firstFixAtOrAfter != null;
+        assert !timePoint.before(lastFixAtOrBefore.getTimePoint());
+        assert !timePoint.after(firstFixAtOrAfter.getTimePoint());
+        final Position result;
+        final SpeedWithBearing estimatedSpeed = estimateSpeedOnTimeDifferenceAndDistanceOnly(lastFixAtOrBefore, firstFixAtOrAfter);
+        Distance distance = estimatedSpeed.travel(lastFixAtOrBefore.getTimePoint(), timePoint);
+        result = lastFixAtOrBefore.getPosition().translateGreatCircle(
+                estimatedSpeed.getBearing(), distance);
+        return result;
+    }
+
+    private SpeedWithBearing estimateSpeedOnTimeDifferenceAndDistanceOnly(GPSFixMoving fix1, GPSFixMoving fix2) {
+        assert fix1 != null && fix2 != null;
+        final Distance distance = fix1.getPosition().getDistance(fix2.getPosition());
+        return new KnotSpeedWithBearingImpl(distance.inTime(fix1.getTimePoint().until(fix2.getTimePoint())).getKnots(),
+                fix1.getPosition().getBearingGreatCircle(fix2.getPosition()));
     }
 
     @Override

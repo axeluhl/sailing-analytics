@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.client.shared.controls;
 
-import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ProvidesKey;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 /**
  * This {@link FlushableCellTable} provides the {@link FlushableCellTable#flush()}-method for the
@@ -12,7 +12,7 @@ import com.google.gwt.view.client.ProvidesKey;
  * @author D064976
  * @param <T>
  */
-public class FlushableCellTable<T> extends CellTable<T> implements Flushable {
+public class FlushableCellTable<T> extends BaseCelltable<T> implements Flushable {
     public FlushableCellTable() {
         super();
     }
