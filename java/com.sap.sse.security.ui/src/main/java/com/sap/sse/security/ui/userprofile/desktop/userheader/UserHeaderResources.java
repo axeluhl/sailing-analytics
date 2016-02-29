@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.desktop.partials.userHeader;
+package com.sap.sse.security.ui.userprofile.desktop.userheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

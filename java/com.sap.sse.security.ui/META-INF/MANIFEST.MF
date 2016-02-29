@@ -41,4 +41,7 @@ Export-Package: com.sap.sse.security.shared,
  com.sap.sse.security.ui.client.i18n,
  com.sap.sse.security.ui.loginpanel,
  com.sap.sse.security.ui.server,
- com.sap.sse.security.ui.shared
+ com.sap.sse.security.ui.shared,
+ com.sap.sse.security.ui.userprofile.shared.userheader,
+ com.sap.sse.security.ui.userprofile.desktop.userheader,
+ com.sap.sse.security.ui.userprofile.mobile.userheader

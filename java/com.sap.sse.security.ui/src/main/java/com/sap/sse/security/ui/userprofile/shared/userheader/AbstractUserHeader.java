@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.partials.userheader;
+package com.sap.sse.security.ui.userprofile.shared.userheader;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;

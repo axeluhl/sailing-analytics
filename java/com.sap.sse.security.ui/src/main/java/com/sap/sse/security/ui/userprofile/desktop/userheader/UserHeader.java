@@ -1,20 +1,20 @@
-package com.sap.sailing.gwt.home.mobile.partials.userheader;
+package com.sap.sse.security.ui.userprofile.desktop.userheader;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.userheader.AbstractUserHeader;
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.ui.userprofile.shared.userheader.AbstractUserHeader;
 
 /**
- * Mobile (smartphone) implementation of {@link AbstractUserHeader}.
+ * Desktop implementation of {@link AbstractUserHeader}.
  */
 public class UserHeader extends AbstractUserHeader {
+    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+
     interface MyUiBinder extends UiBinder<Widget, UserHeader> {
     }
-    
-    private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
     
     @UiField(provided = true) final CommonSharedResources res;
     
