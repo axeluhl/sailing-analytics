@@ -5,6 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
 import com.sap.sailing.gwt.home.mobile.partials.userheader.UserHeader;
 import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
@@ -17,11 +18,12 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     interface MyUiBinder extends UiBinder<Widget, UserProfileDetailsViewImpl> {
     }
 
-    @UiField UserHeader userHeaderUi;
+    @UiField(provided = true) UserHeader userHeaderUi;
     @UiField(provided = true) AuthorizedContentDecoratorMobile decoratorUi;
     @UiField(provided = true) UserDetails userDetailsUi;
     
     public UserProfileDetailsViewImpl(Presenter presenter) {
+        userHeaderUi = new UserHeader(SharedResources.INSTANCE);
         decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
         userDetailsUi = new UserDetails();
         initWidget(uiBinder.createAndBindUi(this));
