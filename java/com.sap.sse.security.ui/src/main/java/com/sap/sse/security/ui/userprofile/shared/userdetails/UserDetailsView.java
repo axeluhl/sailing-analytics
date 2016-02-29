@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.partials.userdetails;
+package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import com.sap.sse.security.ui.shared.UserDTO;
 

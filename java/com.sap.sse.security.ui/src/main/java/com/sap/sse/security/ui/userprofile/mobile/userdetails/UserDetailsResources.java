@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.mobile.partials.userdetails;
+package com.sap.sse.security.ui.userprofile.mobile.userdetails;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

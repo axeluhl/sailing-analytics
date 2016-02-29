@@ -6,11 +6,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountDetails;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
+import com.sap.sse.security.ui.userprofile.desktop.userdetails.UserAccountDetails;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsView;
 
 /**
  * Created by pgtaboada on 25.11.14.

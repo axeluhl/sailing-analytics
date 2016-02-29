@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.partials.userdetails;
+package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;

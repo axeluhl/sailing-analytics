@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.partials.userdetails;
+package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;

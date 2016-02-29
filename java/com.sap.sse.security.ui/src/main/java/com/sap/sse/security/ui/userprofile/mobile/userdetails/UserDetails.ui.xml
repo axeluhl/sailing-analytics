@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
   <ui:with field="res" type="com.sap.sse.gwt.common.CommonSharedResources" />
-  <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetailsResources" />
+  <ui:with field="local_res" type="com.sap.sse.security.ui.userprofile.mobile.userdetails.UserDetailsResources" />
   <g:HTMLPanel>
     <div class="{local_res.css.userdetails}">
       <div class="{res.mediaCss.grid}">

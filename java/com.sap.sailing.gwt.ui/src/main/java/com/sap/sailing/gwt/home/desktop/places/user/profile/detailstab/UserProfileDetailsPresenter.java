@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.detailstab;
 
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsPresenter;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsPresenter;
 
 public class UserProfileDetailsPresenter implements UserProfileDetailsView.Presenter {
 

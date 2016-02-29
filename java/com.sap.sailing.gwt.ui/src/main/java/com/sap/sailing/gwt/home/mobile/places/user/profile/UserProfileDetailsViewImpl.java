@@ -6,11 +6,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorMobile;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.userprofile.mobile.userdetails.UserDetails;
 import com.sap.sse.security.ui.userprofile.mobile.userheader.UserHeader;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsView;
 
 public class UserProfileDetailsViewImpl extends Composite implements UserProfileDetailsView {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);

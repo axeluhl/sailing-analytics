@@ -1,11 +1,11 @@
-package com.sap.sailing.gwt.home.mobile.partials.userdetails;
+package com.sap.sse.security.ui.userprofile.mobile.userdetails;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.AbstractUserDetails;
 import com.sap.sse.gwt.common.CommonSharedResources;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.AbstractUserDetails;
 
 /**
  * Mobile (smartphone) implementation of {@link AbstractUserDetails}.

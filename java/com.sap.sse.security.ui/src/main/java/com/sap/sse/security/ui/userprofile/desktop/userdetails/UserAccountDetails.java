@@ -1,13 +1,13 @@
-package com.sap.sailing.gwt.home.desktop.partials.useraccountDetails;
+package com.sap.sse.security.ui.userprofile.desktop.userdetails;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.userdetails.AbstractUserDetails;
 import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.AbstractUserDetails;
 
 /**
  * Desktop implementation of {@link AbstractUserDetails}.
