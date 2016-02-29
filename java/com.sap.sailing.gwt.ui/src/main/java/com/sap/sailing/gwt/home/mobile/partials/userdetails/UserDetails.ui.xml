@@ -8,59 +8,57 @@
     <div class="{local_res.css.userdetails}">
       <div class="{res.mediaCss.grid}">
         <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-          <form action="" method="">
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.username}' />
-              </div>
-              <input ui:field="usernameUi" type="text" disabled="disabled" class="{res.mainCss.input_input}" />
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.username}' />
             </div>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.name}' />
-              </div>
-              <g:TextBox ui:field="nameUi" styleName="{res.mainCss.input_input}" />
+            <input ui:field="usernameUi" type="text" disabled="disabled" class="{res.mainCss.input_input}" />
+          </div>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.name}' />
             </div>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.company}' />
-              </div>
-              <g:TextBox ui:field="companyUi" styleName="{res.mainCss.input_input}" />
+            <g:TextBox ui:field="nameUi" styleName="{res.mainCss.input_input}" />
+          </div>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.company}' />
             </div>
-            <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
-              <ui:text from='{i18n_sec.save}' />
-            </g:Button>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.email}' />
-              </div>
-              <g:TextBox ui:field="emailUi" addStyleNames="{res.mainCss.input_input}" />
+            <g:TextBox ui:field="companyUi" styleName="{res.mainCss.input_input}" />
+          </div>
+          <g:Button ui:field="saveChangesUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+            <ui:text from='{i18n_sec.save}' />
+          </g:Button>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.email}' />
             </div>
-            <g:Button ui:field="changeEmailUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
-              <ui:text from='{i18n_sec.save}' />
-            </g:Button>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.oldPassword}' />
-              </div>
-              <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+            <g:TextBox ui:field="emailUi" addStyleNames="{res.mainCss.input_input}" />
+          </div>
+          <g:Button ui:field="changeEmailUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+            <ui:text from='{i18n_sec.save}' />
+          </g:Button>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.oldPassword}' />
             </div>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.password}' />
-              </div>
-              <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+            <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+          </div>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.password}' />
             </div>
-            <div class="{res.mainCss.input}">
-              <div class="{res.mainCss.input_label}">
-                <ui:text from='{i18n_sec.passwordRepeat}' />
-              </div>
-              <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{res.mainCss.input_input}" />
+            <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{res.mainCss.input_input}" />
+          </div>
+          <div class="{res.mainCss.input}">
+            <div class="{res.mainCss.input_label}">
+              <ui:text from='{i18n_sec.passwordRepeat}' />
             </div>
-            <g:Button ui:field="changePasswordUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
-              <ui:text from='{i18n_sec.changePassword}' />
-            </g:Button>
-          </form>
+            <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{res.mainCss.input_input}" />
+          </div>
+          <g:Button ui:field="changePasswordUi" addStyleNames="{local_res.css.userdetails_save} {res.mainCss.button} {res.mainCss.buttonprimary}">
+            <ui:text from='{i18n_sec.changePassword}' />
+          </g:Button>
         </div>
       </div>
     </div>
