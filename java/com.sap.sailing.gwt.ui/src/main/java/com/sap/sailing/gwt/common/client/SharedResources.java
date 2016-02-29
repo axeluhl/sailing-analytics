@@ -11,7 +11,7 @@ public interface SharedResources extends ClientBundle, CommonSharedResources {
     @Source("main.gss")
     MainCss mainCss();
 
-    @Source("media.gss")
+    @Source(CommonSharedResources.MEDIA)
     MediaCss mediaCss();
 
     public interface MainCss extends CssResource, CommonMainCss {
