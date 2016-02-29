@@ -18,14 +18,14 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     interface MyUiBinder extends UiBinder<Widget, UserProfileDetailsViewImpl> {
     }
 
-    @UiField(provided = true) UserHeader userHeaderUi;
-    @UiField(provided = true) AuthorizedContentDecoratorMobile decoratorUi;
-    @UiField(provided = true) UserDetails userDetailsUi;
+    @UiField(provided = true) final UserHeader userHeaderUi;
+    @UiField(provided = true) final AuthorizedContentDecoratorMobile decoratorUi;
+    @UiField(provided = true) final UserDetails userDetailsUi;
     
     public UserProfileDetailsViewImpl(Presenter presenter) {
         userHeaderUi = new UserHeader(SharedResources.INSTANCE);
         decoratorUi = new AuthorizedContentDecoratorMobile(presenter);
-        userDetailsUi = new UserDetails();
+        userDetailsUi = new UserDetails(SharedResources.INSTANCE);
         initWidget(uiBinder.createAndBindUi(this));
     }
     

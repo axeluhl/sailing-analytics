@@ -5,6 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.desktop.partials.useraccountDetails.UserAccountDetails;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.partials.userdetails.UserDetailsView;
@@ -24,7 +25,7 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     @UiField(provided = true)
     AuthorizedContentDecoratorDesktop decoratorUi;
     
-    @UiField
+    @UiField(provided = true)
     UserAccountDetails accountDetailsUi;
 
     private UserProfileView.Presenter currentPresenter;
@@ -40,6 +41,7 @@ public class UserProfileDetailsViewImpl extends Composite implements UserProfile
     @Override
     public void setPresenter(Presenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(currentPresenter);
+        accountDetailsUi = new UserAccountDetails(SharedResources.INSTANCE);
         initWidget(ourUiBinder.createAndBindUi(this));
     }
     

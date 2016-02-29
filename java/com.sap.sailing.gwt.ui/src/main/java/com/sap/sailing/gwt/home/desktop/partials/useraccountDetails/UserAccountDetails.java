@@ -6,6 +6,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.userdetails.AbstractUserDetails;
+import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -19,7 +20,10 @@ public class UserAccountDetails extends AbstractUserDetails {
     
     @UiField DivElement editImageLinkUi;
     
-    public UserAccountDetails() {
+    @UiField(provided = true) final CommonSharedResources res;
+    
+    public UserAccountDetails(CommonSharedResources res) {
+        this.res = res;
         UseraccountDetailsResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
     }
