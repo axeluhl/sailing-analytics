@@ -75,12 +75,10 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         mimeTypeListBox.addItem(MimeType.qt.name());
         mimeTypeListBox.addItem(MimeType.youtube.name());
         mimeTypeListBox.addItem(MimeType.vimeo.name());
-        
         localeListBox = createListBox(false);
-        for(String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
+        for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        
         videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
@@ -89,7 +87,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
             }
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
-        
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaConstants.videoTagSuggestions, "Enter tags for the video", 50));
