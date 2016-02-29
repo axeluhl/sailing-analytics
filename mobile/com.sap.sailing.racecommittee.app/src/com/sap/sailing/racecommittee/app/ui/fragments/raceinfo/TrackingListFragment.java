@@ -407,7 +407,9 @@ public class TrackingListFragment extends BaseFragment
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);
-        builder.show();
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     private CharSequence[] getAllMaxPointsReasons() {
