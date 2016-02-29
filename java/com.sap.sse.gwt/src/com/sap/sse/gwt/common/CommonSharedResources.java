@@ -27,6 +27,11 @@ public interface CommonSharedResources extends ClientBundle {
         String mainsection();
         String mainsection_header();
         String mainsection_header_title();
+        String input();
+        String input_label();
+        String input_input();
+        String input_inputerror();
+        String input_errortext();
     }
 
     public interface CommonMediaCss extends CssResource {

@@ -66,3 +66,33 @@
   color: #008fcc;
   text-align: center;
 }
+
+.input {
+  width: 100%;
+  padding: 0.333333333333333em 0;
+  display: inline-block;
+}
+.input_label {
+  font-weight: 600;
+  margin-top: 1.333333333333333em;
+  line-height: 1.333333333333333em;
+  margin-bottom: 0.333333333333333em;
+}
+.input:first-of-type .input_label {
+  margin-top: 0.666666666666667em;
+}
+.input_input {
+  width: 100%;
+  color: #333;
+  padding: 0.6em 1.333333333333333em;
+  border-radius: 0.2em;
+  border: 1px solid #dedede;
+}
+.input_inputerror {
+  border: 1px solid #f00;
+}
+.input_errortext {
+  color: #f00;
+  font-size: 0.8em;
+  margin: -0.266666666666667em 0 0.333333333333333em;
+}
