@@ -67,7 +67,8 @@
             android:id="@+id/competitor_score"
             android:layout_width="@dimen/competitor_width"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentRight="true"
+            android:inputType="numberDecimal" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -129,5 +130,4 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true" />
     </RelativeLayout>
-
 </LinearLayout>
