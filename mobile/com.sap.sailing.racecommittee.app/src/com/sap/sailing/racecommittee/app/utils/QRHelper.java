@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.utils;
 
-import android.app.Activity;
+import java.net.URL;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -10,8 +11,6 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
-
-import java.net.URL;
 
 public class QRHelper {
 

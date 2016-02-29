@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
@@ -28,11 +26,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-import com.sap.sse.common.Util;
-
-import java.net.URL;
 
 public class LoginOnboarding extends Fragment {
 
