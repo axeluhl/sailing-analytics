@@ -11,12 +11,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * {@link HashMap} that implements concurrent behavior for write operations by doing the changes in a copy of an inner map and swapping the inner map afterwards.
+ * {@link HashMap} that implements concurrent behavior for write operations by doing the changes in a copy of an inner
+ * map and swapping the inner map afterwards.
+ * <p>
  * 
- * Read operations are in general non blocking. Be aware that the inner state could have changed on subsequent read operations.
+ * Read operations are in general non blocking. Be aware that the inner state could have changed on subsequent read
+ * operations.
+ * <p>
+ * 
+ * This class violates the contracts of the {@link #keySet()}, {@link #values()} and {@link #entrySet()} methods in that
+ * they return collections that are unmodifiable and not backed by this map. Modifications on this map therefore do not
+ * reflect into the results of these methods, and attempts to modify the collections resulting from these methods will
+ * cause an exception to be thrown.
  *
- * @param <K> The key object type
- * @param <V> The value object type
+ * @param <K>
+ *            The key object type
+ * @param <V>
+ *            The value object type
  */
 public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
     private static final long serialVersionUID = -5618926487507116463L;
@@ -153,7 +164,7 @@ public class CopyOnWriteHashMap<K, V> implements Map<K, V>, Serializable {
     public void set(Map<? extends K, ? extends V> values) {
         LockUtil.lockForWrite(lock);
         try {
-            if(values == null) {
+            if (values == null) {
                 wrappedMap = new HashMap<>();
             } else {
                 wrappedMap = new HashMap<>(values);
