@@ -94,7 +94,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             
         }
         JSONArray sailorsInfoWebsiteURLsJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URLS);
-        if(sailorsInfoWebsiteURLsJson != null) {
+        if (sailorsInfoWebsiteURLsJson != null) {
             for (Object sailorsInfoWebsiteURLJson : sailorsInfoWebsiteURLsJson) {
                 JSONObject sailorsInfoWebsiteURLJsonObject = (JSONObject) sailorsInfoWebsiteURLJson;
                 String localeString = (String) sailorsInfoWebsiteURLJsonObject.get(EventBaseJsonSerializer.FIELD_LOCALE);
@@ -103,7 +103,7 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
             } 
         }
         URL sailorsInfoWebsiteURL = Helpers.getURLField(eventJson, EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL);
-        if(sailorsInfoWebsiteURL != null && !result.hasSailorsInfoWebsiteURL(null)) {
+        if (sailorsInfoWebsiteURL != null && !result.hasSailorsInfoWebsiteURL(null)) {
             result.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
         }
         return result;
