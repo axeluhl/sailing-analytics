@@ -111,18 +111,18 @@ public class Footer extends Composite {
         final Iterable<String> availableLocales = GWTLocaleUtil.getAvailableLocales();
         final int localeCount = Util.size(availableLocales);
         
-        if(localeCount <= 1) {
+        if (localeCount <= 1) {
             // only current language (or removed default) available
             changeLanguageLink.removeFromParent();
             changeLanguageList.removeFromParent();
             languageSelectionDiv.removeFromParent();
             return;
         }
-        if(Util.size(availableLocales) == 2) {
+        if (Util.size(availableLocales) == 2) {
             changeLanguageList.removeFromParent();
             // current language + one we can switch to
-            for(String localeName : availableLocales) {
-                if(!currentLocale.getLocaleName().equals(localeName)) {
+            for (String localeName : availableLocales) {
+                if (!currentLocale.getLocaleName().equals(localeName)) {
                     otherLanguage = localeName;
                     changeLanguageLink.setText(LocaleInfo.getLocaleNativeDisplayName(otherLanguage));
                     return;
@@ -133,10 +133,10 @@ public class Footer extends Composite {
         changeLanguageLink.removeFromParent();
         Collection<Pair<String, String>> values = new ArrayList<>();
         Pair<String, String> selectedValue = null;
-        for(String localeName : availableLocales) {
+        for (String localeName : availableLocales) {
             Pair<String, String> value = new Pair<String, String>(localeName, LocaleInfo.getLocaleNativeDisplayName(localeName));
             values.add(value);
-            if(currentLocale.getLocaleName().equals(localeName)) {
+            if (currentLocale.getLocaleName().equals(localeName)) {
                 selectedValue = value;
             }
         }
