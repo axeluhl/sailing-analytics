@@ -170,7 +170,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.setName(nameEntryField.getText());
         result.setDescription(descriptionEntryField.getText());
         result.setOfficialWebsiteURL(officialWebsiteURLEntryField.getText().trim().isEmpty() ? null : officialWebsiteURLEntryField.getText().trim());
-        for(Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
+        for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
             TextBox sailorsInfoWebsiteURLEntryField = sailorsInfoWebsiteUrlEntry.getValue();
             String sailorsInfoWebsiteURL = sailorsInfoWebsiteURLEntryField.getText().trim();
             result.setSailorsInfoWebsiteURL(sailorsInfoWebsiteUrlEntry.getKey(), sailorsInfoWebsiteURL.isEmpty() ? null : sailorsInfoWebsiteURLEntryField.getText().trim());
@@ -179,17 +179,16 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
         result.id = id;
-
         List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
         for (String courseAreaName : courseAreaNameList.getValue()) {
             CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
             courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
         }
-        for(ImageDTO image: imagesListComposite.getAllImages()) {
+        for (ImageDTO image: imagesListComposite.getAllImages()) {
             result.addImage(image);
         }
-        for(VideoDTO video: videosListComposite.getAllVideos()) {
+        for (VideoDTO video: videosListComposite.getAllVideos()) {
             result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
