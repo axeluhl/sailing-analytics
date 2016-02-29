@@ -27,6 +27,7 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 import com.sap.sse.common.Util;
@@ -88,7 +89,7 @@ public class LoginOnboarding extends Fragment {
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (saveData(url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.fragmentKey + "=" + device_id.getText().toString())) {
+                            if (QRHelper.with(getActivity()).saveData(url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.fragmentKey + "=" + device_id.getText().toString())) {
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_RESET));
                             }
                         }
@@ -116,36 +117,11 @@ public class LoginOnboarding extends Fragment {
                 break;
 
             case Activity.RESULT_OK:
-                saveData(data.getStringExtra("SCAN_RESULT"));
+                QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
                 break;
 
             default:
                 Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }
-    }
-
-    private boolean saveData(String content) {
-        try {
-            Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
-
-            String identifier = connectionConfiguration.getA();
-            URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
-
-            if (apkUrl != null) {
-                String serverUrl = UrlHelper.getServerUrl(apkUrl);
-
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
-                preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
-
-                new AutoUpdater(getActivity()).checkForUpdate(false);
-                return true;
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
-            }
-        } catch (IllegalArgumentException e) {
-            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        return false;
     }
 }
