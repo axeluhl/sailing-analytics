@@ -10,7 +10,7 @@ public interface RaceBoardResources extends CommonSharedResources {
     @Source({CommonSharedResources.RESET, CommonSharedResources.MAIN, "raceboard-main.gss"})
     RaceBoardMainCss mainCss();
     
-    @Source("raceboard-media.gss")
+    @Source({CommonSharedResources.MEDIA, "raceboard-media.gss"})
     RaceBoardMediaCss mediaCss();
     
     public interface RaceBoardMainCss extends CommonMainCss {
