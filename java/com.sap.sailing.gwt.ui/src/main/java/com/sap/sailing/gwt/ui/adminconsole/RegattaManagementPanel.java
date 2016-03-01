@@ -19,7 +19,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
+import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
@@ -32,6 +35,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
@@ -301,6 +305,37 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
         });
+        
+        createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
+    }
+
+    private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
+        for (final SeriesDTO series: newRegatta.series) {
+            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()){
+                // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
+                int insertIndex = 0;
+                final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
+                
+                for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
+                    raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), insertIndex));
+                    insertIndex++;
+                }
+
+                sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
+                        new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
+                                + " to series " + series.getName() + ": " + caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(List<RaceColumnInSeriesDTO> raceColumns) {
+                        regattaRefresher.fillRegattas();
+                    }
+                });
+            }
+        }
     }
 
     @Override
