@@ -447,8 +447,66 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void ok(final EventDTO newEvent) {
                 createNewEvent(newEvent, existingLeaderboardGroups);
+                openCreateDefaultRegattaDialog(newEvent);
             }
         });
+        dialog.show();
+    }
+    
+    private void openCreateDefaultRegattaDialog(final EventDTO createdEvent) {
+        CreateDefaultRegattaDialog dialog = new CreateDefaultRegattaDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
+            @Override
+            public void cancel() {
+            }
+
+            @Override
+            public void ok(Void editedObject) {
+                sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                openCreateRegattaDialog(Collections.<RegattaDTO>emptyList(), Collections.<EventDTO>emptyList(), createdEvent);
+                            }
+
+                            @Override
+                            public void onSuccess(List<EventDTO> result) {
+                                openCreateRegattaDialog(Collections.<RegattaDTO>emptyList(), Collections.unmodifiableList(result), createdEvent);
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onSuccess(final List<RegattaDTO> existingRegattas) {
+                        sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                openCreateRegattaDialog(existingRegattas, Collections.<EventDTO>emptyList(), createdEvent);
+                            }
+
+                            @Override
+                            public void onSuccess(List<EventDTO> result) {
+                                openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result), createdEvent);
+                            }
+                        });                        
+                    }
+                });
+                                
+                
+            }
+        });
+        dialog.ensureDebugId("CreateDefaultRegattaDialog");
+        dialog.show();
+    }
+    
+    private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas,
+            List<EventDTO> existingEvents, EventDTO createdEvent) {
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, stringMessages,
+                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, null, existingEvents));
+        dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
     

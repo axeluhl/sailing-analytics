@@ -25,8 +25,8 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
     private RegattaConfigurationDTO currentRegattaConfiguration;
 
     public RegattaWithSeriesAndFleetsEditDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(regatta, regatta.series, existingEvents, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
+            List<EventDTO> existingEvents, EventDTO correspondingEvent, final StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(regatta, regatta.series, existingEvents, correspondingEvent, stringMessages.editRegatta(), stringMessages.ok(), stringMessages,
                 null, callback);
         ensureDebugId("RegattaWithSeriesAndFleetsEditDialog");
         currentRegattaConfiguration = regatta.configuration;
