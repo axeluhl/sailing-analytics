@@ -27,7 +27,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_USERS,
     MANAGE_FILE_STORAGE,
     MANAGE_MARK_PASSINGS,
-    CAN_REPLAY_DURING_LIVE_RACES;
+    CAN_REPLAY_DURING_LIVE_RACES,
     
     // back-end permissions
     EVENT,

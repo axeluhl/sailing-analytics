@@ -18,7 +18,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
             result = asList(
                     // RaceBoard:
                     Permission.MANAGE_MEDIA,
-                    Permission.MANAGE_MARK_PASSINGS
+                    Permission.MANAGE_MARK_PASSINGS,
                     
                     // AdminConsole:
                     Permission.MANAGE_ALL_COMPETITORS,
