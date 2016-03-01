@@ -6,6 +6,10 @@
   Copyright (c) 2015 com.sap.sailing. All rights reserved.
 */
 /* HomeViewController */
+"Header" = "GPS Tracker Setup";
+"Scan Code" = "QR Code scannen";
+"No Code" = "Kein QR Code?";
+"QR found" = "Der QR Code kann auf Ihrer Anmeldebestätigung gefunden werden";
 "Settings" = "Einstellungen";
 "About" = "Über";
 "Cancel" = "Abbrechen";
@@ -14,6 +18,11 @@
 "Cannot read QR codes with this device." = "Cannot read QR codes with this device.";
 "In order to use this app you need to check-in via QR code or email link. Please contact the racing committee if you need either." = "Für die Verwendung des Regatta-Trackers ist ein Checkin mit QR-Code oder ein Checkin-Link aus der E-Mail notwendig. Sollten Sie diesen nicht erhalten haben, wenden Sie sich bitte an die Wettfahrtleitung.";
 "OK" = "OK";
+/* EULA */
+"EULA_title" = "Endbenutzer Lizenzvereinbarung";
+"EULA_content" = "Mit der Verwendung dieser App stimmen Sie den Datenschutzbestimmungen der SAP SE zu.";
+"EULA_view" = "Anzeigen";
+"EULA_confirm" = "Zustimmen";
 /* AcceptTermsViewController */
 "You must accept the terms to use this app." = "Sie müssen die AGB annehmen, um diese App verwenden zu können.";
 /* AboutViewController */
@@ -23,6 +32,7 @@
 "Photo Library" = "Fotos";
 "Last sync" = "Letzter Update";
 "Start Tracking" = "Tracking starten";
+"Show Event" = "Zum Event";
 "Please listen for announcements" = "Bitte achten Sie auf die Durchsagen";
 "Thank you for participating!" = "Vielen Dank für Ihre Teilnahme!";
 "Check-Out" = "Check-Out";

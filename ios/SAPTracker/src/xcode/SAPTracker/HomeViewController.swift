@@ -14,9 +14,18 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     enum AlertView: Int {
         case NoCameraAvailable
     }
+
+    struct Keys {
+        static let acceptedTerms = "acceptedTerms"
+    }
+    
+    @IBOutlet weak var bottomNote: PaddedLabel!
+    @IBOutlet weak var btnScan: UIButton!
+    @IBOutlet weak var btnNoCode: UIButton!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
+    
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
     
@@ -29,22 +38,62 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         // set up data source for list
         fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
         fetchedResultsController!.delegate = self
-        fetchedResultsController!.performFetch(nil)
+        do {
+            try fetchedResultsController!.performFetch()
+        } catch {
+            print(error)
+        }
         
         // register for open custom URL events
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
-        
+
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "checkEULA:", name: UIApplicationWillEnterForegroundNotification, object: nil)
+
+        checkEULA(NSNotification.init(name: "", object: nil))
+
+        navigationItem.title = NSLocalizedString("Header", comment: "")
+        bottomNote.text = NSLocalizedString("QR found", comment: "")
+        btnScan.setTitle(NSLocalizedString("Scan Code", comment: ""), forState: .Normal)
+        btnNoCode.setTitle(NSLocalizedString("No Code", comment: ""), forState: .Normal)
+
         // add logo to top left
         let imageView = UIImageView(image: UIImage(named: "sap_logo"))
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
-        
+    }
+
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+
+    func checkEULA(n: NSNotification) {
         // check that user accepted terms
-        if !AcceptTermsViewController.acceptedTerms() {
-            performSegueWithIdentifier("EULA", sender: nil)
+        if !NSUserDefaults.standardUserDefaults().boolForKey(Keys.acceptedTerms) {
+
+            let alert = UIAlertController(title: NSLocalizedString("EULA_title", comment: ""),
+                message: NSLocalizedString("EULA_content", comment: ""),
+                preferredStyle: .Alert)
+
+            let viewAction = UIAlertAction(title: NSLocalizedString("EULA_view", comment: ""),
+                style: .Cancel,
+                handler: { action in
+                    UIApplication.sharedApplication().openURL(URLs.EULA)
+            })
+
+            let confirmAction = UIAlertAction(title: NSLocalizedString("EULA_confirm", comment: ""),
+                style: .Default,
+                handler: { action in
+                    let preferences = NSUserDefaults.standardUserDefaults()
+                    preferences.setBool(true, forKey:Keys.acceptedTerms)
+                    preferences.synchronize()
+            })
+
+            alert.addAction(viewAction)
+            alert.addAction(confirmAction)
+            presentViewController(alert, animated: true, completion: nil)
         }
     }
-    
+
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         DataManager.sharedManager.selectedCheckIn = nil;
@@ -77,8 +126,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     // MARK: - UITableViewDataSource
+    
     func resizeTable() {
-        let info = fetchedResultsController!.sections![0] as! NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![0] 
         let rows = info.numberOfObjects
         if rows < 3 {
             tableView.removeConstraint(tableViewHeight)
@@ -94,7 +144,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let info = fetchedResultsController!.sections![section] as! NSFetchedResultsSectionInfo
+        let info = fetchedResultsController!.sections![section] 
         resizeTable()
         return info.numberOfObjects
     }
@@ -104,7 +154,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as! UITableViewCell!
+        let cell = tableView.dequeueReusableCellWithIdentifier("Regatta") as UITableViewCell!
         configureCell(cell, atIndexPath: indexPath)
         return cell
     }

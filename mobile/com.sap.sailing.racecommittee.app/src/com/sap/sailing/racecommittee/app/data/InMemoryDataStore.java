@@ -141,10 +141,10 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     public void addRace(ManagedRace race) {
-        managedRaceById.put(convertManagedRaceIdentiferToSimpleRaceLogIdentifier(race.getIdentifier()), race);
+        managedRaceById.put(convertManagedRaceIdentifierToSimpleRaceLogIdentifier(race.getIdentifier()), race);
     }
 
-    private SimpleRaceLogIdentifier convertManagedRaceIdentiferToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
+    private SimpleRaceLogIdentifier convertManagedRaceIdentifierToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
         return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceName(), id.getFleet().getName());
     }
 

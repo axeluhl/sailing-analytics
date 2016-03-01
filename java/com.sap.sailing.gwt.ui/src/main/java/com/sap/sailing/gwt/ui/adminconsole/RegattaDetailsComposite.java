@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 
@@ -117,7 +118,7 @@ public class RegattaDetailsComposite extends Composite {
     }
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
-        CellTable<SeriesDTO> table = new CellTable<SeriesDTO>(/* pageSize */10000, tableRes);
+        CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
         table.setWidth("100%");
         
         TextColumn<SeriesDTO> seriesNameColumn = new TextColumn<SeriesDTO>() {

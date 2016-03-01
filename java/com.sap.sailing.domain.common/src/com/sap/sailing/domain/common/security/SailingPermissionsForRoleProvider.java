@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.security;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import com.sap.sse.security.shared.DefaultRoles;
@@ -15,32 +15,48 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
             result = Collections.<String>singletonList("*");
         } else if (Roles.eventmanager.getRolename().equals(role)) {
-            result = Arrays.asList(
+            result = asList(
+                    // RaceBoard:
+                    Permission.MANAGE_MEDIA,
+                    Permission.MANAGE_MARK_PASSINGS
+                    
                     // AdminConsole:
-                    Permission.MANAGE_ALL_COMPETITORS.getStringPermission(),
-                    Permission.MANAGE_COURSE_LAYOUT.getStringPermission(),
-                    Permission.MANAGE_DEVICE_CONFIGURATION.getStringPermission(),
-                    Permission.MANAGE_EVENTS.getStringPermission(),
-                    Permission.MANAGE_IGTIMI_ACCOUNTS.getStringPermission(),
-                    Permission.MANAGE_LEADERBOARD_GROUPS.getStringPermission(),
-                    Permission.MANAGE_LEADERBOARDS.getStringPermission(),
-                    Permission.MANAGE_MEDIA.getStringPermission(),
-                    Permission.MANAGE_RACELOG_TRACKING.getStringPermission(),
-                    Permission.MANAGE_REGATTAS.getStringPermission(),
-                    Permission.MANAGE_RESULT_IMPORT_URLS.getStringPermission(),
-                    Permission.MANAGE_STRUCTURE_IMPORT_URLS.getStringPermission(),
-                    Permission.MANAGE_TRACKED_RACES.getStringPermission(),
-                    Permission.MANAGE_WIND.getStringPermission(),
+                    Permission.MANAGE_ALL_COMPETITORS,
+                    Permission.MANAGE_COURSE_LAYOUT,
+                    Permission.MANAGE_DEVICE_CONFIGURATION,
+                    Permission.MANAGE_EVENTS,
+                    Permission.MANAGE_IGTIMI_ACCOUNTS,
+                    Permission.MANAGE_LEADERBOARD_GROUPS,
+                    Permission.MANAGE_LEADERBOARDS,
+                    Permission.MANAGE_MEDIA,
+                    Permission.MANAGE_RACELOG_TRACKING,
+                    Permission.MANAGE_REGATTAS,
+                    Permission.MANAGE_RESULT_IMPORT_URLS,
+                    Permission.MANAGE_STRUCTURE_IMPORT_URLS,
+                    Permission.MANAGE_TRACKED_RACES,
+                    Permission.MANAGE_WIND,
                     
                     // back-end:
-                    Permission.EVENT.getStringPermission(),
-                    Permission.REGATTA.getStringPermission(),
-                    Permission.LEADERBOARD.getStringPermission(),
-                    Permission.LEADERBOARD_GROUP.getStringPermission()
+                    Permission.EVENT,
+                    Permission.REGATTA,
+                    Permission.LEADERBOARD,
+                    Permission.LEADERBOARD_GROUP
                     );
+        } else if (Roles.mediaeditor.getRolename().equals(role)) {
+            result = asList(Permission.MANAGE_MEDIA);
+        } else if (Roles.moderator.getRolename().equals(role)) {
+            result = asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
         } else {
             result = Collections.emptyList();
         }
         return result;
+    }
+    
+    private Iterable<String> asList(Permission... permissions) {
+        ArrayList<String> list = new ArrayList<String>(permissions.length);
+        for (Permission permission : permissions) {
+            list.add(permission.getStringPermission());
+        }
+        return list;
     }
 }

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattanavigation;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -52,17 +51,14 @@ public class ListNavigationPanel<T extends ListNavigationAction> extends Composi
     
     public interface ListNavigationAction {
         String getDisplayName();
-        boolean isShowAdditionalWidget();
     }
     
     private class ActionWidget extends Label {
         private final T action;
-        private final Display displayStyle;
 
         private ActionWidget(T action) {
             super(action.getDisplayName());
             this.action = action;
-            this.displayStyle = action.isShowAdditionalWidget() ? Display.BLOCK : Display.NONE;
             this.addStyleName(CSS.regattanavigation_button());
             this.addClickHandler(new ClickHandler() {
                 @Override
@@ -73,7 +69,6 @@ public class ListNavigationPanel<T extends ListNavigationAction> extends Composi
         }
         
         private void select() {
-            additionalWidgetContainerUi.getElement().getStyle().setDisplay(displayStyle);
             for (int i=0; i < actionContainerUi.getWidgetCount(); i++) {
                 actionContainerUi.getWidget(i).removeStyleName(CSS.regattanavigation_buttonactive());
             }

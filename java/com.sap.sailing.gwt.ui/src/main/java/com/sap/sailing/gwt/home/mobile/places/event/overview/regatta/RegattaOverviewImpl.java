@@ -16,7 +16,6 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RegattaOverviewImpl extends AbstractEventOverview {
@@ -35,9 +34,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
             this.setupOverviewStage(container);
         }
         this.setupMiniLeaderboard(container);
-        if (ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE) {
-            initRacesNavigation(container);
-        }
+        initRacesNavigation(container);
         if (!isMultiRegattaEvent()) {
             this.setupUpdateBox(container);
             this.setupImpressions(container);
@@ -48,18 +45,14 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     
     private void setupProgress(Panel container) {
         eventStepsUi = new EventSteps();
-        if (ExperimentalFeatures.SHOW_REGATTA_PROGRESS_ON_MOBILE) {
-            refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
-            container.add(eventStepsUi);
-        }
+        refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
+        container.add(eventStepsUi);
     }
     
     private void setupLiveRaces(Panel container) {
-        if (ExperimentalFeatures.SHOW_REGATTA_LIVE_RACES_ON_MOBILE) {
-            liveRacesUi = new RegattaLiveRaces();
-            refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
-            container.add(liveRacesUi);
-        }
+        liveRacesUi = new RegattaLiveRaces();
+        refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
+        container.add(liveRacesUi);
     }
     
     private void setupMiniLeaderboard(Panel container) {

@@ -74,12 +74,12 @@
 	</servlet-mapping>
 
 	<servlet>
-	    <display-name>Dispatch Service</display-name>
-	    <servlet-name>DispatchService</servlet-name>
-	    	<servlet-class>com.sap.sailing.gwt.home.server.servlets.DispatchRPCServletImpl</servlet-class>
+	    <display-name>Sailing Dispatch Service</display-name>
+	    <servlet-name>sailingDispatch</servlet-name>
+	    	<servlet-class>com.sap.sailing.gwt.home.server.servlets.SailingDispatchServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>DispatchService</servlet-name>
+		<servlet-name>sailingDispatch</servlet-name>
 		<url-pattern>/service/dispatch</url-pattern>
 	</servlet-mapping>
 

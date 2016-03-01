@@ -60,7 +60,6 @@ import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceTra
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO.RaceViewState;
 import com.sap.sailing.gwt.home.communication.race.wind.SimpleWindDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
@@ -473,9 +472,7 @@ public class RaceContext {
         dto.setStart(getStartTimeAsDate());
         dto.setViewState(getLiveRaceViewState());
         dto.setTrackingState(getRaceTrackingState());
-        if (ExperimentalFeatures.SHOW_RACES_BY_COMPETITOR_FILTER) {
-            dto.setCompetitors(getCompetitors());
-        }
+        dto.setCompetitors(getCompetitors());
     }
 
     private void fillRaceMetadata(RaceMetadataDTO<?> dto) {

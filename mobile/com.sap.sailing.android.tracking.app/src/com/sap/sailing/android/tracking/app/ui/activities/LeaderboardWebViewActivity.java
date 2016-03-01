@@ -35,9 +35,9 @@ public class LeaderboardWebViewActivity extends BaseActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
+            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             toolbar.setPadding(20, 0, 0, 0);
-            getSupportActionBar().setTitle(getString(R.string.title_activity_webview));
+            getSupportActionBar().setTitle(getString(R.string.title_activity_leaderboard));
         }
 
         replaceFragment(R.id.content_frame, new LeaderboardFragment());

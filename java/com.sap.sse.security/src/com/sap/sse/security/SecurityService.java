@@ -51,7 +51,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    User createSimpleUser(String username, String email, String password, String validationBaseURL) throws UserManagementException, MailException;
+    User createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
 

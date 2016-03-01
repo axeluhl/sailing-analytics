@@ -52,7 +52,6 @@ import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
 import com.tractrac.model.lib.api.event.IRace;
-import com.tractrac.model.lib.impl.event.Race;
 import com.tractrac.subscription.lib.api.IEventSubscriber;
 import com.tractrac.subscription.lib.api.IRaceSubscriber;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -175,7 +174,6 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
-     * @param raceLogResolver TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
@@ -187,7 +185,7 @@ public interface DomainFactory {
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm);
 
     /**
-     * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
+     * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
      * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
      * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race
      * cache. The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on

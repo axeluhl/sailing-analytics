@@ -92,7 +92,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
      * @param deviceMappingData
      */
     private void checkInWithAPIAndDisplayTrackingActivity(CheckinData checkinData) {
-        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombnationAvailable(getActivity(),
+        if (DatabaseHelper.getInstance().eventLeaderboardCompetitorCombinationAvailable(getActivity(),
                 checkinData.checkinDigest)) {
             try {
                 DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.getEvent(),
@@ -131,7 +131,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
                     requestObject.toString(), getActivity());
             NetworkHelper.getInstance(getActivity())
-                    .executeHttpJsonRequestAsnchronously(request, new CheckinListener(checkinData.checkinDigest),
+                    .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest),
                             new CheckinErrorListener(checkinData.checkinDigest));
         } catch (JSONException e) {
             ExLog.e(getActivity(), TAG, "Failed to generate checkin JSON: " + e.getMessage());
@@ -145,7 +145,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
         String uriString = uri.toString();
-        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity());
+        CheckinManager manager = new CheckinManager(uriString, (StartActivity) getActivity(), false);
         manager.callServerAndGenerateCheckinData();
     }
 
