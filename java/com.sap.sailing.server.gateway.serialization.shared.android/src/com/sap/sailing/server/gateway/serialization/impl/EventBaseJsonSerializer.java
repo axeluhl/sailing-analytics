@@ -69,7 +69,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         result.put(FIELD_NAME, event.getName());
         result.put(FIELD_DESCRIPTION, event.getDescription());
         result.put(FIELD_OFFICIAL_WEBSITE_URL, event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        result.put(FIELD_SAILORS_INFO_WEBSITE_URL, event.getSailorsInfoWebsiteURL(null) != null ? event.getSailorsInfoWebsiteURL(null).toString() : null);
         result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
