@@ -112,9 +112,6 @@ public class EventDataJsonSerializerTest {
                 expectedOfficialWebsiteURL,
                 new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
         assertEquals(
-                expectedSailorsInfoWebsiteURLs.get(null),
-                new URL((String) result.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL)));
-        assertEquals(
                 expectedLogoImageURL,
                 new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
         assertEquals(
