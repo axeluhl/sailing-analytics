@@ -145,7 +145,10 @@ public class WaypointPositionAndDistanceCacheTest {
                 new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.times(3)))),
                 now.plus(timeRangeResolution.times(3))));
         assertEquals(60, cache.getApproximateDistance(start, windwardWaypoint, now).getNauticalMiles(), 0.01);
-        assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution)).getNauticalMiles(), 0.01);
+        // with no interpolation on the mark tracks of type GPSFixTrackImpl, asking for time point "timeRangeResolution"
+        // will base the result on the last fix *before* that point in time, in this case the fix set for "windward" at
+        // time point "timeRangeResolution.divide(10)"
+        assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.divide(10).divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution)).getNauticalMiles(), 0.01);
         assertEquals(60+new NauticalMileDistance(20).scale(timeRangeResolution.times(2).divide(Duration.ONE_HOUR)).getNauticalMiles(), cache.getApproximateDistance(start, windwardWaypoint, now.plus(timeRangeResolution.times(2))).getNauticalMiles(), 0.01);
         trackedRace.getOrCreateTrack(windward).add(new GPSFixImpl(new DegreePosition(1, 0).translateGreatCircle(
                 new DegreeBearingImpl(0), new KnotSpeedImpl(20).travel(now, now.plus(timeRangeResolution.minus(1)))),
