@@ -203,7 +203,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(8 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
+        Grid formGrid = new Grid(9 + GWTLocaleUtil.getLanguageCountWithDefault(), 2);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1,  0, new Label(stringMessages.description() + ":"));
@@ -222,13 +222,14 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         formGrid.setWidget(7, 1, officialWebsiteURLEntryField);
         int rowIndex = 8;
         for (Map.Entry<String, TextBox> sailorsInfoWebsiteUrlEntry : sailorsInfoWebsiteURLEntryFields.entrySet()) {
-            String suffix = "["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
+            String suffix = " ["+ (sailorsInfoWebsiteUrlEntry.getKey() == null ? stringMessages.defaultLocale() + "*" : sailorsInfoWebsiteUrlEntry.getKey()) + "]";
             formGrid.setWidget(rowIndex, 0, new Label(stringMessages.eventSailorsInfoWebsiteURL() + suffix + ":"));
             formGrid.setWidget(rowIndex, 1, sailorsInfoWebsiteUrlEntry.getValue());
             rowIndex++;
         }
+        formGrid.setText(rowIndex, 1, "[*] " + stringMessages.defaultSailorsInfoLinkInfoText());
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
-        tabPanel.setHeight("500px");
+        tabPanel.setHeight("525px");
         panel.add(tabPanel);
         tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
         tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
