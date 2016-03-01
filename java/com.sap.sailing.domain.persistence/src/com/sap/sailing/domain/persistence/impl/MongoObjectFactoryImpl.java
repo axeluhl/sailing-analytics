@@ -537,7 +537,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     /**
      * StoreEvent() uses some deprecated methods of event to keep backward compatibility.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
@@ -548,28 +547,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
         eventDBObject.put(FieldNames.EVENT_DESCRIPTION.name(), event.getDescription());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
-        eventDBObject.put(FieldNames.EVENT_LOGO_IMAGE_URL.name(), event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
         eventDBObject.put(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name(), event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
-        BasicDBList imageURLs = new BasicDBList();
-        for (URL imageURL : event.getImageURLs()) {
-            imageURLs.add(imageURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_IMAGE_URLS.name(), imageURLs);
-        BasicDBList videoURLs = new BasicDBList();
-        for (URL videoURL : event.getVideoURLs()) {
-            videoURLs.add(videoURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_VIDEO_URLS.name(), videoURLs);
-        BasicDBList sponsorImageURLs = new BasicDBList();
-        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
-            sponsorImageURLs.add(sponsorImageURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name(), sponsorImageURLs);
         BasicDBList images = new BasicDBList();
         for (ImageDescriptor image : event.getImages()) {
             DBObject imageObject = createImageObject(image);
