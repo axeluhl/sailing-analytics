@@ -921,10 +921,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         store.setAccessToken(username, accessToken);
         return null;
     }
+    
+    @Override
+    public String getAccessToken(String username) {
+        return store.getAccessToken(username);
+    }
 
     @Override
-    public Void internalRemoveAccessToken(String username, String accessToken) {
-        store.removeAccessToken(username, accessToken);
+    public Void internalRemoveAccessToken(String username) {
+        store.removeAccessToken(username);
         return null;
     }
 
@@ -934,7 +939,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
             return store.getPreference(username, key);
         } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
                     + " does not have permission to read preferences of user " + username);
         }
     }
@@ -955,8 +960,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void removeAccessToken(String username, String accessToken) {
-        apply(s -> s.internalRemoveAccessToken(username, accessToken));
+    public void removeAccessToken(String username) {
+        Subject subject = SecurityUtils.getSubject();
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            apply(s -> s.internalRemoveAccessToken(username));
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
+                    + " does not have permission to remove access token of user " + username);
+        }
     }
 
     // ----------------- Replication -------------

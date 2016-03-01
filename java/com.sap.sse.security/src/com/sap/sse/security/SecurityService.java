@@ -160,13 +160,20 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String createAccessToken(String username);
 
     /**
+     * May be invoked by users with role {@link DefaultRoles#ADMIN} or the user identified by {@code username}. Returns
+     * the last access token previously created by {@link #createAccessToken(String)} or {@code null} if no such access
+     * token was created before for user {@code username} or was {@link #removeAccessToken(String)}.
+     */
+    String getAccessToken(String username);
+
+    /**
      * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.
      * 
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
      */
     User getUserByAccessToken(String accessToken);
 
-    void removeAccessToken(String username, String accessToken);
+    void removeAccessToken(String username);
 
     User loginByAccessToken(String accessToken);
 
