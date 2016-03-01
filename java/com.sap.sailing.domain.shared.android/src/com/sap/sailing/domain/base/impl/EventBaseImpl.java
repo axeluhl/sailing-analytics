@@ -188,16 +188,6 @@ public abstract class EventBaseImpl implements EventBase {
     public void setOfficialWebsiteURL(URL officialWebsiteURL) {
         this.officialWebsiteURL = officialWebsiteURL;
     }
-
-    @Override
-    public URL getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURLs.get(null);
-    }
-
-    @Override
-    public void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL) {
-        setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
-    }
     
     @Override
     public Map<Locale, URL> getSailorsInfoWebsiteURLs() {

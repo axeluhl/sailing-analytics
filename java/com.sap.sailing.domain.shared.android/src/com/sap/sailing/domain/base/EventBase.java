@@ -83,14 +83,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     /**
-     * @return the URL of an external web site containing sailor related information like protests, official results, etc.
-     *  or <code>null</code> if such a site does not exist or its URL is not known.
-     */
-    URL getSailorsInfoWebsiteURL();
-    
-    void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL);
-    
-    /**
      * Returns a mapping of Locales to URLs where the URLs are meant as an external web site containing sailor related
      * information like protests, official results, etc.
      * The default, language independent URL has {@code null} as key.
