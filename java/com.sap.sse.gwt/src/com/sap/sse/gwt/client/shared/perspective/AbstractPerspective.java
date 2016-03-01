@@ -7,8 +7,8 @@ import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 /**
  * An abstract base class for perspectives.
@@ -45,13 +45,13 @@ public abstract class AbstractPerspective<SettingsType extends Settings> impleme
 
     @Override
     public void updateSettingsOfComponents(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
     private <ComponentSettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<ComponentSettingsType> componentAndSettings) {
-        Component<ComponentSettingsType> component = componentAndSettings.getA();
-        component.updateSettings(componentAndSettings.getB());
+        Component<ComponentSettingsType> component = componentAndSettings.getComponent();
+        component.updateSettings(componentAndSettings.getSettings());
     }
 }

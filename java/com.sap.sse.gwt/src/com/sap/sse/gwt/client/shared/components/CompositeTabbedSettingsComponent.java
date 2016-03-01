@@ -2,7 +2,6 @@ package com.sap.sse.gwt.client.shared.components;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 
 /**
  * A component, that contains a collection of settings components in a tabbed panel.
@@ -45,13 +44,13 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
  
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (CompositeSettings.ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
     private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
-        componentAndSettings.getA().updateSettings(componentAndSettings.getB());
+        componentAndSettings.getComponent().updateSettings(componentAndSettings.getSettings());
     }
 
     @Override
