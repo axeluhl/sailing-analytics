@@ -12,7 +12,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
+import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public abstract class HttpRequest {
@@ -30,7 +33,7 @@ public abstract class HttpRequest {
             }
             throw new IOException(String.format("Request response had error code %d.", statusCode));
         }
-        throw new IOException(String.format("Request response had no valid status."));
+        throw new IOException("Request response had no valid status.");
     }
 
     public interface HttpRequestProgressListener {
@@ -41,6 +44,7 @@ public abstract class HttpRequest {
     private final URL url;
     private final Context context;
     private boolean isCancelled;
+    private SharedPreferences pref;
 
     public HttpRequest(URL url, Context context) {
         this(url, null, context);
@@ -51,6 +55,7 @@ public abstract class HttpRequest {
         this.listener = listener;
         this.isCancelled = false;
         this.context = context;
+        this.pref = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public String getUrlAsString() {
@@ -78,6 +83,11 @@ public abstract class HttpRequest {
         connection.setReadTimeout(15000);
         connection.setRequestProperty("connection", "close");
         connection.setRequestProperty("Accept-Encoding", "");
+
+        String accessToken = pref.getString(context.getString(R.string.preference_access_token_key), null);
+        if (accessToken != null) {
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+        }
 
         BufferedInputStream responseInputStream = null;
         try {
