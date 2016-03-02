@@ -31,7 +31,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_IMAGE_HEIGHT = "imageHeight";
     public static final String FIELD_VIDEO_URL = "videoURL";
     public static final String FIELD_OFFICIAL_WEBSITE_URL = "officialWebsiteURL";
-    public static final String FIELD_SAILORS_INFO_WEBSITE_URL = "sailorsInfoWebsiteURL";
     public static final String FIELD_SAILORS_INFO_WEBSITE_URLS = "sailorsInfoWebsiteURLs";
     public static final String FIELDS_LEADERBOARD_GROUPS = "leaderboardGroups";
 

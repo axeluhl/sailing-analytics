@@ -101,10 +101,6 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
                 result.setSailorsInfoWebsiteURL(localeString == null ? null : new Locale(localeString),  Helpers.getURLField(sailorsInfoWebsiteURLJsonObject, EventBaseJsonSerializer.FIELD_URL));
             } 
         }
-        URL sailorsInfoWebsiteURL = Helpers.getURLField(eventJson, EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL);
-        if (sailorsInfoWebsiteURL != null && !result.hasSailorsInfoWebsiteURL(null)) {
-            result.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
-        }
         return result;
     }
 
