@@ -4,7 +4,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
  * {@link URLEncoder} to help us with the encoding.
@@ -46,7 +45,7 @@ public class DeviceConfigurationQRCodeUtils {
             throw new IllegalArgumentException("There is no server or identifier.");
         }
         String fragment = qrCodeContent.substring(fragmentIndex + 1, qrCodeContent.length());
-        final String[] params = fragment.split("&");
+        final String[] params = fragment.split("\\?");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {
             final String[] keyValue = param.split("=", 2);
@@ -57,8 +56,6 @@ public class DeviceConfigurationQRCodeUtils {
         if (!fragment.startsWith(deviceIdentifierKey + "=")) {
             throw new IllegalArgumentException("The identifier is malformed");
         }
-        fragment = fragment.substring((deviceIdentifierKey + "=").length());
-        fragment = fragment.replaceAll("%20", " ");
 
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
