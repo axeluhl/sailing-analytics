@@ -328,7 +328,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(3, Util.size(loadedVideo1.getTags()));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     /**
      * We expected that the migration code creates also an image URL for each image we create.
@@ -365,9 +364,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Event loadedEvent = dof.loadEvent(eventName);
         assertEquals(2, Util.size(loadedEvent.getImages()));
         assertEquals(1, Util.size(loadedEvent.getVideos()));
-        assertEquals(1, Util.size(loadedEvent.getImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.GALLERY)));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.SPONSOR)));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
     }
     
     

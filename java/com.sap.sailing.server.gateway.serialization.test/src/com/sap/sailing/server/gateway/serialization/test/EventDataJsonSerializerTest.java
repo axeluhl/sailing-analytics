@@ -34,9 +34,11 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 
 public class EventDataJsonSerializerTest {
     protected final UUID expectedId = UUID.randomUUID();
@@ -48,6 +50,7 @@ public class EventDataJsonSerializerTest {
     protected final URL expectedOfficialWebsiteURL;
     protected final Map<Locale, URL> expectedSailorsInfoWebsiteURLs;
     protected final URL expectedLogoImageURL;
+    protected final ImageDescriptor expectedLogoImageDescriptor;
     protected final LeaderboardGroup expectedLeaderboardGroup = mock(LeaderboardGroup.class);
     
     protected JsonSerializer<Venue> venueSerializer;
@@ -58,13 +61,13 @@ public class EventDataJsonSerializerTest {
     public EventDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
+        expectedLogoImageDescriptor = new ImageDescriptorImpl(expectedLogoImageURL, MillisecondsTimePoint.now());
         expectedSailorsInfoWebsiteURLs = new HashMap<>();
         expectedSailorsInfoWebsiteURLs.put(null, new URL("http://sailorinfo.some-sailing-event.com"));
         expectedSailorsInfoWebsiteURLs.put(Locale.GERMAN, new URL("http://sailorinfo-de.some-sailing-event.com"));
     }
     
     // see https://groups.google.com/forum/?fromgroups=#!topic/mockito/iMumB0_bpdo
-    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -75,14 +78,11 @@ public class EventDataJsonSerializerTest {
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
         when(event.getSailorsInfoWebsiteURLs()).thenReturn(expectedSailorsInfoWebsiteURLs);
         when(event.getSailorsInfoWebsiteURL(null)).thenReturn(expectedSailorsInfoWebsiteURLs.get(null));
-        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>singleton(expectedLogoImageDescriptor));
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         // ... and the serializer itself.		
         serializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
@@ -112,9 +112,6 @@ public class EventDataJsonSerializerTest {
                 expectedOfficialWebsiteURL,
                 new URL((String) result.get(EventBaseJsonSerializer.FIELD_OFFICIAL_WEBSITE_URL)));
         assertEquals(
-                expectedLogoImageURL,
-                new URL((String) result.get(EventBaseJsonSerializer.FIELD_LOGO_IMAGE_URL)));
-        assertEquals(
                 expectedDescription,
                 result.get(EventBaseJsonSerializer.FIELD_DESCRIPTION));
         assertEquals(
@@ -139,6 +136,8 @@ public class EventDataJsonSerializerTest {
         assertEquals(expectedLeaderboardGroup.getId(), deserializedEvent.getLeaderboardGroups().iterator().next().getId());
         assertEquals(expectedLeaderboardGroup.hasOverallLeaderboard(), deserializedEvent.getLeaderboardGroups().iterator().next().hasOverallLeaderboard());
         assertEquals(expectedSailorsInfoWebsiteURLs, new HashMap<Locale, URL>(deserializedEvent.getSailorsInfoWebsiteURLs()));
+        assertEquals(1, Util.size(deserializedEvent.getImages()));
+        assertEquals(expectedLogoImageURL, deserializedEvent.getImages().iterator().next().getURL());
     }
 
     @Test
