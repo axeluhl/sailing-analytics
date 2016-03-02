@@ -11,17 +11,13 @@ public interface SharedResources extends ClientBundle, CommonSharedResources {
     @Source("main.gss")
     MainCss mainCss();
 
-    @Source("media.gss")
+    @Source(CommonSharedResources.MEDIA)
     MediaCss mediaCss();
 
     public interface MainCss extends CssResource, CommonMainCss {
         String mobile();
         String desktop();
         String wrapper();
-        String navbar();
-        String navbar_button();
-        String navbar_buttonhidden();
-        String navbar_buttonactive();
         String button();
         String buttontextonly();
         String buttonsmall();

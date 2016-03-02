@@ -12,7 +12,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.communication.eventlist.EventListEventSeriesDTO;
@@ -21,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventTeaser extends Composite {
 

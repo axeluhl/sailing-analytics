@@ -49,5 +49,6 @@
 	<set-configuration-property name="CssResource.legacy" value="true" />
 	
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
+    <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
 	
 </module>

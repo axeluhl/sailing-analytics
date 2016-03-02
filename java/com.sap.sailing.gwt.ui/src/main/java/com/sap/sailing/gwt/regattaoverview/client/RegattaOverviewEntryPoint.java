@@ -14,12 +14,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.theme.component.sapheader2.SAPHeader2;
 import com.sap.sailing.gwt.regattaoverview.client.RegattaRaceStatesComponent.EntryHandler;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sse.gwt.client.URLEncoder;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
 
@@ -33,11 +34,10 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
     private DockLayoutPanel containerPanel;
     private RaceDetailPanel detailPanel;
     private RegattaOverviewPanel regattaPanel;
-    private final Label eventNameLabel = new Label();
-    private final Label venueNameLabel = new Label();
     private final Label clockLabel = new Label();
 
     private final RegattaOverviewResources.LocalCss style = RegattaOverviewResources.INSTANCE.css();
+    private SAPHeaderWithAuthentication siteHeader;
 
     @Override
     public void doOnModuleLoad() {
@@ -52,18 +52,14 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         rootPanel.add(containerPanel);
         containerPanel.addStyleName(RegattaOverviewResources.INSTANCE.css().container());
         
-        FlowPanel descriptionUi = new FlowPanel();
-        descriptionUi.setStyleName(style.eventDescription());
-        eventNameLabel.addStyleName(style.eventLabel());
-        venueNameLabel.addStyleName(style.venueLabel());
         clockLabel.addStyleName(style.clockLabel());
-        descriptionUi.add(eventNameLabel);
-        descriptionUi.add(venueNameLabel);
 
-        SAPHeader2 logoAndTitlePanel = new SAPHeader2(getStringMessages().sapSailingAnalytics(), descriptionUi, false);
+        siteHeader = new SAPHeaderWithAuthentication(getStringMessages()
+                .sapSailingAnalytics());
+        new FixedSailingAuthentication(getUserService(), siteHeader.getAuthenticationMenuView());
 
-        logoAndTitlePanel.addWidgetToRightSide(clockLabel);
-        containerPanel.addNorth(logoAndTitlePanel, 75);
+        siteHeader.addWidgetToRightSide(clockLabel);
+        containerPanel.addNorth(siteHeader, 75);
 
         String eventIdAsString = Window.Location.getParameter(PARAM_EVENT);
         if (eventIdAsString == null) {
@@ -103,9 +99,8 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         regattaPanel.addHandler(new EventDTOLoadedEvent.Handler() {
             @Override
             public void onEventDTOLoaded(EventDTOLoadedEvent e) {
-                eventNameLabel.setText(e.getCurrentEvent().getName());
-                venueNameLabel.setText(e.getCurrentEvent().venue.getName());
-
+                siteHeader.setHeaderTitle(e.getCurrentEvent().getName());
+                siteHeader.setHeaderSubTitle(e.getCurrentEvent().venue.getName());
             }
         }, EventDTOLoadedEvent.TYPE);
 

@@ -13,6 +13,7 @@
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sse.security.ui.Authentication" />
+	<inherits name="com.sap.sse.security.ui.UserProfile" />
 	
 	<!-- Highcharts API -->
 	<inherits name='com.sap.sse.gwt.Highcharts' />

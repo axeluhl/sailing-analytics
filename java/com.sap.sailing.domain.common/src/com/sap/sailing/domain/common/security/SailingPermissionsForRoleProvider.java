@@ -28,6 +28,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
                     Permission.MANAGE_IGTIMI_ACCOUNTS,
                     Permission.MANAGE_LEADERBOARD_GROUPS,
                     Permission.MANAGE_LEADERBOARDS,
+                    Permission.MANAGE_LEADERBOARD_RESULTS,
                     Permission.MANAGE_MEDIA,
                     Permission.MANAGE_RACELOG_TRACKING,
                     Permission.MANAGE_REGATTAS,
