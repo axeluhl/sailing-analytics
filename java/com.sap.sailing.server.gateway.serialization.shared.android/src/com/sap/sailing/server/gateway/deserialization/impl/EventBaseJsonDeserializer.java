@@ -91,7 +91,19 @@ public class EventBaseJsonDeserializer implements JsonDeserializer<EventBase> {
         // if we read an event with data in the old image/video format we need migrate them
         if(Util.size(result.getImages()) == 0 && Util.size(result.getVideos()) == 0) {
             readImageAndVideoURLsFromLegacyServer(eventJson, result);
-            
+        }
+        JSONArray sailorsInfoWebsiteURLsJson = (JSONArray) eventJson.get(EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URLS);
+        if (sailorsInfoWebsiteURLsJson != null) {
+            for (Object sailorsInfoWebsiteURLJson : sailorsInfoWebsiteURLsJson) {
+                JSONObject sailorsInfoWebsiteURLJsonObject = (JSONObject) sailorsInfoWebsiteURLJson;
+                String localeString = (String) sailorsInfoWebsiteURLJsonObject.get(EventBaseJsonSerializer.FIELD_LOCALE);
+                // TODO use Locale.forLanguageTag(localeRaw) -> only possible with Android API Level 21
+                result.setSailorsInfoWebsiteURL(localeString == null ? null : new Locale(localeString),  Helpers.getURLField(sailorsInfoWebsiteURLJsonObject, EventBaseJsonSerializer.FIELD_URL));
+            } 
+        }
+        URL sailorsInfoWebsiteURL = Helpers.getURLField(eventJson, EventBaseJsonSerializer.FIELD_SAILORS_INFO_WEBSITE_URL);
+        if (sailorsInfoWebsiteURL != null && !result.hasSailorsInfoWebsiteURL(null)) {
+            result.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
         }
         return result;
     }

@@ -3,6 +3,8 @@ package com.sap.sailing.domain.persistence.impl;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -535,7 +537,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     /**
      * StoreEvent() uses some deprecated methods of event to keep backward compatibility.
      */
-    @SuppressWarnings("deprecation")
     @Override
     public void storeEvent(Event event) {
         DBCollection eventCollection = database.getCollection(CollectionNames.EVENTS.name());
@@ -546,29 +547,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         eventDBObject.put(FieldNames.EVENT_NAME.name(), event.getName());
         eventDBObject.put(FieldNames.EVENT_DESCRIPTION.name(), event.getDescription());
         eventDBObject.put(FieldNames.EVENT_ID.name(), event.getId());
-        eventDBObject.put(FieldNames.EVENT_LOGO_IMAGE_URL.name(), event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
         eventDBObject.put(FieldNames.EVENT_OFFICIAL_WEBSITE_URL.name(), event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        eventDBObject.put(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name(), event.getSailorsInfoWebsiteURL() != null ? event.getSailorsInfoWebsiteURL().toString() : null);
         storeTimePoint(event.getStartDate(), eventDBObject, FieldNames.EVENT_START_DATE);
         storeTimePoint(event.getEndDate(), eventDBObject, FieldNames.EVENT_END_DATE);
         eventDBObject.put(FieldNames.EVENT_IS_PUBLIC.name(), event.isPublic());
         DBObject venueDBObject = getVenueAsDBObject(event.getVenue());
         eventDBObject.put(FieldNames.VENUE.name(), venueDBObject);
-        BasicDBList imageURLs = new BasicDBList();
-        for (URL imageURL : event.getImageURLs()) {
-            imageURLs.add(imageURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_IMAGE_URLS.name(), imageURLs);
-        BasicDBList videoURLs = new BasicDBList();
-        for (URL videoURL : event.getVideoURLs()) {
-            videoURLs.add(videoURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_VIDEO_URLS.name(), videoURLs);
-        BasicDBList sponsorImageURLs = new BasicDBList();
-        for (URL sponsorImageURL : event.getSponsorImageURLs()) {
-            sponsorImageURLs.add(sponsorImageURL.toString());
-        }
-        eventDBObject.put(FieldNames.EVENT_SPONSOR_IMAGE_URLS.name(), sponsorImageURLs);
         BasicDBList images = new BasicDBList();
         for (ImageDescriptor image : event.getImages()) {
             DBObject imageObject = createImageObject(image);
@@ -581,6 +565,12 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             videos.add(videoObject);
         }
         eventDBObject.put(FieldNames.EVENT_VIDEOS.name(), videos);
+        BasicDBList sailorsInfoWebsiteURLs = new BasicDBList();
+        for(Map.Entry<Locale, URL> sailorsInfoWebsite : event.getSailorsInfoWebsiteURLs().entrySet()) {
+            DBObject sailorsInfoWebsiteObject = createSailorsInfoWebsiteObject(sailorsInfoWebsite.getKey(), sailorsInfoWebsite.getValue());
+            sailorsInfoWebsiteURLs.add(sailorsInfoWebsiteObject);
+        }
+        eventDBObject.put(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name(), sailorsInfoWebsiteURLs);
         eventCollection.update(query, eventDBObject, /* upsrt */ true, /* multi */ false, WriteConcern.SAFE);
         // now store the links to the leaderboard groups
         DBCollection linksCollection = database.getCollection(CollectionNames.LEADERBOARD_GROUP_LINKS_FOR_EVENTS.name());
@@ -1475,6 +1465,13 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             tags.add(tag);
         }
         result.put(FieldNames.VIDEO_TAGS.name(), tags);
+        return result;
+    }
+    
+    private DBObject createSailorsInfoWebsiteObject(Locale locale, URL url) {
+        DBObject result = new BasicDBObject();
+        result.put(FieldNames.SAILORS_INFO_URL.name(), url.toString());
+        result.put(FieldNames.SAILORS_INFO_LOCALE.name(), locale != null ? locale.toLanguageTag() : null);
         return result;
     }
 }

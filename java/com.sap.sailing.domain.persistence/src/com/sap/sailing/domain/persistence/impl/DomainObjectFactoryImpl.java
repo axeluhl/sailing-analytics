@@ -948,7 +948,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         try {
             for (DBObject object : eventCollection.find()) {
                 Event event = loadEvent(object);
-                Boolean requiresStoreAfterMigration = loadLegacyImageAndVideoURLs(event, object);
+                boolean requiresStoreAfterMigration = loadLegacyImageAndVideoURLs(event, object);
+                requiresStoreAfterMigration |= loadLegacySailorsInfoWebsiteURL(event, object);
                 result.add(new Pair<Event, Boolean>(event, requiresStoreAfterMigration));
             }
         } catch (Exception e) {
@@ -1030,14 +1031,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 logger.severe("Error parsing official website URL "+officialWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
             }
         }
-        String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
-        if (sailorsInfoWebSiteURLAsString != null) {
-            try {
-                result.setSailorsInfoWebsiteURL(new URL(sailorsInfoWebSiteURLAsString));
-            } catch (MalformedURLException e) {
-                logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+name+". Ignoring this URL.");
-            }
-        }
         BasicDBList images = (BasicDBList) eventDBObject.get(FieldNames.EVENT_IMAGES.name());
         if (images != null) {
             for (Object imageObject : images) {
@@ -1053,6 +1046,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 VideoDescriptor video = loadVideo((DBObject) videoObject);
                 if (video != null) {
                     result.addVideo(video);
+                }
+            }
+        }
+        BasicDBList sailorsInfoWebsiteURLs = (BasicDBList) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITES.name());
+        if (sailorsInfoWebsiteURLs != null) {
+            for (Object sailorsInfoWebsiteObject : sailorsInfoWebsiteURLs) {
+                DBObject sailorsInfoWebsiteDBObject = (DBObject) sailorsInfoWebsiteObject;
+                URL url = loadURL(sailorsInfoWebsiteDBObject, FieldNames.SAILORS_INFO_URL);
+                String localeRaw = (String) sailorsInfoWebsiteDBObject.get(FieldNames.SAILORS_INFO_LOCALE.name());
+                if (url != null) {
+                    Locale locale = localeRaw != null ? Locale.forLanguageTag(localeRaw) : null; 
+                    result.setSailorsInfoWebsiteURL(locale, url);
                 }
             }
         }
@@ -2161,5 +2166,30 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
         }
         return event.setMediaURLs(imageURLs, sponsorImageURLs, videoURLs, logoImageURL, Collections.emptyMap());
+    }
+
+    private boolean loadLegacySailorsInfoWebsiteURL(Event event, DBObject eventDBObject) {
+        final boolean modified;
+        final String sailorsInfoWebSiteURLAsString = (String) eventDBObject.get(FieldNames.EVENT_SAILORS_INFO_WEBSITE_URL.name());
+        if (sailorsInfoWebSiteURLAsString != null) {
+            try {
+                // The legacy sailors info URL (only used at Kieler/Travemuender Woche events) used to have 2 localized versions:
+                // The German version with no suffix (e.g. http://sailorsinfo.travemuender-woche.com)
+                // The English/international version with "/en" suffix (e.g. http://sailorsinfo.travemuender-woche.com/en)
+                if (!event.hasSailorsInfoWebsiteURL(null)) {
+                    final String englishURL = sailorsInfoWebSiteURLAsString + (sailorsInfoWebSiteURLAsString.endsWith("/") ? "" : "/") + "en";
+                    event.setSailorsInfoWebsiteURL(null, new URL(englishURL));
+                }
+                if (!event.hasSailorsInfoWebsiteURL(Locale.GERMAN)) {
+                    event.setSailorsInfoWebsiteURL(Locale.GERMAN, new URL(sailorsInfoWebSiteURLAsString));
+                }
+            } catch (MalformedURLException e) {
+                logger.severe("Error parsing sailors info website URL "+sailorsInfoWebSiteURLAsString+" for event "+event.getName()+". Ignoring this URL.");
+            }
+            modified = true;
+        } else {
+            modified = false;
+        }
+        return modified;
     }
 }
