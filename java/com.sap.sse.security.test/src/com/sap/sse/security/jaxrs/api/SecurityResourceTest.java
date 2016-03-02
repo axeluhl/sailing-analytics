@@ -6,7 +6,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONObject;
@@ -29,6 +32,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 public class SecurityResourceTest {
     private SecurityResource servlet;
     private SecurityServiceImpl service;
+    private Subject authenticatedAdmin;
 
     @Before
     public void setUp() throws UserManagementException, MailException {
@@ -36,29 +40,41 @@ public class SecurityResourceTest {
         ClassLoader oldContextClassLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         try {
-        final UserStoreImpl store = new UserStoreImpl();
-        Activator.setTestUserStore(store);
-        UsernamePasswordRealm.setTestUserStore(store);
-        service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                store, /* setAsActivatorSecurityService */ true);
-        SecurityUtils.setSecurityManager(service.getSecurityManager());
-        Session session = SecurityUtils.getSubject().getSession();
-        assertNotNull(session);
-        servlet = new SecurityResource() {
-            @Override
-            public SecurityService getService() {
-                return service;
-            }
-        };
-        store.addPermissionForUser("admin", "can do");
-        store.addPermissionForUser("admin", "event:view:*");
-        store.addPermissionForUser("admin", "event:edit:123");
+            final UserStoreImpl store = new UserStoreImpl();
+            Activator.setTestUserStore(store);
+            UsernamePasswordRealm.setTestUserStore(store);
+            service = new SecurityServiceImpl(/* mailServiceTracker */ null,
+                    store, /* setAsActivatorSecurityService */ true);
+            SecurityUtils.setSecurityManager(service.getSecurityManager());
+            authenticatedAdmin = SecurityUtils.getSubject();
+            authenticatedAdmin.login(new UsernamePasswordToken("admin", "admin"));
+            Session session = authenticatedAdmin.getSession();
+            assertNotNull(session);
+            servlet = new SecurityResource() {
+                @Override
+                public SecurityService getService() {
+                    return service;
+                }
+            };
+            store.addPermissionForUser("admin", "can do");
+            store.addPermissionForUser("admin", "event:view:*");
+            store.addPermissionForUser("admin", "event:edit:123");
         } finally {
-        	Thread.currentThread().setContextClassLoader(oldContextClassLoader);
+            Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
     }
     
+    private String getOrCreateAccessToken() throws ParseException {
+        String responseJsonString = (String) servlet.respondWithAccessTokenForUser("admin").getEntity();
+        JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
+        assertEquals("admin", responseJson.get("username"));
+        String accessToken = (String) responseJson.get("access_token");
+        assertNotNull(accessToken);
+        return accessToken;
+    }
+
     private String createAccessToken() throws ParseException {
+        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser("admin").getStatus());
         String responseJsonString = (String) servlet.respondWithAccessTokenForUser("admin").getEntity();
         JSONObject responseJson = (JSONObject) new JSONParser().parse(responseJsonString);
         assertEquals("admin", responseJson.get("username"));
@@ -69,7 +85,7 @@ public class SecurityResourceTest {
 
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
-        String accessToken = createAccessToken();
+        String accessToken = getOrCreateAccessToken();
         User user = service.getUserByAccessToken(accessToken);
         assertNotNull(user);
         assertEquals("admin", user.getName());
@@ -88,7 +104,7 @@ public class SecurityResourceTest {
 
     @Test
     public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
-        String accessToken = createAccessToken();
+        String accessToken = getOrCreateAccessToken();
         createAccessToken();
         User user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one

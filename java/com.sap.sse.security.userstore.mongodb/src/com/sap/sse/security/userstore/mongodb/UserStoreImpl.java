@@ -146,8 +146,9 @@ public class UserStoreImpl implements UserStore {
     @Override
     public String getAccessToken(String username) {
         // only the user or an administrator may request a user's access token
+        final Object principal = SecurityUtils.getSubject().getPrincipal();
         if (SecurityUtils.getSubject().hasRole(DefaultRoles.ADMIN.getRolename()) ||
-            SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
+            (principal != null && principal.toString().equals(username))) {
             return getPreference(username, ACCESS_TOKEN_KEY);
         } else {
             throw new org.apache.shiro.authz.AuthorizationException("Only admin role or owner can retrieve access token");
