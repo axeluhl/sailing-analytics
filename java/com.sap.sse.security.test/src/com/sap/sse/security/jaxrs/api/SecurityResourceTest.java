@@ -83,6 +83,10 @@ public class SecurityResourceTest {
         return accessToken;
     }
 
+    private void removeAccessToken() {
+        assertEquals(Response.Status.OK.getStatusCode(), servlet.respondToRemoveAccessTokenForUser("admin").getStatus());
+    }
+
     @Test
     public void createAccessTokenAndAuthenticate() throws ParseException {
         String accessToken = getOrCreateAccessToken();
@@ -106,6 +110,14 @@ public class SecurityResourceTest {
     public void ensureOldBearerTokenIsInvalidatedByObtainingNewOne() throws ParseException {
         String accessToken = getOrCreateAccessToken();
         createAccessToken();
+        User user = service.getUserByAccessToken(accessToken);
+        assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
+    }
+
+    @Test
+    public void ensureOldBearerTokenIsInvalidatedByRequestingItsRemoval() throws ParseException {
+        String accessToken = getOrCreateAccessToken();
+        removeAccessToken();
         User user = service.getUserByAccessToken(accessToken);
         assertNull(user); // the old access token is expected to have been obsoleted by obtaining a new one
     }
