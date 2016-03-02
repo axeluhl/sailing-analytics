@@ -55,11 +55,7 @@ public class DeviceConfigurationQRCodeUtils {
         for (String param : params) {
             final String[] keyValue = param.split("=");
             if (keyValue.length == 2) {
-                try {
-                    paramMap.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    logger.severe("Internal error: Unknown encoding "+e.getMessage());
-                }
+                paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
             }
         }
         if (!fragment.startsWith(deviceIdentifierKey + "=")) {
