@@ -1,11 +1,8 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 
 /**
@@ -13,7 +10,6 @@ import java.util.logging.Logger;
  * {@link URLEncoder} to help us with the encoding.
  */
 public class DeviceConfigurationQRCodeUtils {
-    private static final Logger logger = Logger.getLogger(DeviceConfigurationQRCodeUtils.class.getName());
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
     
