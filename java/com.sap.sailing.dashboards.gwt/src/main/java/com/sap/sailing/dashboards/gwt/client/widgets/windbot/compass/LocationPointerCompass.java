@@ -57,7 +57,7 @@ public class LocationPointerCompass extends Composite implements HasWidgets, Loc
     private void updateNeedleAngle(double newDirection) {
         // Adapt degrees to image angle
         synchronized (this) {
-            double newAngle = newDirection-angleOffset;
+            double newAngle = (newDirection-angleOffset)%360;
             String winddirectionformatted = NumberFormat.getFormat("#0").format(newAngle);
             compassNeedle.getElement().getStyle().setProperty("transform", "rotate(" + winddirectionformatted + "deg)");
             compassNeedle.getElement().getStyle()
