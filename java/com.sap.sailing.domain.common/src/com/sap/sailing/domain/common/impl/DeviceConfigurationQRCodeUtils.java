@@ -56,7 +56,6 @@ public class DeviceConfigurationQRCodeUtils {
         if (!fragment.startsWith(deviceIdentifierKey + "=")) {
             throw new IllegalArgumentException("The identifier is malformed");
         }
-
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
     }
