@@ -21,10 +21,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_START_DATE = "startDate";
     public static final String FIELD_END_DATE = "endDate";
     public static final String FIELD_VENUE = "venue";
-    public static final String FIELD_IMAGE_URLS = "imageURLs";
-    public static final String FIELD_VIDEO_URLS = "videoURLs";
-    public static final String FIELD_SPONSOR_IMAGE_URLS = "sponsorImageURLs";
-    public static final String FIELD_LOGO_IMAGE_URL = "logoImageURL";
     public static final String FIELD_IMAGE_SIZES = "imageSizes";
     public static final String FIELD_IMAGE_URL = "imageURL";
     public static final String FIELD_IMAGE_WIDTH = "imageWidth";
@@ -61,7 +57,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         this.venueSerializer = venueSerializer;
     }
 
-    @SuppressWarnings("deprecation")
     public JSONObject serialize(EventBase event) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ID, event.getId().toString());
@@ -71,10 +66,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
-        result.put(FIELD_LOGO_IMAGE_URL, event.getLogoImageURL() != null ? event.getLogoImageURL().toString() : null);
-        result.put(FIELD_IMAGE_URLS, getURLsAsStringArray(event.getImageURLs()));
-        result.put(FIELD_VIDEO_URLS, getURLsAsStringArray(event.getVideoURLs()));
-        result.put(FIELD_SPONSOR_IMAGE_URLS, getURLsAsStringArray(event.getSponsorImageURLs()));
         JSONArray leaderboardGroups = new JSONArray();
         result.put(FIELDS_LEADERBOARD_GROUPS, leaderboardGroups);
         for (LeaderboardGroupBase lg : event.getLeaderboardGroups()) {
@@ -155,14 +146,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
             imageSizeJson.put(FIELD_IMAGE_WIDTH, image.getWidthInPx());
             imageSizeJson.put(FIELD_IMAGE_HEIGHT, image.getHeightInPx());
         }
-    }
-
-    private JSONArray getURLsAsStringArray(Iterable<URL> urls) {
-        JSONArray jsonImageURLs = new JSONArray();
-        for (URL url : urls) {
-            jsonImageURLs.add(url.toString());
-        }
-        return jsonImageURLs;
     }
 
     private void addSailorsInfoWebsiteURL(Locale locale, URL url, JSONArray jsonSailorsInfoWebsiteURLs) {
