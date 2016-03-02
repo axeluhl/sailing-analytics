@@ -43,38 +43,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     void setPublic(boolean isPublic);
 
     /**
-     * @deprecated
-     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to image resources that can be
-     * used to represent the event, e.g., on a web page.
-     * 
-     * @return a non-<code>null</code> value which may be empty
-     */
-    Iterable<URL> getImageURLs();
-    
-    /**
-     * @deprecated
-     * An event may have zero or more sponsors, each of which usually want to see their logo on the web page.
-     * 
-     * @return the sponsors' logos; always non-<code>null</code> but possibly empty
-     */
-    Iterable<URL> getSponsorImageURLs();
-
-    /**
-     * @deprecated
-     * An optional logo image; may return <code>null</code>.
-     */
-    URL getLogoImageURL();
-
-    /**
-     * @deprecated
-     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to video resources that can be
-     * used to represent the event, e.g., on a web page.
-     * 
-     * @return a non-<code>null</code> value which may be empty
-     */
-    Iterable<URL> getVideoURLs();
-
-    /**
      * @return the URL of the event's official web site, or <code>null</code> if such a site does not exist or its URL
      *         is not known
      */
