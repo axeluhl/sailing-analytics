@@ -37,7 +37,7 @@ public class DeviceConfigurationQRCodeUtils {
     public static String composeQRContent(String deviceIdentifier, String apkUrl, String accessToken) {
         // poor man's uri fragment encoding: ' ' as '%20'
         String encodedIdentifier = deviceIdentifier.replaceAll(" ", "%20");
-        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"?"+accessTokenKey + "=" + accessToken;
+        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"&"+accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
@@ -49,7 +49,7 @@ public class DeviceConfigurationQRCodeUtils {
         final String[] params = fragment.split("&");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {
-            final String[] keyValue = param.split("=");
+            final String[] keyValue = param.split("=", 2);
             if (keyValue.length == 2) {
                 paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
             }
