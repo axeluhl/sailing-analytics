@@ -156,7 +156,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final TabLayoutPanel raceCommitteeTabPanel = panel.addVerticalTab(getStringMessages().raceCommitteeApp(), "RaceCommiteeAppPanel");
         final DeviceConfigurationUserPanel deviceConfigurationUserPanel = new DeviceConfigurationUserPanel(sailingService,
-                getStringMessages(), this);
+                getUserService(), getStringMessages(), this);
         panel.addToTabPanel(raceCommitteeTabPanel, new DefaultRefreshableAdminConsolePanel<DeviceConfigurationUserPanel>(deviceConfigurationUserPanel),
                 getStringMessages().deviceConfiguration(), Permission.MANAGE_DEVICE_CONFIGURATION);
         

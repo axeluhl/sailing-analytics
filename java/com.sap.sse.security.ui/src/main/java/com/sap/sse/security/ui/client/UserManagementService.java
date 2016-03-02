@@ -73,6 +73,8 @@ public interface UserManagementService extends RemoteService {
      */
     String getPreference(String username, String key);
 
+    String getAccessToken(String username);
+
     // ------------------------------------------------ OAuth Interface --------------------------------------------------------------
 
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;

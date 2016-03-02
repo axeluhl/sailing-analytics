@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -50,6 +51,13 @@ public interface UserManagementServiceAsync {
     void unsetPreference(String username, String key, AsyncCallback<Void> callback);
 
     void getPreference(String username, String key, AsyncCallback<String> callback);
+
+    /**
+     * Obtains an access token for the user specified by {@code username}. The caller needs to
+     * have role {@link DefaultRoles#ADMIN} or be authorized as the user identified by {@code username}
+     * in order to be permitted to retrieve the access token. 
+     */
+    void getAccessToken(String username, AsyncCallback<String> markedAsyncCallback);
 
   //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
 

@@ -8,12 +8,16 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.security.ui.client.UserService;
 
 public class DeviceConfigurationUserPanel extends DeviceConfigurationPanel {
 
-    public DeviceConfigurationUserPanel(SailingServiceAsync sailingService, StringMessages stringMessages,
-            ErrorReporter reporter) {
+    private final UserService userService;
+
+    public DeviceConfigurationUserPanel(SailingServiceAsync sailingService, UserService userService,
+            StringMessages stringMessages, ErrorReporter reporter) {
         super(sailingService, stringMessages, reporter);
+        this.userService = userService;
     }
     
     @Override
@@ -25,7 +29,7 @@ public class DeviceConfigurationUserPanel extends DeviceConfigurationPanel {
     @Override
     protected DeviceConfigurationDetailComposite createDetailComposite(SailingServiceAsync sailingService,
             ErrorReporter errorReporter, StringMessages stringMessages, DeviceConfigurationCloneListener cloneListener) {
-        return new DeviceConfigurationUserDetailComposite(sailingService, errorReporter, stringMessages, cloneListener);
+        return new DeviceConfigurationUserDetailComposite(sailingService, userService, errorReporter, stringMessages, cloneListener);
     }
     
     @Override
