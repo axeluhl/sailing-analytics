@@ -3,10 +3,9 @@ package com.sap.sailing.domain.common.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import com.google.gwt.dev.util.collect.HashMap;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
@@ -41,7 +40,7 @@ public class DeviceConfigurationQRCodeUtils {
     public static String composeQRContent(String deviceIdentifier, String apkUrl, String accessToken) {
         // poor man's uri fragment encoding: ' ' as '%20'
         String encodedIdentifier = deviceIdentifier.replaceAll(" ", "%20");
-        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"?"+accessTokenKey + "=" + accessToken;
+        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier + "?" + accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
@@ -50,23 +49,17 @@ public class DeviceConfigurationQRCodeUtils {
             throw new IllegalArgumentException("There is no server or identifier.");
         }
         String fragment = qrCodeContent.substring(fragmentIndex + 1, qrCodeContent.length());
-        final String[] params = fragment.split("&");
+        final String[] params = fragment.split("\\?");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {
-            final String[] keyValue = param.split("=");
-            if (keyValue.length == 2) {
-                try {
-                    paramMap.put(keyValue[0], URLDecoder.decode(keyValue[1], "UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    logger.severe("Internal error: Unknown encoding "+e.getMessage());
-                }
-            }
+            int pos = param.indexOf("=");
+            String key = param.substring(0, pos);
+            String value = param.substring(pos + 1).replaceAll("%20", " ");
+            paramMap.put(key, value);
         }
         if (!fragment.startsWith(deviceIdentifierKey + "=")) {
             throw new IllegalArgumentException("The identifier is malformed");
         }
-        fragment = fragment.substring((deviceIdentifierKey + "=").length());
-        fragment = fragment.replaceAll("%20", " ");
 
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));

@@ -134,10 +134,11 @@ public class LoginOnboarding extends Fragment {
 
             if (apkUrl != null) {
                 String serverUrl = UrlHelper.getServerUrl(apkUrl);
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
-                preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
-                // TODO Peter: add accessToken to preferences
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                editor.putString(getString(R.string.preference_identifier_key), identifier);
+                editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+                editor.putString(getString(R.string.preference_access_token_key), accessToken);
+                editor.commit();
 
                 new AutoUpdater(getActivity()).checkForUpdate(false);
                 return true;

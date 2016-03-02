@@ -194,14 +194,15 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 String identifier = connectionConfiguration.getDeviceIdentifier();
                 URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
                 String accessToken = connectionConfiguration.getAccessToken();
-                // TODO Peter: use access token and store to preferences
 
                 if (apkUrl != null) {
                     String serverUrl = UrlHelper.getServerUrl(apkUrl);
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
-                    preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                    editor.putString(getString(R.string.preference_identifier_key), identifier);
+                    editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+                    editor.putString(getString(R.string.preference_access_token_key), accessToken);
+                    editor.commit();
 
                     identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
                     serverUrlPreference.setText(serverUrl);
