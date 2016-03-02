@@ -53,8 +53,8 @@ public class DeviceConfigurationQRCodeUtils {
                 paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
             }
         }
-        if (!fragment.startsWith(deviceIdentifierKey + "=")) {
-            throw new IllegalArgumentException("The identifier is malformed");
+        if (!paramMap.containsKey(deviceIdentifierKey)) {
+            throw new IllegalArgumentException("Device identifier missing from QR code contents");
         }
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
