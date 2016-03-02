@@ -21,12 +21,12 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-import com.sap.sse.common.Util;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -189,10 +189,12 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         if (resultCode == Activity.RESULT_OK) {
             String content = data.getStringExtra("SCAN_RESULT");
             try {
-                Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
+                DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
 
-                String identifier = connectionConfiguration.getA();
-                URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
+                String identifier = connectionConfiguration.getDeviceIdentifier();
+                URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
+                String accessToken = connectionConfiguration.getAccessToken();
+                // TODO Peter: use access token and store to preferences
 
                 if (apkUrl != null) {
                     String serverUrl = UrlHelper.getServerUrl(apkUrl);
