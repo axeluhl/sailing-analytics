@@ -1,18 +1,14 @@
 package com.sap.sailing.domain.common.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
  * {@link URLEncoder} to help us with the encoding.
  */
 public class DeviceConfigurationQRCodeUtils {
-    private static final Logger logger = Logger.getLogger(DeviceConfigurationQRCodeUtils.class.getName());
     public static final String deviceIdentifierKey = "identifier";
     public static final String accessTokenKey = "token";
     
@@ -40,7 +36,7 @@ public class DeviceConfigurationQRCodeUtils {
     public static String composeQRContent(String deviceIdentifier, String apkUrl, String accessToken) {
         // poor man's uri fragment encoding: ' ' as '%20'
         String encodedIdentifier = deviceIdentifier.replaceAll(" ", "%20");
-        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier + "?" + accessTokenKey + "=" + accessToken;
+        return apkUrl + "#" + deviceIdentifierKey + "=" + encodedIdentifier+"&"+accessTokenKey + "=" + accessToken;
     }
 
     public static DeviceConfigurationDetails splitQRContent(String qrCodeContent) {
@@ -49,18 +45,17 @@ public class DeviceConfigurationQRCodeUtils {
             throw new IllegalArgumentException("There is no server or identifier.");
         }
         String fragment = qrCodeContent.substring(fragmentIndex + 1, qrCodeContent.length());
-        final String[] params = fragment.split("\\?");
+        final String[] params = fragment.split("&");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {
-            int pos = param.indexOf("=");
-            String key = param.substring(0, pos);
-            String value = param.substring(pos + 1).replaceAll("%20", " ");
-            paramMap.put(key, value);
+            final String[] keyValue = param.split("=", 2);
+            if (keyValue.length == 2) {
+                paramMap.put(keyValue[0], keyValue[1].replaceAll("%20", " "));
+            }
         }
-        if (!fragment.startsWith(deviceIdentifierKey + "=")) {
-            throw new IllegalArgumentException("The identifier is malformed");
+        if (!paramMap.containsKey(deviceIdentifierKey)) {
+            throw new IllegalArgumentException("Device identifier missing from QR code contents");
         }
-
         String apkUrl = qrCodeContent.substring(0, fragmentIndex);
         return new DeviceConfigurationDetails(apkUrl, paramMap.get(deviceIdentifierKey), paramMap.get(accessTokenKey));
     }
