@@ -45,7 +45,7 @@ public class DeviceConfigurationQRCodeUtils {
             throw new IllegalArgumentException("There is no server or identifier.");
         }
         String fragment = qrCodeContent.substring(fragmentIndex + 1, qrCodeContent.length());
-        final String[] params = fragment.split("\\?");
+        final String[] params = fragment.split("&");
         final Map<String, String> paramMap = new HashMap<>();
         for (String param : params) {
             final String[] keyValue = param.split("=", 2);
