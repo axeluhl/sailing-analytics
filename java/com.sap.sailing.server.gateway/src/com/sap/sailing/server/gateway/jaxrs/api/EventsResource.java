@@ -12,11 +12,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -36,6 +38,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents() {
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
@@ -51,6 +54,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{eventId}")
     public Response getEvent(@PathParam("eventId") String eventId) {
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ, eventId));
         Response response;
         UUID eventUuid;
         try {
@@ -77,6 +81,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @Path("{eventId}/racestates")
     public Response getRaceStates(@PathParam("eventId") String eventId, @QueryParam("filterByLeaderboard") String filterByLeaderboard,
             @QueryParam("filterByCourseArea") String filterByCourseArea, @QueryParam("filterByDayOffset") String filterByDayOffset) {
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ, eventId));
         Response response;
         UUID eventUuid;
         try {
