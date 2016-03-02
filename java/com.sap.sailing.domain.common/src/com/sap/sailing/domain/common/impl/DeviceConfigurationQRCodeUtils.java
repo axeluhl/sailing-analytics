@@ -3,10 +3,10 @@ package com.sap.sailing.domain.common.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.google.gwt.dev.util.collect.HashMap;
 
 /**
  * This class is used by our backend, in GWT-client code and by the Android app. Therefore we cannot use classes like
