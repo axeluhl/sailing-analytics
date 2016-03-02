@@ -94,26 +94,27 @@ public abstract class HttpRequest {
             try {
                 responseInputStream = doRequest(connection);
             } catch (FileNotFoundException fnfe) {
+                if (HttpURLConnection.HTTP_UNAUTHORIZED == connection.getResponseCode()) {
+                    throw new UnauthorizedException();
+                }
                 // 404 errors...
-                throw new FileNotFoundException(String.format(
-                        "(Request %d) %s\nHTTP response code: %d.\nHTTP response body: %s.", this.hashCode(),
-                        fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
+                throw new FileNotFoundException(context.getString(R.string.http_request_exception, this.hashCode(), fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
             }
 
             validateHttpResponseCode(connection);
 
             InputStream copiedResponseInputStream = readAndCopyResponse(connection, responseInputStream);
-            
+
             if (copiedResponseInputStream != null) {
-                ExLog.i(context, TAG, String.format("(Request %d) HTTP request executed.", this.hashCode()));
+                ExLog.i(context, TAG, context.getString(R.string.http_request_executed, this.hashCode()));
             } else {
-                ExLog.i(context, TAG, String.format("(Request %d) HTTP request aborted.", this.hashCode()));
+                ExLog.i(context, TAG, context.getString(R.string.http_request_aborted, this.hashCode()));
             }
-            
+
             connection.disconnect();
             return copiedResponseInputStream;
         } catch (IOException e) {
-            ExLog.i(context, TAG, String.format("(Request %d) HTTP request failed.", this.hashCode()));
+            ExLog.i(context, TAG, context.getString(R.string.http_request_failed, this.hashCode()));
             throw e;
         } finally {
             safeClose(responseInputStream);

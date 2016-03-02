@@ -31,10 +31,7 @@ public class LoadFailedDialog extends FragmentAttachedDialogFragment {
     @Override
     protected AlertDialog.Builder createDialog(AlertDialog.Builder builder) {
         return builder
-                .setMessage(String.format(
-                        getString(R.string.generic_load_failure), 
-                        getArguments().getString(ARGS_ERROR_MSG)))
-                        .setTitle(getString(R.string.loading_failure))
-                        .setIcon(R.drawable.ic_warning_grey_600_36dp);
+            .setMessage(getString(R.string.generic_load_failure, getArguments().getString(ARGS_ERROR_MSG)))
+            .setTitle(getString(R.string.loading_failure));
     }
 }
