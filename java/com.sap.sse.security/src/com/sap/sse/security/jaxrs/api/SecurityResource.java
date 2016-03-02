@@ -78,11 +78,17 @@ public class SecurityResource extends AbstractSecurityResource {
         final Object principal = SecurityUtils.getSubject().getPrincipal();
         if (principal != null) {
             final String username = principal.toString();
-            getService().removeAccessToken(username);
-            result = Response.ok().build();
+            result = respondToRemoveAccessTokenForUser(username);
         } else {
             result = Response.status(Status.UNAUTHORIZED).build();
         }
+        return result;
+    }
+
+    Response respondToRemoveAccessTokenForUser(final String username) {
+        final Response result;
+        getService().removeAccessToken(username);
+        result = Response.ok().build();
         return result;
     }
 
