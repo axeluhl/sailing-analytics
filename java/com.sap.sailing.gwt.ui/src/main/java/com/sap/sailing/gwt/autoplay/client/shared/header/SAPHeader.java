@@ -80,7 +80,8 @@ public class SAPHeader extends Composite implements Component<SAPHeaderSettings>
     
     @Override
     public void updateSettings(SAPHeaderSettings newSettings) {
-        // no-op
+        this.settings = newSettings;
+        pageTitleDiv.setInnerText(settings.getTitle());
     }
     
     @Override
