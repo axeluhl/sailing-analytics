@@ -928,6 +928,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public String getOrCreateAccessToken(String username) {
+        String result = store.getAccessToken(username);
+        if (result == null) {
+            result = createAccessToken(username);
+        }
+        return result;
+    }
+
+    @Override
     public Void internalRemoveAccessToken(String username) {
         store.removeAccessToken(username);
         return null;

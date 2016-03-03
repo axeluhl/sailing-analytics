@@ -437,4 +437,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getAccessToken(String username) {
         return getSecurityService().getAccessToken(username);
     }
+
+    @Override
+    public String getOrCreateAccessToken(String username) {
+        return getSecurityService().getOrCreateAccessToken(username);
+    }
 }

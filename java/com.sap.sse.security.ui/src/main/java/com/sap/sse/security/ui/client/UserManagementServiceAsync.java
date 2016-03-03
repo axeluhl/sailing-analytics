@@ -59,6 +59,12 @@ public interface UserManagementServiceAsync {
      */
     void getAccessToken(String username, AsyncCallback<String> markedAsyncCallback);
 
+    /**
+     * Like {@link #getAccessToken(String, AsyncCallback)}, only that instead of returning {@code null} a
+     * new access token will be created and returned.
+     */
+    void getOrCreateAccessToken(String username, AsyncCallback<String> callback);
+
   //------------------------------------------------ OAuth Interface ----------------------------------------------------------------------
 
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);

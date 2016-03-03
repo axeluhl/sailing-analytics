@@ -107,7 +107,7 @@ public class SecurityResource extends AbstractSecurityResource {
     Response respondWithAccessTokenForUser(final String username) {
         JSONObject response = new JSONObject();
         response.put("username", username);
-        String accessToken = getService().getAccessToken(username);
+        String accessToken = getService().getOrCreateAccessToken(username);
         if (accessToken == null) {
             accessToken = getService().createAccessToken(username);
         }

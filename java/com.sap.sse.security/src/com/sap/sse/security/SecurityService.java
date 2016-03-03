@@ -165,6 +165,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * token was created before for user {@code username} or was {@link #removeAccessToken(String)}.
      */
     String getAccessToken(String username);
+    
+    /**
+     * Like {@link #getAccessToken(String)} only that instead of returning {@code null}, a new access token will
+     * be created and returned instead (see {@link #createAccessToken(String)}.
+     */
+    String getOrCreateAccessToken(String username);
 
     /**
      * Looks up a user by an access token that was created before using {@link #createAccessToken(String)} for same user name.

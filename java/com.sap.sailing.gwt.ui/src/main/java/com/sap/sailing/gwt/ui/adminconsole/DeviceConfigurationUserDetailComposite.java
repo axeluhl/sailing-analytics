@@ -42,7 +42,7 @@ public class DeviceConfigurationUserDetailComposite extends DeviceConfigurationD
                     if (currentUser == null) {
                         createAndShowDialogForAccessToken(/* accessToken */ null);
                     } else {
-                        userService.getUserManagementService().getAccessToken(currentUser.getName(),
+                        userService.getUserManagementService().getOrCreateAccessToken(currentUser.getName(),
                                 new MarkedAsyncCallback<>(new AsyncCallback<String>() {
                             @Override
                             public void onFailure(Throwable caught) {
