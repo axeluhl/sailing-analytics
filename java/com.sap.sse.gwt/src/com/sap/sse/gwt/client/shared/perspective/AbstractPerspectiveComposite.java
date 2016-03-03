@@ -61,4 +61,8 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
     public Widget getEntryWidget() {
         return this.asWidget();
     }
+
+    public List<Component<?>> getComponents() {
+        return components;
+    }
 }

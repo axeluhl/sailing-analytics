@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.util.List;
+
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -17,4 +19,7 @@ public interface Perspective<SettingsType extends Settings> extends Component<Se
     void updateSettingsOfComponents(CompositeSettings settingsOfComponents);
 
     String getPerspectiveName();
+    
+    List<Component<?>> getComponents();
+
 }
