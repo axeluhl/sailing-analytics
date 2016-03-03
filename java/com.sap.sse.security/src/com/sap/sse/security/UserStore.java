@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
@@ -97,6 +98,12 @@ public interface UserStore extends Named {
      */
     boolean setAccessToken(String username, String accessToken);
 
-    void removeAccessToken(String username, String accessToken);
+    void removeAccessToken(String username);
 
+    /**
+     * The owner and any subject having the {@link DefaultRoles#ADMIN} role can retrieve an existing
+     * authentication token for the user. {@code null} may result in case for the user identified by
+     * {@code username} no access token has previously been {@link #setAccessToken(String, String) set}.
+     */
+    String getAccessToken(String username);
 }

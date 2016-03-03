@@ -22,6 +22,18 @@
 			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
+                    <h2 class="articleSubheadline">March 2016</h2>
+                    <ul class="bulletList">
+                        <li>The sailors info link is now also available for single regatta events in addition to multi regatta events that used to have this feature.
+                            If a sailors info link is configured for events that are part of a series,
+                            this isn't shown on the event page because the link to the series uses the same space in the UI and has higher priority.
+                        </li>
+                        <li>It's possible to configure language specific sailors info website links for events.
+                            There is a default value that can be overwritten on a per locale base.
+                            No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
+                            even if there is one for another locale configured.
+                        </li>
+                    </ul>
                     <h2 class="articleSubheadline">February 2016</h2>
                     <ul class="bulletList">
 		    	<li>Several improvements regarding the creation of race metadata (events, regatta, etc.) including:
@@ -40,6 +52,14 @@
                         <li>The user management page now provides a "Refresh" button to reload the user list.
                         </li>
                         <li>The user management page now also lists sailing roles and permissions in the respective suggest boxes.
+                        </li>
+                        <li>The "Edit Points" module is now bound to the Permission "MANAGE_LEADERBOARD_RESULTS".
+                            The Role "eventmanager" grants the "MANAGE_LEADERBOARD_RESULTS" permission.
+                        </li>
+                        <li>There is now a UI element in the header of "Edit Points", "Admin Console" and "Races Overview" pages
+                            that indicates the authentication and makes it possible to sign in/sign out without leaving the page.
+                            The pages "Edit Points" and "Admin Console" will show a message instead of the page content
+                            if you aren't autenticated or don't have the required permissions.
                         </li>
                     </ul>
                     <h2 class="articleSubheadline">October 2015</h2>

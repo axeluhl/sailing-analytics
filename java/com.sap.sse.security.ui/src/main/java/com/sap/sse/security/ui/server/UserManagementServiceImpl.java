@@ -152,7 +152,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             new Thread("sending updated password to user "+username+" by e-mail") {
                 @Override public void run() {
                     try {
-                        getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
+                        getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, please contact sailing_analytics@sap.com via email.");
                     } catch (MailException e) {
                         logger.log(Level.SEVERE, "Error sending new password to user "+username+" by e-mail", e);
                     }
@@ -433,4 +433,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return getSecurityService().getPreference(username, key);
     }
 
+    @Override
+    public String getAccessToken(String username) {
+        return getSecurityService().getAccessToken(username);
+    }
+
+    @Override
+    public String getOrCreateAccessToken(String username) {
+        return getSecurityService().getOrCreateAccessToken(username);
+    }
 }

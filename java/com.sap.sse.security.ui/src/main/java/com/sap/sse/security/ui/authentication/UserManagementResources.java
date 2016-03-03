@@ -4,6 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
+/**
+ * Resources used by the authentication framework.
+ */
 public interface UserManagementResources extends ClientBundle {
     
     public static final UserManagementResources INSTANCE = GWT.create(UserManagementResources.class);
@@ -35,5 +38,4 @@ public interface UserManagementResources extends ClientBundle {
         String info_user_realname();
         String info_user_username();
     }
-    
 }
