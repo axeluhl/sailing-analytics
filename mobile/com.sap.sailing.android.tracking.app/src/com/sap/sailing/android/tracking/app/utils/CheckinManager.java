@@ -86,7 +86,6 @@ public class CheckinManager {
         urlData.server = scheme + "://" + uri.getHost();
         urlData.port = uri.getPort();
         urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
-
         Exception exception = null;
         try {
             String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
@@ -95,9 +94,7 @@ public class CheckinManager {
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
             urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
             urlData.leaderboardName = leaderboardNameFromQR;
-
             urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(activity)));
-
             urlData.eventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
             urlData.leaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
             urlData.competitorUrl = urlData.hostWithPort + prefs.getServerCompetitorPath(urlData.competitorId);
@@ -119,7 +116,6 @@ public class CheckinManager {
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
         NetworkHelper.getInstance(activity)
             .executeHttpJsonRequestAsync(getLeaderboardRequest, new NetworkHelper.NetworkHelperSuccessListener() {
-
                 @Override
                 public void performAction(JSONObject response) {
 
