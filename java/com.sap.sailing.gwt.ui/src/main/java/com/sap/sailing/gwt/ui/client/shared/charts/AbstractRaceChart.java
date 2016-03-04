@@ -45,7 +45,7 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
     protected final Timer timer;
     protected final TimeRangeWithZoomProvider timeRangeWithZoomProvider; 
   
-    protected RegattaAndRaceIdentifier selectedRaceIdentifier;
+    protected final RegattaAndRaceIdentifier selectedRaceIdentifier;
 
     protected final DateTimeFormat dateFormat = DateTimeFormat.getFormat("HH:mm:ss");
     protected final DateTimeFormat dateFormatHoursMinutes = DateTimeFormat.getFormat("HH:mm");
@@ -69,9 +69,10 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
     
     private final Button settingsButton;
     
-    protected AbstractRaceChart(SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages, 
-            AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
+    protected AbstractRaceChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, 
+            final StringMessages stringMessages, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
+        this.selectedRaceIdentifier = selectedRaceIdentifier;
         this.timer = timer;
         this.timeRangeWithZoomProvider = timeRangeWithZoomProvider;
         this.stringMessages = stringMessages;
