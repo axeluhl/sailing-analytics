@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -28,16 +29,18 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
-    private SailingServiceAsync sailingService;
-    private ErrorReporter errorReporter;
-    private RegattaRefresher regattaRefresher;
-    private StringMessages stringMessages;
-    private List<EventDTO> existingEvents;
+    private final SailingServiceAsync sailingService;
+    private final ErrorReporter errorReporter;
+    private final EventsRefresher eventsRefresher;
+    private final RegattaRefresher regattaRefresher;
+    private final StringMessages stringMessages;
+    private final List<EventDTO> existingEvents;
 
-    public CreateRegattaCallback(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher, List<EventDTO> existingEvents) {
+    public CreateRegattaCallback(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, List<EventDTO> existingEvents) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
+        this.eventsRefresher = eventsRefresher;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
     }
@@ -76,6 +79,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 // note that the SeriesCreationParametersDTO don't describe race columns.
                 createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
                 fillRegattas();
+                fillEvents(); // events have their associated regattas
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
         });
@@ -113,6 +117,12 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     private void fillRegattas() {
         if (regattaRefresher != null){
             regattaRefresher.fillRegattas();
+        }
+    }
+    
+    private void fillEvents() {
+        if (eventsRefresher != null) {
+            eventsRefresher.fillEvents();
         }
     }
     

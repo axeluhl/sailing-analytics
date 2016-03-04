@@ -92,7 +92,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardsDisplayers = new HashSet<>();
         leaderboardGroupsDisplayers = new HashSet<>();
 
-        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, getStringMessages());
+        final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages());
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
             public void refreshAfterBecomingVisible() {
@@ -103,7 +103,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardGroupsDisplayers.add(eventManagementPanel);
 
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
-                sailingService, this, getStringMessages(), this);
+                sailingService, this, getStringMessages(), this, eventManagementPanel);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanel) {
             @Override

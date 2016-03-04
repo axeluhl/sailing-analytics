@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -40,6 +41,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private final StringMessages stringMessages;
 
     private final RegattaRefresher regattaRefresher;
+    private final EventsRefresher eventsRefresher;
     private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
     private Button removeRegattaButton;
 
@@ -49,11 +51,12 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private final CaptionPanel regattasPanel;
     
     public RegattaManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages, RegattaRefresher regattaRefresher) {
+            StringMessages stringMessages, RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
+        this.eventsRefresher = eventsRefresher;
 
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
@@ -163,7 +166,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, stringMessages,
-                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, regattaRefresher, existingEvents));
+                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, regattaRefresher, eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }

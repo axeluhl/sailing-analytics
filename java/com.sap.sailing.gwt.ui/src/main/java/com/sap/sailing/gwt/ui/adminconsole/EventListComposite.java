@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGro
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
@@ -94,12 +95,17 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
+    private final RegattaRefresher regattaRefresher;
+    private final EventsRefresher eventsRefresher;
 
     @SuppressWarnings("unchecked")
-    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter, final StringMessages stringMessages) {
+    public EventListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, final StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
+        this.regattaRefresher = regattaRefresher;
+        this.eventsRefresher = eventsRefresher;
         availableLeaderboardGroups = Collections.emptyList();
         allEvents = new ArrayList<EventDTO>();
 
@@ -447,7 +453,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void ok(final EventDTO newEvent) {
                 createNewEvent(newEvent, existingLeaderboardGroups);
-                openCreateDefaultRegattaDialog(newEvent);
             }
         });
         dialog.show();
@@ -504,7 +509,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, stringMessages,
-                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, null, existingEvents));
+                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, regattaRefresher, eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -542,6 +547,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                                         } else {
                                             errorReporter.reportError("Could not find the event with name "+newEvent.getName()+" to which the leaderboardgroup should be added");
                                         }
+                                        openCreateDefaultRegattaDialog(newEvent);
                                     }
                                 }));
             }
@@ -682,6 +688,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         public void cancel() {
                         }
                     }).show();
+                } else {
+                    openCreateDefaultRegattaDialog(newEvent);
                 }
             }
         });
