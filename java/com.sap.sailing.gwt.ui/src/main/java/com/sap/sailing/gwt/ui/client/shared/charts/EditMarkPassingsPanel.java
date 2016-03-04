@@ -60,7 +60,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final CompetitorSelectionProvider competitorSelectionModel;
-    private LeaderboardDTO leaderboard;
+    private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
     private CompetitorDTO competitor;
     
@@ -88,6 +88,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     public EditMarkPassingsPanel(final SailingServiceAsync sailingService, final RegattaAndRaceIdentifier raceIdentifier,
             final StringMessages stringMessages, final CompetitorSelectionProvider competitorSelectionModel,
             final ErrorReporter errorReporter, final Timer timer) {
+        this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.sailingService = sailingService;
         this.raceIdentifier = raceIdentifier;
         this.errorReporter = errorReporter;
@@ -206,8 +207,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
             @Override
             public void onClick(ClickEvent event) {
                 final RaceColumnDTO column = getColumn();
-                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column,
-                                column.getFleet(raceIdentifier), waypointSelectionModel.getSelectedObject().getA(),
+                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column.getName(),
+                                column.getFleet(raceIdentifier).getName(), waypointSelectionModel.getSelectedObject().getA(),
                                 competitor, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -227,8 +228,8 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
             @Override
             public void onClick(ClickEvent event) {
                 final RaceColumnDTO column = getColumn();
-                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column,
-                                column.getFleet(raceIdentifier), null, competitor,
+                sailingService.updateSuppressedMarkPassings(getLeaderboardName(), column.getName(),
+                                column.getFleet(raceIdentifier).getName(), null, competitor,
                                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -383,7 +384,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
 
     public void setLeaderboard(LeaderboardDTO leaderboard) {
-        this.leaderboard = leaderboard;
+        this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper.setLeaderboard(leaderboard);
     }
 
     @Override
@@ -429,19 +430,10 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     }
 
     private String getLeaderboardName() {
-        return leaderboard.name;
+        return raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboard().name;
     }
 
     private RaceColumnDTO getColumn() {
-        RaceColumnDTO result = null;
-        if (leaderboard != null) {
-            for (RaceColumnDTO columnDTO : leaderboard.getRaceList()) {
-                if (columnDTO.containsRace(raceIdentifier)) {
-                    result = columnDTO;
-                    break;
-                }
-            }
-        }
-        return result;
+        return raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getColumn(raceIdentifier);
     }
 }

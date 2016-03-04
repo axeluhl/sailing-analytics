@@ -5696,10 +5696,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void updateSuppressedMarkPassings(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    public void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO) {
         RaceLogSuppressedMarkPassingsEvent oldSuppressedMarkPassingEvent = null;
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         Competitor competitor = getCompetitor(competitorDTO);
         NavigableSet<RaceLogEvent> unrevokedEvents = raceLog.getUnrevokedEvents();
         for (RaceLogEvent event : unrevokedEvents) {
