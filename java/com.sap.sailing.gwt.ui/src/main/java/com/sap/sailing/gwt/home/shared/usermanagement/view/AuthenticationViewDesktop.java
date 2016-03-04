@@ -19,7 +19,7 @@ public class AuthenticationViewDesktop extends AbstractFlyoutAuthenticationView 
                 Element anchor = Document.get().getElementById("usrMngmtFlyover");
                 if (anchor != null) {
                     int left = anchor.getAbsoluteLeft() + anchor.getOffsetWidth() - offsetWidth + 15;
-                    popupPanel.setPopupPosition(left, anchor.getAbsoluteTop() + 20);
+                    popupPanel.setPopupPosition(left, anchor.getAbsoluteTop() + 10);
                 }
                 getPresenter().onVisibilityChanged(true);
             }

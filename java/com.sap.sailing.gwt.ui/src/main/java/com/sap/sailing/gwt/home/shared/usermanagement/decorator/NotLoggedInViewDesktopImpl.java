@@ -9,6 +9,8 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInView;
 
 public class NotLoggedInViewDesktopImpl extends Composite implements NotLoggedInView {
 

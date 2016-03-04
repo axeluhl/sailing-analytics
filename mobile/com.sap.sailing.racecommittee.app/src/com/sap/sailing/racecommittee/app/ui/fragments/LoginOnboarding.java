@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.net.URL;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -24,14 +26,12 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-import com.sap.sse.common.Util;
-
-import java.net.URL;
 
 public class LoginOnboarding extends Fragment {
 
@@ -88,7 +88,7 @@ public class LoginOnboarding extends Fragment {
                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (saveData(url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.fragmentKey + "=" + device_id.getText().toString())) {
+                            if (saveData(url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText().toString())) {
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_RESET));
                             }
                         }
@@ -126,17 +126,19 @@ public class LoginOnboarding extends Fragment {
 
     private boolean saveData(String content) {
         try {
-            Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
+            DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
 
-            String identifier = connectionConfiguration.getA();
-            URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
+            final String identifier = connectionConfiguration.getDeviceIdentifier();
+            final URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
+            final String accessToken = connectionConfiguration.getAccessToken();
 
             if (apkUrl != null) {
                 String serverUrl = UrlHelper.getServerUrl(apkUrl);
-
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                preferences.edit().putString(getString(R.string.preference_identifier_key), identifier).commit();
-                preferences.edit().putString(getString(R.string.preference_server_url_key), serverUrl).commit();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
+                editor.putString(getString(R.string.preference_identifier_key), identifier);
+                editor.putString(getString(R.string.preference_server_url_key), serverUrl);
+                editor.putString(getString(R.string.preference_access_token_key), accessToken);
+                editor.commit();
 
                 new AutoUpdater(getActivity()).checkForUpdate(false);
                 return true;
