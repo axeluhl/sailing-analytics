@@ -5,10 +5,13 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
+import com.sap.sse.security.jaxrs.ShiroAuthorizationExceptionTo401ResponseMapper;
+
 
 public class RestApiApplication extends Application {
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<>();
+        // RESTlets
         classes.add(LeaderboardGroupsResource.class);
         classes.add(EventsResource.class);
         classes.add(RegattasResource.class);
@@ -19,6 +22,10 @@ public class RestApiApplication extends Application {
         classes.add(CompetitorsResource.class);
         classes.add(FileStorageResource.class);
         classes.add(DataMiningResource.class);
+        classes.add(PingResource.class);
+        
+        // Exception Mapper
+        classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);
         return classes;
     }
 }

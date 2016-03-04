@@ -3,6 +3,9 @@ package com.sap.sse.security.ui.authentication;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
+/**
+ * Event to be fired if the user needs to see the authentication UI.
+ */
 public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<AuthenticationRequestEvent.Handler>();
 
@@ -10,21 +13,7 @@ public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEv
         void onUserManagementRequestEvent(AuthenticationRequestEvent event);
     }
     
-    private final boolean login;
 
-    public AuthenticationRequestEvent() {
-        this(true);
-    }
-    
-    public AuthenticationRequestEvent(boolean login) {
-        super();
-        this.login = login;
-    }
-    
-    public boolean isLogin() {
-        return login;
-    }
-    
     @Override
     public Type<Handler> getAssociatedType() {
         return TYPE;

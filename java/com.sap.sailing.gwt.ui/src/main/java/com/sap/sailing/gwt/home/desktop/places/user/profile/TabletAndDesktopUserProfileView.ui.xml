@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:c="urn:import:com.sap.sailing.gwt.common.client.controls.tabbar"
-	xmlns:dp="urn:import:com.sap.sailing.gwt.home.desktop.partials"
+	xmlns:uh="urn:import:com.sap.sse.security.ui.userprofile.desktop.userheader"
 	xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="tm" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
@@ -40,10 +40,10 @@
   <g:HTMLPanel>
     <c:TabPanel ui:field="tabPanelUi">
       <c:header>
-        <dp:userHeader.UserHeader ui:field="headerUi" />
+        <uh:UserHeader ui:field="headerUi" />
       </c:header>
       <c:tabcontent title="{i18n.details}">
-        <s:detailstab.UserProfileDetailsTabView />
+        <s:detailstab.UserProfileDetailsTabView ui:field="detailsTabUi" />
       </c:tabcontent>
     </c:TabPanel>
   </g:HTMLPanel>

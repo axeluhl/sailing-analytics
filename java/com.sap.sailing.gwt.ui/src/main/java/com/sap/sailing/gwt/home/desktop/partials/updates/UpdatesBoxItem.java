@@ -14,7 +14,6 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.communication.event.news.AbstractRaceNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.LeaderboardNewsEntryDTO;
 import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
@@ -22,6 +21,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.EventView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.util.ConditionalDateTimeFormatter;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class UpdatesBoxItem extends Widget {
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
