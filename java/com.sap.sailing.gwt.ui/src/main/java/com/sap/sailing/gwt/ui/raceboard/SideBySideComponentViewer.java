@@ -309,24 +309,33 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     public void onUserStatusChange(UserDTO user) {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
+        boolean forceLayout = false;
         if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
                 SailingPermissionsForRoleProvider.INSTANCE)) {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsSplitter.getToggleButton().setVisible(true);
             }
-            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
-                markPositionSplitter.getToggleButton().setVisible(true);
-            }
-            forceLayout();
+            forceLayout = true;
         } else {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsPanel.setVisible(false);
                 markPassingsSplitter.getToggleButton().setVisible(false);
             }
+        }
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPositionSplitter.getToggleButton().setVisible(true);
+            }
+            forceLayout = true;
+        } else {
             if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPositionPanel.setVisible(false);
                 markPositionSplitter.getToggleButton().setVisible(false);
             }
+            forceLayout();
+        }
+        if (forceLayout) {
             forceLayout();
         }
         mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
