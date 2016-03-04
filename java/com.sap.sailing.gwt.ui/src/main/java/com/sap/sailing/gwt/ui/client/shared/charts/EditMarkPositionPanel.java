@@ -78,6 +78,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
@@ -120,12 +121,16 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     private FixPositionChooser currentFixPositionChooser;
     private List<OverlayClickHandler> overlayClickHandlers;
+    private final MarkPositionService markPositionService = new MarkPositionServiceMock();
+    
+    private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
     public EditMarkPositionPanel(final RaceMap raceMap, final LeaderboardPanel leaderboardPanel,
             RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName, final StringMessages stringMessages,
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;
         this.polylines = new HashMap<>();
@@ -223,7 +228,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         // think the fixes have to be thinned out somehow and maybe shown in more detail when zoomed in. The aggregation of
         // fixes is in my eyes no option, because then you have to define behaviour when moving them.
         // I had no remaining time to incorporate the thinned out variable in my code.
-        MarkTracksDTO getMarkTracks(RegattaAndRaceIdentifier raceIdentifier);
+        MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier);
         
         /**
          * The service may decide whether a mark fix can be removed. It may, for example, be impossible to
@@ -232,13 +237,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
          * regatta log is the basis of the service and no tracked race exists yet, mark fixes may be removed
          * by revoking the device mappings.
          */
-        boolean canRemoveMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO fix);
+        boolean canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
         
-        void removeMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO fix);
+        void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
         
-        void addMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO newFix);
+        void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix);
         
-        void editMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO oldFix, Position newPosition);
+        void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO oldFix, Position newPosition);
     }
     
     private class MarkPositionServiceMock implements MarkPositionService {
@@ -269,7 +274,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
         
         @Override
-        public MarkTracksDTO getMarkTracks(RegattaAndRaceIdentifier raceIdentifier) {
+        public MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier) {
             MarkTracksDTO tracks = new MarkTracksDTO(new ArrayList<MarkTrackDTO>());
             for (Map.Entry<MarkDTO, List<GPSFixDTO>> entry : markTracks.entrySet()) {
                 tracks.tracks.add(new MarkTrackDTO(entry.getKey(), entry.getValue(), false));
@@ -278,33 +283,33 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
         
         @Override
-        public boolean canRemoveMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO fix) {
+        public boolean canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix) {
             return true;
         }
 
         @Override
-        public void removeMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark,
+        public void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
                 GPSFixDTO fix) {
             markTracks.get(mark).remove(fix);
         }
 
         @Override
-        public void addMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark,
+        public void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
                 GPSFixDTO newFix) {
             markTracks.get(mark).add(newFix);
         }
 
         @Override
-        public void editMarkFix(RegattaAndRaceIdentifier raceIdentifier, MarkDTO mark, GPSFixDTO fix,
+        public void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix,
                 Position newPosition) {
             markTracks.get(mark).get(markTracks.get(mark).indexOf(fix)).position = newPosition;
         }
     }
     
-    private MarkPositionService serviceMock = new MarkPositionServiceMock();
-    
     private boolean canRemoveMarkFix(MarkDTO mark, GPSFixDTO fix) {
-        return serviceMock.canRemoveMarkFix(selectedRaceIdentifier, mark, fix);
+        return markPositionService.canRemoveMarkFix(
+                raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
+                mark, fix);
     }
     
     private static class Pixel extends JavaScriptObject {
@@ -609,7 +614,8 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             setWidget(chart);
             showLoading(stringMessages.loadingMarkFixes());
             Map<MarkDTO, List<GPSFixDTO>> result = new HashMap<>();
-            for (MarkTrackDTO track : serviceMock.getMarkTracks(selectedRaceIdentifier).tracks) {
+            for (MarkTrackDTO track : markPositionService.getMarkTracks(
+                    raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier)).tracks) {
                 result.put(track.mark, track.fixes);
             }
             marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
@@ -658,7 +664,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public void addMarkFix(MarkDTO mark, Date timepoint, Position fixPosition) {
         GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
-        serviceMock.addMarkFix(selectedRaceIdentifier, mark, fix);
+        markPositionService.addMarkFix(
+                raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
+                mark, fix);
         FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
         overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
         marks.get(mark).put(fix, overlay);
@@ -669,7 +677,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     private void editMarkFix(MarkDTO mark, GPSFixDTO fix, Position newPosition) {
-        serviceMock.editMarkFix(selectedRaceIdentifier, mark, fix, newPosition);
+        markPositionService.editMarkFix(
+                raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
+                mark, fix, newPosition);
         fix.position = newPosition;
         marks.get(mark).get(fix).setGPSFixDTO(fix);
         updatePolylinePoints(mark);
@@ -679,7 +689,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     private void removeMarkFix(MarkDTO mark, GPSFixDTO fix) {
-        serviceMock.removeMarkFix(selectedRaceIdentifier, mark, fix);
+        markPositionService.removeMarkFix(
+                raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
+                mark, fix);
         FixOverlay overlay = marks.get(mark).remove(fix);
         overlay.removeFromMap();
         updatePolylinePoints(mark);

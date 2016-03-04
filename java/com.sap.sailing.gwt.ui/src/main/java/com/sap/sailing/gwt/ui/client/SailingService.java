@@ -520,7 +520,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * pairs of zero-based waypoint numbers and times where <code>null</code> represents a suppressed mark
      * passing and a valid {@link Date} objects represents a fixed mark passing.
      */
-    Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor);
 
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,

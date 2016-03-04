@@ -5649,10 +5649,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    public Map<Integer, Date> getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor) {
         Map<Integer, Date> result = new HashMap<>();
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         for (Triple<Competitor, Integer, TimePoint> fixedEvent : new MarkPassingDataFinder(raceLog).analyze()) {
             if (fixedEvent.getA().getName().equals(competitor.getName())) {
                 final Date date;

@@ -682,7 +682,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCompetitorMarkPassings(RegattaAndRaceIdentifier race, CompetitorDTO competitorDTO,
             AsyncCallback<Map<Integer, Date>> callback);
 
-    void getCompetitorRaceLogMarkPassingData(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void getCompetitorRaceLogMarkPassingData(String leaderboardName, String raceColumnName, String fleetName,
             CompetitorDTO competitor, AsyncCallback<Map<Integer, Date>> callback);
 
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
