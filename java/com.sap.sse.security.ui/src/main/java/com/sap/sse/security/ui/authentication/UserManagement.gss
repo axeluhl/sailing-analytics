@@ -48,6 +48,7 @@
     display: block;
     font-weight: 600;
     margin-bottom: .4em;
+    padding: 0;
 }
 .form_input, .form_description, .form_errors {
     margin-bottom: 1.333333333333333em;
@@ -59,6 +60,7 @@
     padding: .666666666666667em;
     border: 1px solid #ccc;
     border-radius: .2em;
+    font-family: 'Open Sans', sans-serif;
 }
 .form_errors {
 	color: red;
