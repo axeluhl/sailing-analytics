@@ -84,11 +84,9 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
         for (final SeriesDTO series: newRegatta.series) {
             if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
-                int insertIndex = 0;
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
-                    raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), insertIndex));
-                    insertIndex++;
+                    raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), -1));
                 }
                 sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
                         new AsyncCallback<List<RaceColumnInSeriesDTO>>() {
