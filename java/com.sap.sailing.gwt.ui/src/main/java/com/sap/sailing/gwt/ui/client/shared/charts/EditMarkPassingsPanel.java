@@ -166,7 +166,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
             @Override
             public void onClick(ClickEvent event) {
                 final RaceColumnDTO column = getColumn();
-                sailingService.updateFixedMarkPassing(getLeaderboardName(), column, column.getFleet(raceIdentifier),
+                sailingService.updateFixedMarkPassing(getLeaderboardName(), column.getName(), column.getFleet(raceIdentifier).getName(),
                                 waypointSelectionModel.getSelectedObject().getA(), null, competitor, new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -185,7 +185,7 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
             @Override
             public void onClick(ClickEvent event) {
                 final RaceColumnDTO column = getColumn();
-                sailingService.updateFixedMarkPassing(getLeaderboardName(), column, column.getFleet(raceIdentifier),
+                sailingService.updateFixedMarkPassing(getLeaderboardName(), column.getName(), column.getFleet(raceIdentifier).getName(),
                                 waypointSelectionModel.getSelectedObject().getA(), timer.getTime(), competitor,
                                 new AsyncCallback<Void>() {
                     @Override

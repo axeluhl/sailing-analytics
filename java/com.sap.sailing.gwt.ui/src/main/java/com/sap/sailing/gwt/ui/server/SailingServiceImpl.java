@@ -5668,9 +5668,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+    public void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         Competitor competitor = getCompetitor(competitorDTO);
         RaceLogFixedMarkPassingEvent oldFixedMarkPassingEvent = null;
         for (RaceLogEvent event : raceLog.getUnrevokedEvents()) {

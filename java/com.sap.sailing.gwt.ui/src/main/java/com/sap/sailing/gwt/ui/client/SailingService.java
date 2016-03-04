@@ -526,7 +526,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO);
 
-    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet, Integer indexOfWaypoint,
+    void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName, Integer indexOfWaypoint,
             Date dateOfMarkPassing, CompetitorDTO competitorDTO);
 
     void setCompetitorRegistrationsInRegattaLog(String leaderboardName, Set<CompetitorDTO> competitors)

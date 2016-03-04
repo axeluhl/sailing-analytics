@@ -690,7 +690,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void createRegattaStructure(Iterable<RegattaDTO> regattaNames, EventDTO newEvent, AsyncCallback<Void> asyncCallback);
 
-    void updateFixedMarkPassing(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet,
+    void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
             Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
