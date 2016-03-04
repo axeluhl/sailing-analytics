@@ -84,9 +84,8 @@ public class CheckinManager {
         URLData urlData = new URLData();
         urlData.uriStr = uri.toString();
         urlData.server = scheme + "://" + uri.getHost();
-        urlData.port = (uri.getPort() == -1) ? 80 : uri.getPort();
-        urlData.hostWithPort = urlData.server + ":" + urlData.port;
-
+        urlData.port = uri.getPort();
+        urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
         String leaderboardNameFromQR = "";
         try {
             leaderboardNameFromQR = URLEncoder.encode(
