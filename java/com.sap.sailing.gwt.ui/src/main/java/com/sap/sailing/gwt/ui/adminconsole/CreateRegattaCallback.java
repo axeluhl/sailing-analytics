@@ -49,10 +49,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
     @Override
     public void cancel() {
-        // TODO Auto-generated method stub
-        
     }
-
 
     private void createNewRegatta(final RegattaDTO newRegatta, final List<EventDTO> existingEvents) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesStructure = new LinkedHashMap<String, SeriesCreationParametersDTO>();
@@ -79,7 +76,6 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
         });
-        
         createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
     }
 
