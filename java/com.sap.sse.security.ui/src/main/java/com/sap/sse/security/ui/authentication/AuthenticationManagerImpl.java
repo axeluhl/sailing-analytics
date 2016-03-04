@@ -86,12 +86,10 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
             }
         });
-        eventBus.addHandler(AuthenticationRequestEvent.TYPE, new AuthenticationRequestEvent.Handler() {
+        eventBus.addHandler(AuthenticationSignOutRequestEvent.TYPE, new AuthenticationSignOutRequestEvent.Handler() {
             @Override
-            public void onUserManagementRequestEvent(AuthenticationRequestEvent event) {
-                if (!event.isLogin()) {
+            public void onUserManagementSignOutRequestEvent(AuthenticationSignOutRequestEvent event) {
                     logout();
-                }
             }
         });
     }

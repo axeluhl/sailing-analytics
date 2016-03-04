@@ -44,9 +44,11 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<extend-property name="locale" values="en,de" />
+	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+	<!-- AdminConsole inherits the default sailing locale configuration but only activates de and en permutations.
+	     With this, all default sailing locales are included in GWT'2 LocaleInfo.
+	     So we can populate UI elements in the AdminConsole with all locales without the need to really support all those locales for users of the AdminConsole. -->
 	<set-property name="locale" value="en,de"/>
-	<set-property-fallback name="locale" value="en"/>
 	
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
@@ -63,6 +65,11 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceComponents'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceLeaderboard'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard'/>
+	
+    <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+    
+    <set-configuration-property name="CssResource.enableGss" value="true" />
+    <set-configuration-property name="CssResource.legacy" value="true" />
 	
 	<source path='masterdataimport'/>
 	<source path='test'/>

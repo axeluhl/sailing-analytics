@@ -10,12 +10,12 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.common.client.controls.tabbar.BreadcrumbPane;
 import com.sap.sailing.gwt.home.desktop.partials.footer.Footer;
 import com.sap.sailing.gwt.home.desktop.partials.header.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.DefaultErrorReporter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.breadcrumb.BreadcrumbPane;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 
 /**

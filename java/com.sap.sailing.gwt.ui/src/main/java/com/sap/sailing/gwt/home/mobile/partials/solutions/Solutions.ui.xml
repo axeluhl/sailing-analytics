@@ -4,6 +4,16 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.common.client.i18n.TextMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.solutions.SolutionsResources" />
+     <ui:style>
+        .storeBadgesContainer>a>img {
+            height: 60px;
+            width: auto;
+            margin-right: 10px;
+        }
+        .storeBadgesContainer {
+            margin: 20px 0px;
+        }
+    </ui:style>
 	<g:HTMLPanel>
 		<div class="{res.mediaCss.grid}">
 			<div class="{local_res.css.solutions} {local_res.css.accordion}">
@@ -93,6 +103,18 @@
 						<p>
 							<ui:text from='{i18n.contentSapSailingRaceManager}' />
 						</p>
+                        <div 
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a  ui:field="raceManagerPlayStoreLinkUi"
+                                href="{i18n.playstoreRacecommitteeApp}&amp;{i18n.playstoreCampaign}"
+                                target="_blank"
+                                ><img
+                                    ui:field="raceManagerPlayStoreImgUi" 
+                                    alt="Get it on Google Play" 
+                                    src="{i18n.playstoreRacecommitteeBadge}" 
+                                    /></a>
+                        </div>
 					</div>
 				</div>
 				<div ui:field="postRaceAnalyticsUi"
@@ -128,6 +150,16 @@
 						<p>
 							<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
 						</p>
+                        <div 
+                            class="{style.storeBadgesContainer}"
+                            >
+                            <a
+                                alt="Get it on Appstore" 
+                                href="{i18n.appstoreStgTrainingstagebuch}"
+                                target="_blank" >
+                                <img src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"></img>
+                            </a>
+                        </div>
 					</div>
 				</div>
 				<div ui:field="strategySimulatorUi"
