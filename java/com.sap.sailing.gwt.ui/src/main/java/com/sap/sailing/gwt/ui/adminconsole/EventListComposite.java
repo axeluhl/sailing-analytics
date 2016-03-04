@@ -462,7 +462,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void ok(Void editedObject) {
                 sailingService.getRegattas(new AsyncCallback<List<RegattaDTO>>() {
-
                     @Override
                     public void onFailure(Throwable caught) {
                         sailingService.getEvents(new AsyncCallback<List<EventDTO>>() {

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -57,11 +58,9 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
         return grid;
     }
 
-    
     @Override
-    public void show() {
-        super.show();
-        identifierBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return identifierBox;
     }
 
     @Override

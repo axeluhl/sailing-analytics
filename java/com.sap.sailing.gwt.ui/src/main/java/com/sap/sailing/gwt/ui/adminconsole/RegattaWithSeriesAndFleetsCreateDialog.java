@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -135,9 +136,8 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameEntryField.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameEntryField;
     }
 
     @Override
