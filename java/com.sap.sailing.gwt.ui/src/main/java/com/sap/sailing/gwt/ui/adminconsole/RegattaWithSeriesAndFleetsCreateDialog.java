@@ -144,9 +144,9 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     protected RegattaDTO getResult() {        
         RegattaDTO dto = super.getResult();
         List<SeriesDTO> seriesList = getSeriesEditor().getValue();
-        for (SeriesDTO series : seriesList){
-            //generate 3 Default Races if default series is still present
-            if (series.getName().equals(Series.DEFAULT_NAME)){
+        for (SeriesDTO series : seriesList) {
+            // generate 3 Default Races if default series is still present
+            if (series.getName().equals(Series.DEFAULT_NAME)) {
                 List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
                 for (int i = 1; i <= 3; i++) {
                     RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), dto.getName());

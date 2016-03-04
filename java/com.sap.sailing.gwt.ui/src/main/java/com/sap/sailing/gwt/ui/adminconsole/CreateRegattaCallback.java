@@ -72,16 +72,18 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
 
             @Override
             public void onSuccess(RegattaDTO regatta) {
+                // if regatta creation was successful, add race columns as modeled in the creation dialog;
+                // note that the SeriesCreationParametersDTO don't describe race columns.
+                createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
                 fillRegattas();
                 openCreateDefaultRegattaLeaderboardDialog(regatta, existingEvents);
             }
         });
-        createDefaultRacesIfDefaultSeriesIsPresent(newRegatta);
     }
 
     private void createDefaultRacesIfDefaultSeriesIsPresent(final RegattaDTO newRegatta) {
         for (final SeriesDTO series: newRegatta.series) {
-            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()){
+            if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
                 int insertIndex = 0;
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
