@@ -78,6 +78,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
@@ -86,6 +87,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.SideBySideComponentViewer;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sse.common.Util.Pair;
@@ -203,49 +205,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }));
     }
     
-    public class MarkTrackDTO {
-        public MarkDTO mark;
-        public List<GPSFixDTO> fixes;
-        public boolean thinnedOut;
-        
-        public MarkTrackDTO(MarkDTO mark, List<GPSFixDTO> fixes, boolean thinnedOut) {
-            this.mark = mark;
-            this.fixes = fixes;
-            this.thinnedOut = thinnedOut;
-        }
-    }
-    
-    public class MarkTracksDTO {
-        public List<MarkTrackDTO> tracks;
-        
-        public MarkTracksDTO(List<MarkTrackDTO> tracks) {
-            this.tracks = tracks;
-        }
-    }
-    
-    private interface MarkPositionService {
-        // Jonas Dann: I had no great idea for handling of massive amount of fixes. An exception is no real option. I
-        // think the fixes have to be thinned out somehow and maybe shown in more detail when zoomed in. The aggregation of
-        // fixes is in my eyes no option, because then you have to define behaviour when moving them.
-        // I had no remaining time to incorporate the thinned out variable in my code.
-        MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier);
-        
-        /**
-         * The service may decide whether a mark fix can be removed. It may, for example, be impossible to
-         * cleanly remove a mark fix if a tracked race already exists and the mark fixes are already part of
-         * the GPS fix track which currently does not support a remove operation. However, when only the
-         * regatta log is the basis of the service and no tracked race exists yet, mark fixes may be removed
-         * by revoking the device mappings.
-         */
-        boolean canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
-        
-        void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
-        
-        void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix);
-        
-        void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO oldFix, Position newPosition);
-    }
-    
     private class MarkPositionServiceMock implements MarkPositionService {
         private Map<MarkDTO, List<GPSFixDTO>> markTracks;
         
@@ -258,11 +217,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             MarkDTO mark = new MarkDTO("test1", "Five Fixes");
             mark.color = "#0f0";
             List<GPSFixDTO> fixes = new ArrayList<>();
-            fixes.add(new GPSFixDTO(new Date(1453110600000l), new DegreePosition(53.54, 9.98), null, new WindDTO(), null, null, false));
-            fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99), null, new WindDTO(), null, null, false));
-            fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10), null, new WindDTO(), null, null, false));
-            fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01), null, new WindDTO(), null, null, false));
-            fixes.add(new GPSFixDTO(new Date(1453144400000l), new DegreePosition(53.53, 10.01), null, new WindDTO(), null, null, false));
+            fixes.add(new GPSFixDTO(new Date(1453110600000l), new DegreePosition(53.54, 9.98)));
+            fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99)));
+            fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10)));
+            fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01)));
+            fixes.add(new GPSFixDTO(new Date(1453144400000l), new DegreePosition(53.53, 10.01)));
             //final double COUNT = 250;
             //for (double i = 0; i < COUNT; i++) {
             //    fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
@@ -275,9 +234,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         
         @Override
         public MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier) {
-            MarkTracksDTO tracks = new MarkTracksDTO(new ArrayList<MarkTrackDTO>());
+            final ArrayList<MarkTrackDTO> tracksList = new ArrayList<MarkTrackDTO>();
+            MarkTracksDTO tracks = new MarkTracksDTO(tracksList);
             for (Map.Entry<MarkDTO, List<GPSFixDTO>> entry : markTracks.entrySet()) {
-                tracks.tracks.add(new MarkTrackDTO(entry.getKey(), entry.getValue(), false));
+                tracksList.add(new MarkTrackDTO(entry.getKey(), entry.getValue(), false));
             }
             return tracks;
         }
@@ -615,7 +575,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             showLoading(stringMessages.loadingMarkFixes());
             Map<MarkDTO, List<GPSFixDTO>> result = new HashMap<>();
             for (MarkTrackDTO track : markPositionService.getMarkTracks(
-                    raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier)).tracks) {
+                    raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier)).getTracks()) {
                 result.put(track.mark, track.fixes);
             }
             marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
@@ -632,7 +592,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 options.setVisible(false);
                 final Polyline polyline = Polyline.newInstance(options); // Line can not be dashed at the moment, because line symbols are not supported
                 polylines.put(fixes.getKey(), polyline);
-                SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<GPSFixDTO, FixOverlay>(new Comparator<GPSFixDTO>() {
+                SortedMap<GPSFixDTO, FixOverlay> fixOverlayMap = new TreeMap<>(new Comparator<GPSFixDTO>() {
                     @Override
                     public int compare(GPSFixDTO o1, GPSFixDTO o2) {
                         return o1.timepoint.compareTo(o2.timepoint);
@@ -663,7 +623,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public void addMarkFix(MarkDTO mark, Date timepoint, Position fixPosition) {
-        GPSFixDTO fix = new GPSFixDTO(timepoint, fixPosition, null, new WindDTO(), null, null, false);
+        GPSFixDTOWithSpeedWindTackAndLegType fix = new GPSFixDTOWithSpeedWindTackAndLegType(timepoint, fixPosition, null, new WindDTO(), null, null, false);
         markPositionService.addMarkFix(
                 raceIdentifierToLeaderboardRaceColumnAndFleetMapper.getLeaderboardNameAndRaceColumnNameAndFleetName(selectedRaceIdentifier),
                 mark, fix);
@@ -1002,9 +962,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public List<GPSFixDTO> getMarkFixes() {
         if (selectedMark != null) {
-        List<GPSFixDTO> set = new ArrayList<GPSFixDTO>();
-        set.addAll(marks.get(selectedMark).keySet());
-        return set;
+            List<GPSFixDTO> set = new ArrayList<>();
+            set.addAll(marks.get(selectedMark).keySet());
+            return set;
         } else {
             return null;
         }

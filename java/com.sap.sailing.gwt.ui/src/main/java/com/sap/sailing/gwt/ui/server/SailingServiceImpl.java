@@ -303,7 +303,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.GateDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
@@ -1653,7 +1653,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
         }
-        final Map<CompetitorDTO, List<GPSFixDTO>> boatPositions = getBoatPositionsInternal(raceIdentifier,
+        final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
         final List<SidelineDTO> courseSidelines = getCourseSidelines(raceIdentifier, date);
@@ -1709,18 +1709,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      * @return a map where for each competitor participating in the race the list of GPS fixes in increasing
      *         chronological order is provided. The last one is the last position at or before <code>date</code>.
      */
-    private Map<CompetitorDTO, List<GPSFixDTO>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
+    private Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getBoatPositionsInternal(RegattaAndRaceIdentifier raceIdentifier,
             Map<String, Date> fromPerCompetitorIdAsString, Map<String, Date> toPerCompetitorIdAsString,
             boolean extrapolate)
             throws NoWindException {
         Map<Pair<Leg, TimePoint>, LegType> legTypeCache = new HashMap<>();
-        Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
+        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
                     CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
-                    List<GPSFixDTO> fixesForCompetitor = new ArrayList<GPSFixDTO>();
+                    List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     result.put(competitorDTO, fixesForCompetitor);
                     GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
                     TimePoint fromTimePoint = new MillisecondsTimePoint(fromPerCompetitorIdAsString.get(competitorDTO.getIdAsString()));
@@ -1792,7 +1792,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                 legType = null;
                             }
                             WindDTO windDTO = wind == null ? null : createWindDTOFromAlreadyAveraged(wind, toTimePointExcluding);
-                            GPSFixDTO fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix));
+                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, estimatedSpeed, windDTO, tack, legType, /* extrapolate */ extrapolatedFixes.contains(fix));
                             fixesForCompetitor.add(fixDTO);
                             if (fixIter.hasNext()) {
                                 fix = fixIter.next();
@@ -1824,7 +1824,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                         legType2 = null;
                                     }
                                     WindDTO windDTO2 = wind2 == null ? null : createWindDTOFromAlreadyAveraged(wind2, toTimePointExcluding);
-                                    GPSFixDTO extrapolated = new GPSFixDTO(
+                                    GPSFixDTOWithSpeedWindTackAndLegType extrapolated = new GPSFixDTOWithSpeedWindTackAndLegType(
                                             toPerCompetitorIdAsString.get(competitorDTO.getIdAsString()),
                                             position==null?null:position,
                                                     estimatedSpeed2==null?null:createSpeedWithBearingDTO(estimatedSpeed2), windDTO2,
@@ -1850,8 +1850,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 .getBearing().getDegrees());
     }
 
-    private GPSFixDTO createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
-        return new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
+    private GPSFixDTOWithSpeedWindTackAndLegType createGPSFixDTO(GPSFix fix, SpeedWithBearing speedWithBearing, WindDTO windDTO, Tack tack, LegType legType, boolean extrapolated) {
+        return new GPSFixDTOWithSpeedWindTackAndLegType(fix.getTimePoint().asDate(), fix.getPosition()==null?null:fix.getPosition(),
                 speedWithBearing==null?null:createSpeedWithBearingDTO(speedWithBearing), windDTO, tack, legType, extrapolated);
     }
 
@@ -3083,10 +3083,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Map<CompetitorDTO, List<GPSFixDTO>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
+    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier,
             Map<CompetitorDTO, Date> from, Map<CompetitorDTO, Date> to,
             double meters) throws NoWindException {
-        Map<CompetitorDTO, List<GPSFixDTO>> result = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
+        Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
             MeterDistance maxDistance = new MeterDistance(meters);
@@ -3100,7 +3100,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     TimePoint timePointTo = new MillisecondsTimePoint(to.get(competitorDTO));
                     Iterable<GPSFixMoving> gpsFixApproximation = trackedRace.approximate(competitor, maxDistance,
                             timePointFrom, timePointTo);
-                    List<GPSFixDTO> gpsFixDouglasList = new ArrayList<GPSFixDTO>();
+                    List<GPSFixDTOWithSpeedWindTackAndLegType> gpsFixDouglasList = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     GPSFix fix = null;
                     for (GPSFix next : gpsFixApproximation) {
                         if (fix != null) {
@@ -3108,7 +3108,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             Speed speed = fix.getPosition().getDistance(next.getPosition())
                                     .inTime(next.getTimePoint().asMillis() - fix.getTimePoint().asMillis());
                             final SpeedWithBearing speedWithBearing = new KnotSpeedWithBearingImpl(speed.getKnots(), bearing);
-                            GPSFixDTO fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
+                            GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
                             gpsFixDouglasList.add(fixDTO);
                         }
                         fix = next;
@@ -3116,7 +3116,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     if (fix != null) {
                         // add one last GPSFixDTO with no successor to calculate speed/bearing to:
                         final SpeedWithBearing speedWithBearing = gpsFixTrack.getEstimatedSpeed(fix.getTimePoint());
-                        GPSFixDTO fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
+                        GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createDouglasPeuckerGPSFixDTO(trackedRace, competitor, fix, speedWithBearing);
                         gpsFixDouglasList.add(fixDTO);
                     }
                     result.put(competitorDTO, gpsFixDouglasList);
@@ -3126,7 +3126,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
-    private GPSFixDTO createDouglasPeuckerGPSFixDTO(TrackedRace trackedRace, Competitor competitor, GPSFix fix,
+    private GPSFixDTOWithSpeedWindTackAndLegType createDouglasPeuckerGPSFixDTO(TrackedRace trackedRace, Competitor competitor, GPSFix fix,
             SpeedWithBearing speedWithBearing) throws NoWindException {
         Tack tack = trackedRace.getTack(competitor, fix.getTimePoint());
         TrackedLegOfCompetitor trackedLegOfCompetitor = trackedRace.getTrackedLeg(competitor,
@@ -3135,7 +3135,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 trackedLegOfCompetitor.getLeg()).getLegType(fix.getTimePoint());
         Wind wind = trackedRace.getWind(fix.getPosition(), fix.getTimePoint());
         WindDTO windDTO = createWindDTOFromAlreadyAveraged(wind, fix.getTimePoint());
-        GPSFixDTO fixDTO = createGPSFixDTO(fix, speedWithBearing, windDTO, tack, legType, /* extrapolated */
+        GPSFixDTOWithSpeedWindTackAndLegType fixDTO = createGPSFixDTO(fix, speedWithBearing, windDTO, tack, legType, /* extrapolated */
                 false);
         return fixDTO;
     }

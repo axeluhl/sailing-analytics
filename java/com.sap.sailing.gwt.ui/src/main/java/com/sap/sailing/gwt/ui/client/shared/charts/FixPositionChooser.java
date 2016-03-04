@@ -21,6 +21,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 
 public class FixPositionChooser {
@@ -87,11 +88,10 @@ public class FixPositionChooser {
         final GPSFixDTO fix;
         if (overlay != null) {
             final GPSFixDTO oldFix = overlay.getGPSFixDTO();
-            fix = new GPSFixDTO(oldFix.timepoint, oldFix.position, oldFix.speedWithBearing, oldFix.degreesBoatToTheWind,
-                    oldFix.tack, oldFix.legType, oldFix.extrapolated);
+            fix = new GPSFixDTO(oldFix.timepoint, oldFix.position);
             this.moveOverlay = new FixOverlay(map, overlay.getZIndex(), fix, overlay.getType(), "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         } else {
-            fix = new GPSFixDTO(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
+            fix = new GPSFixDTOWithSpeedWindTackAndLegType(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
             this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         }
         map.panTo(startPos);

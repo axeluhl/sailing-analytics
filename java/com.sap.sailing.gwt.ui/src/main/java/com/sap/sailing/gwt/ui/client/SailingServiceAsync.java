@@ -47,7 +47,7 @@ import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventBaseDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
@@ -309,7 +309,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getCountryCodes(AsyncCallback<String[]> callback);
 
     void getDouglasPoints(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
-            Map<CompetitorDTO, Date> to, double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTO>>> callback);
+            Map<CompetitorDTO, Date> to, double meters, AsyncCallback<Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>> callback);
 
     void getManeuvers(RegattaAndRaceIdentifier raceIdentifier, Map<CompetitorDTO, Date> from,
             Map<CompetitorDTO, Date> to, AsyncCallback<Map<CompetitorDTO, List<ManeuverDTO>>> callback);
