@@ -168,14 +168,11 @@ public class CheckinManager {
                                 }))), new LeaderboardGroupBaseJsonDeserializer());
                 try {
                     final EventBase event = deserializer.deserialize((org.json.simple.JSONObject) new JSONParser().parse(response.toString()));
-                    //TODO use constants
                     urlData.eventId = event.getId().toString();
                     urlData.eventName = event.getName();
                     urlData.eventStartDateStr = ""+event.getStartDate().asMillis();
                     urlData.eventEndDateStr = ""+event.getEndDate().asMillis();
-                    
                     Iterable<ImageDescriptor> imageUrls = event.getImages();
-
                     if (!Util.isEmpty(imageUrls)) {
                         urlData.eventFirstImageUrl = imageUrls.iterator().next().getURL().toString();
                     } else {
