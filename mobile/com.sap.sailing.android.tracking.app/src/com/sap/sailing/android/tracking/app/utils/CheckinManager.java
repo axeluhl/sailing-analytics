@@ -85,7 +85,7 @@ public class CheckinManager {
         urlData.uriStr = uri.toString();
         urlData.server = scheme + "://" + uri.getHost();
         urlData.port = uri.getPort();
-        urlData.hostWithPort = urlData.server + ":" + (urlData.port == -1 ? "" : urlData.port);
+        urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
 
         Exception exception = null;
         try {
