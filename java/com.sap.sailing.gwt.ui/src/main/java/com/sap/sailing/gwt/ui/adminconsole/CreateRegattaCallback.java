@@ -86,6 +86,11 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             if (series.getName().equals(Series.DEFAULT_NAME) && !series.getRaceColumns().isEmpty()) {
                 final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
                 for (RaceColumnDTO newRaceColumn : series.getRaceColumns()) {
+                    // We could use an index counter here because we're assuming that we're creating
+                    // races starting at index 0. However, to make things concurrency-safe, we have to
+                    // assume that while the regatta already exists on the server, some other activity
+                    // may already have started to create races for it. Better safe than sorry, append
+                    // at the end, using -1 as "insertIndex."
                     raceColumnNamesToAddWithInsertIndex.add(new Pair<>(newRaceColumn.getName(), -1));
                 }
                 sailingService.addRaceColumnsToSeries(newRegatta.getRegattaIdentifier(), series.getName(), raceColumnNamesToAddWithInsertIndex,
