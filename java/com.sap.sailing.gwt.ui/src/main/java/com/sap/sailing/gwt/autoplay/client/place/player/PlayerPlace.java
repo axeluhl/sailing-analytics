@@ -5,17 +5,13 @@ import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 public class PlayerPlace extends AbstractBasePlace {
     private final AutoPlayerConfiguration playerConfiguration;
     
-    private final PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings;
-    private final PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
-    
-    private final PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings;
-    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings;
+    private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings;
+    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings;
     
     public PlayerPlace(String url) {
         super(url);
@@ -26,26 +22,20 @@ public class PlayerPlace extends AbstractBasePlace {
         Integer timeToSwitchBeforeRaceStartInSeconds = Integer.valueOf(getParameter(AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START));
         
         this.playerConfiguration = new AutoPlayerConfiguration(eventUuidAsString, leaderboardName, fullscreen, timeToSwitchBeforeRaceStartInSeconds);
-        this.leaderboardPerspectiveLifecycleAndSettings = null;
-        this.raceboardPerspectiveLifecycleAndSettings = null;
-        this.leaderboardPerspectiveComponentLifecyclesAndSettings = null;
-        this.raceboardPerspectiveComponentLifecyclesAndSettings = null;
+        this.leaderboardPerspectiveLifecycleWithAllSettings = null;
+        this.raceboardPerspectiveLifecycleWithAllSettings = null;
     }
 
     public PlayerPlace(AutoPlayerConfiguration playerConfiguration,
-            PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecyleAndSettings, 
-            PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyleAndSettings,
-            PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings,
-            PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings) {
+            PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
+            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings) {
         super(AutoPlayerConfiguration.PARAM_EVENTID, playerConfiguration.getEventUidAsString(),
                 AutoPlayerConfiguration.PARAM_FULLSCREEN, String.valueOf(playerConfiguration.isFullscreenMode()), 
                 AutoPlayerConfiguration.PARAM_LEADEROARD_NAME, playerConfiguration.getLeaderboardName(),
                AutoPlayerConfiguration.PARAM_TIME_TO_SWITCH_BEFORE_RACE_START, String.valueOf(playerConfiguration.getTimeToSwitchBeforeRaceStartInSeconds()));
         this.playerConfiguration = playerConfiguration;
-        this.leaderboardPerspectiveLifecycleAndSettings = leaderboardPerspectiveLifecyleAndSettings;
-        this.raceboardPerspectiveLifecycleAndSettings = raceboardPerspectiveLifecyleAndSettings;
-        this.leaderboardPerspectiveComponentLifecyclesAndSettings = leaderboardPerspectiveComponentLifecyclesAndSettings;
-        this.raceboardPerspectiveComponentLifecyclesAndSettings = raceboardPerspectiveComponentLifecyclesAndSettings;
+        this.leaderboardPerspectiveLifecycleWithAllSettings = leaderboardPerspectiveLifecycleWithAllSettings;
+        this.raceboardPerspectiveLifecycleWithAllSettings = raceboardPerspectiveLifecycleWithAllSettings;
     }
 
     public AutoPlayerConfiguration getConfiguration() {
@@ -64,19 +54,11 @@ public class PlayerPlace extends AbstractBasePlace {
         }
     }
 
-    public PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getLeaderboardPerspectiveLifecycleAndSettings() {
-        return leaderboardPerspectiveLifecycleAndSettings;
+    public PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getLeaderboardPerspectiveLifecycleWithAllSettings() {
+        return leaderboardPerspectiveLifecycleWithAllSettings;
     }
 
-    public PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getRaceboardPerspectiveLifecycleAndSettings() {
-        return raceboardPerspectiveLifecycleAndSettings;
-    }
-
-    public PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> getLeaderboardPerspectiveComponentLifecyclesAndSettings() {
-        return leaderboardPerspectiveComponentLifecyclesAndSettings;
-    }
-
-    public PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> getRaceboardPerspectiveComponentLifecyclesAndSettings() {
-        return raceboardPerspectiveComponentLifecyclesAndSettings;
+    public PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getRaceboardPerspectiveLifecycleWithAllSettings() {
+        return raceboardPerspectiveLifecycleWithAllSettings;
     }
 }

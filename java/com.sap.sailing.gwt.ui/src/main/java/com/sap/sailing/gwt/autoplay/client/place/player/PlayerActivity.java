@@ -44,9 +44,8 @@ public class PlayerActivity extends AbstractActivity {
                 autoPlayController = new AutoPlayController(clientFactory.getSailingService(), clientFactory
                         .getMediaService(), clientFactory.getUserService(), clientFactory.getErrorReporter(), 
                         playerPlace.getConfiguration(), userAgent, delayToLiveMillis, showRaceDetails, view,
-                        playerPlace.getLeaderboardPerspectiveLifecycleAndSettings(), playerPlace.getRaceboardPerspectiveLifecycleAndSettings(),
-                        playerPlace.getLeaderboardPerspectiveComponentLifecyclesAndSettings(),
-                        playerPlace.getRaceboardPerspectiveComponentLifecyclesAndSettings());
+                        playerPlace.getLeaderboardPerspectiveLifecycleWithAllSettings(),
+                        playerPlace.getRaceboardPerspectiveLifecycleWithAllSettings());
                 autoPlayController.updatePlayMode(AutoPlayModes.Leaderboard);
             }
 

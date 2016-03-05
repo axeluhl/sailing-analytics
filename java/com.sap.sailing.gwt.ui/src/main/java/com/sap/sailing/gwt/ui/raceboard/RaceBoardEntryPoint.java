@@ -26,7 +26,9 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     private RaceWithCompetitorsDTO selectedRace;
@@ -130,12 +132,13 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
   
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
         CompositeLifecycleSettings raceboardPerspectiveComponentsLifecyclesAndSettings = raceboardPerspectiveLifecycle.getComponentLifecyclesAndDefaultSettings();
+        PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings = new PerspectiveLifecycleAndSettings<>(raceboardPerspectiveLifecycle, perspectiveSettings);
 
-        PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings = new PerspectiveLifecycleAndComponentSettings<>(raceboardPerspectiveLifecycle,
-                raceboardPerspectiveComponentsLifecyclesAndSettings);
-                
-        RaceBoardPerspective raceBoardPerspective = new RaceBoardPerspective(perspectiveSettings, 
-                componentLifecyclesAndSettings, sailingService, mediaService, getUserService(),
+        PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
+                new PerspectiveCompositeLifecycleSettings<>(raceboardPerspectiveLifecycleAndSettings,raceboardPerspectiveComponentsLifecyclesAndSettings));
+
+        RaceBoardPerspective raceBoardPerspective = new RaceBoardPerspective(
+                raceboardPerspectiveLifecyclesAndSettings, sailingService, mediaService, getUserService(),
                 asyncActionsExecutor,  raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider);
 

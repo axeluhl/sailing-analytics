@@ -79,7 +79,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
 import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
@@ -145,7 +145,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
-    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings;
+    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> componentLifecyclesAndSettings;
     /**
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
@@ -155,7 +155,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
      */
-    public RaceBoardPanel(PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings, 
+    public RaceBoardPanel(PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> componentLifecyclesAndSettings, 
             SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,

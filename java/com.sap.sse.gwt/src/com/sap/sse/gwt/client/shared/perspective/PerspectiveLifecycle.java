@@ -15,6 +15,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  */
 public interface PerspectiveLifecycle<P extends Perspective<S>, S extends Settings, SDP extends SettingsDialogComponent<S>>
     extends ComponentLifecycle<P, S, SDP> {
+    
     Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles();
     
     CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings();

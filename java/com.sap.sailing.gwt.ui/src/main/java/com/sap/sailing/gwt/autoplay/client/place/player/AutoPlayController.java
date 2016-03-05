@@ -27,8 +27,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -59,20 +58,16 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
     // raceboard perspective related attributes
     private RegattaAndRaceIdentifier currentLiveRace;
     
-    private final PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings; 
-    private final PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings;
-    private final PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings;
-    private final PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings;
+    private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings;
+    private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings;
     private final PlayerView playerView;
     private final AutoPlayerConfiguration autoPlayerConfiguration;
     
     public AutoPlayController(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, ErrorReporter errorReporter, AutoPlayerConfiguration autoPlayerConfiguration,
             UserAgentDetails userAgent, long delayToLiveInMillis, boolean showRaceDetails, PlayerView playerView,
-            PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings, 
-            PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings,
-            PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> leaderboardPerspectiveComponentLifecyclesAndSettings,
-            PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> raceboardPerspectiveComponentLifecyclesAndSettings) {
+            PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleWithAllSettings,
+            PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleWithAllSettings) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.userService = userService;
@@ -80,10 +75,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
         this.autoPlayerConfiguration = autoPlayerConfiguration;
         this.userAgent = userAgent;
         this.playerView = playerView;
-        this.leaderboardPerspectiveLifecycleAndSettings = leaderboardPerspectiveLifecycleAndSettings;
-        this.raceboardPerspectiveLifecycleAndSettings = raceboardPerspectiveLifecycleAndSettings;
-        this.leaderboardPerspectiveComponentLifecyclesAndSettings = leaderboardPerspectiveComponentLifecyclesAndSettings;
-        this.raceboardPerspectiveComponentLifecyclesAndSettings = raceboardPerspectiveComponentLifecyclesAndSettings;
+        this.leaderboardPerspectiveLifecycleWithAllSettings = leaderboardPerspectiveLifecycleWithAllSettings;
+        this.raceboardPerspectiveLifecycleWithAllSettings = raceboardPerspectiveLifecycleWithAllSettings;
 
         asyncActionsExecutor = new AsyncActionsExecutor();
         currentLeaderboard = null;
@@ -106,8 +99,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
             
             boolean withFullscreenButton = autoPlayerConfiguration.isFullscreenMode() && isInitialScreen;
 
-            LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleAndSettings.getSettings(),
-                    leaderboardPerspectiveComponentLifecyclesAndSettings, 
+            LeaderboardWithHeaderPerspective leaderboardPerspective = new LeaderboardWithHeaderPerspective(leaderboardPerspectiveLifecycleWithAllSettings, 
                     sailingService, asyncActionsExecutor,
                     new CompetitorSelectionModel(/* hasMultiSelection */ true), leaderboardTimer,
                     autoPlayerConfiguration.getLeaderboardName(), errorReporter, StringMessages.INSTANCE,
@@ -133,8 +125,8 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
 
-                    RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(raceboardPerspectiveLifecycleAndSettings.getSettings(),
-                            raceboardPerspectiveComponentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
+                    RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(raceboardPerspectiveLifecycleWithAllSettings,
+                            sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
                             /** leaderboardGroupName */ null, /** eventId */ null, errorReporter,
                             StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);

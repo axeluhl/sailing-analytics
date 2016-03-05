@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.panels.ResizableFlowPanel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -45,8 +45,7 @@ public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoard
     private final RaceBoardPanel raceBoardPanel; 
     private final FlowPanel timePanel;
 
-    public RaceBoardPerspective(RaceBoardPerspectiveSettings perspectiveSettings, 
-            PerspectiveLifecycleAndComponentSettings<RaceBoardPerspectiveLifecycle> componentLifecyclesAndSettings,
+    public RaceBoardPerspective(PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings,
             SailingServiceAsync sailingService, MediaServiceAsync mediaService,
             UserService userService, AsyncActionsExecutor asyncActionsExecutor,
             Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats, Timer timer,
@@ -55,10 +54,10 @@ public class RaceBoardPerspective extends AbstractPerspectiveComposite<RaceBoard
             ErrorReporter errorReporter, StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
         super();
-        this.settings = perspectiveSettings;
-        this.perspectiveLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle();
+        this.settings = perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveLifecycleAndSettings().getSettings();
+        this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
 
-        this.raceBoardPanel = new RaceBoardPanel(componentLifecyclesAndSettings, sailingService, mediaService, userService, asyncActionsExecutor,
+        this.raceBoardPanel = new RaceBoardPanel(perspectiveLifecycleWithAllSettings, sailingService, mediaService, userService, asyncActionsExecutor,
                 competitorsAndTheirBoats, timer, selectedRaceIdentifier, leaderboardName, null, /* event */null, settings,
                 errorReporter, stringMessages, userAgent, raceTimesInfoProvider);
         this.raceBoardPanel.setSize("100%", "100%");

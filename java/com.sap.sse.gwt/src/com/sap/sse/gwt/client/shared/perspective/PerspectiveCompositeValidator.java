@@ -13,10 +13,10 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSetti
 public class PerspectiveCompositeValidator implements Validator<PerspectiveCompositeSettings> {
     
     private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
-    private final PerspectiveAndDialogComponent<?> perspectiveAndDialogComponent;
+    private final Validator<?> perspectiveValidator;
     
     public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<?> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
-        this.perspectiveAndDialogComponent = perspectiveAndDialogComponent;
+        this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
             validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponent(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
@@ -32,17 +32,23 @@ public class PerspectiveCompositeValidator implements Validator<PerspectiveCompo
                 result.append(errorMessage);
             }
         }
-        PerspectiveAndSettingsPair<?> perspectiveSettings = valueToValidate.getPerspectiveSettings();
-        @SuppressWarnings("unchecked")
-        Validator<Settings> validator = (Validator<Settings>) perspectiveAndDialogComponent.getSettingsDialog().getValidator();
-        String perspectiveErrorMessage = validator.getErrorMessage(perspectiveSettings.getSettings());
+        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate.getPerspectiveSettings());
         if (perspectiveErrorMessage != null && !perspectiveErrorMessage.isEmpty()) {
             result.append(perspectiveErrorMessage);
         }
-        
         return result.toString();
     }
 
+    private <SettingsType extends Settings> String getPerspectiveErrorMessage(PerspectiveAndSettingsPair<SettingsType> perspectiveAndSettings) {
+        String errorMessage = null;
+        @SuppressWarnings("unchecked")
+        Validator<SettingsType> validator = (Validator<SettingsType>) perspectiveValidator;
+        if (validator != null) {
+            errorMessage = validator.getErrorMessage(perspectiveAndSettings.getSettings());
+        }
+        return errorMessage;
+    }
+    
     private <SettingsType extends Settings> String getComponentErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")

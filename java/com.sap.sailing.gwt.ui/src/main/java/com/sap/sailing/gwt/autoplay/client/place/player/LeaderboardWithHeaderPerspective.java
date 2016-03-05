@@ -29,7 +29,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndComponentSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
@@ -44,18 +44,17 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final Widget currentContentWidget;
     private final LeaderboardPanel leaderboardPanel;
     private final LeaderboardWithHeaderPerspectiveLifecycle perspectiveLifecycle; 
-    private final PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> componentLifecyclesAndSettings;
+    private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> componentLifecyclesAndSettings;
     
-    public LeaderboardWithHeaderPerspective(LeaderboardWithHeaderPerspectiveSettings perspectiveSettings, 
-            PerspectiveLifecycleAndComponentSettings<LeaderboardWithHeaderPerspectiveLifecycle> componentLifecyclesAndSettings,
+    public LeaderboardWithHeaderPerspective(PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleWithAllSettings,
             SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
         super();
-        this.settings = perspectiveSettings;
-        this.perspectiveLifecycle = componentLifecyclesAndSettings.getPerspectiveLifecycle();
-        this.componentLifecyclesAndSettings = componentLifecyclesAndSettings;
+        this.settings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
+        this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
+        this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
         
         Window.addResizeHandler(new ResizeHandler() {
             @Override
@@ -67,7 +66,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         });
 
         SAPHeaderLifecycle sapHeaderLifecycle = perspectiveLifecycle.getSapHeaderLifecycle();
-        SAPHeader sapHeader = createSAPHeader(sapHeaderLifecycle, componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(sapHeaderLifecycle), startInFullScreenMode);
+        SAPHeader sapHeader = createSAPHeader(sapHeaderLifecycle, perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(sapHeaderLifecycle), startInFullScreenMode);
         leaderboardPanel = createLeaderboardPanel(sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, userAgent);
         
