@@ -25,10 +25,12 @@ import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -44,9 +46,21 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
-    // TODO what is the meaning of this constant?
+
+    /**
+     * Start mark passings will be considered this much before the actual race start. The race start
+     * as identified by {@link TrackedRace#getStartOfRace()} is therefore {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME}
+     * after {@link #raceStartTime}.
+     */
+    private static final Duration EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME = new MillisecondsDurationImpl(5000);
     
-    private static final int MILLISECONDS_BEFORE_STARTTIME = 5000;
+    /**
+     * The duration after which a start mark passing's probability is considered only 50%. A perfect start mark
+     * passing happening exactly at the race start time has time-wise probability of 1.0. Another delay of this much
+     * lets the probability drop to 1/3, and so on.
+     */
+    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = new MillisecondsDurationImpl(5000); // Duration.ONE_MINUTE;
+    
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
@@ -56,14 +70,20 @@ public class CandidateChooserImpl implements CandidateChooser {
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
     private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
+    
+    /**
+     * Set to {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the actual race start,
+     * in case the actual start of race is known; {@code null} otherwise.
+     */
     private TimePoint raceStartTime;
     private final WaypointPositionAndDistanceCache waypointPositionAndDistanceCache;
     
     /**
      * An artificial proxy candidate that comes before the start mark passing. Its time point is set to
-     * {@link #MILLISECONDS_BEFORE_STARTTIME} milliseconds before the race start time or <code>null</code>
+     * {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the race start time or <code>null</code>
      * in case the race start time is not known.
      */
+    
     private final CandidateWithSettableTime start;
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
@@ -71,7 +91,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
-        raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(MILLISECONDS_BEFORE_STARTTIME) : null;
+        raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
@@ -79,7 +99,16 @@ public class CandidateChooserImpl implements CandidateChooser {
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
             candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
-            currentMarkPasses.put(c, new HashMap<Waypoint, MarkPassing>());
+            final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
+            currentMarkPasses.put(c, currentMarkPassesForCompetitor);
+            // in case the tracked race already has mark passings, e.g., from another mark passing calculator,
+            // ensure consistency of the currentMarkPasses map with the TrackedRace:
+            for (final Waypoint w : race.getRace().getCourse().getWaypoints()) {
+                final MarkPassing mp = race.getMarkPassing(c, w);
+                if (mp != null) {
+                    currentMarkPassesForCompetitor.put(w, mp);
+                }
+            }
             TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new Comparator<Candidate>() {
                 @Override
                 public int compare(Candidate o1, Candidate o2) {
@@ -109,8 +138,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
        TimePoint startOfRace = race.getStartOfRace();
         if (startOfRace != null) {
-            if (raceStartTime == null || !startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME).equals(raceStartTime)) {
-                raceStartTime = startOfRace.minus(MILLISECONDS_BEFORE_STARTTIME);
+            if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
+                raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
                 List<Candidate> startList = new ArrayList<>();
                 startList.add(start);
                 for (Competitor com : candidates.keySet()) {
@@ -224,12 +253,12 @@ public class CandidateChooserImpl implements CandidateChooser {
                                 // calculate the probability for the start being the start given its timing and multiply
                                 // with the estimation for the distance-based probability:
                                 final Duration timeGapBetweenStartOfRaceAndCandidateTimePoint = early.getTimePoint()
-                                        .plus(MILLISECONDS_BEFORE_STARTTIME).until(late.getTimePoint());
-                                // Being MILLISECONDS_BEFORE_STARTTIME off means a probability of 1/2; being twice this time
+                                        .plus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).until(late.getTimePoint()).abs();
+                                // Being DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES off means a probability of 1/2; being twice this time
                                 // off means 1/3, and so on
-                                startTimingProbability = (double) MILLISECONDS_BEFORE_STARTTIME
-                                        / (double) (MILLISECONDS_BEFORE_STARTTIME + Math
-                                                .abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
+                                startTimingProbability = DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.divide(
+                                        DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.plus(
+                                                timeGapBetweenStartOfRaceAndCandidateTimePoint));
                                 estimatedDistanceProbability = 1;
                             } else {
                                 startTimingProbability = 1; // can't really tell how well the start time was matched when

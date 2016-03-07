@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 givenMarkPasses.put(wp, markPassing);
             }
             givenPasses.put(c, givenMarkPasses);
+            // now clear the mark passings in the TrackedRace for competitor c:
+            getTrackedRace().updateMarkPassings(c, Collections.emptySet());
         }
     }
 
@@ -246,12 +249,14 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
                             if ((old == null) != (newm == null)) {
                                 gotPassed = false;
-                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed originally; we detected it "+(newm==null?"not ":"")+"having been passed");
+                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed by "+c+" originally; we detected it "+(newm==null?"not ":"")+"having been passed");
                             }
                         } else {
                             if (w != wayPointAfterwards && newm != null) {
                                 gotOther = true;
-                                fail("Received a park passing "+newm+" which was not expected for waypoint "+w);
+                                fail("Received a park passing "+newm+" for the "+waypoints.indexOf(w)+
+                                        "th waypoint "+w+" by "+c+" although only up to "+
+                                        zeroBasedIndexOfLastWaypointToBePassed +" were to be reported");
                             }
                         }
                     }
