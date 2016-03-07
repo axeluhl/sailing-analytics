@@ -16,7 +16,7 @@
          The modules only purpose is to assemble the Android SDK if it doesn't already exist in the build Job. -->
     <profiles>
         <profile>
-            <id>install-android-sdk-windows</id>
+            <id>install-android-sdk-linux</id>
             <activation>
                 <file>
                     <missing>${ldi.android.sdk.location}/platform-tools/adb.exe</missing>
@@ -38,7 +38,7 @@
                                     <artifactItems>
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
-                                            <artifactId>android-sdk-windows</artifactId>
+                                            <artifactId>android-sdk-linux</artifactId>
                                             <version>${ldi.download.android.sdk.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
@@ -47,7 +47,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
-                                            <artifactId>platform-tools-windows</artifactId>
+                                            <artifactId>platform-tools-linux</artifactId>
                                             <version>${ldi.download.android.platform-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
@@ -56,7 +56,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>com.google.download.android</groupId>
-                                            <artifactId>build-tools-windows</artifactId>
+                                            <artifactId>build-tools-linux</artifactId>
                                             <version>${ldi.download.android.build-tools.version}</version>
                                             <type>zip</type>
                                             <overWrite>false</overWrite>
