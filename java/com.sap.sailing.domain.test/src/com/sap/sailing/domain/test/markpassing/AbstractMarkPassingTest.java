@@ -221,7 +221,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         for (Competitor c : getRace().getCompetitors()) {
             MarkPassing markPassingAfter = givenPasses.get(c).get(wayPointAfterwards);
             if (markPassingAfter != null) {
-                if (givenPasses.get(c).get(lastWaypointToBePassed) != null && givenPasses.get(c).get(wayPointAfterwards) != null) {
+                if (givenPasses.get(c).get(lastWaypointToBePassed) != null) {
                     TimePoint beforeNextPassing = markPassingAfter.getTimePoint().minus(20000);
                     List<GPSFix> fixes = new ArrayList<GPSFix>();
                     try {
