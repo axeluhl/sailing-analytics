@@ -186,7 +186,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
             } else {
-                showNoGPSError();
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
             break;
         case R.id.add_photo_button:
@@ -201,20 +201,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         default:
             break;
         }
-    }
-
-    private void showNoGPSError() {
-        new AlertDialog.Builder(getActivity())
-            .setCancelable(true).setTitle(getString(R.string.warning))
-            .setMessage(getString(R.string.enable_gps))
-            .setNegativeButton(getString(R.string.no), null)
-            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    LocationHelper.openLocationSettings(getActivity());
-                }
-            })
-            .show();
     }
 
     public void setChangePhotoButtonHidden(boolean hidden) {

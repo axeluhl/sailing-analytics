@@ -65,4 +65,10 @@
     <string name="http_request_aborted" translatable="false">(Request %d) HTTP request aborted.</string>
     <string name="http_request_failed" translatable="false">(Request %d) HTTP request failed.</string>
 
+    <!-- Dialog -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="warning">Warning</string>
+    <string name="enable_gps">GPS is turned off. This app requires GPS positions. Do you want to turn on GPS in the location settings?</string>
+
 </resources>
