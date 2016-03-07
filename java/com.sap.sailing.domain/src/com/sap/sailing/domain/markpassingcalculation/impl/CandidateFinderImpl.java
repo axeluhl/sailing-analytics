@@ -64,7 +64,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> xteCandidates = new HashMap<>();
     private Map<Competitor, Map<Waypoint, Map<GPSFix, Candidate>>> distanceCandidates = new HashMap<>();
     private final DynamicTrackedRace race;
-    private final double penaltyForSkipping = 1 - Edge.getPenaltyForSkipping();
+    private final double penaltyForSkipping = Edge.getPenaltyForSkipping();
     private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
     private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
         @Override
