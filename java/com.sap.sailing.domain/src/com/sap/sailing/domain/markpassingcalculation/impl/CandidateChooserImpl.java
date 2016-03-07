@@ -295,40 +295,40 @@ public class CandidateChooserImpl implements CandidateChooser {
             if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
                 endOfFixedInterval = end;
             }
-            NavigableSet<Util.Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
+            NavigableSet<Util.Pair<Edge, Double>> currentEdgesMoreLikelyFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
                 @Override
                 public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
                     int result = o2.getB().compareTo(o1.getB());
                     return result != 0 ? result : o1.getA().compareTo(o2.getA());
                 }
             });
-            Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndSmallestTotalCost = new HashMap<>();
+            Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndHighestTotalProbability = new HashMap<>();
             int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
 
             boolean endFound = false;
-            currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
+            currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
                     1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
             while (!endFound) {
-                Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
-                if (cheapestEdgeWithCost == null) {
+                Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
+                if (mostLikelyEdgeWithProbability == null) {
                     endFound = true;
                 } else {
-                    Edge currentCheapestEdge = cheapestEdgeWithCost.getA();
-                    Double currentCheapestCost = cheapestEdgeWithCost.getB();
+                    Edge currentMostLikelyEdge = mostLikelyEdgeWithProbability.getA();
+                    Double currentHighestProbability = mostLikelyEdgeWithProbability.getB();
                     // If the shortest path to this candidate is already known the new edge is not added.
-                    if (!candidateWithParentAndSmallestTotalCost.containsKey(currentCheapestEdge.getEnd())) {
-                        // The cheapest edge taking us to currentCheapestEdge.getEnd() is found. Remember it.
-                        candidateWithParentAndSmallestTotalCost.put(currentCheapestEdge.getEnd(), new Util.Pair<Candidate, Double>(
-                                currentCheapestEdge.getStart(), currentCheapestCost));
+                    if (!candidateWithParentAndHighestTotalProbability.containsKey(currentMostLikelyEdge.getEnd())) {
+                        // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
+                        candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
+                                currentMostLikelyEdge.getStart(), currentHighestProbability));
                         if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Added "+ currentCheapestEdge + "as cheapest edge for " + c);
+                            logger.finest("Added "+ currentMostLikelyEdge + "as most likely edge for " + c);
                         }
-                        endFound = currentCheapestEdge.getEnd() == endOfFixedInterval;
+                        endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
                         if (!endFound) {
                             // the end of the segment was not yet found; add edges leading away from
-                            // currentCheapestEdge.getEnd(), summing up their cost with the cost required
-                            // to reach currentCheapestEdge.getEnd()
-                            Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentCheapestEdge.getEnd());
+                            // currentMostLikelyEdge.getEnd(), multiplying up their probabilities with the probability
+                            // of reaching currentMostLikelyEdge.getEnd()
+                            Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentMostLikelyEdge.getEnd());
                             if (edgesForNewCandidate != null) {
                                 for (Edge e : edgesForNewCandidate) {
                                     int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
@@ -336,7 +336,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                                     // the next fixed mark passing
                                     if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
                                             && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                        currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost * e.getProbability()));
+                                        currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(e, currentHighestProbability * e.getProbability()));
                                     }
                                 }
                             }
@@ -344,10 +344,10 @@ public class CandidateChooserImpl implements CandidateChooser {
                     }
                 }
             }
-            Candidate marker = candidateWithParentAndSmallestTotalCost.get(endOfFixedInterval).getA();
+            Candidate marker = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval).getA();
             while (marker.getOneBasedIndexOfWaypoint() > 0) {
                 mostLikelyCandidates.add(marker);
-                marker = candidateWithParentAndSmallestTotalCost.get(marker).getA();
+                marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
             }
             startOfFixedInterval = endOfFixedInterval;
             endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
