@@ -45,6 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class CandidateChooserImpl implements CandidateChooser {
     // TODO what is the meaning of this constant?
+    
     private static final int MILLISECONDS_BEFORE_STARTTIME = 5000;
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
 
@@ -486,7 +487,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         private TimePoint variableTimePoint;
         
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
-            super(oneBasedIndexOfWaypoint, /* time point */ null, distanceProbability, w);
+            super(oneBasedIndexOfWaypoint, /* time point */ p, distanceProbability, w);
             this.variableTimePoint = p;
         }
 
