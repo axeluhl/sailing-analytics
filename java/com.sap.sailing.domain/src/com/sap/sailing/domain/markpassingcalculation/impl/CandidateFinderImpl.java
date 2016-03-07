@@ -49,7 +49,7 @@ import com.sap.sse.common.Util;
 public class CandidateFinderImpl implements CandidateFinder {
 
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
-    private final int strictnessOfDistanceBasedProbability = 6;
+    private final int strictnessOfDistanceBasedProbability = 7;
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria

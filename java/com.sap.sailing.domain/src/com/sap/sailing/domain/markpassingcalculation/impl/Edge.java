@@ -18,9 +18,9 @@ public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkipped = 0.5;
+    private final static double penaltyForSkipped = 0.4;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkippedToEnd = 0.8;
+    private final static double penaltyForSkippedToEnd = 0.5;
     private final double estimatedDistanceAndStartTimingProbability;
     private final int numberOfWaypoints;
 
@@ -38,9 +38,8 @@ public class Edge implements Comparable<Edge> {
     /**
      * The cost for skipping a waypoint is 2*{@link #penaltyForSkipped} but is reduced to {@link #penaltyForSkippedToEnd} when
      * skipping to the end. The reason for preferring skips to the end proxy node is that in live situations where the course
-     * hasn't been completed yet it is required to skip to the end. Additional cost comes from the inverse probability of
-     * the product of the start node, end node and distance-based probabilities. If these probabilities multiply to zero,
-     * an additional cost of 1.0 is added to any skip penalty.
+     * hasn't been completed yet it is required to skip to the end. Additional cost comes from the probability of
+     * the product of the start node, end node and distance-based probabilities.
      */
     public Double getProbability() {
         double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;

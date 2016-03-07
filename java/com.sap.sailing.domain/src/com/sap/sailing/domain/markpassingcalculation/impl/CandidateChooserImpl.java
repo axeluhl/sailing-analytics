@@ -418,7 +418,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * @return a number between 0 and 1 with 1 representing a "fair chance" that the actual distance sailed could have
      *         been sailed for the given great circle distance; 1 is returned for actual distances being in the range of
      *         1..2 times the great circle distance. Actual distances outside this interval reduce probability linearly
-     *         for smaller distances (gradient 3.5) and varies with the square root for distances that exceed twice the
+     *         for smaller distances (gradient 0.5) and varies with the one over the ratio for distances that exceed twice the
      *         great circle distance.
      */
     private double getProbabilityOfActualDistanceGivenGreatCircleDistance(Distance totalGreatCircleDistance,

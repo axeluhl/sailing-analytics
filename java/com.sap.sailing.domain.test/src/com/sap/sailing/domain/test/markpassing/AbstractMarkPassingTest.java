@@ -95,10 +95,11 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 getSemaphor().wait();
             }
         }
-
+        testWholeRace();
         testMiddleOfRace(0);
         testMiddleOfRace(2);
-        testWholeRace();
+        
+        
     }
 
     private void testWholeRace() {
