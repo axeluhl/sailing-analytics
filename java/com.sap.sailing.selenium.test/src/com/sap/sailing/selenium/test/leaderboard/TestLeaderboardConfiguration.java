@@ -199,6 +199,8 @@ public class TestLeaderboardConfiguration extends AbstractSeleniumTest {
         seriesDialog.addRaces(1, 5);
         seriesDialog.pressOk();
         
+        regattaDetails.deleteSeries("Default");
+        
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         
