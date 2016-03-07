@@ -399,8 +399,8 @@ public class CandidateChooserImpl implements CandidateChooser {
             first = c1.getWaypoint();
         }
         final Waypoint second = c2.getWaypoint();
-        Distance totalGreatCircleDistance = getApproximateTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
-        Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
+        final Distance totalGreatCircleDistance = getApproximateTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        final Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
         result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
         return result;
     }
@@ -424,7 +424,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private double getProbabilityOfActualDistanceGivenGreatCircleDistance(Distance totalGreatCircleDistance,
             Distance actualDistanceTraveled) {
         final double result;
-        double ratio = actualDistanceTraveled.getMeters() / totalGreatCircleDistance.getMeters();
+        final double ratio = actualDistanceTraveled.getMeters() / totalGreatCircleDistance.getMeters();
         // A smaller distance than great circle from mark to mark is very unlikely, somewhere between the distance
         // estimated and double that is likely and anything greater than that gradually becomes unlikely
         if (ratio < 0.95) {

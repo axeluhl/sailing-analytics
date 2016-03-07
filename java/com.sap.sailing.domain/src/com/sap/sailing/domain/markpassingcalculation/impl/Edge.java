@@ -42,7 +42,7 @@ public class Edge implements Comparable<Edge> {
      * the product of the start node, end node and distance-based probabilities.
      */
     public Double getProbability() {
-        double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
+        final double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
         return start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1)*2);
         
     }
