@@ -249,7 +249,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
                             if ((old == null) != (newm == null)) {
                                 gotPassed = false;
-                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed by "+c+" originally; we detected it "+(newm==null?"not ":"")+"having been passed");
+                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed by "+c+" originally"
+                                        +(old==null?"":": "+old)+"; we detected it "+(newm==null?"not ":"")+"having been passed"+
+                                        (newm == null ? "" : (": "+newm)));
                             }
                         } else {
                             if (w != wayPointAfterwards && newm != null) {
