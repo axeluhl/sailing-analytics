@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -245,10 +246,12 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
                             if ((old == null) != (newm == null)) {
                                 gotPassed = false;
+                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed originally; we detected it "+(newm==null?"not ":"")+"having been passed");
                             }
                         } else {
                             if (w != wayPointAfterwards && newm != null) {
                                 gotOther = true;
+                                fail("Received a park passing "+newm+" which was not expected for waypoint "+w);
                             }
                         }
                     }
