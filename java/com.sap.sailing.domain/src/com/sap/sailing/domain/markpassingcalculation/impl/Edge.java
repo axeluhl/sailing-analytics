@@ -18,9 +18,9 @@ public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkipped = 0.7;
+    private final static double penaltyForSkipped = 0.5;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkippedToEnd = 0.6;
+    private final static double penaltyForSkippedToEnd = 0.8;
     private final double estimatedDistanceAndStartTimingProbability;
     private final int numberOfWaypoints;
 
@@ -42,10 +42,10 @@ public class Edge implements Comparable<Edge> {
      * the product of the start node, end node and distance-based probabilities. If these probabilities multiply to zero,
      * an additional cost of 1.0 is added to any skip penalty.
      */
-    public Double getCost() {
+    public Double getProbability() {
         double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
-        return 1 - (start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability) + 2 * penalty
-                * (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1);
+        return start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1)*2);
+        
     }
 
     public Candidate getStart() {
@@ -57,11 +57,11 @@ public class Edge implements Comparable<Edge> {
     }
 
     public String toString() {
-        return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getCost();
+        return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getProbability();
     }
 
     @Override
     public int compareTo(Edge o) {
-        return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getCost().compareTo(o.getCost());
+        return start != o.getStart() ? start.compareTo(o.getStart()) : end != o.getEnd() ? end.compareTo(o.getEnd()) : getProbability().compareTo(o.getProbability());
     }
 }

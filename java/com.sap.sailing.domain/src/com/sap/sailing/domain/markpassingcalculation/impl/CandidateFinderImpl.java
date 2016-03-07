@@ -49,13 +49,13 @@ import com.sap.sse.common.Util;
 public class CandidateFinderImpl implements CandidateFinder {
 
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
-    private final int strictnessOfDistanceBasedProbability = 8;
+    private final int strictnessOfDistanceBasedProbability = 6;
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
-    private final double penaltyForWrongSide = 0.7;
-    private final double penaltyForWrongDirection = 0.7;
-    private final double penaltyForDistanceCandidates = 0.7;
+    private final double penaltyForWrongSide = 0.8;
+    private final double penaltyForWrongDirection = 0.8;
+    private final double penaltyForDistanceCandidates = 0.8;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
     private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> distanceCache = new LinkedHashMap<>();

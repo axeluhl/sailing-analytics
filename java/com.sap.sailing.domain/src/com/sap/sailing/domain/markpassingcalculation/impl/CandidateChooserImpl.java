@@ -231,7 +231,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                                                 .abs(timeGapBetweenStartOfRaceAndCandidateTimePoint.asMillis()));
                                 estimatedDistanceProbability = 1;
                             } else {
-                                startTimingProbability = 0.1; // can't really tell how well the start time was matched when
+                                startTimingProbability = 1; // can't really tell how well the start time was matched when
                                                               // we don't have a start candidate
                                 estimatedDistanceProbability = late == end ? 1 : getDistanceEstimationBasedProbability(c, early, late);
                             }
@@ -298,7 +298,7 @@ public class CandidateChooserImpl implements CandidateChooser {
             NavigableSet<Util.Pair<Edge, Double>> currentEdgesCheapestFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
                 @Override
                 public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
-                    int result = o1.getB().compareTo(o2.getB());
+                    int result = o2.getB().compareTo(o1.getB());
                     return result != 0 ? result : o1.getA().compareTo(o2.getA());
                 }
             });
@@ -307,7 +307,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
             boolean endFound = false;
             currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                    0, race.getRace().getCourse().getNumberOfWaypoints()), 0.0));
+                    1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
             while (!endFound) {
                 Util.Pair<Edge, Double> cheapestEdgeWithCost = currentEdgesCheapestFirst.pollFirst();
                 if (cheapestEdgeWithCost == null) {
@@ -336,7 +336,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                                     // the next fixed mark passing
                                     if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
                                             && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                        currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost + e.getCost()));
+                                        currentEdgesCheapestFirst.add(new Util.Pair<Edge, Double>(e, currentCheapestCost * e.getProbability()));
                                     }
                                 }
                             }
@@ -424,17 +424,16 @@ public class CandidateChooserImpl implements CandidateChooser {
     private double getProbabilityOfActualDistanceGivenGreatCircleDistance(Distance totalGreatCircleDistance,
             Distance actualDistanceTraveled) {
         final double result;
-        double differenceInMeters = actualDistanceTraveled.getMeters() - totalGreatCircleDistance.getMeters();
-        double ratio = differenceInMeters / totalGreatCircleDistance.getMeters();
+        double ratio = actualDistanceTraveled.getMeters() / totalGreatCircleDistance.getMeters();
         // A smaller distance than great circle from mark to mark is very unlikely, somewhere between the distance
         // estimated and double that is likely and anything greater than that gradually becomes unlikely
-        if (ratio < 0) {
+        if (ratio < 0.95) {
             // TODO shouldn't these factors be constants in the class header for easy fine-tuning?
-            result = 3.5 * ratio + 1;
-        } else if (ratio > 1) {
-            result = Math.sqrt((-ratio + 3) / 2);
-        } else {
+            result = 0.5*ratio;
+        } else if (ratio >= 0.95 && ratio < 2) {
             result = 1;
+        } else {
+            result = 1/ratio;
         }
         return result;
     }
