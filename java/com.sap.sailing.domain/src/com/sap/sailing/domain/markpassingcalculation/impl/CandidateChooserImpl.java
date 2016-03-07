@@ -59,7 +59,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * passing happening exactly at the race start time has time-wise probability of 1.0. Another delay of this much
      * lets the probability drop to 1/3, and so on.
      */
-    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = new MillisecondsDurationImpl(5000); // Duration.ONE_MINUTE;
+    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE;
     
     private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
 
