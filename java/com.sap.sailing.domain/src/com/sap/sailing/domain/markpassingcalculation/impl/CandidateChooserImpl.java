@@ -487,7 +487,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         private TimePoint variableTimePoint;
         
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
-            super(oneBasedIndexOfWaypoint, /* time point */ p, distanceProbability, w);
+            super(oneBasedIndexOfWaypoint, /* time point */ null, distanceProbability, w);
             this.variableTimePoint = p;
         }
 
