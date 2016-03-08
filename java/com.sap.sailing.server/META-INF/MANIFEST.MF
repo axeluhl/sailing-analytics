@@ -29,7 +29,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.shared.android,
  com.sap.sse.filestorage,
- com.sap.sailing.simulator;bundle-version="1.0.0"
+ com.sap.sailing.simulator,
+ com.sap.sse.security,
+ org.apache.shiro.web;bundle-version="1.2.2",
+ org.apache.shiro.core;bundle-version="1.2.2",
+ javax.servlet;bundle-version="3.1.0"
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl;
@@ -42,5 +46,7 @@ Export-Package: com.sap.sailing.server,
    com.sap.sailing.domain.racelogtrackingadapter.test",
  com.sap.sailing.server.masterdata,
  com.sap.sailing.server.operationaltransformation,
+ com.sap.sailing.server.operationaltransformation.racelog,
+ com.sap.sailing.server.security,
  com.sap.sailing.server.simulation
-
+ 
