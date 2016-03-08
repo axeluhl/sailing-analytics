@@ -46,6 +46,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
+    /**
+     * Distance ratios of actual distance traveled and leg length above this threshold will receive
+     * penalties on their probability. Ratios below 1.0 receive the ratio as the penalty.
+     * See {@link #getDistanceEstimationBasedProbability(Competitor, Candidate, Candidate)}.
+     */
+    final double MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH = 2.0;
 
     /**
      * Start mark passings will be considered this much before the actual race start. The race start
@@ -458,13 +464,10 @@ public class CandidateChooserImpl implements CandidateChooser {
         final double ratio = actualDistanceTraveled.getMeters() / totalGreatCircleDistance.getMeters();
         // A smaller distance than great circle from mark to mark is very unlikely, somewhere between the distance
         // estimated and double that is likely and anything greater than that gradually becomes unlikely
-        if (ratio < 0.95) {
-            // TODO shouldn't these factors be constants in the class header for easy fine-tuning?
-            result = 0.5*ratio;
-        } else if (ratio >= 0.95 && ratio < 2) {
-            result = 1;
+        if (ratio <= MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH) {
+            result = Math.min(1.0, ratio); // maximum probability is 1; use for the interval between 1 and MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH
         } else {
-            result = 1/ratio;
+            result = 1./(ratio-1.); // start at probability 1 for ratio==2
         }
         return result;
     }
