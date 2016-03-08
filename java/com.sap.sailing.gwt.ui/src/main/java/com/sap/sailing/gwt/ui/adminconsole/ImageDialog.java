@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -199,8 +200,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        imageURLAndUploadComposite.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return imageURLAndUploadComposite.getInitialFocusWidget();
     }
 }

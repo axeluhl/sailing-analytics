@@ -59,4 +59,10 @@
     <string name="eula">EULA</string>
     <string name="licence_information">Licence Information</string>
 
+    <!-- HTTP Requests -->
+    <string name="http_request_exception" translatable="false">(Request %1$d) %2$s\nHTTP response code: %3$d.\nHTTP response body: %4$s.</string>
+    <string name="http_request_executed" translatable="false">(Request %d) HTTP request executed.</string>
+    <string name="http_request_aborted" translatable="false">(Request %d) HTTP request aborted.</string>
+    <string name="http_request_failed" translatable="false">(Request %d) HTTP request failed.</string>
+
 </resources>

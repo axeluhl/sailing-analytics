@@ -14,24 +14,23 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     public static final String rcAppApkPath = "/apps/com.sap.sailing.racecommittee.app.apk";
-    private static final int qrCodeSize = 320;    
+    private static final int qrCodeSize = 320;
 
     private class DeviceConfigurationQRIdentifierWidget extends BaseQRIdentifierWidget {
         private final TextBox identifierBox;
-        private StringMessages stringMessages;
-        public DeviceConfigurationQRIdentifierWidget(String identifier, StringMessages stringMessages) {
+        private final StringMessages stringMessages;
+        private final String accessToken;
+        
+        public DeviceConfigurationQRIdentifierWidget(String identifier, String accessToken, StringMessages stringMessages) {
             super(qrCodeSize, stringMessages);
-            
+            this.accessToken = accessToken;
             identifierBox = new TextBox();
             identifierBox.setValue(identifier);
             identifierBox.setReadOnly(true);
             identifierBox.setVisibleLength(40);
-            
-            
             inputGrid.resize(2, 2);
             inputGrid.setWidget(1, 0, new Label("Identifier:"));
             inputGrid.setWidget(1, 1, identifierBox);
-            
             this.stringMessages = stringMessages;
         }
         
@@ -41,7 +40,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
                 Window.alert(stringMessages.notCapableOfGeneratingACodeForIdentifier());
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
-                return DeviceConfigurationQRCodeUtils.composeQRContent(identifierBox.getValue(), apkUrl);
+                return DeviceConfigurationQRCodeUtils.composeQRContent(identifierBox.getValue(), apkUrl, accessToken);
             }
             return null;
         }   
@@ -49,8 +48,8 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     
     private final DeviceConfigurationQRIdentifierWidget widget;
     
-    public DeviceConfigurationQRIdentifierDialog(String identifier, StringMessages stringMessages) {
-        widget = new DeviceConfigurationQRIdentifierWidget(identifier, stringMessages);
+    public DeviceConfigurationQRIdentifierDialog(String identifier, StringMessages stringMessages, String accessToken) {
+        widget = new DeviceConfigurationQRIdentifierWidget(identifier, accessToken, stringMessages);
         Button exitButton = new Button(stringMessages.close());
         exitButton.addClickHandler(new ClickHandler() {
             @Override

@@ -22,8 +22,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -33,6 +31,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -81,14 +80,9 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
-import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
-import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
-import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -141,7 +135,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     
     private final List<Component<?>> components;
 
-    private static final RaceBoardMainCss MAIN_CSS = RaceBoardResources.INSTANCE.mainCss();
+    private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
+    private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
 
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
@@ -185,8 +180,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), MAIN_CSS.usermanagement_loggedin(), MAIN_CSS.usermanagement_open());
-        this.userManagementMenuView.asWidget().setStyleName(MAIN_CSS.usermanagement_icon());
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
+        this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
 
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
@@ -337,18 +332,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     }
     
     private void setupUserManagementControlPanel(UserService userService) {
-        MAIN_CSS.ensureInjected();
-        EventBus eventBus = new SimpleEventBus();
+        mainCss.ensureInjected();
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
-                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createEmailValidationLink(), 
-                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createPasswordResetLink());
-        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, RaceBoardResources.INSTANCE);
-        AuthenticationCallbackImpl callback = new AuthenticationCallbackImpl();
-        AuthenticationPlaceManagementController userManagementController = 
-                new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
-        callback.setController(userManagementController);
-        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
+        new GenericAuthentication(userService, userManagementMenuView, display, 
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
             regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);
             userManagementMenuView.asWidget().removeFromParent();

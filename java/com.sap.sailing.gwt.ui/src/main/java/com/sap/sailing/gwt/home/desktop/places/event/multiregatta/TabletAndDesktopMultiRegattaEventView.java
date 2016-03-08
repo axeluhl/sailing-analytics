@@ -15,7 +15,6 @@ import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopMultiRegattaEventView extends Composite implements EventMultiregattaView {
@@ -43,7 +42,6 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         eventHeader = new EventHeader(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
-        initBreadCrumbs();
         
         String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
         if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
@@ -69,21 +67,6 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, EventMultiregattaView.Presenter>) e.getSelectedActivity());
-    }
-    
-    private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
-        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        addBreadCrumbItem(currentPresenter.getEventDTO().getDisplayName(), currentPresenter.getCurrentEventNavigation());
-    }
-    
-    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
-        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
-            @Override
-            public void run() {
-                placeNavigation.goToPlace();
-            }
-        });
     }
 
     @Override
