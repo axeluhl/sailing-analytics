@@ -91,7 +91,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
-        raceStartTime = race.getStartOfRace() != null ? race.getStartOfRace().minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME) : null;
+        raceStartTime = race.getStartOfRace(/* inferred */ false) != null ? race.getStartOfRace(/* inferred */ false).
+                minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
                 /* Probability */1, /* Waypoint */null);
