@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.leaderboardedit;
 import java.util.Arrays;
 
 import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -62,9 +63,13 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
     }
 
     @Override
+    protected FocusWidget getInitialFocusWidget() {
+        return netPointsBox;
+    }
+    
+    @Override
     public void show() {
         super.show();
-        netPointsBox.setFocus(true);
         netPointsBox.selectAll();
     }
 }

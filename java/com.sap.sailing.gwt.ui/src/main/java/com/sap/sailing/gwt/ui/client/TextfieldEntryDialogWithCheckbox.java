@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -36,8 +37,7 @@ public class TextfieldEntryDialogWithCheckbox extends DataEntryDialog<Util.Pair<
     }
 
     @Override
-    public void show() {
-        super.show();
-        entryField.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return entryField;
     }
 }
