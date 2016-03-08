@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 
-public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspective, 
+public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPanel, 
     RaceBoardPerspectiveSettings, RaceBoardPerspectiveSettingsDialogComponent> {
 
     private final StringMessages stringMessages;

@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
-import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspective;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -125,7 +125,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                 public void onSuccess(RaceboardDataDTO result) {
                     playerView.clearContent();
 
-                    RaceBoardPerspective raceboardPerspective = new RaceBoardPerspective(raceboardPerspectiveLifecycleWithAllSettings,
+                    RaceBoardPanel raceboardPerspective = new RaceBoardPanel(raceboardPerspectiveLifecycleWithAllSettings,
                             sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
                             /** leaderboardGroupName */ null, /** eventId */ null, errorReporter,

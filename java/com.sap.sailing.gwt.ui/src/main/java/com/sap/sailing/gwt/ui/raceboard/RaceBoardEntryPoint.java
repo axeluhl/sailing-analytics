@@ -137,7 +137,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
                 new PerspectiveCompositeLifecycleSettings<>(raceboardPerspectiveLifecycleAndSettings,raceboardPerspectiveComponentsLifecyclesAndSettings));
 
-        RaceBoardPerspective raceBoardPerspective = new RaceBoardPerspective(
+        RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(
                 raceboardPerspectiveLifecyclesAndSettings, sailingService, mediaService, getUserService(),
                 asyncActionsExecutor,  raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider);
