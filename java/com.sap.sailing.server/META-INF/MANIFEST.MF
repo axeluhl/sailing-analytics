@@ -49,4 +49,3 @@ Export-Package: com.sap.sailing.server,
  com.sap.sailing.server.operationaltransformation.racelog,
  com.sap.sailing.server.security,
  com.sap.sailing.server.simulation
- 
