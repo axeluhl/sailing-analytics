@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -180,8 +181,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        videoURLAndUploadComposite.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return videoURLAndUploadComposite.getInitialFocusWidget();
     }
 }
