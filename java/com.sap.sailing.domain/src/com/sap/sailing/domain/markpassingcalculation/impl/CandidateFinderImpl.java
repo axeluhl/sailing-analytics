@@ -49,13 +49,13 @@ import com.sap.sse.common.Util;
 public class CandidateFinderImpl implements CandidateFinder {
 
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
-    private final int strictnessOfDistanceBasedProbability = 7;
+    private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
-    private final double penaltyForWrongSide = 0.8;
-    private final double penaltyForWrongDirection = 0.8;
-    private final double penaltyForDistanceCandidates = 0.8;
+    private final double PENALTY_FOR_WRONG_SIDE = 0.8;
+    private final double PENALTY_FOR_WRONG_DIRECTION = 0.8;
+    private final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
     private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> distanceCache = new LinkedHashMap<>();
@@ -394,8 +394,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     p = fix.getPosition();
                                     Double newProbability = getDistanceBasedProbability(w, t, dis);
                                     if (newProbability != null) {
-                                        newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? penaltyForDistanceCandidates
-                                                : penaltyForDistanceCandidates * penaltyForWrongSide;
+                                        newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? PENALTY_FOR_DISTANCE_CANDIDATES
+                                                : PENALTY_FOR_DISTANCE_CANDIDATES * PENALTY_FOR_WRONG_SIDE;
                                         if (newProbability > penaltyForSkipping
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
@@ -615,18 +615,23 @@ public class CandidateFinderImpl implements CandidateFinder {
      * crossingInfo.getB()).getMeters()); } } } }
      */
 
+    /**
+     * {@code xte1} and {@code xte2} are expected to have different signums or both be 0. The method
+     * interpolates between the time points {@code t1} and {@code t2} according to where the XTE is
+     * assumed to have crossed 0. The candidate is then generated for this interpolated time point.
+     */
     private Candidate createCandidate(Competitor c, double xte1, double xte2, TimePoint t1, TimePoint t2, Waypoint w,
             Boolean portMark) {
-        long differenceInMillis = t2.asMillis() - t1.asMillis();
-        double ratio = (Math.abs(xte1) / (Math.abs(xte1) + Math.abs(xte2)));
-        TimePoint t = t1.plus((long) (differenceInMillis * ratio));
-        Position p = race.getTrack(c).getEstimatedPosition(t, false);
-        List<Distance> distances = calculateDistance(p, w, t);
-        Distance d = portMark ? distances.get(0) : distances.get(1);
-        double cost = getDistanceBasedProbability(w, t, d);
-        cost = isOnCorrectSideOfWaypoint(w, p, t, portMark) ? cost : cost * penaltyForWrongSide;
-        cost = passesInTheRightDirection(w, xte1, xte2, portMark) ? cost : cost * penaltyForWrongDirection;
-        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, cost, w);
+        final long differenceInMillis = t2.asMillis() - t1.asMillis();
+        final double ratio = (Math.abs(xte1) / (Math.abs(xte1) + Math.abs(xte2)));
+        final TimePoint t = t1.plus((long) (differenceInMillis * ratio));
+        final Position p = race.getTrack(c).getEstimatedPosition(t, false);
+        final List<Distance> distances = calculateDistance(p, w, t);
+        final Distance d = portMark ? distances.get(0) : distances.get(1);
+        double probability = getDistanceBasedProbability(w, t, d);
+        probability = isOnCorrectSideOfWaypoint(w, p, t, portMark) ? probability : probability * PENALTY_FOR_WRONG_SIDE;
+        probability = passesInTheRightDirection(w, xte1, xte2, portMark) ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
+        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w);
     }
 
     /**
@@ -698,19 +703,21 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @return a probability based on the distance to <code>w</code> and the average leg lengths before and after.
      */
     private Double getDistanceBasedProbability(Waypoint w, TimePoint t, Distance distance) {
-        Distance legLength = getLegLength(t, w);
+        final Double result;
+        Distance legLength = getAverageLengthOfAdjacentLegs(t, w);
         if (legLength != null) {
-            double result = 1 / (strictnessOfDistanceBasedProbability/* Raising this will make it stricter */
+            result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     * Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
-            return result;
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 
     /**
      * @return an average of the estimated legs before and after <code>w</code>.
      */
-    private Distance getLegLength(TimePoint t, Waypoint w) {
+    private Distance getAverageLengthOfAdjacentLegs(TimePoint t, Waypoint w) {
         Course course = race.getRace().getCourse();
         if (w == course.getFirstWaypoint()) {
             return race.getTrackedLegStartingAt(w).getGreatCircleDistance(t);

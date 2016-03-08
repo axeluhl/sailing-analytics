@@ -18,9 +18,9 @@ public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkipped = 0.16;
+    private final static double PENALTY_FOR_SKIPPED = 0.16;
     // TODO what is the meaning of this constant?
-    private final static double penaltyForSkippedToEnd = 0.25;
+    private final static double PENALTY_FOR_SKIPPED_TO_END = 0.25;
     private final double estimatedDistanceAndStartTimingProbability;
     private final int numberOfWaypoints;
 
@@ -32,18 +32,18 @@ public class Edge implements Comparable<Edge> {
     }
 
     public static double getPenaltyForSkipping() {
-        return penaltyForSkipped;
+        return PENALTY_FOR_SKIPPED;
     }
 
     /**
-     * The probability-reducing factor for skipping a waypoint is {@link #penaltyForSkipped} but is reduced to
-     * {@link #penaltyForSkippedToEnd} when skipping to the end. The reason for preferring skips to the end proxy node
+     * The probability-reducing factor for skipping a waypoint is {@link #PENALTY_FOR_SKIPPED} but is reduced to
+     * {@link #PENALTY_FOR_SKIPPED_TO_END} when skipping to the end. The reason for preferring skips to the end proxy node
      * is that in live situations where the course hasn't been completed yet it is required to skip to the end. The main
      * probability comes from the probability of the product of the start node, end node and distance-based
      * probabilities.
      */
     public Double getProbability() {
-        final double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? penaltyForSkippedToEnd : penaltyForSkipped;
+        final double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? PENALTY_FOR_SKIPPED_TO_END : PENALTY_FOR_SKIPPED;
         return start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1));
         
     }
