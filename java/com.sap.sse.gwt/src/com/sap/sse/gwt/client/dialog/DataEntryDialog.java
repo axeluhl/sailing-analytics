@@ -528,6 +528,10 @@ public abstract class DataEntryDialog<T> {
         dateEntryDialog.getElement().getStyle().setCursor(cursor);
     }
 
+    public void center() {
+        dateEntryDialog.center();
+    }
+
     public void show() {
         Widget additionalWidget = getAdditionalWidget();
         if (additionalWidget != null) {

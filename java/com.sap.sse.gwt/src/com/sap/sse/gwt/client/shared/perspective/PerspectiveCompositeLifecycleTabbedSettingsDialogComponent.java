@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -78,7 +80,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<P extend
     }
 
     @Override
-    public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
+    public Widget getAdditionalWidget(final DataEntryDialog<?> dialog) {
         TabPanel result = new TabPanel();
         if(perspectiveLifecycleAndSettingsDialog != null) {
             Widget w = perspectiveLifecycleAndSettingsDialog.getDialogComponent().getAdditionalWidget((DataEntryDialog<?>) dialog);
@@ -89,6 +91,12 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<P extend
             result.add(w, component.getComponentLifecycleAndSettings().getComponentLifecycle().getLocalizedShortName());
         }
         result.selectTab(0);
+        result.addSelectionHandler(new SelectionHandler<Integer>() {
+            @Override
+            public void onSelection(SelectionEvent<Integer> event) {
+                dialog.center();
+            }
+          });
         return result;
     }
 
