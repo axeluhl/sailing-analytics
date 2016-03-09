@@ -102,8 +102,6 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         testWholeRace();
         testMiddleOfRace(0);
         testMiddleOfRace(2);
-        
-        
     }
 
     private void testWholeRace() {
