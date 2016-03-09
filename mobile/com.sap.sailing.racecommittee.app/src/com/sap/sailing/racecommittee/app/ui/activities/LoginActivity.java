@@ -48,7 +48,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.BackpressListener;
+import com.sap.sailing.racecommittee.app.domain.BackListener;
 import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
@@ -91,7 +91,7 @@ public class LoginActivity extends BaseActivity
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
 
-    private BackpressListener mBackPressListener;
+    private BackListener mBackPressListener;
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
@@ -457,7 +457,7 @@ public class LoginActivity extends BaseActivity
 
     }
 
-    public void setBackPressListener(BackpressListener listener) {
+    public void setBackPressListener(BackListener listener) {
         mBackPressListener = listener;
     }
 

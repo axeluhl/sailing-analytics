@@ -47,7 +47,7 @@ import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.BackpressListener;
+import com.sap.sailing.racecommittee.app.domain.BackListener;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
@@ -55,7 +55,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferen
 import com.sap.sailing.racecommittee.app.utils.UrlHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
-public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListener, AuthCheckTask.AuthCheckTaskListener, BackpressListener {
+public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListener, AuthCheckTask.AuthCheckTaskListener, BackListener {
 
     private static final String TAG = LoginBackdrop.class.getName();
     private static final int requestCodeQR = 45392;
