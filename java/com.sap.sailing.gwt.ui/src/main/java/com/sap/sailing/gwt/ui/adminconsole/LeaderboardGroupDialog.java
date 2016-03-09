@@ -9,6 +9,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -212,9 +213,7 @@ public class LeaderboardGroupDialog extends DataEntryDialog<LeaderboardGroupDial
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameEntryField.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameEntryField;
     }
-
 }

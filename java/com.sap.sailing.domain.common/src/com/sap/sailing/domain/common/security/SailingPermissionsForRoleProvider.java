@@ -13,13 +13,40 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
     public Iterable<String> getPermissions(String role) {
         final Iterable<String> result;
         if (DefaultRoles.ADMIN.getRolename().equals(role)) {
-            return Collections.<String>singletonList("*");
+            result = Collections.<String>singletonList("*");
         } else if (Roles.eventmanager.getRolename().equals(role)) {
-            return asList(Permission.MANAGE_MEDIA, Permission.MANAGE_MARK_PASSINGS, Permission.MANAGE_LEADERBOARD_RESULTS);
+            result = asList(
+                    // RaceBoard:
+                    Permission.MANAGE_MEDIA,
+                    Permission.MANAGE_MARK_PASSINGS,
+                    
+                    // AdminConsole:
+                    Permission.MANAGE_ALL_COMPETITORS,
+                    Permission.MANAGE_COURSE_LAYOUT,
+                    Permission.MANAGE_DEVICE_CONFIGURATION,
+                    Permission.MANAGE_EVENTS,
+                    Permission.MANAGE_IGTIMI_ACCOUNTS,
+                    Permission.MANAGE_LEADERBOARD_GROUPS,
+                    Permission.MANAGE_LEADERBOARDS,
+                    Permission.MANAGE_LEADERBOARD_RESULTS,
+                    Permission.MANAGE_MEDIA,
+                    Permission.MANAGE_RACELOG_TRACKING,
+                    Permission.MANAGE_REGATTAS,
+                    Permission.MANAGE_RESULT_IMPORT_URLS,
+                    Permission.MANAGE_STRUCTURE_IMPORT_URLS,
+                    Permission.MANAGE_TRACKED_RACES,
+                    Permission.MANAGE_WIND,
+                    
+                    // back-end:
+                    Permission.EVENT,
+                    Permission.REGATTA,
+                    Permission.LEADERBOARD,
+                    Permission.LEADERBOARD_GROUP
+                    );
         } else if (Roles.mediaeditor.getRolename().equals(role)) {
-            return asList(Permission.MANAGE_MEDIA);
+            result = asList(Permission.MANAGE_MEDIA);
         } else if (Roles.moderator.getRolename().equals(role)) {
-            return asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
+            result = asList(Permission.CAN_REPLAY_DURING_LIVE_RACES);
         } else {
             result = Collections.emptyList();
         }

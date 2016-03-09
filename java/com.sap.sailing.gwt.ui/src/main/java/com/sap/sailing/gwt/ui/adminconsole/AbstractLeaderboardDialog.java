@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -32,9 +33,8 @@ public abstract class AbstractLeaderboardDialog extends DataEntryDialog<Leaderbo
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameTextBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameTextBox;
     }
 
     protected static ListBox createScoringSchemeListBox(DataEntryDialog<?> dialog, StringMessages stringMessages) {

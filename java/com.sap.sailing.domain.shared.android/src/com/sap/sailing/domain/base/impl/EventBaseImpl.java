@@ -141,45 +141,6 @@ public abstract class EventBaseImpl implements EventBase {
     }
 
     @Override
-    public Iterable<URL> getImageURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for (ImageDescriptor image : images) {
-            if (!image.hasTag(MediaTagConstants.SPONSOR) && !image.hasTag(MediaTagConstants.LOGO)) {
-                result.add(image.getURL());
-            }
-        }
-        return result;
-    }
-    
-    @Override
-    public Iterable<URL> getVideoURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for(VideoDescriptor video: videos) {
-            result.add(video.getURL());
-        }
-        return result;
-    }
-
-    @Override
-    public Iterable<URL> getSponsorImageURLs() {
-        List<URL> result = new ArrayList<URL>();
-        for(MediaDescriptor media : findMediaWithTag(images, MediaTagConstants.SPONSOR)) {
-            result.add(media.getURL());
-        }
-        return result;
-    }
-    
-    @Override
-    public URL getLogoImageURL() {
-        URL result = null;
-        ImageDescriptor media = findImageWithTag(MediaTagConstants.LOGO);
-        if(media != null) {
-            result = media.getURL();
-        }
-        return result;
-    }
-
-    @Override
     public URL getOfficialWebsiteURL() {
         return officialWebsiteURL;
     }
