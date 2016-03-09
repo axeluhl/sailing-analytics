@@ -204,10 +204,12 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
             manual.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    AppPreferences pref = AppPreferences.on(v.getContext());
                     View view = View.inflate(v.getContext(), R.layout.login_onboarding_edit, null);
                     final EditText url = (EditText) view.findViewById(R.id.url);
+                    url.setText(pref.getServerBaseURL());
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
-                    device_id.setText(AppPreferences.on(v.getContext()).getDeviceIdentifier());
+                    device_id.setText(pref.getDeviceIdentifier());
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.AppTheme_AlertDialog);
                     builder.setView(view);
