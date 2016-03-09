@@ -5,13 +5,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -389,7 +392,15 @@ public class PageObject {
     
     protected void waitForAjaxRequestsExecuted(String category, int numberOfCalls, int timeout, int polling) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
-        
         wait.until(new AjaxCallsExecuted(category, numberOfCalls));
+    }
+    
+    protected void waitUtil(Predicate<WebDriver> predicate) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(predicate);
+    }
+    
+    protected void waitUtil(BooleanSupplier supplier) {
+        waitUtil((driver) -> supplier.getAsBoolean());
     }
 }
