@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;

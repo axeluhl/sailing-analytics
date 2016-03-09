@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.app;
 
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
-import com.sap.sailing.gwt.autoplay.client.place.player.LeaderboardWithHeaderPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;

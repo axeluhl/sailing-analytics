@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;

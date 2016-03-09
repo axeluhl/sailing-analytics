@@ -25,7 +25,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
-import com.sap.sailing.gwt.autoplay.client.place.player.LeaderboardWithHeaderPerspectiveLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;

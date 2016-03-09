@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.autoplay.client.place.player;
+package com.sap.sailing.gwt.autoplay.client.shared.leaderboard;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
