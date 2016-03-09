@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -240,9 +239,8 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     }
 
     @Override
-    public void show() {
-        super.show();
-        Scheduler.get().scheduleFinally(new ScheduledCommand() { @Override public void execute() { nameEntryField.setFocus(true); }});
+    protected FocusWidget getInitialFocusWidget() {
+        return nameEntryField;
     }
     
     protected Map<String, TextBox> createTextBoxesForLocalesAndDefault(Map<String, String> initialValues) {
