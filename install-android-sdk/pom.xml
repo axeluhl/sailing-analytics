@@ -40,7 +40,7 @@
                                             <groupId>com.google.download.android</groupId>
                                             <artifactId>android-sdk-linux</artifactId>
                                             <version>${ldi.download.android.sdk.version}</version>
-                                            <type>zip</type>
+                                            <type>tgz</type>
                                             <overWrite>false</overWrite>
                                             <outputDirectory>${ldi.android.sdk.parent.location}</outputDirectory>
                                             <includes>**/*</includes>
