@@ -118,6 +118,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(eventControlsPanel);
         
         Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.ensureDebugId("RefreshEventsButton");
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -127,6 +128,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventControlsPanel.add(refreshButton);
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
+        createEventBtn.ensureDebugId("CreateEventButton");
         createEventBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -136,6 +138,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventControlsPanel.add(createEventBtn);
 
         removeEventsButton = new Button(stringMessages.remove());
+        removeEventsButton.ensureDebugId("RemoveEventsButton");
         removeEventsButton.setEnabled(false);
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -455,6 +458,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 createNewEvent(newEvent, existingLeaderboardGroups);
             }
         });
+        dialog.ensureDebugId("EventCreateDialog");
         dialog.show();
     }
     
