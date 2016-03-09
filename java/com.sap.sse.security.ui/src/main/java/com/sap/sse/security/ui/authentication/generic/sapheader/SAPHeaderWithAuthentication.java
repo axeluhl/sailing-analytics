@@ -33,7 +33,6 @@ public class SAPHeaderWithAuthentication extends SAPHeader {
         rightWithAuthentication.addStyleName(res.css().header_right_wrapper());
         
         Anchor authenticationMenu = new Anchor();
-        authenticationMenu.ensureDebugId("authenticationMenu");
         authenticationMenu.addStyleName(res.css().usermanagement_icon());
         rightWithAuthentication.add(authenticationMenu);
         authenticationMenuView = new AuthenticationMenuViewImpl(authenticationMenu, res.css().usermanagement_loggedin(), res.css().usermanagement_open());
