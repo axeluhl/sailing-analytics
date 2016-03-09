@@ -12,11 +12,12 @@ import com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.Sta
 import com.sap.sailing.dashboards.gwt.shared.dispatch.DashboardDispatchContext;
 import com.sap.sailing.dashboards.gwt.shared.dispatch.RequiresLiveRaceAndCachesMovingAverageAction;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartlineAdvantagesWithMaxAndAverageDTO;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
-public class GetStartlineAdvantagesByWindAction  extends RequiresLiveRaceAndCachesMovingAverageAction<StartlineAdvantagesWithMaxAndAverageDTO> {
+public class GetStartlineAdvantagesByWindAction extends RequiresLiveRaceAndCachesMovingAverageAction<StartlineAdvantagesWithMaxAndAverageDTO> {
 
     public GetStartlineAdvantagesByWindAction() {}
     
@@ -32,7 +33,8 @@ public class GetStartlineAdvantagesByWindAction  extends RequiresLiveRaceAndCach
         StartlineAdvantagesWithMaxAndAverageDTO result = new StartlineAdvantagesWithMaxAndAverageDTO();
         TrackedRace liveRace = super.getLiveRace(dashboardDispatchContext);
         if (liveRace != null) {
-            StartlineAdvantagesByWindCalculator startlineAdvantagesByWindCalculator = new StartlineAdvantagesByWindCalculator(dashboardDispatchContext);
+            final DomainFactory domainFactory = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory();
+            StartlineAdvantagesByWindCalculator startlineAdvantagesByWindCalculator = new StartlineAdvantagesByWindCalculator(dashboardDispatchContext, domainFactory);
             result = startlineAdvantagesByWindCalculator.getStartLineAdvantagesAccrossLineFromTrackedRaceAtTimePoint(liveRace, MillisecondsTimePoint.now());
         }
         if(result != null && result.maximum != null) {

@@ -278,13 +278,15 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * */
     @UiHandler("verticalWindChartClickArea")
     public void verticalWindChartClickAreaClicked(ClickEvent e) {
-        if (chartIntervallinMinutes == SMALL_DISPLAY_INTERVALL_IN_MINUTES) {
-            chartIntervallinMinutes = LARGE_DISPLAY_INTERVALL_IN_MINUTES;
-        } else {
-            chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
+        if (lastPoint != null) {
+            if (chartIntervallinMinutes == SMALL_DISPLAY_INTERVALL_IN_MINUTES) {
+                chartIntervallinMinutes = LARGE_DISPLAY_INTERVALL_IN_MINUTES;
+            } else {
+                chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
+            }
+            adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
+            notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
         }
-        adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
-        notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
     }
 
     @Override
