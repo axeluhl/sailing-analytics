@@ -254,7 +254,7 @@
     <string name="preference_allow_demo_summary">Wenn aktiv kann man sich im Demo-Modus anmelden. Im Demo-Modus werden keine Rennänderungen an den Server geschickt.</string>
     <string name="loading_events_succeded">Events geladen.</string>
     <string name="available_races">Verfügbare Rennen</string>
-    <string name="change">ÄNDERN</string>
+    <string name="change">Ändern</string>
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
@@ -464,7 +464,12 @@
     <string name="race_group">Group Race</string>
     <string name="wind_select_race">Select Race</string>
     <string name="get_started">Getting Started</string>
-    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>
+    <string name="server_url">Server</string>
+    <string name="username">Nutzername</string>
+    <string name="password">Passwort</string>
+    <string name="wrong_credentials">Nutzername oder Passwort ungültig</string>
+    <string name="unexpected_error">Ein unerwarteter Fehler ist aufgetreten</string>
 
 </resources>

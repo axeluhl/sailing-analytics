@@ -286,7 +286,7 @@
     <string name="races_all">ALL RACES</string>
 
     <string name="welcome">WELCOME</string>
-    <string name="change">CHANGE</string>
+    <string name="change">Change</string>
 
     <string name="start_procedure">Procedure</string>
     <string name="start_procedure_more">More</string>
@@ -491,7 +491,12 @@
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
     <string name="get_started">Getting Started</string>
-    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request failed. User is unauthorized.</string>
+    <string name="server_url">Server</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="wrong_credentials">Username or password invalid</string>
+    <string name="unexpected_error">An unexpected error occurred</string>
 
 </resources>

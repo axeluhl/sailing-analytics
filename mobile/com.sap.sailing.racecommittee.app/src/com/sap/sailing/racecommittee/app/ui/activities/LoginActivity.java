@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -49,11 +48,11 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.BackPressListener;
 import com.sap.sailing.racecommittee.app.domain.LoginType;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.fragments.LoginListViews;
-import com.sap.sailing.racecommittee.app.ui.fragments.LoginOnboarding;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.AttachedDialogFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.DialogListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.CourseAreaListFragment;
@@ -91,6 +90,8 @@ public class LoginActivity extends BaseActivity
     private IntentReceiver mReceiver;
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
+
+    private BackPressListener mBackPressListener;
 
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
@@ -310,16 +311,11 @@ public class LoginActivity extends BaseActivity
         loginListViews = new LoginListViews();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.replace(R.id.login_listview, loginListViews);
-        transaction.replace(R.id.login_onboarding, new LoginOnboarding());
         transaction.commitAllowingStateLoss();
 
         new AutoUpdater(this).notifyAfterUpdate();
 
-        //setup the backdrop click listener
         backdrop = findViewById(R.id.login_view_backdrop);
-        if (backdrop != null) {
-            backdrop.setOnClickListener(new BackdropClick());
-        }
 
         if (!EulaHelper.with(this).isEulaAccepted()) {
             EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
@@ -352,13 +348,15 @@ public class LoginActivity extends BaseActivity
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
+        filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
-        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-            resetData();
-        } else {
-            slideUpBackdropDelayed();
-        }
+        BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
+//        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
+//            resetData();
+//        } else {
+//            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
+//        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -382,6 +380,17 @@ public class LoginActivity extends BaseActivity
         dismissProgressSpinner();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mBackPressListener != null) {
+            if (!mBackPressListener.handleBackPress()) {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void setupDataManager() {
         showProgressSpinner();
 
@@ -401,8 +410,6 @@ public class LoginActivity extends BaseActivity
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                     ExLog.ex(LoginActivity.this, TAG, reason);
                 }
-
-                slideUpBackdropDelayed();
             }
 
             @Override
@@ -450,6 +457,10 @@ public class LoginActivity extends BaseActivity
 
     }
 
+    public void setBackPressListener(BackPressListener listener) {
+        mBackPressListener = listener;
+    }
+
     private void slideUpBackdropDelayed() {
         Handler handler = new Handler();
         Runnable runnable = new Runnable() {
@@ -463,21 +474,6 @@ public class LoginActivity extends BaseActivity
 
     private void slideUpBackdrop() {
         final View loginView = findViewById(R.id.login_listview);
-        loginView.setVisibility(View.GONE);
-        final View onboardingView = findViewById(R.id.login_onboarding);
-        onboardingView.setVisibility(View.GONE);
-
-        ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.GONE);
-        ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.GONE);
-
-        if (TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-            onboardingView.setVisibility(View.VISIBLE);
-            ViewHelper.get(backdrop, R.id.backdrop_onboarding).setVisibility(View.VISIBLE);
-        } else {
-            loginView.setVisibility(View.VISIBLE);
-            ViewHelper.get(backdrop, R.id.backdrop_login).setVisibility(View.VISIBLE);
-        }
-
         // don't slide up if already up
         if (backdrop.getY() != 0) {
             return;
@@ -497,10 +493,6 @@ public class LoginActivity extends BaseActivity
                 ViewGroup.LayoutParams lpLogin = loginView.getLayoutParams();
                 lpLogin.height = val;
                 loginView.setLayoutParams(lpLogin);
-
-                ViewGroup.LayoutParams lpOnboarding = onboardingView.getLayoutParams();
-                lpOnboarding.height = val;
-                onboardingView.setLayoutParams(lpOnboarding);
             }
         });
 
@@ -509,9 +501,6 @@ public class LoginActivity extends BaseActivity
         animators.add(frameAnimation);
         animators.add(getAlphaRevAnimator(findViewById(R.id.backdrop_title)));
         animators.add(getAlphaAnimator(findViewById(R.id.gradient)));
-        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_login)));
-        animators.add(getAlphaAnimator(findViewById(R.id.backdrop_onboarding)));
-        animators.add(getAlphaAnimator(findViewById(R.id.button_bar)));
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animators);
@@ -540,13 +529,6 @@ public class LoginActivity extends BaseActivity
         transaction.commit();
     }
 
-    private class BackdropClick implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            slideUpBackdrop();
-        }
-    }
-
     private class IntentReceiver extends BroadcastReceiver {
 
         @Override
@@ -554,6 +536,8 @@ public class LoginActivity extends BaseActivity
             String action = intent.getAction();
 
             if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+                resetData();
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
                 resetData();
             }
         }
