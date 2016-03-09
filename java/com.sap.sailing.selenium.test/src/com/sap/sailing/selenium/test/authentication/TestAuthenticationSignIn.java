@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.authentication.AuthenticationMenuPO;
-import com.sap.sailing.selenium.pages.authentication.AuthenticationViewPO;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestAuthenticationSignIn extends AbstractSeleniumTest {
@@ -25,10 +24,7 @@ public class TestAuthenticationSignIn extends AbstractSeleniumTest {
         AuthenticationMenuPO authenticationMenu = adminConsolePage.getAuthenticationMenu();
         assertFalse(authenticationMenu.isOpen());
         assertFalse(authenticationMenu.isLoggedIn());
-        AuthenticationViewPO authenticationView = authenticationMenu.showAuthenticationView();
-        assertTrue(authenticationMenu.isOpen());
-        assertFalse(authenticationMenu.isLoggedIn());
-        authenticationView.getSignInView().doLogin("admin", "admin");
+        authenticationMenu.doLogin("admin", "admin");
         assertTrue(authenticationMenu.isOpen());
         assertTrue(authenticationMenu.isLoggedIn());
     }

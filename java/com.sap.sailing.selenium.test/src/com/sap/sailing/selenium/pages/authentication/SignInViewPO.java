@@ -24,11 +24,11 @@ public class SignInViewPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "forgotPasswordAnchor")
     private WebElement forgotPasswordAnchor;
     
-    public SignInViewPO(WebDriver driver, WebElement element) {
+    SignInViewPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     
-    public void doLogin(String username, String password) {
+    void doLogin(String username, String password) {
         loginTextField.clear();
         loginTextField.sendKeys(username);
         passwordTextField.clear();
@@ -36,11 +36,11 @@ public class SignInViewPO extends PageArea {
         signInAnchor.click();
     }
     
-    public void goToSignUpView() {
+    void goToSignUpView() {
         signUpAnchor.click();
     }
     
-    public void goToForgotPasswordView() {
+    void goToForgotPasswordView() {
         forgotPasswordAnchor.click();
     }
 }

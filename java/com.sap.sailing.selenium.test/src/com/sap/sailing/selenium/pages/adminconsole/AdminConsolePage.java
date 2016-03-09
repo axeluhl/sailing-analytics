@@ -14,8 +14,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
-import com.sap.sailing.selenium.pages.HostPage;
-import com.sap.sailing.selenium.pages.PageWithAuthentication;
+import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
@@ -23,7 +22,6 @@ import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManag
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesCompetitorsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tracking.TrackedRacesManagementPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.tractrac.TracTracEventManagementPanelPO;
-import com.sap.sailing.selenium.pages.authentication.AuthenticationMenuPO;
 
 /**
  * <p>The page object representing the administration console. The console consists of multiple tabs with its content
@@ -32,7 +30,7 @@ import com.sap.sailing.selenium.pages.authentication.AuthenticationMenuPO;
  * @author
  *   D049941
  */
-public class AdminConsolePage extends HostPage implements PageWithAuthentication {
+public class AdminConsolePage extends HostPageWithAuthentication {
     private static final Logger logger = Logger.getLogger(AdminConsolePage.class.getName());
     private static final String PAGE_TITLE = "SAP Sailing Analytics Administration Console"; //$NON-NLS-1$
     
@@ -89,9 +87,6 @@ public class AdminConsolePage extends HostPage implements PageWithAuthentication
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")
     private WebElement administrationTabPanel;
     
-    @FindBy(how = BySeleniumId.class, using = "authenticationMenu")
-    private WebElement authenticationMenuAnchor;
-    
     private AdminConsolePage(WebDriver driver) {
         super(driver);
     }
@@ -142,11 +137,6 @@ public class AdminConsolePage extends HostPage implements PageWithAuthentication
         goToTab(TRACTRAC_EVENTS_TAB_PARENT_LABEL, TRACTRAC_EVENTS_TAB_PARENT_IDENTIFIER, true);
         return new SmartphoneTrackingEventManagementPanelPO(this.driver, goToTab(SMARTPHONETRACKINGPANEL_PANEL_TAB_LABEL,
                 SMARTPHONETRACKINGPANEL_PANEL_TAB_IDENTIFIER, false));
-    }
-    
-    @Override
-    public AuthenticationMenuPO getAuthenticationMenu() {
-        return new AuthenticationMenuPO(driver, authenticationMenuAnchor);
     }
     
     /**

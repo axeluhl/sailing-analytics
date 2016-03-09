@@ -20,8 +20,15 @@ public class AuthenticationMenuPO extends PageArea {
         return AttributeHelper.isEnabled(getWebElement(), "data-auth");
     }
     
-    public AuthenticationViewPO showAuthenticationView() {
+    public void doLogin(String username, String password) {
+        AuthenticationViewPO authenticationView = showAuthenticationView();
+        authenticationView.getSignInView().doLogin(username, password);
+        waitUtil(this::isLoggedIn);
+    }
+    
+    private AuthenticationViewPO showAuthenticationView() {
         getWebElement().click();
+        waitUtil(this::isOpen);
         return new AuthenticationViewPO(driver, findElementBySeleniumId(driver, "authenticationView"));
     }
     
