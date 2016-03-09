@@ -26,10 +26,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.place.player.LeaderboardWithHeaderPerspectiveLifecycle;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeader;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
@@ -46,6 +43,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTa
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
+import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class DesktopStartView extends Composite implements StartView {
     private static StartPageViewUiBinder uiBinder = GWT.create(StartPageViewUiBinder.class);
@@ -53,7 +51,7 @@ public class DesktopStartView extends Composite implements StartView {
     interface StartPageViewUiBinder extends UiBinder<Widget, DesktopStartView> {
     }
 
-    @UiField(provided=true) SAPHeader sapHeader;
+    @UiField(provided=true) SAPHeaderWithAuthentication sapHeader;
     @UiField(provided=true) ListBox localeSelectionBox;
     @UiField(provided=true) ListBox eventSelectionBox;
     @UiField(provided=true) ListBox leaderboardSelectionBox;
@@ -82,8 +80,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
         
-        SAPHeaderLifecycle sapHeaderLifecycle = new SAPHeaderLifecycle(TextMessages.INSTANCE.autoPlayerConfiguration(), StringMessages.INSTANCE);
-        sapHeader = new SAPHeader(sapHeaderLifecycle, sapHeaderLifecycle.createDefaultSettings(), false);
+        sapHeader = new SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(), "Autoplayer configuration");
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();

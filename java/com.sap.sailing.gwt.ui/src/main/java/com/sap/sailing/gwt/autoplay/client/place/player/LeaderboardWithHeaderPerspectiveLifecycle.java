@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.place.player;
 
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
-import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderLifecycle;
+import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPerspectiveSettingsDialogComponent;
@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspective, 
     LeaderboardWithHeaderPerspectiveSettings, LeaderboardPerspectiveSettingsDialogComponent> {
 
-    private final SAPHeaderLifecycle sapHeaderLifecycle;
+    private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
     private final StringMessages stringMessages;
 
@@ -19,7 +19,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         super();
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
-        this.sapHeaderLifecycle = new SAPHeaderLifecycle(stringMessages.leaderboard() +  ": " + leaderboard.getDisplayName(), stringMessages);
+        this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " + leaderboard.getDisplayName(), stringMessages);
         
         this.componentLifecycles.add(leaderboardPanelLifecycle);
         this.componentLifecycles.add(sapHeaderLifecycle);
@@ -50,7 +50,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         return true;
     }
 
-    public SAPHeaderLifecycle getSapHeaderLifecycle() {
+    public SAPHeaderComponentLifecycle getSapHeaderLifecycle() {
         return sapHeaderLifecycle;
     }
 
