@@ -16,6 +16,7 @@ import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPageWithAuthentication;
 import com.sap.sailing.selenium.pages.adminconsole.connectors.SmartphoneTrackingEventManagementPanelPO;
+import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardGroupConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaStructureManagementPanelPO;
@@ -39,6 +40,9 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
             ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
+    private static final String EVENTS_TAB_LABEL = "Events"; //$NON-NLS-1$
+    private static final String EVENTS_TAB_IDENTIFIER = "EventManagement"; //$NON-NLS-1$
     
     private static final String REGATTA_STRUCTURE_TAB_LABEL = "Regattas"; //$NON-NLS-1$
     private static final String REGATTA_STRUCTURE_TAB_IDENTIFIER = "RegattaStructureManagement"; //$NON-NLS-1$
@@ -89,6 +93,10 @@ public class AdminConsolePage extends HostPageWithAuthentication {
     
     private AdminConsolePage(WebDriver driver) {
         super(driver);
+    }
+    
+    public EventConfigurationPanelPO goToEvents() {
+        return new EventConfigurationPanelPO(this.driver, goToTab(EVENTS_TAB_LABEL, EVENTS_TAB_IDENTIFIER, true));
     }
     
     public RegattaStructureManagementPanelPO goToRegattaStructure() {
