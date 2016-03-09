@@ -15,8 +15,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class LeaderboardPerspectiveSettingsDialogComponent implements SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> {
-    CheckBox leaderboardAutoZoomBox;
-    DoubleBox leaderboardZoomFactorBox;
+    private CheckBox leaderboardAutoZoomBox;
+    private DoubleBox leaderboardZoomFactorBox;
 
     private final StringMessages stringMessages;
     private final LeaderboardWithHeaderPerspectiveSettings initialSettings;
