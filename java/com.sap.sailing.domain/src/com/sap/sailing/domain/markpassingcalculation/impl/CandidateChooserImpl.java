@@ -97,7 +97,8 @@ public class CandidateChooserImpl implements CandidateChooser {
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
-        raceStartTime = race.getStartOfRace(/* inferred */ false) != null ? race.getStartOfRace(/* inferred */ false).
+        final TimePoint startOfRaceWithoutInference = race.getStartOfRace(/* inferred */ false);
+        raceStartTime = startOfRaceWithoutInference != null ? startOfRaceWithoutInference.
                 minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME) : null;
         start = new CandidateWithSettableTime(/* Index */0, raceStartTime, /* Probability */1, /* Waypoint */null);
         end = new CandidateWithSettableWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints() + 1, /* TimePoint */null,
@@ -143,7 +144,7 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-       TimePoint startOfRace = race.getStartOfRace();
+       final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
             if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
                 raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
@@ -358,7 +359,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                         candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
                                 currentMostLikelyEdge.getStart(), currentHighestProbability));
                         if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Added "+ currentMostLikelyEdge + "as most likely edge for " + c);
+                            logger.finest("Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
                         }
                         endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
                         if (!endFound) {
