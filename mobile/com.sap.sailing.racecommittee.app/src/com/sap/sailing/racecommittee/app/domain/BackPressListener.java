@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.domain;
 
-public interface BackListener {
+public interface BackPressListener {
 
     boolean handleBackPress();
 
