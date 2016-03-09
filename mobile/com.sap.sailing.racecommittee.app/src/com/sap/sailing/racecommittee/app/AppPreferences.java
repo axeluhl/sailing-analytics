@@ -105,7 +105,7 @@ public class AppPreferences {
 
     public List<String> getByNameCourseDesignerCourseNames() {
         Set<String> values = preferences.getStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>());
-        return new ArrayList<String>(values);
+        return new ArrayList<>(values);
     }
 
     public Context getContext() {
@@ -176,7 +176,7 @@ public class AppPreferences {
 
     public List<String> getManagedCourseAreaNames() {
         Set<String> values = preferences.getStringSet(key(R.string.preference_course_areas_key), new HashSet<String>());
-        return new ArrayList<String>(values);
+        return new ArrayList<>(values);
     }
 
     public NumberOfRounds getNumberOfRounds() {
@@ -239,14 +239,11 @@ public class AppPreferences {
 
     public Set<Flags> getRRS26StartmodeFlags() {
         Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
-        if (flagNames != null) {
-            Set<Flags> flags = new HashSet<Flags>();
-            for (String flagName : flagNames) {
-                flags.add(Flags.valueOf(flagName));
-            }
-            return flags;
+        Set<Flags> flags = new HashSet<>();
+        for (String flagName : flagNames) {
+            flags.add(Flags.valueOf(flagName));
         }
-        return null;
+        return flags;
     }
 
     public String getServerBaseURL() {
@@ -297,7 +294,7 @@ public class AppPreferences {
     public void setByNameCourseDesignerCourseNames(List<String> courseNames) {
         preferences
                 .edit()
-                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>(courseNames)).commit();
+                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<>(courseNames)).commit();
     }
 
     public void setCourseLayout(CourseLayouts courseLayout) {
@@ -358,7 +355,7 @@ public class AppPreferences {
 
     public void setManagedCourseAreaNames(List<String> courseAreaNames) {
         preferences.edit()
-                .putStringSet(key(R.string.preference_course_areas_key), new HashSet<String>(courseAreaNames)).commit();
+                .putStringSet(key(R.string.preference_course_areas_key), new HashSet<>(courseAreaNames)).commit();
     }
 
     public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
@@ -377,7 +374,7 @@ public class AppPreferences {
     }
 
     public void setRRS26StartmodeFlags(Set<Flags> flags) {
-        Set<String> flagNames = new HashSet<String>();
+        Set<String> flagNames = new HashSet<>();
         for (Flags flag : flags) {
             flagNames.add(flag.name());
         }
@@ -446,5 +443,13 @@ public class AppPreferences {
     public String getTheme() {
         return preferences.getString(context.getString(R.string.preference_theme_key), context.getResources()
             .getString(R.string.preference_theme_default));
+    }
+
+    public void setAccessToken(String accessToken) {
+        preferences.edit().putString(context.getString(R.string.preference_access_token_key), accessToken).commit();
+    }
+
+    public String getAccessToken() {
+        return preferences.getString(context.getString(R.string.preference_access_token_key), null);
     }
 }

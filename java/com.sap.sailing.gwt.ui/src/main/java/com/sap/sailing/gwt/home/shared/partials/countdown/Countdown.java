@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.SharedResources.MainCss;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
@@ -25,6 +24,7 @@ import com.sap.sailing.gwt.home.shared.partials.countdown.CountdownResources.Loc
 import com.sap.sailing.gwt.home.shared.partials.countdowntimer.CountdownTimer;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class Countdown extends Composite {
 

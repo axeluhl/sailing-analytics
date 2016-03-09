@@ -272,7 +272,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private void openEditRegattaDialog(RegattaDTO regatta, Collection<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsDialog dialog = new RegattaWithSeriesAndFleetsEditDialog(regatta, existingRegattas,
-                existingEvents, stringMessages, new DialogCallback<RegattaDTO>() {
+                existingEvents, /*correspondingEvent*/ null, stringMessages, new DialogCallback<RegattaDTO>() {
                     @Override
                     public void cancel() {
                     }

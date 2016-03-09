@@ -7,6 +7,16 @@
 		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.desktop.partials.solutions.SolutionsResources" />
+    <ui:style>
+        .storeBadgesContainer>a>img {
+            height: 60px;
+            width: auto;
+            margin-right: 10px;
+        }
+        .storeBadgesContainer {
+            margin: 20px 0px;
+        }
+    </ui:style>
 	<g:HTMLPanel>
 		<!-- Page displays all solutions -->
 		<div class="{local_res.css.solutions}">
@@ -122,6 +132,18 @@
 								<p>
 									<ui:text from='{i18n.contentSapSailingRaceManager}' />
 								</p>
+                                <div 
+                                    class="{style.storeBadgesContainer}"
+                                    >
+                                    <a  ui:field="raceManagerPlayStoreLinkUi"
+                                        href="{i18n.playstoreRacecommitteeApp}&amp;{i18n.playstoreCampaign}"
+                                        target="_blank"
+                                        ><img
+                                            ui:field="raceManagerPlayStoreImgUi" 
+                                            alt="Get it on Google Play" 
+                                            src="{i18n.playstoreRacecommitteeBadge}" 
+                                            /></a>
+                                </div>
 								<g:Anchor ui:field="raceCommitteeAppDetailsAnchor"
 									styleName="{res.mainCss.button}">
 									<ui:text from='{i18n.sapSailingRaceManagerReadMore}' />
@@ -158,11 +180,16 @@
 								<p>
 									<ui:text from='{i18n.i18nDeSolutionsTrainingText}' />
 								</p>
-								<a
-									href="https://itunes.apple.com/de/app/stg-trainingstagebuch/id779563635?l=en&amp;mt=8"
-									target="_blank" class="{local_res.css.solutions_content_linkappstore}">
-									<img src="images/home/appstore.png"></img>
-								</a>
+                                <div 
+                                    class="{style.storeBadgesContainer}"
+                                    >
+                                    <a
+                                        alt="Get it on Appstore" 
+                                        href="{i18n.appstoreStgTrainingstagebuch}"
+                                        target="_blank" class="{local_res.css.solutions_content_linkappstore}">
+                                        <img src="images/home/appstore{i18n.appstoreBadgeSuffix}.svg"></img>
+                                    </a>
+                                </div>
 							</div>
 						</div>
 					</div>

@@ -6,8 +6,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -18,10 +16,10 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
-import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
-import com.sap.sse.security.ui.client.component.NewAccountValidator;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserProfileActivity extends AbstractActivity implements UserProfileView.Presenter {
@@ -33,16 +31,15 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     protected final DesktopPlacesNavigator homePlacesNavigator;
 
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
-    private final NewAccountValidator validator = new NewAccountValidator(i18n_sec);
     
     private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView = new TabletAndDesktopUserProfileView();
-    
+
     public UserProfileActivity(AbstractUserProfilePlace place, UserProfileClientFactory clientFactory,
             DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
         this.currentPlace = place;
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
-        
+
         initNavigationPath(navigationPathDisplay);
     }
     
@@ -57,86 +54,16 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
         currentView.registerPresenter(this);
         panel.setWidget(currentView);
         currentView.navigateTabsTo(currentPlace);
-        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+        currentView.setAuthenticationContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
+
         eventBus.addHandler(AuthenticationContextEvent.TYPE, new AuthenticationContextEvent.Handler() {
             @Override
             public void onUserChangeEvent(AuthenticationContextEvent event) {
-                currentView.setUserManagementContext(event.getCtx());
+                currentView.setAuthenticationContext(event.getCtx());
             }
         });
-    }
-
-    @Override
-    public void handleSaveChangesRequest(String fullName, String company) {
-        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
-        clientFactory.getUserManagementService().updateUserProperties(username, fullName, company,
-                new AsyncCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-                clientFactory.getAuthenticationManager().refreshUserInfo();
-                Window.alert(i18n_sec.successfullyUpdatedUserProperties(username));
-            }
-            
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(i18n_sec.errorUpdatingUserProperties(caught.getMessage()));
-            }
-        });
-    }
-
-    @Override
-    public void handleEmailChangeRequest(final String email) {
-        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
-        final String url = Window.Location.createUrlBuilder()
-                .setHash(homePlacesNavigator.getMailVerifiedConfirmationNavigation().getTargetUrl()).buildString();
-        clientFactory.getUserManagementService().updateSimpleUserEmail(username, email, url,
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        Window.alert(i18n_sec.successfullyUpdatedEmail(username, email));
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(i18n_sec.errorUpdatingEmail(caught.getMessage()));
-                    }
-                });
     }
     
-    @Override
-    public void handlePasswordChangeRequest(String oldPassword, String newPassword, String newPasswordConfirmation) {
-        final String username = clientFactory.getAuthenticationManager().getAuthenticationContext().getCurrentUser().getName();
-        String errorMessage = validator.validateUsernameAndPassword(username, newPassword, newPasswordConfirmation);
-        if (errorMessage != null && !errorMessage.isEmpty()) {
-            Window.alert(errorMessage);
-            return;
-        }
-        clientFactory.getUserManagementService().updateSimpleUserPassword(username, oldPassword, null, newPassword, 
-                new AsyncCallback<Void>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        if (caught instanceof UserManagementException) {
-                            String message = ((UserManagementException) caught).getMessage();
-                            if (UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS.equals(message)) {
-                                Window.alert(i18n_sec.passwordDoesNotMeetRequirements());
-                            } else if (UserManagementException.INVALID_CREDENTIALS.equals(message)) {
-                                Window.alert(i18n_sec.invalidCredentials());
-                            } else {
-                                Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
-                            }
-                        } else {
-                            Window.alert(i18n_sec.errorChangingPassword(caught.getMessage()));
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        Window.alert(i18n_sec.passwordSuccessfullyChanged());
-                        currentView.setUserManagementContext(clientFactory.getAuthenticationManager().getAuthenticationContext());
-                    }
-                });
-    }
-
     @Override
     public void handleTabPlaceSelection(TabView<?, ? extends UserProfileView.Presenter> selectedActivity) {
         Place tabPlaceToGo = selectedActivity.placeToFire();
@@ -167,5 +94,21 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     @Override
     public void doTriggerLoginForm() {
         clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
+    }
+    
+    @Override
+    public AuthenticationManager getAuthenticationManager() {
+        return clientFactory.getAuthenticationManager();
+    }
+    
+    @Override
+    public String getMailVerifiedUrl() {
+        return homePlacesNavigator
+                .getMailVerifiedConfirmationNavigation().getTargetUrl();
+    }
+    
+    @Override
+    public UserManagementServiceAsync getUserManagementService() {
+        return clientFactory.getUserManagementService();
     }
 }

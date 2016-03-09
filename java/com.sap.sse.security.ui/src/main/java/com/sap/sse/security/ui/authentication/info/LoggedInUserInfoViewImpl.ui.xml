@@ -13,9 +13,9 @@
             <div class="{local_res.css.info_user_username}" ui:field="userUsernameUi"></div>
         </div>
          <div class="{local_res.css.form_actions}">
-            <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
+            <g:Anchor styleName="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
                     ui:field="userProfileUi"><ui:text from="{i18n_sec.userDetails}" /></g:Anchor>
-            <g:Anchor addStyleNames="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
+            <g:Anchor styleName="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
                     ui:field="signOutUi"><ui:text from="{i18n_sec.signOut}" /></g:Anchor>
         </div>
     </g:HTMLPanel>

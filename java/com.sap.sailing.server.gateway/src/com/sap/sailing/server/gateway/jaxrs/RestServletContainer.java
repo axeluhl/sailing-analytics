@@ -39,13 +39,11 @@ public class RestServletContainer extends ServletContainer {
     @Override
     public void init(ServletConfig config) throws ServletException {  
        super.init(config);  
-       
        BundleContext context = (BundleContext) config.getServletContext().getAttribute(OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
        racingEventServiceTracker = new ServiceTracker<RacingEventService, RacingEventService>(context, RacingEventService.class.getName(), null);
        racingEventServiceTracker.open();
        dataMiningServerTracker = new ServiceTracker<DataMiningServer, DataMiningServer>(context, DataMiningServer.class, null);
        dataMiningServerTracker.open();
-
        config.getServletContext().setAttribute(RACING_EVENT_SERVICE_TRACKER_NAME, racingEventServiceTracker);
        config.getServletContext().setAttribute(DATA_MINING_SERVER_TRACKER_NAME, dataMiningServerTracker);
    }
@@ -53,8 +51,7 @@ public class RestServletContainer extends ServletContainer {
     @Override
     public void destroy() {
         super.destroy();
-        
-        if(racingEventServiceTracker != null) {
+        if (racingEventServiceTracker != null) {
             racingEventServiceTracker.close();
         }
         if (dataMiningServerTracker != null) {

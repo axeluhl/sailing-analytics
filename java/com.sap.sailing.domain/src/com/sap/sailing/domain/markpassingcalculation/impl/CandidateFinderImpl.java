@@ -647,6 +647,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
                 pos.add(po);
             }
+            if (pos.size() != 2){
+                return true;
+            }
             Bearing diff1 = pos.get(0).getBearingGreatCircle(p)
                     .getDifferenceTo(pos.get(0).getBearingGreatCircle(pos.get(1)));
             Bearing diff2 = pos.get(1).getBearingGreatCircle(p)
@@ -757,9 +760,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
                 Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
                 distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
-                        portLinePosition, starboardLinePosition) : portLinePosition != null ? p
-                        .getDistance(portLinePosition) : starboardLinePosition != null ? p
-                        .getDistance(portLinePosition) : null);
+                        portLinePosition, starboardLinePosition) : null);
             }
             break;
         case Offset:
@@ -862,6 +863,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 return new Util.Pair<Mark, Mark>(null, null);
             }
             markPositions.add(estimatedMarkPosition);
+        }
+        if (markPositions.size() != 2){
+            return new Util.Pair<Mark, Mark>(null, null);
         }
         final List<Leg> legs = race.getRace().getCourse().getLegs();
         final int indexOfWaypoint = race.getRace().getCourse().getIndexOfWaypoint(w);
