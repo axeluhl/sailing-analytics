@@ -153,6 +153,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             return;
         }
 
+        if (mRaceList.isDrawerOpen()) {
+            mRaceList.closeDrawer();
+            return;
+        }
+
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_container);
         if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
             if (getFragmentManager().getBackStackEntryCount() > 0) {
