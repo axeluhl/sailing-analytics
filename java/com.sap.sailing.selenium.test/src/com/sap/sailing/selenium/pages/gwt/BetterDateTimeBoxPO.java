@@ -31,6 +31,8 @@ public class BetterDateTimeBoxPO extends TextBoxPO {
     @Override
     public void appendText(String text) {
         super.appendText(text);
+        // Send tabulator key after changing text to ensure the date time boxes datepicker popup is closed.
+        // Otherwise, the popup potentially overlaps other controls, which can cause unexpected errors.
         super.appendText("\t");
     }
     
