@@ -78,9 +78,6 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     public void deliverResult(DataLoaderResult<T> result) {
         if (result.isSuccessful()) {
-            if (result.isResultCached()) {
-                dataHandler.clearCache();
-            }
             dataHandler.onResult(result.getResult());
         }
         super.deliverResult(result);
