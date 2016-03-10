@@ -54,6 +54,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -682,7 +683,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 fillEvents();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
-                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
+                    DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(
+                            sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
                         @Override
                         public void ok(Void editedObject) {
                             openLeaderboardGroupCreationDialog(existingLeaderboardGroups, newEvent);
@@ -691,7 +693,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         @Override
                         public void cancel() {
                         }
-                    }).show();
+                    });
+                    dialog.ensureDebugId("CreateDefaultLeaderboardGroupConfirmDialog");
+                    dialog.show();
                 } else {
                     openCreateDefaultRegattaDialog(newEvent);
                 }
