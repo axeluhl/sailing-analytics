@@ -93,9 +93,9 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             }
         };
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
-            final Date timePoint = parent.timer.getTime();
             @Override
             public void update(int index, final MarkDTO mark, String value) {
+                final Date timePoint = parent.timer.getTime();
                 if (parent.hasFixAtTimePoint(mark, timePoint)) {
                     parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
                 } else {
