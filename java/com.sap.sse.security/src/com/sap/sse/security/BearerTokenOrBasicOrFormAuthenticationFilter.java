@@ -38,9 +38,14 @@ public class BearerTokenOrBasicOrFormAuthenticationFilter extends BasicHttpAuthe
     private final FormAuthenticationFilterWithPublicCreateToken formAuthenticationFilter;
     
     public BearerTokenOrBasicOrFormAuthenticationFilter() {
-        formAuthenticationFilter = new FormAuthenticationFilterWithPublicCreateToken();
+        this(/* application name */ "SAP");
     }
-
+    
+    protected BearerTokenOrBasicOrFormAuthenticationFilter(String applicationName) {
+        formAuthenticationFilter = new FormAuthenticationFilterWithPublicCreateToken();
+        setApplicationName(applicationName);
+    }
+    
     @Override
     protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) {
         String authorizationHeader = getAuthzHeader(request);
