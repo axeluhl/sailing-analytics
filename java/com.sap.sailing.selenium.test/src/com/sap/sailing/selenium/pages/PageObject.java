@@ -22,6 +22,7 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
 import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
+import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
 /**
  * <p>Within a web app's UI there are areas that tests interact with. A page object simply models these as objects
@@ -402,5 +403,13 @@ public class PageObject {
     
     protected void waitUtil(BooleanSupplier supplier) {
         waitUtil((driver) -> supplier.getAsBoolean());
+    }
+    
+    protected <D extends DataEntryDialogPO> D getDialog(DialogPOSupplier<D> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(driver, seleniumId));
+    }
+    
+    protected interface DialogPOSupplier<T extends DataEntryDialogPO> {
+        T get(WebDriver driver, WebElement element);
     }
 }
