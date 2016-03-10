@@ -57,13 +57,13 @@ public class BaseActivity extends SendingServiceAwareActivity {
 
             case R.id.options_menu_logout:
                 ExLog.i(this, TAG, "Clicked LOGOUT");
-                preferences.setAccessToken(null);
                 AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
                         .setTitle(getString(R.string.logout_dialog_title))
                         .setMessage(getString(R.string.logout_dialog_message))
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                preferences.setAccessToken(null);
                                 startActivity(new Intent(BaseActivity.this, PasswordActivity.class));
                                 finish();
                             }

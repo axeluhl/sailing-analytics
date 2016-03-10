@@ -500,5 +500,7 @@
     <string name="password">Password</string>
     <string name="wrong_credentials">Username or password invalid</string>
     <string name="unexpected_error">An unexpected error occurred</string>
+    <string name="sending_exception_title">Warning</string>
+    <string name="sending_exception_message">You have probably not the permission to send data to the server. Do you want to change your login credentials?</string>
 
 </resources>

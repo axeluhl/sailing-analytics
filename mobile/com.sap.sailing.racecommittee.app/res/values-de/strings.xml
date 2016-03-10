@@ -473,5 +473,7 @@
     <string name="password">Passwort</string>
     <string name="wrong_credentials">Nutzername oder Passwort ungültig</string>
     <string name="unexpected_error">Ein unerwarteter Fehler ist aufgetreten</string>
+    <string name="sending_exception_title">Warnung</string>
+    <string name="sending_exception_message">Sie haben wahrscheinlich nicht die Befugniss Daten an den Server zu schicken. Möchten Sie sich als andere Nutzer anmelden?</string>
 
 </resources>
