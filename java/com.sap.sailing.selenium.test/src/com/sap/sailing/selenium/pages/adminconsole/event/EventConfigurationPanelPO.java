@@ -50,9 +50,9 @@ public class EventConfigurationPanelPO extends PageArea {
     
     public void createSimplePublicEvent(String name, String venue, Date startDate, Date endDate) {
         createEventButton.click();
-        EventCreateDialogPO createDialog = getDialog(EventCreateDialogPO::new, "EventCreateDialog");
+        EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, "EventCreateDialog");
         createDialog.createEvent(name, "", venue, startDate, endDate, true);
-        ConfirmDialogPO confirmDialog = getDialog(ConfirmDialogPO::new, "CreateDefaultLeaderboardGroupConfirmDialog");
+        ConfirmDialogPO confirmDialog = getPO(ConfirmDialogPO::new, "CreateDefaultLeaderboardGroupConfirmDialog");
         confirmDialog.pressNo();
     }
     

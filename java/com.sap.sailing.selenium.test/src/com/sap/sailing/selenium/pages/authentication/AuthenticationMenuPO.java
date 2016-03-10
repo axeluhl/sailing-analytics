@@ -29,7 +29,7 @@ public class AuthenticationMenuPO extends PageArea {
     private AuthenticationViewPO showAuthenticationView() {
         getWebElement().click();
         waitUtil(this::isOpen);
-        return new AuthenticationViewPO(driver, findElementBySeleniumId(driver, "authenticationView"));
+        return getPO(AuthenticationViewPO::new, "authenticationView");
     }
     
 }

@@ -22,7 +22,6 @@ import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
 import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
-import com.sap.sailing.selenium.pages.common.DataEntryDialogPO;
 
 /**
  * <p>Within a web app's UI there are areas that tests interact with. A page object simply models these as objects
@@ -405,11 +404,36 @@ public class PageObject {
         waitUtil((driver) -> supplier.getAsBoolean());
     }
     
-    protected <D extends DataEntryDialogPO> D getDialog(DialogPOSupplier<D> supplier, String seleniumId) {
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id using the
+     * {@link WebDriver} as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T getPO(PageAreaSupplier<T> supplier, String seleniumId) {
         return supplier.get(driver, findElementBySeleniumId(driver, seleniumId));
     }
     
-    protected interface DialogPOSupplier<T extends DataEntryDialogPO> {
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
+    protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+    }
+    
+    protected interface PageAreaSupplier<T extends PageArea> {
         T get(WebDriver driver, WebElement element);
     }
+    
 }
