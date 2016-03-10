@@ -23,6 +23,7 @@ import org.moxieapps.gwt.highcharts.client.Series;
 import org.moxieapps.gwt.highcharts.client.ToolTip;
 import org.moxieapps.gwt.highcharts.client.ToolTipData;
 import org.moxieapps.gwt.highcharts.client.ToolTipFormatter;
+import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEventHandler;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
@@ -968,5 +969,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         } else {
             return null;
         }
+    }
+    
+    public XAxis getXAxis() {
+        return chart.getXAxis();
     }
 }
