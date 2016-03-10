@@ -4,8 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 
-import org.json.simple.JSONObject;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -48,6 +46,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.BackPressListener;
+import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SystemInformationActivity;
@@ -59,6 +58,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
 
     private static final String TAG = LoginBackdrop.class.getName();
     private static final int requestCodeQR = 45392;
+    private static final String SHOW_BACKDROP_TEXT = "SHOW_BACKDROP_TEXT";
 
     private IntentReceiver receiver;
     private View login;
@@ -112,13 +112,22 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         return layout;
     }
 
+    public static LoginBackdrop newInstance() {
+
+        Bundle args = new Bundle();
+        args.putBoolean(SHOW_BACKDROP_TEXT, false);
+        LoginBackdrop fragment = new LoginBackdrop();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof LoginActivity) {
-            LoginActivity login = (LoginActivity) activity;
-            login.setBackPressListener(this);
+        if (activity instanceof BaseActivity) {
+            BaseActivity baseActivity = (BaseActivity) activity;
+            baseActivity.setBackPressListener(this);
         }
     }
 
@@ -126,9 +135,9 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     public void onDetach() {
         super.onDetach();
 
-        if (getActivity() instanceof LoginActivity) {
-            LoginActivity activity = (LoginActivity) getActivity();
-            activity.setBackPressListener(null);
+        if (getActivity() instanceof BaseActivity) {
+            BaseActivity baseActivity = (BaseActivity) getActivity();
+            baseActivity.setBackPressListener(null);
         }
     }
 
@@ -141,6 +150,13 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_LOGIN);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_ONBOARDING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(receiver, filter);
+
+        if (getArguments() != null && getView() != null && !getArguments().getBoolean(SHOW_BACKDROP_TEXT, true)) {
+            View view = getView().findViewById(R.id.backdrop_title);
+            if (view != null) {
+                view.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
@@ -207,7 +223,11 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                     AppPreferences pref = AppPreferences.on(v.getContext());
                     View view = View.inflate(v.getContext(), R.layout.login_onboarding_edit, null);
                     final EditText url = (EditText) view.findViewById(R.id.url);
-                    url.setText(pref.getServerBaseURL());
+                    if (TextUtils.isEmpty(pref.getServerBaseURL())) {
+                        url.setText(getString(R.string.preference_server_url_default));
+                    } else {
+                        url.setText(pref.getServerBaseURL());
+                    }
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
                     device_id.setText(pref.getDeviceIdentifier());
 
@@ -217,8 +237,8 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (saveData(
-                                url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText()
-                                    .toString())) {
+                                    url.getText().toString() + "#" + DeviceConfigurationQRCodeUtils.deviceIdentifierKey + "=" + device_id.getText()
+                                            .toString())) {
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
                             }
                         }
@@ -248,6 +268,9 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
 
         TextView url = ViewHelper.get(layout, R.id.server_url);
         if (url != null) {
+            if ("\"SAP\"".equals(server)) {
+                server = null;
+            }
             if (TextUtils.isEmpty(server)) {
                 server = AppPreferences.on(getActivity()).getServerBaseURL();
             }
@@ -266,7 +289,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                 public void onClick(View v) {
                     LoginTask task = new LoginTask(getActivity(), AppPreferences.on(getActivity()).getServerBaseURL(), LoginBackdrop.this);
                     task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new LoginData(userName.getText().toString(), userPassword.getText()
-                        .toString()));
+                            .toString()));
                 }
             });
         }
@@ -297,7 +320,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     private boolean saveData(String content) {
         try {
             DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils
-                .splitQRContent(content);
+                    .splitQRContent(content);
 
             final String identifier = connectionConfiguration.getDeviceIdentifier();
             final URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
@@ -340,8 +363,12 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
     }
 
     @Override
-    public void onRequestReceived(JSONObject json) {
-        BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+    public void onRequestReceived(Boolean authenticated) {
+        if (authenticated) {
+            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_VALID_DATA));
+        } else {
+            Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

@@ -15,7 +15,7 @@ import com.sap.sailing.android.shared.data.http.HttpJsonGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 
-public class AuthCheckTask extends AsyncTask<Void, Void, JSONObject> {
+public class AuthCheckTask extends AsyncTask<Void, Void, Boolean> {
 
     private static final String TAG = AuthCheckTask.class.getName();
 
@@ -37,38 +37,41 @@ public class AuthCheckTask extends AsyncTask<Void, Void, JSONObject> {
     }
 
     @Override
-    protected JSONObject doInBackground(Void... params) {
-        JSONObject result = null;
+    protected Boolean doInBackground(Void... params) {
+        Boolean authenticated = false;
         if (url != null) {
             try {
                 HttpRequest request = new HttpJsonGetRequest(url, context);
                 InputStream responseStream = request.execute();
 
                 JSONParser parser = new JSONParser();
-                result = (JSONObject) parser.parse(new InputStreamReader(responseStream));
+                JSONObject json = (JSONObject) parser.parse(new InputStreamReader(responseStream));
+                if (json.containsKey("authenticated")) {
+                    authenticated = (Boolean) json.get("authenticated");
+                }
             } catch (Exception e) {
                 exception = e;
             }
         } else {
             exception = new IllegalArgumentException();
         }
-        return result;
+        return authenticated;
     }
 
     @Override
-    protected void onPostExecute(JSONObject json) {
-        super.onPostExecute(json);
+    protected void onPostExecute(Boolean authenticated) {
+        super.onPostExecute(authenticated);
         if (listener != null) {
             if (exception != null) {
                 listener.onException(exception);
             } else {
-                listener.onRequestReceived(json);
+                listener.onRequestReceived(authenticated);
             }
         }
     }
 
     public interface AuthCheckTaskListener {
-        void onRequestReceived(JSONObject json);
+        void onRequestReceived(Boolean authenticated);
 
         void onException(Exception exception);
     }

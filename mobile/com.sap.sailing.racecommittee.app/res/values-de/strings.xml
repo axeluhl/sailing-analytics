@@ -174,8 +174,10 @@
     <string name="nationality">Nationalität</string>
     <string name="number">Nummer</string>
     <string name="snap">Fotos schießen</string>
-    <string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
-    <string name="logout_dialog_message">Wenn Sie sich abmelden, wird kein Rennen mehr verwaltet.</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">Wollen Sie sich abmelden und als neuer Nutzer anmelden. Ihre Rennen bleiben im Hintergrund erhalten.</string>
+    <string name="change_dialog_title">Ummelden</string>
+    <string name="change_dialog_message">Wenn Sie sich ummelden, wird kein Rennen mehr auf der aktuellen Bahn mehr verwaltet.</string>
     <string name="logout">Abmelden</string>
     <string name="loading_configuration">Lade Konfiguration&#8230;</string>
     <string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>

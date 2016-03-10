@@ -91,8 +91,6 @@ public class LoginActivity extends BaseActivity
     private ReadonlyDataManager dataManager;
     private View progressSpinner;
 
-    private BackPressListener mBackPressListener;
-
     private ItemSelectedListener<EventBase> eventSelectionListener = new ItemSelectedListener<EventBase>() {
 
         public void itemSelected(Fragment sender, EventBase event) {
@@ -284,9 +282,8 @@ public class LoginActivity extends BaseActivity
         ExLog.i(this, TAG, "Starting Login: " + AppUtils.with(this).getBuildInfo());
         String[] addresses = NetworkHelper.getInstance(this).getLocalIpAddress();
         if (addresses != null) {
-            int len = addresses.length;
-            for (int i = 0; i < len; i++) {
-                ExLog.i(this, TAG, "IP-Addresses: " + addresses[i]);
+            for (String address : addresses) {
+                ExLog.i(this, TAG, "IP-Addresses: " + address);
             }
         }
 
@@ -300,7 +297,12 @@ public class LoginActivity extends BaseActivity
         mSelectedCourseAreaUUID = dataStore.getCourseUUID();
         mSelectedEventId = dataStore.getEventUUID();
         if (mSelectedEventId != null && mSelectedCourseAreaUUID != null) {
-            switchToRacingActivity();
+            if (preferences.getAccessToken() != null) {
+                switchToRacingActivity();
+            } else {
+                startActivity(new Intent(this, PasswordActivity.class));
+                finish();
+            }
         }
 
         setContentView(R.layout.login_view);
@@ -380,17 +382,6 @@ public class LoginActivity extends BaseActivity
         dismissProgressSpinner();
     }
 
-    @Override
-    public void onBackPressed() {
-        if (mBackPressListener != null) {
-            if (!mBackPressListener.handleBackPress()) {
-                super.onBackPressed();
-            }
-        } else {
-            super.onBackPressed();
-        }
-    }
-
     private void setupDataManager() {
         showProgressSpinner();
 
@@ -455,10 +446,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onDialogPositiveButton(AttachedDialogFragment dialog) {
 
-    }
-
-    public void setBackPressListener(BackPressListener listener) {
-        mBackPressListener = listener;
     }
 
     private void slideUpBackdropDelayed() {
