@@ -185,8 +185,8 @@
     <string name="set_tracking_list">Set tracking list</string>
     <string name="confirm_tracking_list">Confirm tracking list</string>
     <string name="snap">Snap</string>
-    <string name="logout_dialog_title">@string/logout</string>
-    <string name="logout_dialog_message">Do you want to logout and login as a new user? All your races will be still monitored.</string>
+    <string name="logout_dialog_title">Sign out</string>
+    <string name="logout_dialog_message">Do you want to sign out and sign in as a new user? All your races will still be monitored.</string>
     <string name="change_dialog_title">Change Regatta</string>
     <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
     <string name="logout">Logout</string>
@@ -501,6 +501,6 @@
     <string name="wrong_credentials">Username or password invalid</string>
     <string name="unexpected_error">An unexpected error occurred</string>
     <string name="sending_exception_title">Warning</string>
-    <string name="sending_exception_message">You have probably not the permission to send data to the server. Do you want to change your login credentials?</string>
+    <string name="sending_exception_message">You probably don\'t have the permission to send data to the server. Do you want to change your login credentials?</string>
 
 </resources>
