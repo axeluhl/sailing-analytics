@@ -1,0 +1,1754 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+	<SailingXRR xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.sailing.org/uploads/xml/sailingXRR_v1.3.xsd" Date="2016-03-10-05:00" Time="05:53:03-05:00" Type="SailingXRR" Version="1.3.1">
+
+	<Boat BoatID="64356" BoatName="Cool Breeze" SailNumber="USA 60432" />
+	<Boat BoatID="64364" BoatName="Flojito Y Cooperando" SailNumber="MEX 384" />
+	<Boat BoatID="64365" BoatName="Extreme2" SailNumber="USA 30009" />
+	<Boat BoatID="64368" BoatName="Sail22 fäle" SailNumber="USA 322" />
+	<Boat BoatID="64385" BoatName="Themis" SailNumber="USA 30015" />
+	<Boat BoatID="64387" BoatName="Late Life Crisis" SailNumber="USA 317" />
+	<Boat BoatID="64388" BoatName="Entourage" SailNumber="USA 201" />
+	<Boat BoatID="64392" BoatName="TBD" SailNumber="USA " />
+	<Boat BoatID="64395" BoatName="Bazinga!" SailNumber="USA 84" />
+	<Boat BoatID="64416" BoatName="Myasasaur" SailNumber="USA 100" />
+	<Boat BoatID="64430" BoatName="Rumor" SailNumber="USA 19" />
+	<Boat BoatID="64456" BoatName="Easy Eights" SailNumber="USA 2" />
+	<Boat BoatID="64481" BoatName="Loco" SailNumber="USA 004" />
+	<Boat BoatID="64499" BoatName="SPOOKIE" SailNumber="USA 95" />
+	<Boat BoatID="64544" BoatName="Zingara" SailNumber="CAN 629" />
+	<Boat BoatID="64776" BoatName="Elusive" SailNumber="BER 308" />
+	<Boat BoatID="64870" BoatName="RUMbunctious" SailNumber="USA 446" />
+	<Boat BoatID="65085" BoatName="Shaka" SailNumber="USA 292" />
+	<Boat BoatID="65279" BoatName="Deviation" SailNumber="USA 24" />
+	<Boat BoatID="66324" BoatName="Empeiria" SailNumber="USA 169" />
+	<Boat BoatID="66603" BoatName="Flight Simulator" SailNumber="USA 64" />
+	<Boat BoatID="66618" BoatName="Overdo" SailNumber="USA 118" />
+	<Boat BoatID="66679" BoatName="Evolution" SailNumber="USA 185" />
+	<Boat BoatID="66853" BoatName="Church Key" SailNumber="USA 59" />
+	<Boat BoatID="67070" BoatName="Party Girl" SailNumber="NOR 800" />
+	<Boat BoatID="67088" BoatName="Touch2Play Racing" SailNumber="CAN 56" />
+	<Boat BoatID="67135" BoatName="Christopher Dragon" SailNumber="USA 4304" />
+	<Boat BoatID="67213" BoatName="Nyabinghi" SailNumber="USA 30007" />
+	<Boat BoatID="67633" BoatName="Still Messin'" SailNumber="USA 001" />
+	<Boat BoatID="67666" BoatName="TriToFly" SailNumber="USA 56737" />
+	<Boat BoatID="67999" BoatName="Black Dog" SailNumber="CAN 121" />
+	<Boat BoatID="68043" BoatName="Tschüss" SailNumber="USA 61180" />
+	<Boat BoatID="68551" BoatName="Hot Mess" SailNumber="USA 397" />
+	<Boat BoatID="69152" BoatName="Bombarda" SailNumber="ITA 841" />
+	<Boat BoatID="69388" BoatName="Second Star" SailNumber="USA 74" />
+	<Boat BoatID="69468" BoatName="Checkmate" SailNumber="GBR 6615R" />
+	<Boat BoatID="69473" BoatName="Instant Karma" SailNumber="USA 20" />
+	<Boat BoatID="69689" BoatName="Double Trouble" SailNumber="USA 93204" />
+	<Boat BoatID="69751" BoatName="Wings" SailNumber="USA 80" />
+	<Boat BoatID="70034" BoatName="Madcow2" SailNumber="USA 46453" />
+	<Boat BoatID="70271" BoatName="Perseverance " SailNumber="USA 7311" />
+	<Boat BoatID="70476" BoatName="Rhumb Punch" SailNumber="USA 26007" />
+	<Boat BoatID="70549" BoatName="Interlodge" SailNumber="USA 4415" />
+	<Boat BoatID="70642" BoatName="Mayhem" SailNumber="USA 21" />
+	<Boat BoatID="70657" BoatName="Powerplay" SailNumber="CAY 30002" />
+	<Boat BoatID="70827" BoatName="BobSled" SailNumber="USA 30023" />
+	<Boat BoatID="71139" BoatName="Life of Riley" SailNumber="USA 239" />
+	<Boat BoatID="71164" BoatName="Stark Raving Mad VIII" SailNumber="USA 30020" />
+	<Boat BoatID="71426" BoatName="Lucky Dog / Gill Race Team" SailNumber="USA 848" />
+	<Boat BoatID="71503" BoatName="Teamwork" SailNumber="USA 52939" />
+	<Boat BoatID="71849" BoatName="Otra Vez" SailNumber="USA 61137" />
+	<Boat BoatID="71871" BoatName="Bella Mente" SailNumber="USA 45" />
+	<Boat BoatID="71951" BoatName="Blondie Down" SailNumber="GBR 6821R" />
+	<Boat BoatID="72295" BoatName="Utah" SailNumber="USA 90" />
+	<Boat BoatID="72463" BoatName="Team RRH" SailNumber="NOR 732" />
+	<Boat BoatID="72709" BoatName="SkyFall" SailNumber="USA 007" />
+	<Boat BoatID="72728" BoatName="Triple Lindy" SailNumber="USA 93310" />
+	<Boat BoatID="72811" BoatName="Wild Child" SailNumber="USA 45" />
+	<Boat BoatID="72879" BoatName="Spaceman Spiff" SailNumber="USA 93" />
+	<Boat BoatID="72880" BoatName="Pied Piper" SailNumber="USA 380" />
+	<Boat BoatID="72886" BoatName="Heartbreaker" SailNumber="USA 353" />
+	<Boat BoatID="72971" BoatName="Orion" SailNumber="USA 12282" />
+	<Boat BoatID="72997" BoatName="Wicked 2.0" SailNumber="USA 30" />
+	<Boat BoatID="73013" BoatName="Cloud Nine" SailNumber="BRA 650" />
+	<Boat BoatID="73054" BoatName="Jings!" SailNumber="GBR 8633R" />
+	<Boat BoatID="73093" BoatName="Tramp" SailNumber="USA 708" />
+	<Boat BoatID="73271" BoatName="Piranha" SailNumber="USA 613" />
+	<Boat BoatID="73313" BoatName="Acqua Veloce" SailNumber="USA 384" />
+	<Boat BoatID="73617" BoatName="Anema and Core" SailNumber="USA 30024" />
+	<Boat BoatID="73946" BoatName="Swordfish" SailNumber="USA 012" />
+	<Boat BoatID="73962" BoatName="Joust" SailNumber="USA 55" />
+	<Boat BoatID="73978" BoatName="Velocity" SailNumber="USA 008" />
+	<Boat BoatID="75016" BoatName="JETHOU" SailNumber="GBR 74R" />
+	<Boat BoatID="76100" BoatName="No28 Pizza Pub" SailNumber="USA 30001" />
+	<Boat BoatID="76121" BoatName="Kleine Rainbow" SailNumber="GER 624" />
+	<Boat BoatID="76199" BoatName="Simply Irresistible" SailNumber="USA 528" />
+	<Boat BoatID="76221" BoatName="Bluto" SailNumber="USA 53194" />
+	<Boat BoatID="76283" BoatName="Rimette" SailNumber="USA 340" />
+	<Boat BoatID="76322" BoatName="Courageous" SailNumber="USA 77" />
+	<Boat BoatID="76374" BoatName="Heat Wave" SailNumber="USA 29" />
+	<Boat BoatID="76396" BoatName="Arethusa" SailNumber="USA 61006" />
+	<Boat BoatID="76400" BoatName="Zig Zag" SailNumber="USA 625" />
+	<Boat BoatID="76424" BoatName="Decision" SailNumber="USA 84001" />
+	<Boat BoatID="76428" BoatName="Reach Around" SailNumber="USA 839" />
+	<Boat BoatID="76433" BoatName="Caol Ila R" SailNumber="GBR 8728R" />
+	<Boat BoatID="76439" BoatName="Lite-N-Up" SailNumber="USA 29" />
+	<Boat BoatID="76450" BoatName="USA 425" SailNumber="USA 425" />
+	<Boat BoatID="76459" BoatName="USA 378" SailNumber="USA 378" />
+	<Boat BoatID="76469" BoatName="Risky Business" SailNumber="USA 665" />
+	<Boat BoatID="76472" BoatName="Proteus" SailNumber="USA 60722" />
+	<Boat BoatID="76482" BoatName="Wooton" SailNumber="USA 89" />
+	<Boat BoatID="76483" BoatName="Skeleton Key" SailNumber="USA 115" />
+	<Boat BoatID="76485" BoatName="White Walker" SailNumber="USA 009" />
+	<Boat BoatID="76491" BoatName="Blondie 2" SailNumber="USA 82" />
+	<Boat BoatID="76504" BoatName="Sprint 6" SailNumber="USA 2608" />
+	<Boat BoatID="76506" BoatName="Pandemonium" SailNumber="GBR 011" />
+	<Boat BoatID="76509" BoatName="Nitemare" SailNumber="USA 335" />
+	<Boat BoatID="76517" BoatName="Fleeboflam" SailNumber="USA 1235" />
+	<Boat BoatID="76523" BoatName="The 300 " SailNumber="USA 839" />
+	<Boat BoatID="76527" BoatName="Grateful Red" SailNumber="USA 42" />
+	<Boat BoatID="76531" BoatName="Wired" SailNumber="USA 808" />
+	<Boat BoatID="76584" BoatName="Peer Pressure" SailNumber="USA 203" />
+	<Boat BoatID="76597" BoatName="Soul" SailNumber="USA 312" />
+	<Boat BoatID="76678" BoatName="AYBE" SailNumber="GBR 9" />
+	<Boat BoatID="76703" BoatName="Blue Steel" SailNumber="USA 185" />
+	<Boat BoatID="76712" BoatName="Gladiator" SailNumber="GBR 11152L" />
+	<Boat BoatID="76738" BoatName="Supra Turbo" SailNumber="USA 2610" />
+	<Boat BoatID="76779" BoatName="Black River Racing" SailNumber="USA 51" />
+	<Boat BoatID="76786" BoatName="USA 2604" SailNumber="USA 26004" />
+	<Boat BoatID="76801" BoatName="Norwegian Steam" SailNumber="NOR 645" />
+	<Boat BoatID="76851" BoatName="Quantum Racing" SailNumber="USA 52015" />
+	<Boat BoatID="76868" BoatName="Sudoeste" SailNumber="BRA 677" />
+	<Boat BoatID="76872" BoatName="Zombie" SailNumber="USA 382" />
+	<Boat BoatID="76873" BoatName="Vertigo too " SailNumber="GBR 910" />
+	<Boat BoatID="76876" BoatName="D I E S E L" SailNumber="USA 005" />
+	<Boat BoatID="76914" BoatName="Jazz" SailNumber="USA 1" />
+	<Boat BoatID="76923" BoatName="Ocean Pact" SailNumber="BRA 642" />
+	<Boat BoatID="76994" BoatName="Relative Obscurity" SailNumber="USA 49" />
+	<Boat BoatID="77042" BoatName="AFRICA" SailNumber="USA 179" />
+	<Boat BoatID="77072" BoatName="24 Heures" SailNumber="USA 57521" />
+	<Boat BoatID="77167" BoatName="JElvis Jr" SailNumber="GBR 108" />
+	<Boat BoatID="77177" BoatName="Marnatura" SailNumber="ESP 669" />
+	<Boat BoatID="77182" BoatName="Tsunami" SailNumber="USA 4215" />
+	<Boat BoatID="78197" BoatName="Blind Squirrel" SailNumber="USA 290" />
+	<Boat BoatID="78199" BoatName="Clown Car" SailNumber="USA 245" />
+	<Boat BoatID="78203" BoatName="Calvi Network" SailNumber="ITA 456" />
+	<Boat BoatID="78204" BoatName="Anticipation" SailNumber="USA 50734" />
+	<Boat BoatID="78215" BoatName="Family Truckster" SailNumber="USA 217" />
+	<Boat BoatID="78287" BoatName="Running Wild" SailNumber="USA 171" />
+	<Boat BoatID="78317" BoatName="Andiamo" SailNumber="USA 18" />
+	<Boat BoatID="78327" BoatName="Catapult" SailNumber="USA 187" />
+	<Boat BoatID="78346" BoatName="Bravo" SailNumber="USA 60909" />
+	<Boat BoatID="78365" BoatName="Vortex" SailNumber="USA 219" />
+	<Boat BoatID="78469" BoatName="Defiant" SailNumber="BER 212" />
+	<Boat BoatID="78489" BoatName="upupup" SailNumber="DEN 837" />
+	<Boat BoatID="78502" BoatName="Spaceman Spiff" SailNumber="USA 15" />
+	<Boat BoatID="78527" BoatName="Madre Maria" SailNumber="USA 101" />
+	<Boat BoatID="78535" BoatName="Jrhino" SailNumber="USA 92" />
+	<Boat BoatID="78537" BoatName="High Noise" SailNumber="USA " />
+	<Boat BoatID="78577" BoatName="Selkie" SailNumber="USA 411" />
+	<Boat BoatID="78607" BoatName="Reggae Sharks" SailNumber="USA 503" />
+	<Boat BoatID="78680" BoatName="Eagles Wings" SailNumber="USA 66" />
+	<Boat BoatID="78696" BoatName="Black Seal" SailNumber="GBR 850" />
+	<Boat BoatID="78717" BoatName="Reach Around / PPRT" SailNumber="USA 151" />
+	<Boat BoatID="78722" BoatName="Mojito" SailNumber="USA 199" />
+	<Boat BoatID="78732" BoatName="Zoo" SailNumber="USA 414" />
+	<Boat BoatID="78784" BoatName="Ceann Saile" SailNumber="USA 7101" />
+	<Boat BoatID="78802" BoatName="Phoenix" SailNumber="USA 220" />
+	<Boat BoatID="78813" BoatName="LM Information Delivery" SailNumber="USA 88" />
+	<Boat BoatID="78821" BoatName="VitaminJ" SailNumber="USA 243" />
+	<Boat BoatID="78843" BoatName="Eagle's Eye" SailNumber="USA 1" />
+	<Boat BoatID="79027" BoatName="Savasana" SailNumber="USA 96" />
+	<Boat BoatID="79042" BoatName="Rattle N Rum" SailNumber="USA 2604" />
+	<Boat BoatID="79051" BoatName="B2" SailNumber="ITA 906" />
+	<Boat BoatID="79056" BoatName="Black Seal" SailNumber="USA 310" />
+	<Boat BoatID="79059" BoatName="Helly Hansen" SailNumber="USA 2" />
+	<Boat BoatID="79084" BoatName="Torqeedo" SailNumber="USA 159" />
+	<Boat BoatID="79126" BoatName="Button Fly" SailNumber="USA 501" />
+	<Boat BoatID="79127" BoatName="Lickity Split" SailNumber="USA 375" />
+	<Boat BoatID="79155" BoatName="Team Naviga" SailNumber="USA 312" />
+	<Boat BoatID="79157" BoatName="Hooligan: Flat Stanley Racing" SailNumber="USA 389" />
+	<Boat BoatID="79173" BoatName="Standard Deviation" SailNumber="USA 006" />
+	<Boat BoatID="79188" BoatName="Surge" SailNumber="USA 153" />
+	<Boat BoatID="79196" BoatName="Down the Line" SailNumber="USA 72" />
+
+	<Person PersonID="95207" BoatID="64356" ISAFPersonID="USABL10" Position="Helm" FamilyName="Cooper" GivenName="John" NOC="USA" />
+	<Person PersonID="95209" BoatID="64356" ISAFPersonID="USABL10" Position="Tactician" FamilyName="Liberty" GivenName="Billy" NOC="USA" />
+	<Person PersonID="108889" BoatID="64356" ISAFPersonID="USAJB334" Position="Pit" FamilyName="Borowski" GivenName="John" NOC="USA" />
+	<Person PersonID="108890" BoatID="64356" ISAFPersonID="" Position="Strategist" FamilyName="Liberty" GivenName="Daniel" NOC="USA" />
+	<Person PersonID="121583" BoatID="64356" ISAFPersonID="" Position="Navigator" FamilyName="Fast" GivenName="Kyle" NOC="USA" />
+	<Person PersonID="121584" BoatID="64356" ISAFPersonID="" Position="Helm" FamilyName="Liberty" GivenName="Ed " NOC="USA" />
+	<Person PersonID="121586" BoatID="64356" ISAFPersonID="" Position="Bow" FamilyName="Murphy" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="121587" BoatID="64356" ISAFPersonID="" Position="Main Trimmer" FamilyName="Waine" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="121589" BoatID="64356" ISAFPersonID="" Position="Mast" FamilyName="Nahon" GivenName="Paul" NOC="USA" />
+	<Person PersonID="121592" BoatID="64356" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Olving" GivenName="Eric " NOC="USA" />
+	<Person PersonID="122291" BoatID="64356" ISAFPersonID="" Position="Mast" FamilyName="Pappas" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="124975" BoatID="64356" ISAFPersonID="USAIL7" Position="Strategist" FamilyName="Liberty" GivenName="Ian" NOC="USA" />
+	<Person PersonID="124977" BoatID="64356" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Fries" GivenName="John " NOC="USA" />
+	<Person PersonID="124978" BoatID="64356" ISAFPersonID="" Position="" FamilyName="Hamilton" GivenName="Douglas" NOC="USA" />
+	<Person PersonID="123722" BoatID="64364" ISAFPersonID="MEXJF" Position="Helm" FamilyName="Fernandez Neckelmann" GivenName="Julian" NOC="Mexico" />
+	<Person PersonID="123723" BoatID="64364" ISAFPersonID="USAWH3" Position="Tactician" FamilyName="Hardesty" GivenName="Bill " NOC="USA" />
+	<Person PersonID="123724" BoatID="64364" ISAFPersonID="USAWV" Position="Headsail Trimmer" FamilyName="Van Waay" GivenName="Willem" NOC="USA" />
+	<Person PersonID="123725" BoatID="64364" ISAFPersonID="MEXDB3" Position="Bow" FamilyName="Belausteguigoitia Fierro" GivenName="Danel" NOC="USA" />
+	<Person PersonID="95250" BoatID="64365" ISAFPersonID="USADC15" Position="Owner" FamilyName="Cheresh" GivenName="Dan" NOC="USA" />
+	<Person PersonID="109182" BoatID="64365" ISAFPersonID="usads60" Position="Captain" FamilyName="Shriner" GivenName="Dave" NOC="USA" />
+	<Person PersonID="109183" BoatID="64365" ISAFPersonID="usaev12" Position="" FamilyName="Vigrass" GivenName="Eric" NOC="USA" />
+	<Person PersonID="109184" BoatID="64365" ISAFPersonID="USAPC70" Position="Other" FamilyName="Crawford" GivenName="Petey" NOC="USA" />
+	<Person PersonID="117618" BoatID="64365" ISAFPersonID="USABB138" Position="Pit Assist" FamilyName="Bachman" GivenName="Bryn" NOC="USA" />
+	<Person PersonID="117619" BoatID="64365" ISAFPersonID="AUSKS6" Position="Chef" FamilyName="Searle" GivenName="Keiran " NOC="USA" />
+	<Person PersonID="117620" BoatID="64365" ISAFPersonID="usamr38" Position="Tactician" FamilyName="Reeser" GivenName="Morgan" NOC="USA" />
+	<Person PersonID="95254" BoatID="64368" ISAFPersonID="" Position="" FamilyName="Furry" GivenName="Ed" NOC="USA" />
+	<Person PersonID="95306" BoatID="64385" ISAFPersonID="" Position="Skipper" FamilyName="Thirion" GivenName="Walt" NOC="USA" />
+	<Person PersonID="123963" BoatID="64385" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Dallman-Weiss" GivenName="Lara" NOC="USA" />
+	<Person PersonID="123964" BoatID="64385" ISAFPersonID="usage02" Position="Tactician" FamilyName="ewenson" GivenName="geoffrey" NOC="USA" />
+	<Person PersonID="123965" BoatID="64385" ISAFPersonID="USANE10" Position="Helm" FamilyName="Ewenson" GivenName="Nick" NOC="USA" />
+	<Person PersonID="123966" BoatID="64385" ISAFPersonID="na" Position="Main Trimmer" FamilyName="flynn" GivenName="Dave" NOC="USA" />
+	<Person PersonID="123967" BoatID="64385" ISAFPersonID="" Position="Bow" FamilyName="kirby" GivenName="Collin" NOC="USA" />
+	<Person PersonID="123968" BoatID="64385" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Ponting" GivenName="Hobie" NOC="USA" />
+	<Person PersonID="95308" BoatID="64387" ISAFPersonID="" Position="" FamilyName="Corbishley" GivenName="Corbo" NOC="USA" />
+	<Person PersonID="95309" BoatID="64388" ISAFPersonID="" Position="" FamilyName="Amendola" GivenName="Nick" NOC="USA" />
+	<Person PersonID="95317" BoatID="64392" ISAFPersonID="USAJB21" Position="" FamilyName="Bone" GivenName="Joshua" NOC="USA" />
+	<Person PersonID="95322" BoatID="64395" ISAFPersonID="" Position="Helm" FamilyName="Goldberg" GivenName="Daniel" NOC="USA" />
+	<Person PersonID="108527" BoatID="64395" ISAFPersonID="USAKB4" Position="Spinnaker trimmer" FamilyName="Berry" GivenName="Kristen" NOC="USA" />
+	<Person PersonID="108528" BoatID="64395" ISAFPersonID="USAKG2" Position="Headsail Trimmer" FamilyName="Goldsmith" GivenName="Kyra" NOC="USA" />
+	<Person PersonID="108529" BoatID="64395" ISAFPersonID="" Position="Bow" FamilyName="Menges" GivenName="Carson" NOC="USA" />
+	<Person PersonID="95353" BoatID="64416" ISAFPersonID="" Position="" FamilyName="Wilusz" GivenName="Craig Deborah" NOC="USA" />
+	<Person PersonID="95376" BoatID="64430" ISAFPersonID="" Position="" FamilyName="Storck, Jr" GivenName="John" NOC="USA" />
+	<Person PersonID="118025" BoatID="64456" ISAFPersonID="USAJS335" Position="Tactician" FamilyName="Spierling" GivenName="John" NOC="USA" />
+	<Person PersonID="118026" BoatID="64456" ISAFPersonID="CANBC19" Position="Strategist" FamilyName="Cross" GivenName="Brad" NOC="CA" />
+	<Person PersonID="118027" BoatID="64456" ISAFPersonID="USAJP154" Position="Helm" FamilyName="Pawlowski" GivenName="Jeffrey" NOC="USA" />
+	<Person PersonID="118028" BoatID="64456" ISAFPersonID="USAJP155" Position="Headsail Trimmer" FamilyName="Pawlowski" GivenName="Joseph" NOC="USA" />
+	<Person PersonID="118048" BoatID="64456" ISAFPersonID="USAKP44" Position="" FamilyName="Daniel" GivenName="Karyn Pawlowski" NOC="USA" />
+	<Person PersonID="118049" BoatID="64456" ISAFPersonID="USAPD80" Position="Headsail Trimmer" FamilyName="Daniel" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="124342" BoatID="64456" ISAFPersonID="CANNL7" Position="" FamilyName="Lounsbury" GivenName="Nick" NOC="CA" />
+	<Person PersonID="95542" BoatID="64481" ISAFPersonID="USAEF37" Position="Helm" FamilyName="Feo" GivenName="Edwin" NOC="USA" />
+	<Person PersonID="118180" BoatID="64481" ISAFPersonID="GBRKM4" Position="Main Trimmer" FamilyName="Magnussen" GivenName="Keith" NOC="USA" />
+	<Person PersonID="118181" BoatID="64481" ISAFPersonID="USAEE3" Position="Tactician" FamilyName="Shampain" GivenName="Erik" NOC="USA" />
+	<Person PersonID="118182" BoatID="64481" ISAFPersonID="USADM111" Position="Strategist" FamilyName="Millett" GivenName="Dave" NOC="USA" />
+	<Person PersonID="118183" BoatID="64481" ISAFPersonID="USACS147" Position="Bow" FamilyName="Schlub" GivenName="Cody" NOC="USA" />
+	<Person PersonID="118184" BoatID="64481" ISAFPersonID="USADD41" Position="Headsail Trimmer" FamilyName="Durant" GivenName="Dustin" NOC="USA" />
+	<Person PersonID="118185" BoatID="64481" ISAFPersonID="USABW86" Position="Offside trimmer" FamilyName="Wheatley" GivenName="Ben" NOC="USA" />
+	<Person PersonID="95594" BoatID="64499" ISAFPersonID="USASB" Position="Helm" FamilyName="Benjamin " GivenName="Steve" NOC="USA" />
+	<Person PersonID="124070" BoatID="64499" ISAFPersonID="USAAR21" Position="Navigator" FamilyName="Reggio" GivenName="Anderson" NOC="USA" />
+	<Person PersonID="124086" BoatID="64499" ISAFPersonID="" Position="Pit" FamilyName="Quatromoni" GivenName="Ben" NOC="USA" />
+	<Person PersonID="124087" BoatID="64499" ISAFPersonID="" Position="Medic/Doctor" FamilyName="McHugh" GivenName="Charles" NOC="USA" />
+	<Person PersonID="124088" BoatID="64499" ISAFPersonID="" Position="Runners" FamilyName="Kam" GivenName="Chris" NOC="USA" />
+	<Person PersonID="124090" BoatID="64499" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Williams" GivenName="Christopher" NOC="USA" />
+	<Person PersonID="124093" BoatID="64499" ISAFPersonID="" Position="Strategist" FamilyName="Benjamin" GivenName="Heidi" NOC="USA" />
+	<Person PersonID="124095" BoatID="64499" ISAFPersonID="USAKS17" Position="Grinder" FamilyName="Savitt" GivenName="Kevin" NOC="USA" />
+	<Person PersonID="124096" BoatID="64499" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Towill" GivenName="Mark" NOC="USA" />
+	<Person PersonID="124098" BoatID="64499" ISAFPersonID="" Position="Main Trimmer" FamilyName="Reynolds" GivenName="Matthew" NOC="USA" />
+	<Person PersonID="124099" BoatID="64499" ISAFPersonID="ISVPH1" Position="Tactician" FamilyName="Holmberg" GivenName="Peter" NOC="USA" />
+	<Person PersonID="124100" BoatID="64499" ISAFPersonID="" Position="Grinder" FamilyName="Carey" GivenName="Peter " NOC="USA" />
+	<Person PersonID="124101" BoatID="64499" ISAFPersonID="" Position="Bow" FamilyName="Kane" GivenName="Robert" NOC="USA" />
+	<Person PersonID="124102" BoatID="64499" ISAFPersonID="" Position="Grinder" FamilyName="Kononchik" GivenName="Ryan" NOC="USA" />
+	<Person PersonID="124103" BoatID="64499" ISAFPersonID="" Position="Grinder" FamilyName="Hallowell" GivenName="Sam" NOC="USA" />
+	<Person PersonID="124909" BoatID="64499" ISAFPersonID="" Position="Alternate" FamilyName="Wilson" GivenName="McKenzie" NOC="USA" />
+	<Person PersonID="95683" BoatID="64544" ISAFPersonID="CANRR5" Position="Helm" FamilyName="Reid" GivenName="Richard" NOC="CAN" />
+	<Person PersonID="122989" BoatID="64544" ISAFPersonID="SUICR1" Position="Tactician" FamilyName="Rast" GivenName="Chris " NOC="USA" />
+	<Person PersonID="122990" BoatID="64544" ISAFPersonID="" Position="Bow" FamilyName="Gooderham" GivenName="Bill " NOC="USA" />
+	<Person PersonID="122991" BoatID="64544" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Douglas" GivenName="Greg" NOC="USA" />
+	<Person PersonID="96273" BoatID="64776" ISAFPersonID="" Position="" FamilyName="Millican " GivenName="Chuck" NOC="BER" />
+	<Person PersonID="96415" BoatID="64870" ISAFPersonID="" Position="" FamilyName="Pirie" GivenName="Steve" NOC="USA" />
+	<Person PersonID="96879" BoatID="65085" ISAFPersonID="USAKS115" Position="Owner" FamilyName="Shannon" GivenName="KC" NOC="USA" />
+	<Person PersonID="114738" BoatID="65085" ISAFPersonID="USATS67" Position="Pit" FamilyName="Sawchuk" GivenName="Tom" NOC="USA" />
+	<Person PersonID="114740" BoatID="65085" ISAFPersonID="USADN2" Position="Tactician" FamilyName="Nickel" GivenName="Doug " NOC="USA" />
+	<Person PersonID="124945" BoatID="65085" ISAFPersonID="USAJT153" Position="Spinnaker trimmer" FamilyName="Tudor" GivenName="Jeremy" NOC="USA" />
+	<Person PersonID="97323" BoatID="65279" ISAFPersonID="" Position="" FamilyName="Vogel" GivenName="Iris" NOC="USA" />
+	<Person PersonID="124523" BoatID="65279" ISAFPersonID="" Position="Bow" FamilyName="Longo" GivenName="Tim" NOC="USA" />
+	<Person PersonID="124524" BoatID="65279" ISAFPersonID="USAWP53" Position="Headsail Trimmer" FamilyName="Pelland" GivenName="Wes" NOC="USA" />
+	<Person PersonID="124525" BoatID="65279" ISAFPersonID="USABH83" Position="Main Trimmer" FamilyName="Heintz" GivenName="Bill" NOC="USA" />
+	<Person PersonID="124526" BoatID="65279" ISAFPersonID="USAOJ1" Position="Bow" FamilyName="Jones" GivenName="Oakley" NOC="USA" />
+	<Person PersonID="124527" BoatID="65279" ISAFPersonID="" Position="Tactician" FamilyName="Klingler" GivenName="Kerry" NOC="USA" />
+	<Person PersonID="99867" BoatID="66324" ISAFPersonID="USAJH119" Position="Skipper" FamilyName="Heaton" GivenName="John" NOC="USA" />
+	<Person PersonID="123236" BoatID="66324" ISAFPersonID="" Position="" FamilyName="Mason" GivenName="Zach" NOC="USA" />
+	<Person PersonID="123237" BoatID="66324" ISAFPersonID="" Position="" FamilyName="Rohde" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123238" BoatID="66324" ISAFPersonID="" Position="" FamilyName="Driscoll" GivenName="Dan" NOC="USA" />
+	<Person PersonID="100934" BoatID="66603" ISAFPersonID="" Position="" FamilyName="Reese" GivenName="Tom" NOC="USA" />
+	<Person PersonID="123171" BoatID="66603" ISAFPersonID="" Position="" FamilyName="Rubino" GivenName="RJ" NOC="USA" />
+	<Person PersonID="123173" BoatID="66603" ISAFPersonID="" Position="Mid Bow" FamilyName="Whitson" GivenName="Ron" NOC="USA" />
+	<Person PersonID="123174" BoatID="66603" ISAFPersonID="" Position="" FamilyName="Green" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="100984" BoatID="66618" ISAFPersonID="" Position="" FamilyName="Novak" GivenName="John" NOC="USA" />
+	<Person PersonID="101855" BoatID="66853" ISAFPersonID="USACC76" Position="" FamilyName="Chadwick" GivenName="Chris " NOC="USA" />
+	<Person PersonID="102405" BoatID="67070" ISAFPersonID="NORJW1" Position="Helm" FamilyName="Wathne" GivenName="Jens " NOC="NOR" />
+	<Person PersonID="121968" BoatID="67070" ISAFPersonID="NORJW3" Position="Tactician" FamilyName="Wathne" GivenName="Jørgen" NOC="USA" />
+	<Person PersonID="121969" BoatID="67070" ISAFPersonID="USATM65" Position="Bow" FamilyName="Murray" GivenName="Tom" NOC="USA" />
+	<Person PersonID="121970" BoatID="67070" ISAFPersonID="USACC76" Position="Mid Bow" FamilyName="Chadwick" GivenName="Chrisopher" NOC="USA" />
+	<Person PersonID="102471" BoatID="67088" ISAFPersonID="CANRB12" Position="" FamilyName="Butler " GivenName="Rob " NOC="CAN" />
+	<Person PersonID="124089" BoatID="67088" ISAFPersonID="Usahn11" Position="Bow" FamilyName="Noble" GivenName="Hillary" NOC="USA" />
+	<Person PersonID="124091" BoatID="67088" ISAFPersonID="Cankp12" Position="Chef" FamilyName="Piper" GivenName="Keven" NOC="Can" />
+	<Person PersonID="124092" BoatID="67088" ISAFPersonID="CANMW19" Position="Spinnaker trimmer" FamilyName="Wallace" GivenName="Matt" NOC="CAN" />
+	<Person PersonID="124094" BoatID="67088" ISAFPersonID="USAGS22" Position="Other" FamilyName="Schwarting" GivenName="Gary" NOC="USA" />
+	<Person PersonID="124097" BoatID="67088" ISAFPersonID="CANTN1" Position="Grinder" FamilyName="Nelson" GivenName="Tom" NOC="" />
+	<Person PersonID="124104" BoatID="67088" ISAFPersonID="CANLH4" Position="Chef" FamilyName="Huibers" GivenName="Larry" NOC="USA" />
+	<Person PersonID="123615" BoatID="67135" ISAFPersonID="USAAW46" Position="Helm" FamilyName="Weiss" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="123616" BoatID="67135" ISAFPersonID="USALW37" Position="Skipper" FamilyName="Weiss" GivenName="Linda " NOC="USA" />
+	<Person PersonID="123617" BoatID="67135" ISAFPersonID="USAEB35" Position="Captain" FamilyName="Bahen" GivenName="Ed " NOC="USA" />
+	<Person PersonID="123618" BoatID="67135" ISAFPersonID="" Position="Main Trimmer" FamilyName="Considine" GivenName="Pat" NOC="USA" />
+	<Person PersonID="123619" BoatID="67135" ISAFPersonID="USAMF24" Position="Spinnaker trimmer" FamilyName="Floyd" GivenName="Mike " NOC="USA" />
+	<Person PersonID="123620" BoatID="67135" ISAFPersonID="usalc39" Position="Headsail Trimmer" FamilyName="Cutler" GivenName="Lawrence" NOC="USA" />
+	<Person PersonID="123621" BoatID="67135" ISAFPersonID="USALF7" Position="Navigator" FamilyName="Fox" GivenName="Larry" NOC="USA" />
+	<Person PersonID="123622" BoatID="67135" ISAFPersonID="USABL18" Position="Strategist" FamilyName="LaMotte" GivenName="Byren" NOC="USA" />
+	<Person PersonID="123623" BoatID="67135" ISAFPersonID="USACU6" Position="Tactician" FamilyName="Ulmer" GivenName="Butch" NOC="USA" />
+	<Person PersonID="123624" BoatID="67135" ISAFPersonID="USABW17" Position="Mid Bow" FamilyName="Wilkinson" GivenName="Ben" NOC="USA" />
+	<Person PersonID="123625" BoatID="67135" ISAFPersonID="" Position="Mast" FamilyName="Johnson" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="123626" BoatID="67135" ISAFPersonID="USAEP48" Position="Pit" FamilyName="Padin" GivenName="Buttons" NOC="USA" />
+	<Person PersonID="102686" BoatID="67213" ISAFPersonID="USAAD22" Position="Owner" FamilyName="Davis" GivenName="Angus" NOC="USA" />
+	<Person PersonID="123329" BoatID="67213" ISAFPersonID="" Position="Runners" FamilyName="Campagna" GivenName="Nick" NOC="USA" />
+	<Person PersonID="123330" BoatID="67213" ISAFPersonID="NZLCA1" Position="Tactician" FamilyName="Appleton" GivenName="Cameron" NOC="USA" />
+	<Person PersonID="123331" BoatID="67213" ISAFPersonID="USACE14" Position="Main Trimmer" FamilyName="Enright" GivenName="Charlie" NOC="USA" />
+	<Person PersonID="123332" BoatID="67213" ISAFPersonID="USALM39" Position="Pit" FamilyName="Mitchell" GivenName="Leeds" NOC="USA" />
+	<Person PersonID="123333" BoatID="67213" ISAFPersonID="USANB16" Position="Bow" FamilyName="Berge" GivenName="Norman" NOC="USA" />
+	<Person PersonID="123334" BoatID="67213" ISAFPersonID="USADR16" Position="" FamilyName="Reed" GivenName="David" NOC="USA" />
+	<Person PersonID="103761" BoatID="67633" ISAFPersonID="USAAE22" Position="" FamilyName="Esselman" GivenName="Adam" NOC="USA" />
+	<Person PersonID="123949" BoatID="67999" ISAFPersonID="CANPD13" Position="Tactician" FamilyName="Dennis" GivenName="Paul" NOC="CAN" />
+	<Person PersonID="123950" BoatID="67999" ISAFPersonID="CANDH13" Position="Bowman" FamilyName="Hymers" GivenName="Dave " NOC="CAN" />
+	<Person PersonID="123951" BoatID="67999" ISAFPersonID="CANES10" Position="Spinnaker trimmer" FamilyName="Schaefer" GivenName="Eric" NOC="CAN" />
+	<Person PersonID="123952" BoatID="67999" ISAFPersonID="CANDB22" Position="Helmsman" FamilyName="Black" GivenName="Dave" NOC="CAN" />
+	<Person PersonID="122373" BoatID="68043" ISAFPersonID="" Position="Helm" FamilyName="Zugel" GivenName="Christian " NOC="USA" />
+	<Person PersonID="122374" BoatID="68043" ISAFPersonID="IRLER1" Position="Navigator" FamilyName="Rohan" GivenName="Eamonn " NOC="IRL" />
+	<Person PersonID="123591" BoatID="68043" ISAFPersonID="IRLMO4" Position="Main Trimmer" FamilyName="OConnell" GivenName="Maurice " NOC="IRL" />
+	<Person PersonID="123592" BoatID="68043" ISAFPersonID="" Position="Pit" FamilyName="Mordaunt " GivenName="Johnny " NOC="Uk" />
+	<Person PersonID="123593" BoatID="68043" ISAFPersonID="" Position="Bow" FamilyName="Glynn" GivenName="Keith " NOC="USA" />
+	<Person PersonID="123594" BoatID="68043" ISAFPersonID="USABJ2" Position="Headsail Trimmer" FamilyName="Janny" GivenName="Brian" NOC="USA" />
+	<Person PersonID="123595" BoatID="68043" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Elliott" GivenName="Jeremy " NOC="USA" />
+	<Person PersonID="123596" BoatID="68043" ISAFPersonID="IRLMO28" Position="Tactician" FamilyName="O'Leary" GivenName="Marty" NOC="USA" />
+	<Person PersonID="123597" BoatID="68043" ISAFPersonID="IRLKJ1" Position="Grinder" FamilyName="Johnson" GivenName="Kevin" NOC="IRL" />
+	<Person PersonID="123598" BoatID="68043" ISAFPersonID="1" Position="Mast" FamilyName="Claxton" GivenName="Michael" NOC="Uk" />
+	<Person PersonID="125346" BoatID="68043" ISAFPersonID="IRLER1" Position="Navigator" FamilyName="Rohan" GivenName="Eamonn " NOC="USA" />
+	<Person PersonID="105340" BoatID="68551" ISAFPersonID="usarb88" Position="" FamilyName="Britts" GivenName="Rob" NOC="USA" />
+	<Person PersonID="123867" BoatID="68551" ISAFPersonID="AUSBM2" Position="" FamilyName="Moon" GivenName="Ben " NOC="USA" />
+	<Person PersonID="123868" BoatID="68551" ISAFPersonID="USASL36" Position="Tactician" FamilyName="Liebel" GivenName="Steve" NOC="USA" />
+	<Person PersonID="123869" BoatID="68551" ISAFPersonID="USACT11" Position="Bow" FamilyName="Walsh" GivenName="Coleen " NOC="USA" />
+	<Person PersonID="106627" BoatID="69152" ISAFPersonID="" Position="" FamilyName="POZZI" GivenName="ANDREA" NOC="ITA" />
+	<Person PersonID="113553" BoatID="69152" ISAFPersonID="" Position="" FamilyName="POZZI" GivenName="FRANCESCO" NOC="ITA" />
+	<Person PersonID="113556" BoatID="69152" ISAFPersonID="" Position="" FamilyName="DESIDERATO" GivenName="GIULIO" NOC="ITA" />
+	<Person PersonID="113558" BoatID="69152" ISAFPersonID="" Position="" FamilyName="CIAMPALINI" GivenName="STEFANO" NOC="ITA" />
+	<Person PersonID="113561" BoatID="69152" ISAFPersonID="" Position="" FamilyName="ZERMINI" GivenName="CARLO" NOC="ITA" />
+	<Person PersonID="107103" BoatID="69388" ISAFPersonID="" Position="Helm" FamilyName="Hill" GivenName="J.D." NOC="USA" />
+	<Person PersonID="107104" BoatID="69388" ISAFPersonID="" Position="Owner" FamilyName="Hill" GivenName="Susan" NOC="USA" />
+	<Person PersonID="107105" BoatID="69388" ISAFPersonID="" Position="Tactician" FamilyName="Jones" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="107275" BoatID="69468" ISAFPersonID="GBRNB5" Position="" FamilyName="Biggs" GivenName="Nigel" NOC="GBR" />
+	<Person PersonID="123310" BoatID="69468" ISAFPersonID="GBRNM2" Position="" FamilyName="Mackley" GivenName="Neil" NOC="GBR" />
+	<Person PersonID="123311" BoatID="69468" ISAFPersonID="GBRJH1111" Position="" FamilyName="Hemingway" GivenName="James" NOC="GBR" />
+	<Person PersonID="123312" BoatID="69468" ISAFPersonID="GBRPE" Position="" FamilyName="Evans" GivenName="Peter" NOC="GBR" />
+	<Person PersonID="123313" BoatID="69468" ISAFPersonID="GBRJH41" Position="" FamilyName="Houston" GivenName="James" NOC="IRL" />
+	<Person PersonID="123314" BoatID="69468" ISAFPersonID="IRLAH13" Position="" FamilyName="Hyland" GivenName="Adam" NOC="IRL" />
+	<Person PersonID="123315" BoatID="69468" ISAFPersonID="IRLCG31" Position="" FamilyName="Guilfoyle" GivenName="Cian" NOC="IRL" />
+	<Person PersonID="107286" BoatID="69473" ISAFPersonID="USADB92" Position="" FamilyName="Betts" GivenName="David" NOC="USA" />
+	<Person PersonID="107690" BoatID="69689" ISAFPersonID="" Position="Helm" FamilyName="Krueger" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123627" BoatID="69689" ISAFPersonID="" Position="Captain" FamilyName="McCormick" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="123628" BoatID="69689" ISAFPersonID="USAJM91" Position="Tactician" FamilyName="Madrigali" GivenName="Jeff " NOC="USA" />
+	<Person PersonID="123629" BoatID="69689" ISAFPersonID="" Position="Main Trimmer" FamilyName="Coburn" GivenName="Jim" NOC="USA" />
+	<Person PersonID="123630" BoatID="69689" ISAFPersonID="" Position="Mast" FamilyName="Pytlak" GivenName="John " NOC="USA" />
+	<Person PersonID="123631" BoatID="69689" ISAFPersonID="USANW18" Position="Offside trimmer" FamilyName="Weissich" GivenName="Noah" NOC="USA" />
+	<Person PersonID="123632" BoatID="69689" ISAFPersonID="" Position="Pit" FamilyName="Hackett" GivenName="Chris" NOC="USA" />
+	<Person PersonID="123633" BoatID="69689" ISAFPersonID="" Position="Mid Mast" FamilyName="Ochs" GivenName="Eric" NOC="USA" />
+	<Person PersonID="123634" BoatID="69689" ISAFPersonID="USAGF45" Position="Mid Mast" FamilyName="Felton" GivenName="Greg " NOC="USA" />
+	<Person PersonID="123635" BoatID="69689" ISAFPersonID="" Position="Bow" FamilyName="Clappier" GivenName="James" NOC="USA" />
+	<Person PersonID="123636" BoatID="69689" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Siddens" GivenName="Matt" NOC="USA" />
+	<Person PersonID="107784" BoatID="69751" ISAFPersonID="Usamb58" Position="Helm" FamilyName="Bruno" GivenName="Mike" NOC="USA" />
+	<Person PersonID="123958" BoatID="69751" ISAFPersonID="CANRF15" Position="Tactician" FamilyName="Fear" GivenName="Rob" NOC="USA" />
+	<Person PersonID="123959" BoatID="69751" ISAFPersonID="USAAW49" Position="Headsail Trimmer" FamilyName="Walsh" GivenName="Adam" NOC="USA" />
+	<Person PersonID="123960" BoatID="69751" ISAFPersonID="" Position="Bow" FamilyName="Randall" GivenName="Tim" NOC="USA" />
+	<Person PersonID="123961" BoatID="69751" ISAFPersonID="USAMP112" Position="Pit Assist" FamilyName="Ploch" GivenName="Mark" NOC="USA" />
+	<Person PersonID="124512" BoatID="69751" ISAFPersonID="" Position="Other" FamilyName="Kulinichenko" GivenName="Vladimir " NOC="USA" />
+	<Person PersonID="124897" BoatID="69751" ISAFPersonID="" Position="Pit" FamilyName="Yip" GivenName="Stephen" NOC="USA" />
+	<Person PersonID="108237" BoatID="70034" ISAFPersonID="" Position="Skipper" FamilyName="German" GivenName="David" NOC="USA" />
+	<Person PersonID="108245" BoatID="70034" ISAFPersonID="USAFM8" Position="Tactician" FamilyName="Meyer" GivenName="Fred" NOC="USA" />
+	<Person PersonID="108246" BoatID="70034" ISAFPersonID="" Position="Bow" FamilyName="Richardson" GivenName="Brian" NOC="USA" />
+	<Person PersonID="108247" BoatID="70034" ISAFPersonID="" Position="Owner" FamilyName="Ruark" GivenName="Ed" NOC="USA" />
+	<Person PersonID="108248" BoatID="70034" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Carballal" GivenName="Dean" NOC="USA" />
+	<Person PersonID="123183" BoatID="70034" ISAFPersonID="" Position="Pit" FamilyName="German" GivenName="Michele" NOC="USA" />
+	<Person PersonID="123186" BoatID="70034" ISAFPersonID="" Position="Main Trimmer" FamilyName="Wilus" GivenName="Josh " NOC="USA" />
+	<Person PersonID="123820" BoatID="70034" ISAFPersonID="" Position="Pit" FamilyName="Kohlhaas" GivenName="Sol" NOC="USA" />
+	<Person PersonID="108725" BoatID="70271" ISAFPersonID="USABG26" Position="Skipper" FamilyName="Greenwald" GivenName="Bennet" NOC="USA" />
+	<Person PersonID="122390" BoatID="70271" ISAFPersonID="USAED4" Position="Tactician" FamilyName="Doyle" GivenName="Eric " NOC="USA" />
+	<Person PersonID="122391" BoatID="70271" ISAFPersonID="USARF57" Position="Main Trimmer" FamilyName="Floyd" GivenName="Roger" NOC="USA" />
+	<Person PersonID="122392" BoatID="70271" ISAFPersonID="USAAN2" Position="Headsail Trimmer" FamilyName="nakanishi" GivenName="allen" NOC="USA" />
+	<Person PersonID="122393" BoatID="70271" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="dalin" GivenName="scott" NOC="USA" />
+	<Person PersonID="122394" BoatID="70271" ISAFPersonID="" Position="Pit" FamilyName="layton" GivenName="terre" NOC="USA" />
+	<Person PersonID="122395" BoatID="70271" ISAFPersonID="USATW34" Position="Bow" FamilyName="Wolk" GivenName="Tyler" NOC="USA" />
+	<Person PersonID="122396" BoatID="70271" ISAFPersonID="" Position="Bow" FamilyName="rohde" GivenName="michael" NOC="USA" />
+	<Person PersonID="108892" BoatID="70476" ISAFPersonID="USAJE37" Position="Skipper" FamilyName="Edwards" GivenName="John and Linda" NOC="USA" />
+	<Person PersonID="124145" BoatID="70476" ISAFPersonID="USASP67" Position="Bowman" FamilyName="Patterson" GivenName="Scott" NOC="USA" />
+	<Person PersonID="124146" BoatID="70476" ISAFPersonID="AFGJS1" Position="Headsail Trimmer" FamilyName="Szymanski" GivenName="Joe" NOC="USA" />
+	<Person PersonID="124147" BoatID="70476" ISAFPersonID="USASS94" Position="Main Trimmer" FamilyName="Stanley" GivenName="Shawn" NOC="USA" />
+	<Person PersonID="124148" BoatID="70476" ISAFPersonID="USAMJ70" Position="Other" FamilyName="Januzzi" GivenName="Michelle" NOC="USA" />
+	<Person PersonID="124149" BoatID="70476" ISAFPersonID="USALC23" Position="Pit" FamilyName="Comeau-Stanley" GivenName="Laura" NOC="USA" />
+	<Person PersonID="124150" BoatID="70476" ISAFPersonID="ISAKP22" Position="Pit" FamilyName="Pederson" GivenName="Kristin" NOC="USA" />
+	<Person PersonID="109003" BoatID="70549" ISAFPersonID="" Position="" FamilyName="Fragomen" GivenName="Austin and Gwen" NOC="USA" />
+	<Person PersonID="123005" BoatID="70549" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Allin" GivenName="Thomas" NOC="USA" />
+	<Person PersonID="123006" BoatID="70549" ISAFPersonID="" Position="Pit Assist" FamilyName="Cantrick" GivenName="Chris" NOC="USA" />
+	<Person PersonID="123007" BoatID="70549" ISAFPersonID="NZLRD1" Position="Main Trimmer" FamilyName="Dawson" GivenName="Rod" NOC="New Zealand" />
+	<Person PersonID="123008" BoatID="70549" ISAFPersonID="" Position="Helmsman" FamilyName="Fragomen" GivenName="Austin" NOC="USA" />
+	<Person PersonID="123010" BoatID="70549" ISAFPersonID="USAGF28" Position="Other" FamilyName="Fragomen" GivenName="Gwen" NOC="USA" />
+	<Person PersonID="123012" BoatID="70549" ISAFPersonID="USAAH6" Position="Tactician" FamilyName="Horton" GivenName="Andy " NOC="USA" />
+	<Person PersonID="123013" BoatID="70549" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Hurst" GivenName="Zach" NOC="USA" />
+	<Person PersonID="123014" BoatID="70549" ISAFPersonID="" Position="Strategist" FamilyName="MacMilan" GivenName="Rob " NOC="USA" />
+	<Person PersonID="123016" BoatID="70549" ISAFPersonID="" Position="Bow" FamilyName="Matthews" GivenName="Kris" NOC="USA" />
+	<Person PersonID="123018" BoatID="70549" ISAFPersonID="AUSCH1" Position="Runners" FamilyName="Hosking" GivenName="Chris " NOC="USA" />
+	<Person PersonID="123019" BoatID="70549" ISAFPersonID="" Position="Navigator" FamilyName="Pammenter" GivenName="Shaun" NOC="United Kingdom" />
+	<Person PersonID="124111" BoatID="70549" ISAFPersonID="" Position="Grinder" FamilyName="Gray" GivenName="Mo " NOC="UK" />
+	<Person PersonID="109176" BoatID="70642" ISAFPersonID="USACC76" Position="Skipper" FamilyName="Chadwick" GivenName="Chris" NOC="USA" />
+	<Person PersonID="109179" BoatID="70642" ISAFPersonID="" Position="Bow" FamilyName="Savage" GivenName="Michelle" NOC="USA" />
+	<Person PersonID="109194" BoatID="70657" ISAFPersonID="" Position="Helm" FamilyName="Cunningham" GivenName="Peter" NOC="CAY" />
+	<Person PersonID="124112" BoatID="70657" ISAFPersonID="" Position="Tactician" FamilyName="Brun" GivenName="Vince" NOC="USA" />
+	<Person PersonID="124113" BoatID="70657" ISAFPersonID="USAHJ7" Position="Main Trimmer" FamilyName="Jordan" GivenName="Hartwell" NOC="USA" />
+	<Person PersonID="124114" BoatID="70657" ISAFPersonID="USABP8" Position="Staysail trimmer" FamilyName="Pedlow" GivenName="Blaine" NOC="USA" />
+	<Person PersonID="124115" BoatID="70657" ISAFPersonID="usamm14" Position="" FamilyName="McDonough" GivenName="Matt " NOC="USA" />
+	<Person PersonID="124116" BoatID="70657" ISAFPersonID="usahs27" Position="" FamilyName="Scott" GivenName="Harry" NOC="USA" />
+	<Person PersonID="124117" BoatID="70657" ISAFPersonID="USAPK64" Position="Runners" FamilyName="Kinney" GivenName="Peter" NOC="USA" />
+	<Person PersonID="109472" BoatID="70827" ISAFPersonID="USARM116" Position="Owner" FamilyName="Moran" GivenName="Bob" NOC="USA" />
+	<Person PersonID="121947" BoatID="70827" ISAFPersonID="USAMC38" Position="Main Trimmer" FamilyName="Coe" GivenName="Michael" NOC="USA" />
+	<Person PersonID="121948" BoatID="70827" ISAFPersonID="USAGB52" Position="Pit" FamilyName="Byus" GivenName="Grady" NOC="USA" />
+	<Person PersonID="121949" BoatID="70827" ISAFPersonID="USAWM32" Position="Headsail Trimmer" FamilyName="Miller" GivenName="William" NOC="USA" />
+	<Person PersonID="121950" BoatID="70827" ISAFPersonID="USAJH215" Position="Bow" FamilyName="Hill" GivenName="Jason" NOC="USA" />
+	<Person PersonID="121951" BoatID="70827" ISAFPersonID="Usadw7" Position="Runners" FamilyName="wittig" GivenName="dan" NOC="USA" />
+	<Person PersonID="121952" BoatID="70827" ISAFPersonID="USASN4" Position="Tactician" FamilyName="nixon" GivenName="Scott" NOC="USA" />
+	<Person PersonID="109941" BoatID="71139" ISAFPersonID="" Position="" FamilyName="Casey" GivenName="Martin " NOC="USA" />
+	<Person PersonID="109979" BoatID="71164" ISAFPersonID="USAJM123" Position="Helm" FamilyName="Madden" GivenName="James" NOC="USA" />
+	<Person PersonID="123368" BoatID="71164" ISAFPersonID="USATR21" Position="Tactician" FamilyName="Rey" GivenName="Tony" NOC="USA" />
+	<Person PersonID="123369" BoatID="71164" ISAFPersonID="USACB27" Position="Main Trimmer" FamilyName="Busch" GivenName="Chris" NOC="USA" />
+	<Person PersonID="123370" BoatID="71164" ISAFPersonID="USAAP45" Position="Pit" FamilyName="Pleskus" GivenName="Al" NOC="USA" />
+	<Person PersonID="123371" BoatID="71164" ISAFPersonID="USADV27" Position="Bow" FamilyName="Vogel" GivenName="Dylan" NOC="USA" />
+	<Person PersonID="123372" BoatID="71164" ISAFPersonID="USASN13" Position="Headsail Trimmer" FamilyName="Natvig" GivenName="Steve" NOC="USA" />
+	<Person PersonID="124376" BoatID="71164" ISAFPersonID="USAAW27" Position="Mid Bow" FamilyName="Winder" GivenName="Alden" NOC="USA" />
+	<Person PersonID="110329" BoatID="71426" ISAFPersonID="" Position="" FamilyName="Weisleder" GivenName="Travis" NOC="USA" />
+	<Person PersonID="110438" BoatID="71503" ISAFPersonID="66276" Position="" FamilyName="Team" GivenName="Robin" NOC="USA" />
+	<Person PersonID="123155" BoatID="71503" ISAFPersonID="" Position="Bow" FamilyName="Team" GivenName="Coleman" NOC="USA" />
+	<Person PersonID="123156" BoatID="71503" ISAFPersonID="" Position="" FamilyName="Fuqua" GivenName="Bill " NOC="USA" />
+	<Person PersonID="123157" BoatID="71503" ISAFPersonID="" Position="Mid Bow" FamilyName="Welborn" GivenName="Matt" NOC="USA" />
+	<Person PersonID="123158" BoatID="71503" ISAFPersonID="" Position="" FamilyName="Team" GivenName="Alston" NOC="USA" />
+	<Person PersonID="123159" BoatID="71503" ISAFPersonID="" Position="" FamilyName="Niven" GivenName="Drew" NOC="USA" />
+	<Person PersonID="123160" BoatID="71503" ISAFPersonID="" Position="" FamilyName="Team" GivenName="Adam" NOC="" />
+	<Person PersonID="123161" BoatID="71503" ISAFPersonID="USAJR160" Position="Headsail Trimmer" FamilyName="Riedle" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="123162" BoatID="71503" ISAFPersonID="USAKR4" Position="" FamilyName="Ryman" GivenName="Kevin" NOC="USA" />
+	<Person PersonID="123168" BoatID="71503" ISAFPersonID="USAJB80" Position="Tactician" FamilyName="Bartlett" GivenName="Jonathan" NOC="USA" />
+	<Person PersonID="111235" BoatID="71849" ISAFPersonID="" Position="" FamilyName="Coates" GivenName="William" NOC="USA" />
+	<Person PersonID="111277" BoatID="71871" ISAFPersonID="" Position="" FamilyName="Fauth" GivenName="Hap" NOC="USA" />
+	<Person PersonID="122803" BoatID="71871" ISAFPersonID="" Position="Main Trimmer" FamilyName="Baxter" GivenName="Skip" NOC="USA" />
+	<Person PersonID="122804" BoatID="71871" ISAFPersonID="" Position="Mid Bow" FamilyName="Cannoni" GivenName="Mickey " NOC="USA" />
+	<Person PersonID="122805" BoatID="71871" ISAFPersonID="" Position="Grinder" FamilyName="Clarkson" GivenName="Sean" NOC="USA" />
+	<Person PersonID="122806" BoatID="71871" ISAFPersonID="USASC4" Position="Bowman" FamilyName="Couvreux" GivenName="Sean " NOC="USA" />
+	<Person PersonID="122807" BoatID="71871" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Dagg" GivenName="James" NOC="USA" />
+	<Person PersonID="122808" BoatID="71871" ISAFPersonID="" Position="Grinder" FamilyName="Giovanelli" GivenName="Federico " NOC="USA" />
+	<Person PersonID="122809" BoatID="71871" ISAFPersonID="" Position="Captain" FamilyName="Henderson" GivenName="Peter" NOC="USA" />
+	<Person PersonID="122810" BoatID="71871" ISAFPersonID="" Position="Tactician" FamilyName="Hutchinson" GivenName="Terry " NOC="" />
+	<Person PersonID="122811" BoatID="71871" ISAFPersonID="" Position="Mid Bow" FamilyName="Keeley" GivenName="Keats" NOC="USA" />
+	<Person PersonID="122812" BoatID="71871" ISAFPersonID="" Position="Grinder" FamilyName="MacInnes" GivenName="Brian" NOC="USA" />
+	<Person PersonID="122813" BoatID="71871" ISAFPersonID="" Position="Grinder" FamilyName="Monk" GivenName="Craig" NOC="USA" />
+	<Person PersonID="122814" BoatID="71871" ISAFPersonID="GBRIM21" Position="Navigator" FamilyName="Moore" GivenName="Ian" NOC="UK" />
+	<Person PersonID="122815" BoatID="71871" ISAFPersonID="USARO" Position="Grinder" FamilyName="Ouellette" GivenName="Robert" NOC="USA" />
+	<Person PersonID="122816" BoatID="71871" ISAFPersonID="NZLMS10" Position="Strategist" FamilyName="Sanderson" GivenName="Mike" NOC="NZ" />
+	<Person PersonID="122817" BoatID="71871" ISAFPersonID="" Position="Pit" FamilyName="Smith" GivenName="Matt" NOC="USA" />
+	<Person PersonID="122818" BoatID="71871" ISAFPersonID="NZLET2" Position="Grinder" FamilyName="Turner" GivenName="Jim" NOC="NZ" />
+	<Person PersonID="122819" BoatID="71871" ISAFPersonID="" Position="Grinder" FamilyName="Spooner" GivenName="Joe" NOC="USA" />
+	<Person PersonID="122820" BoatID="71871" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Trubovich" GivenName="Morgan " NOC="USA" />
+	<Person PersonID="122821" BoatID="71871" ISAFPersonID="USAJF121" Position="Grinder" FamilyName="Fanelli" GivenName="Joe" NOC="USA" />
+	<Person PersonID="122822" BoatID="71871" ISAFPersonID="" Position="" FamilyName="Stead" GivenName="Adrian" NOC="USA" />
+	<Person PersonID="111455" BoatID="71951" ISAFPersonID="" Position="" FamilyName="Chilton" GivenName="Barnaby Graham" NOC="GBR" />
+	<Person PersonID="112019" BoatID="72295" ISAFPersonID="usabf46" Position="Skipper" FamilyName="Faber" GivenName="Bradley" NOC="USA" />
+	<Person PersonID="123248" BoatID="72295" ISAFPersonID="USASB150" Position="Mast" FamilyName="Beat" GivenName="Seth" NOC="USA" />
+	<Person PersonID="123249" BoatID="72295" ISAFPersonID="USAAB100" Position="Main Trimmer" FamilyName="Brummitt" GivenName="Aaron" NOC="USA" />
+	<Person PersonID="123250" BoatID="72295" ISAFPersonID="USAIF7" Position="Spinnaker trimmer" FamilyName="faber" GivenName="ian" NOC="USA" />
+	<Person PersonID="123251" BoatID="72295" ISAFPersonID="USASE32" Position="Bow" FamilyName="English" GivenName="Steve" NOC="USA" />
+	<Person PersonID="123252" BoatID="72295" ISAFPersonID="USAJW223" Position="Pit" FamilyName="Wilkins" GivenName="Justin" NOC="USA" />
+	<Person PersonID="123253" BoatID="72295" ISAFPersonID="USAWC26" Position="Tactician" FamilyName="Cross" GivenName="Wally" NOC="USA" />
+	<Person PersonID="112329" BoatID="72463" ISAFPersonID="" Position="" FamilyName="RRH" GivenName="Team" NOC="NOR" />
+	<Person PersonID="112688" BoatID="72709" ISAFPersonID="" Position="Owner" FamilyName="Sulick" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123536" BoatID="72709" ISAFPersonID="" Position="Tactician" FamilyName="Brown" GivenName="Robert " NOC="USA" />
+	<Person PersonID="123538" BoatID="72709" ISAFPersonID="" Position="Main Trimmer" FamilyName="Walsh" GivenName="Jack" NOC="USA" />
+	<Person PersonID="123539" BoatID="72709" ISAFPersonID="" Position="Chef" FamilyName="Carew" GivenName="Keith " NOC="USA" />
+	<Person PersonID="123553" BoatID="72709" ISAFPersonID="usawi1" Position="Headsail Trimmer" FamilyName="Icely" GivenName="Bill " NOC="USA" />
+	<Person PersonID="123555" BoatID="72709" ISAFPersonID="USARH42" Position="Bow" FamilyName="Hyatt" GivenName="Ron" NOC="USA" />
+	<Person PersonID="123556" BoatID="72709" ISAFPersonID="" Position="Mast" FamilyName="Bozeman" GivenName="Michael" NOC="USA" />
+	<Person PersonID="112728" BoatID="72728" ISAFPersonID="USAJM8" Position="Owner" FamilyName="Mele" GivenName="Joseph" NOC="USA" />
+	<Person PersonID="121528" BoatID="72728" ISAFPersonID="CANPL6" Position="Tactician" FamilyName="LaRoche" GivenName="Patrick" NOC="CAN" />
+	<Person PersonID="121529" BoatID="72728" ISAFPersonID="CANJM15" Position="Bow" FamilyName="Mackay" GivenName="John" NOC="CAN" />
+	<Person PersonID="121530" BoatID="72728" ISAFPersonID="CANSM16" Position="Helm" FamilyName="McDermott" GivenName="Sean " NOC="CAN" />
+	<Person PersonID="121531" BoatID="72728" ISAFPersonID="USADN43" Position="Chef" FamilyName="Newhouse" GivenName="Donald" NOC="USA" />
+	<Person PersonID="121532" BoatID="72728" ISAFPersonID="USAJO24" Position="Navigator" FamilyName="O'Brien" GivenName="John" NOC="USA" />
+	<Person PersonID="121533" BoatID="72728" ISAFPersonID="BERPR1" Position="Mid Bow" FamilyName="Ramsdale" GivenName="Pete" NOC="Bermuda" />
+	<Person PersonID="121534" BoatID="72728" ISAFPersonID="USAAL33" Position="Headsail Trimmer" FamilyName="Loory" GivenName="Adam" NOC="USA" />
+	<Person PersonID="121535" BoatID="72728" ISAFPersonID="CANRM14" Position="Main Trimmer" FamilyName="Macdonald" GivenName="Rory" NOC="CAN" />
+	<Person PersonID="124171" BoatID="72728" ISAFPersonID="BELBS6" Position="Mast" FamilyName="Simonet" GivenName="Benoit" NOC="USA" />
+	<Person PersonID="112886" BoatID="72811" ISAFPersonID="USAHF1" Position="Helm" FamilyName="Filter" GivenName="Henry" NOC="USA" />
+	<Person PersonID="122995" BoatID="72811" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Coleman" GivenName="Ian" NOC="USA" />
+	<Person PersonID="122996" BoatID="72811" ISAFPersonID="" Position="Tactician" FamilyName="Skelley" GivenName="Max" NOC="USA" />
+	<Person PersonID="122997" BoatID="72811" ISAFPersonID="USABS120" Position="Medic/Doctor" FamilyName="Stout" GivenName="Bryan" NOC="USA" />
+	<Person PersonID="112960" BoatID="72879" ISAFPersonID="USARR79" Position="Skipper" FamilyName="Ruhlman" GivenName="Rob" NOC="USA" />
+	<Person PersonID="112963" BoatID="72879" ISAFPersonID="USAAR7" Position="Pit" FamilyName="Ruhlman" GivenName="Abigail" NOC="USA" />
+	<Person PersonID="112964" BoatID="72879" ISAFPersonID="USADM34" Position="Mast" FamilyName="Moose" GivenName="Doug" NOC="USA" />
+	<Person PersonID="112965" BoatID="72879" ISAFPersonID="Usajs78" Position="Pit Assist" FamilyName="Sminchak " GivenName="Jim" NOC="USA" />
+	<Person PersonID="123938" BoatID="72879" ISAFPersonID="canrk12" Position="Spinnaker trimmer" FamilyName="Kellythorne " GivenName="Russ" NOC="USA" />
+	<Person PersonID="123939" BoatID="72879" ISAFPersonID="usamw75" Position="Bow" FamilyName="Wiss" GivenName="Mark" NOC="USA" />
+	<Person PersonID="123940" BoatID="72879" ISAFPersonID="USANT5" Position="Tactician" FamilyName="Turney" GivenName="Nick" NOC="USA" />
+	<Person PersonID="123942" BoatID="72879" ISAFPersonID="USAMS148" Position="Offside trimmer" FamilyName="Sheehan" GivenName="Michael" NOC="USA" />
+	<Person PersonID="112961" BoatID="72880" ISAFPersonID="USADT69" Position="Bow" FamilyName="Troutman" GivenName="Dan Gannon" NOC="USA" />
+	<Person PersonID="122353" BoatID="72880" ISAFPersonID="ARGFN6" Position="Main Trimmer" FamilyName="Norman" GivenName="Federico " NOC="USA" />
+	<Person PersonID="122357" BoatID="72880" ISAFPersonID="ARGTD1" Position="Tactician" FamilyName="Dietrich" GivenName="Tomas " NOC="ARG" />
+	<Person PersonID="122358" BoatID="72880" ISAFPersonID="USAGT37" Position="Skipper" FamilyName="Troutman" GivenName="Gannon" NOC="USA" />
+	<Person PersonID="112972" BoatID="72886" ISAFPersonID="" Position="Helm" FamilyName="Hughes" GivenName="Robert" NOC="USA" />
+	<Person PersonID="123220" BoatID="72886" ISAFPersonID="USAJB68" Position="Bow" FamilyName="Bowden" GivenName="John" NOC="USA" />
+	<Person PersonID="123221" BoatID="72886" ISAFPersonID="" Position="Tactician" FamilyName="Buckley" GivenName="Mike" NOC="USA" />
+	<Person PersonID="123275" BoatID="72886" ISAFPersonID="Usagp6" Position="Headsail Trimmer" FamilyName="Peet" GivenName="George " NOC="USA" />
+	<Person PersonID="113062" BoatID="72971" ISAFPersonID="USAPM110" Position="Skipper" FamilyName="Milo" GivenName="Paul" NOC="USA" />
+	<Person PersonID="122975" BoatID="72971" ISAFPersonID="USABS62" Position="Mast" FamilyName="Scanlon" GivenName="Brendon" NOC="USA" />
+	<Person PersonID="123424" BoatID="72971" ISAFPersonID="" Position="Main Trimmer" FamilyName="Hutchins" GivenName="Tad" NOC="USA" />
+	<Person PersonID="123425" BoatID="72971" ISAFPersonID="GERMM6" Position="Bow" FamilyName="Mueller" GivenName="Matthias" NOC="" />
+	<Person PersonID="123426" BoatID="72971" ISAFPersonID="VIEML1" Position="Pit" FamilyName="Lawlor" GivenName="Mickey" NOC="USA" />
+	<Person PersonID="123427" BoatID="72971" ISAFPersonID="USARW106" Position="Mid Bow" FamilyName="Welsh" GivenName="Regina" NOC="USA" />
+	<Person PersonID="123428" BoatID="72971" ISAFPersonID="USAKS124" Position="Pit Assist" FamilyName="Scala" GivenName="Keith" NOC="USA" />
+	<Person PersonID="123429" BoatID="72971" ISAFPersonID="USAMH132" Position="Tactician" FamilyName="Hillman" GivenName="Mark" NOC="USA" />
+	<Person PersonID="123430" BoatID="72971" ISAFPersonID="USAKM39" Position="Headsail Trimmer" FamilyName="McLean" GivenName="Kenneth" NOC="USA" />
+	<Person PersonID="123431" BoatID="72971" ISAFPersonID="usajg105" Position="Chef" FamilyName="Gentzen" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="113094" BoatID="72997" ISAFPersonID="USADC140" Position="Helm" FamilyName="Curtiss" GivenName="Douglas" NOC="USA" />
+	<Person PersonID="123379" BoatID="72997" ISAFPersonID="USAJM167" Position="Main Trimmer" FamilyName="MELLO" GivenName="JOEY" NOC="USA" />
+	<Person PersonID="123380" BoatID="72997" ISAFPersonID="USAGL2" Position="Headsail Trimmer" FamilyName="LEDUC" GivenName="GARY" NOC="USA" />
+	<Person PersonID="123381" BoatID="72997" ISAFPersonID="VENRF1" Position="" FamilyName="FAVELA" GivenName="ROD" NOC="USA" />
+	<Person PersonID="123382" BoatID="72997" ISAFPersonID="USASJ6" Position="Tactician" FamilyName="JOHNSTONE" GivenName="STUART" NOC="USA" />
+	<Person PersonID="123383" BoatID="72997" ISAFPersonID="USAJS303" Position="Mast" FamilyName="SCHNUAUCK" GivenName="JOHN" NOC="USA" />
+	<Person PersonID="123385" BoatID="72997" ISAFPersonID="USAJP123" Position="Bow" FamilyName="PETERSON" GivenName="JOHN" NOC="USA" />
+	<Person PersonID="123861" BoatID="72997" ISAFPersonID="USACR78" Position="Pit" FamilyName="RUSSELL" GivenName="CARRIE" NOC="USA" />
+	<Person PersonID="113128" BoatID="73013" ISAFPersonID="" Position="" FamilyName="Haegler" GivenName="Phil" NOC="BRA" />
+	<Person PersonID="117706" BoatID="73013" ISAFPersonID="USASG65" Position="" FamilyName="Kamilar" GivenName="Brian" NOC="USA" />
+	<Person PersonID="113186" BoatID="73054" ISAFPersonID="" Position="" FamilyName="Ballantyne" GivenName="David" NOC="GBR" />
+	<Person PersonID="113351" BoatID="73093" ISAFPersonID="USATR5" Position="Skipper" FamilyName="Ritter" GivenName="Thomas" NOC="USA" />
+	<Person PersonID="123738" BoatID="73093" ISAFPersonID="USAMD88" Position="Mid Bow" FamilyName="Denman" GivenName="Melissa" NOC="USA" />
+	<Person PersonID="123739" BoatID="73093" ISAFPersonID="Usaah52" Position="Other" FamilyName="Hume" GivenName="Alex " NOC="USA" />
+	<Person PersonID="123740" BoatID="73093" ISAFPersonID="USAMP74" Position="Tactician" FamilyName="Peseski" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123741" BoatID="73093" ISAFPersonID="USAMS102" Position="Spinnaker trimmer" FamilyName="Spiteri" GivenName="Michael" NOC="USA" />
+	<Person PersonID="113831" BoatID="73271" ISAFPersonID="USADD134" Position="" FamilyName="Dennison" GivenName="David" NOC="USA" />
+	<Person PersonID="113832" BoatID="73271" ISAFPersonID="USAAF48" Position="Tactician" FamilyName="Foster" GivenName="Terry" NOC="USA" />
+	<Person PersonID="119232" BoatID="73271" ISAFPersonID="USAJR127" Position="Tactician" FamilyName="Monson" GivenName="Jon" NOC="USA" />
+	<Person PersonID="119233" BoatID="73271" ISAFPersonID="" Position="Mast" FamilyName="Driscoll" GivenName="Colin " NOC="USA" />
+	<Person PersonID="113938" BoatID="73313" ISAFPersonID="" Position="" FamilyName="boland" GivenName="peter" NOC="usa" />
+	<Person PersonID="114380" BoatID="73617" ISAFPersonID="USAES23" Position="Owner" FamilyName="Staffini" GivenName="Ennio" NOC="USA" />
+	<Person PersonID="122589" BoatID="73617" ISAFPersonID="USACO45" Position="Tactician" FamilyName="O'Malley" GivenName="Chuck" NOC="USA" />
+	<Person PersonID="122590" BoatID="73617" ISAFPersonID="nzlam14" Position="Main Trimmer" FamilyName="McGlashan" GivenName="Alan" NOC="USA" />
+	<Person PersonID="122591" BoatID="73617" ISAFPersonID="USAMZ24" Position="Offside trimmer" FamilyName="Zuschnitt" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123140" BoatID="73617" ISAFPersonID="USAOM1" Position="Headsail Trimmer" FamilyName="Miller" GivenName="Owen" NOC="USA" />
+	<Person PersonID="123141" BoatID="73617" ISAFPersonID="USAWT12" Position="Bow" FamilyName="Tetrick" GivenName="William" NOC="USA" />
+	<Person PersonID="123142" BoatID="73617" ISAFPersonID="usamc141" Position="Mid Mast" FamilyName="Coughlin" GivenName="Mathew" NOC="USA" />
+	<Person PersonID="114943" BoatID="73946" ISAFPersonID="" Position="Skipper" FamilyName="Pesch" GivenName="Christopher" NOC="USA" />
+	<Person PersonID="124905" BoatID="73946" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Pesch" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="124906" BoatID="73946" ISAFPersonID="USAJA48" Position="Bow" FamilyName="Allsopp" GivenName="James" NOC="USA" />
+	<Person PersonID="124907" BoatID="73946" ISAFPersonID="" Position="Main Trimmer" FamilyName="Smith" GivenName="Emerson" NOC="USA" />
+	<Person PersonID="124908" BoatID="73946" ISAFPersonID="Usahr9" Position="Tactician" FamilyName="Ratliff" GivenName="Hunter" NOC="USA" />
+	<Person PersonID="124910" BoatID="73946" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Van Antwerp" GivenName="Nicholas" NOC="USA" />
+	<Person PersonID="114984" BoatID="73962" ISAFPersonID="USATM125" Position="Skipper" FamilyName="Molony" GivenName="Tim" NOC="USA" />
+	<Person PersonID="123921" BoatID="73962" ISAFPersonID="USAJL6" Position="Tactician" FamilyName="Lovell" GivenName="Johnny" NOC="USA" />
+	<Person PersonID="123923" BoatID="73962" ISAFPersonID="USADW146" Position="Strategist" FamilyName="Willits" GivenName="Deborah" NOC="USA" />
+	<Person PersonID="123924" BoatID="73962" ISAFPersonID="USAJK142" Position="Headsail Trimmer" FamilyName="Killeen" GivenName="John" NOC="USA" />
+	<Person PersonID="115019" BoatID="73978" ISAFPersonID="USAJR160" Position="" FamilyName="Roesch" GivenName="Martin" NOC="USA" />
+	<Person PersonID="123177" BoatID="73978" ISAFPersonID="" Position="Bow" FamilyName="Bowdren" GivenName="Cam " NOC="USA" />
+	<Person PersonID="123178" BoatID="73978" ISAFPersonID="" Position="Mast" FamilyName="Luisi" GivenName="Paul" NOC="USA" />
+	<Person PersonID="123179" BoatID="73978" ISAFPersonID="Usaae18" Position="Headsail Trimmer" FamilyName="Eyring" GivenName="Andrew " NOC="USA" />
+	<Person PersonID="123180" BoatID="73978" ISAFPersonID="USARB18" Position="" FamilyName="Bowen" GivenName="Rich" NOC="USA" />
+	<Person PersonID="123181" BoatID="73978" ISAFPersonID="USAPC33" Position="Spinnaker trimmer" FamilyName="Colby" GivenName="Pete" NOC="USA" />
+	<Person PersonID="123182" BoatID="73978" ISAFPersonID="USAJH213" Position="Pit" FamilyName="Hering" GivenName="Jarrett " NOC="USA" />
+	<Person PersonID="123194" BoatID="73978" ISAFPersonID="USARD90" Position="Tactician" FamilyName="Deane" GivenName="Rob" NOC="USA" />
+	<Person PersonID="116121" BoatID="75016" ISAFPersonID="" Position="Owner" FamilyName="Ogden" GivenName="Sir Peter " NOC="GBR" />
+	<Person PersonID="124795" BoatID="75016" ISAFPersonID="" Position="Tactician" FamilyName="Butterworth" GivenName="Brad" NOC="USA" />
+	<Person PersonID="124797" BoatID="75016" ISAFPersonID="ITASA20" Position="Navigator" FamilyName="Arrivabene" GivenName="Silvio" NOC="USA" />
+	<Person PersonID="124798" BoatID="75016" ISAFPersonID="" Position="Runners" FamilyName="lankester" GivenName="bob" NOC="USA" />
+	<Person PersonID="124799" BoatID="75016" ISAFPersonID="" Position="Other" FamilyName="Richmond" GivenName="Sam" NOC="USA" />
+	<Person PersonID="124800" BoatID="75016" ISAFPersonID="" Position="Runners" FamilyName="pafford" GivenName="phil" NOC="uk" />
+	<Person PersonID="124801" BoatID="75016" ISAFPersonID="" Position="Grinder" FamilyName="salt" GivenName="phil" NOC="USA" />
+	<Person PersonID="124802" BoatID="75016" ISAFPersonID="" Position="Offside trimmer" FamilyName="cumming" GivenName="pete" NOC="USA" />
+	<Person PersonID="124803" BoatID="75016" ISAFPersonID="" Position="Main Trimmer" FamilyName="Ardern" GivenName="Rodney" NOC="USA" />
+	<Person PersonID="124804" BoatID="75016" ISAFPersonID="Usamn3" Position="Grinder" FamilyName="newbrook" GivenName="mark" NOC="USA" />
+	<Person PersonID="124805" BoatID="75016" ISAFPersonID="" Position="Grinder" FamilyName="street" GivenName="graham" NOC="USA" />
+	<Person PersonID="124806" BoatID="75016" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="daubney" GivenName="simon" NOC="USA" />
+	<Person PersonID="124807" BoatID="75016" ISAFPersonID="AUSMM39" Position="Grinder" FamilyName="mcteigue" GivenName="mark" NOC="New Zealand" />
+	<Person PersonID="124810" BoatID="75016" ISAFPersonID="" Position="Grinder" FamilyName="cross" GivenName="luke" NOC="UK" />
+	<Person PersonID="124811" BoatID="75016" ISAFPersonID="USAJB354" Position="Pit" FamilyName="belsky" GivenName="josh" NOC="USA" />
+	<Person PersonID="124812" BoatID="75016" ISAFPersonID="" Position="Alternate" FamilyName="clifford" GivenName="ben" NOC="USA" />
+	<Person PersonID="124813" BoatID="75016" ISAFPersonID="" Position="Mid Bow" FamilyName="minter" GivenName="adam" NOC="USA" />
+	<Person PersonID="124814" BoatID="75016" ISAFPersonID="" Position="Bow" FamilyName="gills" GivenName="zane" NOC="USA" />
+	<Person PersonID="124815" BoatID="75016" ISAFPersonID="NEDMB" Position="Grinder" FamilyName="blees" GivenName="marc" NOC="NL" />
+	<Person PersonID="124816" BoatID="75016" ISAFPersonID="" Position="Pit Assist" FamilyName="hochreutener" GivenName="tobias" NOC="UK" />
+	<Person PersonID="125151" BoatID="75016" ISAFPersonID="" Position="Captain" FamilyName="Branson" GivenName="Stuart" NOC="USA" />
+	<Person PersonID="117211" BoatID="76100" ISAFPersonID="NORBB9" Position="Skipper" FamilyName="Bjørnsen" GivenName="Bjørn Erik" NOC="NOR" />
+	<Person PersonID="120296" BoatID="76100" ISAFPersonID="NORHT7" Position="Main Trimmer" FamilyName="Tranberg" GivenName="Hakon" NOC="Norway" />
+	<Person PersonID="120297" BoatID="76100" ISAFPersonID="NORHV3" Position="Headsail Trimmer" FamilyName="Vedholmen" GivenName="Hakon" NOC="NOR" />
+	<Person PersonID="120298" BoatID="76100" ISAFPersonID="USAJA89" Position="Runners" FamilyName="Adams" GivenName="Juana" NOC="NOR" />
+	<Person PersonID="120299" BoatID="76100" ISAFPersonID="NORPG6" Position="Spinnaker trimmer" FamilyName="Gronning" GivenName="Per" NOC="Norway" />
+	<Person PersonID="120300" BoatID="76100" ISAFPersonID="usawh2" Position="Medic/Doctor" FamilyName="Harris" GivenName="Will" NOC="USA" />
+	<Person PersonID="117245" BoatID="76121" ISAFPersonID="" Position="" FamilyName="Dietrich" GivenName="Bent" NOC="GER" />
+	<Person PersonID="117355" BoatID="76199" ISAFPersonID="" Position="" FamilyName="Gault" GivenName="Glenn" NOC="USA" />
+	<Person PersonID="117423" BoatID="76221" ISAFPersonID="" Position="Owner" FamilyName="Hall" GivenName="Ben" NOC="USA" />
+	<Person PersonID="124259" BoatID="76221" ISAFPersonID="" Position="Pit" FamilyName="Hall" GivenName="Nan" NOC="USA" />
+	<Person PersonID="124260" BoatID="76221" ISAFPersonID="" Position="Main Trimmer" FamilyName="Berges" GivenName="Bill" NOC="USA" />
+	<Person PersonID="124261" BoatID="76221" ISAFPersonID="" Position="Tactician" FamilyName="Garland" GivenName="Phil" NOC="USA" />
+	<Person PersonID="124262" BoatID="76221" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Butlin" GivenName="Corey" NOC="USA" />
+	<Person PersonID="124263" BoatID="76221" ISAFPersonID="" Position="Bow" FamilyName="Wisotzkey" GivenName="Peter" NOC="USA" />
+	<Person PersonID="124554" BoatID="76221" ISAFPersonID="" Position="Other" FamilyName="Berges" GivenName="Maureen" NOC="USA" />
+	<Person PersonID="124646" BoatID="76221" ISAFPersonID="" Position="Mid Mast" FamilyName="Grochowski" GivenName="Renee" NOC="USA" />
+	<Person PersonID="124735" BoatID="76221" ISAFPersonID="" Position="Mast" FamilyName="Keenan" GivenName="Matthew" NOC="USA" />
+	<Person PersonID="124968" BoatID="76283" ISAFPersonID="USASR16" Position="Main Trimmer" FamilyName="Roble" GivenName="Stephanie" NOC="USA" />
+	<Person PersonID="124969" BoatID="76283" ISAFPersonID="USACL26" Position="Headsail Trimmer" FamilyName="Leon " GivenName="Collin " NOC="USA" />
+	<Person PersonID="124970" BoatID="76283" ISAFPersonID="" Position="Floater" FamilyName="Dieball" GivenName="Skip" NOC="USA" />
+	<Person PersonID="124973" BoatID="76283" ISAFPersonID="USAPW11" Position="Helm" FamilyName="Wehrheim" GivenName="Philip" NOC="USA" />
+	<Person PersonID="117598" BoatID="76322" ISAFPersonID="" Position="Skipper" FamilyName="Panariello" GivenName="Gary" NOC="USA" />
+	<Person PersonID="117599" BoatID="76322" ISAFPersonID="USAJJ43" Position="Spinnaker trimmer" FamilyName="Jordan" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="117690" BoatID="76374" ISAFPersonID="USAGW49" Position="" FamilyName="Weisberg" GivenName="Gary" NOC="USA" />
+	<Person PersonID="123211" BoatID="76374" ISAFPersonID="USMR26" Position="Tactician" FamilyName="Royer" GivenName="Mike" NOC="USA" />
+	<Person PersonID="123212" BoatID="76374" ISAFPersonID="USAJM344" Position="Other" FamilyName="Murphy" GivenName="Jim" NOC="USA" />
+	<Person PersonID="123213" BoatID="76374" ISAFPersonID="USAAH38" Position="Medic/Doctor" FamilyName="Hoekstra" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="123214" BoatID="76374" ISAFPersonID="" Position="" FamilyName="Wilcox" GivenName="Robert" NOC="USA" />
+	<Person PersonID="123215" BoatID="76374" ISAFPersonID="USAAC61" Position="Main Trimmer" FamilyName="Clegg" GivenName="Alex" NOC="USA" />
+	<Person PersonID="123216" BoatID="76374" ISAFPersonID="USAJS31" Position="Pit" FamilyName="Silverman" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="117740" BoatID="76396" ISAFPersonID="" Position="" FamilyName="Lotz" GivenName="Phil" NOC="USA" />
+	<Person PersonID="123187" BoatID="76396" ISAFPersonID="USAPB" Position="Headsail Trimmer" FamilyName="Benedetto" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123188" BoatID="76396" ISAFPersonID="USAWL17" Position="Navigator" FamilyName="Lotz" GivenName="Wendy" NOC="USA" />
+	<Person PersonID="123189" BoatID="76396" ISAFPersonID="USABM56" Position="Captain" FamilyName="Marshall" GivenName="Brendan" NOC="USA" />
+	<Person PersonID="123190" BoatID="76396" ISAFPersonID="" Position="Grinder" FamilyName="Marshall" GivenName="Collin" NOC="USA" />
+	<Person PersonID="123191" BoatID="76396" ISAFPersonID="USALR" Position="Navigator" FamilyName="Rosenfeld" GivenName="Larry" NOC="USA" />
+	<Person PersonID="123192" BoatID="76396" ISAFPersonID="" Position="Main Trimmer" FamilyName="VanDyke" GivenName="Paul" NOC="USA" />
+	<Person PersonID="123193" BoatID="76396" ISAFPersonID="USAAD88" Position="Pit Assist" FamilyName="Drinker" GivenName="Amy " NOC="USA" />
+	<Person PersonID="117745" BoatID="76400" ISAFPersonID="" Position="" FamilyName="Jensen" GivenName="Marty" NOC="USA" />
+	<Person PersonID="117818" BoatID="76424" ISAFPersonID="" Position="" FamilyName="Murray" GivenName="Stephen" NOC="USA" />
+	<Person PersonID="117822" BoatID="76428" ISAFPersonID="USATB91" Position="" FamilyName="Bowen" GivenName="Thomas" NOC="USA" />
+	<Person PersonID="123954" BoatID="76428" ISAFPersonID="USAAH82" Position="Bow" FamilyName="Hooper" GivenName="Anne " NOC="USA" />
+	<Person PersonID="123956" BoatID="76428" ISAFPersonID="" Position="Chef" FamilyName="Dabney" GivenName="David " NOC="USA" />
+	<Person PersonID="124998" BoatID="76428" ISAFPersonID="" Position="Floater" FamilyName="Kullman" GivenName="Martin" NOC="USA" />
+	<Person PersonID="117831" BoatID="76433" ISAFPersonID="SUIAS19" Position="Helm" FamilyName="Schaerer" GivenName="Alex" NOC="MALTA" />
+	<Person PersonID="121656" BoatID="76433" ISAFPersonID="AUSRD7" Position="Grinder" FamilyName="Daniel" GivenName="Rodney" NOC="USA" />
+	<Person PersonID="121657" BoatID="76433" ISAFPersonID="AUSNE1" Position="Main Trimmer" FamilyName="Ellis" GivenName="Nathan " NOC="AUS" />
+	<Person PersonID="121658" BoatID="76433" ISAFPersonID="SUISH9" Position="Mast" FamilyName="Hodel" GivenName="Samuel" NOC="Swiss" />
+	<Person PersonID="121659" BoatID="76433" ISAFPersonID="AUSMP17" Position="Spinnaker trimmer" FamilyName="Parker" GivenName="Mal" NOC="Australia" />
+	<Person PersonID="121661" BoatID="76433" ISAFPersonID="AUSDS2" Position="Mid Mast" FamilyName="Sampson" GivenName="David" NOC="AUS" />
+	<Person PersonID="121663" BoatID="76433" ISAFPersonID="NZLSB21" Position="Bow" FamilyName="Beavis" GivenName="Scott" NOC="NZ" />
+	<Person PersonID="121664" BoatID="76433" ISAFPersonID="AUSCG2" Position="Mid Bow" FamilyName="Garnet" GivenName="Craig" NOC="AUS" />
+	<Person PersonID="121665" BoatID="76433" ISAFPersonID="Gbrpc94" Position="Grinder" FamilyName="Clapp" GivenName="Phil" NOC="England" />
+	<Person PersonID="121666" BoatID="76433" ISAFPersonID="AUSWM15" Position="Grinder" FamilyName="McCarthy" GivenName="Will" NOC="USA" />
+	<Person PersonID="121667" BoatID="76433" ISAFPersonID="AUSWO" Position="Navigator" FamilyName="Oxley" GivenName="William" NOC="Australia" />
+	<Person PersonID="121668" BoatID="76433" ISAFPersonID="AUSAM66" Position="Runners" FamilyName="Merrington" GivenName="Anthony" NOC="New Zealand" />
+	<Person PersonID="121669" BoatID="76433" ISAFPersonID="AUSMS10" Position="Grinder" FamilyName="Shillington" GivenName="Matthew" NOC="" />
+	<Person PersonID="121670" BoatID="76433" ISAFPersonID="AUSAP14" Position="Headsail Trimmer" FamilyName="Pratt" GivenName="Alby" NOC="Australia" />
+	<Person PersonID="121671" BoatID="76433" ISAFPersonID="AUSPW19" Position="Main Trimmer" FamilyName="Westlake" GivenName="Paul " NOC="USA" />
+	<Person PersonID="121672" BoatID="76433" ISAFPersonID="NZLJC2" Position="Tactician" FamilyName="Cutler" GivenName="John" NOC="" />
+	<Person PersonID="123130" BoatID="76433" ISAFPersonID="USABS27" Position="Grinder" FamilyName="Sharp" GivenName="Brian" NOC="USA" />
+	<Person PersonID="123199" BoatID="76433" ISAFPersonID="AUSBR2" Position="Mid Bow" FamilyName="Ruthenberg" GivenName="Bryce" NOC="AUS" />
+	<Person PersonID="123200" BoatID="76433" ISAFPersonID="AUSOS7" Position="Grinder" FamilyName="Smith" GivenName="Ollie " NOC="USA" />
+	<Person PersonID="124503" BoatID="76433" ISAFPersonID="AUSND9" Position="Grinder" FamilyName="Drennan" GivenName="Noel" NOC="USA" />
+	<Person PersonID="117847" BoatID="76439" ISAFPersonID="" Position="Skipper" FamilyName="ORourke" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123163" BoatID="76439" ISAFPersonID="USAPG66" Position="Mid Bowman" FamilyName="Gavey" GivenName="Phil " NOC="USA" />
+	<Person PersonID="123164" BoatID="76439" ISAFPersonID="" Position="Bow" FamilyName="Johnston" GivenName="Jon" NOC="USA" />
+	<Person PersonID="123165" BoatID="76439" ISAFPersonID="" Position="Helm" FamilyName="Kimberly" GivenName="John" NOC="USA" />
+	<Person PersonID="123166" BoatID="76439" ISAFPersonID="usajm389" Position="Main Trimmer" FamilyName="Morrison" GivenName="Jeffrey" NOC="USA" />
+	<Person PersonID="123167" BoatID="76439" ISAFPersonID="" Position="Medic/Doctor" FamilyName="ODonnell" GivenName="Ken" NOC="USA" />
+	<Person PersonID="123169" BoatID="76439" ISAFPersonID="" Position="Strategist" FamilyName="Smola" GivenName="Rick" NOC="USA" />
+	<Person PersonID="123170" BoatID="76439" ISAFPersonID="USAGM79" Position="Navigator" FamilyName="McGowan" GivenName="Mark" NOC="USA" />
+	<Person PersonID="123172" BoatID="76439" ISAFPersonID="" Position="Grinder" FamilyName="Nealon" GivenName="Bill" NOC="USA" />
+	<Person PersonID="123175" BoatID="76439" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="May" GivenName="Bryce" NOC="USA" />
+	<Person PersonID="117859" BoatID="76450" ISAFPersonID="USAJB130" Position="" FamilyName="Baggett" GivenName="Joe" NOC="USA" />
+	<Person PersonID="124166" BoatID="76450" ISAFPersonID="USACA67" Position="" FamilyName="Arnold" GivenName="Claude" NOC="USA" />
+	<Person PersonID="124948" BoatID="76450" ISAFPersonID="USAEA33" Position="Mid Mast" FamilyName="Aspland" GivenName="Emily" NOC="USA" />
+	<Person PersonID="124950" BoatID="76450" ISAFPersonID="USAWH23" Position="" FamilyName="Harris" GivenName="worth" NOC="USA" />
+	<Person PersonID="117883" BoatID="76459" ISAFPersonID="usajs322" Position="Helm" FamilyName="Schaefer" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="123816" BoatID="76459" ISAFPersonID="USAMH145" Position="Pit" FamilyName="Hettel" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123817" BoatID="76459" ISAFPersonID="USAAC125" Position="Headsail Trimmer" FamilyName="Cermak" GivenName="Amy" NOC="USA" />
+	<Person PersonID="123818" BoatID="76459" ISAFPersonID="USARC130" Position="Headsail Trimmer" FamilyName="Cermak" GivenName="Rick" NOC="USA" />
+	<Person PersonID="117901" BoatID="76469" ISAFPersonID="" Position="" FamilyName="Beck" GivenName="Mark" NOC="USA" />
+	<Person PersonID="117906" BoatID="76472" ISAFPersonID="" Position="" FamilyName="Sakellaris" GivenName="George " NOC="USA" />
+	<Person PersonID="117926" BoatID="76482" ISAFPersonID="USAWS86" Position="Skipper" FamilyName="Smith" GivenName="William " NOC="USA" />
+	<Person PersonID="122826" BoatID="76482" ISAFPersonID="USAQB1" Position="Bowman" FamilyName="Bruhn" GivenName="Quentin" NOC="USA" />
+	<Person PersonID="122827" BoatID="76482" ISAFPersonID="ROUDC1" Position="Mid Mast" FamilyName="Candea" GivenName="Dorin" NOC="USA" />
+	<Person PersonID="122828" BoatID="76482" ISAFPersonID="USAGO7" Position="Main Trimmer" FamilyName="O'Neil" GivenName="Gerard" NOC="USA" />
+	<Person PersonID="122829" BoatID="76482" ISAFPersonID="USAAT13" Position="Tactician" FamilyName="Terhune" GivenName="Allan" NOC="USA" />
+	<Person PersonID="122830" BoatID="76482" ISAFPersonID="USAWR39" Position="Pit" FamilyName="Richards" GivenName="William " NOC="USA" />
+	<Person PersonID="122831" BoatID="76482" ISAFPersonID="USASO16" Position="Spinnaker trimmer" FamilyName="O'Neil" GivenName="Sue" NOC="USA" />
+	<Person PersonID="122832" BoatID="76482" ISAFPersonID="USAGT32" Position="Headsail Trimmer" FamilyName="Tabb" GivenName="Gregory " NOC="USA" />
+	<Person PersonID="117930" BoatID="76483" ISAFPersonID="USAPW42" Position="Skipper" FamilyName="Wagner" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123255" BoatID="76483" ISAFPersonID="USAJP105" Position="Main Trimmer" FamilyName="Pernick" GivenName="John" NOC="USA" />
+	<Person PersonID="123256" BoatID="76483" ISAFPersonID="USASW10" Position="Tactician" FamilyName="Wijsen" GivenName="Seadon" NOC="USA" />
+	<Person PersonID="123257" BoatID="76483" ISAFPersonID="USAJC71" Position="Bow" FamilyName="Collins" GivenName="John" NOC="USA" />
+	<Person PersonID="123258" BoatID="76483" ISAFPersonID="BRAPC19" Position="Headsail Trimmer" FamilyName="Clark" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123259" BoatID="76483" ISAFPersonID="USADL51" Position="Spinnaker trimmer" FamilyName="Lyons" GivenName="David" NOC="USA" />
+	<Person PersonID="123260" BoatID="76483" ISAFPersonID="ITAFN7" Position="Pit" FamilyName="Natale" GivenName="Fabrizio" NOC="USA" />
+	<Person PersonID="123261" BoatID="76483" ISAFPersonID="PORJR22" Position="Mast" FamilyName="Reis" GivenName="Joao" NOC="USA" />
+	<Person PersonID="117932" BoatID="76485" ISAFPersonID="" Position="" FamilyName="Gordon" GivenName="Ian" NOC="USA" />
+	<Person PersonID="117950" BoatID="76491" ISAFPersonID="" Position="" FamilyName="Johnstone" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="124564" BoatID="76491" ISAFPersonID="" Position="" FamilyName="Patton" GivenName="Tod" NOC="USA" />
+	<Person PersonID="124565" BoatID="76491" ISAFPersonID="USAHP29" Position="Spinnaker trimmer" FamilyName="Patton" GivenName="Heidi" NOC="USA" />
+	<Person PersonID="124566" BoatID="76491" ISAFPersonID="" Position="Other" FamilyName="Kirk" GivenName="Tom" NOC="USA" />
+	<Person PersonID="124569" BoatID="76491" ISAFPersonID="" Position="" FamilyName="Manheimer" GivenName="Dave" NOC="USA" />
+	<Person PersonID="124572" BoatID="76491" ISAFPersonID="" Position="" FamilyName="Rogers" GivenName="Brett" NOC="USA" />
+	<Person PersonID="117973" BoatID="76504" ISAFPersonID="" Position="" FamilyName="Stevens" GivenName="G John" NOC="USA" />
+	<Person PersonID="117982" BoatID="76506" ISAFPersonID="" Position="" FamilyName="Rankin" GivenName="Richard" NOC="USA" />
+	<Person PersonID="117984" BoatID="76509" ISAFPersonID="usaan12" Position="" FamilyName="Neill" GivenName="Amy" NOC="USA" />
+	<Person PersonID="124036" BoatID="76509" ISAFPersonID="CANAB9" Position="Chef" FamilyName="Bowman" GivenName="Tony" NOC="CAN" />
+	<Person PersonID="124038" BoatID="76509" ISAFPersonID="USAJS30" Position="Spinnaker trimmer" FamilyName="Stanley" GivenName="John" NOC="USA" />
+	<Person PersonID="124039" BoatID="76509" ISAFPersonID="Usatw67" Position="" FamilyName="Woodworth" GivenName="Tyler" NOC="" />
+	<Person PersonID="118009" BoatID="76517" ISAFPersonID="" Position="" FamilyName="Imhoff" GivenName="Denise" NOC="USA" />
+	<Person PersonID="118052" BoatID="76523" ISAFPersonID="usasb116" Position="" FamilyName="Boho" GivenName="Steven " NOC="USA" />
+	<Person PersonID="118054" BoatID="76527" ISAFPersonID="USAKJ20" Position="Owner" FamilyName="Johnson" GivenName="Ken " NOC="USA" />
+	<Person PersonID="121954" BoatID="76527" ISAFPersonID="USAHS57" Position="Bow" FamilyName="Slivko-Bathurst" GivenName="Heather" NOC="USA" />
+	<Person PersonID="121958" BoatID="76527" ISAFPersonID="" Position="Other" FamilyName="Wagner" GivenName="Brad" NOC="USA" />
+	<Person PersonID="121959" BoatID="76527" ISAFPersonID="" Position="Grinder" FamilyName="wagner" GivenName="bill" NOC="USA" />
+	<Person PersonID="121960" BoatID="76527" ISAFPersonID="" Position="Main Trimmer" FamilyName="Meise" GivenName="Wendell" NOC="USA" />
+	<Person PersonID="121961" BoatID="76527" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Herber" GivenName="Carolyn" NOC="USA" />
+	<Person PersonID="121962" BoatID="76527" ISAFPersonID="" Position="Mid Bow" FamilyName="Fisher" GivenName="Colby" NOC="USA" />
+	<Person PersonID="124580" BoatID="76527" ISAFPersonID="" Position="Other" FamilyName="Brown" GivenName="Lavonne" NOC="USA" />
+	<Person PersonID="118062" BoatID="76531" ISAFPersonID="" Position="" FamilyName="DeGroot" GivenName="Henry" NOC="USA" />
+	<Person PersonID="123971" BoatID="76531" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Yeo" GivenName="David" NOC="USA" />
+	<Person PersonID="123972" BoatID="76531" ISAFPersonID="" Position="Mast" FamilyName="Almeida" GivenName="Mason" NOC="USA" />
+	<Person PersonID="123973" BoatID="76531" ISAFPersonID="" Position="Co-Skipper" FamilyName="DeGroot" GivenName="Patty" NOC="USA" />
+	<Person PersonID="123975" BoatID="76531" ISAFPersonID="" Position="Tactician" FamilyName="Pasqua" GivenName="Simona" NOC="USA" />
+	<Person PersonID="118113" BoatID="76584" ISAFPersonID="USADH74" Position="" FamilyName="Hillmyer" GivenName="Dave" NOC="USA" />
+	<Person PersonID="118130" BoatID="76597" ISAFPersonID="USADK109" Position="" FamilyName="Koski " GivenName="David " NOC="USA" />
+	<Person PersonID="124226" BoatID="76597" ISAFPersonID="USAMZ25" Position="Owner" FamilyName="Zawadzki" GivenName="Maciej" NOC="Ohio" />
+	<Person PersonID="124227" BoatID="76597" ISAFPersonID="USAGK17" Position="Other" FamilyName="Koski" GivenName="Greg " NOC="USA" />
+	<Person PersonID="124245" BoatID="76597" ISAFPersonID="FRAPB88" Position="Mast" FamilyName="BORONAT  " GivenName="Patrick" NOC="Fra" />
+	<Person PersonID="118261" BoatID="76678" ISAFPersonID="" Position="" FamilyName="Hall" GivenName="Joe" NOC="UK" />
+	<Person PersonID="118315" BoatID="76703" ISAFPersonID="USADM161" Position="Helm" FamilyName="McGraw" GivenName="Dan" NOC="USA" />
+	<Person PersonID="124413" BoatID="76703" ISAFPersonID="USATW68" Position="Spinnaker trimmer" FamilyName="Wilson" GivenName="Todd" NOC="USA" />
+	<Person PersonID="124414" BoatID="76703" ISAFPersonID="USATD80" Position="Bow" FamilyName="Wilson" GivenName="Tiffany" NOC="USA" />
+	<Person PersonID="124415" BoatID="76703" ISAFPersonID="USADB157" Position="Spinnaker trimmer" FamilyName="Bennet" GivenName="David" NOC="USA" />
+	<Person PersonID="124416" BoatID="76703" ISAFPersonID="USAMG134" Position="Tactician" FamilyName="Glover" GivenName="Mike" NOC="USA" />
+	<Person PersonID="118352" BoatID="76712" ISAFPersonID="" Position="Helm" FamilyName="Langley" GivenName="Tony" NOC="GBR" />
+	<Person PersonID="123602" BoatID="76712" ISAFPersonID="" Position="Pit" FamilyName="Wilson" GivenName="Tom " NOC="GBR" />
+	<Person PersonID="123603" BoatID="76712" ISAFPersonID="" Position="Grinder" FamilyName="Povey" GivenName="Geoff" NOC="GBR" />
+	<Person PersonID="123604" BoatID="76712" ISAFPersonID="" Position="Grinder" FamilyName="Baker" GivenName="Ian" NOC="NZL" />
+	<Person PersonID="123605" BoatID="76712" ISAFPersonID="" Position="Navigator" FamilyName="Salter" GivenName="Jules" NOC="GBR" />
+	<Person PersonID="123606" BoatID="76712" ISAFPersonID="" Position="Tactician" FamilyName="Walker" GivenName="Ian" NOC="GBR" />
+	<Person PersonID="123607" BoatID="76712" ISAFPersonID="" Position="Grinder" FamilyName="Swete" GivenName="David " NOC="NZL" />
+	<Person PersonID="123608" BoatID="76712" ISAFPersonID="" Position="Main Trimmer" FamilyName="Estcourt" GivenName="Andrew" NOC="NZL" />
+	<Person PersonID="123609" BoatID="76712" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Swain" GivenName="Jono " NOC="RSA" />
+	<Person PersonID="123610" BoatID="76712" ISAFPersonID="" Position="Bow" FamilyName="Blackman" GivenName="Nick " NOC="NZL" />
+	<Person PersonID="123611" BoatID="76712" ISAFPersonID="" Position="Mid Bow" FamilyName="Beavis" GivenName="William" NOC="GBR" />
+	<Person PersonID="123612" BoatID="76712" ISAFPersonID="" Position="Runners" FamilyName="Rossberg" GivenName="Mikkel" NOC="DEN" />
+	<Person PersonID="123613" BoatID="76712" ISAFPersonID="" Position="Offside trimmer" FamilyName="Fyfe" GivenName="Scott" NOC="NZL" />
+	<Person PersonID="124952" BoatID="76712" ISAFPersonID="" Position="Strategist" FamilyName="Finlay" GivenName="Feargal" NOC="USA" />
+	<Person PersonID="124995" BoatID="76712" ISAFPersonID="" Position="Floater" FamilyName="Gibbs" GivenName="Kirk" NOC="USA" />
+	<Person PersonID="118405" BoatID="76738" ISAFPersonID="" Position="Helm" FamilyName="Darista" GivenName="Peter" NOC="USA" />
+	<Person PersonID="124155" BoatID="76738" ISAFPersonID="" Position="Chef" FamilyName="Edwards" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="124157" BoatID="76738" ISAFPersonID="KTUSA19" Position="Pit" FamilyName="Chaney" GivenName="Kate" NOC="USA" />
+	<Person PersonID="124158" BoatID="76738" ISAFPersonID="USASS234" Position="Pit" FamilyName="Southworth" GivenName="Sarah" NOC="USA" />
+	<Person PersonID="124159" BoatID="76738" ISAFPersonID="NZLRK4" Position="Main Trimmer" FamilyName="Keenan" GivenName="Rodney" NOC="NZL" />
+	<Person PersonID="124160" BoatID="76738" ISAFPersonID="USAMH174" Position="" FamilyName="Hildenberger" GivenName="Megan" NOC="USA" />
+	<Person PersonID="124183" BoatID="76738" ISAFPersonID="" Position="Mid Bow" FamilyName="Feusahrens" GivenName="Lauren" NOC="USA" />
+	<Person PersonID="118455" BoatID="76779" ISAFPersonID="" Position="Owner" FamilyName="Strebel" GivenName="Doug" NOC="USA" />
+	<Person PersonID="124868" BoatID="76779" ISAFPersonID="" Position="Mid Bow" FamilyName="Brock" GivenName="Amy " NOC="USA" />
+	<Person PersonID="124869" BoatID="76779" ISAFPersonID="" Position="Tactician" FamilyName="Lutz" GivenName="Jay " NOC="USA" />
+	<Person PersonID="124870" BoatID="76779" ISAFPersonID="" Position="Helm" FamilyName="Lutz" GivenName="Jody " NOC="USA" />
+	<Person PersonID="124871" BoatID="76779" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Williams" GivenName="Emory" NOC="USA" />
+	<Person PersonID="118480" BoatID="76786" ISAFPersonID="" Position="" FamilyName="Donovan" GivenName="James" NOC="USA" />
+	<Person PersonID="118531" BoatID="76801" ISAFPersonID="NOREA2" Position="" FamilyName="Astrup" GivenName="Eivind" NOC="NOR" />
+	<Person PersonID="123202" BoatID="76801" ISAFPersonID="" Position="Tactician" FamilyName="Berthelsen" GivenName="Lasse" NOC="USA" />
+	<Person PersonID="123203" BoatID="76801" ISAFPersonID="" Position="Pit" FamilyName="Nilsson" GivenName="Thomas" NOC="NOR" />
+	<Person PersonID="123204" BoatID="76801" ISAFPersonID="NORPT1" Position="Headsail Trimmer" FamilyName="Tonnesson" GivenName="Pal" NOC="Norway" />
+	<Person PersonID="118546" BoatID="76805" ISAFPersonID="" Position="Helm" FamilyName="Zugel" GivenName="Christian" NOC="IRL" />
+	<Person PersonID="118598" BoatID="76851" ISAFPersonID="" Position="" FamilyName="DeVos" GivenName="Doug" NOC="USA" />
+	<Person PersonID="118650" BoatID="76868" ISAFPersonID="" Position="" FamilyName="Vita" GivenName="Jose" NOC="BRA" />
+	<Person PersonID="118657" BoatID="76872" ISAFPersonID="USAKR36" Position="Helm" FamilyName="Robinson" GivenName="Kristen" NOC="USA" />
+	<Person PersonID="118658" BoatID="76872" ISAFPersonID="USABR48" Position="Main Trimmer" FamilyName="Robinson" GivenName="Brian" NOC="USA" />
+	<Person PersonID="118659" BoatID="76872" ISAFPersonID="USAKR36" Position="Spinnaker trimmer" FamilyName="Noel" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="118660" BoatID="76872" ISAFPersonID="USAKR36" Position="Tactician" FamilyName="Steele" GivenName="Scott" NOC="USA" />
+	<Person PersonID="118661" BoatID="76873" ISAFPersonID="" Position="" FamilyName="Bortoletto " GivenName="Massimo" NOC="" />
+	<Person PersonID="124035" BoatID="76873" ISAFPersonID="" Position="Helm" FamilyName="Salvi" GivenName="Marco " NOC="USA" />
+	<Person PersonID="124037" BoatID="76873" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="De Felice" GivenName="Pierluigi" NOC="USA" />
+	<Person PersonID="124040" BoatID="76873" ISAFPersonID="" Position="Tactician" FamilyName="Fernandez" GivenName="Xabier" NOC="USA" />
+	<Person PersonID="118664" BoatID="76876" ISAFPersonID="" Position="" FamilyName="Russack" GivenName="Tate" NOC="USA" />
+	<Person PersonID="124780" BoatID="76876" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Chiochetti" GivenName="John" NOC="USA" />
+	<Person PersonID="124781" BoatID="76876" ISAFPersonID="" Position="Mast" FamilyName="Mangano" GivenName="Ken" NOC="USA" />
+	<Person PersonID="124782" BoatID="76876" ISAFPersonID="" Position="Bow" FamilyName="Grabowski" GivenName="Alice" NOC="USA" />
+	<Person PersonID="124784" BoatID="76876" ISAFPersonID="" Position="Tactician" FamilyName="Leonard" GivenName="Larry" NOC="USA" />
+	<Person PersonID="124787" BoatID="76876" ISAFPersonID="" Position="Runners" FamilyName="Moses" GivenName="Ed" NOC="USA" />
+	<Person PersonID="118778" BoatID="76914" ISAFPersonID="USADM220" Position="" FamilyName="McKeige" GivenName="Douglas" NOC="USA" />
+	<Person PersonID="124589" BoatID="76914" ISAFPersonID="USAJS44" Position="Chef" FamilyName="Sharkey" GivenName="Jay" NOC="USA" />
+	<Person PersonID="124590" BoatID="76914" ISAFPersonID="" Position="Other" FamilyName="McKeige" GivenName="Ian" NOC="USA" />
+	<Person PersonID="124591" BoatID="76914" ISAFPersonID="USAPG34" Position="Tactician" FamilyName="Patrick-Bruynes" GivenName="Gavin " NOC="USA" />
+	<Person PersonID="124592" BoatID="76914" ISAFPersonID="" Position="" FamilyName="Beekman" GivenName="Matthew " NOC="USA" />
+	<Person PersonID="124593" BoatID="76914" ISAFPersonID="" Position="" FamilyName="Swanson" GivenName="Charles" NOC="USA" />
+	<Person PersonID="124594" BoatID="76914" ISAFPersonID="" Position="Mast" FamilyName="Beekman" GivenName="Matthew " NOC="USA" />
+	<Person PersonID="118792" BoatID="76923" ISAFPersonID="" Position="" FamilyName="Santa cruz" GivenName="Mauricio" NOC="BRA" />
+	<Person PersonID="118926" BoatID="76994" ISAFPersonID="" Position="" FamilyName="Duncan " GivenName="Peter" NOC="USA" />
+	<Person PersonID="123335" BoatID="76994" ISAFPersonID="" Position="" FamilyName="Anderson" GivenName="Karl " NOC="USA" />
+	<Person PersonID="123336" BoatID="76994" ISAFPersonID="" Position="Tactician" FamilyName="Diaz-de-Leon" GivenName="Victor " NOC="USA" />
+	<Person PersonID="123337" BoatID="76994" ISAFPersonID="usadm31" Position="" FamilyName="McClintock" GivenName="Moose" NOC="USA" />
+	<Person PersonID="119021" BoatID="77042" ISAFPersonID="USAJS195" Position="" FamilyName="Smith" GivenName="Jud" NOC="USA" />
+	<Person PersonID="119023" BoatID="77042" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Felder" GivenName="Will" NOC="USA" />
+	<Person PersonID="119024" BoatID="77042" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Boston" GivenName="Tac" NOC="USA" />
+	<Person PersonID="123176" BoatID="77042" ISAFPersonID="" Position="Pit Assist" FamilyName="Smith" GivenName="Lindsay" NOC="USA" />
+	<Person PersonID="119074" BoatID="77072" ISAFPersonID="" Position="" FamilyName="Mulder" GivenName="Anson" NOC="USA" />
+	<Person PersonID="119234" BoatID="77167" ISAFPersonID="GBRMD62" Position="" FamilyName="Dent" GivenName="Martin" NOC="GBR" />
+	<Person PersonID="124446" BoatID="77167" ISAFPersonID="Irlsh4" Position="" FamilyName="Hughes" GivenName="Shane" NOC="IRL" />
+	<Person PersonID="124447" BoatID="77167" ISAFPersonID="bm47" Position="Bow" FamilyName="Mclaughlin" GivenName="Brad" NOC="United Kingdom" />
+	<Person PersonID="124448" BoatID="77167" ISAFPersonID="GBRRS106" Position="Headsail Trimmer" FamilyName="Southwell" GivenName="Robbie" NOC="United Kingdom" />
+	<Person PersonID="119252" BoatID="77177" ISAFPersonID="esplb3" Position="" FamilyName="Bugallo" GivenName="Luis" NOC="ESP" />
+	<Person PersonID="119253" BoatID="77177" ISAFPersonID="ESPJF35" Position="Tactician" FamilyName="Freire Freire" GivenName="Jose Luis" NOC="ESP" />
+	<Person PersonID="119254" BoatID="77177" ISAFPersonID="ESPEF17" Position="Spinnaker trimmer" FamilyName="Freire Faria" GivenName="Enrique" NOC="ESP" />
+	<Person PersonID="119255" BoatID="77177" ISAFPersonID="ESPGP16" Position="Bow" FamilyName="Prego Menor" GivenName="gerardo" NOC="ESP" />
+	<Person PersonID="122045" BoatID="77177" ISAFPersonID="ESPFC22" Position="Spinnaker trimmer" FamilyName="Campos Marquez" GivenName="Fernando" NOC="Spain" />
+	<Person PersonID="119262" BoatID="77182" ISAFPersonID="" Position="" FamilyName="Polk" GivenName="Stephen" NOC="USA" />
+	<Person PersonID="124877" BoatID="77182" ISAFPersonID="" Position="Other" FamilyName="hartmann" GivenName="paul" NOC="USA" />
+	<Person PersonID="124878" BoatID="77182" ISAFPersonID="Usamn51" Position="Chef" FamilyName="nampa" GivenName="mike" NOC="USA" />
+	<Person PersonID="124880" BoatID="77182" ISAFPersonID="USARR117" Position="Bow" FamilyName="Ramirez" GivenName="Robert M. " NOC="USA" />
+	<Person PersonID="124881" BoatID="77182" ISAFPersonID="" Position="Runners" FamilyName="Baker" GivenName="Brien" NOC="USA" />
+	<Person PersonID="124882" BoatID="77182" ISAFPersonID="" Position="Pit" FamilyName="Temple" GivenName="Sue" NOC="USA" />
+	<Person PersonID="124883" BoatID="77182" ISAFPersonID="Usagm18" Position="Navigator" FamilyName="McCliment" GivenName="Greg" NOC="USA" />
+	<Person PersonID="124884" BoatID="77182" ISAFPersonID="" Position="Spinnaker trimmer" FamilyName="Post" GivenName="Tom" NOC="USA" />
+	<Person PersonID="124885" BoatID="77182" ISAFPersonID="" Position="" FamilyName="Briedan" GivenName="Hans" NOC="USA" />
+	<Person PersonID="124889" BoatID="77182" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Hess" GivenName="Charles" NOC="USA" />
+	<Person PersonID="124891" BoatID="77182" ISAFPersonID="USATJ4" Position="Staysail trimmer" FamilyName="Jones" GivenName="Todd" NOC="USA" />
+	<Person PersonID="120287" BoatID="78197" ISAFPersonID="" Position="Skipper" FamilyName="Brown" GivenName="John" NOC="USA" />
+	<Person PersonID="123263" BoatID="78197" ISAFPersonID="" Position="Tactician" FamilyName="Jewett" GivenName="Kevin" NOC="USA" />
+	<Person PersonID="123264" BoatID="78197" ISAFPersonID="USAMP79" Position="Medic/Doctor" FamilyName="Pistay" GivenName="Matt" NOC="USA" />
+	<Person PersonID="123265" BoatID="78197" ISAFPersonID="Usamh172" Position="Other" FamilyName="Horrocks" GivenName="Molly" NOC="USA" />
+	<Person PersonID="123266" BoatID="78197" ISAFPersonID="Usach81" Position="Spinnaker trimmer" FamilyName="Horrocks" GivenName="Carl" NOC="USA" />
+	<Person PersonID="120289" BoatID="78199" ISAFPersonID="USADS143" Position="Watch Captain" FamilyName="Swain" GivenName="Duncan" NOC="USA" />
+	<Person PersonID="124343" BoatID="78199" ISAFPersonID="USAPS135" Position="Helm" FamilyName="Swain" GivenName="Peter" NOC="USA" />
+	<Person PersonID="124344" BoatID="78199" ISAFPersonID="USAAP73" Position="Bow" FamilyName="Preston" GivenName="Abigail" NOC="USA" />
+	<Person PersonID="124345" BoatID="78199" ISAFPersonID="USAAA33" Position="Tactician" FamilyName="Atterbury" GivenName="Tucker" NOC="USA" />
+	<Person PersonID="120292" BoatID="78203" ISAFPersonID="ITACA21" Position="" FamilyName="alberini" GivenName="carlo" NOC="ITA" />
+	<Person PersonID="121554" BoatID="78203" ISAFPersonID="SLOBB3" Position="" FamilyName="Brcin" GivenName="Branko" NOC="SLO" />
+	<Person PersonID="121555" BoatID="78203" ISAFPersonID="SLOKH1" Position="" FamilyName="Hmeljak" GivenName="karlo " NOC="SLO" />
+	<Person PersonID="121556" BoatID="78203" ISAFPersonID="ITASB20" Position="" FamilyName="Blosi" GivenName="Sergio" NOC="ITA" />
+	<Person PersonID="120294" BoatID="78204" ISAFPersonID="" Position="Skipper" FamilyName="Phelan" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123986" BoatID="78204" ISAFPersonID="" Position="Main Trimmer" FamilyName="Frazier" GivenName="Chris" NOC="USA" />
+	<Person PersonID="123987" BoatID="78204" ISAFPersonID="" Position="Chef" FamilyName="heyliger" GivenName="stephan" NOC="USA" />
+	<Person PersonID="123988" BoatID="78204" ISAFPersonID="" Position="Strategist" FamilyName="chambers" GivenName="stephen" NOC="USA" />
+	<Person PersonID="123989" BoatID="78204" ISAFPersonID="" Position="" FamilyName="davis" GivenName="carinne" NOC="USA" />
+	<Person PersonID="123990" BoatID="78204" ISAFPersonID="" Position="Mid Mast" FamilyName="phelan" GivenName="kevin" NOC="USA" />
+	<Person PersonID="123991" BoatID="78204" ISAFPersonID="" Position="" FamilyName="calla" GivenName="dennis" NOC="USA" />
+	<Person PersonID="123992" BoatID="78204" ISAFPersonID="" Position="Runners" FamilyName="underwood" GivenName="rob" NOC="USA" />
+	<Person PersonID="124489" BoatID="78204" ISAFPersonID="" Position="Medic/Doctor" FamilyName="Acha" GivenName="Gabrielle" NOC="USA" />
+	<Person PersonID="120319" BoatID="78215" ISAFPersonID="USACM76" Position="Owner" FamilyName="McKinney" GivenName="Clarke" NOC="USA" />
+	<Person PersonID="123524" BoatID="78215" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="McKinney" GivenName="Neal" NOC="USA" />
+	<Person PersonID="123525" BoatID="78215" ISAFPersonID="" Position="" FamilyName="Caldwell" GivenName="Hawk " NOC="USA" />
+	<Person PersonID="123526" BoatID="78215" ISAFPersonID="" Position="" FamilyName="Caldwell" GivenName="Stephanie" NOC="USA" />
+	<Person PersonID="120447" BoatID="78287" ISAFPersonID="" Position="Skipper" FamilyName="Vessella" GivenName="Peter" NOC="USA" />
+	<Person PersonID="123230" BoatID="78287" ISAFPersonID="USAPT5" Position="Chef" FamilyName="Trinter" GivenName="Phil" NOC="USA" />
+	<Person PersonID="123231" BoatID="78287" ISAFPersonID="USAJM31" Position="Strategist" FamilyName="MacCausland" GivenName="John" NOC="USA" />
+	<Person PersonID="123233" BoatID="78287" ISAFPersonID="USAKW5" Position="Staysail trimmer" FamilyName="Wessels" GivenName="Kurt" NOC="USA" />
+	<Person PersonID="123744" BoatID="78317" ISAFPersonID="USAJM422" Position="Skipper" FamilyName="Mann" GivenName="Julian" NOC="USA" />
+	<Person PersonID="123746" BoatID="78317" ISAFPersonID="USAPM155" Position="Tactician" FamilyName="McCormick" GivenName="Pete" NOC="USA" />
+	<Person PersonID="123747" BoatID="78317" ISAFPersonID="USACG126" Position="Main Trimmer" FamilyName="Gray" GivenName="Casey" NOC="USA" />
+	<Person PersonID="123748" BoatID="78317" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Fletcher" GivenName="Craig" NOC="USA" />
+	<Person PersonID="123749" BoatID="78317" ISAFPersonID="USARA30" Position="Bow" FamilyName="Aull" GivenName="Ryan" NOC="USA" />
+	<Person PersonID="123750" BoatID="78317" ISAFPersonID="USABK71" Position="Spinnaker trimmer" FamilyName="Kennedy" GivenName="Brendan" NOC="USA" />
+	<Person PersonID="121516" BoatID="78327" ISAFPersonID="USAJR127" Position="Helm" FamilyName="Ronning" GivenName="Joel" NOC="USA" />
+	<Person PersonID="124294" BoatID="78327" ISAFPersonID="" Position="" FamilyName="Wilson" GivenName="Patrick" NOC="USA" />
+	<Person PersonID="124295" BoatID="78327" ISAFPersonID="USADM4" Position="" FamilyName="McLean" GivenName="Douglas" NOC="USA" />
+	<Person PersonID="124296" BoatID="78327" ISAFPersonID="CANRC5" Position="Tactician" FamilyName="Clarke" GivenName="Richard" NOC="CAN" />
+	<Person PersonID="121565" BoatID="78346" ISAFPersonID="" Position="Owner" FamilyName="Ward" GivenName="Sedgwick" NOC="USA" />
+	<Person PersonID="123927" BoatID="78346" ISAFPersonID="USAKM70" Position="Main Trimmer" FamilyName="McKee" GivenName="Kevin" NOC="USA" />
+	<Person PersonID="123928" BoatID="78346" ISAFPersonID="USAAR106" Position="Other" FamilyName="Rowsom" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="123929" BoatID="78346" ISAFPersonID="USAJK175" Position="Pit" FamilyName="Kapell" GivenName="Joshua" NOC="" />
+	<Person PersonID="123930" BoatID="78346" ISAFPersonID="USAMK112" Position="Headsail Trimmer" FamilyName="Kapell" GivenName="Matthew" NOC="USA" />
+	<Person PersonID="123931" BoatID="78346" ISAFPersonID="USAAW99" Position="Helm" FamilyName="Ward" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="123932" BoatID="78346" ISAFPersonID="usawf43" Position="Tactician" FamilyName="Flynn" GivenName="Terry" NOC="USA" />
+	<Person PersonID="124252" BoatID="78346" ISAFPersonID="usaif4" Position="Pit Assist" FamilyName="Fraser" GivenName="Ian " NOC="USA" />
+	<Person PersonID="124424" BoatID="78346" ISAFPersonID="USASB168" Position="Bow" FamilyName="Bliss" GivenName="Sebastian" NOC="USA" />
+	<Person PersonID="121599" BoatID="78365" ISAFPersonID="" Position="" FamilyName="Bomar" GivenName="William" NOC="USA" />
+	<Person PersonID="121778" BoatID="78469" ISAFPersonID="USAJS356" Position="" FamilyName="Streicker" GivenName="John" NOC="USA" />
+	<Person PersonID="123791" BoatID="78469" ISAFPersonID="USAAM146" Position="" FamilyName="Maltempo" GivenName="Ashley" NOC="USA" />
+	<Person PersonID="123792" BoatID="78469" ISAFPersonID="USAAQ4" Position="Bow" FamilyName="Quintner" GivenName="Alex" NOC="USA" />
+	<Person PersonID="123795" BoatID="78469" ISAFPersonID="USAAE33" Position="" FamilyName="Embleton" GivenName="Amy" NOC="USA" />
+	<Person PersonID="123796" BoatID="78469" ISAFPersonID="USAIN2" Position="Mast" FamilyName="Nussberg" GivenName="Ivan" NOC="USA" />
+	<Person PersonID="123798" BoatID="78469" ISAFPersonID="USAKK44" Position="Pit Assist" FamilyName="Kuzina" GivenName="Kimberly" NOC="USA" />
+	<Person PersonID="123799" BoatID="78469" ISAFPersonID="USAMM331" Position="Mid Mast" FamilyName="Murphy" GivenName="Mary" NOC="USA" />
+	<Person PersonID="124560" BoatID="78469" ISAFPersonID="CANPW17" Position="Other" FamilyName="Williamson" GivenName="Phillip" NOC="USA" />
+	<Person PersonID="124562" BoatID="78469" ISAFPersonID="BKUSA10" Position="Staysail trimmer" FamilyName="Kuryla" GivenName="Bruce" NOC="USA" />
+	<Person PersonID="124563" BoatID="78469" ISAFPersonID="USABM75" Position="Chef" FamilyName="Marriner" GivenName="Blake" NOC="USA" />
+	<Person PersonID="121799" BoatID="78489" ISAFPersonID="DENBP3" Position="" FamilyName="Boje" GivenName="Bo " NOC="DEN" />
+	<Person PersonID="121806" BoatID="78502" ISAFPersonID="" Position="" FamilyName="Ruhlman" GivenName="Ryan" NOC="USA" />
+	<Person PersonID="124505" BoatID="78502" ISAFPersonID="USAMR49" Position="Main Trimmer" FamilyName="Ruhlman" GivenName="Maegan" NOC="USA" />
+	<Person PersonID="124507" BoatID="78502" ISAFPersonID="usajh57" Position="Bow" FamilyName="Haase" GivenName="Jeff" NOC="USA" />
+	<Person PersonID="124508" BoatID="78502" ISAFPersonID="USAMF85" Position="Other" FamilyName="Frymier" GivenName="Matt" NOC="USA" />
+	<Person PersonID="124509" BoatID="78502" ISAFPersonID="" Position="Chef" FamilyName="Scanlon" GivenName="Tim" NOC="USA" />
+	<Person PersonID="124510" BoatID="78502" ISAFPersonID="USAWF6" Position="Headsail Trimmer" FamilyName="Faude" GivenName="Bill " NOC="USA" />
+	<Person PersonID="121842" BoatID="78527" ISAFPersonID="" Position="" FamilyName="Webster" GivenName="Christopher " NOC="USA" />
+	<Person PersonID="121857" BoatID="78535" ISAFPersonID="USAST99" Position="Owner" FamilyName="Stuart" GivenName="Todd" NOC="USA" />
+	<Person PersonID="123710" BoatID="78535" ISAFPersonID="" Position="Chef" FamilyName="Mullan" GivenName="Matthew" NOC="USA" />
+	<Person PersonID="123711" BoatID="78535" ISAFPersonID="USALS61" Position="Pit" FamilyName="Stuart" GivenName="Lisa" NOC="USA" />
+	<Person PersonID="123712" BoatID="78535" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Williamson" GivenName="Neily" NOC="USA" />
+	<Person PersonID="121859" BoatID="78537" ISAFPersonID="" Position="" FamilyName="Sastre" GivenName="Alex " NOC="USA" />
+	<Person PersonID="121933" BoatID="78577" ISAFPersonID="USAJW224" Position="Skipper" FamilyName="Wallace" GivenName="Jack" NOC="USA" />
+	<Person PersonID="123304" BoatID="78577" ISAFPersonID="GBRVA4" Position="Bow" FamilyName="Allan" GivenName="Vivien" NOC="USA" />
+	<Person PersonID="123305" BoatID="78577" ISAFPersonID="USAGC49" Position="Main Trimmer" FamilyName="Cloutier" GivenName="Gene" NOC="USA" />
+	<Person PersonID="123306" BoatID="78577" ISAFPersonID="USASB167" Position="Chef" FamilyName="Booth" GivenName="Steve" NOC="USA" />
+	<Person PersonID="122059" BoatID="78607" ISAFPersonID="USAMW22" Position="Owner" FamilyName="Whitford" GivenName="Michael" NOC="USA" />
+	<Person PersonID="123476" BoatID="78607" ISAFPersonID="" Position="" FamilyName="Heitzinger" GivenName="Travis" NOC="USA" />
+	<Person PersonID="123478" BoatID="78607" ISAFPersonID="" Position="Tactician" FamilyName="Beccaria" GivenName="Christopher" NOC="USA" />
+	<Person PersonID="124340" BoatID="78607" ISAFPersonID="" Position="" FamilyName="Roney" GivenName="TJ" NOC="USA" />
+	<Person PersonID="122255" BoatID="78680" ISAFPersonID="" Position="Skipper" FamilyName="Gottwald" GivenName="John" NOC="USA" />
+	<Person PersonID="124898" BoatID="78680" ISAFPersonID="" Position="" FamilyName="Ross" GivenName=" Blair" NOC="USA" />
+	<Person PersonID="124899" BoatID="78680" ISAFPersonID="" Position="" FamilyName="Futrell" GivenName="Holly" NOC="USA" />
+	<Person PersonID="124912" BoatID="78680" ISAFPersonID="" Position="Tactician" FamilyName="Gerber" GivenName="David" NOC="USA" />
+	<Person PersonID="122318" BoatID="78696" ISAFPersonID="" Position="" FamilyName="thompson" GivenName="Richard" NOC="UK" />
+	<Person PersonID="124652" BoatID="78696" ISAFPersonID="" Position="Strategist" FamilyName="Young" GivenName="Nigel" NOC="IRL" />
+	<Person PersonID="124653" BoatID="78696" ISAFPersonID="" Position="Tactician" FamilyName="Lea" GivenName="Jamie" NOC="UK" />
+	<Person PersonID="124654" BoatID="78696" ISAFPersonID="Usakp12" Position="Bow" FamilyName="Paxton" GivenName="Krista" NOC="USA" />
+	<Person PersonID="124655" BoatID="78696" ISAFPersonID="GBRRW82" Position="Bow" FamilyName="Williamson" GivenName="Rachel" NOC="IRL" />
+	<Person PersonID="122378" BoatID="78717" ISAFPersonID="Usakm117" Position="Skipper" FamilyName="Mallory" GivenName="Kathryn" NOC="USA" />
+	<Person PersonID="122379" BoatID="78717" ISAFPersonID="usapm75" Position="Runners" FamilyName="Mallory" GivenName="Paul" NOC="USA" />
+	<Person PersonID="122380" BoatID="78717" ISAFPersonID="" Position="Strategist" FamilyName="Yeager" GivenName="Catie" NOC="USA" />
+	<Person PersonID="122381" BoatID="78717" ISAFPersonID="" Position="Mid Mast" FamilyName="Steinberg" GivenName="Daniel" NOC="USA" />
+	<Person PersonID="122400" BoatID="78722" ISAFPersonID="USACE29" Position="Owner" FamilyName="Evans" GivenName="Catharine" NOC="USA" />
+	<Person PersonID="123993" BoatID="78722" ISAFPersonID="USATM17" Position="Grinder" FamilyName="Mangus" GivenName="Tim " NOC="USA" />
+	<Person PersonID="123994" BoatID="78722" ISAFPersonID="AUSCT22" Position="Spinnaker trimmer" FamilyName="Taylor" GivenName="Chuck " NOC="USA" />
+	<Person PersonID="123995" BoatID="78722" ISAFPersonID="USADK23" Position="Bow" FamilyName="Komar" GivenName="Ben " NOC="USA" />
+	<Person PersonID="122424" BoatID="78732" ISAFPersonID="GERCK35" Position="" FamilyName="Kalinski" GivenName="Christoph" NOC="USA" />
+	<Person PersonID="122447" BoatID="78784" ISAFPersonID="USAGR46" Position="Owner" FamilyName="Roth" GivenName="Geoffrey" NOC="USA" />
+	<Person PersonID="123349" BoatID="78784" ISAFPersonID="" Position="Co-Skipper" FamilyName="McGanty" GivenName="Dan" NOC="USA" />
+	<Person PersonID="123350" BoatID="78784" ISAFPersonID="GBRHB31" Position="Headsail Trimmer" FamilyName="Brieley" GivenName="Helen" NOC="USA" />
+	<Person PersonID="123353" BoatID="78784" ISAFPersonID="" Position="Bow" FamilyName="Murphy" GivenName="Pat" NOC="USA" />
+	<Person PersonID="123354" BoatID="78784" ISAFPersonID="" Position="Pit" FamilyName="Fujio-White" GivenName="Mariko" NOC="USA" />
+	<Person PersonID="123355" BoatID="78784" ISAFPersonID="" Position="Other" FamilyName="Solliday" GivenName="Bob" NOC="USA" />
+	<Person PersonID="124684" BoatID="78784" ISAFPersonID="" Position="Runners" FamilyName="Cope" GivenName="Roger" NOC="USA" />
+	<Person PersonID="124986" BoatID="78784" ISAFPersonID="" Position="Mid Bow" FamilyName="Landesman" GivenName="Ynbal" NOC="USA" />
+	<Person PersonID="125062" BoatID="78784" ISAFPersonID="" Position="Runners" FamilyName="Graebner" GivenName="Nicole" NOC="USA" />
+	<Person PersonID="122509" BoatID="78802" ISAFPersonID="Usapf34" Position="" FamilyName="Firey" GivenName="Peter" NOC="USA" />
+	<Person PersonID="124902" BoatID="78802" ISAFPersonID="USAEM13" Position="Tactician" FamilyName="Mentzell" GivenName="Eric " NOC="USA" />
+	<Person PersonID="124903" BoatID="78802" ISAFPersonID="USASO37" Position="Chef" FamilyName="Oldroyd" GivenName="Sam" NOC="USA" />
+	<Person PersonID="124904" BoatID="78802" ISAFPersonID="USAEM90" Position="Pit" FamilyName="McQueen" GivenName="Elizabeth" NOC="USA" />
+	<Person PersonID="122536" BoatID="78813" ISAFPersonID="FINAL2" Position="Helm" FamilyName="Luhta" GivenName="Antti" NOC="FIN" />
+	<Person PersonID="122537" BoatID="78813" ISAFPersonID="FINNR9" Position="Spinnaker trimmer" FamilyName="Risku" GivenName="Niclas" NOC="FIN" />
+	<Person PersonID="122538" BoatID="78813" ISAFPersonID="FINAH3" Position="Headsail Trimmer" FamilyName="Hallberg" GivenName="Arthur" NOC="FIN" />
+	<Person PersonID="122968" BoatID="78813" ISAFPersonID="FINJJ1" Position="Bow" FamilyName="Järvinen" GivenName="Janne" NOC="Finland" />
+	<Person PersonID="123196" BoatID="78821" ISAFPersonID="USAJD105" Position="Tactician" FamilyName="Dragonas" GivenName="Jon" NOC="USA" />
+	<Person PersonID="123197" BoatID="78821" ISAFPersonID="USADF55" Position="Chef" FamilyName="Franzel" GivenName="Dave" NOC="USA" />
+	<Person PersonID="123198" BoatID="78821" ISAFPersonID="USACS232" Position="Headsail Trimmer" FamilyName="Small" GivenName="Chris" NOC="USA" />
+	<Person PersonID="122617" BoatID="78843" ISAFPersonID="" Position="Owner" FamilyName="Wake" GivenName="Matt" NOC="USA" />
+	<Person PersonID="124303" BoatID="78843" ISAFPersonID="CANTF" Position="Tactician" FamilyName="Fedyszyn " GivenName="Todd " NOC="USA" />
+	<Person PersonID="124309" BoatID="78843" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Avila" GivenName="Nevin" NOC="USA" />
+	<Person PersonID="124312" BoatID="78843" ISAFPersonID="" Position="Pit" FamilyName="Tobio" GivenName="Sam" NOC="USA" />
+	<Person PersonID="124378" BoatID="78843" ISAFPersonID="USABM154" Position="Helm" FamilyName="McCarthy" GivenName="Blaire" NOC="USA" />
+	<Person PersonID="124425" BoatID="78843" ISAFPersonID="" Position="Main Trimmer" FamilyName="Boicheff" GivenName="Grant" NOC="USA" />
+	<Person PersonID="122879" BoatID="79027" ISAFPersonID="USABK22" Position="" FamilyName="Keane" GivenName="Brian" NOC="USA" />
+	<Person PersonID="124933" BoatID="79027" ISAFPersonID="ISVTC2" Position="" FamilyName="Canfield" GivenName="Taylor" NOC="USA" />
+	<Person PersonID="124934" BoatID="79027" ISAFPersonID="" Position="Bow" FamilyName="Weed" GivenName="Ron " NOC="USA" />
+	<Person PersonID="124935" BoatID="79027" ISAFPersonID="Usapl18" Position="" FamilyName="Levesque " GivenName="Pete" NOC="USA" />
+	<Person PersonID="122912" BoatID="79042" ISAFPersonID="NZLMB20" Position="Skipper" FamilyName="Beasley" GivenName="Mike" NOC="USA" />
+	<Person PersonID="124169" BoatID="79042" ISAFPersonID="" Position="Main Trimmer" FamilyName="Gibson" GivenName="Joe" NOC="USA" />
+	<Person PersonID="124172" BoatID="79042" ISAFPersonID="USAHT18" Position="Other" FamilyName="Turner" GivenName="Ridge" NOC="USA" />
+	<Person PersonID="124173" BoatID="79042" ISAFPersonID="USAAL87" Position="Bow" FamilyName="Lynch" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="124174" BoatID="79042" ISAFPersonID="USACH173" Position="Headsail Trimmer" FamilyName="Hodan" GivenName="Craig" NOC="USA" />
+	<Person PersonID="124176" BoatID="79042" ISAFPersonID="USADF87" Position="Pit Assist" FamilyName="Feusahrens" GivenName="Devon" NOC="USA" />
+	<Person PersonID="124567" BoatID="79042" ISAFPersonID="TURSC15" Position="Owner" FamilyName="Ciftci" GivenName="Serhad" NOC="USA" />
+	<Person PersonID="122926" BoatID="79051" ISAFPersonID="" Position="" FamilyName="Galli" GivenName="Michele" NOC="RUS" />
+	<Person PersonID="122934" BoatID="79056" ISAFPersonID="USASY2" Position="" FamilyName="Young" GivenName="Seth" NOC="USA" />
+	<Person PersonID="122962" BoatID="79056" ISAFPersonID="usaky2" Position="Chef" FamilyName="Young" GivenName="Kevin" NOC="USA" />
+	<Person PersonID="122938" BoatID="79059" ISAFPersonID="" Position="Skipper" FamilyName="Healy" GivenName="Tim" NOC="USA" />
+	<Person PersonID="122939" BoatID="79059" ISAFPersonID="USAGB25" Position="Tactician" FamilyName="Becker" GivenName="Geoff" NOC="USA" />
+	<Person PersonID="122940" BoatID="79059" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Mollicone" GivenName="John" NOC="" />
+	<Person PersonID="124823" BoatID="79059" ISAFPersonID="" Position="Staysail trimmer" FamilyName="Abdullah" GivenName="Paul " NOC="USA" />
+	<Person PersonID="122973" BoatID="79084" ISAFPersonID="USASE36" Position="Captain" FamilyName="Ensor" GivenName="Shaun" NOC="USA" />
+	<Person PersonID="124129" BoatID="79084" ISAFPersonID="USANB54" Position="Helm" FamilyName="Barta" GivenName="Nicholas" NOC="USA" />
+	<Person PersonID="124130" BoatID="79084" ISAFPersonID="USAAB130" Position="Bow" FamilyName="Barnes" GivenName="Abigail" NOC="USA" />
+	<Person PersonID="124132" BoatID="79084" ISAFPersonID="USAPD66" Position="" FamilyName="Dorsi" GivenName="Paul" NOC="USA" />
+	<Person PersonID="124133" BoatID="79084" ISAFPersonID="USARG104" Position="Grinder" FamilyName="Gleason" GivenName="Rich " NOC="USA" />
+	<Person PersonID="123096" BoatID="79126" ISAFPersonID="USAAF4" Position="" FamilyName="Fisher" GivenName="Andrew " NOC="USA" />
+	<Person PersonID="124202" BoatID="79126" ISAFPersonID="USASB38" Position="Tactician" FamilyName="burke" GivenName="steve " NOC="USA" />
+	<Person PersonID="124203" BoatID="79126" ISAFPersonID="USASB45" Position="Headsail Trimmer" FamilyName="burke" GivenName="shawn" NOC="USA" />
+	<Person PersonID="124204" BoatID="79126" ISAFPersonID="USAMF57" Position="" FamilyName="Fisher" GivenName="melissa" NOC="USA" />
+	<Person PersonID="123098" BoatID="79127" ISAFPersonID="" Position="" FamilyName="Edwards" GivenName="Stanley" NOC="USA" />
+	<Person PersonID="124953" BoatID="79127" ISAFPersonID="" Position="Tactician" FamilyName="robertson" GivenName="phil" NOC="USA" />
+	<Person PersonID="124954" BoatID="79127" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Wallace" GivenName="John" NOC="USA" />
+	<Person PersonID="124955" BoatID="79127" ISAFPersonID="" Position="Bow" FamilyName="Zonnenberg" GivenName="Mchael" NOC="USA" />
+	<Person PersonID="123185" BoatID="79155" ISAFPersonID="" Position="Other" FamilyName="PATRICK" GivenName="BORONAT" NOC="FRA" />
+	<Person PersonID="123205" BoatID="79157" ISAFPersonID="USAJS77" Position="" FamilyName="Sheehan" GivenName="Trey" NOC="USA" />
+	<Person PersonID="124577" BoatID="79157" ISAFPersonID="" Position="Tactician" FamilyName="Boston" GivenName="Brad" NOC="USA" />
+	<Person PersonID="124578" BoatID="79157" ISAFPersonID="" Position="Headsail Trimmer" FamilyName="Florence" GivenName="Curtis" NOC="USA" />
+	<Person PersonID="124579" BoatID="79157" ISAFPersonID="USAWS74" Position="Bowman" FamilyName="Stout" GivenName="Wilson" NOC="USA" />
+	<Person PersonID="123267" BoatID="79173" ISAFPersonID="" Position="" FamilyName="Hubbard" GivenName="Tony" NOC="USA" />
+	<Person PersonID="123269" BoatID="79173" ISAFPersonID="" Position="Bow" FamilyName="Hubbard" GivenName="Jacob" NOC="USA" />
+	<Person PersonID="123270" BoatID="79173" ISAFPersonID="" Position="Watch Captain" FamilyName="Borkowski" GivenName="Cam" NOC="USA" />
+	<Person PersonID="123271" BoatID="79173" ISAFPersonID="" Position="Mid Mast" FamilyName="Goolsby" GivenName="Larry" NOC="USA" />
+	<Person PersonID="123272" BoatID="79173" ISAFPersonID="" Position="Other" FamilyName="Cellamare" GivenName="Tony" NOC="USA" />
+	<Person PersonID="123273" BoatID="79173" ISAFPersonID="" Position="" FamilyName="Maxwell" GivenName="Tom" NOC="USA" />
+	<Person PersonID="123317" BoatID="79188" ISAFPersonID="USAGP27" Position="" FamilyName="Pierini" GivenName="Geoffrey" NOC="USA" />
+	<Person PersonID="124931" BoatID="79188" ISAFPersonID="USAKM43" Position="Bow" FamilyName="Pierini" GivenName="Katie" NOC="USA" />
+	<Person PersonID="124932" BoatID="79188" ISAFPersonID="USACC34" Position="Headsail Trimmer" FamilyName="Copeland" GivenName="Craig" NOC="USA" />
+	<Person PersonID="124938" BoatID="79188" ISAFPersonID="" Position="" FamilyName="Noris" GivenName="Scott" NOC="USA" />
+	<Person PersonID="123340" BoatID="79196" ISAFPersonID="AUSNB14" Position="Spinnaker trimmer" FamilyName="Brownett" GivenName="Nigel" NOC="USA" />
+	<Person PersonID="124041" BoatID="79196" ISAFPersonID="GBRAK19" Position="Tactician" FamilyName="Kerr" GivenName="Andrew" NOC="USA" />
+	<Person PersonID="124042" BoatID="79196" ISAFPersonID="" Position="Helm" FamilyName="Kownacki" GivenName="Eric" NOC="USA" />
+	<Person PersonID="124043" BoatID="79196" ISAFPersonID="USAJT040" Position="Mid Mast" FamilyName="Tihansky" GivenName="Jahn" NOC="USA" />
+	<Person PersonID="124399" BoatID="79562" ISAFPersonID="USAJW224" Position="" FamilyName="Wallace" GivenName="Jack" NOC="USA" />
+
+	<Event EventID="1390" ISAFEventID="" Title="Quantum Key West Race Week 2016" EventCity="Event_City" EventState="FL" EventCountry="USA" EventStart="2016-01-19 00:00:00.0" EventEnd="2016-01-24 00:00:00.0" Type="Regatta">
+
+			<Division DivisionID="1" Title="IRC 0 (Maxi 72)" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71871" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76433" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="76472" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="75016" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="2" Title="IRC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76851" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="64499" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76712" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="70549" RacePoints="2" />
+			</Division>
+
+			<Division DivisionID="3" Title="IRC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="67135" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="64356" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="69689" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="68043" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77182" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 111" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76483" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72879" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="72295" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76482" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="73978" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="78346" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="70271" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76374" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="72997" RacePoints="9" />
+			</Division>
+
+
+			<Division DivisionID="1" Title="IRC 0 (Maxi 72)" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71871" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76433" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="76472" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="75016" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="2" Title="IRC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76851" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="64499" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76712" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="70549" RacePoints="2" />
+			</Division>
+
+			<Division DivisionID="3" Title="IRC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="67135" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="64356" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="69689" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="68043" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77182" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 111" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76483" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72879" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="72295" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76482" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="73978" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="78346" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="70271" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76374" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="72997" RacePoints="9" />
+			</Division>
+
+			<Division DivisionID="1" Title="Melges 24" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78696" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="78197" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="64544" RacePoints="4" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76121" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="67070" RacePoints="9" Discard="true" />
+				<RaceResult RaceID="6" TeamID="73093" RacePoints="8" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76523" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="67999" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="76703" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="65085" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76469" RacePoints="13" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78732" RacePoints="13" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="2" Title="J 70" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78203" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76994" RacePoints="21" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79059" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="64364" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76283" RacePoints="28" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76428" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="77177" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77042" RacePoints="16" />
+				<RaceResult RaceID="6" TeamID="79027" RacePoints="17" />
+				<RaceResult RaceID="6" TeamID="72811" RacePoints="12" />
+				<RaceResult RaceID="6" TeamID="78327" RacePoints="24" Discard="true" />
+				<RaceResult RaceID="6" TeamID="72886" RacePoints="22" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76923" RacePoints="15" />
+				<RaceResult RaceID="6" TeamID="76779" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="79157" RacePoints="19" />
+				<RaceResult RaceID="6" TeamID="79188" RacePoints="27" />
+				<RaceResult RaceID="6" TeamID="78287" RacePoints="20" />
+				<RaceResult RaceID="6" TeamID="79196" RacePoints="29" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76801" RacePoints="18" />
+				<RaceResult RaceID="6" TeamID="66324" RacePoints="11" />
+				<RaceResult RaceID="6" TeamID="72880" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="68551" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="73962" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="77167" RacePoints="13" />
+				<RaceResult RaceID="6" TeamID="76597" RacePoints="26" />
+				<RaceResult RaceID="6" TeamID="73013" RacePoints="14" />
+				<RaceResult RaceID="6" TeamID="76873" RacePoints="38" />
+				<RaceResult RaceID="6" TeamID="79127" RacePoints="31" />
+				<RaceResult RaceID="6" TeamID="78607" RacePoints="35" />
+				<RaceResult RaceID="6" TeamID="78680" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="78199" RacePoints="32" />
+				<RaceResult RaceID="6" TeamID="78821" RacePoints="34" />
+				<RaceResult RaceID="6" TeamID="79051" RacePoints="23" />
+				<RaceResult RaceID="6" TeamID="79126" RacePoints="37" />
+				<RaceResult RaceID="6" TeamID="73271" RacePoints="36" />
+				<RaceResult RaceID="6" TeamID="78722" RacePoints="43" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76459" RacePoints="30" />
+				<RaceResult RaceID="6" TeamID="76509" RacePoints="42" />
+				<RaceResult RaceID="6" TeamID="78215" RacePoints="25" />
+				<RaceResult RaceID="6" TeamID="78813" RacePoints="41" />
+				<RaceResult RaceID="6" TeamID="78802" RacePoints="39" />
+				<RaceResult RaceID="6" TeamID="64395" RacePoints="33" />
+				<RaceResult RaceID="6" TeamID="78717" RacePoints="45" />
+				<RaceResult RaceID="6" TeamID="78535" RacePoints="47" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78577" RacePoints="40" />
+				<RaceResult RaceID="6" TeamID="76450" RacePoints="44" />
+				<RaceResult RaceID="6" TeamID="79084" RacePoints="46" />
+				<RaceResult RaceID="6" TeamID="79155" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79056" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78365" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76868" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64368" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64387" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64776" RacePoints="55" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="3" Title="CC 30" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="64385" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="64365" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="64481" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="70827" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="67213" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="69468" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="70657" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="71164" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="73617" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="78317" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76100" RacePoints="11" />
+			</Division>
+
+
+			<Division DivisionID="1" Title="IRC 0 (Maxi 72)" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71871" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76433" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="76472" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="75016" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="2" Title="IRC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76851" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="64499" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76712" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="70549" RacePoints="2" />
+			</Division>
+
+			<Division DivisionID="3" Title="IRC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="67135" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="64356" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="69689" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="68043" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77182" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 111" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76483" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72879" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="72295" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76482" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="73978" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="78346" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="70271" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76374" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="72997" RacePoints="9" />
+			</Division>
+
+			<Division DivisionID="1" Title="Melges 24" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78696" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="78197" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="64544" RacePoints="4" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76121" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="67070" RacePoints="9" Discard="true" />
+				<RaceResult RaceID="6" TeamID="73093" RacePoints="8" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76523" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="67999" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="76703" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="65085" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76469" RacePoints="13" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78732" RacePoints="13" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="2" Title="J 70" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78203" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76994" RacePoints="21" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79059" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="64364" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76283" RacePoints="28" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76428" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="77177" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77042" RacePoints="16" />
+				<RaceResult RaceID="6" TeamID="79027" RacePoints="17" />
+				<RaceResult RaceID="6" TeamID="72811" RacePoints="12" />
+				<RaceResult RaceID="6" TeamID="78327" RacePoints="24" Discard="true" />
+				<RaceResult RaceID="6" TeamID="72886" RacePoints="22" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76923" RacePoints="15" />
+				<RaceResult RaceID="6" TeamID="76779" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="79157" RacePoints="19" />
+				<RaceResult RaceID="6" TeamID="79188" RacePoints="27" />
+				<RaceResult RaceID="6" TeamID="78287" RacePoints="20" />
+				<RaceResult RaceID="6" TeamID="79196" RacePoints="29" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76801" RacePoints="18" />
+				<RaceResult RaceID="6" TeamID="66324" RacePoints="11" />
+				<RaceResult RaceID="6" TeamID="72880" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="68551" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="73962" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="77167" RacePoints="13" />
+				<RaceResult RaceID="6" TeamID="76597" RacePoints="26" />
+				<RaceResult RaceID="6" TeamID="73013" RacePoints="14" />
+				<RaceResult RaceID="6" TeamID="76873" RacePoints="38" />
+				<RaceResult RaceID="6" TeamID="79127" RacePoints="31" />
+				<RaceResult RaceID="6" TeamID="78607" RacePoints="35" />
+				<RaceResult RaceID="6" TeamID="78680" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="78199" RacePoints="32" />
+				<RaceResult RaceID="6" TeamID="78821" RacePoints="34" />
+				<RaceResult RaceID="6" TeamID="79051" RacePoints="23" />
+				<RaceResult RaceID="6" TeamID="79126" RacePoints="37" />
+				<RaceResult RaceID="6" TeamID="73271" RacePoints="36" />
+				<RaceResult RaceID="6" TeamID="78722" RacePoints="43" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76459" RacePoints="30" />
+				<RaceResult RaceID="6" TeamID="76509" RacePoints="42" />
+				<RaceResult RaceID="6" TeamID="78215" RacePoints="25" />
+				<RaceResult RaceID="6" TeamID="78813" RacePoints="41" />
+				<RaceResult RaceID="6" TeamID="78802" RacePoints="39" />
+				<RaceResult RaceID="6" TeamID="64395" RacePoints="33" />
+				<RaceResult RaceID="6" TeamID="78717" RacePoints="45" />
+				<RaceResult RaceID="6" TeamID="78535" RacePoints="47" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78577" RacePoints="40" />
+				<RaceResult RaceID="6" TeamID="76450" RacePoints="44" />
+				<RaceResult RaceID="6" TeamID="79084" RacePoints="46" />
+				<RaceResult RaceID="6" TeamID="79155" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79056" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78365" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76868" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64368" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64387" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64776" RacePoints="55" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="3" Title="CC 30" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="64385" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="64365" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="64481" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="70827" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="67213" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="69468" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="70657" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="71164" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="73617" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="78317" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76100" RacePoints="11" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 88" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="69751" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="65279" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76491" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="67088" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="78502" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="64456" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76914" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76322" RacePoints="8" />
+			</Division>
+
+			<Division DivisionID="1" Title="ORC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71503" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72971" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76221" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="70034" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="72709" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="78784" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="76439" RacePoints="7" />
+			</Division>
+
+			<Division DivisionID="2" Title="ORC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76531" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="79042" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="73946" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="78843" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="70476" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="76876" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="79173" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="76738" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="67633" RacePoints="10" ScoreCode="DNC" />
+			</Division>
+
+
+			<Division DivisionID="1" Title="IRC 0 (Maxi 72)" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71871" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76433" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="76472" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="75016" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="2" Title="IRC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76851" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="64499" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76712" RacePoints="3.5" />
+				<RaceResult RaceID="6" TeamID="70549" RacePoints="2" />
+			</Division>
+
+			<Division DivisionID="3" Title="IRC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="67135" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="64356" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="69689" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="68043" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77182" RacePoints="4" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 111" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76483" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72879" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="72295" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76482" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="73978" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="78346" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="70271" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76374" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="72997" RacePoints="9" />
+			</Division>
+
+			<Division DivisionID="1" Title="Melges 24" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78696" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="78197" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="64544" RacePoints="4" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76121" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="67070" RacePoints="9" Discard="true" />
+				<RaceResult RaceID="6" TeamID="73093" RacePoints="8" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76523" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="67999" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="76703" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="65085" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76469" RacePoints="13" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78732" RacePoints="13" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="2" Title="J 70" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="78203" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76994" RacePoints="21" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79059" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="64364" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76283" RacePoints="28" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76428" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="77177" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="77042" RacePoints="16" />
+				<RaceResult RaceID="6" TeamID="79027" RacePoints="17" />
+				<RaceResult RaceID="6" TeamID="72811" RacePoints="12" />
+				<RaceResult RaceID="6" TeamID="78327" RacePoints="24" Discard="true" />
+				<RaceResult RaceID="6" TeamID="72886" RacePoints="22" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76923" RacePoints="15" />
+				<RaceResult RaceID="6" TeamID="76779" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="79157" RacePoints="19" />
+				<RaceResult RaceID="6" TeamID="79188" RacePoints="27" />
+				<RaceResult RaceID="6" TeamID="78287" RacePoints="20" />
+				<RaceResult RaceID="6" TeamID="79196" RacePoints="29" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76801" RacePoints="18" />
+				<RaceResult RaceID="6" TeamID="66324" RacePoints="11" />
+				<RaceResult RaceID="6" TeamID="72880" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="68551" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="73962" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="77167" RacePoints="13" />
+				<RaceResult RaceID="6" TeamID="76597" RacePoints="26" />
+				<RaceResult RaceID="6" TeamID="73013" RacePoints="14" />
+				<RaceResult RaceID="6" TeamID="76873" RacePoints="38" />
+				<RaceResult RaceID="6" TeamID="79127" RacePoints="31" />
+				<RaceResult RaceID="6" TeamID="78607" RacePoints="35" />
+				<RaceResult RaceID="6" TeamID="78680" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="78199" RacePoints="32" />
+				<RaceResult RaceID="6" TeamID="78821" RacePoints="34" />
+				<RaceResult RaceID="6" TeamID="79051" RacePoints="23" />
+				<RaceResult RaceID="6" TeamID="79126" RacePoints="37" />
+				<RaceResult RaceID="6" TeamID="73271" RacePoints="36" />
+				<RaceResult RaceID="6" TeamID="78722" RacePoints="43" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76459" RacePoints="30" />
+				<RaceResult RaceID="6" TeamID="76509" RacePoints="42" />
+				<RaceResult RaceID="6" TeamID="78215" RacePoints="25" />
+				<RaceResult RaceID="6" TeamID="78813" RacePoints="41" />
+				<RaceResult RaceID="6" TeamID="78802" RacePoints="39" />
+				<RaceResult RaceID="6" TeamID="64395" RacePoints="33" />
+				<RaceResult RaceID="6" TeamID="78717" RacePoints="45" />
+				<RaceResult RaceID="6" TeamID="78535" RacePoints="47" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78577" RacePoints="40" />
+				<RaceResult RaceID="6" TeamID="76450" RacePoints="44" />
+				<RaceResult RaceID="6" TeamID="79084" RacePoints="46" />
+				<RaceResult RaceID="6" TeamID="79155" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="79056" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="78365" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="76868" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64368" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64387" RacePoints="55" ScoreCode="DNS" Discard="true" />
+				<RaceResult RaceID="6" TeamID="64776" RacePoints="55" ScoreCode="DNS" Discard="true" />
+			</Division>
+
+			<Division DivisionID="3" Title="CC 30" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="64385" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="64365" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="64481" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="70827" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="67213" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="69468" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="70657" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="71164" RacePoints="9" />
+				<RaceResult RaceID="6" TeamID="73617" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="78317" RacePoints="10" />
+				<RaceResult RaceID="6" TeamID="76100" RacePoints="11" />
+			</Division>
+
+			<Division DivisionID="1" Title="J 88" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="69751" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="65279" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="76491" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="67088" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="78502" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="64456" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="76914" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="76322" RacePoints="8" />
+			</Division>
+
+			<Division DivisionID="1" Title="ORC 1" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="71503" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="72971" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="76221" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="70034" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="72709" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="78784" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="76439" RacePoints="7" />
+			</Division>
+
+			<Division DivisionID="2" Title="ORC 2" Type="Regatta" >
+				<RaceResult RaceID="6" TeamID="76531" RacePoints="2" />
+				<RaceResult RaceID="6" TeamID="79042" RacePoints="3" />
+				<RaceResult RaceID="6" TeamID="73946" RacePoints="6" />
+				<RaceResult RaceID="6" TeamID="78843" RacePoints="1" />
+				<RaceResult RaceID="6" TeamID="70476" RacePoints="4" />
+				<RaceResult RaceID="6" TeamID="76876" RacePoints="7" />
+				<RaceResult RaceID="6" TeamID="79173" RacePoints="8" />
+				<RaceResult RaceID="6" TeamID="76738" RacePoints="5" />
+				<RaceResult RaceID="6" TeamID="67633" RacePoints="10" ScoreCode="DNC" />
+			</Division>
+
+			<Division DivisionID="1" Title="Performance Cruising" Type="Regatta" >
+			</Division>
+
+			<Division DivisionID="1" Title="Multihulls" Type="Regatta" >
+			</Division>
+
+
+			<Division Title="IRC 0 (Maxi 72)" >
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="71871" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="75016" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76433" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76472" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 1" >
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="64499" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="70549" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76712" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76851" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 2" >
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="64356" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="67135" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="68043" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="69689" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="77182" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 111" >
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="70271" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72295" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72879" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72997" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="73978" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76374" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76482" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76483" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="78346" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+
+			<Division Title="IRC 0 (Maxi 72)" >
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="71871" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="75016" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76433" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76472" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 1" >
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="64499" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="70549" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76712" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76851" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 2" >
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="64356" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="67135" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="68043" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="69689" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="77182" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 111" >
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="70271" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72295" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72879" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72997" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="73978" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76374" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76482" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76483" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="78346" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="Melges 24" >
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="64544" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="65085" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="67070" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="67999" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="73093" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76121" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76469" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76523" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76703" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78197" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78696" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78732" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 70" >
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64364" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64368" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64387" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64395" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64776" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="66324" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="68551" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72811" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72880" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72886" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73013" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73271" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73962" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76283" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76428" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76450" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76459" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76509" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76597" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76779" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76801" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76868" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76873" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76923" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76994" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77042" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77167" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77177" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78199" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78203" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78215" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78287" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78327" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78365" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78535" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78577" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78607" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78680" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78717" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78722" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78802" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78813" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78821" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79027" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79051" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79056" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79059" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79084" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79126" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79127" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79155" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79157" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79188" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79196" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="CC 30" >
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64365" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64385" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64481" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="67213" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="69468" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="70657" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="70827" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="71164" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="73617" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="76100" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="78317" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+
+			<Division Title="IRC 0 (Maxi 72)" >
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="71871" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="75016" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76433" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37104" RaceName="R6" RaceNumber="6" BoatID="76472" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 1" >
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="64499" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="70549" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76712" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37105" RaceName="R6" RaceNumber="6" BoatID="76851" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="IRC 2" >
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="64356" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="67135" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="68043" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="69689" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37106" RaceName="R6" RaceNumber="6" BoatID="77182" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:42:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 111" >
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="70271" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72295" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72879" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="72997" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="73978" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76374" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76482" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="76483" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37107" RaceName="R6" RaceNumber="6" BoatID="78346" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:47:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="Melges 24" >
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="64544" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="65085" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="67070" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="67999" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="73093" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76121" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76469" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76523" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="76703" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78197" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78696" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37102" RaceName="R6" RaceNumber="6" BoatID="78732" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:30:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 70" >
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64364" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64368" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64387" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64395" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="64776" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="66324" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="68551" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72811" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72880" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="72886" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73013" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73271" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="73962" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76283" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76428" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76450" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76459" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76509" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76597" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76779" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76801" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76868" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76873" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76923" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="76994" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77042" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77167" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="77177" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78199" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78203" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78215" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78287" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78327" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78365" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78535" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78577" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78607" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78680" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78717" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78722" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78802" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78813" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="78821" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79027" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79051" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79056" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79059" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79084" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79126" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79127" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79155" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79157" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79188" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37103" RaceName="R6" RaceNumber="6" BoatID="79196" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="CC 30" >
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64365" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64385" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="64481" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="67213" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="69468" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="70657" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="70827" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="71164" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="73617" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="76100" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37101" RaceName="R6" RaceNumber="6" BoatID="78317" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:25:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="J 88" >
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="64456" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="65279" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="67088" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="69751" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="76322" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="76491" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="76914" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37111" RaceName="R6" RaceNumber="6" BoatID="78502" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="ORC 1" >
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="70034" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="71503" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="72709" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="72971" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="76221" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="76439" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37110" RaceName="R6" RaceNumber="6" BoatID="78784" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:35:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+			<Division Title="ORC 2" >
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="67633" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="70476" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="73946" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="76531" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="76738" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="76876" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="78843" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="79042" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+				<Race RaceID="37112" RaceName="R6" RaceNumber="6" BoatID="79173" RaceStartDate="2016-01-20-05:00" RaceStartTime="02:40:00-05:00" RaceStatus="Finished" />
+			</Division>
+
+
+  </Event>
+  
+</SailingXRR>
+
