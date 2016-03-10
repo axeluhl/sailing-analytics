@@ -1,5 +1,8 @@
 package com.sap.sailing.selenium.pages;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -9,7 +12,7 @@ import org.openqa.selenium.WebDriver;
  * @author
  *   D049941
  */
-public class HostPage extends PageObject {
+public abstract class HostPage extends PageObject {
     protected static final String GWT_CODE_SERVER_PARAMETER_NAME = "gwt.codesvr"; //$NON-NLS-1$
     
     protected static final String NO_CODE_SERVER_PARAMTER_VALUE = ""; //$NON-NLS-1$
@@ -25,6 +28,20 @@ public class HostPage extends PageObject {
             return NO_CODE_SERVER_PARAMTER_VALUE;
         }
         return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
+    }
+    
+    protected static void goToUrl(WebDriver driver, String url) {
+        try {
+            goToPage(driver, new URI(url));
+        } catch (URISyntaxException exc) {
+            throw new IllegalArgumentException(exc);
+        }
+    }
+    
+    private static final void goToPage(WebDriver driver, URI uri) throws URISyntaxException {
+        String scheme = uri.getScheme(), userInfo = uri.getUserInfo(), host = uri.getHost(); 
+        String path = uri.getPath(), query = getGWTCodeServer(), fragment = uri.getFragment();
+        driver.get(new URI(scheme, userInfo, host, uri.getPort(), path, query, fragment).toString());
     }
     
     /**
