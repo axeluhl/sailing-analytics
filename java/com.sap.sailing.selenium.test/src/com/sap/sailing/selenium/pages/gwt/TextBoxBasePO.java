@@ -25,7 +25,9 @@ public abstract class TextBoxBasePO extends AbstractInputPO {
      * @see WebElement#sendKeys(CharSequence...)
      */
     public void appendText(String text) {
-        getWebElement().sendKeys(text);
+        if (text != null) {
+            getWebElement().sendKeys(text);
+        }
     }
     
     /**
