@@ -122,8 +122,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         TimePoint end = null;
         for (Entry<Mark, List<GPSFix>> fixes : markFixes.entrySet()) {
             for (GPSFix fix : fixes.getValue()) {
-                TimeRange timePoints = race.getOrCreateTrack(fixes.getKey()).getEstimatedPositionTimePeriodAffectedBy(
-                        fix);
+                TimeRange timePoints = race.getOrCreateTrack(fixes.getKey()).getEstimatedPositionTimePeriodAffectedBy(fix);
                 TimePoint newStart = timePoints.from();
                 TimePoint newEnd = timePoints.to();
                 start = start == null || start.after(newStart) ? newStart : start;
@@ -131,24 +130,24 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
         }
         for (Competitor c : race.getRace().getCompetitors()) {
-            List<GPSFix> comFixes = new ArrayList<>();
+            List<GPSFix> competitorFixes = new ArrayList<>();
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
             GPSFix comFix = track.getFirstFixAtOrAfter(start);
             if (comFix != null) {
                 if (end != null) {
                     while (comFix != null && !comFix.getTimePoint().after(end)) {
-                        comFixes.add(comFix);
+                        competitorFixes.add(comFix);
                         comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 } else {
                     while (comFix != null) {
-                        comFixes.add(comFix);
+                        competitorFixes.add(comFix);
                         comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 }
             }
-            if (!comFixes.isEmpty()) {
-                affectedFixes.put(c, comFixes);
+            if (!competitorFixes.isEmpty()) {
+                affectedFixes.put(c, competitorFixes);
             }
         }
         return affectedFixes;
@@ -156,7 +155,6 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes) {
-
         List<Candidate> newCans = new ArrayList<>();
         List<Candidate> wrongCans = new ArrayList<>();
         Course course = race.getRace().getCourse();
@@ -370,6 +368,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                     Boolean isCan = false;
                     Candidate oldCan = null;
                     Double probability = null;
+                    Distance distance = null;
+                    boolean onCorrectSideOfWaypoint = false;
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
                     List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
@@ -394,12 +394,16 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     p = fix.getPosition();
                                     Double newProbability = getDistanceBasedProbability(w, t, dis);
                                     if (newProbability != null) {
-                                        newProbability *= isOnCorrectSideOfWaypoint(w, p, t, portMark) ? PENALTY_FOR_DISTANCE_CANDIDATES
+                                        // FIXME why not generate the candidate here where we have all information at hand?
+                                        final boolean newOnCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
+                                        newProbability *= newOnCorrectSideOfWaypoint ? PENALTY_FOR_DISTANCE_CANDIDATES
                                                 : PENALTY_FOR_DISTANCE_CANDIDATES * PENALTY_FOR_WRONG_SIDE;
                                         if (newProbability > penaltyForSkipping
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
                                             probability = newProbability;
+                                            onCorrectSideOfWaypoint = newOnCorrectSideOfWaypoint;
+                                            distance = dis;
                                         }
                                     }
                                 }
@@ -411,8 +415,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                             wasCan = true;
                         }
                         if (!wasCan && isCan) {
-                            Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, w);
+                            Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
+                                    t, probability, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance" + newCan.toString() + "for " + c);
@@ -420,8 +424,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
                         } else if (wasCan && isCan && oldCan.getProbability() != probability) {
-                            Candidate newCan = new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, w);
+                            Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
+                                    t, probability, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance" + newCan.toString() + "for " + c);
@@ -629,9 +633,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         final List<Distance> distances = calculateDistance(p, w, t);
         final Distance d = portMark ? distances.get(0) : distances.get(1);
         double probability = getDistanceBasedProbability(w, t, d);
-        probability = isOnCorrectSideOfWaypoint(w, p, t, portMark) ? probability : probability * PENALTY_FOR_WRONG_SIDE;
-        probability = passesInTheRightDirection(w, xte1, xte2, portMark) ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
-        return new CandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w);
+        final boolean onCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
+        probability = onCorrectSideOfWaypoint ? probability : probability * PENALTY_FOR_WRONG_SIDE;
+        final boolean passesInTheRightDirection = passesInTheRightDirection(w, xte1, xte2, portMark);
+        probability = passesInTheRightDirection ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
+        return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w, onCorrectSideOfWaypoint, passesInTheRightDirection);
     }
 
     /**
