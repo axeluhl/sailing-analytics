@@ -467,4 +467,10 @@
     <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>
 
+    <string name="preference_heading_with_declination_subtracted_is_enabled">Ein</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">Aus</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Rechtweisend</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
+
 </resources>

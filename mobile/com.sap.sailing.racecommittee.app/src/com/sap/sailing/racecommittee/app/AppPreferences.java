@@ -451,5 +451,10 @@ public class AppPreferences {
 
     public String getAccessToken() {
         return preferences.getString(context.getString(R.string.preference_access_token_key), null);
+	}
+
+    public boolean isMagnetic() {
+        return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
+                context.getResources().getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
     }
 }

@@ -461,7 +461,8 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
      */
     private void onSendClick() {
         Wind wind = getResultingWindFix();
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, /* isMagnetic */ true);
+        boolean isMagnetic = preferences.isMagnetic();
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, isMagnetic);
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
@@ -539,7 +540,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 for (ManagedRace race : mSelectedRaces) {
-                    race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(), true);
+                    race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(), preferences.isMagnetic());
                 }
             }
         });
