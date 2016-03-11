@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-       xmlns:tools="http://schemas.android.com/tools"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       tools:showIn="@layout/login_backdrop_normal">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:showIn="@layout/login_backdrop_normal">
 
     <TextView
         android:id="@+id/get_started"
@@ -12,7 +12,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/side_padding"
         android:text="@string/get_started"
-        android:textAppearance="?attr/textSmall"/>
+        android:textAppearance="?attr/textSmall" />
 
     <Button
         android:id="@+id/scanQr"
@@ -21,7 +21,7 @@
         android:layout_height="@dimen/default_button_height"
         android:layout_marginBottom="@dimen/side_padding"
         android:text="@string/onboarding_scan"
-        android:textSize="@dimen/textSize_18"/>
+        android:textSize="@dimen/textSize_18" />
 
     <Button
         android:id="@+id/manual_input"
@@ -29,5 +29,5 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_button_height"
         android:text="@string/onboarding_input"
-        android:textSize="@dimen/textSize_18"/>
+        android:textSize="@dimen/textSize_18" />
 </merge>
