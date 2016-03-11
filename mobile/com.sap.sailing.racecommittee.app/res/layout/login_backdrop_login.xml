@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:showIn="@layout/login_backdrop_normal">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/change_server"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:src="@drawable/ic_create_light" />
+
+        <TextView
+            android:id="@+id/server_url_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/change_server"
+            android:text="@string/server_url"
+            android:textColor="@color/constant_black" />
+
+        <TextView
+            android:id="@+id/server_url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/server_url_label"
+            android:layout_toLeftOf="@id/change_server"
+            android:textColor="@color/constant_black"
+            tools:text="https://dev.sapsailing.com" />
+    </RelativeLayout>
+
+    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/side_padding"
+        app:floatLabelPaddingLeft="@dimen/float_label_padding"
+        app:floatLabelTextAppearance="?attr/floatLabel">
+
+        <EditText
+            android:id="@+id/user_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"
+            android:inputType="text"
+            android:textColor="@color/constant_black"
+            android:textColorHint="@color/dialog_color_text" />
+    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+
+    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/side_padding"
+        app:floatLabelPaddingLeft="@dimen/float_label_padding"
+        app:floatLabelTextAppearance="?attr/floatLabel">
+
+        <EditText
+            android:id="@+id/user_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/constant_black"
+            android:textColorHint="@color/dialog_color_text" />
+    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+
+    <Button
+        android:id="@+id/login_request"
+        style="?attr/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/side_padding"
+        android:text="@string/login"
+        android:textSize="@dimen/textSize_18" />
+
+</merge>

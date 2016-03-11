@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -77,11 +78,9 @@ public class MarkEditDialog extends DataEntryDialog<MarkDTO> {
         return result;
     }
 
-    
     @Override
-    public void show() {
-        super.show();
-        name.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return name;
     }
 
     @Override

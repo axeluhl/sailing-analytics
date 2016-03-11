@@ -55,12 +55,14 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     private final ListBox rankingMetricListBox;
 
     protected final List<EventDTO> existingEvents;
+    private EventDTO defaultEvent;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
+    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, 
             String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
         this.regatta = regatta;
+        this.defaultEvent = correspondingEvent;
         this.existingEvents = existingEvents;
         rankingMetricListBox = createListBox(/* isMultipleSelect */ false);
         for (RankingMetrics rankingMetricType : RankingMetrics.values()) {
@@ -198,9 +200,20 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         });
         for (EventDTO event : sortedEvents) {
             sailingEventsListBox.addItem(event.getName());
-            if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuid)) {
-                sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
-                fillCourseAreaListBox(event);
+            if(defaultEvent != null){
+                if (defaultEvent.getName().equals(event.getName())){
+                    sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
+                    fillCourseAreaListBox(event);
+                    //select default course area, 2 elements as first is please select course area string
+                    if (courseAreaListBox.getItemCount() == 2){
+                        courseAreaListBox.setSelectedIndex(1);
+                    }
+                }
+            } else { 
+                if (isCourseAreaInEvent(event, regatta.defaultCourseAreaUuid)) {
+                    sailingEventsListBox.setSelectedIndex(sailingEventsListBox.getItemCount() - 1);
+                    fillCourseAreaListBox(event);
+                }
             }
         }
         sailingEventsListBox.addChangeHandler(new ChangeHandler() {

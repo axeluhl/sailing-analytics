@@ -1484,11 +1484,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String linkLeaderboardToLeaderboardGroupOfEvent();
     String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
     String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String createDefaultRegatta();
+    String doYouWantToCreateADefaultRegatta();
     String defaultLocale();
     String defaultSailorsInfoLinkInfoText();
     String qrSync();
     String thereIsNoIdentifierSet();
     String couldNotObtainAccessTokenForUser(String message);
+    String raceManagerDeviceName();
     String marks();
     String addNewFix();
     String pleaseSelectOtherTimepoint();

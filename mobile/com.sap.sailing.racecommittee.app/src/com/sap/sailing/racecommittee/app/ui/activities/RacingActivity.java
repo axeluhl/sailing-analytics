@@ -349,7 +349,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 windValue.setPanelText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
             }
             if (mSelectedRace != null) {
-                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, /* isMagnetic */ true);
+                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
             }
 
             mWind = windFix;
