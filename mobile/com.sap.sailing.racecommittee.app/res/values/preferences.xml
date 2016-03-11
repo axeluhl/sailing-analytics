@@ -19,7 +19,7 @@
     </string-array>
 
     <string name="preference_mail_key" translatable="false">mailRecipientPreference</string>
-    <string name="preference_mail_default" translatable="false">lukas.niemeier@sap.com</string>
+    <string name="preference_mail_default" translatable="false"></string>
     
     <string name="preference_polling_active_key" translatable="false">pollingActivePreference</string>
     <bool name="preference_polling_active_default">true</bool>

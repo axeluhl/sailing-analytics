@@ -1490,4 +1490,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String qrSync();
     String thereIsNoIdentifierSet();
     String couldNotObtainAccessTokenForUser(String message);
+    String raceManagerDeviceName();
 }
