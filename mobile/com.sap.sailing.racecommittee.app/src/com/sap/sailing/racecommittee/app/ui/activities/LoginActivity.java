@@ -1,11 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -63,6 +57,12 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
         implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
@@ -400,6 +400,8 @@ public class LoginActivity extends BaseActivity
                     Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
                     ExLog.ex(LoginActivity.this, TAG, reason);
                 }
+
+                slideUpBackdropDelayed();
             }
 
             @Override
