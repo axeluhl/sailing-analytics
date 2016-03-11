@@ -11,7 +11,7 @@
         />
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
-        android:id="@+id/licence_button"
+        android:id="@+id/license_button"
         android:layout_width="match_parent"
         android:layout_height="@dimen/about_button_height"
         android:layout_above="@id/center_anchor"
@@ -21,7 +21,7 @@
         android:layout_marginRight="@dimen/about_button_side_margin"
         android:layout_marginTop="@dimen/about_button_top_bottom_margin"
         android:background="@drawable/rounded_btn_yellow"
-        android:text="@string/licence_information"
+        android:text="@string/license_information"
         android:textAllCaps="false"
         android:textSize="@dimen/about_button_text_size"
         android:textStyle="bold"/>
