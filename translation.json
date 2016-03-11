@@ -53,7 +53,7 @@
          "collectionName":"SecurityGwtUi",
          "folders":[  
             {  
-               "sourceFolderPath":"java/com.sap.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n",
+               "sourceFolderPath":"java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n",
                "sourceFilters":[  
                   "StringMessages*.properties"
                ],
