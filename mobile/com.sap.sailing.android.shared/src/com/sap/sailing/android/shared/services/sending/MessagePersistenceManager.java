@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.FileHandlerUtils;
 
