@@ -228,7 +228,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
                         url.setText(pref.getServerBaseURL());
                     }
                     final EditText device_id = (EditText) view.findViewById(R.id.device_id);
-                    device_id.setText(pref.getDeviceIdentifier());
+                    device_id.setText(pref.getDeviceIdentifier(null));
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext(), R.style.AppTheme_AlertDialog);
                     builder.setView(view);
