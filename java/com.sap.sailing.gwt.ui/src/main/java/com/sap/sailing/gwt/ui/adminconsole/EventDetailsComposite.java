@@ -34,7 +34,7 @@ public class EventDetailsComposite extends Composite  {
     private final Label endDate;
     private final Label isPublic;
     private final Anchor officialWebsiteURL;
-    private final Anchor sailorsInfoWebsiteURL;
+    private final SimpleAnchorListComposite sailorsInfoWebsiteURLList;
     private final Anchor eventOverviewURL;
     private final SimpleStringListComposite courseAreaNamesList;
     private final SimpleAnchorListComposite imageURLList;
@@ -65,7 +65,7 @@ public class EventDetailsComposite extends Composite  {
         endDate = createLabelAndValueWidget(grid, currentRow++, stringMessages.endDate(), "EndDateLabel");
         isPublic = createLabelAndValueWidget(grid, currentRow++, stringMessages.isPublic(), "IsPublicLabel");
         officialWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOfficialWebsiteURL(), "OfficialWebsiteURLLabel");
-        sailorsInfoWebsiteURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
+        sailorsInfoWebsiteURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.eventSailorsInfoWebsiteURL(), "SailorsInfoWebsiteURLLabel");
         eventOverviewURL = createLabelAndAnchorWidget(grid, currentRow++, stringMessages.eventOverviewURL(), "EventOverviewURLLabel");
         courseAreaNamesList = createLabelAndValueListWidget(grid, currentRow++, stringMessages.courseAreas(), "CourseAreaValueList");
         imageURLList = createLabelAndAnchorListWidget(grid, currentRow++, stringMessages.images(), "ImageURLValueList");
@@ -134,8 +134,7 @@ public class EventDetailsComposite extends Composite  {
             isPublic.setText(String.valueOf(event.isPublic));
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
             officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
-            sailorsInfoWebsiteURL.setText(event.getSailorsInfoWebsiteURL());
-            sailorsInfoWebsiteURL.setHref(event.getSailorsInfoWebsiteURL());
+            sailorsInfoWebsiteURLList.setValues(new ArrayList<String>(event.getSailorsInfoWebsiteURLs().values()));
             Map<String, String> regattaOverviewURLParameters = new HashMap<String, String>();
             regattaOverviewURLParameters.put("event", event.id.toString());
             String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);

@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.serialization.impl;
 
 import java.net.URL;
+import java.util.Locale;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -30,6 +32,7 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_VIDEO_URL = "videoURL";
     public static final String FIELD_OFFICIAL_WEBSITE_URL = "officialWebsiteURL";
     public static final String FIELD_SAILORS_INFO_WEBSITE_URL = "sailorsInfoWebsiteURL";
+    public static final String FIELD_SAILORS_INFO_WEBSITE_URLS = "sailorsInfoWebsiteURLs";
     public static final String FIELDS_LEADERBOARD_GROUPS = "leaderboardGroups";
 
     public static final String FIELD_SOURCE_URL = "sourceURL";
@@ -48,6 +51,8 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
     public static final String FIELD_VIDEOS = "videos";
     public static final String FIELD_VIDEO_THUMBNAIL_URL = "thumbnailURL";
     public static final String FIELD_VIDEO_LENGTH_IN_SECONDS = "lengthInSeconds";
+    // specific sailorsInfoWebsite fields
+    public static final String FIELD_URL = "url";
 
     private final JsonSerializer<Venue> venueSerializer;
     private final JsonSerializer<? super LeaderboardGroupBase> leaderboardGroupBaseSerializer;
@@ -64,7 +69,6 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
         result.put(FIELD_NAME, event.getName());
         result.put(FIELD_DESCRIPTION, event.getDescription());
         result.put(FIELD_OFFICIAL_WEBSITE_URL, event.getOfficialWebsiteURL() != null ? event.getOfficialWebsiteURL().toString() : null);
-        result.put(FIELD_SAILORS_INFO_WEBSITE_URL, event.getSailorsInfoWebsiteURL() != null ? event.getSailorsInfoWebsiteURL().toString() : null);
         result.put(FIELD_START_DATE, event.getStartDate() != null ? event.getStartDate().asMillis() : null);
         result.put(FIELD_END_DATE, event.getStartDate() != null ? event.getEndDate().asMillis() : null);
         result.put(FIELD_VENUE, venueSerializer.serialize(event.getVenue()));
@@ -92,6 +96,11 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
             addVideo(videoDescriptor, jsonVideos);
         }
         result.put(FIELD_VIDEOS, jsonVideos);
+        JSONArray jsonSailorsInfoWebsiteURLs = new JSONArray();
+        for (Map.Entry<Locale, URL> entry: event.getSailorsInfoWebsiteURLs().entrySet()) {
+            addSailorsInfoWebsiteURL(entry.getKey(), entry.getValue(), jsonSailorsInfoWebsiteURLs);
+        }
+        result.put(FIELD_SAILORS_INFO_WEBSITE_URLS, jsonSailorsInfoWebsiteURLs);
         return result;
     }
 
@@ -155,5 +164,13 @@ public class EventBaseJsonSerializer implements JsonSerializer<EventBase> {
             jsonImageURLs.add(url.toString());
         }
         return jsonImageURLs;
+    }
+
+    private void addSailorsInfoWebsiteURL(Locale locale, URL url, JSONArray jsonSailorsInfoWebsiteURLs) {
+        JSONObject jsonSailorsInfoWebsiteURL = new JSONObject();
+        // TODO use toLanguageTag() when deserializer can use Locale.forLanguageTag()
+        jsonSailorsInfoWebsiteURL.put(FIELD_LOCALE, locale != null ? locale.getLanguage() : null);
+        jsonSailorsInfoWebsiteURL.put(FIELD_URL, url.toString());
+        jsonSailorsInfoWebsiteURLs.add(jsonSailorsInfoWebsiteURL);
     }
 }

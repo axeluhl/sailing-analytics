@@ -1490,4 +1490,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String linkLeaderboardToLeaderboardGroupOfEvent();
     String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
     String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String defaultLocale();
+    String defaultSailorsInfoLinkInfoText();
 }
