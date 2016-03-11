@@ -1,0 +1,81 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+  <ui:with field="res" type="com.sap.sse.gwt.common.CommonSharedResources" />
+  <ui:with field="local_res" type="com.sap.sse.security.ui.userprofile.desktop.userdetails.UseraccountDetailsResources" />
+  <g:HTMLPanel>
+    <div class="{local_res.css.useraccountdetails}">
+      <div class="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.small12} {res.mediaCss.columns}">
+          <div ui:field="editImageLinkUi" class="{local_res.css.useraccountdetails_image}">
+            <a href="#" class="{local_res.css.useraccountdetails_image_editbutton}"></a>
+          </div>
+          <div class="{local_res.css.useraccountdetails_content}">
+           <div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.username}" />
+              </label>
+              <input ui:field="usernameUi" type="text" disabled="disabled" class="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.name}" />
+              </label>
+              <g:TextBox ui:field="nameUi" styleName="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.mediumoffset6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.company}" />
+              </label>
+              <g:TextBox ui:field="companyUi" styleName="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_submit} {res.mediaCss.small12}">
+              <g:Button ui:field="saveChangesUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
+                <ui:text from="{i18n_sec.save}" />
+              </g:Button>
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_spacer} {res.mediaCss.small12}"></div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.mediumoffset6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.email}" />
+              </label>
+              <g:TextBox ui:field="emailUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_submit} {res.mediaCss.small12}">
+              <g:Button ui:field="changeEmailUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
+                <ui:text from="{i18n_sec.save}" />
+              </g:Button>
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_spacer} {res.mediaCss.small12}"></div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label} {res.mediaCss.medium6} {res.mediaCss.small12}">
+                <ui:text from="{i18n_sec.oldPassword}" />
+              </label>
+              <g:PasswordTextBox ui:field="oldPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+                <ui:text from="{i18n_sec.password}" />
+              </label>
+              <g:PasswordTextBox ui:field="newPasswordUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_detail} {res.mediaCss.medium6} {res.mediaCss.mediumoffset6} {res.mediaCss.small12}">
+              <label class="{local_res.css.useraccountdetails_content_detail_label}">
+              <!-- <ui:text from='{i18n_ubi.passwordConfirmation}' /> -->
+                <ui:text from="{i18n_sec.passwordRepeat}" />
+              </label>
+              <g:PasswordTextBox ui:field="newPasswordConfirmationUi" addStyleNames="{local_res.css.useraccountdetails_content_detail_input}" />
+            </div>
+            <div class="{local_res.css.useraccountdetails_content_submit} {res.mediaCss.small12}">
+              <g:Button ui:field="changePasswordUi" addStyleNames="{res.mainCss.button} {res.mainCss.buttonprimary}">
+                <ui:text from="{i18n_sec.changePassword}" />
+              </g:Button>
+            </div>
+          </div>
+         </div>
+        </div>
+      </div>
+    </div>
+  </g:HTMLPanel>
+</ui:UiBinder>

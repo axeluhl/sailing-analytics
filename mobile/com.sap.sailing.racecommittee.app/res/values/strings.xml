@@ -492,5 +492,6 @@
     <string name="wind_select_race">Select Race</string>
     <string name="get_started">Getting Started</string>
     <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="user_unauthorized">Request failed. User is unauthorized.</string>
 
 </resources>
