@@ -91,19 +91,19 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
 
         if (getSupportActionBar() != null) {
             EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(eventInfo.leaderboardName);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            if (toolbar != null) {
+                toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+                toolbar.setPadding(20, 0, 0, 0);
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            }
         }
 
         // Instantiate a ViewPager and a PagerAdapter.
