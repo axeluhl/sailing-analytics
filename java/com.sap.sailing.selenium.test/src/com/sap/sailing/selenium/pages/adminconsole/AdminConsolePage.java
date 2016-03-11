@@ -85,8 +85,7 @@ public class AdminConsolePage extends HostPageWithAuthentication {
      *   The page object for the administration console.
      */
     public static AdminConsolePage goToPage(WebDriver driver, String root) {
-        HostPage.goToUrl(driver, root + "gwt/AdminConsole.html");
-        return new AdminConsolePage(driver);
+        return HostPage.goToUrl(AdminConsolePage::new, driver, root + "gwt/AdminConsole.html");
     }
     
     @FindBy(how = BySeleniumId.class, using = "AdministrationTabs")

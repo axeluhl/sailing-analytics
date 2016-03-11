@@ -30,9 +30,10 @@ public abstract class HostPage extends PageObject {
         return GWT_CODE_SERVER_PARAMETER_NAME + "=" + codeServer;
     }
     
-    protected static void goToUrl(WebDriver driver, String url) {
+    protected final static <T extends HostPage> T goToUrl(HostPageSupplier<T> supplier, WebDriver driver, String url) {
         try {
             goToPage(driver, new URI(url));
+            return supplier.get(driver); 
         } catch (URISyntaxException exc) {
             throw new IllegalArgumentException(exc);
         }
@@ -69,5 +70,9 @@ public abstract class HostPage extends PageObject {
     
     protected int getPageLoadTimeOut() {
         return DEFAULT_PAGE_LOAD_TIMEOUT;
+    }
+    
+    protected interface HostPageSupplier<T extends HostPage> {
+        T get(WebDriver driver);
     }
 }

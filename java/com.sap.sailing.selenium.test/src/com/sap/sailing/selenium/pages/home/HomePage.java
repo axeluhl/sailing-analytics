@@ -30,8 +30,7 @@ public class HomePage extends HostPageWithAuthentication {
      * @return the {@link PageObject} for the home page
      */
     public static HomePage goToHomeUrl(WebDriver driver, String url) {
-        HostPage.goToUrl(driver, url);
-        return new HomePage(driver);
+        return HostPage.goToUrl(HomePage::new, driver, url);
     }
     
     private HomePage(WebDriver driver) {
