@@ -208,7 +208,7 @@
     <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Activate this option to enable choosing the additional Golf-Down time</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">Additional Golf-down time</string>
-    <string name="device_identifier">Device identifier</string>
+    <string name="device_identifier">Device Name</string>
     <string name="synchronize_connection_settings_header">Synchronize with server</string>
     <string name="synchronize_connection_settings_description">When creating a configuration on the server, click here to synchronize your app and connection settings via QRCode.</string>
     <string name="update_app_header">Force update</string>

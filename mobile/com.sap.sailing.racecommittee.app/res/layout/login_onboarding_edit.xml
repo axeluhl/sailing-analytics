@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/side_padding">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="@dimen/side_padding">
 
     <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
         android:layout_width="match_parent"
@@ -23,15 +23,17 @@
             android:selectAllOnFocus="true"
             android:textColor="@color/black"
             android:textColorHint="@color/dialog_color_text"
-            tools:text="@string/preference_server_url_default" />
+            tools:text="@string/preference_server_url_default"/>
     </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
 
     <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/side_padding"
+        android:visibility="gone"
         app:floatLabelPaddingLeft="@dimen/float_label_padding"
-        app:floatLabelTextAppearance="?attr/floatLabel">
+        app:floatLabelTextAppearance="?attr/floatLabel"
+        tools:visibility="visible">
 
         <EditText
             android:id="@+id/device_id"
@@ -42,6 +44,6 @@
             android:selectAllOnFocus="true"
             android:textColor="@color/black"
             android:textColorHint="@color/dialog_color_text"
-            tools:text="N10" />
+            tools:text="N10"/>
     </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
 </LinearLayout>
