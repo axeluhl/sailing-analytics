@@ -16,6 +16,9 @@ import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
 
 public class EventConfigurationPanelPO extends PageArea {
     
+    private static final String ID_EVENT_CREATE_DIALOG = "EventCreateDialog";
+    private static final String ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG = "CreateDefaultLeaderboardGroupConfirmDialog";
+    
     public static class EventEntryPO extends DataEntryPO {
 
         public EventEntryPO(CellTablePO<?> table, WebElement element) {
@@ -48,11 +51,11 @@ public class EventConfigurationPanelPO extends PageArea {
         super(driver, element);
     }
     
-    public void createSimplePublicEvent(String name, String venue, Date startDate, Date endDate) {
+    public void createEmptyEvent(String name, String desc, String venue, Date startDate, Date endDate, boolean isPublic) {
         createEventButton.click();
-        EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, "EventCreateDialog");
-        createDialog.createEvent(name, "", venue, startDate, endDate, true);
-        ConfirmDialogPO confirmDialog = getPO(ConfirmDialogPO::new, "CreateDefaultLeaderboardGroupConfirmDialog");
+        EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, ID_EVENT_CREATE_DIALOG);
+        createDialog.createEvent(name, desc, venue, startDate, endDate, isPublic);
+        ConfirmDialogPO confirmDialog = getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG);
         confirmDialog.pressNo();
     }
     
