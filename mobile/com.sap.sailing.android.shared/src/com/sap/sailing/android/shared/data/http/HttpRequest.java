@@ -44,7 +44,7 @@ public abstract class HttpRequest {
     private final URL url;
     private final Context context;
     private boolean isCancelled;
-    private SharedPreferences pref;
+    protected SharedPreferences pref;
 
     public HttpRequest(URL url, Context context) {
         this(url, null, context);
@@ -95,7 +95,7 @@ public abstract class HttpRequest {
                 responseInputStream = doRequest(connection);
             } catch (FileNotFoundException fnfe) {
                 if (HttpURLConnection.HTTP_UNAUTHORIZED == connection.getResponseCode()) {
-                    throw new UnauthorizedException();
+                    throw new UnauthorizedException(connection.getHeaderField("WWW-Authenticate"));
                 }
                 // 404 errors...
                 throw new FileNotFoundException(context.getString(R.string.http_request_exception, this.hashCode(), fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));

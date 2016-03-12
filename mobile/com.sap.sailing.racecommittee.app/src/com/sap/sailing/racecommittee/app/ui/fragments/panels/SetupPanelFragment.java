@@ -592,6 +592,12 @@ public class SetupPanelFragment extends BasePanelFragment {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                     if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE.equals(data)) {
                         uncheckMarker(mButtonProcedure);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE.equals(data)) {
+                        uncheckMarker(mButtonMode);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER.equals(data)) {
+                        uncheckMarker(mButtonPathfinder);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING.equals(data)) {
+                        uncheckMarker(mButtonTiming);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
                         uncheckMarker(mButtonCourse);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_WIND.equals(data)) {

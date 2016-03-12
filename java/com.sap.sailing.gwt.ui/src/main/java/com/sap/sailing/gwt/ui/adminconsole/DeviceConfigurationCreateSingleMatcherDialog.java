@@ -40,20 +40,22 @@ public class DeviceConfigurationCreateSingleMatcherDialog extends DataEntryDialo
         
     }
 
-    private TextBox identifierBox;
+    private final TextBox identifierBox;
+    private final StringMessages stringMessages;
     
     public DeviceConfigurationCreateSingleMatcherDialog(StringMessages stringMessages,
             Validator<DeviceConfigurationMatcherDTO> validator,
             com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<DeviceConfigurationMatcherDTO> callback) {
         super(stringMessages.createDeviceConfiguration(), stringMessages.forWhichDeviceShouldConfigurationApply(), 
                 stringMessages.create(), stringMessages.cancel(), validator, callback);
+        this.stringMessages = stringMessages;
         this.identifierBox = createTextBox("");
     }
     
     @Override
     protected Widget getAdditionalWidget() {
         Grid grid = new Grid(1, 2);
-        grid.setWidget(0, 0, createLabel("Identifier"));
+        grid.setWidget(0, 0, createLabel(stringMessages.raceManagerDeviceName()));
         grid.setWidget(0, 1, identifierBox);
         return grid;
     }
