@@ -105,7 +105,6 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         videos.add(video1);
     }
     
-    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -115,9 +114,6 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getImages()).thenReturn(images);
         when(event.getVideos()).thenReturn(videos);
         // ... and the serializer itself.		

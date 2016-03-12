@@ -15,7 +15,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.EventBus;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.mobile.app.MobilePlacesNavigator;
 import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
@@ -23,8 +22,9 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
-import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationSignOutRequestEvent;
 
 public class Header extends Composite {
 
@@ -73,7 +73,7 @@ public class Header extends Composite {
         signOutNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signOut(), new Runnable() {
             @Override
             public void run() {
-                eventBus.fireEvent(new AuthenticationRequestEvent(false));
+                        eventBus.fireEvent(new AuthenticationSignOutRequestEvent());
             }
         });
         

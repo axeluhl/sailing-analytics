@@ -13,9 +13,9 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources.LocalCss;
 import com.sap.sailing.gwt.home.shared.utils.DropdownHandler;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class DropdownFilter<T> extends Composite {
 

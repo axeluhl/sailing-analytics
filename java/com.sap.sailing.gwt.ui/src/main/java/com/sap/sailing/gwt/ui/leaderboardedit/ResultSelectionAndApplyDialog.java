@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -244,12 +245,11 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     @Override
-    public void show() {
-        super.show();
-        scoreCorrectionProviderListBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return scoreCorrectionProviderListBox;
     }
 
-     @Override
+    @Override
     protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
          Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
 
