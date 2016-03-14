@@ -11,8 +11,8 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
-import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -44,6 +44,8 @@ public class RegattaHeaderBody extends UIObject {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
         }
         addDetailsItem(regattaMetadata.getBoatCategory());
+        UIObject.ensureDebugId(labelUi, "RegattaStateLabelDiv");
+        UIObject.ensureDebugId(nameUi, "RegattaNameDiv");
     }
     
     private void addDetailsItem(int count, String text) {
