@@ -164,7 +164,8 @@ public class AbstractPosition implements Position {
     @Override
     public Distance getDistanceToLine(Position left, Position right) {
         final Distance result;
-        final int factor = this.crossTrackError(left, left.getBearingGreatCircle(right)).getMeters()>0?1:-1;
+        final Distance crossTrackError = this.crossTrackError(left, left.getBearingGreatCircle(right));
+        final int factor = crossTrackError.getMeters()>0?1:-1;
         double toLeft = Math.abs(left.getBearingGreatCircle(this).getDifferenceTo(left.getBearingGreatCircle(right))
                 .getDegrees());
         double toRight = Math.abs(right.getBearingGreatCircle(this).getDifferenceTo(right.getBearingGreatCircle(left))
@@ -174,7 +175,7 @@ public class AbstractPosition implements Position {
         } else if (toRight > 90) {
                 result = this.getDistance(right).scale(factor);
             } else {
-                result = this.crossTrackError(left, left.getBearingGreatCircle(right));
+                result = crossTrackError;
         }
         return result;
     }

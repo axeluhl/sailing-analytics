@@ -6,8 +6,10 @@ import com.sap.sse.common.TimePoint;
 public class XTECandidateImpl extends CandidateWithSide {
     private final Boolean passesInTheRightDirection;
 
-    public XTECandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w, boolean onCorrectSideOfWaypoint, Boolean passesInTheRightDirection) {
-        super(oneBasedIndexOfWaypoint, p, probability, w, onCorrectSideOfWaypoint);
+    public XTECandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability,
+            Double startProbabilityBasedOnOtherCompetitors, Waypoint w, boolean onCorrectSideOfWaypoint,
+            Boolean passesInTheRightDirection) {
+        super(oneBasedIndexOfWaypoint, p, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint);
         this.passesInTheRightDirection = passesInTheRightDirection;
     }
 

@@ -7,9 +7,9 @@ import com.sap.sse.common.TimePoint;
 public class DistanceCandidateImpl extends CandidateWithSide {
     private final Distance distance;
     
-    public DistanceCandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w,
-            boolean onCorrectSideOfWaypoint, Distance distance) {
-        super(oneBasedIndexOfWaypoint, p, probability, w, onCorrectSideOfWaypoint);
+    public DistanceCandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Double startProbabilityBasedOnOtherCompetitors,
+            Waypoint w, boolean onCorrectSideOfWaypoint, Distance distance) {
+        super(oneBasedIndexOfWaypoint, p, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint);
         this.distance = distance;
     }
 

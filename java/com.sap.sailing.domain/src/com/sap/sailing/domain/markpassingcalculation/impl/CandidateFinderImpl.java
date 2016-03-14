@@ -369,6 +369,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     Candidate oldCan = null;
                     Double probability = null;
                     Distance distance = null;
+                    Double startProbabilityBasedOnOtherCompetitors = null;
                     boolean onCorrectSideOfWaypoint = false;
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
@@ -398,12 +399,20 @@ public class CandidateFinderImpl implements CandidateFinder {
                                         final boolean newOnCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
                                         newProbability *= newOnCorrectSideOfWaypoint ? PENALTY_FOR_DISTANCE_CANDIDATES
                                                 : PENALTY_FOR_DISTANCE_CANDIDATES * PENALTY_FOR_WRONG_SIDE;
+                                        final Double newStartProbabilityBasedOnOtherCompetitors;
+                                        if (isStartWaypoint(w)) {
+                                            newStartProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
+                                            newProbability *= startProbabilityBasedOnOtherCompetitors;
+                                        } else {
+                                            newStartProbabilityBasedOnOtherCompetitors = null;
+                                        }
                                         if (newProbability > penaltyForSkipping
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
                                             probability = newProbability;
                                             onCorrectSideOfWaypoint = newOnCorrectSideOfWaypoint;
                                             distance = dis;
+                                            startProbabilityBasedOnOtherCompetitors = newStartProbabilityBasedOnOtherCompetitors;
                                         }
                                     }
                                 }
@@ -416,7 +425,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                         if (!wasCan && isCan) {
                             Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, w, onCorrectSideOfWaypoint, distance);
+                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance" + newCan.toString() + "for " + c);
@@ -425,7 +434,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                             result.getB().add(oldCan);
                         } else if (wasCan && isCan && oldCan.getProbability() != probability) {
                             Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, w, onCorrectSideOfWaypoint, distance);
+                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance" + newCan.toString() + "for " + c);
@@ -638,7 +647,67 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Boolean passesInTheRightDirection = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
         probability = passesInTheRightDirection != Boolean.FALSE ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
-        return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w, onCorrectSideOfWaypoint, passesInTheRightDirection);
+        final Double startProbabilityBasedOnOtherCompetitors;
+        if (isStartWaypoint(w)) {
+            // add a penalty if at time point t the other competitors are largely not even close to the start waypoint;
+            // this will make start candidates much more likely if many other competitors are also very close to the
+            // start, and it will help ruling out those candidates where someone is practicing a start just for themselves
+            startProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
+            probability *= startProbabilityBasedOnOtherCompetitors;
+        } else {
+            startProbabilityBasedOnOtherCompetitors = null;
+        }
+        return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability,
+                startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, passesInTheRightDirection);
+    }
+
+    /**
+     * For a fixed line start it is very likely that all competitors pass the start waypoint at about the same time.
+     * This requires everyone to at least be pretty close to the start waypoint at the start time. Therefore, a start
+     * mark passing candidate is very likely when a large share of competitors is very close to the start line, whereas
+     * it becomes pretty unlikely when everyone is sailing around anywhere on the course or behind the line but not
+     * being in close proximity to the line.
+     * 
+     * @param t
+     *            the time point at which to consider the other competitors behavior relative to the start waypoint
+     * @return a probability between 0..1 (inclusive) where 0 means that based on all but {@code c}'s relation to the
+     *         start line it seems completely unlikely that a candidate for {@code c} at time {@code t} could have been
+     *         a start candidate; 1 meaning that based on the other competitors' relation to the start line at time
+     *         point {@code t} is seems a fact that this must have been the start.
+     */
+    private double getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(Competitor c, TimePoint t) {
+        final double result;
+        final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
+        if (start == null) {
+            result = 1;
+        } else {
+            for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
+                final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
+                if (track != null) {
+                    final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
+                    final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
+                    if (otherCompetitorsDistanceToStartAtT != null) {
+                        // TODO use a function that will approach 1 as we get, say, 50% of the other competitors within a reasonable distance from the start line, say 10m; the closer, the more likely
+                    }
+                }
+            }
+            result = 1;
+        }
+        return result;
+    }
+
+    private Distance getMinDistanceOrNull(List<Distance> distances) {
+        Distance result = null;
+        for (Distance d : distances) {
+            if (d != null && (result == null || result.compareTo(d) > 0)) {
+                result = d;
+            }
+        }
+        return result;
+    }
+
+    private boolean isStartWaypoint(Waypoint w) {
+        return race.getRace().getCourse().getFirstWaypoint() == w;
     }
 
     /**
@@ -751,7 +820,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * Calculates the distance from p to each mark of w at the timepoint t.
      */
     private List<Distance> calculateDistance(Position p, Waypoint w, TimePoint t) {
-        List<Distance> distances = new ArrayList<>();
+        final List<Distance> distances = new ArrayList<>();
         PassingInstruction instruction = getPassingInstructions(w);
         boolean singleMark = false;
         switch (instruction) {
