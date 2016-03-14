@@ -256,7 +256,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             courseAreaNames.add(courseAreaDTO.getName());
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
-                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getSailorsInfoWebsiteURL(),
+                newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getSailorsInfoWebsiteURLs(),
                 newEvent.getImages(), newEvent.getVideos(),
                 new AsyncCallback<EventDTO>() {
                     @Override

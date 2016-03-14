@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Set;
+
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -8,6 +9,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.LeaderboardGroupsDisplayer;
+import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -28,7 +30,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
     
     public EventManagementPanel(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
+            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         VerticalPanel mainPanel = new VerticalPanel();
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
@@ -38,7 +40,7 @@ public class EventManagementPanel extends SimplePanel implements EventsRefresher
         VerticalPanel eventsContentPanel = new VerticalPanel();
         eventsPanel.setContentWidget(eventsContentPanel);
         
-        eventListComposite = new EventListComposite(sailingService, errorReporter, stringMessages);
+        eventListComposite = new EventListComposite(sailingService, errorReporter, regattaRefresher, this, stringMessages);
         eventListComposite.ensureDebugId("EventListComposite");
         eventsContentPanel.add(eventListComposite);
         

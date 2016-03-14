@@ -189,9 +189,4 @@ public class RaceColumnsInLeaderboardDialog extends DataEntryDialog<List<RaceCol
         }
         parentPanel.insert(raceColumnsGrid, widgetIndex);
     }
-
-    @Override
-    public void show() {
-        super.show();
-    }
 }

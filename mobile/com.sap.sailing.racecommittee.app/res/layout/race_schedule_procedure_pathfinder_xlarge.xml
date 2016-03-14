@@ -41,7 +41,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:floatLabelPaddingLeft="9dp"
+                app:floatLabelPaddingLeft="@dimen/float_label_padding"
                 app:floatLabelTextAppearance="?attr/floatLabel">
 
                 <EditText
@@ -60,7 +60,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                app:floatLabelPaddingLeft="9dp"
+                app:floatLabelPaddingLeft="@dimen/float_label_padding"
                 app:floatLabelTextAppearance="?attr/floatLabel">
 
                 <EditText

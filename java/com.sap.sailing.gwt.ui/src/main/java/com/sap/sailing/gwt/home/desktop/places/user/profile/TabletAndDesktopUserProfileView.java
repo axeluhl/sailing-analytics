@@ -8,15 +8,16 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
-import com.sap.sailing.gwt.home.desktop.partials.userHeader.UserHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.userprofile.desktop.userheader.UserHeader;
 
 public class TabletAndDesktopUserProfileView extends Composite implements UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> {
     private static final ApplicationHistoryMapper historyMapper = GWT.<ApplicationHistoryMapper> create(ApplicationHistoryMapper.class);
@@ -44,7 +45,7 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
         this.currentPresenter = currentPresenter;
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         
-        headerUi = new UserHeader();
+        headerUi = new UserHeader(SharedResources.INSTANCE);
         
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -64,9 +65,9 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     }
     
     @Override
-    public void setUserManagementContext(AuthenticationContext userManagementContext) {
-        headerUi.setUserManagementContext(userManagementContext);
-        tabPanelUi.getCurrentTab().setUserManagementContext(userManagementContext);
+    public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        headerUi.setAuthenticationContext(authenticationContext);
+        tabPanelUi.getCurrentTab().setAuthenticationContext(authenticationContext);
     }
 
     @SuppressWarnings("unchecked")

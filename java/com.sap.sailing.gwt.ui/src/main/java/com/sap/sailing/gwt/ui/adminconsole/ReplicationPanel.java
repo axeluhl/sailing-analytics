@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -352,9 +353,8 @@ public class ReplicationPanel extends FlowPanel {
         }
         
         @Override
-        public void show() {
-            super.show();
-            hostnameEntryField.setFocus(true);
+        protected FocusWidget getInitialFocusWidget() {
+            return hostnameEntryField;
         }
 
         @Override

@@ -22,6 +22,7 @@
     <attr name="buttonSolidSmall" format="reference"/>
     <attr name="buttonSolidNormal" format="reference"/>
     <attr name="round" format="reference"/>
+    <attr name="round_transparent" format="reference"/>
     <attr name="text" format="reference"/>
     <attr name="textXXSmall" format="reference"/>
     <attr name="textXSmall" format="reference"/>

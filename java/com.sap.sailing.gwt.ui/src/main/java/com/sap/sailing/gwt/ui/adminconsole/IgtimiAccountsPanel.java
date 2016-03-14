@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -243,11 +244,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
         
         @Override
-        public void show() {
-            super.show();
-            eMail.setFocus(true);
+        protected FocusWidget getInitialFocusWidget() {
+            return eMail;
         }
-
+        
         @Override
         protected UserData getResult() {
             return new UserData(eMail.getText(), password.getText());
