@@ -73,8 +73,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         }
         startDateBox = createDateTimeBox(regatta.startDate);
         startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        startDateBox.ensureDebugId("StartDateTimeBox");
         endDateBox = createDateTimeBox(regatta.endDate);
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {

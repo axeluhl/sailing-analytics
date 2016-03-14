@@ -562,6 +562,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName());
+        leaderboardGroupCreateDialog.ensureDebugId("LeaderboardGroupCreateDialog");
         leaderboardGroupCreateDialog.show();
     }
 
