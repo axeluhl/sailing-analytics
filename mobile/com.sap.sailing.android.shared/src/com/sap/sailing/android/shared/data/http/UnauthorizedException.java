@@ -7,4 +7,8 @@ import java.io.IOException;
  */
 public class UnauthorizedException extends IOException {
     private static final long serialVersionUID = 5913076970322227942L;
+
+    public UnauthorizedException(String detailMessage) {
+        super(detailMessage);
+    }
 }

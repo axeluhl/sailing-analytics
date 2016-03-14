@@ -57,7 +57,9 @@ public class Edge implements Comparable<Edge> {
     }
 
     public String toString() {
-        return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " to " + end.getOneBasedIndexOfWaypoint() + ": " + getProbability();
+        return "Edge from Waypoint " + start.getOneBasedIndexOfWaypoint() + " (" +
+                start.getTimePoint()+") to " + end.getOneBasedIndexOfWaypoint() + " (" +
+                end.getTimePoint()+"): " + getProbability();
     }
 
     @Override

@@ -37,6 +37,7 @@
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
         <item name="round">@style/AppTheme.Dark.Round</item>
+        <item name="round_transparent">@style/AppTheme.Dark.RoundTransparent</item>
         <item name="text">@style/AppTheme.Dark.Text</item>
         <item name="textXXSmall">@style/AppTheme.Dark.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Dark.Text.XSmall</item>
@@ -120,6 +121,11 @@
 
     <style name="AppTheme.Dark.Round">
         <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">@dimen/logout_padding</item>
+    </style>
+
+    <style name="AppTheme.Dark.RoundTransparent">
+        <item name="android:background">@drawable/round_button_transparent</item>
         <item name="android:padding">@dimen/logout_padding</item>
     </style>
 
