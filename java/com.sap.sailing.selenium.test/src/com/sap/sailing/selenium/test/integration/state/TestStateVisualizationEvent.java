@@ -15,7 +15,7 @@ import com.sap.sailing.selenium.pages.common.LabelTypePO;
 import com.sap.sailing.selenium.pages.home.event.EventPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
-public class TestStateVisualisationEvent extends AbstractSeleniumTest {
+public class TestStateVisualizationEvent extends AbstractSeleniumTest {
 
     @Override
     public void setUp() {
