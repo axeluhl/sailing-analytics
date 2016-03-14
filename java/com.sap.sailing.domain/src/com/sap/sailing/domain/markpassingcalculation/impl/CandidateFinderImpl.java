@@ -291,7 +291,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 if (numberofMarks == 2) {
                     instruction = PassingInstruction.Gate;
                 } else if (numberofMarks == 1) {
-                    instruction = PassingInstruction.Port;
+                    instruction = PassingInstruction.Single_Unknown;
                 } else {
                     instruction = PassingInstruction.None;
                 }
@@ -635,8 +635,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         double probability = getDistanceBasedProbability(w, t, d);
         final boolean onCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
         probability = onCorrectSideOfWaypoint ? probability : probability * PENALTY_FOR_WRONG_SIDE;
-        final boolean passesInTheRightDirection = passesInTheRightDirection(w, xte1, xte2, portMark);
-        probability = passesInTheRightDirection ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
+        final Boolean passesInTheRightDirection = passesInTheRightDirection(w, xte1, xte2, portMark);
+        // null would mean "unknown"; no penalty for those cases
+        probability = passesInTheRightDirection != Boolean.FALSE ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
         return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability, w, onCorrectSideOfWaypoint, passesInTheRightDirection);
     }
 
@@ -671,7 +672,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
         } else {
             Mark m = null;
-            if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
+            if (instruction == PassingInstruction.Single_Unknown || instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
                     || instruction == PassingInstruction.FixedBearing || instruction == PassingInstruction.Offset) {
                 m = w.getMarks().iterator().next();
             } else if (instruction == PassingInstruction.Gate) {
@@ -692,15 +693,22 @@ public class CandidateFinderImpl implements CandidateFinder {
      * For marks passed on port, the cross-track error should switch from positive to negative and vice versa. Lines are
      * also from positive to negative as the cross-track error to a line is always positive when approaching it from the
      * correct side.
+     * 
+     * @return {@code null} in case the passing instructions aren't defined and therefore the correct direction is not
+     *         known
      */
-    private boolean passesInTheRightDirection(Waypoint w, double xte1, double xte2, boolean portMark) {
-        boolean result = true;
+    private Boolean passesInTheRightDirection(Waypoint w, double xte1, double xte2, boolean portMark) {
+        final Boolean result;
         PassingInstruction instruction = getPassingInstructions(w);
-        if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Line
+        if (instruction == PassingInstruction.Single_Unknown) {
+            result = null;
+        } else if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Line
                 || (instruction == PassingInstruction.Gate && portMark)) {
             result = xte1 > xte2 ? true : false;
         } else if (instruction == PassingInstruction.Starboard || (instruction == PassingInstruction.Gate && !portMark)) {
             result = xte1 < xte2 ? true : false;
+        } else {
+            result = null;
         }
         return result;
     }
@@ -748,6 +756,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         boolean singleMark = false;
         switch (instruction) {
         case Port:
+        case Single_Unknown:
         case Starboard:
         case FixedBearing:
             singleMark = true;
