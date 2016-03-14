@@ -44,8 +44,8 @@ public class RegattaHeaderBody extends UIObject {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
         }
         addDetailsItem(regattaMetadata.getBoatCategory());
+        UIObject.ensureDebugId(nameUi, "RegattaNameSpan");
         UIObject.ensureDebugId(labelUi, "RegattaStateLabelDiv");
-        UIObject.ensureDebugId(nameUi, "RegattaNameDiv");
     }
     
     private void addDetailsItem(int count, String text) {

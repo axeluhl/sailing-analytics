@@ -25,7 +25,7 @@ public class RegattaListItemPO extends PageArea {
         }
         
         public String getRegattaName() {
-            return findElementBySeleniumId("RegattaNameDiv").getText();
+            return findElementBySeleniumId("RegattaNameSpan").getText();
         }
         
         public LabelTypePO getRegattaStateLabel() {
