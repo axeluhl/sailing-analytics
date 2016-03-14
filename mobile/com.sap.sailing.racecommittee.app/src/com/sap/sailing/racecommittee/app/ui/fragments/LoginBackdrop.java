@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -186,7 +187,7 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
 
         TextView link = ViewHelper.get(layout, R.id.get_started);
         if (link != null) {
-            underlineText(link);
+            formatText(link);
             link.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -344,10 +345,11 @@ public class LoginBackdrop extends Fragment implements LoginTask.LoginTaskListen
         return false;
     }
 
-    private void underlineText(TextView textView) {
+    private void formatText(TextView textView) {
         if (textView != null) {
             SpannableString string = new SpannableString(textView.getText());
             string.setSpan(new UnderlineSpan(), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            string.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.constant_sap_blue_1)), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             textView.setText(string);
         }
     }
