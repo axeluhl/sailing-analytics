@@ -124,6 +124,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
         seriesDialog.addRaces(1, 1);
         seriesDialog.pressOk();
+        regattaDetails.deleteSeries("Default");
         // Start the tracking for the races and wait until they are ready to use
         startTrackingRaceAndStopWhenFinished(adminConsole);
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();

@@ -21,6 +21,9 @@ public interface TimePoint extends Comparable<TimePoint>, Serializable {
     
     TimePoint minus(Duration duration);
     
+    /**
+     * The duration that {@code later} is after {@code this}. May be negative if {@code later} is before {@code this}.
+     */
     Duration until(TimePoint later);
     
     boolean after(TimePoint other);

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.test.markpassing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +85,8 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                 givenMarkPasses.put(wp, markPassing);
             }
             givenPasses.put(c, givenMarkPasses);
+            // now clear the mark passings in the TrackedRace for competitor c:
+            getTrackedRace().updateMarkPassings(c, Collections.emptySet());
         }
     }
 
@@ -98,8 +102,6 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         testWholeRace();
         testMiddleOfRace(0);
         testMiddleOfRace(2);
-        
-        
     }
 
     private void testWholeRace() {
@@ -220,7 +222,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         for (Competitor c : getRace().getCompetitors()) {
             MarkPassing markPassingAfter = givenPasses.get(c).get(wayPointAfterwards);
             if (markPassingAfter != null) {
-                if (givenPasses.get(c).get(lastWaypointToBePassed) != null && givenPasses.get(c).get(wayPointAfterwards) != null) {
+                if (givenPasses.get(c).get(lastWaypointToBePassed) != null) {
                     TimePoint beforeNextPassing = markPassingAfter.getTimePoint().minus(20000);
                     List<GPSFix> fixes = new ArrayList<GPSFix>();
                     try {
@@ -245,10 +247,16 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
                         if (waypoints.indexOf(w) <= zeroBasedIndexOfLastWaypointToBePassed) {
                             if ((old == null) != (newm == null)) {
                                 gotPassed = false;
+                                fail("Waypoint "+w+" was "+(old == null?"not ":"")+"passed by "+c+" originally"
+                                        +(old==null?"":": "+old)+"; we detected it "+(newm==null?"not ":"")+"having been passed"+
+                                        (newm == null ? "" : (": "+newm)));
                             }
                         } else {
                             if (w != wayPointAfterwards && newm != null) {
                                 gotOther = true;
+                                fail("Received a park passing "+newm+" for the "+waypoints.indexOf(w)+
+                                        "th waypoint "+w+" by "+c+" although only up to "+
+                                        zeroBasedIndexOfLastWaypointToBePassed +" were to be reported");
                             }
                         }
                     }

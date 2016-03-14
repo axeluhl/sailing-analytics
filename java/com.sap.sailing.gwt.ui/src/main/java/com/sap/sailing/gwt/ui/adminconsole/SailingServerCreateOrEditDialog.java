@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -94,9 +95,7 @@ public class SailingServerCreateOrEditDialog extends DataEntryDialog<RemoteSaili
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameTextBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameTextBox;
     }
-
 }
