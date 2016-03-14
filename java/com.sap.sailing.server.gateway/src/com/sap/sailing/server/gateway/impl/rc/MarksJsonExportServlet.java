@@ -1,7 +1,6 @@
 package com.sap.sailing.server.gateway.impl.rc;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -61,19 +60,9 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
         final Iterable<Mark> marks = raceColumn.getAvailableMarks(fleet);
         MarkJsonSerializer serializer = new MarkJsonSerializer();
         for (Mark mark : marks) {
-            if (toUUID(mark.getId().toString()) != null) {
-                result.add(serializer.serialize(mark));
-            }
+            result.add(serializer.serialize(mark));
         }
         setJsonResponseHeader(response);
         result.writeJSONString(response.getWriter());
-    }
-    
-    private UUID toUUID(String value) {
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException iae) {
-            return null;
-        }
     }
 }
