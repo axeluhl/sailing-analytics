@@ -22,7 +22,7 @@
     <dimen name="thick_line">2dp</dimen>
     <dimen name="obesity_line">3dp</dimen>
 
-    <dimen name="float_label_padding">9dp</dimen>
+    <dimen name="float_label_padding">3dp</dimen>
 
     <dimen name="textSize_14">12sp</dimen> <!-- XXSmall -->
     <dimen name="textSize_18">14sp</dimen> <!-- XSmall -->
