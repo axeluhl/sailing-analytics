@@ -58,7 +58,7 @@ public class MarksJsonExportServlet extends AbstractJsonHttpServlet {
             return;
         }
         JSONArray result = new JSONArray();
-        final Iterable<Mark> marks = raceColumn.getMarks(fleet);
+        final Iterable<Mark> marks = raceColumn.getAvailableMarks(fleet);
         MarkJsonSerializer serializer = new MarkJsonSerializer();
         for (Mark mark : marks) {
             if (toUUID(mark.getId().toString()) != null) {
