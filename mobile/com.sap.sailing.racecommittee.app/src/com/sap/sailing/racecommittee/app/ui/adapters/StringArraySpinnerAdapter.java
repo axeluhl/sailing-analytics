@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.support.annotation.NonNull;
@@ -11,9 +14,6 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.R;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class StringArraySpinnerAdapter implements SpinnerAdapter {
 
@@ -91,6 +91,7 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
         TextView mainText = ViewHelper.get(layout, android.R.id.text1);
         if (mainText != null) {
             mainText.setText(mArray.get(position));
+            mainText.setTextColor(context.getResources().getColor(R.color.constant_black));
         }
 
         return layout;

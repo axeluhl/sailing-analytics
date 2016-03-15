@@ -515,5 +515,7 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Magnetic</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
+    <string name="finishing_date">Finishing Date</string>
+    <string name="date_short">yyyy-MM-dd</string>
 
 </resources>

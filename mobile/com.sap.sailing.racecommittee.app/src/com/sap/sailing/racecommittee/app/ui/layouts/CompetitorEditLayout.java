@@ -1,16 +1,26 @@
 package com.sap.sailing.racecommittee.app.ui.layouts;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
@@ -19,16 +29,12 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
+import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-
-public class CompetitorEditLayout extends FrameLayout {
+@SuppressLint("ViewConstructor")
+public class CompetitorEditLayout extends ScrollView {
 
     private CompetitorResultWithIdImpl mCompetitor;
     private GregorianCalendar mCalendar;
@@ -36,18 +42,28 @@ public class CompetitorEditLayout extends FrameLayout {
     private Spinner mPosition;
     private Spinner mPenalty;
     private EditText mScore;
+    private Spinner mDate;
     private NumberPicker mHours;
     private NumberPicker mMinutes;
     private NumberPicker mSeconds;
     private EditText mComment;
 
-    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
+    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
         super(context);
-        init(competitor, currentPos, maxPos);
+        init(startTime, competitor, currentPos, maxPos);
     }
 
-    private void init(CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
-        View layout = LayoutInflater.from(getContext()).inflate(R.layout.race_tracking_list_competitor_edit, this, false);
+    private void init(TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
+        int layoutId;
+        if (AppUtils.with(getContext()).isPhone() && AppUtils.with(getContext()).isHDPI()) {
+            layoutId = R.layout.race_tracking_list_competitor_edit_small;
+        } else {
+            layoutId = R.layout.race_tracking_list_competitor_edit_normal;
+        }
+        View layout = LayoutInflater.from(getContext()).inflate(layoutId, this, false);
+
+        setFillViewport(true);
+        setPadding(0, getResources().getDimensionPixelSize(R.dimen.dialog_top_padding), 0, 0);
 
         mCompetitor = competitor;
 
@@ -90,6 +106,18 @@ public class CompetitorEditLayout extends FrameLayout {
             mPenalty.setSelection(penaltyAdapter.getPosition(mCompetitor.getMaxPointsReason().toString()));
         }
 
+        mDate = ViewHelper.get(layout, R.id.competitor_finish_date);
+        if (mDate != null) {
+            String[] dates = getDates(startTime);
+            StringArraySpinnerAdapter dateAdapter = new StringArraySpinnerAdapter(dates);
+            mDate.setAdapter(dateAdapter);
+            mDate.setOnItemSelectedListener(new SpinnerSelectedListener(dateAdapter));
+            mDate.setSelection(findDate(dates, competitor.getFinishingTime()));
+            if (dates.length == 1) {
+                mDate.setVisibility(GONE);
+            }
+        }
+
         mScore = ViewHelper.get(layout, R.id.competitor_score);
         if (mScore != null && mCompetitor.getScore() != null) {
             mScore.setText(String.format(Locale.US, "%f", mCompetitor.getScore()));
@@ -101,6 +129,26 @@ public class CompetitorEditLayout extends FrameLayout {
         }
 
         addView(layout);
+    }
+
+    private String[] getDates(@NonNull TimePoint startTime) {
+        TimePoint now = MillisecondsTimePoint.now();
+        ArrayList<String> dates = TimeUtils.getDates(getContext(), startTime, now);
+        return dates.toArray(new String[dates.size()]);
+    }
+
+    private int findDate(@NonNull String[] dates, @Nullable TimePoint finishingTime) {
+        int pos = 0;
+        if (finishingTime != null) {
+            SimpleDateFormat simpleFormat = new SimpleDateFormat(getContext().getString(R.string.date_short), Locale.US);
+            String finishDate = simpleFormat.format(finishingTime.asDate());
+            for (int i = 0; i < dates.length; i++) {
+                if (finishDate.equals(dates[i])) {
+                    pos = i;
+                }
+            }
+        }
+        return pos;
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -132,6 +180,12 @@ public class CompetitorEditLayout extends FrameLayout {
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {
             score = Double.valueOf(mScore.getText().toString());
         }
+        if (mDate != null) {
+            String[] date = ((String) mDate.getSelectedItem()).split("-");
+            mCalendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
+            mCalendar.set(Calendar.MONTH, Integer.parseInt(date[1]) - 1);
+            mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
+        }
         if (mHours != null) {
             mCalendar.set(Calendar.HOUR_OF_DAY, mHours.getValue());
         }
@@ -146,7 +200,8 @@ public class CompetitorEditLayout extends FrameLayout {
         if (mComment != null) {
             comment = mComment.getText().toString();
         }
-        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor.getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment);
+        CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
+            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment);
         return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
     }
 
@@ -160,8 +215,9 @@ public class CompetitorEditLayout extends FrameLayout {
                     return String.format(Locale.US, "%02d", value);
                 }
             });
-            ThemeHelper.setPickerColor(getContext(), picker, getContext().getResources().getColor(R.color.dialog_color_text),
-                    getContext().getResources().getColor(R.color.dialog_color_button));
+            ThemeHelper
+                .setPickerColor(getContext(), picker, getContext().getResources().getColor(R.color.dialog_color_text), getContext().getResources()
+                    .getColor(R.color.dialog_color_button));
         }
     }
 

@@ -472,6 +472,7 @@
     <string name="penalty">Strafe</string>
     <string name="score">Punkte</string>
     <string name="finishing_time">Zielzeit</string>
+    <string name="finishing_date">Zieldatum</string>
     <string name="comment">Kommentar</string>
     <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>

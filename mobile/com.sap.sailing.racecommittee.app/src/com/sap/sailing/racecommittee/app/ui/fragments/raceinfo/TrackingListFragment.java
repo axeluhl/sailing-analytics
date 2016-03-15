@@ -1,11 +1,19 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.graphics.drawable.NinePatchDrawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.h6ah4i.android.widget.advrecyclerview.animator.SwipeDismissItemAnimator;
@@ -20,6 +29,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropM
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.touchguard.RecyclerViewTouchActionGuardManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.WrapperAdapterUtils;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -44,11 +54,6 @@ import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 public class TrackingListFragment extends BaseFragment
         implements CompetitorAdapter.CompetitorClick, FinishListAdapter.FinishEvents, View.OnClickListener {
 
@@ -64,6 +69,7 @@ public class TrackingListFragment extends BaseFragment
     private ArrayList<Competitor> mCompetitorData;
     private int mId = 0;
     private HeaderLayout mHeader;
+    private TextView mPageTitle;
 
     public TrackingListFragment() {
         mCompetitorData = new ArrayList<>();
@@ -105,9 +111,8 @@ public class TrackingListFragment extends BaseFragment
             btnNext.setOnClickListener(this);
         }
 
-        HeaderLayout header = ViewHelper.get(layout, R.id.header);
-        if (header != null) {
-            header.setHeaderOnClickListener(new View.OnClickListener() {
+        if (mHeader != null) {
+            mHeader.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -117,8 +122,13 @@ public class TrackingListFragment extends BaseFragment
         }
 
         if (getArguments().getInt(START_MODE, 0) != 0) {
-            if (header != null) {
-                header.setVisibility(View.GONE);
+            mPageTitle = ViewHelper.get(layout, R.id.page_title);
+            if (mPageTitle != null) {
+                mPageTitle.setVisibility(View.VISIBLE);
+            }
+
+            if (mHeader != null) {
+                mHeader.setVisibility(View.GONE);
             }
 
             View buttonBar = ViewHelper.get(layout, R.id.bottom_bar);
@@ -380,9 +390,16 @@ public class TrackingListFragment extends BaseFragment
 
     @Override
     public void onEditItem(final CompetitorResultWithIdImpl item, int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        Context context = getActivity();
+        if (context instanceof AppCompatActivity) {
+            ActionBar actionBar = ((AppCompatActivity) context).getSupportActionBar();
+            if (actionBar != null) {
+                context = actionBar.getThemedContext();
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
         builder.setTitle(item.getCompetitorDisplayName());
-        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), item, position, mFinishedAdapter.getItemCount());
+        final CompetitorEditLayout layout = new CompetitorEditLayout(getActivity(), getRace().getState().getFinishingTime(), item, position, mFinishedAdapter.getItemCount());
         builder.setView(layout);
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
@@ -409,7 +426,9 @@ public class TrackingListFragment extends BaseFragment
         builder.setNegativeButton(android.R.string.cancel, null);
         AlertDialog dialog = builder.create();
         dialog.show();
-        dialog.getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (AppUtils.with(getActivity()).isTablet()) {
+            dialog.getWindow().setLayout(getResources().getDimensionPixelSize(R.dimen.competitor_dialog_width), ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     private CharSequence[] getAllMaxPointsReasons() {
@@ -475,6 +494,9 @@ public class TrackingListFragment extends BaseFragment
 
                 default:
                     mHeader.setHeaderText(R.string.tracking_list_02);
+            }
+            if (mPageTitle != null) {
+                mPageTitle.setText(mHeader.getHeaderText());
             }
         }
         mConfirm.setEnabled(mActivePage != 0 || mDots.size() == 0);
