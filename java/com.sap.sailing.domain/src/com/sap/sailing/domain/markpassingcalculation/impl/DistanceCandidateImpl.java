@@ -8,7 +8,7 @@ public class DistanceCandidateImpl extends CandidateWithSide {
     private final Distance distance;
     
     public DistanceCandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w,
-            boolean onCorrectSideOfWaypoint, Distance distance) {
+            double onCorrectSideOfWaypoint, Distance distance) {
         super(oneBasedIndexOfWaypoint, p, probability, w, onCorrectSideOfWaypoint);
         this.distance = distance;
     }

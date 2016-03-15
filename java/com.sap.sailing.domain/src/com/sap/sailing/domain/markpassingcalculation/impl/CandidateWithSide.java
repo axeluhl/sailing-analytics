@@ -4,10 +4,10 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.TimePoint;
 
 public abstract class CandidateWithSide extends CandidateImpl {
-    private final boolean onCorrectSideOfWaypoint;
+    private final double onCorrectSideOfWaypoint;
 
     public CandidateWithSide(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w,
-            boolean onCorrectSideOfWaypoint) {
+            double onCorrectSideOfWaypoint) {
         super(oneBasedIndexOfWaypoint, p, probability, w);
         this.onCorrectSideOfWaypoint = onCorrectSideOfWaypoint;
     }
