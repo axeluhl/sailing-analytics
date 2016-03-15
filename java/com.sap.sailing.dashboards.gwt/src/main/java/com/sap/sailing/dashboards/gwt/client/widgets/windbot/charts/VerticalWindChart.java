@@ -37,6 +37,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.theme.Colors;
+import com.sap.sailing.dashboards.gwt.client.theme.Fonts;
+import com.sap.sailing.dashboards.gwt.client.theme.Sizes;
 import com.sap.sailing.dashboards.gwt.client.util.HighchartsUtil;
 import com.sap.sailing.dashboards.gwt.shared.WindType;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartPointRecalculator;
@@ -138,9 +141,8 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 .setType(Type.DATE_TIME)
                 .setReversed(false)
                 .setLabels(
-                        new XAxisLabels().setStyle(new Style().setFontFamily("Arial").setFontSize("12")
-                                .setColor("grey"))).setLineColor("grey").setTickWidth(0.5).setLineWidth(1)
-                .setTickWidth(1).setTickColor("grey").setOffset(0).setMinPadding(20).setGridLineColor("white")
+                        new XAxisLabels().setStyle(new Style().setFontFamily(Fonts.DASHBOARD_FONT_FAMILY).setFontSize(Sizes.DASHBOARD_FONT_SIZE_SMALL).setColor(Colors.LIGHT_TEXT_COLOR))).setLineColor(Colors.LIGHT_TEXT_COLOR).setTickWidth(0.5).setLineWidth(1)
+                .setTickWidth(1).setTickColor(Colors.LIGHT_TEXT_COLOR).setOffset(0).setMinPadding(20).setGridLineColor(Colors.LIGHT_GREY)
                 .setGridLineWidth(0)
                 .setDateTimeLabelFormats(new DateTimeLabelFormats().setMonth("%e. %b").setYear("%b"));
     }
@@ -148,12 +150,12 @@ public class VerticalWindChart extends Composite implements HasWidgets {
     private void setYAxisOptions() {
         verticalWindChart
                 .getYAxis()
-                .setLineColor("grey")
+                .setLineColor(Colors.LIGHT_TEXT_COLOR)
                 .setTickWidth(1)
-                .setTickColor("grey")
+                .setTickColor(Colors.LIGHT_TEXT_COLOR)
                 .setAxisTitleText(null)
                 .setGridLineWidth(0)
-                .setAlternateGridColor("#d4d4d4")
+                .setAlternateGridColor(Colors.LIGHT_GREY)
                 .setLineWidth(1)
                 .setEndOnTick(true)
                 .setStartOnTick(true)
@@ -163,7 +165,7 @@ public class VerticalWindChart extends Composite implements HasWidgets {
                 .setMaxPadding(0)
                 .setLabels(
                         new YAxisLabels().setStyle(
-                                new Style().setFontFamily("Arial").setFontSize("12").setColor("grey")).setFormatter(
+                                new Style().setFontFamily(Fonts.DASHBOARD_FONT_FAMILY).setFontSize(Sizes.DASHBOARD_FONT_SIZE_SMALL).setColor(Colors.LIGHT_TEXT_COLOR)).setFormatter(
                                 new AxisLabelsFormatter() {
                                     @Override
                                     public String format(AxisLabelsData axisLabelsData) {
@@ -276,13 +278,15 @@ public class VerticalWindChart extends Composite implements HasWidgets {
      * */
     @UiHandler("verticalWindChartClickArea")
     public void verticalWindChartClickAreaClicked(ClickEvent e) {
-        if (chartIntervallinMinutes == SMALL_DISPLAY_INTERVALL_IN_MINUTES) {
-            chartIntervallinMinutes = LARGE_DISPLAY_INTERVALL_IN_MINUTES;
-        } else {
-            chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
+        if (lastPoint != null) {
+            if (chartIntervallinMinutes == SMALL_DISPLAY_INTERVALL_IN_MINUTES) {
+                chartIntervallinMinutes = LARGE_DISPLAY_INTERVALL_IN_MINUTES;
+            } else {
+                chartIntervallinMinutes = SMALL_DISPLAY_INTERVALL_IN_MINUTES;
+            }
+            adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
+            notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
         }
-        adaptVerticalWindChartExtemes(lastPoint.getX().longValue());
-        notifyVerticalWindChartClickListeners(chartIntervallinMinutes);
     }
 
     @Override

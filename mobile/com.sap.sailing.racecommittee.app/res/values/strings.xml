@@ -185,8 +185,10 @@
     <string name="set_tracking_list">Set tracking list</string>
     <string name="confirm_tracking_list">Confirm tracking list</string>
     <string name="snap">Snap</string>
-    <string name="logout_dialog_title">Are you sure want to logout?</string>
-    <string name="logout_dialog_message">Logging out stops automatic monitoring for all races.</string>
+    <string name="logout_dialog_title">Sign out</string>
+    <string name="logout_dialog_message">Do you want to sign out and sign in as a new user? All your races will still be monitored.</string>
+    <string name="change_dialog_title">Change Regatta</string>
+    <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
     <string name="logout">Logout</string>
     <string name="loading_configuration">Loading configuration&#8230;</string>
     <string name="loading_configuration_failed">There was an error loading the configuration.</string>
@@ -206,7 +208,7 @@
     <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Activate this option to enable choosing the additional Golf-Down time</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header">Additional Golf-down time</string>
-    <string name="device_identifier">Device identifier</string>
+    <string name="device_identifier">Device Name</string>
     <string name="synchronize_connection_settings_header">Synchronize with server</string>
     <string name="synchronize_connection_settings_description">When creating a configuration on the server, click here to synchronize your app and connection settings via QRCode.</string>
     <string name="update_app_header">Force update</string>
@@ -286,7 +288,7 @@
     <string name="races_all">ALL RACES</string>
 
     <string name="welcome">WELCOME</string>
-    <string name="change">CHANGE</string>
+    <string name="change">Change</string>
 
     <string name="start_procedure">Procedure</string>
     <string name="start_procedure_more">More</string>
@@ -491,7 +493,20 @@
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
     <string name="get_started">Getting Started</string>
-    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request failed. User is unauthorized.</string>
+    <string name="server_url">Server</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="wrong_credentials">Username or password invalid</string>
+    <string name="unexpected_error">An unexpected error occurred</string>
+    <string name="sending_exception_title">Warning</string>
+    <string name="sending_exception_message">You probably don\'t have the permission to send data to the server. Do you want to change your login credentials?</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">On</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">Off</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Magnetic</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
 
 </resources>

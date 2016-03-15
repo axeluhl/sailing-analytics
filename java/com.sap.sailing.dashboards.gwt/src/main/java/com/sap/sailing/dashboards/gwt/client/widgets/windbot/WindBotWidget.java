@@ -7,15 +7,17 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.DashboardClientFactory;
 import com.sap.sailing.dashboards.gwt.client.dataretriever.WindBotDataRetrieverListener;
+import com.sap.sailing.dashboards.gwt.client.widgets.header.DashboardWidgetHeaderAndNoDataMessage;
 import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.util.LiveAverageComponent;
 import com.sap.sailing.dashboards.gwt.client.widgets.windbot.charts.VerticalWindChart;
 import com.sap.sailing.dashboards.gwt.client.widgets.windbot.compass.LocationPointerCompass;
@@ -49,18 +51,18 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
 
     interface WindBotWidgetUiBinder extends UiBinder<Widget, WindBotWidget> {
     }
-
-    interface WindBotComponentStyle extends CssResource {
-    }
     
     @UiField
-    public HTMLPanel windBotComponent;
-
-    /**
-     * The header of the widget displaying the name of the wind bot.
-     * */
+    HTMLPanel contentContainer;
+    
+    @UiField(provided = true)
+    DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
+    
     @UiField
-    public HTMLPanel windBotNamePanel;
+    DivElement totalWindSpeedHeader;
+    
+    @UiField
+    DivElement totalWindDirectionHeader;
 
     /**
      * One of two {@link LiveAverageComponent}s that display in big font the live and the average value of the measured
@@ -97,27 +99,45 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
     @UiField
     public LocationPointerCompass locationPointerCompass;
 
+    public DashboardClientFactory dashboardClientFactory;
     private String windBotId;
     private StringMessages stringConstants;
-    private final static String UNIT_WIND_DIRECTION = "°";
 
-    public WindBotWidget(String windBotId) {
+    public WindBotWidget(DashboardClientFactory dashboardClientFactory) {
         WindBotWidgetResources.INSTANCE.gss().ensureInjected();
-        this.windBotId = windBotId;
+        this.dashboardClientFactory = dashboardClientFactory;
+        dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
         stringConstants = StringMessages.INSTANCE;
         movingAverageSpeed = new MovingAverage(500);
         movingAverageDirection = new MovingAverage(500);
-        trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeed(), stringConstants.dashboardTrueWindSpeedUnit());
-        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindDirection(), UNIT_WIND_DIRECTION);
+        trueWindSpeedLiveAverageComponent = new LiveAverageComponent(stringConstants.dashboardTrueWindSpeedUnit());
+        trueWindDirectionLiveAverageComponent = new LiveAverageComponent(stringConstants.degreesUnit());
         trueWindSpeedVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         trueWindDirectionVerticalWindChart = new VerticalWindChart("#008FFF", "#6ADBFF");
         initWidget(uiBinder.createAndBindUi(this));
-        windBotNamePanel.getElement().setInnerText(stringConstants.dashboardWindBot()+" "+ windBotId);
+        hideContentContainer();
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot());
+        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(stringConstants.dashboardNoWindBotAvailableHeader(), stringConstants.dashboardNoWindBotAvailableMessage());
+        totalWindSpeedHeader.setInnerHTML(stringConstants.dashboardTrueWindSpeed());
+        totalWindDirectionHeader.setInnerHTML(stringConstants.dashboardTrueWindDirection());
         trueWindSpeedVerticalWindChart.addVerticalWindChartClickListener(trueWindSpeedLiveAverageComponent);
         trueWindDirectionVerticalWindChart.addVerticalWindChartClickListener(trueWindDirectionLiveAverageComponent);
     }
-
-    public WindTrackInfoDTO getWindTrackInfoDTOFromAndWindBotID(WindInfoForRaceDTO windInfoForRaceDTO, String id) {
+    
+    public void setWindBotId(String windBotId) {
+        this.windBotId = windBotId;
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(stringConstants.dashboardWindBot() + " " + windBotId);
+    }
+    
+    private void showContentContainer(){
+        contentContainer.getElement().getStyle().setOpacity(1.0);
+    }
+    
+    private void hideContentContainer(){
+        contentContainer.getElement().getStyle().setOpacity(0.0);
+    }
+    
+    private WindTrackInfoDTO getWindTrackInfoDTOFromAndWindBotID(WindInfoForRaceDTO windInfoForRaceDTO, String id) {
         WindTrackInfoDTO windTrackInfo = null;
         for (WindSource windSource : windInfoForRaceDTO.windTrackInfoByWindSource.keySet()) {
             if (windSource.getType().equals(WindSourceType.EXPEDITION) && windSource.getId() != null) {
@@ -126,26 +146,6 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
             }
         }
         return windTrackInfo;
-    }
-
-    @Override
-    public void add(Widget w) {
-        throw new UnsupportedOperationException("The method add(Widget w) is not supported.");
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException("The method clear() is not supported.");
-    }
-
-    @Override
-    public Iterator<Widget> iterator() {
-        return null;
-    }
-
-    @Override
-    public boolean remove(Widget w) {
-        return false;
     }
 
     /**
@@ -161,6 +161,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
                 logger.log(Level.INFO, "WindInfoForRaceDTO contains WindTrackInfoDTO for Windbot id " + windBotId);
                 if (windTrackInfoDTO.windFixes != null) {
                     if (windTrackInfoDTO.windFixes.size() > 0) {
+                        dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
                         logger.log(Level.INFO, "Upating UI with Wind Fixes for WindBot id " + windBotId);
                         SplitScheduler.get().schedule(new ScheduledCommand() {
 
@@ -190,6 +191,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
                                 updateLocationPointerCompass(windTrackInfoDTO);
                             }
                         });
+                        showContentContainer();
                     } else {
                         logger.log(Level.INFO, "WindTrackInfoDTO.windFixes is empty");
                     }
@@ -220,8 +222,7 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
     }
     
     private void updateLocationPointerCompass(final WindTrackInfoDTO windTrackInfoDTO) {
-        locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes
-                .get(windTrackInfoDTO.windFixes.size() - 1).position);
+        locationPointerCompass.windBotPositionChanged(windTrackInfoDTO.windFixes.get(windTrackInfoDTO.windFixes.size() - 1).position);
     }
     
     private void updateMovingAverages(List<WindDTO> windFixes) {
@@ -229,5 +230,25 @@ public class WindBotWidget extends Composite implements HasWidgets, WindBotDataR
             movingAverageSpeed.add(windDTO.trueWindSpeedInKnots);
             movingAverageDirection.add(windDTO.trueWindFromDeg);
         }
+    }
+    
+    @Override
+    public void add(Widget w) {
+        throw new UnsupportedOperationException("The method add(Widget w) is not supported.");
+    }
+
+    @Override
+    public void clear() {
+        throw new UnsupportedOperationException("The method clear() is not supported.");
+    }
+
+    @Override
+    public Iterator<Widget> iterator() {
+        return null;
+    }
+
+    @Override
+    public boolean remove(Widget w) {
+        return false;
     }
 }
