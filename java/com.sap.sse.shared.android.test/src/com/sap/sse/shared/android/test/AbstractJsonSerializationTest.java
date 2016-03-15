@@ -10,6 +10,7 @@ import org.junit.Test;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.TextOperator.Operators;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.BooleanSetting;
 import com.sap.sse.common.settings.DecimalListSetting;
 import com.sap.sse.common.settings.DecimalSetting;
 import com.sap.sse.common.settings.EnumListSetting;
@@ -54,6 +55,7 @@ public abstract class AbstractJsonSerializationTest<SOT> {
 
     private static class TestSettings extends AbstractSettings {
         private final StringSetting humba = new StringSetting("humba", this);
+        private final BooleanSetting bumpa = new BooleanSetting("bumpa", this);
         private final EnumSetting<TextOperator.Operators> trala = new EnumSetting<>("trala", this,
                 TextOperator.Operators::valueOf);
         private final DecimalSetting num = new DecimalSetting("num", this);
@@ -105,6 +107,7 @@ public abstract class AbstractJsonSerializationTest<SOT> {
     public void testFlatJsonSerialization() {
         final TestSettings settings = new TestSettings();
         settings.humba.setValue("trala");
+        settings.bumpa.setValue(true);
         settings.trala.setValue(TextOperator.Operators.Contains);
         settings.num.setValue(BigDecimal.TEN);
         settings.l.setValues(Arrays.asList(BigDecimal.ONE, BigDecimal.valueOf(2), BigDecimal.valueOf(3)));
