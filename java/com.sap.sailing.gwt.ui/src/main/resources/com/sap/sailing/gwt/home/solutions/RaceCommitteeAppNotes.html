@@ -4,6 +4,19 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
 	<div class="innerContent">
+		<h5 class="articleSubheadline">March 2016</h5>
+
+		<ul class="bulletList">
+			<li>Added sign in/sign out into the app. The user has to be create in the backend, with leaderboard
+				permission. Without the permission, the user can't send data to the server.</li>
+			<li>We changed the QR Code, so it includes the user's access token. There is also a possibility to manual login into
+				the app, if no QR Code is available. <b>The app doesn't store username and password.</b></li>
+			<li>The behavior of the red share icon has also slightly changed. If it is red and tapped, it will call the server
+				to check, if the users access token is still valid. If not the server response with a 401 error code and the user
+				has to enter his credentials.</li>
+			<li>You can force a user sign out within the overflow menu, if you need other user credentials.</li>
+		</ul>
+
 		<h5 class="articleSubheadline">February 2016</h5>
 
 		<ul class="bulletList">
