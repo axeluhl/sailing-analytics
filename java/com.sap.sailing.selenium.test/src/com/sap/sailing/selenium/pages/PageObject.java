@@ -11,6 +11,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -393,6 +394,11 @@ public class PageObject {
     protected void waitForAjaxRequestsExecuted(String category, int numberOfCalls, int timeout, int polling) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
         wait.until(new AjaxCallsExecuted(category, numberOfCalls));
+    }
+    
+    protected void waitForElement(String seleniumId) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
     }
     
     protected void waitUntil(Predicate<WebDriver> predicate) {
