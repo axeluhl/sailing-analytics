@@ -633,7 +633,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   createHeaderPanel(map);
               }
               if (showMapControls) {
-              createSettingsButton(map);
+                  createSettingsButton(map);
               }
               // Data has been initialized
               RaceMap.this.isMapInitialized = true;
