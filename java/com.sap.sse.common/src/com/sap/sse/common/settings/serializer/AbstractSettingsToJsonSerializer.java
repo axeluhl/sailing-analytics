@@ -78,14 +78,14 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
                 Setting setting = entry.getValue();
                 if(hasProperty(json, entry.getKey())) {
                     Object jsonValue = get(json, entry.getKey());
-                    deserialize(setting, jsonValue);
+                    deserializeSetting(setting, jsonValue);
                 }
             }
         }
         return settings;
     }
 
-    private void deserialize(Setting setting, Object jsonValue) {
+    private void deserializeSetting(Setting setting, Object jsonValue) {
         if (setting instanceof ValueSetting) {
             deserializeValueSetting(jsonValue, (ValueSetting<?>) setting);
         } else if (setting instanceof ListSetting) {
