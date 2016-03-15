@@ -12,9 +12,38 @@ public class SettingsToUrlSerializer {
     
     private final SettingsToStringMapSerializer settingsToStringMapSerializer = new SettingsToStringMapSerializer();
     
-    public void serializeBasedOnCurrentLocation(Settings settings) {
+    public String serializeBasedOnCurrentLocation(Settings settings) {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         serializeToUrlBuilder(settings, urlBuilder);
+        return urlBuilder.buildString();
+    }
+    
+    public String serializeBasedOnCurrentLocationWithCleanParameters(Settings settings) {
+        final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParameters();
+        serializeToUrlBuilder(settings, urlBuilder);
+        return urlBuilder.buildString();
+    }
+    
+    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocation(Settings settings) {
+        final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+        serializeToUrlBuilder(settings, urlBuilder);
+        return urlBuilder;
+    }
+    
+    public UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(Settings settings) {
+        final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParameters();
+        serializeToUrlBuilder(settings, urlBuilder);
+        return urlBuilder;
+    }
+
+    private UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParameters() {
+        final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
+        for(String parameterName : Window.Location.getParameterMap().keySet()) {
+            if("gwt.codesvr".equals(parameterName)) {
+                urlBuilder.removeParameter(parameterName);
+            }
+        }
+        return urlBuilder;
     }
     
     public void serializeToUrlBuilder(Settings settings, UrlBuilder urlBuilder) {
@@ -26,10 +55,10 @@ public class SettingsToUrlSerializer {
         }
     }
     
-    public void deserializeFromCurrentLocation(Settings settings) {
+    public <T extends Settings> T deserializeFromCurrentLocation(T settings) {
         @SuppressWarnings({ "rawtypes", "unchecked" })
         Map<String, Iterable<String>> values = (Map) Window.Location.getParameterMap();
-        settingsToStringMapSerializer.deserialize(settings, values);
+        return settingsToStringMapSerializer.deserialize(settings, values);
     }
 
 }
