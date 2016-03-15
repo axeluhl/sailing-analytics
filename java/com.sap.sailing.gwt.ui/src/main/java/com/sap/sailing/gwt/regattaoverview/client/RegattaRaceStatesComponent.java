@@ -66,6 +66,7 @@ import com.sap.sailing.gwt.ui.shared.RaceGroupSeriesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceInfoDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.WaypointDTO;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -359,8 +360,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             return;
         }
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-        sailingService.getRaceStateEntriesForRaceGroup(eventId, settings.getVisibleCourseAreas(), settings
-                .getVisibleRegattas(), settings.isShowOnlyCurrentlyRunningRaces(), settings.isShowOnlyRacesOfSameDay(),
+        sailingService.getRaceStateEntriesForRaceGroup(eventId, Util.asList(settings.getVisibleCourseAreas()),
+                Util.asList(settings.getVisibleRegattas()), settings.isShowOnlyCurrentlyRunningRaces(), settings
+                .isShowOnlyRacesOfSameDay(),
                 new MarkedAsyncCallback<List<RegattaOverviewEntryDTO>>(
                         new AsyncCallback<List<RegattaOverviewEntryDTO>>() {
                             @Override
@@ -743,16 +745,14 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        if (settings.getVisibleCourseAreas().isEmpty()
+        if (Util.isEmpty(settings.getVisibleCourseAreas())
                 || !settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
-            settings.getVisibleCourseAreas().clear();
-            settings.getVisibleCourseAreas().addAll(newSettings.getVisibleCourseAreas());
+            settings.setVisibleCourseAreas(newSettings.getVisibleCourseAreas());
             fillVisibleCourseAreasInSettingsIfEmpty();
         }
-        if (settings.getVisibleRegattas().isEmpty()
+        if (Util.isEmpty(settings.getVisibleRegattas())
                 || !settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
-            settings.getVisibleRegattas().clear();
-            settings.getVisibleRegattas().addAll(newSettings.getVisibleRegattas());
+            settings.setVisibleRegattas(newSettings.getVisibleRegattas());
             fillVisibleRegattasInSettingsIfEmpty();
         }
         if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
@@ -772,17 +772,17 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private void fillVisibleRegattasInSettingsIfEmpty() {
-        if (settings.getVisibleRegattas().isEmpty() && raceGroupDTOs != null) {
+        if (Util.isEmpty(settings.getVisibleRegattas()) && raceGroupDTOs != null) {
             for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                settings.getVisibleRegattas().add(raceGroup.getName());
+                settings.addVisibleRegatta(raceGroup.getName());
             }
         }
     }
 
     private void fillVisibleCourseAreasInSettingsIfEmpty() {
-        if (settings.getVisibleCourseAreas().isEmpty() && eventDTO != null) {
+        if (Util.isEmpty(settings.getVisibleCourseAreas()) && eventDTO != null) {
             for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.getVisibleCourseAreas().add(courseArea.id);
+                settings.addVisibleCourseArea(courseArea.id);
             }
         }
     }

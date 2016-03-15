@@ -38,6 +38,14 @@ public abstract class AbstractValueListSetting<T> extends AbstractHasValueSettin
         }
     }
     
+    public void addValue(T value) {
+        this.values.add(value);
+    }
+
+    public void clear() {
+        this.values.clear();
+    }
+
     @Override
     public String toString() {
         return values.toString();

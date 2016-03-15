@@ -9,6 +9,7 @@ import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
+import com.sap.sse.common.Util;
 
 public class RegattaRaceStatesSettingsJsonDeSerializer implements GwtJsonDeSerializer<RegattaRaceStatesSettings> {
     
@@ -24,14 +25,14 @@ public class RegattaRaceStatesSettingsJsonDeSerializer implements GwtJsonDeSeria
         result.put(FIELD_SHOW_ONLY_RACES_OF_SAME_DAY, JSONBoolean.getInstance(settings.isShowOnlyRacesOfSameDay()));
         
         JSONArray visibleCourseAreas = new JSONArray();
-        for (int i = 0 ; i < settings.getVisibleCourseAreas().size() ; i++) {
-            visibleCourseAreas.set(i, new JSONString(settings.getVisibleCourseAreas().get(i).toString()));
+        for (int i = 0; i < Util.size(settings.getVisibleCourseAreas()); i++) {
+            visibleCourseAreas.set(i, new JSONString(Util.get(settings.getVisibleCourseAreas(), i).toString()));
         }
         result.put(FIELD_VISIBLE_COURSE_AREAS, visibleCourseAreas);
         
         JSONArray visibleRegattas = new JSONArray();
-        for (int i = 0 ; i < settings.getVisibleRegattas().size() ; i++) {
-            visibleRegattas.set(i, new JSONString(settings.getVisibleRegattas().get(i)));
+        for (int i = 0; i < Util.size(settings.getVisibleRegattas()); i++) {
+            visibleRegattas.set(i, new JSONString(Util.get(settings.getVisibleRegattas(), i)));
         }
         result.put(FIELD_VISIBLE_REGATTAS, visibleRegattas);
         

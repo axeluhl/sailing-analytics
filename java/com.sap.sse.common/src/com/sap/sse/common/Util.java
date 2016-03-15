@@ -457,4 +457,10 @@ public class Util {
         }
         return result;
     }
+
+    public static <T> List<T> asList(Iterable<T> visibleCourseAreas) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(visibleCourseAreas, list);
+        return list;
+    }
 }

@@ -1,54 +1,76 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.BooleanSetting;
+import com.sap.sse.common.settings.StringListSetting;
+import com.sap.sse.common.settings.UUIDListSetting;
 
 public class RegattaRaceStatesSettings extends AbstractSettings {
-    private List<UUID> visibleCourseAreas;
-    private List<String> visibleRegattas;
-    
-    private boolean showOnlyRacesOfSameDay;
-    private boolean showOnlyCurrentlyRunningRaces;
+    private UUIDListSetting visibleCourseAreas = new UUIDListSetting("visibleCourseAreas", this);
+    private StringListSetting visibleRegattas = new StringListSetting("visibleRegattas", this);
+    private BooleanSetting showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
+    private BooleanSetting showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces", this,
+            true);
 
     public RegattaRaceStatesSettings() {
-        this.visibleCourseAreas = new ArrayList<UUID>();
-        this.visibleRegattas = new ArrayList<String>();
-        this.showOnlyRacesOfSameDay = false;
-        this.showOnlyCurrentlyRunningRaces = true;
     }
 
-    public RegattaRaceStatesSettings(List<UUID> visibleCourseAreas, List<String> visibleRegattas, 
+    public RegattaRaceStatesSettings(Iterable<UUID> visibleCourseAreas, Iterable<String> visibleRegattas,
             boolean showOnlyRacesOfSameDay, boolean showOnlyCurrentlyRunningRaces) {
-        this.visibleCourseAreas = visibleCourseAreas;
-        this.visibleRegattas = visibleRegattas;
-        this.showOnlyRacesOfSameDay = showOnlyRacesOfSameDay;
-        this.showOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRaces;
+        this.visibleCourseAreas.setValues(visibleCourseAreas);
+        this.visibleRegattas.setValues(visibleRegattas);
+        this.showOnlyRacesOfSameDay.setValue(showOnlyRacesOfSameDay);
+        this.showOnlyCurrentlyRunningRaces.setValue(showOnlyCurrentlyRunningRaces);
     }
 
-    public List<UUID> getVisibleCourseAreas() {
-        return visibleCourseAreas;
+    public Iterable<UUID> getVisibleCourseAreas() {
+        return visibleCourseAreas.getValues();
     }
     
-    public List<String> getVisibleRegattas() {
-        return visibleRegattas;
+    public Iterable<String> getVisibleRegattas() {
+        return visibleRegattas.getValues();
+    }
+
+    public void setVisibleCourseAreas(Iterable<UUID> visibleCourseAreas) {
+        this.visibleCourseAreas.setValues(visibleCourseAreas);
+    }
+
+    public void addVisibleCourseArea(UUID value) {
+        visibleCourseAreas.addValue(value);
+    }
+
+    public void clearVisibleCourseAreas() {
+        visibleCourseAreas.clear();
+    }
+
+    public void setVisibleRegattas(Iterable<String> visibleRegattas) {
+        this.visibleRegattas.setValues(visibleRegattas);
+    }
+
+    public void addVisibleRegatta(String value) {
+        visibleRegattas.addValue(value);
+    }
+
+    public void clearVisibleRegattas() {
+        visibleRegattas.clear();
     }
 
     public boolean isShowOnlyRacesOfSameDay() {
-        return showOnlyRacesOfSameDay;
+        return showOnlyRacesOfSameDay.getValue();
     }
     
     public void setShowOnlyRaceOfSameDay(boolean newValue) {
-        showOnlyRacesOfSameDay = newValue;
+        showOnlyRacesOfSameDay.setValue(newValue);
     }
     
     public boolean isShowOnlyCurrentlyRunningRaces() {
-        return showOnlyCurrentlyRunningRaces;
+        return showOnlyCurrentlyRunningRaces.getValue();
     }
     
     public void setShowOnlyCurrentlyRunningRaces(boolean newValue) {
-        showOnlyCurrentlyRunningRaces = newValue;
+        showOnlyCurrentlyRunningRaces.setValue(newValue);
     }
+
 }
