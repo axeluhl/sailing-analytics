@@ -13,8 +13,8 @@ import org.junit.Test;
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.event.EventConfigurationPanelPO;
 import com.sap.sailing.selenium.pages.common.LabelTypePO;
-import com.sap.sailing.selenium.pages.home.event.EventPage;
-import com.sap.sailing.selenium.pages.home.regatta.RegattaListItemPO;
+import com.sap.sailing.selenium.pages.home.event.RegattaListItemPO;
+import com.sap.sailing.selenium.pages.home.event.regatta.RegattaEventPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 
 public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
@@ -53,8 +53,8 @@ public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
         eventConfigurationPanel.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(eventName, null,
                 venue, getPastDate(3), getFutureDate(3), true, regattaName, boatClass, regattaStartDate, regattaEndDate);
         String eventUrl = eventConfigurationPanel.getEventEntry(eventName).getEventURL();
-        EventPage eventPage = EventPage.goToEventUrl(getWebDriver(), eventUrl);
-        RegattaListItemPO regattaListItem = eventPage.getRegattaListItem(regattaName);
+        RegattaEventPage regattaEventPage = RegattaEventPage.goToRegattaEventUrl(getWebDriver(), eventUrl);
+        RegattaListItemPO regattaListItem = regattaEventPage.getRegattaListItem(regattaName);
         Assert.assertTrue(expectedLabelType.test(regattaListItem.getRegattaHeader().getRegattaStateLabel()));
     }
     
