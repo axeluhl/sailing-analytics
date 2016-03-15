@@ -1,4 +1,4 @@
-package com.sap.sailing.server.gateway.serialization.test;
+package com.sap.sse.shared.android.test;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,7 +19,7 @@ import com.sap.sse.common.settings.EnumListSetting;
 import com.sap.sse.common.settings.EnumSetting;
 import com.sap.sse.common.settings.StringSetting;
 import com.sap.sse.common.settings.StringToEnumConverter;
-import com.sap.sse.settings.SettingsToJsonSerializer;
+import com.sap.sse.shared.settings.SettingsToJsonSerializer;
 
 public class SettingsJsonSerializationTest {
     

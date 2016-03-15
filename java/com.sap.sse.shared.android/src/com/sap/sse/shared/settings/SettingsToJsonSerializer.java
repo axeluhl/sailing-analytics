@@ -1,4 +1,4 @@
-package com.sap.sse.settings;
+package com.sap.sse.shared.settings;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
