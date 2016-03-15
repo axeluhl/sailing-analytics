@@ -18,7 +18,6 @@ import com.sap.sse.common.settings.ValueListSetting;
 import com.sap.sse.common.settings.ValueSetting;
 
 public class SettingsToStringMapSerializer {
-    private static final String PATH_SEPARATOR = ".";
 
     public Map<String, Iterable<String>> serialize(Settings settings) {
         final Map<String, Iterable<String>> result = new HashMap<>();
@@ -42,7 +41,7 @@ public class SettingsToStringMapSerializer {
         } else if (setting instanceof ValueListSetting) {
             serialized.put(key, serializeValueListSetting(key, (ValueListSetting<?>) setting));
         } else {
-            String prefix = key + PATH_SEPARATOR;
+            String prefix = key + Settings.PATH_SEPARATOR;
             if (setting instanceof Settings) {
                 serialize(prefix, (Settings) setting, serialized);
             } else if (setting instanceof SettingsListSetting) {
@@ -57,7 +56,7 @@ public class SettingsToStringMapSerializer {
             Map<String, Iterable<String>> serialized) {
         int index = 0;
         for (T childSettings : setting.getValues()) {
-            String nestedPrefix = prefix + index + PATH_SEPARATOR;
+            String nestedPrefix = prefix + index + Settings.PATH_SEPARATOR;
             serialize(nestedPrefix, childSettings, serialized);
             index++;
         }
@@ -151,7 +150,7 @@ public class SettingsToStringMapSerializer {
         Map<String, Map<String, Iterable<String>>> result = new HashMap<>();
         for (Map.Entry<String, Iterable<String>> entry : values.entrySet()) {
             String key = entry.getKey();
-            int separatorIndex = key.indexOf(PATH_SEPARATOR);
+            int separatorIndex = key.indexOf(Settings.PATH_SEPARATOR);
             if (separatorIndex > 0) {
                 String group = key.substring(0, separatorIndex);
                 String nestedKey = key.substring(separatorIndex + 1);

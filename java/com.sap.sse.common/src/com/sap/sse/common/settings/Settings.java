@@ -24,6 +24,9 @@ import java.util.Map;
  *
  */
 public interface Settings extends Setting {
+    
+    public static final String PATH_SEPARATOR = ".";
+    
     /**
      * Obtains all settings that have non-default values and therefore are required for the later re-construction
      * of the settings object when passed the resulting map.
