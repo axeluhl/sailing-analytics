@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.sap.sse.shared.android
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Require-Bundle: com.sap.sse.common
+Require-Bundle: com.sap.sse.common,
+ org.json.simple;bundle-version="1.1.0"
 Export-Package: com.sap.sse.concurrent,
  com.sap.sse.shared.media,
  com.sap.sse.shared.media.impl,
