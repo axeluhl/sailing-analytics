@@ -180,7 +180,7 @@ public class SettingsToStringMapSerializer {
                 o1error = true;
             }
             try {
-                o2int = Integer.parseInt(o1);
+                o2int = Integer.parseInt(o2);
             } catch (NumberFormatException e) {
                 o1error = true;
             }
