@@ -155,7 +155,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         final TimePanelSettings timePanelSettings = timePanel.getSettings();
         timePanelSettings.setRefreshInterval(refreshInterval);
         timePanel.updateSettings(timePanelSettings);
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.raceMapStyle().ensureInjected();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorBoats);
         final CompetitorSelectionProvider competitorSelection;
         if (showCompetitors) {

@@ -23,23 +23,23 @@ public class CombinedWindPanel extends FlowPanel {
     
     private Canvas canvas;
     
-    private CombinedWindPanelStyle combinedWindPanelStyle;
+    private RaceMapStyle raceMapStyle;
     private final CoordinateSystem coordinateSystem;
     
-    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle,
+    public CombinedWindPanel(RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
             StringMessages stringMessages, CoordinateSystem coordinateSystem) {
-        combinedWindPanelStyle.ensureInjected();
+        raceMapStyle.ensureInjected();
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
-        this.combinedWindPanelStyle = combinedWindPanelStyle;
-        addStyleName(combinedWindPanelStyle.combinedWindPanel());
+        this.raceMapStyle = raceMapStyle;
+        addStyleName(raceMapStyle.combinedWindPanel());
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
-        canvas.addStyleName(this.combinedWindPanelStyle.combinedWindPanelCanvas());
+        canvas.addStyleName(this.raceMapStyle.combinedWindPanelCanvas());
         add(canvas);
         textLabel = new Label("");
-        textLabel.addStyleName(this.combinedWindPanelStyle.combinedWindPanelTextLabel());
+        textLabel.addStyleName(this.raceMapStyle.combinedWindPanelTextLabel());
         add(textLabel);
     }
 

@@ -138,7 +138,7 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         selectedCompetitorWithSettingsButton.disable();
         selectedCompetitorWithSettingsButton.setSelectionIndicationTextOnLabel(StringMessages.INSTANCE.dashboardSelectCompetitor());
         addClickListenerToSettingsButtonAndLabel();
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.raceMapStyle().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
