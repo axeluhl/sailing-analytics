@@ -1,5 +1,7 @@
 package com.sap.sse.common.settings;
 
+
+
 /**
  * A setting as contained as values in the map returned by {@link AbstractSettings#getSettings()}. This generic
  * view on a {@link AbstractSettings} object can then be used by one or more serializer / de-serializer combos
@@ -10,5 +12,5 @@ package com.sap.sse.common.settings;
  *
  */
 public interface Setting {
-    SettingType getType();
+    boolean isDefaultValue();
 }

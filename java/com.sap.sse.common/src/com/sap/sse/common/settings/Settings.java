@@ -28,5 +28,5 @@ public interface Settings extends Setting {
      * Obtains all settings that have non-default values and therefore are required for the later re-construction
      * of the settings object when passed the resulting map.
      */
-    Map<String, Setting> getNonDefaultSettings();
+    Map<String, Setting> getChildSettings();
 }
