@@ -51,7 +51,7 @@ public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
     @Test
     public void testStateFlagOfFinishedRegatta() {
         TestCase testCase = new TestCase();
-        testCase.createTestEventWithRegatta("TestRegatta", getPastDate(3), getPastDate(7));
+        testCase.createTestEventWithRegatta("TestRegatta", getPastDate(7), getPastDate(3));
         testCase.assertStateFlagOfRegatta("TestRegatta", LabelTypePO::isFinished);
     }
     
