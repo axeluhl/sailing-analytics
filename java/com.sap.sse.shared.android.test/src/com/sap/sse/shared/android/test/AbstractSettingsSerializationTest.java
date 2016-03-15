@@ -20,7 +20,7 @@ import com.sap.sse.common.settings.SettingsList;
 import com.sap.sse.common.settings.StringSetting;
 import com.sap.sse.common.settings.StringToEnumConverter;
 
-public abstract class AbstractJsonSerializationTest<SOT> {
+public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class TestOuterSettings extends AbstractSettings {
         private SimpleTestSettings nested = new SimpleTestSettings("nested", this);

@@ -6,7 +6,7 @@ import org.json.simple.parser.JSONParser;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.shared.settings.SettingsToJsonSerializer;
 
-public class SettingsJsonSerializationTest extends AbstractJsonSerializationTest<String> {
+public class SettingsToJsonSerializationTest extends AbstractSettingsSerializationTest<String> {
     
     private final SettingsToJsonSerializer serializer = new SettingsToJsonSerializer();
     

@@ -5,7 +5,7 @@ import java.util.Map;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.serializer.SettingsToStringMapSerializer;
 
-public class SettingsToStringMapSerializationTest extends AbstractJsonSerializationTest<Map<String,Iterable<String>>> {
+public class SettingsToStringMapSerializationTest extends AbstractSettingsSerializationTest<Map<String,Iterable<String>>> {
     
     private final SettingsToStringMapSerializer serializer = new SettingsToStringMapSerializer();
     
