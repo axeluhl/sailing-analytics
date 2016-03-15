@@ -1,4 +1,4 @@
-package com.sap.sailing.selenium.pages.home.regatta;
+package com.sap.sailing.selenium.pages.home.event;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

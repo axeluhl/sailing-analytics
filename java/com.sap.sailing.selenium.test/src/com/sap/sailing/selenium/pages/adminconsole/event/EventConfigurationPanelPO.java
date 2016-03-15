@@ -68,7 +68,7 @@ public class EventConfigurationPanelPO extends PageArea {
         createEvent(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic).pressYes();
         getPO(LeaderboardGroupCreateDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_DIALOG).pressOk();
         getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG).pressYes();
-        createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressYes();
+        createRegatta(regattaName, boatClass, regattaStartDate, regattaEndDate).pressOk();
         getPO(ConfirmDialogPO::new, ID_LINK_LEADERBORAD_TO_GROUP_DIALOG).pressOk();
     }
     
