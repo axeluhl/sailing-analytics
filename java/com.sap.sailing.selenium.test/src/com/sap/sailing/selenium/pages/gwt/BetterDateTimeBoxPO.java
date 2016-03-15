@@ -14,29 +14,47 @@ import com.sap.sailing.selenium.pages.PageObject;
  */
 public class BetterDateTimeBoxPO extends TextBoxPO {
     
-    private static final DateFormat DATE_TIME_BOX_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+    private static final DateFormat TIME_FORMAT_HOURS_MINUTES = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+    private static final DateFormat TIME_FORMAT_HOURS_MINUTES_SECONDS = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
     
+    private final DateFormat timeFormat;
+
     /**
-     * Factory method to create a {@link BetterDateTimeBoxPO}.
+     * Factory method to create a {@link BetterDateTimeBoxPO} using {@link DateFormat} <code>dd/MM/yyyy hh:mm</code> by
+     * default.
      * 
      * @param driver the web driver to use
      * @param element the element representing the date time box on the page
      * @return a new {@link BetterDateTimeBoxPO} instance
      */
     public static BetterDateTimeBoxPO create(WebDriver driver, WebElement element) {
-        return new BetterDateTimeBoxPO(driver, element);
+        return new BetterDateTimeBoxPO(driver, element, TIME_FORMAT_HOURS_MINUTES);
+    }
+    /**
+     * Factory method to create a {@link BetterDateTimeBoxPO}.
+     * 
+     * @param driver the web driver to use
+     * @param element the element representing the date time box on the page
+     * @param includeSeconds <code>true</code> to use the {@link DateFormat} <code>dd/MM/yyyy hh:mm:ss</code>,
+     *                  <code>false</code> to use the default {@link DateFormat} <code>dd/MM/yyyy hh:mm</code>
+     * @return a new {@link BetterDateTimeBoxPO} instance
+     */
+    public static BetterDateTimeBoxPO create(WebDriver driver, WebElement element, boolean includeSeconds) {
+        DateFormat timeFormat = includeSeconds ? TIME_FORMAT_HOURS_MINUTES_SECONDS : TIME_FORMAT_HOURS_MINUTES;
+        return new BetterDateTimeBoxPO(driver, element, timeFormat);
     }
     
     /**
      * @see TextBoxPO#TextBoxPO(WebDriver, WebElement)
      */
-    protected BetterDateTimeBoxPO(WebDriver driver, WebElement element) {
+    protected BetterDateTimeBoxPO(WebDriver driver, WebElement element, DateFormat timeFormat) {
         super(driver, element);
+        this.timeFormat = timeFormat;
     }
     
     /**
      * Sets the underlying {@link WebElement}s text by formatting the given {@link Date} using the internal date format
-     * (<code>dd/MM/yyyy hh:mm</code>).
+     * (<code>dd/MM/yyyy hh:mm</code> or <code>dd/MM/yyyy hh:mm:ss</code>).
      * 
      * @param date the {@link Date} object to set
      * 
@@ -44,7 +62,7 @@ public class BetterDateTimeBoxPO extends TextBoxPO {
      * @see #setText(String)
      */
     public void setDate(Date date) {
-        this.setText(DATE_TIME_BOX_FORMAT.format(date));
+        this.setText(timeFormat.format(date));
     }
     
     @Override
