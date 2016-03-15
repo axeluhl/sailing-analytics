@@ -395,13 +395,13 @@ public class PageObject {
         wait.until(new AjaxCallsExecuted(category, numberOfCalls));
     }
     
-    protected void waitUtil(Predicate<WebDriver> predicate) {
+    protected void waitUntil(Predicate<WebDriver> predicate) {
         WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
         webDriverWait.until(predicate);
     }
     
-    protected void waitUtil(BooleanSupplier supplier) {
-        waitUtil((driver) -> supplier.getAsBoolean());
+    protected void waitUntil(BooleanSupplier supplier) {
+        waitUntil((driver) -> supplier.getAsBoolean());
     }
     
     /**

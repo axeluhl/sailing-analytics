@@ -23,12 +23,12 @@ public class AuthenticationMenuPO extends PageArea {
     public void doLogin(String username, String password) {
         AuthenticationViewPO authenticationView = showAuthenticationView();
         authenticationView.getSignInView().doLogin(username, password);
-        waitUtil(this::isLoggedIn);
+        waitUntil(this::isLoggedIn);
     }
     
     private AuthenticationViewPO showAuthenticationView() {
         getWebElement().click();
-        waitUtil(this::isOpen);
+        waitUntil(this::isOpen);
         return getPO(AuthenticationViewPO::new, "authenticationView");
     }
     
