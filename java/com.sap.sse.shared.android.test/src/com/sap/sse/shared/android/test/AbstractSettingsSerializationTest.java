@@ -84,6 +84,11 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         @SuppressWarnings("unused")
         private final DecimalSetting bumba = new DecimalSetting("humba", this);
     }
+    
+    private static class DisallowedKeySettings extends AbstractSettings {
+        @SuppressWarnings("unused")
+        private final StringSetting disallowedKey= new StringSetting("disallowed.key", this);
+    }
 
     protected abstract <T extends Settings> SOT serialize(T settings) throws Exception;
 
@@ -134,6 +139,14 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     @Test(expected = RuntimeException.class)
     public void testDuplicateSetting() {
         new DuplicateFieldSettings();
+    }
+    
+    /**
+     * Verifies that it is not possible to have setting names with ".".
+     */
+    @Test(expected = RuntimeException.class)
+    public void testDisallowedSettingNameSetting() {
+        new DisallowedKeySettings();
     }
 
     /**
