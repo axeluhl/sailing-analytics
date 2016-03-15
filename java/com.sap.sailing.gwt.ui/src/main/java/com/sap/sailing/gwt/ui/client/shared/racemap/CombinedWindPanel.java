@@ -33,13 +33,13 @@ public class CombinedWindPanel extends FlowPanel {
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
-        addStyleName(raceMapStyle.combinedWindPanel());
+        addStyleName(raceMapStyle.raceMapIndicatorPanel());
         transformer = raceMapResources.getCombinedWindIconTransformer();
         canvas = transformer.getCanvas();
-        canvas.addStyleName(this.raceMapStyle.combinedWindPanelCanvas());
+        canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
         add(canvas);
         textLabel = new Label("");
-        textLabel.addStyleName(this.raceMapStyle.combinedWindPanelTextLabel());
+        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
         add(textLabel);
     }
 

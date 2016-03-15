@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 
-.combinedWindPanel {
+.raceMapIndicatorPanel {
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     -o-border-radius: 4px;
@@ -10,7 +10,7 @@
     border: 1px solid #C9CACA;
 }
 
-.combinedWindPanelTextLabel {
+.raceMapIndicatorPanelTextLabel {
 	height: 12px;
 	width: 55px;
 	vertical-align: middle;
@@ -18,12 +18,12 @@
 	text-align: center;
 }
 
-.combinedWindPanelCanvas {
+.raceMapIndicatorPanelCanvas {
 	width: 55px;
 	margin-left: 6px;
 	cursor: pointer;
 }
 
-.trueNorthIndicator {
-	opacity: 1.0;
-}
+.combinedWindPanel {}
+
+.trueNorthIndicator {}

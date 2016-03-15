@@ -35,11 +35,11 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
         this.raceMapStyle = raceMapStyle;
-        addStyleName(raceMapStyle.combinedWindPanel());
+        addStyleName(raceMapStyle.raceMapIndicatorPanel());
         addStyleName(raceMapStyle.trueNorthIndicator());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
         canvas = transformer.getCanvas();
-        canvas.addStyleName(this.raceMapStyle.combinedWindPanelCanvas());
+        canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
         add(canvas);
         canvas.addClickHandler(new ClickHandler() {
             @Override
@@ -59,7 +59,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
             }
         });
         textLabel = new Label("");
-        textLabel.addStyleName(this.raceMapStyle.combinedWindPanelTextLabel());
+        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
         add(textLabel);
     }
 

@@ -1,6 +1,6 @@
 @require 'theme';
 
-.combinedWindPanel {
+.raceMapIndicatorPanel {
 	margin-top: DASHBOARD_SPACE_VERY_SMALL;
 	margin-left: DASHBOARD_SPACE_VERY_SMALL;
 	right: 0px;
@@ -10,25 +10,27 @@
 	background-color: white;
 }
 
-.combinedWindPanelTextLabel {
-margin-top: DASHBOARD_SPACE_VERY_SMALL;
-width: 50px;
-height: DASHBOARD_SPACE_SMALL;
-line-height: DASHBOARD_SPACE_SMALL;
-vertical-align: middle;
-font-size: DASHBOARD_FONT_SIZE_SMALL;
-font-weight: bold;
-font-family: DASHBOARD_FONT_FAMILY;
-text-align: center;
-color: white;
+.raceMapIndicatorPanelTextLabel {
+	margin-top: DASHBOARD_SPACE_VERY_SMALL;
+	width: 50px;
+	height: DASHBOARD_SPACE_SMALL;
+	line-height: DASHBOARD_SPACE_SMALL;
+	vertical-align: middle;
+	font-size: DASHBOARD_FONT_SIZE_SMALL;
+	font-weight: bold;
+	font-family: DASHBOARD_FONT_FAMILY;
+	text-align: center;
+	color: white;
 }
 
-.combinedWindPanelCanvas {
+.raceMapIndicatorPanelCanvas {
 	width: 30px !important;
 	height: 30px !important;
 	margin-top: 10px;
 	margin-left: 10px;
 }
+
+.combinedWindPanel {}
 
 .trueNorthIndicator {
 	opacity: 0.0;
