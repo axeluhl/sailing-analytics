@@ -57,6 +57,10 @@
 	<set-configuration-property name="CssResource.legacy" value="true" />
 
 	<extend-property name="locale" values="de" />
+	
+	<define-linker name="manifest" class="com.sap.sailing.dashboards.gwt.client.linker.DashboardManifestLinker"/>
+	<add-linker name="manifest"/>
+	
 	<source path='client' />
 	<source path='shared' />
 	<source path="dispatch"/>

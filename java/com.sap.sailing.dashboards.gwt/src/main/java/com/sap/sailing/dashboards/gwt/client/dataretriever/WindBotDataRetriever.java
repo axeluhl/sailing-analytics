@@ -76,7 +76,6 @@ public class WindBotDataRetriever implements PollsLiveDataEvery5Seconds, WindBot
                                 }
                                 notifyWindBotDataRetrieverListeners(result);
                             } else {
-                                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
                                 logger.log(Level.INFO, "WindInfoForRaceDTO is not containing wind from windbots");
                             }
                         } else {
@@ -115,12 +114,6 @@ public class WindBotDataRetriever implements PollsLiveDataEvery5Seconds, WindBot
         }
     }
     
-    private void notifyListenersAboutNumberOfWindBotsReceivedIsZero() {
-        for (NumberOfWindBotsChangeListener numberOfWindBotsChangeListener : numberOfWindBotsChangeListeners) {
-            numberOfWindBotsChangeListener.numberOfWindBotsReceivedIsZero();
-        }
-    }
-    
     @Override
     public void addWindBotDataRetrieverListener(WindBotDataRetrieverListener windBotDataRetrieverListener) {
         windBotDataRetrieverListeners.add(windBotDataRetrieverListener);
@@ -156,7 +149,6 @@ public class WindBotDataRetriever implements PollsLiveDataEvery5Seconds, WindBot
                                 logger.log(Level.INFO, "Received RegattaAndRaceIdentifier from race that takes wind fixes now");
                                 loadWindBotData(finaloldTime, finalNewTime, raceId);
                             } else {
-                                notifyListenersAboutNumberOfWindBotsReceivedIsZero();
                                 logger.log(Level.INFO, "Can´t load wind data because RegattaAndRaceIdentifier for race which takes wind is null");
                             }
                         }
@@ -164,7 +156,6 @@ public class WindBotDataRetriever implements PollsLiveDataEvery5Seconds, WindBot
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        notifyListenersAboutNumberOfWindBotsReceivedIsZero();
                         logger.log(Level.INFO, "Failed to received RegattaAndRaceIdentifier from race that takes wind fixes now");
                         logger.log(Level.INFO, caught.getMessage());
                     }
