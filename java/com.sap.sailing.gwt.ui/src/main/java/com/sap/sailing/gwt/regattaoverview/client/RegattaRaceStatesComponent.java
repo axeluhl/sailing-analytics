@@ -19,9 +19,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.storage.client.Storage;
@@ -54,7 +51,6 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.gwt.ui.client.AnchorCell;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
@@ -74,6 +70,7 @@ import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 
 /**
  * This component shows a table displaying the current state of races for a given event. Which races are shown depends
@@ -844,29 +841,25 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
+        GWT.debugger();
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null && eventId != null) {
             // delete old value
             localStorage.removeItem(localStorageRegattaOverviewEventKey);
             // store settings
-            GwtJsonDeSerializer<RegattaRaceStatesSettings> serializer = new RegattaRaceStatesSettingsJsonDeSerializer();
-            JSONObject settingsAsJson = serializer.serialize(settings);
-            localStorage.setItem(localStorageRegattaOverviewEventKey, settingsAsJson.toString());
+            localStorage.setItem(localStorageRegattaOverviewEventKey,
+                    new SettingsToJsonSerializerGWT().serializeToString(settings));
         }
     }
 
     private RegattaRaceStatesSettings loadRegattaRaceStatesSettings() {
+        GWT.debugger();
         RegattaRaceStatesSettings loadedSettings = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             String jsonAsLocalStore = localStorage.getItem(localStorageRegattaOverviewEventKey);
-            if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                GwtJsonDeSerializer<RegattaRaceStatesSettings> deserializer = new RegattaRaceStatesSettingsJsonDeSerializer();
-                JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                if (value.isObject() != null) {
-                    loadedSettings = deserializer.deserialize((JSONObject) value);
-                }
-            }
+            loadedSettings = new SettingsToJsonSerializerGWT().deserialize(new RegattaRaceStatesSettings(),
+                    jsonAsLocalStore);
         }
         return loadedSettings;
     }
