@@ -1,7 +1,6 @@
 package com.sap.sailing.dashboards.gwt.server.util.actions.startlineadvantage.precalculation;
 
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -15,17 +14,46 @@ public abstract class AbstracPreCalculationDataRetriever implements PreCalculati
                                                                     PreCalculationStartlineAdvantageRetriever, 
                                                                     PreCalculationWindRetriever, 
                                                                     PreCalculationPolarDataRetriever {
-    public StartlineAndFirstMarkPositions startlineAndFirstMarkPositions;
-    public double startlineAdvantageAtPinEndInMeters;
-    public double startlineLenghtInMeters;
-    public Wind wind;
-    public double meouvreAngle;
+    private StartlineAndFirstMarkPositions startlineAndFirstMarkPositions;
+    private double startlineAdvantageAtPinEndInMeters;
+    private double startlineLenghtInMeters;
+    private Wind wind;
+    private double maneuverAngle;
     
+    private final DomainFactory domainFactory;
+    
+    public AbstracPreCalculationDataRetriever(DomainFactory domainFactory) {
+        super();
+        this.domainFactory = domainFactory;
+    }
+
     protected void retrieveDataForCalculation(TrackedRace trackedRace, PolarDataService polarDataService) {
         startlineAndFirstMarkPositions = retrieveMarkPositions(trackedRace);
         startlineAdvantageAtPinEndInMeters = retrieveStartlineAdvantage(trackedRace);
         startlineLenghtInMeters = retrieveStartlineLenght(trackedRace);
         wind = retrieveWindAtPosition(startlineAndFirstMarkPositions.startBoatPosition, trackedRace);
-        meouvreAngle = retrieveManouvreAngleAtWindSpeedAndBoatClass(new BoatClassImpl("Extreme40", BoatClassMasterdata.EXTREME_40), ManeuverType.TACK, wind, polarDataService);
+        maneuverAngle = retrieveManouvreAngleAtWindSpeedAndBoatClass(domainFactory.getOrCreateBoatClass("Extreme 40"), ManeuverType.TACK, wind, polarDataService);
     }
+
+    protected StartlineAndFirstMarkPositions getStartlineAndFirstMarkPositions() {
+        return startlineAndFirstMarkPositions;
+    }
+
+    protected double getStartlineAdvantageAtPinEndInMeters() {
+        return startlineAdvantageAtPinEndInMeters;
+    }
+
+    protected double getStartlineLenghtInMeters() {
+        return startlineLenghtInMeters;
+    }
+
+    protected Wind getWind() {
+        return wind;
+    }
+
+    protected double getManeuverAngle() {
+        return maneuverAngle;
+    }
+    
+    
 }

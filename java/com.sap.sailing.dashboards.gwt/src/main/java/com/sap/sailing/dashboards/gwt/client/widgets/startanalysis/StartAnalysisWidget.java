@@ -12,7 +12,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Cookies;
@@ -32,21 +31,24 @@ import com.sap.sailing.dashboards.gwt.client.notifications.bottom.BottomNotifica
 import com.sap.sailing.dashboards.gwt.client.notifications.bottom.BottomNotificationType;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionListener;
 import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.CompetitorSelectionPopup;
-import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.SettingsButtonWithSelectionIndicationLabel;
+import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.util.SettingsButtonWithSelectionIndicationLabel;
+import com.sap.sailing.dashboards.gwt.client.widgets.ActionPanel;
 import com.sap.sailing.dashboards.gwt.client.widgets.PollsLiveDataEvery5Seconds;
+import com.sap.sailing.dashboards.gwt.client.widgets.header.DashboardWidgetHeaderAndNoDataMessage;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.card.StartAnalysisCard;
 import com.sap.sailing.dashboards.gwt.shared.DashboardURLParameters;
 import com.sap.sailing.dashboards.gwt.shared.dto.LeaderboardCompetitorsDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysesDTO;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 
 /**
  * The class contains an collection of {@link StartAnalysisCard}s that are displayed in horizontal aligned pages. It
- * shows only one {@link StartAnalysisCard} at a time and enables the user to switch between
- * {@link StartAnalysisCard}s with left and right buttons represented by {@link #left_focus_panel} and
- * {@link #right_focus_panel}. When a new {@link StartAnalysisCard} gets added to the component it shows a
- * {@link BottomNotification}.
+ * shows only one {@link StartAnalysisCard} at a time and enables the user to switch between {@link StartAnalysisCard}s
+ * with left and right buttons represented by {@link #left_focus_panel} and {@link #right_focus_panel}. When a new
+ * {@link StartAnalysisCard} gets added to the component it shows a {@link BottomNotification}.
  * 
  * @author Alexander Ries (D062114)
  *
@@ -61,14 +63,26 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
     interface StartlineAnalysis extends CssResource {
     }
 
-    @UiField
-    HTMLPanel header;
+    @UiField(provided = true)
+    DashboardWidgetHeaderAndNoDataMessage dashboardWidgetHeaderAndNoDataMessage;
+
+    @UiField(provided = true)
+    SettingsButtonWithSelectionIndicationLabel selectedCompetitorWithSettingsButton;
 
     @UiField
-    Image rightButton;
+    HTMLPanel currentStartPanel;
 
     @UiField
-    Image leftButton;
+    HTMLPanel rightButton;
+
+    @UiField
+    HTMLPanel leftButton;
+
+    @UiField
+    Image rightButtonImage;
+
+    @UiField
+    Image leftButtonImage;
 
     @UiField
     FocusPanel left_focus_panel;
@@ -97,49 +111,71 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
      * Amount of {@link StartAnalysisCard}s in {@link #startanalysis_card_container}.
      * */
     private int numberOfStartAnalysisCards = 0;
-
     private boolean displaysCards;
     private List<StartAnalysisDTO> starts;
     private List<StartAnalysisCard> pageChangeListener;
     private BottomNotification bottomNotification;
-
     private CompetitorSelectionPopup competitorSelectionPopup;
-    private SettingsButtonWithSelectionIndicationLabel settingsButtonWithSelectionIndicationLabel;
-    
     private DashboardClientFactory dashboardClientFactory;
 
-    private static final String SELECTED_COMPETITOR_ID_COOKIE_KEY = "selectedCompetitorId";
+    private final String cookieKeyForSelectedCompetitorInLeaderboard;
+
+    private static final String SELECTED_COMPETITOR_IN_LEADERBOARD_COOKIE_KEY_FIRST_PART = "competitorId";
     private static final int SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS = 60 * 1000 * 60 * 5;
-    private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 83;
+    private static final int SCROLL_OFFSET_STARTANALYSIS_CARDS = 80;
+    private static final double MARGIN_LEFT_STARTANALYSIS_CARD = 12.5;
     private static final Logger logger = Logger.getLogger(StartAnalysisWidget.class.getName());
+
+    private static final RaceMapResources raceMapResources = GWT.create(DashboardRaceMapResources.class);
 
     /**
      * Component that contains handles, displays and loads startanalysis cards.
      * */
     public StartAnalysisWidget(DashboardClientFactory dashboardClientFactory) {
         StartAnalysisWidgetResources.INSTANCE.gss().ensureInjected();
-        StartAnalysisWidgetResources.INSTANCE.combinedWindPanelStyle().ensureInjected();
+        dashboardWidgetHeaderAndNoDataMessage = new DashboardWidgetHeaderAndNoDataMessage();
+        selectedCompetitorWithSettingsButton = new SettingsButtonWithSelectionIndicationLabel();
+        selectedCompetitorWithSettingsButton.disable();
+        selectedCompetitorWithSettingsButton.setSelectionIndicationTextOnLabel(StringMessages.INSTANCE.dashboardSelectCompetitor());
+        addClickListenerToSettingsButtonAndLabel();
+        raceMapResources.raceMapStyle().ensureInjected();
         this.dashboardClientFactory = dashboardClientFactory;
         pageChangeListener = new ArrayList<StartAnalysisCard>();
         starts = new ArrayList<StartAnalysisDTO>();
+        cookieKeyForSelectedCompetitorInLeaderboard = computeCookieKeyForSelectedCompetitorInLeaderboard();
         initWidget(uiBinder.createAndBindUi(this));
+        dashboardWidgetHeaderAndNoDataMessage.setHeaderText(StringMessages.INSTANCE.dashboardStartAnalysesHeader());
         initCompetitorSelectionPopupAndAddCompetitorSelectionListener();
         initLeftRightButtons();
         initAndAddBottomNotification();
-        getCachedSelectedCompetitorOrAskForWithPopup();
-        initAndAddSettingsButtonWithSelectionIndicationLabel();
         registerForDashboardFiveSecondsTimer(dashboardClientFactory);
     }
 
+    private String computeCookieKeyForSelectedCompetitorInLeaderboard() {
+        String result = SELECTED_COMPETITOR_IN_LEADERBOARD_COOKIE_KEY_FIRST_PART+DashboardURLParameters.LEADERBOARD_NAME.getValue();
+        return result;
+    }
+
+    private String getCachedSelectedCompetitorId() {
+        String result = null;
+        String selectedCompetitorId = Cookies.getCookie(cookieKeyForSelectedCompetitorInLeaderboard);
+        if (selectedCompetitorId == null || "undefined".equals(selectedCompetitorId)) {
+            result = null;
+        } else {
+            result = selectedCompetitorId;
+        }
+        return result;
+    }
+
     private void initLeftRightButtons() {
-        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
+        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
         left_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 clickedArrowButton(false);
             }
         });
-        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
         right_focus_panel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -148,33 +184,43 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         });
     }
 
-    private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString){
+    private void loadStartAnalysisDTOsForCompetitorID(String competitorIdAsString) {
         logger.log(Level.INFO, "Loading startanalysis for competitor id " + competitorIdAsString);
-        dashboardClientFactory.getDispatch().execute(new GetStartAnalysesAction(DashboardURLParameters.LEADERBOARD_NAME.getValue(), competitorIdAsString), new AsyncCallback<StartAnalysesDTO>() {
+        dashboardClientFactory.getDispatch().execute(
+                new GetStartAnalysesAction(DashboardURLParameters.LEADERBOARD_NAME.getValue(), competitorIdAsString),
+                new AsyncCallback<StartAnalysesDTO>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
-            }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.INFO, "Failed to received startanalysis list, "+caught.getMessage());
+                        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
+                        selectedCompetitorWithSettingsButton.disable();
+                    }
 
-            @Override
-            public void onSuccess(StartAnalysesDTO result) {
-              logger.log(Level.INFO, "Received startanalysis list");
-              if (result != null && !result.getStartAnalyses().isEmpty()) {
-                  if (displayedStartAnalysisCompetitorDifferentToRequestedOne()) {
-                      removeAllStartAnalysisCards();
-                  }
-                  if (result.getStartAnalyses().size() != starts.size()) {
-                      showNotificationForNewStartAnalysis();
-                  }
-                  logger.log(Level.INFO, "Updating UI with startanalysis list");
-                  addNewStartAnalysisCards(result.getStartAnalyses());
-                  settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(result.getStartAnalyses().get(0).competitor.getName());
-              } else {
-                  logger.log(Level.INFO, "Received startanalysis list is null or empty");
-              }
-            }
-        });
+                    @Override
+                    public void onSuccess(StartAnalysesDTO result) {
+                        logger.log(Level.INFO, "Received startanalysis list");
+                        if (result != null && !result.getStartAnalyses().isEmpty() && result.getStartAnalyses().size() > 0) {
+                            dashboardWidgetHeaderAndNoDataMessage.hideNoDataMessage();
+                            if (displayedStartAnalysisForDifferentCompetitorToRequestedOne()) {
+                                removeAllStartAnalysisCards();
+                            }
+                            if (result.getStartAnalyses().size() != starts.size()) {
+                                showNotificationForNewStartAnalysis();
+                            }
+                            logger.log(Level.INFO, "Updating UI with startanalysis list");
+                            addNewStartAnalysisCards(result.getStartAnalyses());
+                            showControllHeaderButtons();
+                            if (result.getStartAnalyses().get(0).competitor != null) {
+                                selectedCompetitorWithSettingsButton.setSelectionIndicationTextOnLabel(result.getStartAnalyses().get(0).competitor.getName());
+                            }
+                            selectedCompetitorWithSettingsButton.enable();
+                        } else {
+                            logger.log(Level.INFO, "Received startanalysis list is null or empty");
+                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(), StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
+                        }
+                    }
+                });
     }
 
     private void initAndAddBottomNotification() {
@@ -196,12 +242,10 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
             @Override
             public void didClickOKWithSelectedCompetitor(CompetitorDTO competitor) {
                 if (competitor != null) {
-                    Cookies.removeCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
-                    Cookies.setCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY, competitor.getIdAsString(), new Date(
-                            new Date().getTime() + SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS));
-                    if (settingsButtonWithSelectionIndicationLabel != null) {
-                        settingsButtonWithSelectionIndicationLabel.setSelectionIndicationTextOnLabel(competitor
-                                .getName());
+                    Cookies.removeCookie(cookieKeyForSelectedCompetitorInLeaderboard);
+                    Cookies.setCookie(cookieKeyForSelectedCompetitorInLeaderboard, competitor.getIdAsString(), new Date(new Date().getTime()+SELECTED_COMPETITOR_ID_COOKIE_KEY_EXPIRE_TIME_IN_MILLIS));
+                    if (selectedCompetitorWithSettingsButton != null) {
+                        selectedCompetitorWithSettingsButton.setSelectionIndicationTextOnLabel(competitor.getName());
                     }
                     loadStartAnalysisDTOsForCompetitorID(competitor.getIdAsString());
                 }
@@ -209,21 +253,17 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         });
     }
 
-    private void getCachedSelectedCompetitorOrAskForWithPopup() {
-        String selectedCompetitorIdFromCookie = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
-        if (selectedCompetitorIdFromCookie == null) {
-            loadCompetitorsAndShowCompetitorSelectionPopup();
-        }
-    }
-
     private void loadCompetitorsAndShowCompetitorSelectionPopup() {
         logger.log(Level.INFO, "Requesting Competitors in Leaderboard");
-        dashboardClientFactory.getDispatch().execute(new GetCompetitorInLeaderboardAction(DashboardURLParameters.LEADERBOARD_NAME.getValue()), new AsyncCallback<LeaderboardCompetitorsDTO>() {
+        dashboardClientFactory.getDispatch().execute(
+                new GetCompetitorInLeaderboardAction(DashboardURLParameters.LEADERBOARD_NAME.getValue()),
+                new AsyncCallback<LeaderboardCompetitorsDTO>() {
 
                     @Override
                     public void onSuccess(LeaderboardCompetitorsDTO result) {
                         logger.log(Level.INFO, "Received competitors for leaderboard name");
                         if (result.getCompetitors() != null && result.getCompetitors().size() > 0) {
+                            selectedCompetitorWithSettingsButton.enable();
                             if (!competitorSelectionPopup.isShown()) {
                                 logger.log(Level.INFO, "Showing CompetitorSelectionPopup with competitors");
                                 competitorSelectionPopup.show(result.getCompetitors());
@@ -232,26 +272,33 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                             }
                         } else {
                             logger.log(Level.INFO, "Received competitors are null or empty");
+                            dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(
+                                    StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(),
+                                    StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
+                            selectedCompetitorWithSettingsButton.disable();
                         }
                     }
-                    
+
                     @Override
                     public void onFailure(Throwable caught) {
-                        logger.log(Level.INFO, "Failed to received competitors for leaderboard name, "+caught.getMessage());
+                        logger.log(Level.INFO,
+                                "Failed to received competitors for leaderboard name, " + caught.getMessage());
+                        dashboardWidgetHeaderAndNoDataMessage.showNoDataMessageWithHeaderAndMessage(
+                                StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableHeader(),
+                                StringMessages.INSTANCE.dashboardNoStartAnalysesAvailableMessage());
+                        selectedCompetitorWithSettingsButton.disable();
                     }
                 });
     }
 
-    private void initAndAddSettingsButtonWithSelectionIndicationLabel() {
-        settingsButtonWithSelectionIndicationLabel = new SettingsButtonWithSelectionIndicationLabel();
-        settingsButtonWithSelectionIndicationLabel.addClickHandlerToSettingsButton(new ClickHandler() {
+    private void addClickListenerToSettingsButtonAndLabel() {
+        selectedCompetitorWithSettingsButton.addActionListener(new ActionPanel.ActionPanelListener() {
 
             @Override
-            public void onClick(ClickEvent event) {
+            public void eventTriggered() {
                 loadCompetitorsAndShowCompetitorSelectionPopup();
             }
         });
-        RootPanel.get().add(settingsButtonWithSelectionIndicationLabel);
     }
 
     /**
@@ -268,14 +315,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
                     int displayPage = page + 1;
-                    header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
+                    currentStartPanel.getElement().setInnerHTML(starts.get(displayPage - 1).raceName);
                     if (page != numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.right());
+                        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.right());
                         rightButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == 0) {
-                        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
-                        leftButton.getElement().getStyle().setProperty("disabled", "true");
+                        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.leftdisabled());
+                        leftButtonImage.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
             } else {
@@ -285,18 +332,25 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
                     notifyStartAnalysisPageChangeListener(page);
                     int displayPage = page + 1;
-                    header.getElement().setInnerHTML("Start " + starts.get(displayPage - 1).raceName);
+                    currentStartPanel.getElement().setInnerHTML(starts.get(displayPage - 1).raceName);
                     if (page >= 0) {
-                        leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.left());
+                        leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.left());
                         leftButton.getElement().getStyle().setProperty("disabled", "false");
                     }
                     if (page == numberOfStartAnalysisCards - 1) {
-                        rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+                        rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
                         rightButton.getElement().getStyle().setProperty("disabled", "true");
                     }
                 }
             }
         }
+    }
+
+    private void showControllHeaderButtons() {
+        leftButton.getElement().addClassName(
+                StartAnalysisWidgetResources.INSTANCE.gss().controll_header_button_visible());
+        rightButton.getElement().addClassName(
+                StartAnalysisWidgetResources.INSTANCE.gss().controll_header_button_visible());
     }
 
     private void scrollToLast() {
@@ -305,11 +359,11 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
                     * SCROLL_OFFSET_STARTANALYSIS_CARDS;
             page = numberOfStartAnalysisCards - 1;
             startanalysis_card_container.getElement().getStyle().setLeft(currentScrollPosition, Unit.PCT);
-            header.getElement().setInnerHTML("Start " + starts.get(page).raceName);
+            currentStartPanel.getElement().setInnerHTML(starts.get(page).raceName);
             notifyStartAnalysisPageChangeListener(page);
-            rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
+            rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.rightdisabled());
             rightButton.getElement().getStyle().setProperty("disabled", "true");
-            leftButton.setResource(StartAnalysisWidgetResources.INSTANCE.left());
+            leftButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.left());
             leftButton.getElement().getStyle().setProperty("disabled", "false");
         }
     }
@@ -318,14 +372,14 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         logger.log(Level.INFO, "Adding Startanalysis Card");
         if (displaysCards == false) {
             displaysCards = true;
-            header.getElement().setInnerHTML("Start " + SafeHtmlUtils.fromString(startAnalysisDTO.raceName));
+            currentStartPanel.getElement().setInnerHTML(startAnalysisDTO.raceName);
         }
         if (numberOfStartAnalysisCards > 0) {
-            rightButton.setResource(StartAnalysisWidgetResources.INSTANCE.right());
+            rightButtonImage.setResource(StartAnalysisWidgetResources.INSTANCE.right());
         }
         final StartAnalysisCard startlineAnalysisCard = new StartAnalysisCard(numberOfStartAnalysisCards
-                * SCROLL_OFFSET_STARTANALYSIS_CARDS + 10, numberOfStartAnalysisCards, startAnalysisDTO,
-                dashboardClientFactory.getSailingService());
+                * SCROLL_OFFSET_STARTANALYSIS_CARDS + MARGIN_LEFT_STARTANALYSIS_CARD, numberOfStartAnalysisCards,
+                startAnalysisDTO, dashboardClientFactory.getSailingService(), raceMapResources);
         startanalysis_card_container.add(startlineAnalysisCard);
         startlineAnalysisCard.startAnalysisComponentPageChangedToIndexAndStartAnalysis(page, startAnalysisDTO);
         registerPageChangeListener(startlineAnalysisCard);
@@ -352,8 +406,8 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
 
     public void notifyStartAnalysisPageChangeListener(int newPageIndex) {
         for (StartAnalysisPageChangeListener sO : pageChangeListener) {
-            if(starts.get(newPageIndex) != null)
-            sO.startAnalysisComponentPageChangedToIndexAndStartAnalysis(newPageIndex, starts.get(newPageIndex));
+            if (starts.get(newPageIndex) != null)
+                sO.startAnalysisComponentPageChangedToIndexAndStartAnalysis(newPageIndex, starts.get(newPageIndex));
         }
     }
 
@@ -364,8 +418,8 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         }
     }
 
-    private String getCompetitorIdAsStringFromDisplayedStartAnalysisDTOs() {
-        String result = "";
+    private String getCompetitorIdAsStringFromFirstDisplayedStartAnalysis() {
+        String result = null;
         if (starts != null && starts.size() > 0) {
             CompetitorDTO competitor = starts.get(0).competitor;
             if (competitor != null)
@@ -374,27 +428,20 @@ public class StartAnalysisWidget extends Composite implements HasWidgets, PollsL
         return result;
     }
 
-    private boolean displayedStartAnalysisCompetitorDifferentToRequestedOne() {
-        String competitorIDFromDispalyedStartAnalysisDTOs = getCompetitorIdAsStringFromDisplayedStartAnalysisDTOs();
-        if (competitorIDFromDispalyedStartAnalysisDTOs != null
-                && !(competitorIDFromDispalyedStartAnalysisDTOs.equals(Cookies
-                        .getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY)))) {
+    private boolean displayedStartAnalysisForDifferentCompetitorToRequestedOne() {
+        String competitorIDFromDispalyedStartAnalysisDTOs = getCompetitorIdAsStringFromFirstDisplayedStartAnalysis();
+        if ((competitorIDFromDispalyedStartAnalysisDTOs != getCachedSelectedCompetitorId()) || (competitorIDFromDispalyedStartAnalysisDTOs == null && getCachedSelectedCompetitorId() != null)) {
             return true;
         } else {
             return false;
         }
     }
-    
+
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
-        String selectedCompetitorId = Cookies.getCookie(SELECTED_COMPETITOR_ID_COOKIE_KEY);
-        if (selectedCompetitorId != null) {
-            loadStartAnalysisDTOsForCompetitorID(selectedCompetitorId);
-        } else {
-            loadCompetitorsAndShowCompetitorSelectionPopup();
-        }
+        loadStartAnalysisDTOsForCompetitorID(getCachedSelectedCompetitorId());
     }
-    
+
     @Override
     public void registerForDashboardFiveSecondsTimer(DashboardClientFactory dashboardClientFactory) {
         if (dashboardClientFactory != null) {

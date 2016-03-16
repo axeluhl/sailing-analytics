@@ -1,0 +1,91 @@
+@require 'theme';
+
+.competitorselectionbackground {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.4);
+	width: 100%;
+	height: 100%;
+	z-index: 4;
+}
+
+.competitorselectionpopup {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 250px;
+	height: 300px;
+	margin-top: -150px;
+	margin-left: -125px;
+	background-color: WHITE;
+	border-radius: 5px;
+	overflow: hidden;
+	z-index: 7;
+}
+
+.header {
+	position: absolute;
+	color: BLACK;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	background-color: WHITE;
+	height: DASHBOARD_SPACE_MEDIUM;
+	line-height: DASHBOARD_SPACE_MEDIUM;
+	vertical-align: middle;
+	text-align: center;
+	font-weight: bold;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+	width: 100%;
+	z-index: 3;
+}
+
+.scrollpanel {
+	position: absolute;
+	top: DASHBOARD_SPACE_MEDIUM;
+	width: 100%;
+	bottom: 42px;
+	overflow: hidden;
+	z-index: 2;
+}
+
+.buttonSeparator {
+	position: absolute;
+	height: DASHBOARD_SPACE_MEDIUM;
+	width: 1px;
+	left: 49%;
+	bottom: 0px;
+	background-color: WHITE;
+}
+
+.button {
+	position: absolute;
+	bottom: 0px;
+	background-color: BUTTON_BACKGROUND;
+	box-shadow: none;
+	outline: none;
+	border-width: 0;
+	font-size: DASHBOARD_FONT_SIZE_MEDIUM;
+	line-height: DASHBOARD_SPACE_MEDIUM;
+	text-align: center;
+	color: WHITE;
+	height: DASHBOARD_SPACE_MEDIUM;
+	width: 50%;
+}
+
+.button:active {
+	background-color: BUTTON_BACKGROUND_ACTIVE;
+}
+
+.cancelButton {
+	left:0px;
+}
+
+.okButton {
+	right: 0px;
+}
+
+.popupshow {
+/* 	margin-top: -150pt; */
+}
+
+.popuphide {
+/* 	margin-top: -600pt; */
+}
