@@ -173,9 +173,9 @@ public class AbstractPosition implements Position {
         if (toLeft > 90) {
             result = this.getDistance(left).scale(factor);
         } else if (toRight > 90) {
-                result = this.getDistance(right).scale(factor);
-            } else {
-                result = crossTrackError;
+            result = this.getDistance(right).scale(factor);
+        } else {
+            result = crossTrackError;
         }
         return result;
     }

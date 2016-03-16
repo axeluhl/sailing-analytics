@@ -402,7 +402,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                                         final Double newStartProbabilityBasedOnOtherCompetitors;
                                         if (isStartWaypoint(w)) {
                                             newStartProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
-                                            newProbability *= startProbabilityBasedOnOtherCompetitors;
+                                            if (newStartProbabilityBasedOnOtherCompetitors != null) {
+                                                newProbability *= newStartProbabilityBasedOnOtherCompetitors;
+                                            }
                                         } else {
                                             newStartProbabilityBasedOnOtherCompetitors = null;
                                         }
@@ -649,11 +651,14 @@ public class CandidateFinderImpl implements CandidateFinder {
         probability = passesInTheRightDirection != Boolean.FALSE ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
         final Double startProbabilityBasedOnOtherCompetitors;
         if (isStartWaypoint(w)) {
-            // add a penalty if at time point t the other competitors are largely not even close to the start waypoint;
+            // add a penalty for a start candidate if we don't know the start time, it's not a gate start and
+            // at time point t the other competitors are largely not even close to the start waypoint;
             // this will make start candidates much more likely if many other competitors are also very close to the
             // start, and it will help ruling out those candidates where someone is practicing a start just for themselves
             startProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
-            probability *= startProbabilityBasedOnOtherCompetitors;
+            if (startProbabilityBasedOnOtherCompetitors != null) {
+                probability *= startProbabilityBasedOnOtherCompetitors;
+            }
         } else {
             startProbabilityBasedOnOtherCompetitors = null;
         }
@@ -670,28 +675,44 @@ public class CandidateFinderImpl implements CandidateFinder {
      * 
      * @param t
      *            the time point at which to consider the other competitors behavior relative to the start waypoint
-     * @return a probability between 0..1 (inclusive) where 0 means that based on all but {@code c}'s relation to the
-     *         start line it seems completely unlikely that a candidate for {@code c} at time {@code t} could have been
-     *         a start candidate; 1 meaning that based on the other competitors' relation to the start line at time
-     *         point {@code t} is seems a fact that this must have been the start.
+     * @return {@code null} if the {@link #race} has a gate start or the start time is known; a probability between 0..1
+     *         (inclusive) where 0 means that based on all but {@code c}'s relation to the start line it seems
+     *         completely unlikely that a candidate for {@code c} at time {@code t} could have been a start candidate; 1
+     *         meaning that based on the other competitors' relation to the start line at time point {@code t} is seems
+     *         a fact that this must have been the start.
      */
-    private double getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(Competitor c, TimePoint t) {
-        final double result;
-        final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
-        if (start == null) {
-            result = 1;
-        } else {
-            for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
-                final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
-                if (track != null) {
-                    final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
-                    final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
-                    if (otherCompetitorsDistanceToStartAtT != null) {
-                        // TODO use a function that will approach 1 as we get, say, 50% of the other competitors within a reasonable distance from the start line, say 10m; the closer, the more likely
+    private Double getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(Competitor c, TimePoint t) {
+        final Double result;
+        if (race.getStartOfRace(/* inferred */ false) == null && race.isGateStart() != Boolean.TRUE) {
+            // boats within one hull length of the start line are great indicators that we're at the start:
+            final Distance goodProxmity = race.getRace().getBoatClass().getHullLength();
+            final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
+            if (start == null) {
+                result = 1.0;
+            } else {
+                int numberOfCompetitorsForWhichStartLineDistanceIsAvailable = 0;
+                Distance sumOfStartLineDistances = Distance.NULL;
+                for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
+                    final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
+                    if (track != null) {
+                        final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
+                        final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
+                        if (otherCompetitorsDistanceToStartAtT != null) {
+                            numberOfCompetitorsForWhichStartLineDistanceIsAvailable++;
+                            sumOfStartLineDistances = sumOfStartLineDistances.add(otherCompetitorsDistanceToStartAtT);
+                        }
                     }
                 }
+                // TODO use a function that will approach 1 as we get, say, 50% of the other competitors within a reasonable distance from the start line, say 10m; the closer, the more likely
+                if (numberOfCompetitorsForWhichStartLineDistanceIsAvailable > 0) {
+                    result = Math.max(1.0, goodProxmity.divide(sumOfStartLineDistances.scale(1./numberOfCompetitorsForWhichStartLineDistanceIsAvailable)));
+                } else {
+                    // no distance for any other competitor from the start line was available
+                    result = 1.0;
+                }
             }
-            result = 1;
+        } else {
+            result = null;
         }
         return result;
     }
@@ -851,7 +872,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 Position portLinePosition = race.getOrCreateTrack(posLine.getA()).getEstimatedPosition(t, false);
                 Position starboardLinePosition = race.getOrCreateTrack(posLine.getB()).getEstimatedPosition(t, false);
                 distances.add((portLinePosition != null && starboardLinePosition != null) ? p.getDistanceToLine(
-                        portLinePosition, starboardLinePosition) : null);
+                        portLinePosition, starboardLinePosition).abs() : null);
             }
             break;
         case Offset:
