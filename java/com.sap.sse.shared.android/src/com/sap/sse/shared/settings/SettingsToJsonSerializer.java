@@ -4,7 +4,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.sap.sse.common.settings.EnumSetting;
-import com.sap.sse.common.settings.ListSetting;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 

@@ -14,7 +14,7 @@ import com.sap.sse.common.settings.Setting;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.SettingsListSetting;
 import com.sap.sse.common.settings.ValueConverter;
-import com.sap.sse.common.settings.ValueListSetting;
+import com.sap.sse.common.settings.ValueCollectionSetting;
 import com.sap.sse.common.settings.ValueSetting;
 
 public class SettingsToStringMapSerializer {
@@ -38,8 +38,8 @@ public class SettingsToStringMapSerializer {
     private void serialize(String key, Setting setting, Map<String, Iterable<String>> serialized) {
         if (setting instanceof ValueSetting) {
             serialized.put(key, serializeValueSetting(key, (ValueSetting<?>) setting));
-        } else if (setting instanceof ValueListSetting) {
-            serialized.put(key, serializeValueListSetting(key, (ValueListSetting<?>) setting));
+        } else if (setting instanceof ValueCollectionSetting) {
+            serialized.put(key, serializeValueListSetting(key, (ValueCollectionSetting<?>) setting));
         } else {
             String prefix = key + Settings.PATH_SEPARATOR;
             if (setting instanceof Settings) {
@@ -66,7 +66,7 @@ public class SettingsToStringMapSerializer {
         return Collections.singleton(valueSetting.getValueConverter().toStringValue(valueSetting.getValue()));
     }
 
-    private <T> Iterable<String> serializeValueListSetting(String key, ValueListSetting<T> valueSetting) {
+    private <T> Iterable<String> serializeValueListSetting(String key, ValueCollectionSetting<T> valueSetting) {
         List<String> result = new ArrayList<>();
         ValueConverter<T> valueConverter = valueSetting.getValueConverter();
         for (T value : valueSetting.getValues()) {
@@ -92,8 +92,8 @@ public class SettingsToStringMapSerializer {
             if (settingValues != null) {
                 if (setting instanceof ValueSetting) {
                     deserializeValueSetting((ValueSetting<?>) setting, settingValues);
-                } else if (setting instanceof ValueListSetting) {
-                    deserializeValueListSetting((ValueListSetting<?>) setting, settingValues);
+                } else if (setting instanceof ValueCollectionSetting) {
+                    deserializeValueListSetting((ValueCollectionSetting<?>) setting, settingValues);
                 } else {
                     throw new IllegalStateException("Unknown HasValueSetting type");
                 }
@@ -122,7 +122,7 @@ public class SettingsToStringMapSerializer {
         }
     }
 
-    private <T> void deserializeValueListSetting(ValueListSetting<T> valueSetting, Iterable<String> values) {
+    private <T> void deserializeValueListSetting(ValueCollectionSetting<T> valueSetting, Iterable<String> values) {
         List<T> deserializedValues = new ArrayList<>();
         for (String stringValue : values) {
             deserializedValues.add(valueSetting.getValueConverter().fromStringValue(stringValue));

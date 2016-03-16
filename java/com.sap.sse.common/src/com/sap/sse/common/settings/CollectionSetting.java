@@ -1,7 +1,7 @@
 package com.sap.sse.common.settings;
 
 
-public interface ListSetting<T> extends Setting {
+public interface CollectionSetting<T> extends Setting {
     
     void setValues(Iterable<T> values);
     

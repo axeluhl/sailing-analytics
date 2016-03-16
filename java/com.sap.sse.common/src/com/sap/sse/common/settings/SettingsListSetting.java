@@ -1,4 +1,4 @@
 package com.sap.sse.common.settings;
 
-public interface SettingsListSetting<T extends Settings> extends ListSetting<T>, HasSettingsFactory<T> {
+public interface SettingsListSetting<T extends Settings> extends CollectionSetting<T>, HasSettingsFactory<T> {
 }

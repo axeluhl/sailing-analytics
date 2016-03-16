@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.sse.common.settings.ListSetting;
+import com.sap.sse.common.settings.CollectionSetting;
 import com.sap.sse.common.settings.Setting;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.SettingsListSetting;
+import com.sap.sse.common.settings.ValueCollectionSetting;
 import com.sap.sse.common.settings.ValueConverter;
-import com.sap.sse.common.settings.ValueListSetting;
 import com.sap.sse.common.settings.ValueSetting;
 
 public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
@@ -40,8 +40,8 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     private Object serialize(Setting setting) {
         if (setting instanceof ValueSetting) {
             return serializeValueSetting((ValueSetting<?>) setting);
-        } else if (setting instanceof ListSetting) {
-            return serializeListSetting((ListSetting<?>) setting);
+        } else if (setting instanceof CollectionSetting) {
+            return serializeListSetting((CollectionSetting<?>) setting);
         } else if (setting instanceof Settings) {
             return serialize((Settings) setting);
         } else {
@@ -53,10 +53,10 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         return valueSetting.getValueConverter().toJSONValue(valueSetting.getValue());
     }
 
-    private <T> Object serializeListSetting(ListSetting<T> listSetting) {
+    private <T> Object serializeListSetting(CollectionSetting<T> listSetting) {
         List<Object> jsonValues = new ArrayList<>();
-        if (listSetting instanceof ValueListSetting) {
-            ValueListSetting<T> valueListSetting = (ValueListSetting<T>) listSetting;
+        if (listSetting instanceof ValueCollectionSetting) {
+            ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
             ValueConverter<T> converter = valueListSetting.getValueConverter();
             for (T value : valueListSetting.getValues()) {
                 jsonValues.add(converter.toJSONValue(value));
@@ -88,8 +88,8 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
     private void deserializeSetting(Setting setting, Object jsonValue) {
         if (setting instanceof ValueSetting) {
             deserializeValueSetting(jsonValue, (ValueSetting<?>) setting);
-        } else if (setting instanceof ListSetting) {
-            deserializeListSetting(jsonValue, (ListSetting<?>) setting);
+        } else if (setting instanceof CollectionSetting) {
+            deserializeListSetting(jsonValue, (CollectionSetting<?>) setting);
         } else if (setting instanceof Settings) {
             deserializeObject((Settings) setting, jsonValue);
         } else {
@@ -106,11 +106,11 @@ public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
         valueSetting.setValue(valueSetting.getValueConverter().fromJSONValue(jsonValue));
     }
 
-    private <T> void deserializeListSetting(Object jsonValue, ListSetting<T> listSetting) {
+    private <T> void deserializeListSetting(Object jsonValue, CollectionSetting<T> listSetting) {
         @SuppressWarnings("unchecked")
         ARRAY jsonArray = (ARRAY) jsonValue;
-        if (listSetting instanceof ValueListSetting) {
-            ValueListSetting<T> valueListSetting = (ValueListSetting<T>) listSetting;
+        if (listSetting instanceof ValueCollectionSetting) {
+            ValueCollectionSetting<T> valueListSetting = (ValueCollectionSetting<T>) listSetting;
             ValueConverter<T> converter = valueListSetting.getValueConverter();
             List<T> values = new ArrayList<>();
             for (Object value : fromJsonArray(jsonArray)) {

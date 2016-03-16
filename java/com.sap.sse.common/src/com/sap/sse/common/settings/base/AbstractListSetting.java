@@ -6,9 +6,9 @@ import java.util.List;
 
 import com.sap.sse.common.settings.AbstractSetting;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.common.settings.ListSetting;
+import com.sap.sse.common.settings.CollectionSetting;
 
-public abstract class AbstractListSetting<T> extends AbstractSetting implements ListSetting<T> {
+public abstract class AbstractListSetting<T> extends AbstractSetting implements CollectionSetting<T> {
     
     private List<T> values = new ArrayList<>();
     
