@@ -41,9 +41,13 @@ public abstract class AbstractValueSetSetting<T> extends AbstractValueCollection
     
     @Override
     public final void setDefaultValues(Iterable<T> defaultValues) {
+        boolean wasDefault = isDefaultValue();
         this.defaultValues.clear();
         if(defaultValues != null) {
             Util.addAll(defaultValues, this.defaultValues);
+        }
+        if(wasDefault) {
+            resetToDefault();
         }
     }
 }
