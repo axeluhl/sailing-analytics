@@ -6,8 +6,10 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 
 /**
@@ -16,6 +18,24 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
  *
  */
 public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
+    
+    public String serializeToString(Settings settings) {
+        return serialize(settings).toString();
+    }
+
+    public <T extends Settings> T deserialize(T settings, String jsonString) {
+        if (jsonString != null && !jsonString.isEmpty()) {
+            JSONValue jsonValue = JSONParser.parseStrict(jsonString);
+            if (jsonValue != null) {
+                JSONObject jsonObject = jsonValue.isObject();
+                if (jsonObject != null) {
+                    deserialize(settings, (JSONObject) jsonObject);
+                }
+            }
+        }
+        return settings;
+    }
+    
     @Override
     protected JSONObject newOBJECT() {
         return new JSONObject();
