@@ -11,6 +11,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -139,8 +140,12 @@ public class AppPreferences {
     }
 
     public String getDeviceIdentifier() {
+        return getDeviceIdentifier(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+    }
+
+    public String getDeviceIdentifier(String defaultValue) {
         String identifier = preferences.getString(key(R.string.preference_identifier_key), "");
-        return identifier.isEmpty() ? Secure.getString(context.getContentResolver(), Secure.ANDROID_ID) : identifier;
+        return TextUtils.isEmpty(identifier) ? defaultValue : identifier;
     }
 
     public boolean getGateStartHasAdditionalGolfDownTime() {
@@ -451,5 +456,10 @@ public class AppPreferences {
 
     public String getAccessToken() {
         return preferences.getString(context.getString(R.string.preference_access_token_key), null);
+	}
+
+    public boolean isMagnetic() {
+        return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
+                context.getResources().getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
     }
 }

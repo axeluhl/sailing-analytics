@@ -107,22 +107,22 @@ public class SystemInformationActivityHelper {
 
     private void setupAboutButtons() {
         Button eulaButton = (Button) activity.findViewById(R.id.eula_button);
-        Button licenceButton = (Button) activity.findViewById(R.id.licence_button);
+        Button licenseButton = (Button) activity.findViewById(R.id.license_button);
         eulaButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 EulaHelper.with(activity).openEulaPage();
             }
         });
-        licenceButton.setOnClickListener(new OnClickListener() {
+        licenseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showLicenceDialog();
+                showLicenseDialog();
             }
         });
     }
 
-    private void showLicenceDialog() {
+    private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
         notices.addNotice(licenseHelper.getAndroidSupportNotice());
@@ -130,7 +130,7 @@ public class SystemInformationActivityHelper {
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
         notices.addNotice(licenseHelper.getDialogNotice());
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
-        builder.setTitle(activity.getString(R.string.licence_information));
+        builder.setTitle(activity.getString(R.string.license_information));
         builder.setNotices(notices);
         builder.build().show();
     }
