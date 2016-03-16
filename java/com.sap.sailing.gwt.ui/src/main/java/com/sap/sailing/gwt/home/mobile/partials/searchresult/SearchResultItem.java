@@ -23,14 +23,12 @@ public class SearchResultItem extends AbstractSearchResultItem {
     @UiField DivElement eventInfoContainerUi;
     @UiField AnchorElement anchorUi;
     private final MobilePlacesNavigator navigator;
+    private final SearchResultDTO item;
 
     SearchResultItem(MobilePlacesNavigator navigator, SearchResultDTO item) {
         this.navigator = navigator;
+        this.item = item;
         init(uiBinder.createAndBindUi(this), item);
-        SearchResultEventInfoDTO event = item.getEvents().iterator().next();
-        String eventId = String.valueOf(event.getId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
-        PlaceNavigation<?> regattaNavigation = navigator.getRegattaOverviewNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
-        regattaNavigation.configureAnchorElement(anchorUi);
     }
 
     @Override
@@ -39,8 +37,15 @@ public class SearchResultItem extends AbstractSearchResultItem {
     }
     
     @Override
+    protected void configureRegattaNavigation(String eventId, String leaderboardName, String baseUrl, boolean isOnRemoteServer) {
+        navigator.getRegattaOverviewNavigation(eventId, leaderboardName, baseUrl, isOnRemoteServer).configureAnchorElement(anchorUi);
+    }
+    
+    @Override
     protected void addEventInfo(SearchResultEventInfoDTO event) {
-        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(navigator, event).getElement());
+        String eventId = String.valueOf(event.getId());
+        PlaceNavigation<?> eventNavigation = navigator.getEventNavigation(eventId, item.getBaseUrl(), item.isOnRemoteServer());
+        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(event, eventNavigation).getElement());
     }
 
 }
