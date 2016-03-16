@@ -841,7 +841,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private void storeRegattaRaceStatesSettings(RegattaRaceStatesSettings settings) {
-        GWT.debugger();
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null && eventId != null) {
             // delete old value
@@ -853,7 +852,6 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
 
     private RegattaRaceStatesSettings loadRegattaRaceStatesSettings() {
-        GWT.debugger();
         RegattaRaceStatesSettings loadedSettings = null;
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
