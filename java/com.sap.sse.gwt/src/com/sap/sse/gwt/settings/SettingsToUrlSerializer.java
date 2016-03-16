@@ -19,7 +19,7 @@ public class SettingsToUrlSerializer {
     }
     
     public String serializeBasedOnCurrentLocationWithCleanParameters(Settings settings) {
-        final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParameters();
+        final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder.buildString();
     }
@@ -31,21 +31,11 @@ public class SettingsToUrlSerializer {
     }
     
     public UrlBuilder serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(Settings settings) {
-        final UrlBuilder urlBuilder = createUrlBuilderFromCurrentLocationWithCleanParameters();
+        final UrlBuilder urlBuilder = UrlBuilderUtil.createUrlBuilderFromCurrentLocationWithCleanParameters();
         serializeToUrlBuilder(settings, urlBuilder);
         return urlBuilder;
     }
 
-    private UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParameters() {
-        final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
-        for(String parameterName : Window.Location.getParameterMap().keySet()) {
-            if("gwt.codesvr".equals(parameterName)) {
-                urlBuilder.removeParameter(parameterName);
-            }
-        }
-        return urlBuilder;
-    }
-    
     public void serializeToUrlBuilder(Settings settings, UrlBuilder urlBuilder) {
         Map<String, Iterable<String>> serializedValues = settingsToStringMapSerializer.serialize(settings);
         for(Map.Entry<String, Iterable<String>> entry : serializedValues.entrySet()) {
