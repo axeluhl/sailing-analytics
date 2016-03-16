@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.app.FragmentTransaction;
@@ -75,6 +76,7 @@ public class StartTimeFragment extends BaseFragment
     private Spinner mFleet;
     private Spinner mRace;
     private TimePicker mTimePicker;
+    private NumberPicker mStartSeconds;
     private TextView mCountdown;
     private TextView mDebugTime;
     private Button mMinuteInc;
@@ -178,20 +180,6 @@ public class StartTimeFragment extends BaseFragment
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        getRaceState().removeChangedListener(raceStateChangedListener);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        getRaceState().addChangedListener(raceStateChangedListener);
-    }
-
-    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -256,6 +244,11 @@ public class StartTimeFragment extends BaseFragment
                     if (syncButtons != null) {
                         syncButtons.setVisibility(View.GONE);
                     }
+
+                    View startSeconds = ViewHelper.get(getView(), R.id.start_time_seconds);
+                    if (startSeconds != null) {
+                        startSeconds.setVisibility(View.GONE);
+                    }
                     break;
             }
         }
@@ -268,6 +261,20 @@ public class StartTimeFragment extends BaseFragment
 
         initViewsAbsolute(time);
         initViewsRelative();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        getRaceState().removeChangedListener(raceStateChangedListener);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        getRaceState().addChangedListener(raceStateChangedListener);
     }
 
     private void initViewsRelative() {
@@ -480,6 +487,14 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setCurrentMinute(minutes);
             mTimePicker.setTag(time.get(Calendar.SECOND));
         }
+
+        mStartSeconds = ViewHelper.get(getView(), R.id.start_time_seconds);
+        if (mStartSeconds != null) {
+            ThemeHelper.setPickerColor(getActivity(), mStartSeconds, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_yellow_1));
+            mStartSeconds.setEnabled(false);
+            setSeconds("00");
+        }
     }
 
     @Override
@@ -672,6 +687,7 @@ public class StartTimeFragment extends BaseFragment
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
+            setSeconds("00");
         }
         mListenerIgnore = false;
     }
@@ -680,8 +696,15 @@ public class StartTimeFragment extends BaseFragment
     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
+            setSeconds("00");
         }
         mListenerIgnore = false;
+    }
+
+    private void setSeconds(String seconds) {
+        if (mStartSeconds != null) {
+            mStartSeconds.setDisplayedValues(new String[] { seconds });
+        }
     }
 
     private void setPickerTime() {
@@ -698,6 +721,8 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setCurrentHour(newTime.get(Calendar.HOUR_OF_DAY));
             mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
         }
+
+        setSeconds(String.format(Locale.US, "%02d", newTime.get(Calendar.SECOND)));
     }
 
     private TimePoint getPickerTime() {
