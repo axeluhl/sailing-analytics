@@ -33,6 +33,11 @@
                             No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
                             even if there is one for another locale configured.
                         </li>
+                        <li>The mechanism to handle RegattaOverview settings has been changed to a more generic approach.
+                            This leads to slightly changed URL parameter names so that old bookmarks could be broken in a way
+                            so that the actual shown set of races is different using the new version because the old parameters aren't correctly recognized.
+                            All automatically generated links to this page in Home and AdminConsole have been updated to use the new parameter names.
+                        </li>
                     </ul>
                     <h2 class="articleSubheadline">February 2016</h2>
                     <ul class="bulletList">
