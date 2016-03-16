@@ -715,13 +715,13 @@ public class CandidateFinderImpl implements CandidateFinder {
                 // computing an arithmetic mean across the logarithms.
                 // f(1) := 1
                 // f(NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES) := WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START
-                // f(x) := 1-(1-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES * hullLengthInMeters / weightedMeterAverageDistance
+                // f(x) := 1-(1-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES * (hullLengthInMeters / weightedMeterAverageDistance - 1)
                 if (numberOfCompetitorsForWhichStartLineDistanceIsAvailable > 0) {
                     double log10Avg = log10OfMeterDistanceSum / numberOfCompetitorsForWhichStartLineDistanceIsAvailable;
                     double weightedMeterAverageDistance = Math.pow(10, log10Avg);
                     result = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
                             (1.-(1.-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES
-                                    * (weightedMeterAverageDistance  / hullLengthInMeters-1))));
+                                    * (weightedMeterAverageDistance / hullLengthInMeters-1))));
                 } else {
                     // no distance for any other competitor from the start line was available
                     result = 1.0;
