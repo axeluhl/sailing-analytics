@@ -7,8 +7,9 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.ValueSetSetting;
 
-public abstract class AbstractValueSetSetting<T> extends AbstractValueCollectionSetting<T> {
+public abstract class AbstractValueSetSetting<T> extends AbstractValueCollectionSetting<T> implements ValueSetSetting<T> {
     
     private final Set<T> values = new HashSet<>();
     private final Set<T> defaultValues = new HashSet<>();
@@ -38,6 +39,7 @@ public abstract class AbstractValueSetSetting<T> extends AbstractValueCollection
         setValues(defaultValues);
     }
     
+    @Override
     public final void setDefaultValues(Iterable<T> defaultValues) {
         this.defaultValues.clear();
         if(defaultValues != null) {
