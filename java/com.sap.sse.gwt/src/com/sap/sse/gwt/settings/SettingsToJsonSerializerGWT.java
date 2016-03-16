@@ -86,7 +86,7 @@ public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerialize
 
     @Override
     protected Object get(JSONObject jsonObject, String property) {
-        return jsonObject.get(property);
+        return fromJsonValue(jsonObject.get(property));
     }
 
     @Override
