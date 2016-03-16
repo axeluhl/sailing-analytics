@@ -133,8 +133,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         return new SettingsToUrlSerializer().deserializeFromCurrentLocation(new RegattaRaceStatesSettings());
     }
 
-    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings, boolean isSetVisibleCourseAreasInUrl,
-            boolean isSetVisibleRegattasInUrl) {
+    public static String getUrl(UUID eventId, RegattaRaceStatesSettings settings) {
         return new SettingsToUrlSerializer().serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(settings)
                 .setParameter(PARAM_IGNORE_LOCAL_SETTINGS, "true").setParameter(PARAM_EVENT, eventId.toString())
                 .buildString();

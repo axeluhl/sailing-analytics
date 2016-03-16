@@ -264,15 +264,7 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
     }
     
     private void updateLinkUrl(UUID eventId, RegattaRaceStatesSettings settings) {
-        boolean isSetVisibleCourseAreasInUrl = true;
-        boolean isSetVisibleRegattasInUrl = true;
-        if (Util.size(settings.getVisibleCourseAreas()) == courseAreas.size()) {
-            isSetVisibleCourseAreasInUrl = false;
-        }
-        if (Util.size(settings.getVisibleRegattas()) == raceGroups.size()) {
-            isSetVisibleRegattasInUrl = false;
-        }
-        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings, isSetVisibleCourseAreasInUrl, isSetVisibleRegattasInUrl));
+        resultingLink.setHref(RegattaOverviewEntryPoint.getUrl(eventId, settings));
     }
 
 }
