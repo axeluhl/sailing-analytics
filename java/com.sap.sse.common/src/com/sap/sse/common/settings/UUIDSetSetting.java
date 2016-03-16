@@ -9,4 +9,8 @@ public class UUIDSetSetting extends AbstractValueSetSetting<UUID> {
     public UUIDSetSetting(String name, AbstractSettings settings) {
         super(name, settings, UUIDConverter.INSTANCE);
     }
+
+    public UUIDSetSetting(String name, AbstractSettings settings, Iterable<UUID> defaultValues) {
+        super(name, settings, defaultValues, UUIDConverter.INSTANCE);
+    }
 }
