@@ -1,24 +1,36 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
+import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.BooleanSetting;
 import com.sap.sse.common.settings.StringSetSetting;
 import com.sap.sse.common.settings.UUIDSetSetting;
 
 public final class RegattaRaceStatesSettings extends AbstractSettings {
-    private final UUIDSetSetting visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this);
-    private final StringSetSetting visibleRegattas = new StringSetSetting("visibleRegattas", this);
+    private final UUIDSetSetting visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this, true);
+    private final StringSetSetting visibleRegattas = new StringSetSetting("visibleRegattas", this, true);
     private final BooleanSetting showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
     private final BooleanSetting showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces",
             this, true);
 
     public RegattaRaceStatesSettings() {
     }
+    
+    public RegattaRaceStatesSettings(Iterable<CourseAreaDTO> defaultCourseAreas, Iterable<RaceGroupDTO> defaultRaceGroups) {
+        setDefaultCourseAreas(defaultCourseAreas);
+        setDefaultRegattas(defaultRaceGroups);
+    }
 
-    public RegattaRaceStatesSettings(Iterable<UUID> visibleCourseAreas, Iterable<String> visibleRegattas,
-            boolean showOnlyRacesOfSameDay, boolean showOnlyCurrentlyRunningRaces) {
+    public RegattaRaceStatesSettings(Iterable<CourseAreaDTO> defaultCourseAreas, Iterable<UUID> visibleCourseAreas,
+            Iterable<RaceGroupDTO> defaultRaceGroups, Iterable<String> visibleRegattas, boolean showOnlyRacesOfSameDay,
+            boolean showOnlyCurrentlyRunningRaces) {
+        this(defaultCourseAreas, defaultRaceGroups);
         this.visibleCourseAreas.setValues(visibleCourseAreas);
         this.visibleRegattas.setValues(visibleRegattas);
         this.showOnlyRacesOfSameDay.setValue(showOnlyRacesOfSameDay);
@@ -63,6 +75,28 @@ public final class RegattaRaceStatesSettings extends AbstractSettings {
     
     public void setShowOnlyCurrentlyRunningRaces(boolean newValue) {
         showOnlyCurrentlyRunningRaces.setValue(newValue);
+    }
+    
+    public void setDefaultCourseAreas(Iterable<CourseAreaDTO> defaultCourseAreas) {
+        if(defaultCourseAreas == null) {
+            defaultCourseAreas = Collections.emptySet();
+        }
+        Set<UUID> courseAreaIds = new HashSet<>();
+        for (CourseAreaDTO courseArea : defaultCourseAreas) {
+            courseAreaIds.add(courseArea.id);
+        }
+        visibleCourseAreas.setDefaultValues(courseAreaIds);
+    }
+    
+    public void setDefaultRegattas(Iterable<RaceGroupDTO> defaultRaceGroups) {
+        if(defaultRaceGroups == null) {
+            defaultRaceGroups = Collections.emptySet();
+        }
+        Set<String> regattaIds = new HashSet<>();
+        for (RaceGroupDTO raceGroup : defaultRaceGroups) {
+            regattaIds.add(raceGroup.getName());
+        }
+        visibleRegattas.setDefaultValues(regattaIds);
     }
 
 }

@@ -54,7 +54,6 @@ import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ClickableSafeHtmlCell;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
@@ -742,22 +741,12 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     @Override
     public void updateSettings(RegattaRaceStatesSettings newSettings) {
-        if (Util.isEmpty(settings.getVisibleCourseAreas())
-                || !settings.getVisibleCourseAreas().equals(newSettings.getVisibleCourseAreas())) {
-            settings.setVisibleCourseAreas(newSettings.getVisibleCourseAreas());
-            fillVisibleCourseAreasInSettingsIfEmpty();
-        }
-        if (Util.isEmpty(settings.getVisibleRegattas())
-                || !settings.getVisibleRegattas().equals(newSettings.getVisibleRegattas())) {
-            settings.setVisibleRegattas(newSettings.getVisibleRegattas());
-            fillVisibleRegattasInSettingsIfEmpty();
-        }
-        if (settings.isShowOnlyRacesOfSameDay() != newSettings.isShowOnlyRacesOfSameDay()) {
-            settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
-        }
-        if (settings.isShowOnlyCurrentlyRunningRaces() != newSettings.isShowOnlyCurrentlyRunningRaces()) {
-            settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
-        }
+        setDefaultCourseAreas();
+        settings.setVisibleCourseAreas(newSettings.getVisibleCourseAreas());
+        setDefaultRegattas();
+        settings.setVisibleRegattas(newSettings.getVisibleRegattas());
+        settings.setShowOnlyRaceOfSameDay(newSettings.isShowOnlyRacesOfSameDay());
+        settings.setShowOnlyCurrentlyRunningRaces(newSettings.isShowOnlyCurrentlyRunningRaces());
         refreshTableWithNewSettings();
         storeRegattaRaceStatesSettings(settings);
     }
@@ -768,19 +757,13 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         }
     }
 
-    private void fillVisibleRegattasInSettingsIfEmpty() {
-        if (Util.isEmpty(settings.getVisibleRegattas()) && raceGroupDTOs != null) {
-            for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                settings.getVisibleRegattaSettings().addValue(raceGroup.getName());
-            }
-        }
+    private void setDefaultRegattas() {
+        settings.setDefaultRegattas(raceGroupDTOs);
     }
 
-    private void fillVisibleCourseAreasInSettingsIfEmpty() {
-        if (Util.isEmpty(settings.getVisibleCourseAreas()) && eventDTO != null) {
-            for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.getVisibleCourseAreaSettings().addValue(courseArea.id);
-            }
+    private void setDefaultCourseAreas() {
+        if(eventDTO != null) {
+            settings.setDefaultCourseAreas(eventDTO.venue.getCourseAreas());
         }
     }
 
@@ -797,7 +780,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     @Override
     public void onEventUpdated(EventDTO event) {
         eventDTO = event;
-        fillVisibleCourseAreasInSettingsIfEmpty();
+        setDefaultCourseAreas();
         refreshTableWithNewSettings();
     }
 
@@ -836,7 +819,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         // }
         // }
         // regattaOverviewTable.redraw();
-        fillVisibleRegattasInSettingsIfEmpty();
+        setDefaultRegattas();
         refreshTableWithNewSettings();
     }
 
@@ -856,8 +839,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         Storage localStorage = Storage.getLocalStorageIfSupported();
         if (localStorage != null) {
             String jsonAsLocalStore = localStorage.getItem(localStorageRegattaOverviewEventKey);
-            loadedSettings = new SettingsToJsonSerializerGWT().deserialize(new RegattaRaceStatesSettings(),
-                    jsonAsLocalStore);
+            loadedSettings = new SettingsToJsonSerializerGWT().deserialize(new RegattaRaceStatesSettings(
+                    eventDTO == null ? null : eventDTO.venue.getCourseAreas(), raceGroupDTOs), jsonAsLocalStore);
         }
         return loadedSettings;
     }

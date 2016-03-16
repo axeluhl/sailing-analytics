@@ -240,7 +240,8 @@ public class RegattaRaceStatesSettingsDialogComponent implements SettingsDialogC
         
         boolean isShowOnlyRacesOfSameDay = showOnlyRacesOfSameDayCheckBox.getValue();
         boolean isShowOnlyCurrentlyRunningRaces = showOnlyCurrentlyRunningRacesCheckBox.getValue();
-        return new RegattaRaceStatesSettings(selectedCourseAreas, selectedRegattas, isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
+        return new RegattaRaceStatesSettings(this.courseAreas, selectedCourseAreas, this.raceGroups, selectedRegattas,
+                isShowOnlyRacesOfSameDay, isShowOnlyCurrentlyRunningRaces);
     }
 
     @Override
