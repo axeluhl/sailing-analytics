@@ -57,6 +57,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     private static final double PENALTY_FOR_WRONG_DIRECTION = 0.8;
     private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
     private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.8;
+    private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 5;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
 
@@ -688,7 +689,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Double result;
         if (race.getStartOfRace(/* inferred */ false) == null && race.isGateStart() != Boolean.TRUE) {
             // boats within one hull length of the start line are great indicators that we're at the start:
-            final double goodProxmityInMeters = race.getRace().getBoatClass().getHullLength().getMeters();
+            final double hullLengthInMeters = race.getRace().getBoatClass().getHullLength().getMeters();
             final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
             if (start == null) {
                 result = 1.0;
@@ -712,11 +713,15 @@ public class CandidateFinderImpl implements CandidateFinder {
                 // To make outliers such as trackers left in the harbor not hurt the results unnecessarily, the logarithm of
                 // distances to the start waypoint is averaged, giving more relevance to the competitors close to the line when
                 // computing an arithmetic mean across the logarithms.
+                // f(1) := 1
+                // f(NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES) := WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START
+                // f(x) := 1-(1-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES * hullLengthInMeters / weightedMeterAverageDistance
                 if (numberOfCompetitorsForWhichStartLineDistanceIsAvailable > 0) {
                     double log10Avg = log10OfMeterDistanceSum / numberOfCompetitorsForWhichStartLineDistanceIsAvailable;
                     double weightedMeterAverageDistance = Math.pow(10, log10Avg);
                     result = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
-                            goodProxmityInMeters / weightedMeterAverageDistance));
+                            (1.-(1.-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES
+                                    * (weightedMeterAverageDistance  / hullLengthInMeters-1))));
                 } else {
                     // no distance for any other competitor from the start line was available
                     result = 1.0;
