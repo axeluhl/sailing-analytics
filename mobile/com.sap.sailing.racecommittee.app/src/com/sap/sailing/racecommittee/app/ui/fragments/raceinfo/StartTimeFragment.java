@@ -493,7 +493,7 @@ public class StartTimeFragment extends BaseFragment
             ThemeHelper.setPickerColor(getActivity(), mStartSeconds, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
                 .getColor(getActivity(), R.attr.sap_yellow_1));
             mStartSeconds.setEnabled(false);
-            setSeconds("00");
+            setSeconds();
         }
     }
 
@@ -687,7 +687,7 @@ public class StartTimeFragment extends BaseFragment
     public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
-            setSeconds("00");
+            setSeconds();
         }
         mListenerIgnore = false;
     }
@@ -696,11 +696,14 @@ public class StartTimeFragment extends BaseFragment
     public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
-            setSeconds("00");
+            setSeconds();
         }
         mListenerIgnore = false;
     }
 
+    private void setSeconds() {
+        setSeconds("00,000");
+    }
     private void setSeconds(String seconds) {
         if (mStartSeconds != null) {
             mStartSeconds.setDisplayedValues(new String[] { seconds });
@@ -722,7 +725,7 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
         }
 
-        setSeconds(String.format(Locale.US, "%02d", newTime.get(Calendar.SECOND)));
+        setSeconds(String.format(Locale.US, "%02d,%03d", newTime.get(Calendar.SECOND), newTime.get(Calendar.MILLISECOND)));
     }
 
     private TimePoint getPickerTime() {
