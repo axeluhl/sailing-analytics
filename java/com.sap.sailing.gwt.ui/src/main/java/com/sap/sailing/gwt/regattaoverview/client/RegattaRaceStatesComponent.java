@@ -774,7 +774,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void fillVisibleRegattasInSettingsIfEmpty() {
         if (Util.isEmpty(settings.getVisibleRegattas()) && raceGroupDTOs != null) {
             for (RaceGroupDTO raceGroup : raceGroupDTOs) {
-                settings.addVisibleRegatta(raceGroup.getName());
+                settings.getVisibleRegattaSettings().addValue(raceGroup.getName());
             }
         }
     }
@@ -782,7 +782,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private void fillVisibleCourseAreasInSettingsIfEmpty() {
         if (Util.isEmpty(settings.getVisibleCourseAreas()) && eventDTO != null) {
             for (CourseAreaDTO courseArea : eventDTO.venue.getCourseAreas()) {
-                settings.addVisibleCourseArea(courseArea.id);
+                settings.getVisibleCourseAreaSettings().addValue(courseArea.id);
             }
         }
     }

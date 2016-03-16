@@ -4,15 +4,15 @@ import java.util.UUID;
 
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.BooleanSetting;
-import com.sap.sse.common.settings.StringListSetting;
-import com.sap.sse.common.settings.UUIDListSetting;
+import com.sap.sse.common.settings.StringSetSetting;
+import com.sap.sse.common.settings.UUIDSetSetting;
 
-public class RegattaRaceStatesSettings extends AbstractSettings {
-    private UUIDListSetting visibleCourseAreas = new UUIDListSetting("visibleCourseAreas", this);
-    private StringListSetting visibleRegattas = new StringListSetting("visibleRegattas", this);
-    private BooleanSetting showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
-    private BooleanSetting showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces", this,
-            true);
+public final class RegattaRaceStatesSettings extends AbstractSettings {
+    private final UUIDSetSetting visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this);
+    private final StringSetSetting visibleRegattas = new StringSetSetting("visibleRegattas", this);
+    private final BooleanSetting showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
+    private final BooleanSetting showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces",
+            this, true);
 
     public RegattaRaceStatesSettings() {
     }
@@ -28,33 +28,25 @@ public class RegattaRaceStatesSettings extends AbstractSettings {
     public Iterable<UUID> getVisibleCourseAreas() {
         return visibleCourseAreas.getValues();
     }
-    
-    public Iterable<String> getVisibleRegattas() {
-        return visibleRegattas.getValues();
-    }
 
     public void setVisibleCourseAreas(Iterable<UUID> visibleCourseAreas) {
         this.visibleCourseAreas.setValues(visibleCourseAreas);
     }
-
-    public void addVisibleCourseArea(UUID value) {
-        visibleCourseAreas.addValue(value);
+    
+    public UUIDSetSetting getVisibleCourseAreaSettings() {
+        return visibleCourseAreas;
     }
 
-    public void clearVisibleCourseAreas() {
-        visibleCourseAreas.clear();
+    public Iterable<String> getVisibleRegattas() {
+        return visibleRegattas.getValues();
     }
 
     public void setVisibleRegattas(Iterable<String> visibleRegattas) {
         this.visibleRegattas.setValues(visibleRegattas);
     }
 
-    public void addVisibleRegatta(String value) {
-        visibleRegattas.addValue(value);
-    }
-
-    public void clearVisibleRegattas() {
-        visibleRegattas.clear();
+    public StringSetSetting getVisibleRegattaSettings() {
+        return visibleRegattas;
     }
 
     public boolean isShowOnlyRacesOfSameDay() {
