@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -219,8 +220,9 @@ public class TrackedLegImpl implements TrackedLeg {
         if (middleOfLeg == null) {
             wind = null;
         } else {
-            wind = getWind(middleOfLeg, at,
-                    getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+            Set<WindSource> windSourcesToExclude = new HashSet<>(getTrackedRace().getWindSourcesToExclude());
+            windSourcesToExclude.addAll(getTrackedRace().getWindSources(WindSourceType.TRACK_BASED_ESTIMATION));
+            wind = getWind(middleOfLeg, at, windSourcesToExclude);
         }
         return wind;
     }

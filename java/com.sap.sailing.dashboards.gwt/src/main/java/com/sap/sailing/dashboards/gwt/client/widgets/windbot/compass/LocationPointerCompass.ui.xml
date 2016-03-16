@@ -1,0 +1,12 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+	
+    <ui:with field="resources" type="com.sap.sailing.dashboards.gwt.client.widgets.windbot.compass.LocationPointerCompassRessources"/>
+    
+	<g:HTMLPanel styleName="{resources.gss.location_pointer_compass}">
+	    <g:Image ui:field="compassNeedle" styleName="{resources.gss.needle}"></g:Image>
+	    <div ui:field="angleToPointetLocation" class="{resources.gss.angle_to_location}"></div>
+	    <div ui:field="distanceToPointetLocation" class="{resources.gss.distance_to_location}"></div>
+	</g:HTMLPanel>
+</ui:UiBinder> 
