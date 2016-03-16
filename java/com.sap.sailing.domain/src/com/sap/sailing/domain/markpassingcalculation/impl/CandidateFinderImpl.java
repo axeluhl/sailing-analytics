@@ -53,11 +53,14 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
-    private final double PENALTY_FOR_WRONG_SIDE = 0.8;
-    private final double PENALTY_FOR_WRONG_DIRECTION = 0.8;
-    private final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
+    private static final double PENALTY_FOR_WRONG_SIDE = 0.8;
+    private static final double PENALTY_FOR_WRONG_DIRECTION = 0.8;
+    private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
+    private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.8;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
+
+    
     private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> distanceCache = new LinkedHashMap<>();
     private Map<Competitor, LinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>> xteCache = new LinkedHashMap<>();
 
@@ -685,27 +688,35 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Double result;
         if (race.getStartOfRace(/* inferred */ false) == null && race.isGateStart() != Boolean.TRUE) {
             // boats within one hull length of the start line are great indicators that we're at the start:
-            final Distance goodProxmity = race.getRace().getBoatClass().getHullLength();
+            final double goodProxmityInMeters = race.getRace().getBoatClass().getHullLength().getMeters();
             final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
             if (start == null) {
                 result = 1.0;
             } else {
                 int numberOfCompetitorsForWhichStartLineDistanceIsAvailable = 0;
-                Distance sumOfStartLineDistances = Distance.NULL;
+                double log10OfMeterDistanceSum = 0;
                 for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
-                    final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
-                    if (track != null) {
-                        final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
-                        final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
-                        if (otherCompetitorsDistanceToStartAtT != null) {
-                            numberOfCompetitorsForWhichStartLineDistanceIsAvailable++;
-                            sumOfStartLineDistances = sumOfStartLineDistances.add(otherCompetitorsDistanceToStartAtT);
+                    if (otherCompetitor != c) {
+                        final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
+                        if (track != null) {
+                            final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
+                            final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
+                            if (otherCompetitorsDistanceToStartAtT != null) {
+                                numberOfCompetitorsForWhichStartLineDistanceIsAvailable++;
+                                log10OfMeterDistanceSum += Math.log10(otherCompetitorsDistanceToStartAtT.getMeters());
+                            }
                         }
                     }
                 }
                 // TODO use a function that will approach 1 as we get, say, 50% of the other competitors within a reasonable distance from the start line, say 10m; the closer, the more likely
+                // To make outliers such as trackers left in the harbor not hurt the results unnecessarily, the logarithm of
+                // distances to the start waypoint is averaged, giving more relevance to the competitors close to the line when
+                // computing an arithmetic mean across the logarithms.
                 if (numberOfCompetitorsForWhichStartLineDistanceIsAvailable > 0) {
-                    result = Math.max(1.0, goodProxmity.divide(sumOfStartLineDistances.scale(1./numberOfCompetitorsForWhichStartLineDistanceIsAvailable)));
+                    double log10Avg = log10OfMeterDistanceSum / numberOfCompetitorsForWhichStartLineDistanceIsAvailable;
+                    double weightedMeterAverageDistance = Math.pow(10, log10Avg);
+                    result = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
+                            goodProxmityInMeters / weightedMeterAverageDistance));
                 } else {
                     // no distance for any other competitor from the start line was available
                     result = 1.0;
