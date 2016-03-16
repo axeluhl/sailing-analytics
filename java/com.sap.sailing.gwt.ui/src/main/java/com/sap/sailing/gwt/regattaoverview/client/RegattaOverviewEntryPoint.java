@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.regattaoverview.client;
 import java.util.Collections;
 import java.util.UUID;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -145,7 +146,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
         if (!isSetVisibleRegattasInUrl) {
             copiedSettings.setVisibleRegattas(Collections.<String> emptyList());
         }
-        return new SettingsToUrlSerializer().serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(settings)
+        return new SettingsToUrlSerializer().serializeUrlBuilderBasedOnCurrentLocationWithCleanParameters(copiedSettings)
                 .setParameter(PARAM_IGNORE_LOCAL_SETTINGS, "true").setParameter(PARAM_EVENT, eventId.toString())
                 .buildString();
     }
