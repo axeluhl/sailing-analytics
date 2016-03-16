@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
@@ -48,6 +49,7 @@ import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.CompetitorAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.FinishListAdapter;
+import com.sap.sailing.racecommittee.app.ui.comparators.CompetitorSailIdComparator;
 import com.sap.sailing.racecommittee.app.ui.comparators.NaturalNamedComparator;
 import com.sap.sailing.racecommittee.app.ui.layouts.CompetitorEditLayout;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -70,6 +72,9 @@ public class TrackingListFragment extends BaseFragment
     private int mId = 0;
     private HeaderLayout mHeader;
     private TextView mPageTitle;
+
+    private Comparator mComparator;
+    private ArrayList<Comparator> mComparators;
 
     public TrackingListFragment() {
         mCompetitorData = new ArrayList<>();
@@ -144,6 +149,10 @@ public class TrackingListFragment extends BaseFragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mComparators = new ArrayList<>();
+        mComparators.add(new CompetitorSailIdComparator());
+        mComparators.add(new NaturalNamedComparator());
+
         mFinishedData = initializeFinishList();
         loadCompetitors();
 
@@ -214,8 +223,9 @@ public class TrackingListFragment extends BaseFragment
             }
         }
 
+        mComparator = mComparators.get(0);
         Util.addAll(getRace().getCompetitors(), mCompetitorData);
-        Collections.sort(mCompetitorData, new NaturalNamedComparator());
+        Collections.sort(mCompetitorData, mComparator);
         mCompetitorAdapter.notifyDataSetChanged();
     }
 
@@ -287,7 +297,7 @@ public class TrackingListFragment extends BaseFragment
     protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
         mCompetitorData.clear();
         mCompetitorData.addAll(data);
-        Collections.sort(mCompetitorData, new NaturalNamedComparator());
+        Collections.sort(mCompetitorData, mComparator);
         deleteCompetitorsFromFinishedList(data);
         deleteCompetitorsFromCompetitorList();
         mCompetitorAdapter.notifyDataSetChanged();
@@ -350,7 +360,7 @@ public class TrackingListFragment extends BaseFragment
 
     private void removeCompetitorFromList(Competitor competitor) {
         mCompetitorData.remove(competitor);
-        Collections.sort(mCompetitorData, new NaturalNamedComparator());
+        Collections.sort(mCompetitorData, mComparator);
         mCompetitorAdapter.notifyDataSetChanged();
     }
 
@@ -370,7 +380,7 @@ public class TrackingListFragment extends BaseFragment
 
     private void addNewCompetitorToCompetitorList(Competitor competitor) {
         mCompetitorData.add(competitor);
-        Collections.sort(mCompetitorData, new NaturalNamedComparator());
+        Collections.sort(mCompetitorData, mComparator);
         mCompetitorAdapter.notifyDataSetChanged();
     }
 
