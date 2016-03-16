@@ -462,4 +462,9 @@ public class AppPreferences {
         return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
                 context.getResources().getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
     }
+
+    public int showNonPublic() {
+        return preferences.getBoolean(context.getString(R.string.preference_non_public_events_key),
+            context.getResources().getBoolean(R.bool.preference_non_public_events_default)) ? 1 : 0;
+    }
 }

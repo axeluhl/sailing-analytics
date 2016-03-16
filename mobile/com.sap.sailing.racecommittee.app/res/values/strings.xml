@@ -509,4 +509,6 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
 
+    <string name="preference_non_public_events_header">Show Non Public Events</string>
+    <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
 </resources>
