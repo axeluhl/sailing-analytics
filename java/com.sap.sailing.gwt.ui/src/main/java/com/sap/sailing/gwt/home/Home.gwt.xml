@@ -44,6 +44,7 @@
 	<inherits name="com.sap.sailing.gwt.regattaoverview.SourceRegattaOverview"/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
 	<inherits name='com.sap.sse.gwt.CommonControlCSS'/>
+	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<entry-point class="com.sap.sailing.gwt.home.shared.SwitchingEntryPoint" />
 </module>

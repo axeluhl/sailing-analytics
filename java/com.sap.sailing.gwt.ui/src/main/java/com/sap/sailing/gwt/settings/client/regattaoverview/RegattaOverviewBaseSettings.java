@@ -10,6 +10,13 @@ public final class RegattaOverviewBaseSettings extends AbstractSettings {
     private final UUIDSetting event = new UUIDSetting("event", this);
     private final BooleanSetting ignoreLocalSettings = new BooleanSetting("ignoreLocalSettings", this, false);
 
+    public RegattaOverviewBaseSettings() {
+    }
+    
+    public RegattaOverviewBaseSettings(String event) {
+        this(UUID.fromString(event));
+    }
+    
     public RegattaOverviewBaseSettings(UUID event) {
         this(event, true);
     }
@@ -17,5 +24,13 @@ public final class RegattaOverviewBaseSettings extends AbstractSettings {
     public RegattaOverviewBaseSettings(UUID event, boolean ignoreLocalSettings) {
         this.event.setValue(event);
         this.ignoreLocalSettings.setValue(ignoreLocalSettings);
+    }
+    
+    public UUID getEvent() {
+        return event.getValue();
+    }
+    
+    public boolean isIgnoreLocalSettings() {
+        return ignoreLocalSettings.getValue();
     }
 }

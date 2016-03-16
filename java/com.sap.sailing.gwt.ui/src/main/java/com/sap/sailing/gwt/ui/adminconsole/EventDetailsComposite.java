@@ -1,9 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Anchor;
@@ -13,7 +11,8 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewBaseSettings;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -135,9 +134,8 @@ public class EventDetailsComposite extends Composite  {
             officialWebsiteURL.setText(event.getOfficialWebsiteURL());
             officialWebsiteURL.setHref(event.getOfficialWebsiteURL());
             sailorsInfoWebsiteURLList.setValues(new ArrayList<String>(event.getSailorsInfoWebsiteURLs().values()));
-            Map<String, String> regattaOverviewURLParameters = new HashMap<String, String>();
-            regattaOverviewURLParameters.put("event", event.id.toString());
-            String regattaOverviewLink = EntryPointLinkFactory.createRegattaOverviewLink(regattaOverviewURLParameters);
+            String regattaOverviewLink = EntryPointWithSettingsLinkFactory
+                    .createRegattaOverviewLink(new RegattaOverviewBaseSettings(event.id, false));
             eventOverviewURL.setText(regattaOverviewLink);
             eventOverviewURL.setHref(UriUtils.fromString(regattaOverviewLink));
      

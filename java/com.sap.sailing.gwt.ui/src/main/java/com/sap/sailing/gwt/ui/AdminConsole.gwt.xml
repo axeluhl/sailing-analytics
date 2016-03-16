@@ -67,6 +67,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard'/>
 	
     <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
     
     <set-configuration-property name="CssResource.enableGss" value="true" />
     <set-configuration-property name="CssResource.legacy" value="true" />
