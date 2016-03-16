@@ -51,7 +51,9 @@ public class SettingsToUrlSerializer {
         for(Map.Entry<String, Iterable<String>> entry : serializedValues.entrySet()) {
             Iterable<String> parameterValues = entry.getValue();
             String[] parameterValuesAsArray = Util.toArray(parameterValues, new String[Util.size(parameterValues)]);
-            urlBuilder.setParameter(entry.getKey(), parameterValuesAsArray);
+            if (parameterValuesAsArray.length > 0) {
+                urlBuilder.setParameter(entry.getKey(), parameterValuesAsArray);
+            }
         }
     }
     
