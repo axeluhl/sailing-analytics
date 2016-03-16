@@ -42,7 +42,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceSimulator'/>
 	<inherits name='com.sap.sailing.gwt.common.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
-	<inherits name='com.sap.sse.gwt.Settings'/>
+	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 </module>

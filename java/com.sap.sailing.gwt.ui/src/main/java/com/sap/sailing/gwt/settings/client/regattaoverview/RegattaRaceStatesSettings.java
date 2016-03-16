@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.regattaoverview.client;
+package com.sap.sailing.gwt.settings.client.regattaoverview;
 
 import java.util.Collections;
 import java.util.HashSet;
