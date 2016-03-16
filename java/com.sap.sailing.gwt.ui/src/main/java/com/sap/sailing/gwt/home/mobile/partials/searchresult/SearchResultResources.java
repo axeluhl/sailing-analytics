@@ -20,8 +20,10 @@ public interface SearchResultResources extends ClientBundle {
         String searchresult_header_form_button();
         String searchresult_amount();
         String searchresult_item();
+        String searchresult_item_link();
         String searchresult_item_headline();
         String searchresult_item_event();
+        String searchresult_item_event_info();
         String searchresult_item_event_link();
         String searchresult_item_event_separator();
         String searchresult_item_arrow();

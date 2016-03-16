@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.searchresult;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.SpanElement;
@@ -14,7 +15,7 @@ public class SearchResultItemEventInfo extends AbstractSearchResultItemEventInfo
 
     private static SearchResultItemEventInfoUiBinder uiBinder = GWT.create(SearchResultItemEventInfoUiBinder.class);
 
-    interface SearchResultItemEventInfoUiBinder extends UiBinder<Element, SearchResultItemEventInfo> {
+    interface SearchResultItemEventInfoUiBinder extends UiBinder<AnchorElement, SearchResultItemEventInfo> {
     }
     
     @UiField DivElement eventNameUi;

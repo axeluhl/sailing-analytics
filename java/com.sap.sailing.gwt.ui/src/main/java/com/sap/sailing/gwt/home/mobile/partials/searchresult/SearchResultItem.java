@@ -16,17 +16,17 @@ public class SearchResultItem extends AbstractSearchResultItem {
 
     private static SearchResultItemUiBinder uiBinder = GWT.create(SearchResultItemUiBinder.class);
 
-    interface SearchResultItemUiBinder extends UiBinder<AnchorElement, SearchResultItem> {
+    interface SearchResultItemUiBinder extends UiBinder<DivElement, SearchResultItem> {
     }
     
     @UiField DivElement resultTitleUi;
     @UiField DivElement eventInfoContainerUi;
-    private final AnchorElement anchorUi;
+    @UiField AnchorElement anchorUi;
     private final MobilePlacesNavigator navigator;
 
     SearchResultItem(MobilePlacesNavigator navigator, SearchResultDTO item) {
         this.navigator = navigator;
-        init(anchorUi = uiBinder.createAndBindUi(this), item);
+        init(uiBinder.createAndBindUi(this), item);
         SearchResultEventInfoDTO event = item.getEvents().iterator().next();
         String eventId = String.valueOf(event.getId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
         PlaceNavigation<?> regattaNavigation = navigator.getRegattaOverviewNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
@@ -40,7 +40,6 @@ public class SearchResultItem extends AbstractSearchResultItem {
     
     @Override
     protected void addEventInfo(SearchResultEventInfoDTO event) {
-        if (eventInfoContainerUi.hasChildNodes()) return; // TODO: Temporary add only one event on mobile
         eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(navigator, event).getElement());
     }
 

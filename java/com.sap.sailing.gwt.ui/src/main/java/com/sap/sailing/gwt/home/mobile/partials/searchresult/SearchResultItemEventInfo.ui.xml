@@ -4,11 +4,12 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.searchresult.SearchResultResources" />
-	<div class="{local_res.css.searchresult_item_event}">
-		<div class="{local_res.css.searchresult_item_event_link}" ui:field="eventNameUi"></div>
-		<div>
+	<a class="{local_res.css.searchresult_item_event_link}">
+		<div class="{local_res.css.searchresult_item_event}" ui:field="eventNameUi"></div>
+		<div class="{local_res.css.searchresult_item_event_info}">
 			<span class="{local_res.css.searchresult_item_event_separator}" ui:field="eventVenueUi"></span>
 			<span ui:field="eventDateUi"></span>
 		</div>
-	</div>
+		<div class="{local_res.css.searchresult_item_arrow}"></div>
+	</a>
 </ui:UiBinder>
