@@ -18,9 +18,10 @@ public interface LocationPointerCompassRessources extends ClientBundle {
 
     @Shared
     public interface LocationPointerCompassGSS extends CssResource {
+        public String location_pointer_compass();
         public String compass();
         public String needle();
-        public String angleToLocationLabel();
-        public String distanceToLocationLabel();
+        public String angle_to_location();
+        public String distance_to_location();
     }
 }

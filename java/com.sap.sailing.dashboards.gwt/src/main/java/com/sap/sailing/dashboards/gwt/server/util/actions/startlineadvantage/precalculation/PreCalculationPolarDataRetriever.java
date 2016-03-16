@@ -15,13 +15,11 @@ import com.sap.sailing.domain.polars.PolarDataService;
 public interface PreCalculationPolarDataRetriever {
 
     default double retrieveManouvreAngleAtWindSpeedAndBoatClass(BoatClass boatClass, ManeuverType maneuverType, Speed windSpeed, PolarDataService polarDataService) {
-        double result = 0;
+        double result = DefaultPolarValues.getManouvreAngle(ManeuverType.TACK);
         try {
             if (boatClass != null && maneuverType != null && windSpeed != null) {
                 BearingWithConfidence<Void> bearingWithConfidence =  polarDataService.getManeuverAngle(boatClass, maneuverType, windSpeed);
                 result = bearingWithConfidence.getObject().getDegrees();
-            } else {
-                result = DefaultPolarValues.getManouvreAngle(ManeuverType.TACK);
             }
         } catch (NotEnoughDataHasBeenAddedException | NullPointerException e) {
             e.printStackTrace();

@@ -251,7 +251,7 @@ public class MoreFlagsFragment extends BaseFragment implements MoreFlagItemClick
             }
 
             if (result.hasError()) {
-                Toast.makeText(getActivity(), result.getMessageId(), Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), result.getMessage(getActivity()), Toast.LENGTH_LONG).show();
             }
         }
     }

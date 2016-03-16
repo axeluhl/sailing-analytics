@@ -1,37 +1,52 @@
 @CHARSET "UTF-8";
 
 .cellTableHeader {
-padding-left: 10px;
-color: black;
-font-size: 9pt;
-background-image: none;
-background-color: white;
-height: 30px;
-vertical-align: middle;
-font-weight: bold;
-text-shadow: 0 1px 1px rgba(255,255,255,.7);
+	padding: 7px;
+	padding-left: 10px;
+	color: black;
+	background-image: none;
+	background-color: white;
+	font-family: 'Open Sans' !important;
+	font-size: 13px;
+	font-weight: bold;
+	text-shadow: 0 1px 1px rgba(255, 255, 255, .7);
+	border-bottom-color: lightgrey !important;
+	border: none !important;
+	vertical-align: bottom;
 }
 
 .cellTableCell {
-padding: 5px;
-overflow: hidden;
-font-size: 10pt;
-height: 20px;
-color: black;
-background-color: white;
-border:none;
+	padding-bottom: 8px;
+	padding-left: 10px;
+	overflow: hidden;
+	font-family: 'Open Sans' !important;
+	font-size: 13px;
+	color: #848484;
+	background-color: white;
+	border: none !important;
+	margin: 100px !important;
+	border-spacing: 0px !important;
 }
 
-.cellTableEvenRow {
-background-color: white;
-border:none;
-}
-.cellTableOddRow {
-background-color: white;
-border:none;
+.cellTableOddRowCell {
+	background-color: white;
+	border: none !important;
+	padding: 0px;
+    padding-left: 10px;
+	padding-bottom: 10px;
+	margin: 0px !important;
+	border-spacing: 0px !important;
+	font-family: 'Open Sans' !important;
 }
 
-cellTableOddRowCell{
-background-color: white;
-border:none;
+.cellTableEvenRowCell {
+	background-color: white;
+	border: none !important;
+	padding: 0px;
+	padding-left: 10px;
+	padding-bottom: 10px;
+	maring: 0px !important;
+	border-spacing: 0px !important;
+	font-family: 'Open Sans' !important;
 }
+

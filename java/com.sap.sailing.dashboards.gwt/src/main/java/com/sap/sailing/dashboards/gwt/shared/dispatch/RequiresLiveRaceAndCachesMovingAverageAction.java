@@ -20,11 +20,12 @@ public abstract class RequiresLiveRaceAndCachesMovingAverageAction<R extends Res
     
     @GwtIncompatible
     protected void addValueToMovingAverage(double value, MovingAveragesCache movingAveragesCache) {
-        if(!movingAveragesCache.containesCacheWithKey(getKeyForMovingAverage())) {
-            movingAveragesCache.createMovingAverageWithKeyAndSize(getKeyForMovingAverage(), MOVING_AVERAGE_CACHE_SIZE);
+        if(!movingAveragesCache.containesCacheWithKey(uniqueMovingAverageCacheKey())) {
+            movingAveragesCache.createMovingAverageWithKeyAndSize(uniqueMovingAverageCacheKey(), MOVING_AVERAGE_CACHE_SIZE);
         }
-        movingAveragesCache.addValueToAverageWithKey(getKeyForMovingAverage(), value);
+        movingAveragesCache.addValueToAverageWithKey(uniqueMovingAverageCacheKey(), value);
     }
     
-    protected abstract String getKeyForMovingAverage();
+    protected abstract String uniqueMovingAverageCacheKey();
+        
 }
