@@ -9,7 +9,7 @@ import com.sap.sse.common.settings.ValueConverter;
 
 public abstract class AbstractValueListSetting<T> extends AbstractValueCollectionSetting<T> {
     
-    private List<T> values = new ArrayList<>();
+    private final List<T> values = new ArrayList<>();
     
     public AbstractValueListSetting(String name, AbstractSettings settings, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter);
@@ -18,5 +18,17 @@ public abstract class AbstractValueListSetting<T> extends AbstractValueCollectio
     @Override
     protected Collection<T> getInnerCollection() {
         return values;
+    }
+    
+    @Override
+    public void resetToDefault() {
+        values.clear();
+    }
+    
+    @Override
+    public boolean isDefaultValue() {
+        // explicit default values are possible to implement
+        // currently, empty is always default
+        return getInnerCollection().isEmpty();
     }
 }

@@ -36,6 +36,13 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
         }
         return true;
     }
+    
+    @Override
+    public void resetToDefault() {
+        for (Setting setting : childSettings.values()) {
+            setting.resetToDefault();
+        }
+    }
 
     @Override
     public Map<String, Setting> getChildSettings() {

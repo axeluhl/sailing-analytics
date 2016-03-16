@@ -10,7 +10,7 @@ import com.sap.sse.common.settings.CollectionSetting;
 
 public abstract class AbstractListSetting<T> extends AbstractSetting implements CollectionSetting<T> {
     
-    private List<T> values = new ArrayList<>();
+    private final List<T> values = new ArrayList<>();
     
     public AbstractListSetting(String name, AbstractSettings settings) {
         super(name, settings);
@@ -21,8 +21,14 @@ public abstract class AbstractListSetting<T> extends AbstractSetting implements 
     
     @Override
     public boolean isDefaultValue() {
-        // TODO implement
+        // explicit default values are possible to implement
+        // currently, empty is always default
         return values.isEmpty();
+    }
+    
+    @Override
+    public void resetToDefault() {
+        this.values.clear();
     }
     
     @Override

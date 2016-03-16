@@ -16,13 +16,6 @@ public abstract class AbstractValueCollectionSetting<T> extends AbstractHasValue
     protected abstract Collection<T> getInnerCollection();
     
     @Override
-    public boolean isDefaultValue() {
-        // explicit default values are possible to implement
-        // currently, empty is always default
-        return getInnerCollection().isEmpty();
-    }
-    
-    @Override
     public Iterable<T> getValues() {
         return Collections.unmodifiableCollection(getInnerCollection());
     }

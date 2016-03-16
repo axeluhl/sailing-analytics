@@ -13,4 +13,6 @@ package com.sap.sse.common.settings;
  */
 public interface Setting {
     boolean isDefaultValue();
+
+    void resetToDefault();
 }

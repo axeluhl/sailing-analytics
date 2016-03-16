@@ -4,7 +4,7 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.ValueConverter;
 import com.sap.sse.common.settings.ValueSetting;
 
-public class AbstractValueSetting<T> extends AbstractHasValueSetting<T> implements ValueSetting<T> {
+public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T> implements ValueSetting<T> {
     
     private T defaultValue;
     
@@ -36,6 +36,11 @@ public class AbstractValueSetting<T> extends AbstractHasValueSetting<T> implemen
         }
         // value == null && defaultValue != null => value isn't default
         return false;
+    }
+    
+    @Override
+    public void resetToDefault() {
+        this.value = defaultValue;
     }
     
     @Override
