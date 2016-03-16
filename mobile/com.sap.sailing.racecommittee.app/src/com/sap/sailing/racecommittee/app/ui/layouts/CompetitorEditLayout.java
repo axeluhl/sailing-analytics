@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ScrollView;
@@ -94,7 +93,7 @@ public class CompetitorEditLayout extends ScrollView {
         if (mPosition != null) {
             StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(maxPos));
             mPosition.setAdapter(positionAdapter);
-            mPosition.setOnItemSelectedListener(new SpinnerSelectedListener(positionAdapter));
+            mPosition.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(positionAdapter));
             mPosition.setSelection(currentPos);
         }
 
@@ -102,7 +101,7 @@ public class CompetitorEditLayout extends ScrollView {
         if (mPenalty != null) {
             StringArraySpinnerAdapter penaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
             mPenalty.setAdapter(penaltyAdapter);
-            mPenalty.setOnItemSelectedListener(new SpinnerSelectedListener(penaltyAdapter));
+            mPenalty.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(penaltyAdapter));
             mPenalty.setSelection(penaltyAdapter.getPosition(mCompetitor.getMaxPointsReason().toString()));
         }
 
@@ -111,7 +110,7 @@ public class CompetitorEditLayout extends ScrollView {
             String[] dates = getDates(startTime);
             StringArraySpinnerAdapter dateAdapter = new StringArraySpinnerAdapter(dates);
             mDate.setAdapter(dateAdapter);
-            mDate.setOnItemSelectedListener(new SpinnerSelectedListener(dateAdapter));
+            mDate.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(dateAdapter));
             mDate.setSelection(findDate(dates, competitor.getFinishingTime()));
             if (dates.length == 1) {
                 mDate.setVisibility(GONE);
@@ -218,25 +217,6 @@ public class CompetitorEditLayout extends ScrollView {
             ThemeHelper
                 .setPickerColor(getContext(), picker, getContext().getResources().getColor(R.color.dialog_color_text), getContext().getResources()
                     .getColor(R.color.dialog_color_button));
-        }
-    }
-
-    private static class SpinnerSelectedListener implements AdapterView.OnItemSelectedListener {
-
-        private StringArraySpinnerAdapter mAdapter;
-
-        public SpinnerSelectedListener(StringArraySpinnerAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            mAdapter.setSelected(position);
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            mAdapter.setSelected(0);
         }
     }
 }

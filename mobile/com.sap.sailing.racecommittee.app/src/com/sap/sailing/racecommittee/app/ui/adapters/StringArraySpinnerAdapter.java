@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
@@ -123,5 +124,36 @@ public class StringArraySpinnerAdapter implements SpinnerAdapter {
 
     public void setSelected(int selected) {
         mSelectedItem = selected;
+    }
+
+    public static class SpinnerSelectedListener implements AdapterView.OnItemSelectedListener {
+
+        private StringArraySpinnerAdapter mAdapter;
+        private AdapterView.OnItemSelectedListener mListener;
+
+        public SpinnerSelectedListener(StringArraySpinnerAdapter adapter) {
+            this(adapter, null);
+        }
+
+        public SpinnerSelectedListener(StringArraySpinnerAdapter adapter, AdapterView.OnItemSelectedListener listener) {
+            mAdapter = adapter;
+            mListener = listener;
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            mAdapter.setSelected(position);
+            if (mListener != null) {
+                mListener.onItemSelected(parent, view, position, id);
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+            mAdapter.setSelected(0);
+            if (mListener != null) {
+                mListener.onNothingSelected(parent);
+            }
+        }
     }
 }

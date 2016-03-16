@@ -516,6 +516,10 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
     <string name="finishing_date">Finishing Date</string>
-    <string name="date_short">yyyy-MM-dd</string>
+    <string name="date_short" translatable="false">yyyy-MM-dd</string>
+    <string-array name="sort_by_values">
+        <item>by Sail Id</item>
+        <item>by Name</item>
+    </string-array>
 
 </resources>

@@ -489,5 +489,9 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Rechtweisend</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
+    <string-array name="sort_by_values">
+        <item>nach Segelnummer</item>
+        <item>nach Namen</item>
+    </string-array>
 
 </resources>
