@@ -54,8 +54,23 @@ public class CandidateFinderImpl implements CandidateFinder {
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
     private static final double PENALTY_FOR_WRONG_SIDE = 0.8;
+    
+    /**
+     * The penalty factor multiplied with a candidate's probability in case the competitor passes the
+     * line of an XTE candidate in the wrong direction, e.g., passing a start line the wrong way or rounding
+     * a mark in the wrong direction.
+     */
     private static final double PENALTY_FOR_WRONG_DIRECTION = 0.7;
-    private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
+    
+    /**
+     * Normally, for each distance candidate there should also be a proper XTE candidate that also tells about the
+     * direction in which the boat crosses the line. XTE candidates are more precise and get a penalty in case the competitor
+     * crosses the virtual line in the wrong direction: {@link #PENALTY_FOR_WRONG_DIRECTION}. The penalty a competitor should
+     * get for not triggering a proper XTE candidate and only producing a candidate by getting near a mark and then
+     * moving away again should be penalized at least as badly as {@link #PENALTY_FOR_WRONG_DIRECTION}.
+     */
+    private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.9 * PENALTY_FOR_WRONG_DIRECTION;
+    
     private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.6;
     private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 5;
 
