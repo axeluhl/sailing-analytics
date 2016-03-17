@@ -1,5 +1,5 @@
 package com.sap.sse.common.settings;
 
-public interface SettingsFactory<T> {
+public interface SettingsFactory<T extends Settings> {
     T newInstance();
 }
