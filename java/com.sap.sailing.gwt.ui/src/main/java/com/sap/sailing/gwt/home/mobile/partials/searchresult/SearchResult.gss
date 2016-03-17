@@ -63,12 +63,13 @@
 .searchresult_item_headline {
   font-size: 1.066666666666667em;
   font-weight: bold;
-  margin-right: 2em;
+  margin-right: 2rem;
 }
 .searchresult_item_event {
   font-size: 1.066666666666667em;
   font-weight: bold;
   color: #bcbcbc;
+  margin-right: 2rem;
 }
 .searchresult_item_event_link,
 .searchresult_item_event_link:visited,
@@ -83,6 +84,7 @@
 }
 .searchresult_item_event_info {
   font-size: 0.866666666666667em;
+  margin-right: 2rem;
 }
 .searchresult_item_event_separator:after {
   content: "|";
