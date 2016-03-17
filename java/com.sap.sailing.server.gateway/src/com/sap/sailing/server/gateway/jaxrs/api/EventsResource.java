@@ -36,7 +36,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents() {
-        return getEventsData(0)
+        return getEventsData(0);
     }
 
     @GET
