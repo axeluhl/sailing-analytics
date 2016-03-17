@@ -55,7 +55,10 @@ public class CompetitorInvitationHelper {
             @Override
             public void ok(Pair<EventDTO, String> result) {
                 sailingService.inviteCompetitorsForTrackingViaEmail(result.getB(), result.getA(), leaderboardName,
-                        competitors, getLocaleInfo(), new AsyncCallback<Void>() {
+                        competitors,
+                        stringMessages.appstoreSapSailingInsight(),
+                                stringMessages.playstoreTrackingApp(),
+                        getLocaleInfo(), new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {

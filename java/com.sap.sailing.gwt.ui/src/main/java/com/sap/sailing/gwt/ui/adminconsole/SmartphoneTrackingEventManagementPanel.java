@@ -545,7 +545,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         new InviteBuoyTenderDialog(stringMessages, sailingService, leaderBoardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
             @Override
             public void ok(Triple<EventDTO, String, String> result) {
-                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(), getLocaleInfo(), new AsyncCallback<Void>() {
+                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(),
+                        null,
+                        stringMessages.playStoreBuoypositioningApp(),
+                        getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());

@@ -551,10 +551,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     Integer getStructureImportOperationProgress();
     
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo) throws MailException;
+            String leaderboardName, Collection<CompetitorDTO> competitors, String iOSAppUrl, String androidAppUrl,
+            String localeInfo) throws MailException;
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
-            String emails, String localeInfoName) throws MailException;
+            String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName) throws MailException;
             
     ArrayList<LeaderboardGroupDTO> getLeaderboardGroupsByEventId(UUID id);
 

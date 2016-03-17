@@ -215,10 +215,10 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrac
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -5855,7 +5855,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String iOSAppUrl, String androidAppUrl,
+            String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {
@@ -5863,16 +5864,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                competitors, getLocale(localeInfoName));
+ competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
     }
     
     @Override
     public void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, String emails, String localeInfoName) throws MailException {
+            String leaderboardName, String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName)
+            throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                emails, getLocale(localeInfoName));
+                emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
     }
 
     @Override
