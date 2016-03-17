@@ -4,6 +4,51 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Common superclass for custom Settings used by Components. The following example shows how to implement custom
+ * Settings:
+ * 
+ * <pre>
+ * <code>
+ * public final class RegattaOverviewBaseSettings extends AbstractSettings {
+ *     private final StringSetting myString = new UUIDSetting("myString", this);
+ *     private final BooleanSetting myBoolean = new BooleanSetting("myBoolean", this);
+ *     
+ *     // Used to create instances for a component
+ *     public RegattaOverviewBaseSettings() {
+ *     }
+ *     
+ *     // Used to create nested settings
+ *     public RegattaOverviewBaseSettings(String name, AbstractSettings settings) {
+ *         this.event.setValue(event);
+ *         this.ignoreLocalSettings.setValue(ignoreLocalSettings);
+ *     }
+ *     
+ *     public String getMyString() {
+ *         return this.myString.getValue();
+ *     }
+ *     
+ *     public void setMyString(String myString) {
+ *         return this.myString.setValue(myString);
+ *     }
+ *     
+ *     public boolean isMyBoolean() {
+ *         return this.myBoolean.getValue();
+ *     }
+ *     
+ *     public void setMyBoolean(boolean myBoolean) {
+ *         return this.myBoolean.setValue(myBoolean);
+ *     }
+ * }
+ * </code>
+ * </pre>
+ * 
+ * If a custom Settings class only has {@link Setting} oder {@link Settings} children that are correctly attached by
+ * calling their constructor with a name and the parent {@link Settings} you do not need to implement
+ * {@link #hashCode()}, {@link #equals(Object)} and {@link #toString()}. There are generic implementations of those methods that are
+ * based on the child {@link Setting}s which should be sufficient for most cases.
+ *
+ */
 public abstract class AbstractSettings extends AbstractSetting implements Settings {
 
     private Map<String, Setting> childSettings = new HashMap<>();
