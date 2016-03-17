@@ -62,7 +62,7 @@ public class Header extends Composite {
         addNavigation(placeNavigator.getHomeNavigation(), StringMessages.INSTANCE.home());
         addNavigation(placeNavigator.getEventsNavigation(), StringMessages.INSTANCE.events());
         addNavigation(placeNavigator.getSolutionsNavigation(), TextMessages.INSTANCE.solutions());
-        addUrl("http://blog.sapsailing.com", TextMessages.INSTANCE.blog());
+        addUrl("https://blog.sapsailing.com", TextMessages.INSTANCE.blog());
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
             public void run() {
