@@ -12,6 +12,16 @@ import com.sap.sse.common.settings.ValueCollectionSetting;
 import com.sap.sse.common.settings.ValueConverter;
 import com.sap.sse.common.settings.ValueSetting;
 
+/**
+ * Base class for {@link Settings} serializers that produce JSON objects using some generic object model. This base
+ * class ensures that the produced structure is equivalent for different JSON APIs so the setrialized JSON Strings
+ * should be compatible and sharable between all those implementations.
+ *
+ * @param <OBJECT>
+ *            JSON object type
+ * @param <ARRAY>
+ *            JSON Array type
+ */
 public abstract class AbstractSettingsToJsonSerializer<OBJECT, ARRAY> {
 
     protected abstract OBJECT newOBJECT();

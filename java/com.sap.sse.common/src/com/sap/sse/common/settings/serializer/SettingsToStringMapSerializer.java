@@ -17,6 +17,12 @@ import com.sap.sse.common.settings.ValueConverter;
 import com.sap.sse.common.settings.ValueCollectionSetting;
 import com.sap.sse.common.settings.ValueSetting;
 
+/**
+ * {@link Settings} serializer that constructs flattened String keys with associated String values from the hierarchical
+ * {@link Settings} structures. This is necessary for cases where hierarchical structures aren't mappable (e.g. URL
+ * serialization).
+ *
+ */
 public class SettingsToStringMapSerializer {
 
     public Map<String, Iterable<String>> serialize(Settings settings) {
