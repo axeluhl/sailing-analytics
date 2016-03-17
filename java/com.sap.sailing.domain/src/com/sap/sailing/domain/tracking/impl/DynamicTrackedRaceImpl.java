@@ -575,7 +575,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
                     neededToCreateOrUpdateFinishMarkPassing = true;
                 } else {
                     finishMarkPassingToUse = originalMarkPassing.getOriginal();
-                    if (copyOfMarkPassings != originalMarkPassing) {
+                    if (finishMarkPassingToUse != originalMarkPassing) {
                         logger.info(getRace().getName()+": Reverting race log-based finish mark passing "+originalMarkPassing+" to "+finishMarkPassingToUse+
                                 " because no finishing time found anymore for that competitor in race log");
                         neededToCreateOrUpdateFinishMarkPassing = true;
