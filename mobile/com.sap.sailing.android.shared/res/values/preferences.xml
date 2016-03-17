@@ -7,7 +7,7 @@
     <bool name="preference_isSendingActive_default">true</bool>
     
     <string name="preference_server_url_key">webserviceUrlPref</string>
-    <string name="preference_server_url_default">http://dev.sapsailing.com/</string>
+    <string name="preference_server_url_default">https://dev.sapsailing.com</string>
     
     <string name="preference_enableLifecycleLogging_key">enableLifecycleLogging</string>
     <bool name="preference_enableLifecycleLogging_default">false</bool>

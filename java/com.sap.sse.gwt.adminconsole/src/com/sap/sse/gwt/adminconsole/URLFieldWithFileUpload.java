@@ -16,6 +16,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
@@ -148,8 +149,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         }
     }
     
-    public void setFocus(boolean focused) {
-        urlTextBox.setFocus(focused);
+    public FocusWidget getInitialFocusWidget() {
+        return urlTextBox;
     }
 
     private HandlerRegistration addChangeHandler(ChangeHandler handler) {

@@ -174,7 +174,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     public void setupLoader() {
-        getLoaderManager().restartLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())));
+        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity()))).forceLoad();
     }
 
     private void showLoadFailedDialog(String message) {

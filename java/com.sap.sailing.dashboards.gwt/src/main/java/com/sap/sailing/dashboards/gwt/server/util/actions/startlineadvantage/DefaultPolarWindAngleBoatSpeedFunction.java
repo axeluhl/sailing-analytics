@@ -4,6 +4,9 @@ import org.apache.commons.math.ArgumentOutsideDomainException;
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction;
 
+import com.sap.sailing.domain.base.SpeedWithConfidence;
+import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
+import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 
@@ -27,11 +30,11 @@ public class DefaultPolarWindAngleBoatSpeedFunction {
         windAngleBoatBearingSpeedFunction = splineInterpolator.interpolate(windAngleXValues, boatBearingYValues);
     }
     
-    public Speed getBoatSpeedForWindAngleAndSpeed(double angle, double speed) {
-        Speed result = null;
+    public SpeedWithConfidence<Void> getBoatSpeedForWindAngleAndSpeed(Bearing angleToWind, Speed speed) {
+        SpeedWithConfidence<Void> result = null;
         try {
-            double boatSpeed = windAngleBoatBearingSpeedFunction.value(convert360AngleTo180RangeAngle(angle));
-            result = new KnotSpeedImpl(boatSpeed);
+            KnotSpeedImpl boatSpeed = new KnotSpeedImpl(windAngleBoatBearingSpeedFunction.value(convert360AngleTo180RangeAngle(angleToWind.getDegrees())));
+            result = new SpeedWithConfidenceImpl<Void>(boatSpeed, 0.5 , null);
         } catch (ArgumentOutsideDomainException e) {
             e.printStackTrace();
         }

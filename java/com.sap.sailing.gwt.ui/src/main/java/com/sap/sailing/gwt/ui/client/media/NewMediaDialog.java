@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.media.client.Audio;
 import com.google.gwt.media.client.MediaBase;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
@@ -293,8 +294,7 @@ public class NewMediaDialog extends DataEntryDialog<MediaTrack> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        urlBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return urlBox;
     }
 }

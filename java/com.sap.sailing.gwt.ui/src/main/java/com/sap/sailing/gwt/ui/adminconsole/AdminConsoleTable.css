@@ -1,162 +1,154 @@
 .cellTableWidget {
-	border-left: 1px solid #c9caca;
-	border-top: 1px solid #c9caca;
+    border-left: 1px solid #c9caca;
+    border-top: 1px solid #c9caca;
+    border-collapse: separate;
 }
+
+
 
 /** v-align images in the table header
  * grey background for table header
  */
 .cellTableHeader {
-	position: relative;
-    vertical-align: middle;
-	background-color: #e5e5e5;
-	border-right: 1px solid #ffffff !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
+    position: relative;
+    vertical-align: bottom;
+    background-color: #e5e5e5;
+    border-right: 0px solid #c9caca !important;
+    border-top: none !important;
+    border-bottom: 1px solid #c9caca !important;
+    padding: 3px 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    text-shadow: none !important;
 }
 
 .cellTableFirstColumnHeader {
-	position: relative;
-    vertical-align: middle;
-	background-color: #e5e5e5;
-	border-left: none !important;
-	border-right: 1px solid #ffffff !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
+    position: relative;
+    vertical-align: bottom;
+    background-color: #e5e5e5;
+    border-left: none !important;
+    border-right: 1px solid #c9caca !important;
+    border-top: none !important;
+    border-bottom: 1px solid #c9caca !important;
+    text-align: center;
 }
 
 .cellTableLastColumnHeader {
-	position: relative;
-    vertical-align: middle;
-	background-color: #e5e5e5;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 3px 12px;
-	text-align: center;
+    position: relative;
+    vertical-align: bottom;
+    background-color: #e5e5e5;
+    border-right: 1px solid #c9caca !important;
+    border-top: none !important;
+    border-bottom: 1px solid #c9caca !important;
+    text-align: center;
 }
 
 .cellTableHeader > span > img:first-child {
-	position: relative;
+    position: relative;
     vertical-align: middle;
 }
 
 .cellTableEvenRow {
-	border-bottom: 1px solid #e5e5e5;
-	background-color: rgba(255,255,255,0.5);
-}
-
-.cellTableEvenRowCell {
-	border-right: 1px solid #c9caca !important;
-	border-left: none;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 10px 5px !important;
-	white-space: nowrap;
+    background-color: rgba(255,255,255,0.5);
 }
 
 .cellTableOddRow {
-	border-bottom: 1px solid #e5e5e5;
-	background-color: rgba(242,242,242,0.5);
-}
-
-.cellTableOddRowCell {
-	border-left: none !important;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 5px 10px 5px !important;
-	white-space: nowrap;
-}
-
-.cellTableHoveredRow {
-	background-color: rgba(229,242,249,0.5);
-	border-bottom: 1px solid #e5e5e5;
+    background-color: rgba(242,242,242,0.5);
 }
 
 .cellTableSelectedRow {
-	color: #000000;
-	background-color: rgba(229,242,249,0.5);
-	border-right: 2px solid #21a0e4 !important;
-	border-left: 2px solid #21a0e4 !important;
-	border: 2px solid #21a0e4;
+    color: #000000;
+    background-color: rgba(229,242,249,0.5);
 }
 
-.cellTableSelectedRow > td:FIRST-CHILD {
-	border-left: 2px solid rgba(33,160,228,0.5) !important;
-}
 
-.cellTableSelectedRow > td:LAST-CHILD {
-	border-right: 2px solid rgba(33,160,228,0.5) !important;
+.cellTableCell {
+    overflow: inherit;
+    font-size: 12px !important;
+    line-height: 1.5em !important;  
 }
 
 .cellTableSelectedRowCell {
-	border-left: none;
-	border-right: 1px solid #e5e5e5;
-	border-top: 2px solid #21a0e4 !important;
-	border-bottom: 2px solid #21a0e4 !important;
+    box-shadow: inset 0px -3px 3px -3px #21a0e4, inset 0px 3px 3px -3px #21a0e4;
+    padding: 7px !important;
+    margin-bottom: -2px;
 }
 
-.cellTableRaceColumnHeader {
-	background-color: #e0e0e0;
-	padding: 3px 12px;
-}
-
-.cellTableLegColumnHeader {
-	background-color: #efefef;
-	padding: 3px 12px;
-}
-
-.cellTableLegDetailColumnHeader {
-	background-color: #f4f5f6;
-	padding: 3px 12px;
-}
-
-.cellTableRaceColumn {
-	background-color: #e0e0e0 !important;
-}
-
-.cellTableLegColumn {
-	background-color: #efefef !important;
-}
-
-.cellTableLegDetailColumn {
-	background-color: #ffffff !important;
-}
-
-.cellTableTotalColumn {
-	background-color: #e0e0e0 !important;
+.cellTableEvenRowCell, .cellTableOddRowCell {
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid #d6d6d6;
+    border-left: 1px solid #d6d6d6;
+    padding: 7px;
+    white-space: nowrap;
 }
 
 .cellTableCheckboxColumnCell {
-	padding: 1px 1px 1px !important;
-	vertical-align: middle !important;
-	text-align: center;
 }
 
 .cellTableCheckboxSelected {
-	margin-left: 0px; /* account for the selection border that pushes a selected checkbox to the side */
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-right: 2px;
-	height: 18px;
-	width: 18px;
-	border: solid 1px #acacac;
-	background-color: #cacaca;
-	vertical-align: middle;
+    height: 13px;
+    width: 13px;
+    margin: auto auto;
+    border: solid 1px #acacac;
+    background-color: #cacaca;
 }
 
 .cellTableCheckboxDeselected {
-	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-right: 2px;
-	border: solid 1px #acacac;
-	height: 18px;
-	width: 18px;
-	vertical-align: middle;
+    height: 13px;
+    width: 13px;
+    margin: auto auto;
+    border: solid 1px #acacac;
+}
+
+.cellTableHoveredRow {
+    background-color: rgba(229,242,249,0.5);
+    border-bottom: 1px solid #e5e5e5;
+}
+
+
+.cellTableRaceColumnHeader {
+    background-color: #e5e5e5;
+}
+
+.cellTableRaceColumnHeader span:first-child{
+    display: block;
+}
+
+.cellTableRaceColumnHeader span input, .cellTableRaceColumnHeader span img{
+    margin: 0 auto;
+}
+
+.cellTableRaceColumnHeader span img {
+    float: left;
+}
+
+.cellTableLegColumnHeader {
+    background-color: #efefef;
+
+}
+
+.cellTableLegDetailColumnHeader {
+    background-color: #f4f5f6;
+}
+
+.cellTableRaceColumnHeader span > div, .cellTableLegColumnHeader span > div {
+    width: 19px !important;
+    height: 19px !important;
+}
+
+.cellTableRaceColumn {
+    background-color: #e0e0e0 !important;
+}
+
+.cellTableLegColumn {
+    background-color: #efefef !important;
+}
+
+.cellTableLegDetailColumn {
+    background-color: #ffffff !important;
+}
+
+.cellTableTotalColumn {
+    background-color: #e0e0e0 !important;
 }

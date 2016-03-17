@@ -57,7 +57,7 @@
     <!-- About this app -->
     <string name="about_this_app">About this app</string>
     <string name="eula">EULA</string>
-    <string name="licence_information">Licence Information</string>
+    <string name="license_information">License Information</string>
 
     <!-- HTTP Requests -->
     <string name="http_request_exception" translatable="false">(Request %1$d) %2$s\nHTTP response code: %3$d.\nHTTP response body: %4$s.</string>
@@ -70,5 +70,9 @@
     <string name="no">No</string>
     <string name="warning">Warning</string>
     <string name="enable_gps">GPS is turned off. This app requires GPS positions. Do you want to turn on GPS in the location settings?</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">Currently %1$d events waiting to be sent.\nLast successful sent was at %2$s</string>
+    <string name="sending_no_waiting">Currently no event waiting to be sent.</string>
 
 </resources>

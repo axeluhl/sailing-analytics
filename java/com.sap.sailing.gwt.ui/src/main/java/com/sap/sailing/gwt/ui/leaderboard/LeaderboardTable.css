@@ -1,7 +1,10 @@
 .cellTableWidget {
 	border-left: 1px solid #c9caca;
 	border-top: 1px solid #c9caca;
+	border-collapse: separate;
 }
+
+
 
 /** v-align images in the table header
  * grey background for table header
@@ -10,7 +13,7 @@
 	position: relative;
     vertical-align: bottom;
 	background-color: #e5e5e5;
-	border-right: 1px solid #c9caca !important;
+	border-right: 0px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
 	padding: 3px 5px;
@@ -46,64 +49,55 @@
 }
 
 .cellTableEvenRow {
-	border-bottom: 1px solid #e5e5e5;
-	background-color: rgba(255,255,255,0.5);
-}
-
-.cellTableEvenRowCell {
-	border-right: 1px solid #c9caca !important;
-	border-left: none;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 7px 7px 7px;
-	white-space: nowrap;
-	font-size: 12px !important;
-	line-height: 1.5 !important;
-}
-
-.cellTableCheckboxColumnCell {
-	padding: 1px 1px 1px !important;
-	vertical-align: middle !important;
-	text-align: center;
-}
-
-.cellTableCheckboxSelected {
-	margin-left: 0px; /* account for the selection border that pushes a selected checkbox to the side */
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-right: 2px;
-	height: 18px;
-	width: 18px;
-	border: solid 1px #fcbb22;
-	background-color: #fcbb22;
-	vertical-align: middle;
-}
-
-.cellTableCheckboxDeselected {
-	margin-left: 2px; /* account for the selection border that pushes a selected checkbox to the side */
-	margin-top: 0px;
-	margin-bottom: 0px;
-	margin-right: 2px;
-	border: solid 1px #acacac;
-	height: 18px;
-	width: 18px;
-	vertical-align: middle;
+    background-color: rgba(255,255,255,0.5);
 }
 
 .cellTableOddRow {
-	border-bottom: 1px solid #e5e5e5;
-	background-color: rgba(242,242,242,0.5);
+    background-color: rgba(242,242,242,0.5);
 }
 
-.cellTableOddRowCell {
-	border-left: none !important;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
-	padding: 7px 7px 7px;
+.cellTableSelectedRow {
+    color: #000000;
+    background-color: rgba(229,242,249,0.5);
+}
+
+
+.cellTableCell {
+    font-size: 12px !important;
+    line-height: 1.5em !important;  
+    vertical-align: middle;
+}
+
+.cellTableSelectedRowCell {
+    box-shadow: inset 0px -3px 3px -3px #21a0e4, inset 0px 3px 3px -3px #21a0e4;
+    padding: 7px !important;
+ }
+
+.cellTableEvenRowCell, .cellTableOddRowCell {
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid #d6d6d6;
+    border-left: 1px solid #d6d6d6;
+	padding: 7px;
 	white-space: nowrap;
-	font-size: 12px !important;
-	line-height: 1.5 !important;
+}
+
+.cellTableCheckboxColumnCell {
+}
+
+.cellTableCheckboxSelected {
+    height: 13px;
+    width: 13px;
+    margin: auto auto;
+	border: 1px solid #fcbb22;
+	background-color: #fcbb22;
+}
+
+.cellTableCheckboxDeselected {
+    height: 13px;
+    width: 13px;
+	margin: auto auto;
+	border: solid 1px #acacac;
 }
 
 .cellTableHoveredRow {
@@ -111,28 +105,6 @@
 	border-bottom: 1px solid #e5e5e5;
 }
 
-.cellTableSelectedRow {
-	color: #000000;
-	background-color: rgba(229,242,249,0.5);
-	border-right: 2px solid #21a0e4 !important;
-	border-left: 2px solid #21a0e4 !important;
-	border: 2px solid #21a0e4;
-}
-
-.cellTableSelectedRow > td:FIRST-CHILD {
-	border-left: 2px solid rgba(33,160,228,0.5) !important;
-}
-
-.cellTableSelectedRow > td:LAST-CHILD {
-	border-right: 2px solid rgba(33,160,228,0.5) !important;
-}
-
-.cellTableSelectedRowCell {
-	border-left: none;
-	border-right: 1px solid #e5e5e5;
-	border-top: 2px solid #21a0e4 !important;
-	border-bottom: 2px solid #21a0e4 !important;
-}
 
 .cellTableRaceColumnHeader {
 	background-color: #e5e5e5;
@@ -152,7 +124,6 @@
 
 .cellTableLegColumnHeader {
 	background-color: #efefef;
-
 }
 
 .cellTableLegDetailColumnHeader {
