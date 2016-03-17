@@ -17,10 +17,26 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
 public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
-    // TODO what is the meaning of this constant?
-    private final static double PENALTY_FOR_SKIPPED = 0.16;
-    // TODO what is the meaning of this constant?
-    private final static double PENALTY_FOR_SKIPPED_TO_END = 0.25;
+    
+    /**
+     * The penalty for an edge's probability in case the edge skips one or more waypoints and does not
+     * end at the end proxy node. Skipping a waypoint that is not the last means that either the waypoint
+     * was passed in a very strange, unrecognized way or we got a tracker outage. This is both pretty
+     * unlikely and is penalized by this factor being multiplied to the edge's general probability.<p>
+     * 
+     * This factor is raised to the n-th power for n waypoints skipped.
+     */
+    private final static double PENALTY_FOR_SKIPPED = 0.3;
+    
+    /**
+     * Similar to {@link #PENALTY_FOR_SKIPPED}, but applied to edges that skip to the end proxy node. Such skips
+     * are regular business while the race is still going on, and paths that are otherwise likely but don't lead
+     * up to the end shall be possible and therefore must not be penalized harshly, receiving less of a penalty
+     * (greater factor).<p>
+     * 
+     * As with {@link #PENALTY_FOR_SKIPPED}, this factor is raised to the n-th power for n waypoints skipped.
+     */
+    private final static double PENALTY_FOR_SKIPPED_TO_END = 0.5;
     private final double estimatedDistanceAndStartTimingProbability;
     private final int numberOfWaypoints;
 
