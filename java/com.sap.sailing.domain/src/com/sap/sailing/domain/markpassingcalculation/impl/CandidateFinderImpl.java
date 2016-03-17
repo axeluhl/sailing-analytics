@@ -54,9 +54,9 @@ public class CandidateFinderImpl implements CandidateFinder {
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
     private static final double PENALTY_FOR_WRONG_SIDE = 0.8;
-    private static final double PENALTY_FOR_WRONG_DIRECTION = 0.8;
+    private static final double PENALTY_FOR_WRONG_DIRECTION = 0.7;
     private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.8;
-    private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.8;
+    private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.6;
     private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 5;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());

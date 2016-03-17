@@ -13,7 +13,6 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
  * @author Nicolas Klose
  * 
  */
-
 public class Edge implements Comparable<Edge> {
     private final Candidate start;
     private final Candidate end;
@@ -26,7 +25,7 @@ public class Edge implements Comparable<Edge> {
      * 
      * This factor is raised to the n-th power for n waypoints skipped.
      */
-    private final static double PENALTY_FOR_SKIPPED = 0.3;
+    private final static double PENALTY_FOR_SKIPPED = 0.1;
     
     /**
      * Similar to {@link #PENALTY_FOR_SKIPPED}, but applied to edges that skip to the end proxy node. Such skips
@@ -37,6 +36,7 @@ public class Edge implements Comparable<Edge> {
      * As with {@link #PENALTY_FOR_SKIPPED}, this factor is raised to the n-th power for n waypoints skipped.
      */
     private final static double PENALTY_FOR_SKIPPED_TO_END = 0.5;
+    
     private final double estimatedDistanceAndStartTimingProbability;
     private final int numberOfWaypoints;
 
@@ -60,8 +60,9 @@ public class Edge implements Comparable<Edge> {
      */
     public Double getProbability() {
         final double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? PENALTY_FOR_SKIPPED_TO_END : PENALTY_FOR_SKIPPED;
-        return start.getProbability() * end.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1));
-        
+        // See bug 3241 comment #38: only use the edge's start candidate's probability; the end candidate's probability is the
+        // next edge's start probability. The only probability we'll miss this way is that of the end proxy node and that is always 1.
+        return start.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1));
     }
 
     public Candidate getStart() {
