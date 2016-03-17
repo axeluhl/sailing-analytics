@@ -64,7 +64,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         simpleName = getClass().getSimpleName();
     }
 
-    private void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
+    protected void setUp(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
         super.setUp();
         URI storedUri = new URI("file:///"
                 + new File("resources/" + getFileName() + raceNumber + ".mtb").getCanonicalPath().replace('\\', '/'));
