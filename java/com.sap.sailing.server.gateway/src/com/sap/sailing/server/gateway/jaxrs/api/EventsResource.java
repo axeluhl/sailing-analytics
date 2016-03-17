@@ -42,7 +42,7 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") int showNonPublic) {
-        return getEventsData(showNonPublic)
+        return getEventsData(showNonPublic);
     }
 
     private Response getEventsData(int showNonPublic) {
