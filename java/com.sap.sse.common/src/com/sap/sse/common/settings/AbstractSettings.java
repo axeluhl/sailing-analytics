@@ -10,7 +10,7 @@ import java.util.Map;
  * 
  * <pre>
  * <code>
- * public final class RegattaOverviewBaseSettings extends AbstractSettings {
+ * public final class ExampleSettings extends AbstractSettings {
  *     private final StringSetting myString = new UUIDSetting("myString", this);
  *     private final BooleanSetting myBoolean = new BooleanSetting("myBoolean", this);
  *     
