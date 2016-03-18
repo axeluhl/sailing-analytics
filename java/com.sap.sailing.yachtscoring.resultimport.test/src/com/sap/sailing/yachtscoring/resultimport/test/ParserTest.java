@@ -38,7 +38,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class ParserTest {
     private static final String SAMPLE_INPUT_NAME_KEYWESTRACEWEEEK = "event1390_KeyWestRaceWeek2016_xrr.xml";
     private static final String KEYWESTRACEWEEEK_EVENT_NAME = "Key West Race Week 2016";
-    private static final String ISAF_ID_29ER = "29ER";
+    private static final String BOAT_CLASS_J111 = "J 111";
     
     private static final String RESOURCES = "resources/";
 
@@ -57,9 +57,9 @@ public class ParserTest {
                 try {
                     List<ResultDocumentDescriptor> result = new ArrayList<ResultDocumentDescriptor>();
 
-                    Date _29erDate = DatatypeConverter.parseDateTime("2016-01-19T12:55:08.000Z").getTime();
+                    Date _J111Date = DatatypeConverter.parseDateTime("2016-01-19T12:55:08.000Z").getTime();
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(SAMPLE_INPUT_NAME_KEYWESTRACEWEEEK),
-                            null, new MillisecondsTimePoint(_29erDate), KEYWESTRACEWEEEK_EVENT_NAME , null, ISAF_ID_29ER));
+                            null, new MillisecondsTimePoint(_J111Date), KEYWESTRACEWEEEK_EVENT_NAME , null, BOAT_CLASS_J111));
                     
                     return result;
                 } catch (Exception e) {
@@ -85,10 +85,10 @@ public class ParserTest {
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         
-        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForYES = hasResultsFor.get(KEYWESTRACEWEEEK_EVENT_NAME);
-        assertNotNull(resultsForYES);
+        Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(KEYWESTRACEWEEEK_EVENT_NAME);
+        assertNotNull(resultsForKeyWestRaceWeek);
 
-        assertEquals(3, resultsForYES.size());
+        assertEquals(3, resultsForKeyWestRaceWeek.size());
     }
     
 //    @Test

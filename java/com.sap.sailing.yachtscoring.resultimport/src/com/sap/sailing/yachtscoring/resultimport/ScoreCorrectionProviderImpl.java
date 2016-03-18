@@ -87,27 +87,26 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
         Parser parser = resolveParser(eventName, boatClassName);
         try {
             RegattaResults regattaResults = parser.parse();
-                for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
-                    if (o instanceof Event) {
-                        Event event = (Event) o;
-                        if (event.getTitle().equals(eventName)) {
-                            for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
-                                if (eventO instanceof Division) {
-                                    Division division = (Division) eventO;
-                                    EventGender divisionGender = division.getGender();
-                                    String divisionBoatClassAndGender = parser.getBoatClassName(division);
-                                    if(divisionGender != null) {
-                                        divisionBoatClassAndGender += ", " + divisionGender.name();  
-                                    }
-                                    if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
-                                        return new XRRRegattaResultsAsScoreCorrections(event, division, this,
-                                                parser);
-                                    }
+            for (Object o : regattaResults.getPersonOrBoatOrTeam()) {
+                if (o instanceof Event) {
+                    Event event = (Event) o;
+                    if (event.getTitle().equals(eventName)) {
+                        for (Object eventO : event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                            if (eventO instanceof Division) {
+                                Division division = (Division) eventO;
+                                EventGender divisionGender = division.getGender();
+                                String divisionBoatClassAndGender = parser.getBoatClassName(division);
+                                if(divisionGender != null) {
+                                    divisionBoatClassAndGender += ", " + divisionGender.name();  
+                                }
+                                if (boatClassName.equalsIgnoreCase(divisionBoatClassAndGender) || boatClassName.contains(divisionBoatClassAndGender)) {
+                                    return new XRRRegattaResultsAsScoreCorrections(event, division, this,
+                                            parser);
                                 }
                             }
                         }
                     }
-//                }
+                }
             }
         } catch (JAXBException e) {
             logger.info("Parse error during XRR import. Ignoring document " + parser.toString());
