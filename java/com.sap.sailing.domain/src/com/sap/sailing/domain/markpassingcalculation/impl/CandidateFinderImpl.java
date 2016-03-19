@@ -763,7 +763,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (start == null) {
                 result = 1.0;
             } else {
-                final boolean startIsLine = start.getPassingInstructions() == PassingInstruction.Line;
+                // if the start waypoint's passing instructions are unknown, assume it's a line
+                final boolean startIsLine = start.getPassingInstructions() == PassingInstruction.Line || start.getPassingInstructions() == PassingInstruction.None;
                 final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors = new ArrayList<>();
                 for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
                     if (otherCompetitor != c) {
