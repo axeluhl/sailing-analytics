@@ -60,9 +60,10 @@ public class Edge implements Comparable<Edge> {
      */
     public Double getProbability() {
         final double penalty = end.getOneBasedIndexOfWaypoint() == numberOfWaypoints + 1 ? PENALTY_FOR_SKIPPED_TO_END : PENALTY_FOR_SKIPPED;
-        // See bug 3241 comment #38: only use the edge's start candidate's probability; the end candidate's probability is the
-        // next edge's start probability. The only probability we'll miss this way is that of the end proxy node and that is always 1.
-        return start.getProbability() * estimatedDistanceAndStartTimingProbability * Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1));
+        // See bug 3241 comment #38: only use the edge's end candidate's probability; the start candidate's probability is the
+        // previous edge's end probability. The only probability we'll miss this way is that of the start proxy node and that is always 1.
+        return end.getProbability() * estimatedDistanceAndStartTimingProbability *
+                Math.pow(penalty, (end.getOneBasedIndexOfWaypoint() - start.getOneBasedIndexOfWaypoint() - 1));
     }
 
     public Candidate getStart() {
