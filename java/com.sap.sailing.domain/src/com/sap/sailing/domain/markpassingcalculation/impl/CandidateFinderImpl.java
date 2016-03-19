@@ -2,6 +2,7 @@ package com.sap.sailing.domain.markpassingcalculation.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
@@ -77,8 +79,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private static final double PENALTY_FOR_DISTANCE_CANDIDATES = 0.9 * PENALTY_FOR_WRONG_DIRECTION;
     
-    private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.6;
-    private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 5;
+    private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.1;
+    private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 10;
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
 
@@ -426,7 +428,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                                 : PENALTY_FOR_DISTANCE_CANDIDATES * PENALTY_FOR_WRONG_SIDE;
                                         final Double newStartProbabilityBasedOnOtherCompetitors;
                                         if (isStartWaypoint(w)) {
-                                            newStartProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
+                                            newStartProbabilityBasedOnOtherCompetitors = getProbabilityForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
                                             if (newStartProbabilityBasedOnOtherCompetitors != null) {
                                                 newProbability *= newStartProbabilityBasedOnOtherCompetitors;
                                             }
@@ -680,7 +682,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             // at time point t the other competitors are largely not even close to the start waypoint;
             // this will make start candidates much more likely if many other competitors are also very close to the
             // start, and it will help ruling out those candidates where someone is practicing a start just for themselves
-            startProbabilityBasedOnOtherCompetitors = getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
+            startProbabilityBasedOnOtherCompetitors = getProbabilityForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
             if (startProbabilityBasedOnOtherCompetitors != null) {
                 probability *= startProbabilityBasedOnOtherCompetitors;
             }
@@ -690,13 +692,59 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability,
                 startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, passesInTheRightDirectionProbability);
     }
+    
+    static class AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine {
+        private final Distance absoluteGeometricDistance;
+        private final Distance signedProjectedDistance;
+        public AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(Distance absoluteGeometricDistance,
+                Distance signedProjectedDistance) {
+            super();
+            this.absoluteGeometricDistance = absoluteGeometricDistance;
+            this.signedProjectedDistance = signedProjectedDistance;
+        }
+        public Distance getAbsoluteGeometricDistance() {
+            return absoluteGeometricDistance;
+        }
+        public Distance getSignedProjectedDistance() {
+            return signedProjectedDistance;
+        }
+        @Override
+        public String toString() {
+            return "AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine [absoluteGeometricDistance="
+                    + absoluteGeometricDistance + ", signedProjectedDistance=" + signedProjectedDistance + "]";
+        }
+    }
 
     /**
-     * For a fixed line start it is very likely that all competitors pass the start waypoint at about the same time.
-     * This requires everyone to at least be pretty close to the start waypoint at the start time. Therefore, a start
-     * mark passing candidate is very likely when a large share of competitors is very close to the start line, whereas
-     * it becomes pretty unlikely when everyone is sailing around anywhere on the course or behind the line but not
-     * being in close proximity to the line.
+     * For a fixed line start it is very likely that all competitors pass the start waypoint at about the same time, or
+     * that only a few competitors lag behind, e.g., because of start time penalties. This requires everyone to at least
+     * be pretty close to the start waypoint at the start time, of if we're looking at a competitor starting late, the
+     * field would at least have little variance and be consistently on the course side of the start line.
+     * <p>
+     * 
+     * Therefore, a start mark passing candidate is very likely when a large share of competitors is very close to the
+     * start line. If the other competitors are not very close to the start line, a start may still be likely if the
+     * others are on the course side and have similar distance to the start line, whereas it becomes pretty unlikely
+     * when everyone is sailing around anywhere on the course or behind the line but not being in close proximity to the
+     * line and not having similar distances to the start line while being on course side.
+     * 
+     * <ul>
+     * <li>check distance variance of other competitors; low variance could mean they started jointly</li>
+     * <li>for start *line*, consider the side on which the other competitors are; don't rule out a late start if other
+     * competitors have low distance variance and are on course side of the line</li>
+     * <li>generally consider distance of other competitors to line</li>
+     * <li>dampen "outliers" such as trackers forgotten in harbor or trackers not currently sending (80% of competitors
+     * that look like they are starting seems like a good guess)</li>
+     * </ul>
+     * 
+     * Approach: compute signed distances to start line (positive meaning on course side). Sort by absolute distance and
+     * compute a {@link #weight(double) weighted} average where the boats farthest away are considered less relevant than
+     * the ones closer, leading to a natural outlier removal.<p>
+     * 
+     * For the special case of a late starter, consider the weighted variance of the signed distance from the start line.
+     * A low variance with a positive average (meaning on course side) indicates that everyone else may have started around the
+     * same time, making this a probable late starter's candidate. Therefore, low variance with positive average shall increase
+     * a probability that was low because of a large weighted average distance.
      * 
      * @param t
      *            the time point at which to consider the other competitors behavior relative to the start waypoint
@@ -705,18 +753,18 @@ public class CandidateFinderImpl implements CandidateFinder {
      *         completely unlikely that a candidate for {@code c} at time {@code t} could have been a start candidate; 1
      *         meaning that based on the other competitors' relation to the start line at time point {@code t} is seems
      *         a fact that this must have been the start.
+     * 
      */
-    private Double getPenaltyForStartCandidateBasedOnOtherCompetitorsBehavior(Competitor c, TimePoint t) {
+    private Double getProbabilityForStartCandidateBasedOnOtherCompetitorsBehavior(Competitor c, TimePoint t) {
         final Double result;
         if (race.getStartOfRace(/* inferred */ false) == null && race.isGateStart() != Boolean.TRUE) {
-            // boats within one hull length of the start line are great indicators that we're at the start:
-            final double hullLengthInMeters = race.getRace().getBoatClass().getHullLength().getMeters();
             final Waypoint start = race.getRace().getCourse().getFirstWaypoint();
+            final Iterable<Pair<Position, Bearing>> crossingInformationForStart = getCrossingInformation(start, t);
             if (start == null) {
                 result = 1.0;
             } else {
-                int numberOfCompetitorsForWhichStartLineDistanceIsAvailable = 0;
-                double log10OfMeterDistanceSum = 0;
+                final boolean startIsLine = start.getPassingInstructions() == PassingInstruction.Line;
+                final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors = new ArrayList<>();
                 for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
                     if (otherCompetitor != c) {
                         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
@@ -724,34 +772,114 @@ public class CandidateFinderImpl implements CandidateFinder {
                             final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
                             final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
                             if (otherCompetitorsDistanceToStartAtT != null) {
-                                numberOfCompetitorsForWhichStartLineDistanceIsAvailable++;
-                                log10OfMeterDistanceSum += Math.log10(otherCompetitorsDistanceToStartAtT.getMeters());
+                                final Distance crossTrackError;
+                                if (startIsLine) {
+                                    Pair<Position, Bearing> crossingInformationForStartLine = crossingInformationForStart.iterator().next();
+                                    crossTrackError = estimatedPositionAtT.crossTrackError(crossingInformationForStartLine.getA(),
+                                            crossingInformationForStartLine.getB());
+                                } else {
+                                    crossTrackError = null;
+                                }
+                                distancesToStartLineOfOtherCompetitors.add(new
+                                        AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(otherCompetitorsDistanceToStartAtT, crossTrackError));
                             }
                         }
                     }
                 }
-                // TODO use a function that will approach 1 as we get, say, 50% of the other competitors within a reasonable distance from the start line, say 10m; the closer, the more likely
-                // To make outliers such as trackers left in the harbor not hurt the results unnecessarily, the logarithm of
-                // distances to the start waypoint is averaged, giving more relevance to the competitors close to the line when
-                // computing an arithmetic mean across the logarithms.
-                // f(1) := 1
-                // f(NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES) := WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START
-                // f(x) := 1-(1-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES * (hullLengthInMeters / weightedMeterAverageDistance - 1)
-                if (numberOfCompetitorsForWhichStartLineDistanceIsAvailable > 0) {
-                    double log10Avg = log10OfMeterDistanceSum / numberOfCompetitorsForWhichStartLineDistanceIsAvailable;
-                    double weightedMeterAverageDistance = Math.pow(10, log10Avg);
-                    result = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
-                            (1.-(1.-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES
-                                    * (weightedMeterAverageDistance / hullLengthInMeters-1))));
-                } else {
-                    // no distance for any other competitor from the start line was available
-                    result = 1.0;
-                }
+                result = getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(distancesToStartLineOfOtherCompetitors, startIsLine);
             }
         } else {
             result = null;
         }
         return result;
+    }
+
+    /**
+     * The method computes two probabilities of the candidate being a start: one based on the other competitors largely
+     * being close to the start line, meaning a regular start where the competitor starts roughly at the same time as
+     * everybody else; the other probability computed is based on the other competitors largely being in a similar
+     * distance to the start line on the course side, suggesting that the competitor is starting late, but mostly
+     * everybody else did start earlier and around the same time. The probability returned is the probability of
+     * the start being the one <em>or</em> the other scenario which mathematically is represented by using the inverted
+     * probabilities of the two start options, multiplying them and inverting the resulting probability.
+     */
+    Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
+            final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors, boolean startIsLine) {
+        final Double result;
+        // sort by the absolute distance to start line
+        // boats within one hull length of the start line are great indicators that we're at the start:
+        final Distance hullLength = race.getRace().getBoatClass().getHullLength();
+        final Distance weightedAverageAbsoluteDistance;
+        if (!distancesToStartLineOfOtherCompetitors.isEmpty()) {
+            Collections.sort(distancesToStartLineOfOtherCompetitors, (a, b)->a.getAbsoluteGeometricDistance().compareTo(b.getAbsoluteGeometricDistance()));
+            Distance weightedAbsoluteDistanceSum = Distance.NULL;
+            int i=0;
+            double weightSum = 0;
+            for (final AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine d : distancesToStartLineOfOtherCompetitors) {
+                final double weight = weight(((double) i)/distancesToStartLineOfOtherCompetitors.size());
+                final Distance weightedDistance = d.getAbsoluteGeometricDistance().scale(weight);
+                weightedAbsoluteDistanceSum = weightedAbsoluteDistanceSum.add(weightedDistance);
+                weightSum += weight;
+                i++;
+            }
+            weightedAverageAbsoluteDistance = weightedAbsoluteDistanceSum.scale(1. / weightSum);
+            final double probabilityOfStartWithOthers = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
+                    (1.-(1.-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES
+                            * (weightedAverageAbsoluteDistance.divide(hullLength)-1))));
+            if (startIsLine) {
+                // Now look at the variance, particularly on course side: low variance may mean we are looking at a late starter
+                // sort such that the boats with the least value (greatest negative amount) comes first and the last ~20% are largely ignored
+                Collections.sort(distancesToStartLineOfOtherCompetitors, (a, b)->a.getSignedProjectedDistance().compareTo(b.getSignedProjectedDistance()));
+                Distance weightedSignedDistanceSum = Distance.NULL;
+                weightSum = 0;
+                i=0;
+                for (final AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine d : distancesToStartLineOfOtherCompetitors) {
+                    final double weight = weight(((double) i)/distancesToStartLineOfOtherCompetitors.size());
+                    weightedSignedDistanceSum  = weightedSignedDistanceSum.add(d.getSignedProjectedDistance().scale(
+                            weight));
+                    weightSum += weight;
+                    i++;
+                }
+                final Distance weightedAverageSignedDistance = weightedSignedDistanceSum.scale(1. / weightSum);
+                i=0;
+                double signedDistanceVarianceSumInSquareMeters = 0;
+                weightSum = 0;
+                for (final AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine d : distancesToStartLineOfOtherCompetitors) {
+                    final double differenceFromWeightedAverageInMeters = d.getSignedProjectedDistance().getMeters() - weightedAverageSignedDistance.getMeters();
+                    final double weight = weight(((double) i)/distancesToStartLineOfOtherCompetitors.size());
+                    signedDistanceVarianceSumInSquareMeters += weight*differenceFromWeightedAverageInMeters*differenceFromWeightedAverageInMeters;
+                    weightSum += weight;
+                    i++;
+                }
+                final double weightedVarianceInSquareMeters = signedDistanceVarianceSumInSquareMeters / weightSum;
+                final double weightedVarianceRatioToSquaredHullLength = weightedVarianceInSquareMeters / hullLength.getMeters() / hullLength.getMeters();
+                final double probabilityOfLateStart = Math.max(WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START, Math.min(1.0,
+                        (1.-(1.-WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START)/NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES
+                                * (weightedVarianceRatioToSquaredHullLength-1))));
+                result = 1. - (1.-probabilityOfLateStart) * (1.-probabilityOfStartWithOthers);
+            } else {
+                result = probabilityOfStartWithOthers;
+            }
+        } else {
+            // no distance for any other competitor from the start line was available
+            result = 1.0;
+        }
+        return result;
+    }
+
+    /**
+     * Idea: sort and cut off the worst 20%. We played with weight functions for averaging the distances such that after sorting them
+     * in increasing order the smaller ones get greater weight and the "outlier" ones towards the end of the sorted set receive small
+     * weights. Still, if even the "best" (least) distances are far away, the result will be a low probability.
+     * A function that could be helpful is this: -atan(20*(x-0.8)) + Pi/2)/Pi. The 0.8 represents the 80% starting from which the
+     * weight declines sharply. The factor of 20 represents how sharp the decline is. x is between 0 and 1, representing the start
+     * and the end of the sorted distance collection, respectively. Outputs are between 0 and 1, representing the weight to assign
+     * to a distance while averaging.
+     */
+    private double weight(double relativePositionInDistanceCollectionInIncreasingOrder) {
+        final double SHARPNESS_OF_DECLINE = 100;
+        final double CENTER_OF_DECLINE = 0.8;
+        return (-Math.atan(SHARPNESS_OF_DECLINE*(relativePositionInDistanceCollectionInIncreasingOrder-CENTER_OF_DECLINE))+Math.PI/2) / Math.PI;
     }
 
     private Distance getMinDistanceOrNull(List<Distance> distances) {
