@@ -56,11 +56,17 @@ public class CandidateFinderImpl implements CandidateFinder {
     private static final double PENALTY_FOR_WRONG_SIDE = 0.8;
     
     /**
-     * The penalty factor multiplied with a candidate's probability in case the competitor passes the
-     * line of an XTE candidate in the wrong direction, e.g., passing a start line the wrong way or rounding
-     * a mark in the wrong direction.
+     * The penalty factor multiplied with a candidate's probability in case the competitor passes the line of an XTE
+     * candidate with passing instructions other than {@link PassingInstruction#Line} in the wrong direction, e.g.,
+     * passing a single mark that is to be passed to port in the wrong direction.
      */
     private static final double PENALTY_FOR_WRONG_DIRECTION = 0.7;
+    
+    /**
+     * The penalty factor multiplied with a candidate's probability in case the competitor passes an XTE candidate for a
+     * {@link PassingInstruction#Line line} in the wrong direction, e.g., passing a start line the wrong way.
+     */
+    private static final double PENALTY_FOR_LINE_PASSED_IN_WRONG_DIRECTION = 0.3;
     
     /**
      * Normally, for each distance candidate there should also be a proper XTE candidate that also tells about the
@@ -665,9 +671,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         double probability = getDistanceBasedProbability(w, t, d);
         final boolean onCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
         probability = onCorrectSideOfWaypoint ? probability : probability * PENALTY_FOR_WRONG_SIDE;
-        final Boolean passesInTheRightDirection = passesInTheRightDirection(w, xte1, xte2, portMark);
+        final Double passesInTheRightDirectionProbability = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
-        probability = passesInTheRightDirection != Boolean.FALSE ? probability : probability * PENALTY_FOR_WRONG_DIRECTION;
+        probability = passesInTheRightDirectionProbability == null ? probability : probability * passesInTheRightDirectionProbability;
         final Double startProbabilityBasedOnOtherCompetitors;
         if (isStartWaypoint(w)) {
             // add a penalty for a start candidate if we don't know the start time, it's not a gate start and
@@ -682,7 +688,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             startProbabilityBasedOnOtherCompetitors = null;
         }
         return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability,
-                startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, passesInTheRightDirection);
+                startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, passesInTheRightDirectionProbability);
     }
 
     /**
@@ -810,24 +816,29 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * Determines whether a candidate passes a waypoint in the right direction. Can only be applied to XTE-Candidates.
-     * For marks passed on port, the cross-track error should switch from positive to negative and vice versa. Lines are
-     * also from positive to negative as the cross-track error to a line is always positive when approaching it from the
-     * correct side.
+     * Determines whether a candidate passes a waypoint in the right direction. A probability of 1 is assigned in case
+     * it does. Otherwise, depending on the passing instructions, {@link #PENALTY_FOR_WRONG_DIRECTION} or
+     * {@link #PENALTY_FOR_LINE_PASSED_IN_WRONG_DIRECTION} is returned as a "probability penalty" for passing the
+     * waypoint in the wrong direction. The penalty is worse if {@link PassingInstruction#Line lines} are passed in the
+     * wrong direction. Can only be applied to XTE-Candidates. For marks passed on port, the cross-track error should
+     * switch from positive to negative and vice versa. Lines are also from positive to negative as the cross-track
+     * error to a line is always positive when approaching it from the correct side.
      * 
      * @return {@code null} in case the passing instructions aren't defined and therefore the correct direction is not
      *         known
      */
-    private Boolean passesInTheRightDirection(Waypoint w, double xte1, double xte2, boolean portMark) {
-        final Boolean result;
+    private Double passesInTheRightDirection(Waypoint w, double xte1, double xte2, boolean portMark) {
+        final Double result;
         PassingInstruction instruction = getPassingInstructions(w);
         if (instruction == PassingInstruction.Single_Unknown) {
             result = null;
-        } else if (instruction == PassingInstruction.Port || instruction == PassingInstruction.Line
+        } else if (instruction == PassingInstruction.Port
                 || (instruction == PassingInstruction.Gate && portMark)) {
-            result = xte1 > xte2 ? true : false;
+            result = xte1 > xte2 ? 1 : PENALTY_FOR_WRONG_DIRECTION;
         } else if (instruction == PassingInstruction.Starboard || (instruction == PassingInstruction.Gate && !portMark)) {
-            result = xte1 < xte2 ? true : false;
+            result = xte1 < xte2 ? 1 : PENALTY_FOR_WRONG_DIRECTION;
+        } else if (instruction == PassingInstruction.Line) {
+            result = xte1 > xte2 ? 1 : PENALTY_FOR_LINE_PASSED_IN_WRONG_DIRECTION;
         } else {
             result = null;
         }
