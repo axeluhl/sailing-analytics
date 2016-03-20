@@ -90,6 +90,21 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
     }
 
+    protected Iterable<Waypoint> getWaypoints() {
+        return waypoints;
+    }
+    
+    protected Competitor getCompetitorByName(final String name) {
+        Competitor result = null;
+        for (Competitor c : getTrackedRace().getRace().getCompetitors()) {
+            if (c.getName().equals(name)) {
+                result = c;
+                break;
+            }
+        }
+        return result;
+    }
+    
     protected abstract String getFileName();
 
     protected void testRace(String raceNumber) throws IOException, InterruptedException, URISyntaxException, ParseException, SubscriberInitializationException, CreateModelException {
@@ -214,9 +229,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
     }
 
     private void testMiddleOfRace(int zeroBasedIndexOfLastWaypointToBePassed) {
+        int mistakes = 0;
         CandidateFinder finder = new CandidateFinderImpl(getTrackedRace());
         CandidateChooser chooser = new CandidateChooserImpl(getTrackedRace());
-        int mistakes = 0;
         Waypoint lastWaypointToBePassed = waypoints.get(zeroBasedIndexOfLastWaypointToBePassed);
         Waypoint wayPointAfterwards = waypoints.get(zeroBasedIndexOfLastWaypointToBePassed + 1);
         for (Competitor c : getRace().getCompetitors()) {
@@ -224,21 +239,9 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
             if (markPassingAfter != null) {
                 if (givenPasses.get(c).get(lastWaypointToBePassed) != null) {
                     final TimePoint lastGivenPassingToDetectAt = givenPasses.get(c).get(lastWaypointToBePassed).getTimePoint();
-                    // add fixes up to 20% into the leg starting after the last passing to be detected
+                    // add fixes up to 50% into the leg starting after the last passing to be detected
                     final TimePoint beforeNextPassing = lastGivenPassingToDetectAt.plus(lastGivenPassingToDetectAt.until(markPassingAfter.getTimePoint()).times(0.5));
-                    List<GPSFix> fixes = new ArrayList<GPSFix>();
-                    try {
-                        getTrackedRace().getTrack(c).lockForRead();
-                        for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
-                            if (fix.getTimePoint().before(beforeNextPassing)) {
-                                fixes.add(fix);
-                            }
-                        }
-                    } finally {
-                        getTrackedRace().getTrack(c).unlockAfterRead();
-                    }
-                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
-                    chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
+                    calculateMarkPassingsForPartialTrack(c, beforeNextPassing, finder, chooser);
                     boolean gotPassed = true;
                     boolean gotOther = false;
                     System.out.println(c);
@@ -270,6 +273,23 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
         }
         assertEquals(0, mistakes);
 
+    }
+
+    protected void calculateMarkPassingsForPartialTrack(Competitor c, final TimePoint upToTimePoint,
+            CandidateFinder finder, CandidateChooser chooser) {
+        List<GPSFix> fixes = new ArrayList<GPSFix>();
+        try {
+            getTrackedRace().getTrack(c).lockForRead();
+            for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
+                if (fix.getTimePoint().before(upToTimePoint)) {
+                    fixes.add(fix);
+                }
+            }
+        } finally {
+            getTrackedRace().getTrack(c).unlockAfterRead();
+        }
+        Util.Pair<Iterable<Candidate>, Iterable<Candidate>> f = finder.getCandidateDeltas(c, fixes);
+        chooser.calculateMarkPassDeltas(c, f.getA(), f.getB());
     }
 
     @AfterClass
