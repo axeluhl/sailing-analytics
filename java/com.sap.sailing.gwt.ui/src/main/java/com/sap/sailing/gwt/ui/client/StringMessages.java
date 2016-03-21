@@ -1499,4 +1499,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String thereIsNoIdentifierSet();
     String couldNotObtainAccessTokenForUser(String message);
     String raceManagerDeviceName();
+    String serverURLInvalid();
+    String serverURLEmpty();
 }
