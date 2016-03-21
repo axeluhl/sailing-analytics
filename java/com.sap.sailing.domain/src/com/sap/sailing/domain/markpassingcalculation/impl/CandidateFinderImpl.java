@@ -931,7 +931,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                 Distance leftDistance = p.getDistance(leftMarkPos);
                 Distance rightDistance = p.getDistance(rightMarkPos);
                 onWrongSide = leftDistance.getMeters() < rightDistance.getMeters() ? leftDistance : rightDistance;
-                
             }
         } else {
             Mark m = null;
@@ -944,10 +943,8 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             if (m != null) {
                 Util.Pair<Position, Bearing> crossingInfo = Util.get(getCrossingInformation(w, t), portMark ? 0 : 1);
-                isOnRightSide =  p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90)))
-                        .getMeters() < 0;
-                
-                if(isOnRightSide == false) {
+                isOnRightSide = p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90))).getMeters() < 0;
+                if (isOnRightSide == false) {
                     onWrongSide = p.getDistance(crossingInfo.getA());
                 }
             }
@@ -958,7 +955,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         } else {
             //TODO There should be a constant (either the 1.5 or the -0.2) which controls how strict the the curve  is.
             result = (1-PENALTY_FOR_WRONG_SIDE) * Math.pow(1.5, -0.2 * onWrongSide.getMeters()) + PENALTY_FOR_WRONG_SIDE;
-            }
+        }
         return result;
     }
 
