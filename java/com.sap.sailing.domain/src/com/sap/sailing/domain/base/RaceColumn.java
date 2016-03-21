@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -255,17 +257,38 @@ public interface RaceColumn extends Named {
     Iterable<Competitor> getAllCompetitors(Fleet fleet);
     
     /**
-     * Provides the combined set of marks from all {@link #getTrackedRace(Fleet) tracked races attached to this
-     * column} or, in case a fleet does not have a tracked race attached, the marks registered through the
+     * Provides the combined set of marks from the courses of all {@link #getTrackedRace(Fleet) tracked races attached
+     * to this column} or, in case a fleet does not have a tracked race attached, the marks registered through the
      * {@link #getRegattaLog() regatta log} for the regatta-like object to which this column belongs (flexible
-     * leaderboard or regatta).
+     * leaderboard or regatta) and used in a {@link RaceLogCourseDesignChangedEvent}.
+     * <p>
+     * 
+     * See also {@link #getAvailableMarks()}.
      */
-    Iterable<Mark> getAllMarks();
+    Iterable<Mark> getCourseMarks();
 
     /**
-     * Same as {@link #getAllMarks()}, but restricted to the single race identified by the <code>fleet</code> parameter.
+     * Same as {@link #getCourseMarks()}, but restricted to the single race identified by the <code>fleet</code> parameter
+     * and in case of an existing {@link TrackedRace} restricted to the marks actually used by the
+     * {@link TrackedRace#getRace() race's} {@link RaceDefinition#getCourse() course}.
      */
-    Iterable<Mark> getMarks(Fleet fleet);
+    Iterable<Mark> getCourseMarks(Fleet fleet);
+    
+    /**
+     * Provides the set of marks available for use in course designs for races in this column. This includes, in
+     * particular, those marks defined on the {@link RegattaLog} using {@link RegattaLogDefineMarkEvent} objects.
+     * Additionally, all marks that any of the {@link TrackedRace}s attached to this column have "seen" (as
+     * returned by their {@link TrackedRace#getMarks()} method) will be added.
+     */
+    Iterable<Mark> getAvailableMarks();
+
+    /**
+     * Like {@link #getAvailableMarks()}, but restricted to the race identified by the {@code fleet} parameter. While
+     * marks from the {@link RegattaLog} are available to all races of the regatta and therefore also to all races in
+     * this column, in case a {@link TrackedRace} exists for the {@code fleet}, only that race's
+     * {@link TrackedRace#getMarks() marks} will be added to the result.
+     */
+    Iterable<Mark> getAvailableMarks(Fleet fleet);
 
     /**
      * Returns the competitor set registered in the race column's race log associated to the passed fleet. If competitor
@@ -345,4 +368,5 @@ public interface RaceColumn extends Named {
      *             {@link MetaLeaderboard}
      */
     void deregisterCompetitors(Iterable<Competitor> currentlyRegisteredCompetitors, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException;
+
 }

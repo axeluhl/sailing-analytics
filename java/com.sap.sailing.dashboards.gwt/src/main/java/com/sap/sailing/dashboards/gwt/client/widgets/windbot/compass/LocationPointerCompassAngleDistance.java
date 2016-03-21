@@ -55,18 +55,17 @@ public class LocationPointerCompassAngleDistance implements LocationListener, Co
         Double phi2 = lat2 * degreesToRadiansFactor;
         Double lam1 = lng1 * degreesToRadiansFactor;
         Double lam2 = lng2 * degreesToRadiansFactor;
-
         double angle = Math.atan2(Math.sin(lam2 - lam1) * Math.cos(phi2),
                 Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(lam2 - lam1))
                 * 180 / Math.PI;
         if (angle < 0) {
             angle = 360 + angle;
         }
-        return angle;
+        return Math.abs(angle);
     }
 
     private float getDistanceBetweenGPSPoints(double lat1, double lng1, double lat2, double lng2) {
-        double earthRadius = 6371000; // kilometers
+        double earthRadius = 6371000; //kilometers
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1))
