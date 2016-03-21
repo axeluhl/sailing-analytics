@@ -65,7 +65,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
         assertMarkPassing(GER7897, Util.get(getWaypoints(), 9), DateParser.parse("2013-05-04T15:36:36+0200"));
         assertMarkPassing(GER7897, Util.get(getWaypoints(), 10), DateParser.parse("2013-05-04T15:38:09+0200"));
 
-        final Competitor GER7616 = getCompetitorByName("Seefelder, Jürgen,Seefelder, N"); // starts late
+        final Competitor GER7616 = getCompetitorByName("Seefelder, JÃ¼rgen,Seefelder, N"); // starts late
         assertMarkPassing(GER7616, Util.get(getWaypoints(), 0), DateParser.parse("2013-05-04T14:50:57+0200"));
         assertMarkPassing(GER7616, Util.get(getWaypoints(), 1), DateParser.parse("2013-05-04T14:59:05+0200"));
         assertMarkPassing(GER7616, Util.get(getWaypoints(), 3), DateParser.parse("2013-05-04T15:07:32+0200"));
@@ -99,7 +99,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
         }
         final Competitor GER7897 = getCompetitorByName("Tusch, Frank,Winkelmann, Sven");
         assertMarkPassing(GER7897, Util.get(getWaypoints(), 0), DateParser.parse("2013-05-04T14:50:10+0200"));
-        final Competitor GER7616 = getCompetitorByName("Seefelder, Jürgen,Seefelder, N"); // starts late
+        final Competitor GER7616 = getCompetitorByName("Seefelder, Jï¿½rgen,Seefelder, N"); // starts late
         assertMarkPassing(GER7616, Util.get(getWaypoints(), 0), DateParser.parse("2013-05-04T14:50:57+0200"));
         final Competitor GER8340 = getCompetitorByName("Griese, Achim,Marcour, Michael"); // starts rather early
         assertMarkPassing(GER8340, Util.get(getWaypoints(), 0), DateParser.parse("2013-05-04T14:50:04+0200"));
