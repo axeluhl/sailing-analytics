@@ -215,10 +215,10 @@ import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrac
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.igtimiadapter.Account;
@@ -288,6 +288,7 @@ import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 import com.sap.sailing.domain.tractracadapter.TracTracConnectionConstants;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.SailingService;
+import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
@@ -6101,35 +6102,61 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public MarkTracksDTO getMarkTracks(String leaderboardName, String raceColumnName, String fleetName) {
-        // TODO Auto-generated method stub
-        return null;
+        final List<MarkTrackDTO> markTracks = new ArrayList<>();
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    for (final Mark mark : raceColumn.getMarks(fleet)) {
+                        final MarkDTO markDTO = convertToMarkDTO(mark, /* position */ null);
+                        
+                    }
+                }
+            }
+        }
+        return new MarkTracksDTO(markTracks);
     }
 
     @Override
     public boolean canRemoveMarkFix(String leaderboardName, String raceColumnName, String fleetName,
             String markIdAsString, GPSFixDTO fix) {
-        // TODO Auto-generated method stub
-        return false;
+        final boolean result;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    result = raceColumn.getTrackedRace(fleet) == null;
+                } else {
+                    result = false;
+                }
+            } else {
+                result = false;
+            }
+        } else {
+            result = false;
+        }
+        return result;
     }
 
     @Override
     public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO fix) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO newFix) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
     public void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
             GPSFixDTO oldFix, Position newPosition) {
         // TODO Auto-generated method stub
-        
     }
 }
