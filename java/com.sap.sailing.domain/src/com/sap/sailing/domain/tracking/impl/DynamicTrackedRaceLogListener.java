@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -31,6 +32,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
@@ -309,6 +311,14 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedBoats().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
+            if (revokedEvent instanceof RaceLogDependentStartTimeEvent || revokedEvent instanceof RaceLogStartTimeEvent){
+                analyzeStartTime(null);
+            }
+            if (revokedEvent instanceof RaceLogRaceStatusEvent){
+                if (((RaceLogRaceStatusEvent) revokedEvent).getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+                    trackedRace.invalidateEndTime();
+                }
+            }
         }
     }
 
@@ -325,5 +335,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
         trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+    }
+
+    @Override
+    public void visit(RaceLogRaceStatusEvent event) {
+        if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+            trackedRace.invalidateEndTime();
+        }
     }
 }

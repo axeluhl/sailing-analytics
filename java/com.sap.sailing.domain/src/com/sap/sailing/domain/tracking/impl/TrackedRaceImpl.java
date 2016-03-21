@@ -40,6 +40,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
@@ -49,6 +50,8 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -111,6 +114,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -156,6 +160,8 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
+    private static final int TRACKING_BUFFER_IN_MINUTES = 5;
+
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -722,11 +728,100 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TimePoint getStartOfTracking() {
+        updateStartAndEndOfTracking();//FIXME: unclear whether change listeners etc similar to DynamicTrackedRace can be used here for caching and invalidation
         return startOfTrackingReceived;
     }
+    
+    /**
+     * Use mapping time ranges to set time start and end of tracking time for race
+     */
+    public void updateStartAndEndOfTracking() {
+        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+        final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
+        
+        boolean startOfTrackingFound = false;
+        boolean endOfTrackingFound = false;
+        
+        if (trackingTimesFromRaceLog != null){
+            if (trackingTimesFromRaceLog.getA() != null){
+                setStartOfTrackingReceived(trackingTimesFromRaceLog.getA(), false);
+                startOfTrackingFound = true;
+            }
+            if (trackingTimesFromRaceLog.getB() != null){
+                setEndOfTrackingReceived(trackingTimesFromRaceLog.getB(), false);
+                endOfTrackingFound = true;
+            }
+        }
+        
+        if(!startOfTrackingFound || !endOfTrackingFound){
+            if (startAndFinishedTimesFromRaceLog != null){
+                if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
+                    setStartOfTrackingReceived(startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES)), false);
+                    startOfTrackingFound = true;
+                }
+                if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null){
+                    setEndOfTrackingReceived(startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES)), false);
+                    endOfTrackingFound = true;
+                }
+            }
+        }
+        
+        if(!startOfTrackingFound || !endOfTrackingFound){
+            TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
+            TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
+            Map<Mark, List<DeviceMapping<Mark>>> markMappings = new HashMap<Mark, List<DeviceMapping<Mark>>>();
+            Map<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new HashMap<Competitor, List<DeviceMapping<Competitor>>>();
+            for (RegattaLog regattaLog: attachedRegattaLogs.values()){
+                 competitorMappings.putAll(new RegattaLogDeviceCompetitorMappingFinder(regattaLog).analyze());
+                 markMappings.putAll(new RegattaLogDeviceMarkMappingFinder(regattaLog).analyze());
+            }
+            for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
+                for (DeviceMapping<?> mapping : list) {
+                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
+                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
+                }
+            }
+            for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
+                for (DeviceMapping<?> mapping : list) {
+                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
+                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
+                }
+            }
+            
+            if (!startOfTrackingFound && earliestMappingStart != null){
+                setStartOfTrackingReceived(earliestMappingStart, false);
+            }
+            
+            if (!endOfTrackingFound && latestMappingEnd != null){
+                setEndOfTrackingReceived(latestMappingEnd, false);
+            }
+        }
+    }
+
+    private TimePoint getUpdatedEarliestMappingStart(TimePoint earliestMappingStart, final TimePoint from) {
+        if (from == null) {
+            earliestMappingStart = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
+        } else if (earliestMappingStart != null && from.before(earliestMappingStart)) {
+            earliestMappingStart = from;
+        }
+        return earliestMappingStart;
+    }
+
+    private TimePoint getUpdatedLatestMappingEnd(TimePoint latestMappingEnd, final TimePoint to) {
+        if (to == null) {
+            latestMappingEnd = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
+        } else if (latestMappingEnd != null && to.after(latestMappingEnd)) {
+            latestMappingEnd = to;
+        }
+        return latestMappingEnd;
+    }
+    
+    
+    
 
     @Override
     public TimePoint getEndOfTracking() {
+        updateStartAndEndOfTracking();//FIXME: unclear whether change listeners etc similar to DynamicTrackedRace can be used here for caching and invalidation
         return endOfTrackingReceived;
     }
 
@@ -761,6 +856,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return null;
+    }
+    
+    @Override
+    public Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
+        //Only one of the RaceLogs should have valid data, so one doesn't have to compare all the 
+        //start/finished time values in order to find the earliest startTime/latestFinishedTime
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            TimePoint startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            if (startTime != null || finishedTime != null){
+                return new Util.Pair<TimePoint, TimePoint>(startTime, finishedTime);
+            }
+        }
+        return null;        
     }
 
     /**

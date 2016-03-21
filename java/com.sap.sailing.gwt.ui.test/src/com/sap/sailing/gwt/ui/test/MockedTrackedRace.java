@@ -790,4 +790,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void updateMarkPassingsAfterRaceLogChanges() {
     }
+
+    @Override
+    public void updateStartAndEndOfTracking() {
+    }
+
+    @Override
+    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+    }
 }

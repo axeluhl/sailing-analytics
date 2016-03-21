@@ -75,9 +75,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.WithID;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
@@ -239,50 +237,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         return new RegattaLogDeviceMarkMappingFinder(params.getRegattaLog()).analyze();
     }
 
-    /**
-     * Use mapping time ranges to set time start and end of tracking time for race
-     */
-    private void updateStartAndEndOfTracking() {
-        // TODO bug 3196: this would need to be evaluated lazily in TrackedRaceImpl.getStartOfTracking / getEndOfTracking
-        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = trackedRace.getTrackingTimesFromRaceLogs();
-        if (trackingTimesFromRaceLog == null) {
-            TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
-            TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
-            for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
-                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
-                }
-            }
-            for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
-                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
-                }
-            }
-            trackedRace.setStartOfTrackingReceived(earliestMappingStart == null ? TimePoint.BeginningOfTime : earliestMappingStart);
-            trackedRace.setEndOfTrackingReceived(latestMappingEnd == null ? TimePoint.EndOfTime : latestMappingEnd);
-        }
-    }
-
-    private TimePoint getUpdatedEarliestMappingStart(TimePoint earliestMappingStart, final TimePoint from) {
-        if (from == null) {
-            earliestMappingStart = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
-        } else if (earliestMappingStart != null && from.before(earliestMappingStart)) {
-            earliestMappingStart = from;
-        }
-        return earliestMappingStart;
-    }
-
-    private TimePoint getUpdatedLatestMappingEnd(TimePoint latestMappingEnd, final TimePoint to) {
-        if (to == null) {
-            latestMappingEnd = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
-        } else if (latestMappingEnd != null && to.after(latestMappingEnd)) {
-            latestMappingEnd = to;
-        }
-        return latestMappingEnd;
-    }
-
     private <ItemT extends WithID, FixT extends GPSFix> boolean hasMappingAlreadyBeenLoaded(
             DeviceMapping<ItemT> newMapping, List<DeviceMapping<ItemT>> oldMappings) {
         if (oldMappings == null) {
@@ -355,7 +309,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         markMappingsByDevices.clear();
         markMappingsByDevices.putAll(transformToMappingsByDevice(markMappings));
 
-        updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking();
     }
 
     private void onDeviceMarkMappingEvent(RegattaLogDeviceMarkMappingEvent event) {
@@ -429,7 +383,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         competitorMappings.putAll(newMappings);
         competitorMappingsByDevices.clear();
         competitorMappingsByDevices.putAll(transformToMappingsByDevice(competitorMappings));
-        updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking();
     }
 
     private void onStartTrackingEvent(RaceLogStartTrackingEvent event) {
