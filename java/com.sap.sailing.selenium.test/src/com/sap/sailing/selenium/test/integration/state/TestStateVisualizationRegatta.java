@@ -2,12 +2,14 @@ package com.sap.sailing.selenium.test.integration.state;
 
 import static com.sap.sailing.selenium.pages.common.DateHelper.getFutureDate;
 import static com.sap.sailing.selenium.pages.common.DateHelper.getPastDate;
+import static com.sap.sailing.selenium.pages.common.DateHelper.getPastTime;
 
 import java.util.Date;
 import java.util.function.Predicate;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
@@ -16,6 +18,7 @@ import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfig
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardDetailsPanelPO;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.SetStartTimeDialogPO;
 import com.sap.sailing.selenium.pages.common.LabelTypePO;
+import com.sap.sailing.selenium.pages.common.RaceStatusEventHelper;
 import com.sap.sailing.selenium.pages.home.event.RegattaListItemPO;
 import com.sap.sailing.selenium.pages.home.event.regatta.RegattaEventPage;
 import com.sap.sailing.selenium.test.AbstractSeleniumTest;
@@ -23,6 +26,7 @@ import com.sap.sailing.selenium.test.AbstractSeleniumTest;
 public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
 
     @Override
+    @Before
     public void setUp() {
         clearState(getContextRoot());
         super.setUp();
@@ -31,28 +35,32 @@ public class TestStateVisualizationRegatta extends AbstractSeleniumTest {
     @Test
     public void testStateFlagOfUpcomingRegatta() {
         TestCase testCase = new TestCase();
-        testCase.createTestEventWithRegatta("TestRegatta", getFutureDate(3), getFutureDate(7));
-        testCase.assertStateFlagOfRegatta("TestRegatta", LabelTypePO::isUpcoming);
+        testCase.createTestEventWithRegatta("TestUpcomingRegatta", getFutureDate(3), getFutureDate(7));
+        testCase.assertStateFlagOfRegatta("TestUpcomingRegatta", LabelTypePO::isUpcoming);
     }
 
-    // @Test
+    @Test
     public void testStateFlagOfInProgressRegatta() {
-        // TODO
+        TestCase testCase = new TestCase();
+        testCase.createTestEventWithRegatta("TestInProgressRegatta", getPastDate(3), getFutureDate(3));
+        testCase.setLeaderboardsRaceStartTime("TestInProgressRegatta", "R1", getPastTime(20));
+        RaceStatusEventHelper.get(getContextRoot(),"TestInProgressRegatta", "R1", "Default").finishRace(getPastTime(5));
+        testCase.assertStateFlagOfRegatta("TestInProgressRegatta", LabelTypePO::isInProgress);
     }
 
     @Test
     public void testStateFlagOfLiveRegatta() {
         TestCase testCase = new TestCase();
         testCase.createTestEventWithRegatta("TestLiveRegatta", getPastDate(3), getFutureDate(3));
-        testCase.setLeaderboardsRaceStartTime("TestLiveRegatta", "R1", getPastDate(1));
+        testCase.setLeaderboardsRaceStartTime("TestLiveRegatta", "R1", getPastTime(30));
         testCase.assertStateFlagOfRegatta("TestLiveRegatta", LabelTypePO::isLive);
     }
 
     @Test
     public void testStateFlagOfFinishedRegatta() {
         TestCase testCase = new TestCase();
-        testCase.createTestEventWithRegatta("TestRegatta", getPastDate(7), getPastDate(3));
-        testCase.assertStateFlagOfRegatta("TestRegatta", LabelTypePO::isFinished);
+        testCase.createTestEventWithRegatta("TestFinishedRegatta", getPastDate(7), getPastDate(3));
+        testCase.assertStateFlagOfRegatta("TestFinishedRegatta", LabelTypePO::isFinished);
     }
     
     private class TestCase {
