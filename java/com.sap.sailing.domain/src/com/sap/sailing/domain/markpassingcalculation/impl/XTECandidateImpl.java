@@ -7,7 +7,7 @@ public class XTECandidateImpl extends CandidateWithSide {
     private final Double passesInTheRightDirectionProbability;
 
     public XTECandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability,
-            Double startProbabilityBasedOnOtherCompetitors, Waypoint w, boolean onCorrectSideOfWaypoint,
+            Double startProbabilityBasedOnOtherCompetitors, Waypoint w, double onCorrectSideOfWaypoint,
             Double passesInTheRightDirectionProbability) {
         super(oneBasedIndexOfWaypoint, p, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint);
         this.passesInTheRightDirectionProbability = passesInTheRightDirectionProbability;

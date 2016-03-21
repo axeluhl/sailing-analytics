@@ -395,9 +395,10 @@ public class CandidateFinderImpl implements CandidateFinder {
                     Boolean isCan = false;
                     Candidate oldCan = null;
                     Double probability = null;
+                    double sidePenalty = 1;
                     Distance distance = null;
                     Double startProbabilityBasedOnOtherCompetitors = null;
-                    boolean onCorrectSideOfWaypoint = false;
+                    double onCorrectSideOfWaypoint = 0.8;
                     List<Distance> waypointDistances = fixDistances.get(w);
                     List<Distance> waypointDistancesBefore = fixDistancesBefore.get(w);
                     List<Distance> waypointDistancesAfter = fixDistancesAfter.get(w);
@@ -423,9 +424,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     Double newProbability = getDistanceBasedProbability(w, t, dis);
                                     if (newProbability != null) {
                                         // FIXME why not generate the candidate here where we have all information at hand?
-                                        final boolean newOnCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
-                                        newProbability *= newOnCorrectSideOfWaypoint ? PENALTY_FOR_DISTANCE_CANDIDATES
-                                                : PENALTY_FOR_DISTANCE_CANDIDATES * PENALTY_FOR_WRONG_SIDE;
+                                        final double newOnCorrectSideOfWaypointPenalty = getSidePenalty(w, p, t, portMark);
+                                        newProbability *= newOnCorrectSideOfWaypointPenalty * PENALTY_FOR_DISTANCE_CANDIDATES;
                                         final Double newStartProbabilityBasedOnOtherCompetitors;
                                         if (isStartWaypoint(w)) {
                                             newStartProbabilityBasedOnOtherCompetitors = getProbabilityForStartCandidateBasedOnOtherCompetitorsBehavior(c, t);
@@ -439,7 +439,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
                                             probability = newProbability;
-                                            onCorrectSideOfWaypoint = newOnCorrectSideOfWaypoint;
+                                            sidePenalty = newOnCorrectSideOfWaypointPenalty;
+                                            onCorrectSideOfWaypoint = newOnCorrectSideOfWaypointPenalty;
                                             distance = dis;
                                             startProbabilityBasedOnOtherCompetitors = newStartProbabilityBasedOnOtherCompetitors;
                                         }
@@ -454,7 +455,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                         if (!wasCan && isCan) {
                             Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
+                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance" + newCan.toString() + "for " + c);
@@ -670,9 +671,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         final Position p = race.getTrack(c).getEstimatedPosition(t, false);
         final List<Distance> distances = calculateDistance(p, w, t);
         final Distance d = portMark ? distances.get(0) : distances.get(1);
-        double probability = getDistanceBasedProbability(w, t, d);
-        final boolean onCorrectSideOfWaypoint = isOnCorrectSideOfWaypoint(w, p, t, portMark);
-        probability = onCorrectSideOfWaypoint ? probability : probability * PENALTY_FOR_WRONG_SIDE;
+        final double sidePenalty = getSidePenalty(w, p, t, portMark);
+        double probability = getDistanceBasedProbability(w, t, d) * sidePenalty;
         final Double passesInTheRightDirectionProbability = passesInTheRightDirection(w, xte1, xte2, portMark);
         // null would mean "unknown"; no penalty for those cases
         probability = passesInTheRightDirectionProbability == null ? probability : probability * passesInTheRightDirectionProbability;
@@ -690,7 +690,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             startProbabilityBasedOnOtherCompetitors = null;
         }
         return new XTECandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1, t, probability,
-                startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, passesInTheRightDirectionProbability);
+                startProbabilityBasedOnOtherCompetitors, w, sidePenalty, passesInTheRightDirectionProbability);
     }
     
     static class AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine {
@@ -903,27 +903,35 @@ public class CandidateFinderImpl implements CandidateFinder {
      * to be negative. If the passing instructions are {@link PassingInstruction#Line}, it checks whether the boat
      * passed between the two marks.
      */
-    private boolean isOnCorrectSideOfWaypoint(Waypoint w, Position p, TimePoint t, boolean portMark) {
-        boolean result = true;
+    private double getSidePenalty(Waypoint w, Position p, TimePoint t, boolean portMark) {
+        boolean isOnRightSide = true;
+        Distance onWrongSide = new MeterDistance(0);        
         PassingInstruction instruction = getPassingInstructions(w);
         if (instruction == PassingInstruction.Line) {
             List<Position> pos = new ArrayList<>();
             for (Mark m : w.getMarks()) {
                 Position po = race.getOrCreateTrack(m).getEstimatedPosition(t, false);
                 if (po == null) {
-                    return true;
+                    isOnRightSide = true;
+                    break;
                 }
                 pos.add(po);
             }
             if (pos.size() != 2) {
-                return true;
+                isOnRightSide = true;
             }
-            Bearing diff1 = pos.get(0).getBearingGreatCircle(p)
-                    .getDifferenceTo(pos.get(0).getBearingGreatCircle(pos.get(1)));
-            Bearing diff2 = pos.get(1).getBearingGreatCircle(p)
-                    .getDifferenceTo(pos.get(1).getBearingGreatCircle(pos.get(0)));
+            Position leftMarkPos = pos.get(0);
+            Position rightMarkPos = pos.get(1);
+            Bearing diff1 = leftMarkPos.getBearingGreatCircle(p)
+                    .getDifferenceTo(leftMarkPos.getBearingGreatCircle(rightMarkPos));
+            Bearing diff2 = rightMarkPos.getBearingGreatCircle(p)
+                    .getDifferenceTo(rightMarkPos.getBearingGreatCircle(leftMarkPos));
             if (Math.abs(diff1.getDegrees()) > 90 || Math.abs(diff2.getDegrees()) > 90) {
-                result = false;
+                isOnRightSide =  false;
+                Distance leftDistance = p.getDistance(leftMarkPos);
+                Distance rightDistance = p.getDistance(rightMarkPos);
+                onWrongSide = leftDistance.getMeters() < rightDistance.getMeters() ? leftDistance : rightDistance;
+                
             }
         } else {
             Mark m = null;
@@ -936,10 +944,21 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
             if (m != null) {
                 Util.Pair<Position, Bearing> crossingInfo = Util.get(getCrossingInformation(w, t), portMark ? 0 : 1);
-                result = p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90)))
+                isOnRightSide =  p.crossTrackError(crossingInfo.getA(), crossingInfo.getB().add(new DegreeBearingImpl(90)))
                         .getMeters() < 0;
+                
+                if(isOnRightSide == false) {
+                    onWrongSide = p.getDistance(crossingInfo.getA());
+                }
             }
         }
+        final double result;
+        if (isOnRightSide == true) {
+            result = 1;
+        } else {
+            //TODO There should be a constant (either the 1.5 or the -0.2) which controls how strict the the curve  is.
+            result = (1-PENALTY_FOR_WRONG_SIDE) * Math.pow(1.5, -0.2 * onWrongSide.getMeters()) + PENALTY_FOR_WRONG_SIDE;
+            }
         return result;
     }
 
