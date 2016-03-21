@@ -802,9 +802,11 @@ public class CandidateFinderImpl implements CandidateFinder {
      * distance to the start line on the course side, suggesting that the competitor is starting late, but mostly
      * everybody else did start earlier and around the same time. The probability returned is the probability of
      * the start being the one <em>or</em> the other scenario which mathematically is represented by using the inverted
-     * probabilities of the two start options, multiplying them and inverting the resulting probability.
+     * probabilities of the two start options, multiplying them and inverting the resulting probability.<p>
+     * 
+     * Access needs to be public to satisfy Maven-based test cases in com.sap.sailing.domain.test bundle which is not a fragment
      */
-    Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
+    public Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
             final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors, boolean startIsLine) {
         final Double result;
         // sort by the absolute distance to start line
