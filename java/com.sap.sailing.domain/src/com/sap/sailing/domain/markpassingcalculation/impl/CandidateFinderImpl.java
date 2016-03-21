@@ -693,7 +693,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 startProbabilityBasedOnOtherCompetitors, w, sidePenalty, passesInTheRightDirectionProbability);
     }
     
-    static class AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine {
+    public static class AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine {
         private final Distance absoluteGeometricDistance;
         private final Distance signedProjectedDistance;
         public AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(Distance absoluteGeometricDistance,
