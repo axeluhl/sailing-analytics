@@ -6,7 +6,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/sap_logo_64_sq"/>
+            android:src="@drawable/launch_screen_icon"/>
     </item>
 
 </layer-list>
