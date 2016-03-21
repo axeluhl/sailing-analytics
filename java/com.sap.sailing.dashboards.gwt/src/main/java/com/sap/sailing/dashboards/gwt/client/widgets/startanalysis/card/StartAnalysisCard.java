@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisPageChangeListener;
-import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysisWidgetResources;
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
@@ -36,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
@@ -53,6 +53,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
     @UiField
     HTMLPanel startanalysis_card;
+    
+    @UiField
+    HTMLPanel card_map_container;
     
     @UiField
     HTMLPanel startanalysis_card_table;
@@ -74,12 +77,14 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
     private final double GEOMETRIC_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 210;
-    private final int TABLE_MARGIN_IN_PT = 10;
     private final String RACE_TIME_START = "00:00:00";
     
-    public StartAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO, SailingServiceAsync sailingServiceAsync) {
+    private RaceMapResources raceMapResources;
+    
+    public StartAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO, SailingServiceAsync sailingServiceAsync, RaceMapResources raceMapResources) {
         stringMessages = StringMessages.INSTANCE;
         this.sailingServiceAsync = sailingServiceAsync;
+        this.raceMapResources = raceMapResources;
         colorProvider = new CompetitorColorProviderImpl();
         competitorSelectionModel = new CompetitorSelectionModel(/* hasMultiSelection */true, colorProvider);
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(),
@@ -98,9 +103,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             final String startLineAdvantageType;
             if (startAnalysisDTO.startAnalysisWindLineInfoDTO.startLineAdvantage.startLineAdvatageType
                     .equals(StartlineAdvantageType.GEOMETRIC)) {
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometry();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantageByGeometryHeader();
             } else {
-                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWind();
+                startLineAdvantageType = stringMessages.dashboardStartlineAdvantagesByWindHeader();
             }
             startanalysis_card_line_advantage
                     .setInnerHTML(SafeHtmlUtils.fromString(startLineAdvantageType
@@ -135,7 +140,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         }
     }
 
-    private void addMap(final int cardID, final StartAnalysisDTO startAnalysisDTO) {
+    private void addMap(final int cardID, final StartAnalysisDTO startAnalysisDTO, RaceMapResources raceMapResources) {
         com.sap.sse.gwt.client.player.Timer timer = new com.sap.sse.gwt.client.player.Timer(PlayModes.Live, 1000l);
         timer.pause();
         ArrayList<ZoomTypes> zoomTypes = new ArrayList<ZoomTypes>();
@@ -152,13 +157,14 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
         raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
-                StartAnalysisWidgetResources.INSTANCE.combinedWindPanelStyle(), /* isSimulationEnabled */ false, /* showHeaderPanel */ true);
+                raceMapResources, /* isSimulationEnabled */ false, /* showHeaderPanel */ true);
         raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
         raceMap.getSettings().setTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
-        raceMap.setSize("100%", getHeightForRaceMapInPixels()+"px");
-        startanalysis_card.add(raceMap);
+        raceMap.setSize("100%", "100%");
+        card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
+        card_map_container.add(raceMap);
         /**
          * Executes onResize() after the reflow of the DOM. Otherwise it has no effect.
          * Needs to resize the map because google maps are not shown loaded fully when they are hidden.
@@ -172,8 +178,8 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         });
     }
     
-    private int getHeightForRaceMapInPixels(){
-        return this.getElement().getOffsetHeight() - startanalysis_card_table.getElement().getOffsetHeight() + (TABLE_MARGIN_IN_PT*3);
+    private double getHeightForRaceMapInPixels(){
+        return this.getElement().getOffsetHeight() - startanalysis_card_table.getElement().getOffsetHeight() - 30;
     }
 
     private RaceMapHelpLinesSettings getHelpLineSettings() {
@@ -187,7 +193,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
     private void removeMap() {
         if (raceMap != null && raceMap.isAttached() == true) {
-            startanalysis_card.remove(raceMap);
+            card_map_container.remove(raceMap);
         }
     }
 
@@ -204,7 +210,7 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
                 @Override
                 public void execute() {
-                    addMap(newPageIndex, startAnalysisDTO);
+                    addMap(newPageIndex, startAnalysisDTO, raceMapResources);
                 }
             });
         }

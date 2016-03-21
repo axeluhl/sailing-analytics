@@ -174,8 +174,10 @@
     <string name="nationality">Nationalität</string>
     <string name="number">Nummer</string>
     <string name="snap">Fotos schießen</string>
-    <string name="logout_dialog_title">Möchten Sie sich abmelden?</string>
-    <string name="logout_dialog_message">Wenn Sie sich abmelden, wird kein Rennen mehr verwaltet.</string>
+    <string name="logout_dialog_title">@string/logout</string>
+    <string name="logout_dialog_message">Wollen Sie sich abmelden und als neuer Nutzer anmelden. Ihre Rennen bleiben im Hintergrund erhalten.</string>
+    <string name="change_dialog_title">Ummelden</string>
+    <string name="change_dialog_message">Wenn Sie sich ummelden, wird kein Rennen mehr auf der aktuellen Bahn mehr verwaltet.</string>
     <string name="logout">Abmelden</string>
     <string name="loading_configuration">Lade Konfiguration&#8230;</string>
     <string name="loading_configuration_failed">Fehler beim Laden der Konfiguration.</string>
@@ -254,7 +256,7 @@
     <string name="preference_allow_demo_summary">Wenn aktiv kann man sich im Demo-Modus anmelden. Im Demo-Modus werden keine Rennänderungen an den Server geschickt.</string>
     <string name="loading_events_succeded">Events geladen.</string>
     <string name="available_races">Verfügbare Rennen</string>
-    <string name="change">ÄNDERN</string>
+    <string name="change">Ändern</string>
     <string name="race_started">Gestartet %s</string>
     <string name="race_finished">Beendet %s</string>
     <string name="wind">Wind</string>
@@ -464,7 +466,20 @@
     <string name="race_group">Group Race</string>
     <string name="wind_select_race">Select Race</string>
     <string name="get_started">Getting Started</string>
-    <string name="get_started_url">http://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
+    <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>
+    <string name="server_url">Server</string>
+    <string name="username">Nutzername</string>
+    <string name="password">Passwort</string>
+    <string name="wrong_credentials">Nutzername oder Passwort ungültig</string>
+    <string name="unexpected_error">Ein unerwarteter Fehler ist aufgetreten</string>
+    <string name="sending_exception_title">Warnung</string>
+    <string name="sending_exception_message">Sie haben wahrscheinlich nicht die Befugnis Daten an den Server zu schicken. Möchten Sie sich als andere Nutzer anmelden?</string>
+
+    <string name="preference_heading_with_declination_subtracted_is_enabled">Ein</string>
+    <string name="preference_heading_with_declination_subtracted_is_disabled">Aus</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Rechtweisend</string>
+    <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
+    <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
 
 </resources>

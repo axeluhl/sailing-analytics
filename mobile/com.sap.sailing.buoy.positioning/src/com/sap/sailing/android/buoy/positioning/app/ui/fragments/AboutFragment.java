@@ -29,10 +29,10 @@ public class AboutFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
-        view.findViewById(R.id.licence_button).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.license_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showLicenceDialog();
+                showLicenseDialog();
             }
         });
         view.findViewById(R.id.eula_button).setOnClickListener(new View.OnClickListener() {
@@ -46,7 +46,7 @@ public class AboutFragment extends BaseFragment {
         return view;
     }
 
-    private void showLicenceDialog() {
+    private void showLicenseDialog() {
         Notices notices = new Notices();
         LicenseHelper licenseHelper = new LicenseHelper();
         notices.addNotice(licenseHelper.getAndroidSupportNotice());
@@ -54,7 +54,7 @@ public class AboutFragment extends BaseFragment {
         notices.addNotice(licenseHelper.getJsonSimpleNotice());
         notices.addNotice(licenseHelper.getDialogNotice());
         LicensesDialog.Builder builder = new LicensesDialog.Builder(getActivity());
-        builder.setTitle(getString(R.string.licence_information));
+        builder.setTitle(getString(R.string.license_information));
         builder.setNotices(notices);
         builder.build().show();
     }

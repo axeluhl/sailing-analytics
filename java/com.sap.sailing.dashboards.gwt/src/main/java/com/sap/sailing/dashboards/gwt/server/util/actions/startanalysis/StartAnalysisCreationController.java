@@ -14,20 +14,20 @@ public final class StartAnalysisCreationController extends AbstractStartAnalysis
 
     private static final Logger logger = Logger.getLogger(StartAnalysisCreationController.class.getName());
     
-    private StartAnalysisCreationController(DashboardDispatchContext ctx) {
-        
-    }
-
     public static StartAnalysisDTO checkStartAnalysisForCompetitorInTrackedRace(DashboardDispatchContext dashboardDispatchContext, Competitor competitor, TrackedRace trackedRace) {
         StartAnalysisDTO result = null;
-        if (competitor != null && trackedRace != null) {
-            if (threeCompetitorsPassedSecondWayPoint(trackedRace) && raceProgressedFarEnough(competitor, trackedRace)) {
-                logger.log(Level.INFO, "Creating startanalysis for race " + trackedRace.getRace().getName() + " and competitor: " + competitor.getName());
-                result = StartAnalysisDTOFactory.createStartAnalysisForCompetitorAndTrackedRace(dashboardDispatchContext, competitor, trackedRace);
+        if(trackedRace != null) {
+            if (competitor != null) {
+                if (threeCompetitorsPassedSecondWayPoint(trackedRace) && raceProgressedFarEnough(competitor, trackedRace)) {
+                    logger.log(Level.INFO, "Creating startanalysis for race " + trackedRace.getRace().getName() + " and competitor: " + competitor.getName());
+                    result = StartAnalysisDTOFactory.createStartAnalysisForCompetitorAndTrackedRace(dashboardDispatchContext, competitor, trackedRace);
+                } else {
+                    logger.log(Level.INFO, "Waiting to create startanalysis for race " + trackedRace.getRace().getName() + " and competitor: " + competitor.getName());
+                }
             } else {
-                logger.log(Level.INFO, "Waiting to create startanalysis for race " + trackedRace.getRace().getName() + " and competitor: " + competitor.getName());
+                result = StartAnalysisDTOFactory.createStartAnalysisForCompetitorAndTrackedRace(dashboardDispatchContext, competitor, trackedRace);
             }
-        }
+        } 
         return result;
     }
 }

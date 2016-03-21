@@ -5,48 +5,42 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.table.CompetitorTable;
+import com.sap.sailing.dashboards.gwt.client.popups.competitorselection.table.CompetitorTableRowSelectionListener;
+import com.sap.sailing.dashboards.gwt.client.widgets.ActionPanel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class CompetitorSelectionPopup extends Composite implements HasWidgets, CompetitorTableRowSelectionListener {
 
-    interface CompetitorSelectionPopupStyle extends CssResource {
-        String popupshow();
-        String popuphide();
-        String buttonshow();
-    }
+    @UiField(provided = true)
+    ActionPanel competitorselectionbackground;
 
     @UiField
-    CompetitorSelectionPopupStyle style;
+    HTMLPanel competitorselectionpopup;
 
-    @UiField
-    HTMLPanel competitorselectionbackground;
-    
-    @UiField
-    VerticalPanel competitorselectionpopup;
-    
     @UiField
     HTMLPanel header;
 
     @UiField(provided = true)
     CompetitorTable competitortable;
 
-    @UiField
-    Button button;
+    @UiField(provided = true)
+    ActionPanel cancelButton;
+
+    @UiField(provided = true)
+    ActionPanel okButton;
 
     private CompetitorDTO currentCompetitorSelected;
     private boolean isVisible;
+    private CompetitorSelectionPopupResources competitorSelectionPopupResources = CompetitorSelectionPopupResources.INSTANCE;
 
     private List<CompetitorSelectionListener> competitorSelectionPopupListener;
 
@@ -56,28 +50,34 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
     }
 
     public CompetitorSelectionPopup() {
+        competitorSelectionPopupResources.gss().ensureInjected();
         competitorSelectionPopupListener = new ArrayList<CompetitorSelectionListener>();
         competitortable = new CompetitorTable(this);
         isVisible = false;
+        competitorselectionbackground = new ActionPanel(Event.TOUCHEVENTS, Event.ONCLICK);
+        cancelButton = new ActionPanel(Event.TOUCHEVENTS, Event.ONCLICK);
+        okButton = new ActionPanel(Event.TOUCHEVENTS, Event.ONCLICK);
+        addActionListenerToActionPanels();
         initWidget(uiBinder.createAndBindUi(this));
+        cancelButton.getElement().setInnerText("CANCEL");
+        okButton.getElement().setInnerText("OK");
     }
 
     public void show(List<CompetitorDTO> competitorList) {
         competitortable.setTableContent(competitorList);
         RootLayoutPanel.get().add(this);
-        this.button.setText("OK");
-        competitorselectionpopup.addStyleName(style.popupshow());
-        competitorselectionpopup.removeStyleName(style.popuphide());
+        competitorselectionpopup.addStyleName(competitorSelectionPopupResources.gss().popupshow());
+        competitorselectionpopup.removeStyleName(competitorSelectionPopupResources.gss().popuphide());
         isVisible = true;
     }
 
     public void hide() {
-        competitorselectionpopup.addStyleName(style.popuphide());
-        competitorselectionpopup.removeStyleName(style.popupshow());
+        competitorselectionpopup.addStyleName(competitorSelectionPopupResources.gss().popuphide());
+        competitorselectionpopup.removeStyleName(competitorSelectionPopupResources.gss().popupshow());
         RootLayoutPanel.get().remove(this);
         isVisible = false;
     }
-    
+
     public void addListener(CompetitorSelectionListener o) {
         if (o != null && !competitorSelectionPopupListener.contains(o)) {
             this.competitorSelectionPopupListener.add(o);
@@ -94,25 +94,42 @@ public class CompetitorSelectionPopup extends Composite implements HasWidgets, C
         }
         hide();
     }
-    
-    public boolean isShown(){
+
+    public boolean isShown() {
         return isVisible;
     }
 
-    @UiHandler("button")
-    void handleClick(ClickEvent e) {
-        hide();
-        if (currentCompetitorSelected != null) {
-            notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(currentCompetitorSelected);
-        }
-    }
-    
-    @Override
-    public void didSelectedRowWithCompetitorName(CompetitorDTO competitor) {
-        button.getElement().addClassName(style.buttonshow());
-        currentCompetitorSelected = competitor;
+    private void addActionListenerToActionPanels() {
+        competitorselectionbackground.addActionPanelListener(new ActionPanel.ActionPanelListener() {
+
+            @Override
+            public void eventTriggered() {
+                hide();
+            }
+        });
+        cancelButton.addActionPanelListener(new ActionPanel.ActionPanelListener() {
+
+            @Override
+            public void eventTriggered() {
+                hide();
+            }
+        });
+        okButton.addActionPanelListener(new ActionPanel.ActionPanelListener() {
+
+            @Override
+            public void eventTriggered() {
+                hide();
+                if (currentCompetitorSelected != null) {
+                    notifyListenerAboutOKButtonClickedWithSelectedCompetitorName(currentCompetitorSelected);
+                }
+            }
+        });
     }
 
+    @Override
+    public void didSelectedRowWithCompetitorName(CompetitorDTO competitor) {
+        currentCompetitorSelected = competitor;
+    }
 
     @Override
     public void add(Widget w) {

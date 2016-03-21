@@ -151,7 +151,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
         };
         final Button backToLivePlayButton = timePanel.getBackToLiveButton();
         timePanel.updateSettings(new TimePanelSettings(refreshInterval));
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.raceMapStyle().ensureInjected();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorBoats);
         final CompetitorSelectionProvider competitorSelection;
         if (showCompetitors) {
@@ -160,7 +160,7 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             competitorSelection = createEmptyFilterCompetitorModel(colorProvider); // show no competitors
         }
         final RaceMap raceMap = new RaceMap(new RaceMapLifecycle(getStringMessages()), raceMapSettings, sailingService, asyncActionsExecutor, /* errorReporter */ EmbeddedMapAndWindChartEntryPoint.this, timer,
-                competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(),
+                competitorSelection, getStringMessages(), selectedRaceIdentifier, raceMapResources,
                 raceboardPerspectiveSettings.isSimulationEnabled(), /* showHeaderPanel */ false) {
             @Override
             protected void showAdditionalControls(MapWidget map) {

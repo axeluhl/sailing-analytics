@@ -42,19 +42,15 @@ public abstract class SessionActivity extends BaseActivity {
     public boolean logoutSession() {
         ExLog.i(this, TAG, String.format("Logging out from activity %s", this.getClass().getSimpleName()));
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
-                .setTitle(getString(R.string.logout_dialog_title))
-                .setMessage(getString(R.string.logout_dialog_message))
-                .setPositiveButton(getString(R.string.logout), new OnClickListener() {
+                .setTitle(getString(R.string.change_dialog_title))
+                .setMessage(getString(R.string.change_dialog_message))
+                .setPositiveButton(android.R.string.ok, new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         doLogout();
                     }
-                }).setNegativeButton(getString(R.string.cancel), new OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        /* nothing here */
-                    }
-                }).create();
+                })
+                .setNegativeButton(android.R.string.cancel, null).create();
         dialog.show();
         return true;
     }

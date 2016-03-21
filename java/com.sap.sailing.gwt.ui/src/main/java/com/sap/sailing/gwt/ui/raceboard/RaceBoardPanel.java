@@ -196,7 +196,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.raceMapStyle().ensureInjected();
         RaceMapLifecycle raceMapLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
         RaceMapSettings raceMapSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceMapLifecycle);
 
@@ -204,7 +204,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceTimePanelLifecycle);
 
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
-                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), 
+                competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
                 settings.isSimulationEnabled(), /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
