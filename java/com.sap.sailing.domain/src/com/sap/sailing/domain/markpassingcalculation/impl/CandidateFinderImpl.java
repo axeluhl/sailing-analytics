@@ -764,7 +764,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 result = 1.0;
             } else {
                 // if the start waypoint's passing instructions are unknown, assume it's a line
-                final boolean startIsLine = start.getPassingInstructions() == PassingInstruction.Line || start.getPassingInstructions() == PassingInstruction.None;
+                final boolean startIsLine = getPassingInstructions(start) == PassingInstruction.Line;
                 final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors = new ArrayList<>();
                 for (final Competitor otherCompetitor : race.getRace().getCompetitors()) {
                     if (otherCompetitor != c) {
@@ -915,7 +915,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
                 pos.add(po);
             }
-            if (pos.size() != 2){
+            if (pos.size() != 2) {
                 return true;
             }
             Bearing diff1 = pos.get(0).getBearingGreatCircle(p)
@@ -925,7 +925,6 @@ public class CandidateFinderImpl implements CandidateFinder {
             if (Math.abs(diff1.getDegrees()) > 90 || Math.abs(diff2.getDegrees()) > 90) {
                 result = false;
             }
-
         } else {
             Mark m = null;
             if (instruction == PassingInstruction.Single_Unknown || instruction == PassingInstruction.Port || instruction == PassingInstruction.Starboard
