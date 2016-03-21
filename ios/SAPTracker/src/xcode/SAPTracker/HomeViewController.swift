@@ -45,9 +45,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         // register for open custom URL events
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(openUrl(_:)), name: AppDelegate.NotificationType.openUrl, object: nil)
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "checkEULA:", name: UIApplicationWillEnterForegroundNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(checkEULA(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
 
         checkEULA(NSNotification.init(name: "", object: nil))
 
@@ -187,8 +187,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
             case .Delete:
                 tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            default:
-                return
             }
     }
     
