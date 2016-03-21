@@ -804,9 +804,9 @@ public class CandidateFinderImpl implements CandidateFinder {
      * the start being the one <em>or</em> the other scenario which mathematically is represented by using the inverted
      * probabilities of the two start options, multiplying them and inverting the resulting probability.<p>
      * 
-     * Access needs to be public to satisfy Maven-based test cases in com.sap.sailing.domain.test bundle which is not a fragment
+     * Access needs to be protected to satisfy Maven-based test cases in com.sap.sailing.domain.test bundle which is not a fragment
      */
-    public Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
+    protected Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
             final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors, boolean startIsLine) {
         final Double result;
         // sort by the absolute distance to start line

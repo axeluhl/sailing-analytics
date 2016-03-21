@@ -20,7 +20,19 @@ import com.sap.sailing.domain.markpassingcalculation.impl.CandidateFinderImpl.Ab
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 
 public class CandidateFinderImplWhiteBoxTest {
-    private CandidateFinderImpl finder;
+    private static class CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances extends CandidateFinderImpl {
+        public CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
+                DynamicTrackedRace race) {
+            super(race);
+        }
+
+        public Double getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
+                final List<AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine> distancesToStartLineOfOtherCompetitors, boolean startIsLine) {
+            return super.getProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(distancesToStartLineOfOtherCompetitors, startIsLine);
+        }
+    }
+    
+    private CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances finder;
     
     @Before
     public void setUp() {
@@ -30,7 +42,7 @@ public class CandidateFinderImplWhiteBoxTest {
         when(trackedRace.getRace()).thenReturn(race);
         when(race.getBoatClass()).thenReturn(boatClass);
         when(race.getCompetitors()).thenReturn(Collections.emptySet());
-        finder = new CandidateFinderImpl(trackedRace);
+        finder = new CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(trackedRace);
     }
     
     @Test
