@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.List;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
@@ -36,7 +37,7 @@ public interface MarkPositionService {
     // think the fixes have to be thinned out somehow and maybe shown in more detail when zoomed in. The aggregation of
     // fixes is in my eyes no option, because then you have to define behaviour when moving them.
     // I had no remaining time to incorporate the thinned out variable in my code.
-    MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier);
+    void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback);
     
     /**
      * The service may decide whether a mark fix can be removed. It may, for example, be impossible to
@@ -45,11 +46,11 @@ public interface MarkPositionService {
      * regatta log is the basis of the service and no tracked race exists yet, mark fixes may be removed
      * by revoking the device mappings.
      */
-    boolean canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
+    void canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix, AsyncCallback<Boolean> callback);
     
-    void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix);
+    void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix, AsyncCallback<Void> callback);
     
-    void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix);
+    void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix, AsyncCallback<Void> callback);
     
-    void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO oldFix, Position newPosition);
+    void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO oldFix, Position newPosition, AsyncCallback<Void> callback);
 }

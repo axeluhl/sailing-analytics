@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
@@ -15,35 +16,30 @@ public class MarkPositionServiceForSailingService implements MarkPositionService
     }
 
     @Override
-    public MarkTracksDTO getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier) {
-        // TODO Auto-generated method stub
-        return null;
+    public void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback) {
+        sailingService.getMarkTracks(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), callback);
     }
 
     @Override
-    public boolean canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
-            GPSFixDTO fix) {
-        // TODO Auto-generated method stub
-        return false;
+    public void canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
+            GPSFixDTO fix, AsyncCallback<Boolean> callback) {
+        sailingService.canRemoveMarkFix(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), mark.getIdAsString(), fix, callback);
     }
 
     @Override
-    public void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix) {
-        // TODO Auto-generated method stub
-
+    public void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix, AsyncCallback<Void> callback) {
+        sailingService.removeMarkFix(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), mark.getIdAsString(), fix, callback);
     }
 
     @Override
-    public void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix) {
-        // TODO Auto-generated method stub
-
+    public void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO newFix, AsyncCallback<Void> callback) {
+        sailingService.addMarkFix(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), mark.getIdAsString(), newFix, callback);
     }
 
     @Override
     public void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO oldFix,
-            Position newPosition) {
-        // TODO Auto-generated method stub
-
+            Position newPosition, AsyncCallback<Void> callback) {
+        sailingService.editMarkFix(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), mark.getIdAsString(), oldFix, newPosition, callback);
     }
 
 }
