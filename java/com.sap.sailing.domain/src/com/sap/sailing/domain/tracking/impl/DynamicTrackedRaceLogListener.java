@@ -311,14 +311,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
                 markPassingUpdateListener.removeFixedPassing(revokedEvent.getInvolvedBoats().get(0),
                         ((RaceLogFixedMarkPassingEvent) revokedEvent).getZeroBasedIndexOfPassedWaypoint());
             }
-            if (revokedEvent instanceof RaceLogDependentStartTimeEvent || revokedEvent instanceof RaceLogStartTimeEvent){
-                analyzeStartTime(null);
-            }
-            if (revokedEvent instanceof RaceLogRaceStatusEvent){
-                if (((RaceLogRaceStatusEvent) revokedEvent).getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
-                    trackedRace.invalidateEndTime();
-                }
-            }
         }
     }
 
