@@ -22,4 +22,10 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <style name="launchScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:windowBackground">@drawable/launch_screen</item>
+    </style>
+
 </resources>
