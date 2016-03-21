@@ -1,7 +1,7 @@
 .cellTableWidget {
-	border-left: 1px solid #c9caca;
 	border-top: 1px solid #c9caca;
-	border-collapse: collapse;
+	border-right: 1px solid #c9caca;
+	border-collapse: separate;
 }
 
 
@@ -16,20 +16,19 @@
 	border-right: 0px solid #c9caca !important;
 	border-top: none !important;
 	border-bottom: 1px solid #c9caca !important;
+	border-left: 1px solid #c9caca !important;
 	padding: 3px 5px;
 	padding-bottom: 5px;
 	text-align: center;
 	text-shadow: none !important;
+	font-weight: bold;
+	font-size: 12px!important;
 }
 
 .cellTableFirstColumnHeader {
 	position: relative;
     vertical-align: bottom;
 	background-color: #e5e5e5;
-	border-left: none !important;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
 	text-align: center;
 }
 
@@ -37,9 +36,6 @@
 	position: relative;
     vertical-align: bottom;
 	background-color: #e5e5e5;
-	border-right: 1px solid #c9caca !important;
-	border-top: none !important;
-	border-bottom: 1px solid #c9caca !important;
 	text-align: center;
 }
 
@@ -58,57 +54,49 @@
 
 .cellTableSelectedRow {
     color: #000000;
-    background-color: rgba(229,242,249,0.6);
+    background-color: rgba(229,242,249,0.5);
 }
 
-.cellTableSelectedRow > td:FIRST-CHILD {
-    border-left: 1px solid rgba(33,160,228,0.6) !important;
-}
-
-.cellTableSelectedRow > td:LAST-CHILD {
-    border-right: 1px solid rgba(33,160,228,0.6) !important;
-}
-.cellTableSelectedRow > td {
-}
 
 .cellTableCell {
-    overflow: inherit;
     font-size: 12px !important;
     line-height: 1.5em !important;  
-}
-.cellTableSelectedRowCell {
-    border-top: 2px double #21a0e4 !important;
-    border-bottom: 2px double #21a0e4 !important;
-    padding: 7px 7px 6px 7px !important;
+    vertical-align: middle;
 }
 
+.cellTableSelectedRowCell {
+    box-shadow: inset 0px -3px 3px -3px #21a0e4, inset 0px 3px 3px -3px #21a0e4;
+    padding: 7px !important;
+ }
+
 .cellTableEvenRowCell, .cellTableOddRowCell {
-    border: 1px solid #c9caca;
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid #d6d6d6;
+    border-left: 1px solid #d6d6d6;
 	padding: 7px;
 	white-space: nowrap;
 }
 
 .cellTableCheckboxColumnCell {
-	padding: 1px 1px 1px !important;
-	vertical-align: middle !important;
-	text-align: center;
 }
 
 .cellTableCheckboxSelected {
+    height: 13px;
+    width: 13px;
     margin: auto auto;
-	height: 13px;
-	width: 13px;
-	border: 1px solid #fcbb22;
-	background-color: #fcbb22;
-	vertical-align: middle;
+    border: 1px solid #fcbb22;
+    background-color: #fcbb22;
+/*     border: solid 1px #acacac; */
+/*     background-color: #cacaca; */
+	
 }
 
 .cellTableCheckboxDeselected {
-    margin: auto auto;
-	height: 13px;
-	width: 13px;
+    height: 13px;
+    width: 13px;
+	margin: auto auto;
 	border: solid 1px #acacac;
-	vertical-align: middle;
 }
 
 .cellTableHoveredRow {
@@ -135,7 +123,6 @@
 
 .cellTableLegColumnHeader {
 	background-color: #efefef;
-
 }
 
 .cellTableLegDetailColumnHeader {

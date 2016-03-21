@@ -67,7 +67,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      */
     private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE;
     
-    private final static double MINIMUM_PROBABILITY = 1 - Edge.getPenaltyForSkipping();
+    private final static double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
 

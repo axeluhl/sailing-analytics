@@ -4,15 +4,17 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.TimePoint;
 
 public class XTECandidateImpl extends CandidateWithSide {
-    private final boolean passesInTheRightDirection;
+    private final Double passesInTheRightDirectionProbability;
 
-    public XTECandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w, double onCorrectSideOfWaypoint, boolean passesInTheRightDirection) {
-        super(oneBasedIndexOfWaypoint, p, probability, w, onCorrectSideOfWaypoint);
-        this.passesInTheRightDirection = passesInTheRightDirection;
+    public XTECandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability,
+            Double startProbabilityBasedOnOtherCompetitors, Waypoint w, double onCorrectSideOfWaypoint,
+            Double passesInTheRightDirectionProbability) {
+        super(oneBasedIndexOfWaypoint, p, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint);
+        this.passesInTheRightDirectionProbability = passesInTheRightDirectionProbability;
     }
 
     @Override
     public String toString() {
-        return super.toString()+", passesInTheRightDirection: "+passesInTheRightDirection;
+        return super.toString()+", passesInTheRightDirection: "+passesInTheRightDirectionProbability;
     }
 }

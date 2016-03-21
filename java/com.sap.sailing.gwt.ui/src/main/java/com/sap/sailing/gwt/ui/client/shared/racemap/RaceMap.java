@@ -2033,7 +2033,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                         + stringMessages.knotsUnit() + ")"));
         if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), ""+maneuver.maneuverLossInMeters+"m"));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), NumberFormat.getFormat("0.0").format(maneuver.maneuverLossInMeters)+"m"));
         }
         return vPanel;
     }
