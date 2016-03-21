@@ -9,7 +9,7 @@ public class LabelTypePO extends PageArea {
     
     private static final String LABEL_TYPE_LIVE = "live";
     private static final String LABEL_TYPE_FINISHED = "finished";
-    private static final String LABEL_TYPE_INPROGRESS = "proress";
+    private static final String LABEL_TYPE_INPROGRESS = "progress";
     private static final String LABEL_TYPE_UPCOMING = "upcoming";
     
     public LabelTypePO(WebDriver driver, WebElement element) {
