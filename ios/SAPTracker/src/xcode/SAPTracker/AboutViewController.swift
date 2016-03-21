@@ -21,6 +21,11 @@ class AboutViewController: UIViewController {
         } else {
             versionLabel.text = "-"
         }
+		
+		// add logo to top left
+		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
+		let barButtonItem = UIBarButtonItem(customView: imageView)
+		navigationItem.leftBarButtonItem = barButtonItem
     }
     
     @IBAction func done(sender: AnyObject) {
