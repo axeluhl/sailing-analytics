@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_partnership_header">About the SAP US Sailing Partnership</string>
+    <string name="about_partnership_text">SAP is the Official Technology Partner of the United States Sailing Association
+SAP supports the United States Sailing Association through the implementation of a
+range of innovative technology solutions, delivering analytics to help teams and sailors
+improve whilst also providing systems to help sailing operations run more efficiently.</string>
+    <string name="about_insight_buoy_header">About the SAP Sailing Boat Tracker /SAP Sail InSight?</string>
+    <string name="about_insight_buoy_text">The SAP Sailing Boat Tracker /SAP Sail InSight provides sailors and teams with valuable information
+for post-race analysis. Users download the app on their smartphone and record GPS
+tracks whilst out on the water, calculating racing results and other valuable data.</string>
+</resources>
