@@ -2,7 +2,10 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import java.util.List;
 
+import org.moxieapps.gwt.highcharts.client.Color;
+import org.moxieapps.gwt.highcharts.client.PlotLine;
 import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.PlotLine.DashStyle;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -38,6 +41,7 @@ public class FixPositionChooser {
     private MenuBar menu;
     private final EditMarkPositionPanel editMarkPositionPanel;
     private final StringMessages stringMessages;
+    private final PlotLine redTimeLine;
     
     /**
      * Use this constructor when there is already a fix with an overlay. 
@@ -81,6 +85,7 @@ public class FixPositionChooser {
         this.coordinateSystem = coordinateSystem;
         this.editMarkPositionPanel = editMarkPositionPanel;
         this.editMarkPositionPanel.showNotification(stringMessages.selectAFixPositionBy());
+        this.redTimeLine = editMarkPositionPanel.getXAxis().createPlotLine().setColor(new Color(255, 0, 0)).setWidth(1.5).setDashStyle(DashStyle.SOLID);
         setupUIOverlay(confirmButtonText);
     }
     
@@ -94,6 +99,8 @@ public class FixPositionChooser {
             fix = new GPSFixDTOWithSpeedWindTackAndLegType(editMarkPositionPanel.getTimepoint(), coordinateSystem.getPosition(startPos), null, new WindDTO(), null, null, false);
             this.moveOverlay = new FixOverlay(map, 0, fix, FixType.BUOY, "#f00", coordinateSystem, stringMessages.dragToChangePosition());
         }
+        redTimeLine.setValue(fix.timepoint.getTime());
+        editMarkPositionPanel.getXAxis().addPlotLines(redTimeLine);
         map.panTo(startPos);
         if (polylinePath != null && newFix) {
             polylinePath.insertAt(polylineFixIndex, map.getCenter());
@@ -138,6 +145,7 @@ public class FixPositionChooser {
     }
     
     private void cleanupChart() {
+        editMarkPositionPanel.getXAxis().removePlotLine(redTimeLine);
         editMarkPositionPanel.updateRedPoint(polylineFixIndex);
         editMarkPositionPanel.resetPointColor(polylineFixIndex);
         editMarkPositionPanel.redrawChart();
