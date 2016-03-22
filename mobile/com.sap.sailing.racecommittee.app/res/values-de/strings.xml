@@ -494,4 +494,7 @@
         <item>nach Namen</item>
     </string-array>
 
+    <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
+    <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+
 </resources>

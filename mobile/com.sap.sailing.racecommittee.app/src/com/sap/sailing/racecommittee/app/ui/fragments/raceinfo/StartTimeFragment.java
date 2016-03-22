@@ -32,6 +32,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -422,7 +423,7 @@ public class StartTimeFragment extends BaseFragment
                     }
                     if (races.getFleet().getName().equals(fleet.getA())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
-                            if (!getRace().equals(race)) {
+                            if (!getRace().equals(race) && race.getStatus() != RaceLogRaceStatus.FINISHED) {
                                 Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
                                 int position = mRaceAdapter.add(data);
                                 if (position >= 0) {
