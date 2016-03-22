@@ -35,13 +35,13 @@ public class EventsResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    public Response getEvents() {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be authentication aware...
+    public Response getEvents(@QueryParam("showNonPublic") int showNonPublic) {
+     // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be authentication aware...
         // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
-            if (event.isPublic()) {
+            if (showNonPublic != 0 || event.isPublic()) {
                 result.add(eventSerializer.serialize(event));
             }
         }
