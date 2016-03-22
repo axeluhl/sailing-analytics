@@ -93,6 +93,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
         @Override
         public void onSuccess(Pair<TimePoint, TimePoint> result) {
+            raceWithStartAndEndOfTrackingTime.put(raceColumnDTOAndFleet, result);
             raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet);
         }
     }
@@ -356,15 +357,22 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             @Override
             public void onSuccess(Void result) {
                 loadAndRefreshLeaderboard(getSelectedLeaderboard().name, raceColumnName);
-                leaderboardSelectionChanged();
             }
         });
     }
     
     private RaceLogSetTrackingTimesDTO generateRaceLogSetTrackingTimesDTOWith(TimePoint startTime, TimePoint endTime) {
         Pair<TimePoint, TimePoint> startEndTrackingTime = getTrackingTimesFor(getSelectedRaceColumnWithFleet());
-        TimePoint currentStart = startEndTrackingTime.getA();
-        TimePoint currentEnd = startEndTrackingTime.getB();
+        TimePoint currentStart;
+        TimePoint currentEnd;
+        if (startEndTrackingTime == null){
+            currentStart = null;
+            currentEnd = null;
+        } else {
+            currentStart = startEndTrackingTime.getA();
+            currentEnd = startEndTrackingTime.getB();
+        }
+        
         RaceLogSetTrackingTimesDTO dto = new RaceLogSetTrackingTimesDTO();
         dto.leaderboardName = getSelectedLeaderboardName();
         dto.raceColumnName = getSelectedRaceColumnWithFleet().getA().getName();
