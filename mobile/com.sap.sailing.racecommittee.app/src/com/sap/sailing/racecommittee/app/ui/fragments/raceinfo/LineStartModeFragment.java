@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -21,6 +20,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartModeItem;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -67,10 +67,9 @@ public class LineStartModeFragment extends BaseFragment {
 
         mListView = (ListView) layout.findViewById(R.id.listView);
 
-        LinearLayout headerText = (LinearLayout) layout.findViewById(R.id.header_text);
-        if (headerText != null) {
-            headerText.setOnClickListener(new OnClickListener() {
-
+        HeaderLayout header = (HeaderLayout) layout.findViewById(R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     goHome();

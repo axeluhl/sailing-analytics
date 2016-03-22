@@ -44,7 +44,7 @@
             tools:text="https://dev.sapsailing.com"/>
     </RelativeLayout>
 
-    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+    <com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:floatLabelPaddingLeft="@dimen/float_label_padding"
@@ -59,9 +59,9 @@
             android:textAppearance="?attr/textSmall"
             android:textColor="@color/constant_black"
             android:textColorHint="@color/dialog_color_text"/>
-    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+    </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
 
-    <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+    <com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:floatLabelPaddingLeft="@dimen/float_label_padding"
@@ -76,7 +76,7 @@
             android:textAppearance="?attr/textSmall"
             android:textColor="@color/constant_black"
             android:textColorHint="@color/dialog_color_text"/>
-    </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+    </com.sap.sailing.racecommittee.app.ui.layouts.FloatLabelLayout>
 
     <Button
         android:id="@+id/login_request"

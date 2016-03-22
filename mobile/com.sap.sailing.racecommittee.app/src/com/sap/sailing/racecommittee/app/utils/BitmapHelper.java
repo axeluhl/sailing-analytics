@@ -67,9 +67,6 @@ public class BitmapHelper {
         return inSampleSize;
     }
 
-    // @SuppressWarnings, but it is handled correctly
-    @SuppressWarnings("deprecation")
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static Drawable getAttrDrawable(Context context, @AttrRes int attrRes) {
         Drawable drawable = null;
         TypedValue value = new TypedValue();
@@ -77,11 +74,7 @@ public class BitmapHelper {
             String[] data = String.valueOf(value.string).split("/");
             int resId = context.getResources().getIdentifier(data[2].substring(0, data[2].length() - 4), "drawable", context.getPackageName());
             if (resId != 0) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    drawable = context.getDrawable(resId);
-                } else {
-                    drawable = context.getResources().getDrawable(resId);
-                }
+                drawable = ContextCompat.getDrawable(context, resId);
             }
         }
         return drawable;
