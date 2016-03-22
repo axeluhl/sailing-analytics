@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="3xl-Yh-rPF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="3xl-Yh-rPF">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
@@ -729,7 +729,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="r6d-OU-cRI">
-                                <rect key="frame" x="20" y="39.5" width="49.5" height="23.5"/>
+                                <rect key="frame" x="20" y="39" width="49.5" height="23.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -741,7 +741,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracking Running" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="5Xu-6g-tqP">
-                                <rect key="frame" x="444" y="39.5" width="136" height="23.5"/>
+                                <rect key="frame" x="444" y="39" width="136" height="23.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098039220000001" green="0.50196078430000002" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -768,13 +768,13 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <containerView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
-                                <rect key="frame" x="0.0" y="134.5" width="600" height="401.5"/>
+                                <rect key="frame" x="0.0" y="134" width="600" height="401.5"/>
                                 <connections>
                                     <segue destination="rjH-vb-OUF" kind="embed" id="ln5-SR-WkO"/>
                                 </connections>
                             </containerView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="no GPS" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
-                                <rect key="frame" x="506.5" y="8" width="57.5" height="23.5"/>
+                                <rect key="frame" x="506" y="8" width="57.5" height="23.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -788,11 +788,34 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Online" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                <rect key="frame" x="527.5" y="103" width="52.5" height="23.5"/>
+                                <rect key="frame" x="527" y="103" width="52.5" height="23.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mnl-aL-6R2">
+                                <rect key="frame" x="20" y="424" width="560" height="75"/>
+                                <color key="backgroundColor" red="0.87843137250000003" green="0.20000000000000001" blue="0.090196078430000007" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="75" id="NVa-wY-Jve">
+                                        <variation key="heightClass=compact" constant="50"/>
+                                    </constraint>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
+                                <state key="normal" title="Stop Tracking">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="5"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="stopTrackingButtonTapped:" destination="eHd-jN-WkS" eventType="touchUpInside" id="V6I-ta-wMI"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -801,6 +824,7 @@
                             <constraint firstItem="Ujw-jg-ilY" firstAttribute="top" secondItem="r6d-OU-cRI" secondAttribute="bottom" constant="8" symbolic="YES" id="76Y-1b-oFJ">
                                 <variation key="heightClass=compact" constant="0.0"/>
                             </constraint>
+                            <constraint firstAttribute="trailingMargin" secondItem="mnl-aL-6R2" secondAttribute="trailing" id="8vV-66-vsk"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="top" secondItem="Xww-rc-pOA" secondAttribute="bottom" constant="8" symbolic="YES" id="9el-UI-bzr"/>
                             <constraint firstItem="UcT-H2-Fxp" firstAttribute="bottom" secondItem="nE0-bK-d8x" secondAttribute="top" id="C25-aA-8XZ"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="top" secondItem="Z1d-5I-pbj" secondAttribute="bottom" constant="8" symbolic="YES" id="C3i-US-IRf"/>
@@ -811,6 +835,7 @@
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="JQs-RK-ocI"/>
                             <constraint firstItem="r6d-OU-cRI" firstAttribute="leading" secondItem="Z1d-5I-pbj" secondAttribute="leading" id="L9y-4I-Xx1"/>
                             <constraint firstItem="Ujw-jg-ilY" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="MH7-cy-19A"/>
+                            <constraint firstItem="nE0-bK-d8x" firstAttribute="top" secondItem="mnl-aL-6R2" secondAttribute="bottom" constant="37" id="N0D-rv-8NW"/>
                             <constraint firstItem="dz3-w7-CCh" firstAttribute="centerY" secondItem="Ujw-jg-ilY" secondAttribute="centerY" id="NPU-zR-WBN"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="centerY" secondItem="tJY-RR-vpe" secondAttribute="centerY" id="NVc-vI-Vxb"/>
                             <constraint firstItem="Xww-rc-pOA" firstAttribute="top" secondItem="Ujw-jg-ilY" secondAttribute="bottom" constant="8" symbolic="YES" id="Owh-AZ-oxm"/>
@@ -820,6 +845,7 @@
                             <constraint firstAttribute="trailingMargin" secondItem="5Xu-6g-tqP" secondAttribute="trailing" id="j12-j8-u1B"/>
                             <constraint firstItem="Z1d-5I-pbj" firstAttribute="top" secondItem="qL4-PH-8ve" secondAttribute="bottom" constant="8" symbolic="YES" id="pnF-1D-Rxo"/>
                             <constraint firstAttribute="trailing" secondItem="BFc-m8-XKV" secondAttribute="trailing" constant="16" id="r8t-UX-UKm"/>
+                            <constraint firstItem="mnl-aL-6R2" firstAttribute="leading" secondItem="6kF-Wb-Hv2" secondAttribute="leadingMargin" id="zei-4r-UQH"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="qfB-FT-Ysz">
@@ -869,41 +895,14 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ULl-vy-5gb">
-                                <rect key="frame" x="20" y="525" width="560" height="75"/>
-                                <color key="backgroundColor" red="0.87843137250000003" green="0.20000000000000001" blue="0.090196078430000007" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="75" id="WnL-zt-cEe">
-                                        <variation key="heightClass=compact" constant="50"/>
-                                    </constraint>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
-                                <state key="normal" title="Stop Tracking">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="stopTrackingButtonTapped:" destination="QJL-mi-hJE" eventType="touchUpInside" id="5fq-CB-McA"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstAttribute="centerY" secondItem="mUm-EE-6Is" secondAttribute="centerY" priority="750" id="8N8-eA-npB"/>
                             <constraint firstAttribute="centerX" secondItem="mUm-EE-6Is" secondAttribute="centerX" id="8mv-fJ-KnI"/>
-                            <constraint firstAttribute="centerX" secondItem="ULl-vy-5gb" secondAttribute="centerX" id="Fzl-H6-UnL"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="top" secondItem="mP6-V4-QPK" secondAttribute="top" id="IZk-R3-x2F"/>
-                            <constraint firstItem="ULl-vy-5gb" firstAttribute="bottom" secondItem="gKu-YN-ryh" secondAttribute="top" id="UN0-98-lxt"/>
                             <constraint firstAttribute="trailing" secondItem="mUm-EE-6Is" secondAttribute="trailing" constant="20" symbolic="YES" id="ZKy-Zc-RiE"/>
-                            <constraint firstItem="IeZ-JM-OWw" firstAttribute="leading" secondItem="ULl-vy-5gb" secondAttribute="leading" id="eGE-uB-OHk"/>
                             <constraint firstItem="IeZ-JM-OWw" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leadingMargin" id="eYA-zH-AXy"/>
                             <constraint firstItem="mUm-EE-6Is" firstAttribute="leading" secondItem="mP6-V4-QPK" secondAttribute="leading" constant="20" symbolic="YES" id="lbB-rJ-KNj"/>
-                            <constraint firstItem="ULl-vy-5gb" firstAttribute="top" relation="greaterThanOrEqual" secondItem="mUm-EE-6Is" secondAttribute="bottom" constant="8" symbolic="YES" id="xXT-VC-dgn"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Tracking" id="fyS-rY-bYp"/>
@@ -1403,6 +1402,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="QMa-LQ-D8c"/>
-        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="HaH-Jc-FNR"/>
     </inferredMetricsTieBreakers>
 </document>
