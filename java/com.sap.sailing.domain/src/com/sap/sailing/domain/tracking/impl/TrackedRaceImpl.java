@@ -202,7 +202,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The calculated race start time
      */
     private TimePoint startTime;
-
+    
+    /**
+     * Maintained in lock-step with {@link #startTime}, only that {@code null} will be contained if {@link #startTime}
+     * was only inferred from start mark passings and no other, more official, information such as
+     * {@link #getStartTimeReceived()} or a start time coming from an attached {@link RaceLog}.
+     */
+    private TimePoint startTimeWithoutInferenceFromStartMarkPassings;
+    
     /**
      * The calculated race end time
      */
@@ -732,6 +739,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     public void invalidateStartTime() {
         startTime = null;
+        startTimeWithoutInferenceFromStartMarkPassings = null;
     }
 
     public void invalidateEndTime() {
@@ -771,13 +779,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public TimePoint getStartOfRace() {
-        if (startTime == null) {
+        return getStartOfRace(/* inferred */ true);
+    }
+
+    @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        final TimePoint result;
+        // check if we have in our caching fields what is asked:
+        if (inferred && startTime != null) {
+            result = startTime;
+        } else if (!inferred && startTimeWithoutInferenceFromStartMarkPassings != null) {
+            result = startTimeWithoutInferenceFromStartMarkPassings;
+        } else {
+            // no cache match; re-calculate
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 }
                 startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (startTime != null) {
+                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
                     if (logger.isLoggable(Level.FINEST)) {
                         logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     }
@@ -789,12 +810,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.finest("No start time found in race logs for race "+getRace().getName());
                 }
                 startTime = getStartTimeReceived();
+                if (startTime != null) {
+                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
+                }
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
                 // If no official start time was received, try to estimate the start time using the mark passings for
                 // the start line.
                 final Waypoint firstWaypoint;
                 if (getTrackedRegatta().getRegatta().useStartTimeInference() && (firstWaypoint = getRace().getCourse().getFirstWaypoint()) != null) {
+                    // in this "if" branch update only startTime, not startTimeWithoutInferenceFromStartMarkPassings
                     if (startTimeReceived != null) {
                         // plausibility check for start time received, based on start mark passings; if no boat started within
                         // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
@@ -828,8 +853,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                 }
             }
+            if (inferred) {
+                result = startTime;
+            } else {
+                result = startTimeWithoutInferenceFromStartMarkPassings;
+            }
         }
-        return startTime;
+        return result;
     }
 
     /**
