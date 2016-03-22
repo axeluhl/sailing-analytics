@@ -176,6 +176,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
+    String degreesUnit();
     @Override
     String close();
     String compareCompetitors();
@@ -1262,9 +1263,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueDescending();
     String sortBy();
     
-    String dashboardWindBotLoadingText();
-    String dashboardWindBotLoadingMessage();
-    String dashboardWindBotNotAvailable();
+    String dashboardHeader();
+    String dashboardNoWindBotAvailableHeader();
+    String dashboardNoWindBotAvailableMessage();
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
     String dashboardTrueWindDirection();
@@ -1275,10 +1276,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardAverageWindMinutes(int minutes);
     String dashboardWindChartHint();
     
+    String dashboardSelectCompetitor();
+    String dashboardStartAnalysesHeader();
     String dashboardNewStartAnalysisAvailable();
-    
-    String dashboardStartlineAdvantagesByWind();
-    String dashboardStartlineAdvantageByGeometry();
+    String dashboardNoStartAnalysesAvailableHeader();
+    String dashboardNoStartAnalysesAvailableMessage();
+    String dashboardNoStartlineAdvantagesByWindAvailableHeader();
+    String dashboardNoStartlineAdvantagesByWindAvailableMessage();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableHeader();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableMessage();
+    String dashboardStartlineAdvantagesByWindHeader();
+    String dashboardStartlineAdvantageByGeometryHeader();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
@@ -1492,6 +1500,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String thereIsNoIdentifierSet();
     String couldNotObtainAccessTokenForUser(String message);
     String raceManagerDeviceName();
+    String serverURLInvalid();
+    String serverURLEmpty();
     String marks();
     String addNewFix();
     String pleaseSelectOtherTimepoint();

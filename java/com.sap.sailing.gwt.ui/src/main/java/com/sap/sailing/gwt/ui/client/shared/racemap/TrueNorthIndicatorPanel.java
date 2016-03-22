@@ -26,19 +26,20 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
 
     private Canvas canvas;
     
-    private CombinedWindPanelStyle combinedWindPanelStyle;
+    private RaceMapStyle raceMapStyle;
     private final CoordinateSystem coordinateSystem;
     
-    public TrueNorthIndicatorPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, CombinedWindPanelStyle combinedWindPanelStyle,
+    public TrueNorthIndicatorPanel(final RaceMap map, RaceMapImageManager theRaceMapResources, RaceMapStyle raceMapStyle,
             final StringMessages stringMessages, CoordinateSystem coordinateSystem) {
         this.stringMessages = stringMessages;
         this.coordinateSystem = coordinateSystem;
         this.raceMapResources = theRaceMapResources;
-        this.combinedWindPanelStyle = combinedWindPanelStyle;
-        addStyleName(combinedWindPanelStyle.combinedWindPanel());
+        this.raceMapStyle = raceMapStyle;
+        addStyleName(raceMapStyle.raceMapIndicatorPanel());
+        addStyleName(raceMapStyle.trueNorthIndicator());
         transformer = raceMapResources.getTrueNorthIndicatorIconTransformer();
         canvas = transformer.getCanvas();
-        canvas.addStyleName(this.combinedWindPanelStyle.combinedWindPanelCanvas());
+        canvas.addStyleName(this.raceMapStyle.raceMapIndicatorPanelCanvas());
         add(canvas);
         canvas.addClickHandler(new ClickHandler() {
             @Override
@@ -58,7 +59,7 @@ public class TrueNorthIndicatorPanel extends FlowPanel {
             }
         });
         textLabel = new Label("");
-        textLabel.addStyleName(this.combinedWindPanelStyle.combinedWindPanelTextLabel());
+        textLabel.addStyleName(this.raceMapStyle.raceMapIndicatorPanelTextLabel());
         add(textLabel);
     }
 

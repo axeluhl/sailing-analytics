@@ -103,7 +103,7 @@ public class RegattaLogImportFixesAndAddMappingsDialog extends DataEntryDialog<C
     }
 
     void getCompetitorRegistrations(SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
-        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName,
+        sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName,
                 new AsyncCallback<Collection<CompetitorDTO>>() {
                     @Override
                     public void onSuccess(Collection<CompetitorDTO> result) {

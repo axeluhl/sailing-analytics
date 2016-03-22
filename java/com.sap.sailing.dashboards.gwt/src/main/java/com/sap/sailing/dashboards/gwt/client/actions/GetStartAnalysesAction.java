@@ -2,6 +2,8 @@ package com.sap.sailing.dashboards.gwt.client.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.dashboards.gwt.server.util.actions.startanalysis.StartAnalysisCreationController;
@@ -24,6 +26,8 @@ public class GetStartAnalysesAction implements DashboardAction<StartAnalysesDTO>
 
     private String leaderboarName;
     private String competitorIdAsString;
+    
+    private static final Logger logger = Logger.getLogger(GetStartAnalysesAction.class.getName());
 
     @SuppressWarnings("unused")
     private GetStartAnalysesAction() {
@@ -39,10 +43,12 @@ public class GetStartAnalysesAction implements DashboardAction<StartAnalysesDTO>
     public StartAnalysesDTO execute(DashboardDispatchContext dashboardDispatchContext) throws DispatchException {
         StartAnalysesDTO result = new StartAnalysesDTO();
         List<StartAnalysisDTO> startanalyses = new ArrayList<StartAnalysisDTO>();
-        if (competitorIdAsString != null && leaderboarName != null) {
+        if (leaderboarName != null) {
             try {
-                Competitor competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().getExistingCompetitorByIdAsString(
-                        competitorIdAsString);
+                Competitor competitor = null;
+                if(competitorIdAsString != null) {
+                    competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().getExistingCompetitorByIdAsString(competitorIdAsString);   
+                }
                 Leaderboard leaderboard = dashboardDispatchContext.getRacingEventService().getLeaderboardByName(this.leaderboarName);
                 if (leaderboard != null) {
                     for (RaceColumn column : leaderboard.getRaceColumns()) {
@@ -59,7 +65,7 @@ public class GetStartAnalysesAction implements DashboardAction<StartAnalysesDTO>
 
                 }
             } catch (NullPointerException e) {
-                // logger.log(Level.INFO, "", e);
+                 logger.log(Level.INFO, "", e);
             }
         }
         result.setStartAnalyses(startanalyses);

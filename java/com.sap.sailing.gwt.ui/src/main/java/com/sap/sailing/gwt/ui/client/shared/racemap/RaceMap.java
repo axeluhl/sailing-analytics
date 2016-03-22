@@ -409,10 +409,10 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     
     private final NumberFormat numberFormatOneDecimal = NumberFormat.getFormat("0.0");
     
-    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter,
-            Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages, boolean showMapControls,
-            boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, RegattaAndRaceIdentifier raceIdentifier,
-            CombinedWindPanelStyle combinedWindPanelStyle, boolean showHeaderPanel) {
+    public RaceMap(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
+            ErrorReporter errorReporter, Timer timer, CompetitorSelectionProvider competitorSelection, StringMessages stringMessages,
+            boolean showMapControls, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
+            RegattaAndRaceIdentifier raceIdentifier, RaceMapResources raceMapResources, boolean showHeaderPanel) {
         this.setSize("100%", "100%");
         this.showMapControls = showMapControls;
         this.stringMessages = stringMessages;
@@ -422,7 +422,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         this.errorReporter = errorReporter;
         this.timer = timer;
         timer.addTimeListener(this);
-        raceMapImageManager = new RaceMapImageManager();
+        raceMapImageManager = new RaceMapImageManager(raceMapResources);
         markDTOs = new HashMap<String, MarkDTO>();
         courseSidelines = new HashMap<>();
         courseMiddleLines = new HashMap<>();
@@ -450,9 +450,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         panelForLeftHeaderLabels = new AbsolutePanel();
         panelForRightHeaderLabels = new AbsolutePanel();
         initializeData(showMapControls, showHeaderPanel);
-        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
+        combinedWindPanel = new CombinedWindPanel(raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
         combinedWindPanel.setVisible(false);
-        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, combinedWindPanelStyle, stringMessages, coordinateSystem);
+        trueNorthIndicatorPanel = new TrueNorthIndicatorPanel(this, raceMapImageManager, raceMapResources.raceMapStyle(), stringMessages, coordinateSystem);
         trueNorthIndicatorPanel.setVisible(true);
         orientationChangeInProgress = false;
         mapFirstZoomDone = false;
@@ -636,8 +636,9 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
               if (showHeaderPanel) {
                   createHeaderPanel(map);
               }
-              createSettingsButton(map);
-
+              if (showMapControls) {
+                  createSettingsButton(map);
+              }
               // Data has been initialized
               RaceMap.this.isMapInitialized = true;
               RaceMap.this.redraw();
@@ -2066,7 +2067,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                         + " -> " + NumberFormat.getDecimalFormat().format(after.speedInKnots) + " "
                         + stringMessages.knotsUnit() + ")"));
         if (maneuver.maneuverLossInMeters != null) {
-            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), ""+maneuver.maneuverLossInMeters+"m"));
+            vPanel.add(createInfoWindowLabelAndValue(stringMessages.maneuverLoss(), NumberFormat.getFormat("0.0").format(maneuver.maneuverLossInMeters)+"m"));
         }
         return vPanel;
     }

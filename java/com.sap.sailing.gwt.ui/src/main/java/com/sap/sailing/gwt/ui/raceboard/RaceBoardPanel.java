@@ -172,10 +172,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
-        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer, competitorSelectionProvider,
-                stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(), selectedRaceIdentifier,
-                raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true) {
+        raceMapResources.raceMapStyle().ensureInjected();
+        raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
+                competitorSelectionProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
+                selectedRaceIdentifier, raceMapResources, /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
