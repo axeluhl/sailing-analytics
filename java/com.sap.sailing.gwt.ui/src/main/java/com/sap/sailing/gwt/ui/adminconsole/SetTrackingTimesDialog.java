@@ -90,6 +90,13 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
                         currentEnd = result == null ? null : result.getB();
                         updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
                         updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
+                        if (currentStart == null){
+                            setupStartStopButton(false);
+                        } else if (currentStart != null && currentEnd == null){
+                            setupStartStopButton(true);
+                        } else {
+                            setupStartStopButton(false);
+                        }
                     }
                 });
     }
@@ -98,16 +105,14 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
             dateTimeBox.setValue(null);
-            setupStartStopButton(/*startTimeSet*/ false);
         } else {
             label.setText(dateTimeFormat.format(timePoint.asDate()));
             dateTimeBox.setValue(timePoint.asDate());
-            setupStartStopButton(/*startTimeSet*/ true);
         }
     }
 
     private void setupStartStopButton(boolean startTimeSet) {
-        startStopButton.setDown(!startTimeSet);
+        startStopButton.setDown(startTimeSet);
     }
 
     private Widget createInputPanel() {
