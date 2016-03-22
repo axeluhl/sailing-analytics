@@ -85,7 +85,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             final ErrorReporter errorReporter, StringMessages theStringConstants, final boolean showRaceDetails,
             LeaderboardsRefresher leaderboardsRefresher) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter, theStringConstants,
-                /* multi-selection */ false);
+                /* multi-selection */ false, /*autoAddRaceColumnsToTable*/ true);
         this.showRaceDetails = showRaceDetails;
         leaderboardTable.ensureDebugId("LeaderboardsCellTable");
     }

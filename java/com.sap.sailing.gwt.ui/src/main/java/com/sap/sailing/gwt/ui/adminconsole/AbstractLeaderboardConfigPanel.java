@@ -135,7 +135,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
     public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
             LeaderboardsRefresher leaderboardsRefresher, final ErrorReporter errorReporter,
-            StringMessages theStringConstants, boolean multiSelection) {
+            StringMessages theStringConstants, boolean multiSelection, boolean autoAddRaceColumns) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         leaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
@@ -265,7 +265,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 sailingService, stringMessages, errorReporter, multiSelection);
         raceColumnTable.asWidget().ensureDebugId("RaceColumnTable");
         raceColumnTable.getTable().setWidth("100%");
-        addColumnsToRacesTable(raceColumnTable.getTable());
+        if (autoAddRaceColumns){
+            addColumnsToRacesTable(raceColumnTable.getTable());
+        }
         this.raceColumnTableSelectionModel = raceColumnTable.getSelectionModel();
         raceColumnTableSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             public void onSelectionChange(SelectionChangeEvent event) {

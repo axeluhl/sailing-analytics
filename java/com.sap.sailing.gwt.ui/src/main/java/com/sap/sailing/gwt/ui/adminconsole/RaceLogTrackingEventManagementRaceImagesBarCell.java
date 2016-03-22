@@ -1,15 +1,14 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 
 public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCell {
     public final static String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
@@ -27,11 +26,13 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
 
     
     private final StringMessages stringMessages;
+    private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public RaceLogTrackingEventManagementRaceImagesBarCell(StringMessages stringConstants) {
+    public RaceLogTrackingEventManagementRaceImagesBarCell(StringMessages stringConstants, SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel) {
         super();
         this.stringMessages = stringConstants;
+        this.smartphoneTrackingEventManagementPanel = smartphoneTrackingEventManagementPanel;
     }
  
     @Override
@@ -52,24 +53,21 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
         
-        if (startTimeSet(object.getA(), object.getB())){
-            if (!endTimeSet(object.getA(), object.getB())){
-                result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
-            }
-        } else {
+        Pair<TimePoint, TimePoint> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
+        if (startEndTrackingTime == null){
             result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+        } else {
+            if (startEndTrackingTime.getA() != null){
+                if (startEndTrackingTime.getB() != null){
+                    result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+                } else {
+                    result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
+                }
+            } else {
+                result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+            }
         }
         
         return result;
-    }
-
-    private boolean startTimeSet(RaceColumnDTO raceColumn, FleetDTO fleet) {
-        Date startTime = raceColumn.getStartOfTracking(fleet);
-        return startTime != null;
-    }
-    
-    private boolean endTimeSet(RaceColumnDTO raceColumn, FleetDTO fleet) {
-        Date endTime = raceColumn.getEndOfTracking(fleet);
-        return endTime != null;
     }
 }
