@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
@@ -19,6 +22,8 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
     public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
     public final static String ACTION_SET_TRACKING_TIMES = "ACTION_SET_TRACKING_TIMES";
+    public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
+    public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
 
     
     private final StringMessages stringMessages;
@@ -46,6 +51,25 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
+        
+        if (startTimeSet(object.getA(), object.getB())){
+            if (!endTimeSet(object.getA(), object.getB())){
+                result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
+            }
+        } else {
+            result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+        }
+        
         return result;
+    }
+
+    private boolean startTimeSet(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        Date startTime = raceColumn.getStartOfTracking(fleet);
+        return startTime != null;
+    }
+    
+    private boolean endTimeSet(RaceColumnDTO raceColumn, FleetDTO fleet) {
+        Date endTime = raceColumn.getEndOfTracking(fleet);
+        return endTime != null;
     }
 }
