@@ -91,7 +91,9 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.base.Boat;
@@ -6111,7 +6113,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null) {
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
-                    for (final Mark mark : raceColumn.getMarks(fleet)) {
+                    for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
                         final MarkDTO markDTO = convertToMarkDTO(mark, /* position */ null);
                         final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
                         final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
@@ -6186,23 +6188,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO fix) {
+    public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO fix) throws NotRevokableException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
-                final Fleet fleet = raceColumn.getFleetByName(fleetName);
-                if (fleet != null) {
-                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
-                } else {
-                    result = false;
+                final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
+                final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                final Collection<Mark> marks = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
+                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                for (final Mark mark : marks) {
+                    if (mark.getId().toString().equals(markIdAsString)) {
+                        mappingFinder.removeTimePointFromMapping(mark, fixTimePoint);
+                    }
                 }
-            } else {
-                result = false;
             }
         }
-        // TODO need to find all mappings that span fix's time point; revoke all those mappings and instead create two replacements that end before/start after fix's time point to skip it;
-        // TODO if an existing mapping starts at or ends with the fix's time point, only one or no replacement mapping may be required ("ping" case).
     }
 
     @Override
