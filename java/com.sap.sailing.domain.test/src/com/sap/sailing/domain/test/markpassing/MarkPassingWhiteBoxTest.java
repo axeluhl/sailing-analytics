@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
