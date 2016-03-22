@@ -40,6 +40,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void> {
+    private static final int HOURS_TO_EXPAND_FOR_OPEN_END = 2;
+
     protected final String leaderboardName;
 
     public static final double PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS = 0.1;
@@ -165,16 +167,19 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     void updateChart() {
-        earliest = new Date(Long.MAX_VALUE);
-        latest = new Date(Long.MIN_VALUE);
+        earliest = null;
+        latest = null;
         for (DeviceMappingDTO mapping : mappings) {
             updateExtremes(mapping);
         }
         data = new Point[mappings.size()];
+        
+        handleOpenEndedIntervalls();
+        
         long earliestMillis = earliest.getTime();
         long latestMillis = latest.getTime();
         long range = latestMillis - earliestMillis;
-        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS); // TODO bug 3426: open intervals dominate the chart too badly
+        long extension = (long) (range * PERCENTAGE_OF_TIMESPAN_TO_EXTEND_OPEN_ENDS);
         long yMin = earliestMillis - extension;
         long yMax = latestMillis + extension;
         int i = 0;
@@ -192,19 +197,25 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 .setPoints(data));
         chart.getYAxis().setExtremes(yMin, yMax);
     }
+
+    private void handleOpenEndedIntervalls() {
+        if (earliest == null && latest == null){
+            //allMappingsAreOpenEnded in Both directions or no mappings present
+            earliest = new Date(0);
+            latest = new Date();
+        } else if (earliest == null && latest != null){
+            earliest = new Date(latest.getTime() - HOURS_TO_EXPAND_FOR_OPEN_END*1000*60*60);
+        } else if (latest == null && earliest != null){
+            latest = new Date(earliest.getTime() + HOURS_TO_EXPAND_FOR_OPEN_END*1000*60*60);
+        }
+    }
     
     private void updateExtremes(DeviceMappingDTO mapping) {
-        if (mapping.from != null && earliest.after(mapping.from)) {
+        if (mapping.from != null && (earliest == null || earliest.after(mapping.from))) {
             earliest = mapping.from;
         }
-        if (mapping.to != null && latest.before(mapping.to)) {
+        if (mapping.to != null && (latest == null || latest.before(mapping.to))) {
             latest = mapping.to;
-        }
-        if (mapping.to != null && earliest.after(mapping.to)) {
-            earliest = mapping.to;
-        }
-        if (mapping.from != null && latest.before(mapping.from)) {
-            latest = mapping.from;
         }
     }
     
