@@ -67,7 +67,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
-                stringMessages, /* multiSelection */ true, /*autoAddRaceColumnsToTable*/ true);
+                stringMessages, /* multiSelection */ true);
         // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
         VerticalPanel importContent = new VerticalPanel();
