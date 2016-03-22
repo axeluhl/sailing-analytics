@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
@@ -59,7 +60,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private CheckBox correctWindDirectionForDeclination;
     private CheckBox trackWind;
     private ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn;
-    protected boolean regattaHasCompetitors = false;            
+    protected boolean regattaHasCompetitors = false; 
+    private AtomicInteger asyncCallBackCounter = new AtomicInteger(0);
     private Map<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Pair<TimePoint,TimePoint>> raceWithStartAndEndOfTrackingTime = new HashMap<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Pair<TimePoint,TimePoint>>();
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
@@ -77,25 +79,6 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         importPanel.add(importContent);
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
-    }
-    
-    private final class AddRaceColumnCallback implements AsyncCallback<Util.Pair<TimePoint, TimePoint>> {
-        private final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet;
-
-        private AddRaceColumnCallback(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet) {
-            this.raceColumnDTOAndFleet = raceColumnDTOAndFleet;
-        }
-
-        @Override
-        public void onFailure(Throwable caught) {
-            errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
-        }
-
-        @Override
-        public void onSuccess(Pair<TimePoint, TimePoint> result) {
-            raceWithStartAndEndOfTrackingTime.put(raceColumnDTOAndFleet, result);
-            raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet);
-        }
     }
 
     private static interface ShowWithBoatClass {
@@ -444,9 +427,28 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             raceColumnTable.getDataProvider().getList().clear();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
+                    asyncCallBackCounter.incrementAndGet();
                     final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
                     sailingService.getTrackingTimes(selectedLeaderboard.name, raceColumn.getName(), fleet.getName(),
-                            new AddRaceColumnCallback(raceColumnDTOAndFleet));
+                            new AsyncCallback<Util.Pair<TimePoint,TimePoint>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Pair<TimePoint, TimePoint> result) {
+                            raceWithStartAndEndOfTrackingTime.put(raceColumnDTOAndFleet, result);
+                            if (asyncCallBackCounter.decrementAndGet() == 0){
+                                for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
+                                    for (FleetDTO fleet : raceColumn.getFleets()) {
+                                        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet2 = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
+                                        raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet2);
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
             }
             selectedLeaderBoardPanel.setVisible(true);
