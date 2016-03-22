@@ -274,6 +274,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -281,6 +282,7 @@ import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tractracadapter.RaceRecord;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapter;
 import com.sap.sailing.domain.tractracadapter.TracTracAdapterFactory;
@@ -6111,12 +6113,53 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getMarks(fleet)) {
                         final MarkDTO markDTO = convertToMarkDTO(mark, /* position */ null);
-                        
+                        final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                        final GPSFixTrack<Mark, ? extends GPSFix> markTrack;
+                        if (trackedRace != null) {
+                            markTrack = trackedRace.getOrCreateTrack(mark);
+                        } else {
+                            DynamicGPSFixTrackImpl<Mark> writeableMarkTrack = new DynamicGPSFixTrackImpl<Mark>(mark, BoatClass.APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis());
+                            markTrack = writeableMarkTrack;
+                            final RaceLog raceLog = raceColumn.getRaceLog(fleet);
+                            final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                            final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
+                            final Pair<TimePoint, TimePoint> trackingTimes = trackingTimesFinder.analyze();
+                            try {
+                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark, trackingTimes.getA(), trackingTimes.getB());
+                            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
+                            }
+                        }
+                        Iterable<GPSFixDTO> gpsFixDTOTrack = convertToGPSFixDTOTrack(markTrack);
+                        final MarkTrackDTO markTrackDTO = new MarkTrackDTO(markDTO, gpsFixDTOTrack, /* thinned out */ false);
+                        markTracks.add(markTrackDTO);
                     }
                 }
             }
         }
         return new MarkTracksDTO(markTracks);
+    }
+    
+    /**
+     * Uses all fixed from {@code track} with the outliers removed, {@link #convertToGPSFixDTO(GPSFix) converts} each
+     * of them to a {@link GPSFixDTO} and adds them to the resulting list.
+     */
+    private Iterable<GPSFixDTO> convertToGPSFixDTOTrack(Track<? extends GPSFix> track) {
+        final List<GPSFixDTO> result = new ArrayList<>();
+        for (final GPSFix fix : track.getFixes()) {
+            result.add(convertToGPSFixDTO(fix));
+        }
+        return result;
+    }
+    
+    private GPSFixDTO convertToGPSFixDTO(GPSFix fix) {
+        final GPSFixDTO result;
+        if (fix == null) {
+            result = null;
+        } else {
+            result = new GPSFixDTO(fix.getTimePoint().asDate(), fix.getPosition());
+        }
+        return result;
     }
 
     @Override
@@ -6143,14 +6186,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
-            GPSFixDTO fix) {
-        // TODO Auto-generated method stub
+    public void removeMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO fix) {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                } else {
+                    result = false;
+                }
+            } else {
+                result = false;
+            }
+        }
+        // TODO need to find all mappings that span fix's time point; revoke all those mappings and instead create two replacements that end before/start after fix's time point to skip it;
+        // TODO if an existing mapping starts at or ends with the fix's time point, only one or no replacement mapping may be required ("ping" case).
     }
 
     @Override
-    public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
-            GPSFixDTO newFix) {
+    public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO newFix) {
         // TODO Auto-generated method stub
     }
 

@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
-import java.util.List;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
@@ -10,14 +8,26 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 
 public interface MarkPositionService {
     public static class MarkTrackDTO {
-        public MarkDTO mark;
-        public List<GPSFixDTO> fixes;
-        public boolean thinnedOut;
+        private final MarkDTO mark;
+        private final Iterable<GPSFixDTO> fixes;
+        private final boolean thinnedOut;
         
-        public MarkTrackDTO(MarkDTO mark, List<GPSFixDTO> fixes, boolean thinnedOut) {
+        public MarkTrackDTO(MarkDTO mark, Iterable<GPSFixDTO> fixes, boolean thinnedOut) {
             this.mark = mark;
             this.fixes = fixes;
             this.thinnedOut = thinnedOut;
+        }
+
+        public MarkDTO getMark() {
+            return mark;
+        }
+
+        public Iterable<GPSFixDTO> getFixes() {
+            return fixes;
+        }
+
+        public boolean isThinnedOut() {
+            return thinnedOut;
         }
     }
     

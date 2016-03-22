@@ -608,13 +608,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
                         @Override
                         public void onSuccess(MarkTracksDTO markTracks) {
-                            Map<MarkDTO, List<GPSFixDTO>> result = new HashMap<>();
+                            Map<MarkDTO, Iterable<GPSFixDTO>> result = new HashMap<>();
                             for (MarkTrackDTO track : markTracks.getTracks()) {
-                                result.put(track.mark, track.fixes);
+                                result.put(track.getMark(), track.getFixes());
                                 marks = new HashMap<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>>();
                                 raceFromTime = timeRangeWithZoomProvider.getFromTime();
                                 raceToTime = timeRangeWithZoomProvider.getToTime();
-                                for (final Map.Entry<MarkDTO, List<GPSFixDTO>> fixes : result.entrySet()) {
+                                for (final Map.Entry<MarkDTO, Iterable<GPSFixDTO>> fixes : result.entrySet()) {
                                     Date fromTime = raceFromTime;
                                     Date toTime = raceToTime;
                                     PolylineOptions options = PolylineOptions.newInstance();
