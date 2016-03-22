@@ -80,6 +80,22 @@ public interface Distance extends Comparable<Distance>, Serializable {
         public String toString() {
             return "0m";
         }
+
+        @Override
+        public double divide(Distance other) {
+            final double result;
+            if (other.getMeters() == 0) {
+                result = 0./0.;
+            } else {
+                result = 0;
+            }
+            return result;
+        }
+
+        @Override
+        public Distance abs() {
+            return this;
+        }
     };
     
     double getGeographicalMiles();
@@ -108,4 +124,16 @@ public interface Distance extends Comparable<Distance>, Serializable {
     Speed inTime(Duration duration);
     
     Distance add(Distance d);
+
+    /**
+     * Divides this distance by the {@code other} distance. Should the {@code other} distance
+     * be {@link #<code>null</code>}, the result will be {@code NaN}.
+     */
+    double divide(Distance other);
+
+    /**
+     * If this distance is negative, returns a positive difference with the same absolute value; for positive
+     * distances, this distance is returned.
+     */
+    Distance abs();
 }
