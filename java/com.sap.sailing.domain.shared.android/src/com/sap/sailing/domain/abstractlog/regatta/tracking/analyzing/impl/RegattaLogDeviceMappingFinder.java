@@ -20,9 +20,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.WithID;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
@@ -126,11 +124,14 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
             final TimePoint to = closingEvent!= null ? closingEvent.getClosingTimePoint() : event.getTo();
             final TimeRange mappingTimeRange = new TimeRangeImpl(from, to);
             if (mappingTimeRange.includes(fixTimePoint)) {
-                if (Util.equalsWithNull(from, fixTimePoint)) {
-                    // revoke original mapping event and replace by one that starts one millisecond after the fix time point
-                    log.revokeEvent(event.getAuthor(), event);
-                    log.add(createDeviceMappingEvent(item, event.getAuthor(), from.plus(new MillisecondsDurationImpl(1)), to, event.getDevice()));
+                if (closingEvent != null) {
+                    log.revokeEvent(closingEvent.getAuthor(), closingEvent);
                 }
+                log.revokeEvent(event.getAuthor(), event);
+                final TimePoint endOfFirstHalf = fixTimePoint.minus(1);
+                final TimePoint startOfSecondHalf = fixTimePoint.plus(1);
+                log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
+                log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to, event.getDevice()));
             }
         }
     }
