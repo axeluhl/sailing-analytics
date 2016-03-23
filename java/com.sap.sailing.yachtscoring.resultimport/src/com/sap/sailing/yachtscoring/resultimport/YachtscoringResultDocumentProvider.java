@@ -4,51 +4,55 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.yachtscoring.EventResultDescriptor;
-import com.sap.sailing.yachtscoring.YachtscoringEventResultsParserImpl;
-import com.sap.sailing.yachtscoring.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
-import com.sap.sailing.resultimport.ResultDocumentProvider;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sailing.xrr.resultimport.ParserFactory;
+import com.sap.sailing.xrr.resultimport.impl.UrlBasedXRRResultDocumentProvider;
+import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
+import com.sap.sailing.xrr.schema.Division;
+import com.sap.sailing.xrr.schema.Event;
+import com.sap.sailing.xrr.schema.RegattaResults;
+import com.sap.sse.common.TimePoint;
 
-public class YachtscoringResultDocumentProvider implements ResultDocumentProvider {
-    private final ResultUrlProvider resultUrlProvider;
+/**
+ * A yachtscoring.com specific result document provider reading the complete XRR document of an event to find all regattas inside.
+ * @author Frank
+ *
+ */
+public class YachtscoringResultDocumentProvider extends UrlBasedXRRResultDocumentProvider {
 
-    public YachtscoringResultDocumentProvider(final ResultUrlProvider resultUrlProvider) {
-        this.resultUrlProvider = resultUrlProvider;
+    public YachtscoringResultDocumentProvider(ResultUrlProvider resultUrlProvider, ParserFactory parserFactory) {
+        super(resultUrlProvider, parserFactory);
     }
 
-    @Override
-    public Iterable<ResultDocumentDescriptor> getResultDocumentDescriptors() throws IOException {
+    public List<ResultDocumentDescriptor> resolveResultDocumentDescriptors(RegattaResults xrrParserResult, URL url) {
         List<ResultDocumentDescriptor> result = new ArrayList<>();
-        YachtscoringEventResultsParserImpl parser = new YachtscoringEventResultsParserImpl();
-        for (URL url : resultUrlProvider.getUrls()) {
-            URLConnection eventResultConn = url.openConnection();
-            EventResultDescriptor eventResult = parser.getEventResult((InputStream) eventResultConn.getContent());
-            if (eventResult != null) {
-                for (RegattaResultDescriptor regattaResult : eventResult.getRegattaResults()) {
-                    // Depending on the regatta type the boat class in the XRR is set or not (in the division tag)
-                    // Olympic boat classes -> IFClassID="2.4M" Title="2.4M open"
-                    // International boat classes -> IFClassID="" Title="Coachboat"
-                    // Open boat classes (ORC) ->  IFClassID="" Title="Welcome Race ORC-Club"
-                    // -> therefore we need to take the regatta title as boat class where the IsafID is not available
-                    String boatClass = regattaResult.getIsafId() != null && !regattaResult.getIsafId().isEmpty() ? regattaResult.getIsafId() : regattaResult.getName();
-                    if (regattaResult.getIsFinal() != null && regattaResult.getPublishedAt() != null) {
-                        if (regattaResult.getIsFinal() && regattaResult.getXrrFinalUrl() != null) {
-                            URLConnection regattaResultConn = regattaResult.getXrrFinalUrl().openConnection();
-                            result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
-                                    regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                            eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
-                        } else if (regattaResult.getXrrPreliminaryUrl() != null) {
-                            URLConnection regattaResultConn = regattaResult.getXrrPreliminaryUrl().openConnection();
-                            result.add(new ResultDocumentDescriptorImpl((InputStream) regattaResultConn.getContent(),
-                                    regattaResult.getXrrPreliminaryUrl().toString(), new MillisecondsTimePoint(regattaResult.getPublishedAt()),
-                                    eventResult.getName(), regattaResult.getName(), boatClass, regattaResult.getCompetitorGenderType()));
+        TimePoint xrrDocumentDateAndTime = XRRParserUtil.calculateTimePointForRegattaResults(xrrParserResult);
+        
+        for (Object o : xrrParserResult.getPersonOrBoatOrTeam()) {
+            if (o instanceof Event) {
+                Event event = (Event) o;
+                String eventName = event.getTitle();
+                for(Object d: event.getRaceOrDivisionOrRegattaSeriesResult()) {
+                    if (d instanceof Division) {
+                        Division division = (Division) d;
+                        String regattaName = division.getTitle();
+                        String boatClass = division.getTitle();
+                        try {
+                            String requestUrl = url.toString() + "?Class=" + URLEncoder.encode(boatClass, "UTF-8");
+                            URL urlByClass = new URL(requestUrl);
+                            URLConnection eventResultConn = urlByClass.openConnection();
+                            InputStream is = (InputStream) eventResultConn.getContent();
+                            
+                            result.add(new ResultDocumentDescriptorImpl(is, requestUrl, xrrDocumentDateAndTime,
+                                    eventName, regattaName, boatClass));
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
                 }

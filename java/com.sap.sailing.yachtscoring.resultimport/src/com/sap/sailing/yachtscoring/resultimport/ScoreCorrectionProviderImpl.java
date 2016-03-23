@@ -46,7 +46,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     }
 
     public ScoreCorrectionProviderImpl(ParserFactory parserFactory, ResultUrlRegistry resultUrlRegistry) {
-        this.documentProvider = new YachtscoringResultDocumentProvider(this);
+        this.documentProvider = new YachtscoringResultDocumentProvider(this, parserFactory);
         this.parserFactory = parserFactory;
         this.resultUrlRegistry = resultUrlRegistry;
     }
@@ -118,11 +118,7 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
     private Parser resolveParser(String eventName, String boatClassName) throws IOException {
         Parser result = null;
         for (ResultDocumentDescriptor resultDocDescr : documentProvider.getResultDocumentDescriptors()) {
-            String boatClassAndGenderType = resultDocDescr.getBoatClass();
-            if(resultDocDescr.getCompetitorGenderType() != null) {
-                boatClassAndGenderType += ", " + resultDocDescr.getCompetitorGenderType().name();
-            }
-            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(boatClassAndGenderType)) {
+            if(eventName.equals(resultDocDescr.getEventName()) && boatClassName.equals(resultDocDescr.getBoatClass())) {
                 result = parserFactory.createParser(resultDocDescr.getInputStream(), resultDocDescr.getEventName());
                 break;
             }
@@ -137,6 +133,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
 
     @Override
     public String getOptionalSampleURL() {
-        return "http://www.yachtscoring.com/results_xrr.cfm?Spec_Race=6&eid=1220";
+        return "http://www.yachtscoring.com/xrr/1220_ys_xrr.xml";
     }
 }
