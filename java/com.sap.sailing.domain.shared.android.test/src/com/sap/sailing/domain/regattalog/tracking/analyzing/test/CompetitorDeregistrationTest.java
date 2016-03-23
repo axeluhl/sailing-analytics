@@ -28,7 +28,8 @@ public class CompetitorDeregistrationTest extends AbstractRegattaLogTrackingTest
         log.add(new RegattaLogRegisterCompetitorEventImpl(MillisecondsTimePoint.now(), author, competitor2));
         final CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregistrator = new CompetitorDeregistrator<>(log,
                 Collections.singleton(competitor2), author);
-        deregistrator.analyze();
+        final Set<RegattaLogEvent> events = deregistrator.analyze();
+        deregistrator.deregister(events);
         final Set<Competitor> competitors = new CompetitorsInLogAnalyzer<>(log).analyze();
         assertEquals(1, competitors.size());
         assertSame(competitor, competitors.iterator().next());
