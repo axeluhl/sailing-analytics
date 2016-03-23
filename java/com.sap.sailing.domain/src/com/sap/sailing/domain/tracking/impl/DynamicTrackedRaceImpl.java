@@ -861,7 +861,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         final boolean result;
         if (!applyFilter || takesWindFixWithTimePoint(wind.getTimePoint())) {
-            result = getOrCreateWindTrack(windSource).add(wind);
+            getOrCreateWindTrack(windSource).add(wind);
+            result = true;
             updated(wind.getTimePoint());
             triggerManeuverCacheRecalculationForAllCompetitors();
             notifyListeners(wind, windSource);

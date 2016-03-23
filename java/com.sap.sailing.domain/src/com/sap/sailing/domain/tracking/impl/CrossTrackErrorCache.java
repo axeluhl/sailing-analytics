@@ -113,8 +113,8 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
             }
         }
         
-        public boolean add(CrossTrackErrorSumAndNumberOfFixes entry) {
-            return getInternalRawFixes().add(entry);
+        public void add(CrossTrackErrorSumAndNumberOfFixes entry) {
+            getInternalRawFixes().add(entry);
         }
     }
     

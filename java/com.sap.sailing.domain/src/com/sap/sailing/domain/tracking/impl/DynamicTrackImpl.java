@@ -14,7 +14,7 @@ public class DynamicTrackImpl<FixType extends Timed> extends TrackImpl<FixType> 
      * Simply makes the superclass method public as now we need to expose it via the {@link DynamicTrack} interface.
      */
     @Override
-    public boolean add(FixType fix) {
-        return super.add(fix);
+    public void add(FixType fix) {
+        super.add(fix);
     }
 }

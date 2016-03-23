@@ -15,6 +15,16 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 import com.sap.sse.util.impl.UnmodifiableNavigableSet;
 
+/**
+ * A track of fixes, ordered by their {@link Timed#getTimePoint() time stamp}. The underlying navigable set by default
+ * uses the time stamp not only as the ordering but also the equality criterion. {@link #add(Timed) Adding} a fix that
+ * has a time point equal to that of another fix already part of the track will replace the existing fix with the new
+ * one.
+ * 
+ * @author Axel Uhl (D043530)
+ *
+ * @param <FixType>
+ */
 public class TrackImpl<FixType extends Timed> implements Track<FixType> {
     private static final long serialVersionUID = -4075853657857657528L;
     /**
@@ -312,20 +322,27 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         return result;
     }
 
-    protected boolean add(FixType fix) {
+    protected void add(FixType fix) {
         lockForWrite();
         try {
-            return addWithoutLocking(fix);
+            addWithoutLocking(fix);
         } finally {
             unlockAfterWrite();
         }
     }
 
     /**
-     * The caller must ensure to hold the write lock for this track when calling this methos
+     * The caller must ensure to hold the write lock for this track when calling this method.
+     * If an equal fix already exists, it is replaced by {@code fix}. Note that this is different
+     * from the semantics of the underlying {@link #fixes} set where trying to add an element for which
+     * an equal element already exists in the set will leave the set unchanged.
      */
-    protected boolean addWithoutLocking(FixType fix) {
-        return getInternalRawFixes().add(fix);
+    protected void addWithoutLocking(FixType fix) {
+        final boolean equalFixExisted = !getInternalRawFixes().add(fix);
+        if (equalFixExisted) {
+            getInternalFixes().remove(fix);
+            getInternalFixes().add(fix);
+        }
     }
 
     @Override
