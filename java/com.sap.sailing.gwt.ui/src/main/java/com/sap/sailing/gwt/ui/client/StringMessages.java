@@ -1323,6 +1323,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String urlProviders();
     String pleaseSelectAURLProvider();
     String sampleURL(String sampleURL);
+    String sapSportsOn();
     String followSapSports();
     String liveNow();
     String analyseRace();
