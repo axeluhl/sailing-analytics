@@ -651,7 +651,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                 List<MarkDTO> markList = new ArrayList<MarkDTO>();
                                 markList.addAll(marks.keySet());
                                 markDataProvider.setList(markList);
-                                
                             }
                             finalizeLoadingData();
                         }
