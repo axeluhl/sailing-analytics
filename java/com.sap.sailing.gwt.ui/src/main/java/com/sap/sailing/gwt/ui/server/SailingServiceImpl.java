@@ -466,6 +466,7 @@ import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.util.HttpURLConnectionHelper;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -521,7 +522,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
-	private static final int HTTP_MAX_REDIRECTS = 5;
 
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
@@ -4534,7 +4534,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         HttpURLConnection connection = null;
         try {
         	serverAddress = createUrl(hostname, port, path, query);
-        	connection = redirectConnection(serverAddress);
+        	connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
             inputStream = connection.getInputStream();
 
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
@@ -4563,28 +4563,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     }
 
-    private HttpURLConnection redirectConnection(URL url) throws MalformedURLException, IOException {
-    	HttpURLConnection connection = null;
-    	URL nextUrl = url;
-    	for(int counterOfRedirects = 0; counterOfRedirects <= HTTP_MAX_REDIRECTS; counterOfRedirects ++){
-    		if(connection!=null){
-    			connection.disconnect();
-    		}
-    		connection = (HttpURLConnection) nextUrl.openConnection();
-    		connection.setInstanceFollowRedirects(false);
-    		connection.setRequestProperty("User-Agent", "Mozilla/5.0...");
-    		connection.setDoOutput(true);
-    		// Initial timeout needs to be big enough to allow the first parts of the response to reach this server
-    		connection.setReadTimeout(10000);
-    		if(connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP){
-    			String location = connection.getHeaderField("Location");
-    			nextUrl = new URL(nextUrl,location);
-    		}else{
-    			break;
-    		}
-    	}
-    	return connection;
-	}
 
 	private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
@@ -4645,7 +4623,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 try {
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(hostname, port, path, query);
-                   connection = redirectConnection(serverAddress);
+                   connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
                             0.5);
 
