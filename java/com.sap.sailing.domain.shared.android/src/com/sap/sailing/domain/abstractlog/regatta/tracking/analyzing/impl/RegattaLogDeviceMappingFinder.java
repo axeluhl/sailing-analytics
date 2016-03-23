@@ -130,8 +130,12 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
                 log.revokeEvent(event.getAuthor(), event);
                 final TimePoint endOfFirstHalf = fixTimePoint.minus(1);
                 final TimePoint startOfSecondHalf = fixTimePoint.plus(1);
-                log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
-                log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to, event.getDevice()));
+                if (!endOfFirstHalf.before(from)) {
+                    log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
+                }
+                if (!to.before(startOfSecondHalf)) {
+                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to, event.getDevice()));
+                }
             }
         }
     }
