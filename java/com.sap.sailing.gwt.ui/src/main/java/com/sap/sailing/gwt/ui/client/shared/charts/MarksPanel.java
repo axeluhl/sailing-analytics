@@ -38,7 +38,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     
     public MarksPanel(final EditMarkPositionPanel parent, final ListDataProvider<MarkDTO> markDataProvider, final StringMessages stringMessages) {
         this.markDataProvider = markDataProvider;
-        setTitle("Marks");
+        setTitle(stringMessages.marks());
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
         markTable.setStyleName("EditMarkPositionMarkTable");
         SelectionCheckboxColumn<MarkDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<MarkDTO>(
