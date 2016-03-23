@@ -179,6 +179,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         if (PassingInstruction.Port.equals(direction)) {
             return "P";
         }
+        if (PassingInstruction.Single_Unknown.equals(direction)) {
+            return "U";
+        }
         if (PassingInstruction.Starboard.equals(direction)) {
             return "S";
         }

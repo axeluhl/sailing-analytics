@@ -54,7 +54,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     private IEventSubscriber eventSubscriber;
     private IRaceSubscriber raceSubscriber;
     private final Collection<Receiver> receivers;
-    
+
     @Rule public Timeout AbstractTracTracLiveTestTimeout = new Timeout(3 * 60 * 1000);
 
     protected AbstractTracTracLiveTest() throws URISyntaxException, MalformedURLException {
