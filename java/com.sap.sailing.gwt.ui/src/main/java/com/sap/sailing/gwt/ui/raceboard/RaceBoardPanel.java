@@ -273,6 +273,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         components.add(editMarkPassingPanel);
         editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
                 asyncActionsExecutor, errorReporter);
+        editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
         components.add(editMarkPositionPanel);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
@@ -407,6 +408,9 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);
+        }
+        if (editMarkPositionPanel != null) {
+            editMarkPositionPanel.setLeaderboard(leaderboard);
         }
     }
 

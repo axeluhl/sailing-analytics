@@ -77,6 +77,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.FixType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -1035,5 +1036,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public XAxis getXAxis() {
         return chart.getXAxis();
+    }
+
+    public void setLeaderboard(LeaderboardDTO leaderboard) {
+        raceIdentifierToLeaderboardRaceColumnAndFleetMapper.setLeaderboard(leaderboard);
     }
 }
