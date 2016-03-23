@@ -236,6 +236,49 @@ public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
     }
 
     @Test
+    public void testFixRemovalForMillisecondInterval() throws NotRevokableException {
+        final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
+        addMapping(author, device, 100l, 100l, competitor);
+        {
+            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            assertEquals(1, mappings.size());
+            assertTrue(mappings.containsKey(competitor));
+            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            assertEquals(1, deviceMappings.size());
+            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
+            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
+        }
+        finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
+        {
+            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            assertTrue(mappings.isEmpty());
+        }
+    }
+    
+    @Test
+    public void testFixRemovalForMillisecondIntervalClosedSeparately() throws NotRevokableException {
+        final RegattaLogDeviceCompetitorMappingFinder finder = new RegattaLogDeviceCompetitorMappingFinder(log);
+        final Serializable mappingId = addMapping(author, device, 100l, null, competitor);
+        closeMapping(author, device, mappingId, 100);
+        {
+            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            assertEquals(1, mappings.size());
+            assertTrue(mappings.containsKey(competitor));
+            final List<DeviceMapping<Competitor>> deviceMappings = mappings.get(competitor);
+            assertEquals(1, deviceMappings.size());
+            final DeviceMapping<Competitor> mapping = deviceMappings.iterator().next();
+            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().from());
+            assertEquals(new MillisecondsTimePoint(100), mapping.getTimeRange().to());
+        }
+        finder.removeTimePointFromMapping(competitor, new MillisecondsTimePoint(100));
+        {
+            final Map<Competitor, List<DeviceMapping<Competitor>>> mappings = finder.analyze();
+            assertTrue(mappings.isEmpty());
+        }
+    }
+
+    @Test
     public void notDisturbedByMappingsForOtherItemsAndDevices() {
     	//two mappings for first competitor found? (competitor2 mappings should not "distract")
         addMapping(author, device, 10L, 40L, competitor);

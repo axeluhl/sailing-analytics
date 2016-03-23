@@ -91,7 +91,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
@@ -6195,11 +6194,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null) {
                 final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final Collection<Mark> marks = new RegattaLogDefinedMarkAnalyzer(regattaLog).analyze();
                 final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
-                for (final Mark mark : marks) {
-                    if (mark.getId().toString().equals(markIdAsString)) {
-                        mappingFinder.removeTimePointFromMapping(mark, fixTimePoint);
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
+                        if (mark.getId().toString().equals(markIdAsString)) {
+                            mappingFinder.removeTimePointFromMapping(mark, fixTimePoint);
+                        }
                     }
                 }
             }
@@ -6208,7 +6209,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO newFix) {
-        // TODO Auto-generated method stub
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
+                        if (mark.getId().toString().equals(markIdAsString)) {
+                            getRaceLogTrackingAdapter().pingMark(regattaLog, mark,
+                                    new GPSFixImpl(newFix.position, new MillisecondsTimePoint(newFix.timepoint)),
+                                    getService());
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
