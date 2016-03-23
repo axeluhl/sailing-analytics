@@ -521,6 +521,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
 
+	private static final int HTTP_MAX_REDIRECTS = 5;
+
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
     private int leaderboardDifferenceCacheByIdPairHits;
@@ -4527,23 +4529,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int port = hostnameAndPort.getB();
         final String path = "/sailingserver/api/v1/leaderboardgroups";
         final String query = null;
-
-        HttpURLConnection connection = null;
-
         URL serverAddress = null;
         InputStream inputStream = null;
+        HttpURLConnection connection = null;
         try {
-            serverAddress = createUrl(hostname, port, path, query);
-            // set up out communications stuff
-            connection = null;
-            // Set up the initial connection
-            connection = (HttpURLConnection) serverAddress.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
-            connection.setReadTimeout(10000);
-            connection.connect();
-
+        	serverAddress = createUrl(hostname, port, path, query);
+        	connection = redirectConnection(serverAddress);
             inputStream = connection.getInputStream();
 
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
@@ -4572,7 +4563,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     }
 
-    private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
+    private HttpURLConnection redirectConnection(URL url) throws MalformedURLException, IOException {
+    	HttpURLConnection connection = null;
+    	URL nextUrl = url;
+    	for(int counterOfRedirects = 0; counterOfRedirects <= HTTP_MAX_REDIRECTS; counterOfRedirects ++){
+    		if(connection!=null){
+    			connection.disconnect();
+    		}
+    		connection = (HttpURLConnection) nextUrl.openConnection();
+    		connection.setInstanceFollowRedirects(false);
+    		connection.setRequestProperty("User-Agent", "Mozilla/5.0...");
+    		connection.setDoOutput(true);
+    		// Initial timeout needs to be big enough to allow the first parts of the response to reach this server
+    		connection.setReadTimeout(10000);
+    		if(connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP){
+    			String location = connection.getHeaderField("Location");
+    			nextUrl = new URL(nextUrl,location);
+    		}else{
+    			break;
+    		}
+    	}
+    	return connection;
+	}
+
+	private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
