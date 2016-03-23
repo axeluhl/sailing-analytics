@@ -637,6 +637,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void addMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO newFix);
     
-    void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO oldFix, Position newPosition);
+    void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO oldFix, Position newPosition) throws NotRevokableException;
 
 }

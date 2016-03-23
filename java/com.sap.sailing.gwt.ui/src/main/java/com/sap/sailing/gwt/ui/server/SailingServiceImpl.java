@@ -6230,7 +6230,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString,
-            GPSFixDTO oldFix, Position newPosition) {
-        // TODO Auto-generated method stub
+            GPSFixDTO oldFix, Position newPosition) throws NotRevokableException {
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard != null) {
+            final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn != null) {
+                final RegattaLog regattaLog = raceColumn.getRegattaLog();
+                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                if (fleet != null) {
+                    final TimePoint fixTimePoint = new MillisecondsTimePoint(oldFix.timepoint);
+                    for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
+                        if (mark.getId().toString().equals(markIdAsString)) {
+                            mappingFinder.removeTimePointFromMapping(mark, fixTimePoint);
+                            getRaceLogTrackingAdapter().pingMark(regattaLog, mark,
+                                    new GPSFixImpl(newPosition, fixTimePoint), getService());
+                        }
+                    }
+                }
+            }
+        }
     }
 }
