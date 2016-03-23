@@ -55,6 +55,11 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
         return super.add(new CompactGPSFixMovingImpl(fix));
     }
 
+    @Override
+    public boolean add(GPSFixMoving fix, boolean replace) {
+        return super.add(new CompactGPSFixMovingImpl(fix), replace);
+    }
+
     /**
      * Interpolates linearly between the two fixes based on their time difference and distance. This
      * intentionally ignores the {@link GPSFixMoving#getSpeed() speed values} provided by the fixes

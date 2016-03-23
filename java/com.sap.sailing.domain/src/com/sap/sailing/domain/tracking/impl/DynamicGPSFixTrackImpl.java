@@ -17,7 +17,12 @@ public class DynamicGPSFixTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, 
     
     @Override
     public boolean add(GPSFix fix) {
-        return super.add(new CompactGPSFixImpl(fix));
+        return super.add(fix);
+    }
+
+    @Override
+    public boolean add(GPSFix fix, boolean replace) {
+        return super.add(new CompactGPSFixImpl(fix), replace);
     }
 
     @Override
