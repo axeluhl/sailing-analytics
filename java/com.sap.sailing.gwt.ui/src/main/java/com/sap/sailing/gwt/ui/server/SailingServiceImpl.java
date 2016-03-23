@@ -4645,16 +4645,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 try {
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(hostname, port, path, query);
-                    // set up out communications stuff
-                    connection = null;
-                    // Set up the initial connection
-                    connection = (HttpURLConnection) serverAddress.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setDoOutput(true);
-                    // Initial timeout needs to be big enough to allow the first parts of the response to reach this
-                    // server
-                    connection.setReadTimeout(60000);
-                    connection.connect();
+                   connection = redirectConnection(serverAddress);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
                             0.5);
 
