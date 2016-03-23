@@ -126,7 +126,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     private FixPositionChooser currentFixPositionChooser;
     private List<OverlayClickHandler> overlayClickHandlers;
-    private final MarkPositionService markPositionService = new MarkPositionServiceMock();
+    private final MarkPositionService markPositionService;
     
     private final RaceIdentifierToLeaderboardRaceColumnAndFleetMapper raceIdentifierToLeaderboardRaceColumnAndFleetMapper;
 
@@ -135,6 +135,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             SailingServiceAsync sailingService, Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider,
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter) {
         super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        this.markPositionService = new MarkPositionServiceForSailingService(sailingService);
         this.raceIdentifierToLeaderboardRaceColumnAndFleetMapper = new RaceIdentifierToLeaderboardRaceColumnAndFleetMapper();
         this.raceMap = raceMap;
         this.leaderboardPanel = leaderboardPanel;

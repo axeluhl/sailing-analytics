@@ -1,16 +1,19 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 
 public interface MarkPositionService {
-    public static class MarkTrackDTO {
-        private final MarkDTO mark;
-        private final Iterable<GPSFixDTO> fixes;
-        private final boolean thinnedOut;
+    public static class MarkTrackDTO implements IsSerializable {
+        private MarkDTO mark;
+        private Iterable<GPSFixDTO> fixes;
+        private boolean thinnedOut;
+        
+        MarkTrackDTO() {} // for GWT serialization
         
         public MarkTrackDTO(MarkDTO mark, Iterable<GPSFixDTO> fixes, boolean thinnedOut) {
             this.mark = mark;
@@ -31,8 +34,10 @@ public interface MarkPositionService {
         }
     }
     
-    public static class MarkTracksDTO {
+    public static class MarkTracksDTO implements IsSerializable {
         private Iterable<MarkTrackDTO> tracks;
+        
+        MarkTracksDTO() {} // for GWT serialization
         
         public MarkTracksDTO(Iterable<MarkTrackDTO> tracks) {
             this.tracks = tracks;
