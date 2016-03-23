@@ -37,7 +37,7 @@
         <item name="sap_light_gray">@color/light_sap_light_gray</item>
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
-        <item name="white">@color/light_white</item>
+        <item name="white">@color/white_light</item>
         <item name="white_invert">@color/constant_white</item>
 
         <!-- styles -->
