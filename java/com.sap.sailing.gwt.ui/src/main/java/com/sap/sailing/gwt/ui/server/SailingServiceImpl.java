@@ -6147,8 +6147,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private Iterable<GPSFixDTO> convertToGPSFixDTOTrack(Track<? extends GPSFix> track) {
         final List<GPSFixDTO> result = new ArrayList<>();
-        for (final GPSFix fix : track.getFixes()) {
-            result.add(convertToGPSFixDTO(fix));
+        track.lockForRead();
+        try {
+            for (final GPSFix fix : track.getFixes()) {
+                result.add(convertToGPSFixDTO(fix));
+            }
+        } finally {
+            track.unlockAfterRead();
         }
         return result;
     }
