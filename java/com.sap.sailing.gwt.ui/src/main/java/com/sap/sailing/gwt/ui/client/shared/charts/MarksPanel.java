@@ -15,6 +15,8 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.InvertibleComparator;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SortingOrder;
@@ -27,6 +29,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardTableResources;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -40,25 +43,6 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         this.markDataProvider = markDataProvider;
         setTitle(stringMessages.marks());
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
-        markTable.setStyleName("EditMarkPositionMarkTable");
-        SelectionCheckboxColumn<MarkDTO> selectionCheckboxColumn = new SelectionCheckboxColumn<MarkDTO>(
-                tableResources.cellTableStyle().cellTableCheckboxSelected(),
-                tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                tableResources.cellTableStyle().cellTableCheckboxColumnCell(),
-                new EntityIdentityComparator<MarkDTO>() {
-                    @Override
-                    public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
-                        return dto1.getIdAsString().equals(dto2.getIdAsString());
-                    }
-                    @Override
-                    public int hashCode(MarkDTO t) {
-                        return t.getIdAsString().hashCode();
-                    }
-                },
-                this.markDataProvider,
-                markTable);
-        markTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
-        markTable.setColumnWidth(selectionCheckboxColumn, 27, Unit.PX);
         SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
@@ -92,6 +76,8 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
                 return null;
             }
         };
+       
+        
         addFixColumn.setFieldUpdater(new FieldUpdater<MarkDTO, String>() {
             @Override
             public void update(int index, final MarkDTO mark, String value) {
@@ -114,13 +100,23 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             }
         });
         markTable.addColumn(addFixColumn, new TextHeader(""));
-        markTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
+        SingleSelectionModel<MarkDTO> selectionModel = new RefreshableSingleSelectionModel<MarkDTO>(new EntityIdentityComparator<MarkDTO>() {
+            @Override
+            public boolean representSameEntity(MarkDTO dto1, MarkDTO dto2) {
+                return dto1.getIdAsString().equals(dto2.getIdAsString());
+            }
+            @Override
+            public int hashCode(MarkDTO t) {
+                return t.getIdAsString().hashCode();
+            }
+        },this.markDataProvider);
+        markTable.setSelectionModel(selectionModel);
         markTable.getSelectionModel().addSelectionChangeHandler(parent);
         markDataProvider.addDataDisplay(markTable);
         setWidget(markTable);
     }
-    
-    @Override
+
+	@Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
     }
@@ -154,24 +150,17 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         return null;
     }
 
-    public List<MarkDTO> getSelectedMarks() {
-        List<MarkDTO> list = new ArrayList<MarkDTO>();
+    public MarkDTO getSelectedMark() {
         for (MarkDTO mark : markDataProvider.getList()) {
             if (markTable.getSelectionModel().isSelected(mark)) {
-                list.add(mark);
+               	return mark;
             }
         }
-        return list;               
+        return null;               
     }
     
-    public void deselectMark(MarkDTO mark) {
-        markTable.getSelectionModel().setSelected(mark, false);
-    }
-
-    public void deselectMarks() {
-        for (MarkDTO mark : markDataProvider.getList()) {
-            deselectMark(mark);
-        }
+    public void deselectMark() {//FIXME
+        markTable.getSelectionModel().setSelected(getSelectedMark(), false);
     }
 
     public void select(MarkDTO mark) {
