@@ -83,7 +83,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
-import com.sap.sailing.gwt.ui.client.shared.charts.RaceIdentifierToLeaderboardRaceColumnAndFleetMapper.LeaderboardNameRaceColumnNameAndFleetName;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CourseMarkOverlay;
 import com.sap.sailing.gwt.ui.client.shared.racemap.FixOverlay;
@@ -208,67 +207,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 }
             }
         }));
-    }
-    
-    private class MarkPositionServiceMock implements MarkPositionService {
-        private Map<MarkDTO, List<GPSFixDTO>> markTracks;
-        
-        // With 20000 fixes the browser tab crashed.
-        // 1000 fixes was possible on the google map but did not show in the Highchart for some reason.
-        // With 500 fixes the line was drawn in the Highchart, but the markers did not show in the chart.
-        // 250 finally worked pretty smoothly
-        public MarkPositionServiceMock() {
-            markTracks = new HashMap<MarkDTO, List<GPSFixDTO>>();
-            MarkDTO mark = new MarkDTO("test1", "Five Fixes");
-            mark.color = "#0f0";
-            List<GPSFixDTO> fixes = new ArrayList<>();
-            fixes.add(new GPSFixDTO(new Date(1453110600000l), new DegreePosition(53.54, 9.98)));
-            fixes.add(new GPSFixDTO(new Date(1453141600000l), new DegreePosition(53.531, 9.99)));
-            fixes.add(new GPSFixDTO(new Date(1453142600000l), new DegreePosition(53.5323, 10)));
-            fixes.add(new GPSFixDTO(new Date(1453142400000l), new DegreePosition(53.54, 10.01)));
-            fixes.add(new GPSFixDTO(new Date(1453144400000l), new DegreePosition(53.53, 10.01)));
-            //final double COUNT = 250;
-            //for (double i = 0; i < COUNT; i++) {
-            //    fixes.add(new GPSFixDTO(new Date(1453141600000l + (long)(i * 1000000d / COUNT)), new DegreePosition(53.531 + i * 1d / COUNT, 9.99), null, new WindDTO(), null, null, false));
-            //}
-            markTracks.put(mark, fixes);
-            mark = new MarkDTO("test2", "No Fix");
-            fixes = new ArrayList<>();
-            markTracks.put(mark, fixes);
-        }
-        
-        @Override
-        public void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback) {
-            final ArrayList<MarkTrackDTO> tracksList = new ArrayList<MarkTrackDTO>();
-            MarkTracksDTO tracks = new MarkTracksDTO(tracksList);
-            for (Map.Entry<MarkDTO, List<GPSFixDTO>> entry : markTracks.entrySet()) {
-                tracksList.add(new MarkTrackDTO(entry.getKey(), entry.getValue(), false));
-            }
-            callback.onSuccess(tracks);
-        }
-        
-        @Override
-        public void canRemoveMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix, AsyncCallback<Boolean> callback) {
-            callback.onSuccess(true);
-        }
-
-        @Override
-        public void removeMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
-                GPSFixDTO fix, AsyncCallback<Void> callback) {
-            markTracks.get(mark).remove(fix);
-        }
-
-        @Override
-        public void addMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark,
-                GPSFixDTO newFix, AsyncCallback<Void> callback) {
-            markTracks.get(mark).add(newFix);
-        }
-
-        @Override
-        public void editMarkFix(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, MarkDTO mark, GPSFixDTO fix,
-                Position newPosition, AsyncCallback<Void> callback) {
-            markTracks.get(mark).get(markTracks.get(mark).indexOf(fix)).position = newPosition;
-        }
     }
     
     private void canRemoveMarkFix(MarkDTO mark, GPSFixDTO fix, AsyncCallback<Boolean> callback) {

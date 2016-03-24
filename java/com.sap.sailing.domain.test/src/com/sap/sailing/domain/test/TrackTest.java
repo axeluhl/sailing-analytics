@@ -256,7 +256,7 @@ public class TrackTest {
                     protected Pair<GPSFixMoving, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
                         Pair<GPSFixMoving, Speed> result = super.computeMaxSpeed(from, to);
                         try {
-                            Thread.sleep(500); // just wait a bit; can't lock really because that would cause a deadlock
+                            Thread.sleep(5000); // just wait a bit; can't lock really because that would cause a deadlock
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
@@ -280,11 +280,9 @@ public class TrackTest {
                 };
             }
         };
-        new Thread(()->{
-            GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
+        GPSFixMoving fix1 = new GPSFixMovingImpl(new DegreePosition(0, 0), new MillisecondsTimePoint(0), new KnotSpeedWithBearingImpl(
                 1, new DegreeBearingImpl(123)));
-            track.addGPSFix(fix1);
-        }).start();
+        track.addGPSFix(fix1);
         // The following getMaximumSpeedOverGround call will trigger a computeMaxSpeed(...) and a cache(...) call
         new Thread(()->
             assertEquals(1., track.getMaximumSpeedOverGround(new MillisecondsTimePoint(0), new MillisecondsTimePoint(7200000)).
@@ -319,8 +317,8 @@ public class TrackTest {
                 throw new RuntimeException(e);
             }
         }).start();
-        cacheBarrier.await(10, TimeUnit.SECONDS);
-        cacheDone.await(10, TimeUnit.SECONDS);
+        cacheBarrier.await(20, TimeUnit.SECONDS);
+        cacheDone.await(20, TimeUnit.SECONDS);
         testDone.await();
         assertEquals(2., maxSpeed[0], 0.001);
     }
