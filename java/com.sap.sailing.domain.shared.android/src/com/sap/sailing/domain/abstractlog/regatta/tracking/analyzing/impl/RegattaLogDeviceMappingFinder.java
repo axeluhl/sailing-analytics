@@ -125,9 +125,9 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
             final TimeRange mappingTimeRange = new TimeRangeImpl(from, to);
             if (mappingTimeRange.includes(fixTimePoint)) {
                 if (closingEvent != null) {
-                    log.revokeEvent(closingEvent.getAuthor(), closingEvent);
+                    log.revokeEvent(closingEvent.getAuthor(), closingEvent, "removing single time point "+fixTimePoint+" from mapping for "+item);
                 }
-                log.revokeEvent(event.getAuthor(), event);
+                log.revokeEvent(event.getAuthor(), event, "removing single time point "+fixTimePoint+" from mapping for "+item);
                 final TimePoint endOfFirstHalf = fixTimePoint.minus(1);
                 final TimePoint startOfSecondHalf = fixTimePoint.plus(1);
                 if (!endOfFirstHalf.before(from)) {
