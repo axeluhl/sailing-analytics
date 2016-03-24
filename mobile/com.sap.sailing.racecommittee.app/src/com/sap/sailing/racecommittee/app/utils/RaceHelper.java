@@ -1,10 +1,16 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateStartRacingProcedure;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
@@ -16,10 +22,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class RaceHelper {
     public static String getRaceName(@Nullable ManagedRace race) {
@@ -244,5 +246,13 @@ public class RaceHelper {
             }
         }
         return preselectedRaces;
+    }
+
+    public static SimpleRaceLogIdentifier getSimpleRaceLogIdentifier(@Nullable ManagedRace race) {
+        SimpleRaceLogIdentifier identifier = null;
+        if (race != null) {
+            identifier = new SimpleRaceLogIdentifierImpl(race.getRaceGroup().getName(), race.getRaceName(), race.getFleet().getName());
+        }
+        return identifier;
     }
 }

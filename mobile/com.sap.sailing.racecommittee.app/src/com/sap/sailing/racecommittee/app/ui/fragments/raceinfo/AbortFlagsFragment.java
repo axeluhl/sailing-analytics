@@ -1,6 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +15,19 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -69,42 +79,40 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceState state = getRaceState();
         Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
         switch (mainFlag) {
-        case AP:
-            logFlag(flag);
-            state.setAborted(now, /* postponed */ true, flag);
-            if (flag != Flags.NONE) {
-                setProtestTime();
-            }
-            break;
+            case AP:
+                logFlag(flag);
+                state.setAborted(now, /* postponed */ true, flag);
+                if (flag != Flags.NONE) {
+                    setProtestTime();
+                }
+                state.setAdvancePass(now);
+                break;
 
-        case NOVEMBER:
-            logFlag(flag);
-            state.setAborted(now, /* postponed */ false, flag);
-            if (flag != Flags.NONE) {
-                setProtestTime();
-            }
-            break;
+            case NOVEMBER:
+                logFlag(flag);
+                abortChildRaces(now, state, flag);
+                break;
 
-        default:
-            logFlag(flag);
-            break;
+            default:
+                logFlag(flag);
+                state.setAdvancePass(now);
+                break;
         }
-        state.setAdvancePass(now);
     }
 
     private void logFlag(Flags flag) {
         switch (flag) {
-        case ALPHA:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
-            break;
+            case ALPHA:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
+                break;
 
-        case HOTEL:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
-            break;
+            case HOTEL:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
+                break;
 
-        default:
-            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
-            break;
+            default:
+                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
+                break;
         }
     }
 
@@ -124,5 +132,81 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         super.onPause();
 
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
+    }
+
+    private void abortChildRaces(final TimePoint now, final RaceState state, final Flags flag) {
+        RacingActivity activity = (RacingActivity) getActivity();
+        final List<ManagedRace> races = activity
+            .getChildRaces(getRace(), new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING });
+
+        if (races.size() > 0) {
+            final ArrayList<String> raceList = new ArrayList<>();
+            for (ManagedRace race : races) {
+                raceList.add(RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
+            }
+            final ArrayList<ManagedRace> raceChecked = new ArrayList<>();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)) + " " + getString(R.string.flags_dependent_races));
+            builder.setMultiChoiceItems(raceList.toArray(new String[raceList.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    ManagedRace race = races.get(which);
+                    if (raceChecked.contains(race)) {
+                        raceChecked.remove(race);
+                    }
+                    if (isChecked) {
+                        raceChecked.add(race);
+                    }
+                }
+            });
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    for (ManagedRace race : races) {
+                        RaceState raceState = race.getState();
+                        if (raceChecked.contains(race)) {
+                            Duration startTimeDiff = raceState.getStartTimeFinderResult().getStartTimeDiff();
+                            raceState.setAborted(now, /* postponed */ false, flag);
+                            raceState.setAdvancePass(now);
+                            raceState.forceNewDependentStartTime(now, startTimeDiff, RaceHelper.getSimpleRaceLogIdentifier(getRace()));
+                        } else {
+                            raceState.forceNewStartTime(now, raceState.getStartTimeFinderResult().getStartTime());
+                        }
+                    }
+                    abortRace(now, state, flag);
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    abortRace(now, state, flag);
+                }
+            });
+            builder.setCancelable(false);
+            builder.show();
+        } else {
+            abortRace(now, state, flag);
+        }
+    }
+
+    private void abortRace(TimePoint now, RaceState state, Flags flag) {
+        fixStartTime(now);
+        state.setAborted(now, /* postponed */ false, flag);
+        if (flag != Flags.NONE) {
+            setProtestTime();
+        }
+        state.setAdvancePass(now);
+    }
+
+    private void fixStartTime(TimePoint now) {
+        RacingActivity activity = (RacingActivity) getActivity();
+        List<ManagedRace> races = activity
+            .getChildRaces(getRace(), new RaceLogRaceStatus[] { RaceLogRaceStatus.PRESCHEDULED, RaceLogRaceStatus.SCHEDULED,
+                RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED });
+
+        for (ManagedRace race : races) {
+            race.getState().forceNewStartTime(now, race.getState().getStartTimeFinderResult().getStartTime());
+        }
     }
 }
