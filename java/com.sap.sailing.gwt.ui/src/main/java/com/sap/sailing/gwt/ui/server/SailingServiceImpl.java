@@ -472,6 +472,7 @@ import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
+import com.sap.sse.util.HttpURLConnectionHelper;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
 
@@ -526,6 +527,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private static final int LEADERBOARD_BY_NAME_RESULTS_CACHE_BY_ID_SIZE = 100;
     
     private static final int LEADERBOARD_DIFFERENCE_CACHE_SIZE = 50;
+
 
     private final LinkedHashMap<String, LeaderboardDTO> leaderboardByNameResultsCacheById;
 
@@ -4533,23 +4535,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         int port = hostnameAndPort.getB();
         final String path = "/sailingserver/api/v1/leaderboardgroups";
         final String query = null;
-
-        HttpURLConnection connection = null;
-
         URL serverAddress = null;
         InputStream inputStream = null;
+        HttpURLConnection connection = null;
         try {
-            serverAddress = createUrl(hostname, port, path, query);
-            // set up out communications stuff
-            connection = null;
-            // Set up the initial connection
-            connection = (HttpURLConnection) serverAddress.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            // Initial timeout needs to be big enough to allow the first parts of the response to reach this server
-            connection.setReadTimeout(10000);
-            connection.connect();
-
+        	serverAddress = createUrl(hostname, port, path, query);
+        	connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
             inputStream = connection.getInputStream();
 
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
@@ -4578,7 +4569,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     }
 
-    private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
+
+	private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
@@ -4637,16 +4629,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 try {
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(hostname, port, path, query);
-                    // set up out communications stuff
-                    connection = null;
-                    // Set up the initial connection
-                    connection = (HttpURLConnection) serverAddress.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setDoOutput(true);
-                    // Initial timeout needs to be big enough to allow the first parts of the response to reach this
-                    // server
-                    connection.setReadTimeout(60000);
-                    connection.connect();
+                   connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
                             0.5);
 
