@@ -41,6 +41,7 @@ import com.sap.sse.replication.ReplicablesProvider;
 import com.sap.sse.replication.ReplicablesProvider.ReplicableLifeCycleListener;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
+import com.sap.sse.util.HttpURLConnectionHelper;
 
 /**
  * Manages a set of observers of {@link Replicable}, receiving notifications for the operations they perform that
@@ -632,8 +633,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             ClassNotFoundException {
         URL replicationRegistrationRequestURL = master.getReplicationRegistrationRequestURL(getServerIdentifier(),
                 ServerInfo.getBuildVersion());
-        final URLConnection registrationRequestConnection = replicationRegistrationRequestURL.openConnection();
-        registrationRequestConnection.connect();
+        final URLConnection registrationRequestConnection = HttpURLConnectionHelper.redirectConnection(replicationRegistrationRequestURL);
         final InputStream content = (InputStream) registrationRequestConnection.getContent();
         final StringBuilder uuid = new StringBuilder();
         final byte[] buf = new byte[256];
@@ -652,8 +652,7 @@ public class ReplicationServiceImpl implements ReplicationService {
             URL replicationDeRegistrationRequestURL = master
                     .getReplicationDeRegistrationRequestURL(getServerIdentifier());
             logger.info("Unregistering replica from master "+master+" using URL "+replicationDeRegistrationRequestURL);
-            final URLConnection deregistrationRequestConnection = replicationDeRegistrationRequestURL.openConnection();
-            deregistrationRequestConnection.connect();
+            final URLConnection deregistrationRequestConnection = HttpURLConnectionHelper.redirectConnection(replicationDeRegistrationRequestURL);
             StringBuilder uuid = new StringBuilder();
             InputStream content = (InputStream) deregistrationRequestConnection.getContent();
             byte[] buf = new byte[256];
