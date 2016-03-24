@@ -1100,13 +1100,13 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
     }
 
     @Override
-    protected boolean add(FixType fix) {
+    protected boolean add(FixType fix, boolean replace) {
         final boolean result;
         final boolean firstFixInTrack;
         lockForWrite();
         try {
             firstFixInTrack = getRawFixes().isEmpty();
-            result = addWithoutLocking(fix, /* replace */ false);
+            result = addWithoutLocking(fix, replace);
             if (!validityCachingSuspended) {
                 invalidateValidityAndEstimatedSpeedAndDistanceCaches(fix);
             }
