@@ -106,7 +106,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {
-    private static final int FIX_OVERLAY_Z_ORDER = 230;
+    protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
     private final LeaderboardPanel leaderboardPanel;
     private final MarksPanel marksPanel;
