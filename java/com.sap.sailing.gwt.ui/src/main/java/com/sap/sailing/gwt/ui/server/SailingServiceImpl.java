@@ -4564,7 +4564,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
 
-	private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
+    private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
         String hostname;
         Integer port = 80;
         try {
