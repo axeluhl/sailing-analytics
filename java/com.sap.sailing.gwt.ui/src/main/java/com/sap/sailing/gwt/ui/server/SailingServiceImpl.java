@@ -4524,16 +4524,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
-        com.sap.sse.common.Util.Pair<String, Integer> hostnameAndPort = parseHostAndPort(url);
-        String hostname = hostnameAndPort.getA();
-        int port = hostnameAndPort.getB();
         final String path = "/sailingserver/api/v1/leaderboardgroups";
         final String query = null;
         URL serverAddress = null;
         InputStream inputStream = null;
         HttpURLConnection connection = null;
         try {
-        	serverAddress = createUrl(hostname, port, path, query);
+            URL base = createBaseUrl(url);
+        	serverAddress = createUrl(base, path, query);
         	connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
             inputStream = connection.getInputStream();
 
@@ -4547,7 +4545,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             return names;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); 
         } finally {
             // close the connection
             if (connection != null) {
@@ -4564,33 +4562,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
 
-    private com.sap.sse.common.Util.Pair<String, Integer> parseHostAndPort(String urlAsString) {
-        String hostname;
-        Integer port = 80;
+    private URL createBaseUrl(String urlAsString) throws MalformedURLException {
+        String urlAsStringAfterFormatting;
+        URL url;
         try {
-            URL url = new URL(urlAsString);
-            hostname = url.getHost();
-            int portFromUrl = url.getPort();
-            if (portFromUrl > 0) {
-                port = portFromUrl;
-            }
+            url = new URL(urlAsString);
+            return url;
         } catch (MalformedURLException e1) {
-            hostname = urlAsString;
-            if (urlAsString.contains("://")) {
-                hostname = hostname.split("://")[1];
+            urlAsStringAfterFormatting = urlAsString;
+            if (urlAsStringAfterFormatting.contains("://")) {
+                urlAsStringAfterFormatting = urlAsString.split("://")[1];
             }
-            if (hostname.contains("/")) {
-                hostname = hostname.split("/")[0]; // also eliminate a trailing slash
+            if (urlAsStringAfterFormatting.contains("/")) {
+                urlAsStringAfterFormatting = urlAsStringAfterFormatting.split("/")[0]; // also eliminate a trailing slash
             }
-            if (hostname.contains(":")) {
-                String[] split = hostname.split(":");
-                hostname = split[0];
-                if (port > 0) {
-                    port = Integer.parseInt(split[1]);
-                }
-            }
+            url = new URL("http://" + urlAsStringAfterFormatting);
         }
-        return new com.sap.sse.common.Util.Pair<String, Integer>(hostname, port);
+        return url;
     }
 
     @Override
@@ -4607,9 +4595,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 long startTime = System.currentTimeMillis();
                 getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
                         "Setting up connection", 0.5);
-                com.sap.sse.common.Util.Pair<String, Integer> hostnameAndPort = parseHostAndPort(urlAsString);
-                String hostname = hostnameAndPort.getA();
-                int port = hostnameAndPort.getB();
                 String query;
                 try {
                     query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations);
@@ -4621,8 +4606,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 URL serverAddress = null;
                 InputStream inputStream = null;
                 try {
+                    URL base = createBaseUrl(urlAsString);
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
-                    serverAddress = createUrl(hostname, port, path, query);
+                    serverAddress = createUrl(base, path, query);
                    connection = HttpURLConnectionHelper.redirectConnection(serverAddress);
                     getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting",
                             0.5);
@@ -4667,12 +4653,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return importOperationId;
     }
     
-    private URL createUrl(String host, Integer port, String path, String query) throws Exception {
+    private URL createUrl(URL base, String path, String query) throws Exception {
         URL url;
         if (query != null) {
-            url = new URL("http://" + host + ":" + port + path + "?" + query);
+            url = new URL(base.toExternalForm() +  path + "?" + query);
         } else {
-            url = new URL("http://" + host + ":" + port + path);
+            url = new URL(base.toExternalForm() + path);
         }
         return url;
     }
