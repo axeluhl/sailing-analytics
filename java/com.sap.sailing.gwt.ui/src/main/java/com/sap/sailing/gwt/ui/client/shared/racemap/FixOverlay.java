@@ -98,10 +98,6 @@ public class FixOverlay extends CanvasOverlayV3 {
         draw();
     }
     
-    public int getZIndex() {
-        return zIndex;
-    }
-    
     public String getColor() {
         return fixVectorGraphics.getColor();
     }

@@ -94,6 +94,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
 import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
+import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -105,6 +106,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {
+    private static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
     private final LeaderboardPanel leaderboardPanel;
     private final MarksPanel marksPanel;
@@ -578,7 +580,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                                         }
                                     });
                                     for (final GPSFixDTO fix : fixes.getValue()) {
-                                        final FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+                                        final FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, fixes.getKey().color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                                         fixOverlayMap.put(fix, overlay);
                                         overlay.setVisible(false);
                                         overlayClickHandlers.add(new OverlayClickHandler(fixes.getKey(), fix, overlay).register());
@@ -614,7 +616,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
                     @Override
                     public void onSuccess(Void result) {
-                        FixOverlay overlay = new FixOverlay(map, 1, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
+                        FixOverlay overlay = new FixOverlay(map, FIX_OVERLAY_Z_ORDER, fix, FixType.BUOY, mark.color, raceMap.getCoordinateSystem(), stringMessages.dragToChangePosition());
                         overlayClickHandlers.add(new OverlayClickHandler(mark, fix, overlay).register());
                         marks.get(mark).put(fix, overlay);
                         updatePolylinePoints(mark);
@@ -657,7 +659,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
                     @Override
                     public void onSuccess(Void result) {
-                        FixOverlay overlay = marks.get(mark).remove(fix);
+                        CanvasOverlayV3 overlay = marks.get(mark).remove(fix);
                         overlay.removeFromMap();
                         updatePolylinePoints(mark);
                         setSeriesPoints(mark);
@@ -855,7 +857,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             raceMap.hideAllHelplines();
             if (marks != null) {
                 for (final Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> e : marks.entrySet()) {
-                    for (FixOverlay overlay : e.getValue().values()) {
+                    for (CanvasOverlayV3 overlay : e.getValue().values()) {
                         // show only tail of selected mark, hide all others
                         overlay.setVisible(selectedMark.equals(e.getKey()));
                     }
@@ -884,16 +886,14 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     
     public void hideAllCourseMarkOverlaysExceptSelected() { 
         for (Map.Entry<String, CourseMarkOverlay> overlay : raceMap.getCourseMarkOverlays().entrySet()) {
-            if (!overlay.getKey().equals(selectedMark.getName())) {
-                overlay.getValue().setVisible(false);
-            }
+            overlay.getValue().setVisible(overlay.getKey().equals(selectedMark.getName()));
         }
     }
     
     public void hideAllFixOverlays() {
         if (marks != null) {
             for (Map.Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> mark : marks.entrySet()) {
-                for (FixOverlay overlay : mark.getValue().values()) {
+                for (CanvasOverlayV3 overlay : mark.getValue().values()) {
                     overlay.setVisible(false);
                 }
             }

@@ -75,7 +75,7 @@ public abstract class CanvasOverlayV3 {
     /**
      * the z-Index of the canvas
      */
-    protected int zIndex;
+    protected final int zIndex;
 
     protected MapCanvasProjection mapProjection;
     
@@ -94,6 +94,7 @@ public abstract class CanvasOverlayV3 {
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
+        this.zIndex = zIndex;
         this.mapProjection = null;
         this.coordinateSystem = coordinateSystem;
         canvas = Canvas.createIfSupported();
@@ -415,5 +416,9 @@ public abstract class CanvasOverlayV3 {
         } else {
             setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
         }
+    }
+
+    public int getZIndex() {
+        return zIndex;
     }
 }
