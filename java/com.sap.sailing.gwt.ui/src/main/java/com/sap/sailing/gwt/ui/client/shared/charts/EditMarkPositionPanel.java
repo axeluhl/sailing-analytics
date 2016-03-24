@@ -762,10 +762,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                     }
                 }
             }
-            if (bounds != null) {
-                map.setZoom(raceMap.getZoomLevel(bounds));
-                map.panToBounds(bounds);
-            }
         }
         chart.setSizeToMatchContainer();
         chart.redraw();
