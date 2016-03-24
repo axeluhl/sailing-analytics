@@ -231,11 +231,12 @@
         <item name="android:textSize">@dimen/panel_button_caption_size</item>
     </style>
 
-    <style name="AppTheme.Light.SettingsAlertDialog" parent="AppTheme.AlertDialog">
+    <style name="AppTheme.Light.SettingsAlertDialog" parent="Base.Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorPrimaryDark">@color/dialog_color_text</item>
         <item name="android:textColorSecondary">@color/dialog_color_text</item>
+        <item name="colorAccent">@color/dialog_color_button</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.Light.TabWidget" parent="@android:style/Widget.TabWidget">
