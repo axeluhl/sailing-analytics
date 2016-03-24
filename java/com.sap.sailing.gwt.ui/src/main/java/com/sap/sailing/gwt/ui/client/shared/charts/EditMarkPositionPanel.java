@@ -644,6 +644,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                         setSeriesPoints(mark);
                         onResize();
                         showNotification(stringMessages.fixPositionSuccessfullyEdited(), NotificationType.SUCCESS);
+                        timer.setTime(timer.getTime().getTime()+1);
                     }
                 });
     }
