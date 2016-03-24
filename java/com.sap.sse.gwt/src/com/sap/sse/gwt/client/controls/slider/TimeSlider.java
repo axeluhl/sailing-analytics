@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.user.client.DOM;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.NormalizedInterval;
 import com.sap.sse.gwt.client.controls.slider.TimeTicksCalculator.TickPosition;
 
@@ -223,13 +224,18 @@ public class TimeSlider extends SliderBar {
     }
     
     @Override
-    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+    public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+        final boolean result;
         if (!isZoomed) {
-            super.setMinAndMaxValue(minValue, maxValue, fireEvent);
+            result = super.setMinAndMaxValue(minValue, maxValue, fireEvent);
         } else {
+            boolean minChanged = !Util.equalsWithNull(this.minValue, minValue);
             this.minValue = minValue;
+            boolean maxChanged = !Util.equalsWithNull(this.maxValue, maxValue);
             this.maxValue = maxValue;
+            result = minChanged || maxChanged;
         }
+        return result;
     }
     
     @Override

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -840,8 +841,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         if (selectedMark != null) {
             if (marksFromToTimes.get(selectedMark) != null) {
                 // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
-                timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB(),
-                        /* listeners not to notify */ this);
+                timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
             }
             setWidget(chart);
             markSeries.remove();
@@ -854,11 +854,16 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             hideAllCourseMarkOverlaysExceptSelected();
             raceMap.hideAllHelplines();
             if (marks != null) {
-                for (FixOverlay overlay : marks.get(selectedMark).values()) {
-                    overlay.setVisible(true);
+                for (final Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> e : marks.entrySet()) {
+                    for (FixOverlay overlay : e.getValue().values()) {
+                        // show only tail of selected mark, hide all others
+                        overlay.setVisible(selectedMark.equals(e.getKey()));
+                    }
                 }
             }
-            polylines.get(selectedMark).setVisible(true);
+            for (final Entry<MarkDTO, Polyline> e : polylines.entrySet()) {
+                e.getValue().setVisible(selectedMark.equals(e.getKey()));
+            }
         } else {
             if (raceFromTime != null && raceToTime != null) {
                 timeRangeWithZoomProvider.setTimeRange(raceFromTime, raceToTime);
