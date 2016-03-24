@@ -256,7 +256,7 @@ public class TrackTest {
                     protected Pair<GPSFixMoving, Speed> computeMaxSpeed(TimePoint from, TimePoint to) {
                         Pair<GPSFixMoving, Speed> result = super.computeMaxSpeed(from, to);
                         try {
-                            Thread.sleep(5000); // just wait a bit; can't lock really because that would cause a deadlock
+                            Thread.sleep(1000); // just wait a bit; can't lock really because that would cause a deadlock
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
