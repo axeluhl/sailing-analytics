@@ -338,7 +338,7 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         final boolean added = getInternalRawFixes().add(fix);
         if (!added && replace) {
             getInternalRawFixes().remove(fix);
-            result = getInternalFixes().add(fix);
+            result = getInternalRawFixes().add(fix);
         } else {
             result = added;
         }
