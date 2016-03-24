@@ -229,7 +229,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
-import com.sap.sse.util.HttpURLConnectionHelper;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -3111,7 +3111,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
                             + URLEncoder.encode(query.toString(), "UTF-8"));
                     logger.info("Searching remote server " + remoteRef + " for " + query);
-                    URLConnection urlConnection = HttpURLConnectionHelper.redirectConnection(eventsURL);
+                    URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);
