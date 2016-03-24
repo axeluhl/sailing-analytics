@@ -787,7 +787,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
                 currentFixPositionChooser.cancel();
                 currentFixPositionChooser = null;
             }
-            marksPanel.deselectMarks();
+            marksPanel.deselectMark();
             selectedMark = null;
             if (sideBySideComponentViewer != null) {
                 sideBySideComponentViewer.setLeftComponent(leaderboardPanel);
@@ -887,18 +887,12 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     @Override
     public void onSelectionChange(SelectionChangeEvent event) {
-        List<MarkDTO> selected = marksPanel.getSelectedMarks();
+       selectedMark = marksPanel.getSelectedMark();
         if (currentFixPositionChooser != null) {
             currentFixPositionChooser.cancel();
             currentFixPositionChooser = null;
         }
-        if (selected.size() > 1) {
-            hideAllFixOverlays();
-            hideAllPolylines();
-            setWidget(noMarkSelectedLabel);
-            marksPanel.deselectMark(selectedMark);
-        } else if (selected.size() > 0) {
-            selectedMark = selected.get(0);
+     if (selectedMark != null) {
             if (marksFromToTimes.get(selectedMark) != null) {
                 // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
                 timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB());
@@ -918,7 +912,6 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             }
             polylines.get(selectedMark).setVisible(true);
         } else {
-            selectedMark = null;
             if (raceFromTime != null && raceToTime != null) {
                 timeRangeWithZoomProvider.setTimeRange(raceFromTime, raceToTime);
             }
@@ -966,7 +959,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
      * @throws MultipleFixPositionChooserException Is thrown when another fix position chooser is still open
      */
     public void createFixPositionChooserToAddFixToMark(MarkDTO mark, Callback<Position, Exception> callback) {
-        if (currentFixPositionChooser != null) {
+        if (currentFixPositionChooser != null) { 
             return;
         }
         int index = 0;
