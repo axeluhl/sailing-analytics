@@ -429,11 +429,16 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
         }
         
         private int getIndexOfFixInPolyline(MarkDTO mark, GPSFixDTO fix) {
-            int index = 0;
-            for (GPSFixDTO fixToCompare : marks.get(mark).keySet()) {
-                if (fixToCompare.timepoint.equals(fix.timepoint))
-                    return index;
-                index++;
+            int index;
+            if (marks == null) {
+                index = -1;
+            } else {
+                index = 0;
+                for (GPSFixDTO fixToCompare : marks.get(mark).keySet()) {
+                    if (fixToCompare.timepoint.equals(fix.timepoint))
+                        return index;
+                    index++;
+                }
             }
             return index;
         }
@@ -509,7 +514,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public void updateRedPoint(int index) {
-        if (selectedMark != null) {
+        if (selectedMark != null && marks != null) {
             Point[] points = getSeriesPoints(marks.get(selectedMark).keySet());
             if (points.length > index) {
                 setRedPoint(points, index);
@@ -744,11 +749,13 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void onResize() {
         if (selectedMark != null) {
             LatLngBounds bounds = null;
-            for (GPSFixDTO fix : marks.get(selectedMark).keySet()) {
-                if (bounds == null) {
-                    bounds = BoundsUtil.getAsBounds(raceMap.getCoordinateSystem().toLatLng(fix.position));
-                } else {
-                    bounds = bounds.extend(raceMap.getCoordinateSystem().toLatLng(fix.position));
+            if (marks != null) {
+                for (GPSFixDTO fix : marks.get(selectedMark).keySet()) {
+                    if (bounds == null) {
+                        bounds = BoundsUtil.getAsBounds(raceMap.getCoordinateSystem().toLatLng(fix.position));
+                    } else {
+                        bounds = bounds.extend(raceMap.getCoordinateSystem().toLatLng(fix.position));
+                    }
                 }
             }
             if (bounds != null) {
@@ -830,7 +837,7 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             currentFixPositionChooser.cancel();
             currentFixPositionChooser = null;
         }
-     if (selectedMark != null) {
+        if (selectedMark != null) {
             if (marksFromToTimes.get(selectedMark) != null) {
                 // For some reason the time slider does not change with this method only if you comment out line 430 and 432 in TimePanel it works
                 timeRangeWithZoomProvider.setTimeRange(marksFromToTimes.get(selectedMark).getA(), marksFromToTimes.get(selectedMark).getB(),
@@ -846,8 +853,10 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
             onResize(); // redraw chart
             hideAllCourseMarkOverlaysExceptSelected();
             raceMap.hideAllHelplines();
-            for (FixOverlay overlay : marks.get(selectedMark).values()) {
-                overlay.setVisible(true);
+            if (marks != null) {
+                for (FixOverlay overlay : marks.get(selectedMark).values()) {
+                    overlay.setVisible(true);
+                }
             }
             polylines.get(selectedMark).setVisible(true);
         } else {
@@ -877,9 +886,11 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     }
     
     public void hideAllFixOverlays() {
-        for (Map.Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> mark : marks.entrySet()) {
-            for (FixOverlay overlay : mark.getValue().values()) {
-                overlay.setVisible(false);
+        if (marks != null) {
+            for (Map.Entry<MarkDTO, SortedMap<GPSFixDTO, FixOverlay>> mark : marks.entrySet()) {
+                for (FixOverlay overlay : mark.getValue().values()) {
+                    overlay.setVisible(false);
+                }
             }
         }
     }
@@ -892,10 +903,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
 
     /**
      * Call {@link #resetCurrentFixPositionChooser()} after the fix position chooser is done.
-     * @param mark
-     * @param callback
-     * @return
-     * @throws MultipleFixPositionChooserException Is thrown when another fix position chooser is still open
+     * 
+     * @throws MultipleFixPositionChooserException
+     *             Is thrown when another fix position chooser is still open
      */
     public void createFixPositionChooserToAddFixToMark(MarkDTO mark, Callback<Position, Exception> callback) {
         if (currentFixPositionChooser != null) { 
