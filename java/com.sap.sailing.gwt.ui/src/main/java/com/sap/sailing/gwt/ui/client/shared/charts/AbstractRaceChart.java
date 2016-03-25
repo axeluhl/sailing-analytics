@@ -11,6 +11,8 @@ import org.moxieapps.gwt.highcharts.client.XAxis;
 import org.moxieapps.gwt.highcharts.client.events.ChartClickEvent;
 import org.moxieapps.gwt.highcharts.client.events.ChartSelectionEvent;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -156,13 +158,17 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
             }
             timeRangeWithZoomProvider.setTimeZoom(new Date(xAxisMin), new Date(xAxisMax), this);
         } catch (Exception e) {
-            // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
-            timeRangeWithZoomProvider.resetTimeZoom(this);
-            // Trigger the redrawing... otherwise chart wouldn't reset the zoom
-            chart.redraw();
-            isZoomed = false;
-            // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
-            ignoreNextClickEvent = true;
+            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                @Override
+                public void execute() {
+                    // in case the user clicks the "reset zoom" button chartSelectionEvent.getXAxisMinAsLong() throws in exception
+                    isZoomed = false;
+                    timeRangeWithZoomProvider.resetTimeZoom();
+                    // redraw is triggered by the call to onTimeZoomReset() and therefore not necessary again here
+                    // after the selection change event, another click event is sent with the mouse position on the "Reset Zoom" button; ignore that
+                    ignoreNextClickEvent = true;
+                }
+            });
         }
         return true;
     }
@@ -189,7 +195,7 @@ public abstract class AbstractRaceChart extends AbsolutePanel implements TimeLis
                 xAxis.setMax(maxTimepoint.getTime());
             }
             if (minTimepoint != null && maxTimepoint != null) {
-                xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), false, false);
+                xAxis.setExtremes(minTimepoint.getTime(), maxTimepoint.getTime(), /* redraw */ false, false);
                 long tickInterval = (maxTimepoint.getTime() - minTimepoint.getTime()) / TICKCOUNT;
                 xAxis.setTickInterval(tickInterval);
             }

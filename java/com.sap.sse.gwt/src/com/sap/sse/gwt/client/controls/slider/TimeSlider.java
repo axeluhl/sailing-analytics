@@ -38,15 +38,13 @@ public class TimeSlider extends SliderBar {
     }
     
     private void calculateTicks() {
-        if (!isMinMaxInitialized())
-            return;
-
-        calculatedTimeTicks.clear();
-        
-        long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
-        long tickInterval = minMaxDiffInMs / TICKCOUNT; 
-        NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
-        calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
+        if (isMinMaxInitialized()) {
+            calculatedTimeTicks.clear();
+            long minMaxDiffInMs = maxValue.longValue() - minValue.longValue();
+            long tickInterval = minMaxDiffInMs / TICKCOUNT; 
+            NormalizedInterval normalizedTimeTickInterval = calc.normalizeTimeTickInterval(tickInterval);
+            calculatedTimeTicks = calc.calculateTimeTicks(normalizedTimeTickInterval, minValue.longValue(), maxValue.longValue(), 1);
+        }
     }
     
     /**
