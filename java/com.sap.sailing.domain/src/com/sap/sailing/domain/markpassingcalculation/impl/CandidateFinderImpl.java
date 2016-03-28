@@ -164,11 +164,15 @@ public class CandidateFinderImpl implements CandidateFinder {
                 if (end != null) {
                     while (comFix != null && !comFix.getTimePoint().after(end)) {
                         competitorFixes.add(comFix);
+                        distanceCache.get(c).remove(comFix);
+                        xteCache.get(c).remove(comFix);
                         comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 } else {
                     while (comFix != null) {
                         competitorFixes.add(comFix);
+                        distanceCache.get(c).remove(comFix);
+                        xteCache.get(c).remove(comFix);
                         comFix = track.getFirstFixAfter(comFix.getTimePoint());
                     }
                 }

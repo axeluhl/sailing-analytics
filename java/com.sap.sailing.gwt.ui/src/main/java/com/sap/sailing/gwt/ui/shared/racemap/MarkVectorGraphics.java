@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.MarkType;
 
 /**
  * A class for course mark graphics based on SVG graphics drawn to a HTML5 canvas
- * The SVG files for the drawing can be found in the package com.sap.sailing.gwt.ui.svg.buys
+ * The SVG files for the drawing can be found in the package com.sap.sailing.gwt.ui.svg.buoys
  * A general description how to convert SVG files to 'drawing commands' can be found at http://wiki.sapsailing.com/wiki/boatgraphicssvg 
  * @author Frank
  *
