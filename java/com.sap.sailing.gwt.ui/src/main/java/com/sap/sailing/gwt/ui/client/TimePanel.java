@@ -427,10 +427,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime()) || !min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinAndMaxValue(new Double(min.getTime()),new Double(max.getTime()), fireEvent);
-        }
+        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
         if (changed) {
             if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
@@ -528,6 +525,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {

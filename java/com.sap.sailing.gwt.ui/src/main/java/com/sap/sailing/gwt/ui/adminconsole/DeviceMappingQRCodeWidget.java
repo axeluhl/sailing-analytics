@@ -38,12 +38,17 @@ public class DeviceMappingQRCodeWidget extends BaseQRIdentifierWidget {
     
     @Override
     protected String generateEncodedQRCodeContent() throws QRCodeURLCreationException {
+        if (!isServerUrlValid()){
+            super.url.setText("");
+            throw new QRCodeURLCreationException(stringMessages.serverURLInvalid());
+        }
+        
         String serverUrl = getServerUrlWithoutFinalSlash();
         if (serverUrl.isEmpty()) {
-            throw new QRCodeURLCreationException("Server URL empty");
+            throw new QRCodeURLCreationException(stringMessages.serverURLEmpty());
         }
         if (mappedItemId == null) {
-            throw new QRCodeURLCreationException("No item selected for mapping");
+            throw new QRCodeURLCreationException(stringMessages.pleaseSelectAnItemToMapTo());
         }
         
         return urlFactory.createURL(serverUrl, mappedItemType, mappedItemId);

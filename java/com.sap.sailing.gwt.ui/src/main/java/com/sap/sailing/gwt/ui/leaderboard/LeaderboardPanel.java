@@ -649,6 +649,9 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
         protected SailIDColumn(CompetitorFetcher<T> competitorFetcher) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.competitorFetcher = competitorFetcher;
+            // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
+            // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
+            setCellStyleNames(tableResources.cellTableStyle().cellTableSailIdColumn());
         }
 
         @Override

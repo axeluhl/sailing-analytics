@@ -1221,6 +1221,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
     String useInternalAlgorithm();
     String editMarkPassings();
+    String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
     String setSuppressedPassing();
@@ -1502,4 +1503,24 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String thereIsNoIdentifierSet();
     String couldNotObtainAccessTokenForUser(String message);
     String raceManagerDeviceName();
+    String serverURLInvalid();
+    String serverURLEmpty();
+    String marks();
+    String addNewFix();
+    String pleaseSelectOtherTimepoint();
+    String confirmMove();
+    String confirmNewFix();
+    String selectAFixPositionBy();
+    String pleaseSelectAMark();
+    String markFixes();
+    String distanceFromAveragePosition();
+    String useATouchOptimizedUI();
+    String deleteFix();
+    String theDeletionOfThisFix();
+    String loadingMarkFixes();
+    String fixSuccessfullyAdded();
+    String fixPositionSuccessfullyEdited();
+    String fixSuccessfullyRemoved();
+    String dragToChangePosition();
+    String moveFix();
 }

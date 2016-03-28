@@ -26,7 +26,7 @@ import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager.PlayerChangeListen
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.MediaSingleSelectionControl;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -61,7 +61,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         }
     }
 
-    private final LeaderboardPanel leftComponent;
+    private Component<?> leftComponent;
     private final Component<?> rightComponent;
     private final List<Component<?>> components;
     private final ScrollPanel leftScrollPanel;
@@ -69,6 +69,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private final Button mediaSelectionButton;
     private final Button mediaManagementButton;
     private final EditMarkPassingsPanel markPassingsPanel;
+    private final EditMarkPositionPanel markPositionPanel;
     private final MediaPlayerManagerComponent mediaPlayerManagerComponent;
 
     private LayoutPanel mainPanel;
@@ -77,9 +78,10 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private int savedSplitPosition = -1;
     private boolean layoutForLeftComponentForcedOnce = false;
 
-    public SideBySideComponentViewer(final LeaderboardPanel leftComponentP, final Component<?> rightComponentP,
+    public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
-            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel) {
+            final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
+            EditMarkPositionPanel markPositionPanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -88,6 +90,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
+        this.markPositionPanel = markPositionPanel;
+        markPositionPanel.setComponentViewer(this);
         userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
@@ -169,6 +173,12 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,
                 additionalVerticalButtons);
+    }
+    
+    public void setLeftComponent(Component<?> component) {
+        leftComponent = component;
+        leftScrollPanel.setWidget(leftComponent.getEntryWidget());
+        leftScrollPanel.setTitle(leftComponent.getEntryWidget().getTitle());
     }
 
     /**
@@ -296,19 +306,37 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     @Override
     public void onUserStatusChange(UserDTO user) {
-        final Splitter associatedSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
-        if (associatedSplitter != null) { // if the panel is not present, the splitter may not be found
-            final Button toggleButton = associatedSplitter.getToggleButton();
-            if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
-                    SailingPermissionsForRoleProvider.INSTANCE)) {
-            toggleButton.setVisible(true);
-            forceLayout();
+        final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
+        final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
+        boolean forceLayout = false;
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_PASSINGS.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPassingsSplitter.getToggleButton().setVisible(true);
+            }
+            forceLayout = true;
         } else {
-            markPassingsPanel.setVisible(false);
-            toggleButton.setVisible(false);
+            if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPassingsPanel.setVisible(false);
+                markPassingsSplitter.getToggleButton().setVisible(false);
+            }
+        }
+        if (user != null && user.hasPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPositionSplitter.getToggleButton().setVisible(true);
+            }
+            forceLayout = true;
+        } else {
+            if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
+                markPositionPanel.setVisible(false);
+                markPositionSplitter.getToggleButton().setVisible(false);
+            }
             forceLayout();
         }
-    }
+        if (forceLayout) {
+            forceLayout();
+        }
         mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
     }
     
@@ -328,6 +356,13 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
             Style drapperStyle = leftScrollPanelSplitter.getDragger().getElement().getStyle();
             if (visible) drapperStyle.clearMarginTop();
             else drapperStyle.setMarginTop(-25, Unit.PX);
+        }
+    }
+    
+    public void setLeftComponentToggleButtonVisible(boolean visible) {
+        Splitter leftScrollPanelSplitter = splitLayoutPanel.getAssociatedSplitter(leftScrollPanel);
+        if (leftScrollPanelSplitter != null) {
+            leftScrollPanelSplitter.getToggleButton().setVisible(visible);
         }
     }
 }

@@ -32,6 +32,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJ
 import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 
 /**
  * A set of {@link RemoteSailingServerReference}s including a cache of their {@link EventBase events} that is
@@ -101,8 +102,7 @@ public class RemoteSailingServerSet {
             try {
                 final URL eventsURL = getEventsURL(ref.getURL());
                 logger.fine("Updating events for remote server "+ref+" from URL "+eventsURL);
-                URLConnection urlConnection = eventsURL.openConnection();
-                urlConnection.connect();
+                URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                 bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                 JSONParser parser = new JSONParser();
                 Object eventsAsObject = parser.parse(bufferedReader);
