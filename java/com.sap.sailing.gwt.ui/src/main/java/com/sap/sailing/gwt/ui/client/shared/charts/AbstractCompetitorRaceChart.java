@@ -106,7 +106,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -124,7 +124,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         createChart();
         setSelectedDetailType(detailType);
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        this.selectedRaceIdentifier = selectedRaceIdentifier;
         clearChart();
         if (selectedRaceIdentifier != null) {
             timeChanged(timer.getTime(), null);
@@ -503,7 +502,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
                 chart = createChart();
                 if (isZoomed) {
-                	com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                    com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
                     onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
@@ -628,12 +627,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             break;
         }
         }
-    }
-
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
     }
 
     @Override

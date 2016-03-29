@@ -23,7 +23,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     /**
      * The course mark to draw
      */
-    private MarkDTO mark;
+    private final MarkDTO mark;
 
     private Position position;
 
@@ -169,6 +169,11 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
     public void setMarkPosition(Position position, long transitionTimeInMillis) {
         updateTransition(transitionTimeInMillis);
         this.position = position;
+    }
+    
+    public void setMarkPosition(LatLng positionLatLng) {
+        position = coordinateSystem.getPosition(positionLatLng);
+        draw();
     }
     
     /**
