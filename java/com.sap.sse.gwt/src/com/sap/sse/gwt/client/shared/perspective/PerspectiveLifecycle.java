@@ -22,6 +22,4 @@ public interface PerspectiveLifecycle<P extends Perspective<S>, S extends Settin
     Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles();
     
     CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings();
-    
-    String getPerspectiveName();
 }

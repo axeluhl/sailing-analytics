@@ -43,9 +43,4 @@ public abstract class AbstractPerspectiveLifecycle<P extends Perspective<Setting
     public Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles() {
         return componentLifecycles;
     }
-
-    @Override
-    public String getPerspectiveName() {
-        return getLocalizedShortName();
-    }
 }

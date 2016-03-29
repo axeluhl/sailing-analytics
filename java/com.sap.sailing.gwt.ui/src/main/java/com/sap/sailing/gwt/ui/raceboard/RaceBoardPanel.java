@@ -574,11 +574,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
 
     @Override
-    public String getPerspectiveName() {
-        return perspectiveLifecycle.getPerspectiveName();
-    }
-
-    @Override
     public List<Component<?>> getComponents() {
         return components;
     }

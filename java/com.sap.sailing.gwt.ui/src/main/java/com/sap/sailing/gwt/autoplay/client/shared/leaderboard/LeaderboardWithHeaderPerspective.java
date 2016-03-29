@@ -97,11 +97,6 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     }
 
     @Override
-    public String getPerspectiveName() {
-        return perspectiveLifecycle.getPerspectiveName();
-    }
-
-    @Override
     public String getLocalizedShortName() {
         return perspectiveLifecycle.getLocalizedShortName();
     }

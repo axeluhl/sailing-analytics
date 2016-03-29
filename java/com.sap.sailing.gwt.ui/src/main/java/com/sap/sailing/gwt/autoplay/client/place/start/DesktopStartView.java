@@ -137,7 +137,7 @@ public class DesktopStartView extends Composite implements StartView {
 
     private <P extends PerspectiveLifecycle<?,S,?>, S extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<P,S> perspectiveLifecycleAndSettings) {
         PerspectiveCompositeLifecycleTabbedSettingsDialog<P,S> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(StringMessages.INSTANCE,
-                perspectiveLifecycleAndSettings.getAllSettings(), perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getPerspectiveName(), 
+                perspectiveLifecycleAndSettings.getAllSettings(), perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(), 
                 new DialogCallback<PerspectiveCompositeLifecycleSettings<P,S>>() {
             @Override
             public void ok(PerspectiveCompositeLifecycleSettings<P,S> newSettings) {
