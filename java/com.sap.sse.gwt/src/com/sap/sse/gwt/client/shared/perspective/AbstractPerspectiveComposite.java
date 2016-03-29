@@ -15,7 +15,8 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * An abstract base class for perspectives with a widget.
- * @author Frank
+ * 
+ * @author Frank Mittag
  *
  */
 public abstract class AbstractPerspectiveComposite<PLC extends PerspectiveLifecycle<?, SettingsType, ?>, SettingsType extends Settings> extends Composite implements Perspective<SettingsType> {
