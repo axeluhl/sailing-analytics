@@ -57,7 +57,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                     new DialogCallback<SettingsType>() {
                         @Override
                         public void cancel() {
-                            if(callback != null) {
+                            if (callback != null) {
                                 callback.cancel();
                             }
                         }
@@ -65,7 +65,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
                         @Override
                         public void ok(SettingsType newSettings) {
                             component.updateSettings(newSettings);
-                            if(callback != null) {
+                            if (callback != null) {
                                 callback.ok(newSettings);
                             }
                         }
@@ -86,5 +86,5 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return settingsDialogComponent.getFocusWidget();
-        }
+    }
 }
