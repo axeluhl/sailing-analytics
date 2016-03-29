@@ -114,11 +114,12 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
+                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
                 builder.setTitle(getString(R.string.url_refresh_title));
                 builder.setMessage(getString(R.string.url_refresh_message));
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.create().show();
+                builder.show();
                 return true;
             }
         });
@@ -207,6 +208,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                     identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
                     serverUrlPreference.setText(serverUrl);
                     serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
+                    AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
 
                     new AutoUpdater(getActivity()).checkForUpdate(false);
                 } else {

@@ -16,8 +16,6 @@
 
     <dimen name="header_line">@dimen/thin_line</dimen>
 
-    <dimen name="preference_margin">0dp</dimen>
-
     <dimen name="panel_text_padding">5dp</dimen>
 
     <dimen name="thin_line">1dp</dimen>
@@ -101,6 +99,12 @@
     <dimen name="switch_radius">3dp</dimen>
     <dimen name="switch_height">32dp</dimen>
     <dimen name="switch_padding">8dp</dimen>
+
+    <dimen name="preference_side_margin">0dp</dimen>
+    <dimen name="preference_margin">0dp</dimen>
+    <dimen name="preference_line_margin">72dp</dimen>
+    <dimen name="preference_item_height">72dp</dimen>
+    <item name="preference_columns" format="integer" type="integer">1</item>
 
     <!-- race state dependent -->
     <!-- login -->

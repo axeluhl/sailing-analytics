@@ -524,4 +524,5 @@
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
+    <string name="reload_config">Reload Configuration from Server</string>
 </resources>
