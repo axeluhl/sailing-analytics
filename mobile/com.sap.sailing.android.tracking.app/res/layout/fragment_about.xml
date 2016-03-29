@@ -70,35 +70,14 @@
         android:layout_below="@+id/top_bar"
         android:fillViewport="false">
 
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_marginTop="@dimen/about_header_margin_top"
             android:paddingLeft="@dimen/about_text_side_padding"
-            android:paddingRight="@dimen/about_text_side_padding">
+            android:paddingRight="@dimen/about_text_side_padding"
+            android:text="@string/about_partnership_text"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/about_header_margin_top"
-                android:text="@string/about_partnership_header"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_partnership_text"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/about_header_margin_top"
-                android:text="@string/about_insight_buoy_header"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/about_insight_buoy_text"/>
-        </LinearLayout>
     </ScrollView>
 
 </RelativeLayout>
