@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.NavigableSet;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
@@ -34,6 +35,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  * Tests tricky situation that can fail easily. Created with help of http://itouchmap.com/latlong.html
  * 
  */
+@Ignore
 public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
 
     @Test
@@ -78,7 +80,6 @@ public class MarkPassingWhiteBoxTest extends AbstractMockedRaceMarkPassingTest {
         chooser.suppressMarkPassings(ron, 1);
         NavigableSet<MarkPassing> markPassingsAfterSupressing = race.getMarkPassings(ron);
         assertEquals(0, markPassingsAfterSupressing.size());
-
     }
 
     @Test

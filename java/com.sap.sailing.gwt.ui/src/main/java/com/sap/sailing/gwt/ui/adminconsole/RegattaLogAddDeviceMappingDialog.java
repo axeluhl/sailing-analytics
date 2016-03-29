@@ -217,7 +217,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
     }
 
     private void loadCompetitorsAndMarks() {
-        sailingService.getCompetitorRegistrationsInRegattaLog(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

@@ -108,9 +108,14 @@ public class WindTrackImpl extends TrackImpl<Wind> implements WindTrack {
     }
 
     @Override
-    public boolean add(Wind wind) {
+    public boolean add(Wind fix) {
+        return super.add(fix);
+    }
+
+    @Override
+    public boolean add(Wind wind, boolean replace) {
         final CompactWindImpl compactWind = new CompactWindImpl(wind);
-        final boolean result = super.add(compactWind);
+        final boolean result = super.add(compactWind, replace);
         notifyListenersAboutReceive(compactWind);
         return result;
     }
