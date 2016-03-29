@@ -3,6 +3,7 @@ encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages.prop
 encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages_de.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages_ru.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages_zh.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages_zh_CN.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/home/mobile/partials/sectionHeader/SectionHeaderContent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/regattaoverview/client/RegattaRaceStatesComponent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/server/HomeServiceUtil.java=utf-8
