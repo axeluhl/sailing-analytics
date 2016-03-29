@@ -7,11 +7,14 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * A lifecycle interface for perspectives
- * @author Frank
  *
- * @param <P> the perspective type
- * @param <S> the settings type
- * @param <SDP> the settings dialog component type
+ * @param <P>
+ *            the perspective type
+ * @param <S>
+ *            the settings type
+ * @param <SDP>
+ *            the settings dialog component type
+ * @author Frank Mittag
  */
 public interface PerspectiveLifecycle<P extends Perspective<S>, S extends Settings, SDP extends SettingsDialogComponent<S>>
     extends ComponentLifecycle<P, S, SDP> {

@@ -26,7 +26,7 @@ public class CompositeLifecycleSettings extends AbstractSettings {
     @SuppressWarnings("unchecked")
     public <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> findComponentLifecycleAndSettings(ComponentLifecycle<?,S,?> componentLifecycle) {
         ComponentLifecycleAndSettings<C,S> result = null;
-        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
+        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings : settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle() == componentLifecycle) {
                 result = (ComponentLifecycleAndSettings<C, S>) componentLifecycleAndSettings;
                 break;
@@ -37,7 +37,7 @@ public class CompositeLifecycleSettings extends AbstractSettings {
 
     public boolean hasSettings() {
         boolean result = false;
-        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings: settingsPerComponentLifecycle) {
+        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings : settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle().hasSettings()) {
                 result = true;
                 break;

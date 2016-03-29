@@ -11,7 +11,8 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * An abstract base class for perspective lifecycles.
- * @author Frank
+ * 
+ * @author Frank Mittag
  *
  */
 public abstract class AbstractPerspectiveLifecycle<P extends Perspective<SettingsType>, SettingsType extends Settings, SDP extends SettingsDialogComponent<SettingsType>>
@@ -26,7 +27,7 @@ public abstract class AbstractPerspectiveLifecycle<P extends Perspective<Setting
     @Override
     public CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
         List<ComponentLifecycleAndSettings<?,?>> lifecyclesAndSettings = new ArrayList<>();
-        for(ComponentLifecycle<?,?,?> componentLifecycle: componentLifecycles) {
+        for (ComponentLifecycle<?,?,?> componentLifecycle : componentLifecycles) {
             lifecyclesAndSettings.add(createComponentLifecycleAndSettings(componentLifecycle));
         }
         CompositeLifecycleSettings compositeSettings = new CompositeLifecycleSettings(lifecyclesAndSettings);
