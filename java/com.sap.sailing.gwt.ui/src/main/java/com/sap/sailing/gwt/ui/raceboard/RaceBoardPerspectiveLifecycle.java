@@ -62,7 +62,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     public String getLocalizedShortName() {
-        return "Race Viewer";
+        return stringMessages.raceViewer();
     }
 
     @Override

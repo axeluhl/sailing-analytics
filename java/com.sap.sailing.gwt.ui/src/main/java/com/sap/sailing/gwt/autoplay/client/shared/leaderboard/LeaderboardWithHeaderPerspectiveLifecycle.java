@@ -40,7 +40,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
 
     @Override
     public String getLocalizedShortName() {
-        return "Leaderboard Viewer";
+        return stringMessages.leaderboard();
     }
 
     @Override
