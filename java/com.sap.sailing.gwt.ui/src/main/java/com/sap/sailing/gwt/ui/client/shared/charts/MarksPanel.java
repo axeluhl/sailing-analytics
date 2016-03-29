@@ -154,11 +154,16 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         return null;               
     }
     
-    public void deselectMark() {//FIXME
+    public void deselectMark() {
         markTable.getSelectionModel().setSelected(getSelectedMark(), false);
     }
 
     public void select(MarkDTO mark) {
         markTable.getSelectionModel().setSelected(mark, true);
+    }
+    
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
     }
 }

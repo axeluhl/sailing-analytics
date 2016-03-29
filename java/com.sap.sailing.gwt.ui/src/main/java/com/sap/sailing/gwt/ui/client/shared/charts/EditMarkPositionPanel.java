@@ -984,4 +984,9 @@ public class EditMarkPositionPanel extends AbstractRaceChart implements Componen
     public void setLeaderboard(LeaderboardDTO leaderboard) {
         raceIdentifierToLeaderboardRaceColumnAndFleetMapper.setLeaderboard(leaderboard);
     }
+
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
 }

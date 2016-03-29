@@ -34,7 +34,7 @@ public interface Component<SettingsType extends Settings> {
     SettingsDialogComponent<SettingsType> getSettingsDialogComponent();
     
     /** 
-     * @return the current settings of the component or null if the component has no settings.
+     * @return the current settings of the component or {@code null} if the component has no settings.
      */
     SettingsType getSettings();
 
