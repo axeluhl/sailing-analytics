@@ -6,7 +6,7 @@ import java.util.Map;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveAndDialogComponent;
 
@@ -26,7 +26,7 @@ public class PerspectiveCompositeValidator implements Validator<PerspectiveCompo
     @Override
     public String getErrorMessage(PerspectiveCompositeSettings valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (ComponentAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -49,7 +49,7 @@ public class PerspectiveCompositeValidator implements Validator<PerspectiveCompo
         return errorMessage;
     }
     
-    private <SettingsType extends Settings> String getComponentErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getComponentErrorMessage(ComponentAndSettings<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
         Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponent());

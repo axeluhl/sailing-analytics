@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
@@ -27,9 +27,9 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
     
     @Override 
     public CompositeSettings getSettingsOfComponents() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
         for (Component<?> component : components) {
-            ComponentAndSettingsPair<?> componentAndSettings = getComponentAndSettings(component);
+            ComponentAndSettings<?> componentAndSettings = getComponentAndSettings(component);
             if (componentAndSettings != null) {
                 settings.add(componentAndSettings);
             }
@@ -37,22 +37,22 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
         return new CompositeSettings(settings);
     }
     
-    private <ComponentSettingsType extends Settings> ComponentAndSettingsPair<ComponentSettingsType> getComponentAndSettings(Component<ComponentSettingsType> component) {
-        ComponentAndSettingsPair<ComponentSettingsType> result = null;
+    private <ComponentSettingsType extends Settings> ComponentAndSettings<ComponentSettingsType> getComponentAndSettings(Component<ComponentSettingsType> component) {
+        ComponentAndSettings<ComponentSettingsType> result = null;
         if(component.hasSettings()) {
-            result = new ComponentAndSettingsPair<ComponentSettingsType>(component, component.getSettings());
+            result = new ComponentAndSettings<ComponentSettingsType>(component, component.getSettings());
         }
         return result;
     }
 
     @Override
     public void updateSettingsOfComponents(CompositeSettings newSettings) {
-        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
-    private <ComponentSettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<ComponentSettingsType> componentAndSettings) {
+    private <ComponentSettingsType extends Settings> void updateSettings(ComponentAndSettings<ComponentSettingsType> componentAndSettings) {
         Component<ComponentSettingsType> component = componentAndSettings.getComponent();
         component.updateSettings(componentAndSettings.getSettings());
     }

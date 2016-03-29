@@ -3,7 +3,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -50,7 +50,7 @@ public class PerspectiveCompositeTabbedSettingsComponent implements Component<Pe
     @Override
     public void updateSettings(PerspectiveCompositeSettings newSettings) {
         updatePerspectiveSettings(newSettings.getPerspectiveSettings());
-        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateComponentSettings(componentAndSettings);
         }
     }
@@ -59,7 +59,7 @@ public class PerspectiveCompositeTabbedSettingsComponent implements Component<Pe
         perspectiveAndSettings.getComponent().updateSettings(perspectiveAndSettings.getSettings());
     }
 
-    private <SettingsType extends Settings> void updateComponentSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> void updateComponentSettings(ComponentAndSettings<SettingsType> componentAndSettings) {
         componentAndSettings.getComponent().updateSettings(componentAndSettings.getSettings());
     }
 

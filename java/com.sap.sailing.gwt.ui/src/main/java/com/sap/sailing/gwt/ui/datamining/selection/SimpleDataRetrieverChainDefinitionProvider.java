@@ -32,7 +32,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -237,7 +237,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     @Override
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
-        for (ComponentAndSettingsPair<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
             RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) settingsPerComponent.getComponent();
             SerializableSettings settings = (SerializableSettings) settingsPerComponent.getSettings();
             chainSettings.put(component.getRetrieverLevel(), settings);
@@ -247,7 +247,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
 
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
 
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(getDataRetrieverChainDefinition()).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
@@ -267,7 +267,7 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
         return new CompositeSettings(settings);
     }
     
-    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentAndSettingsPair<SettingsType>(component, component.getSettings()) : null;
+    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentAndSettings<SettingsType>(component, component.getSettings()) : null;
     }
  }

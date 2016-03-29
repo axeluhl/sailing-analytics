@@ -11,7 +11,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 
 public class CompositeTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     
@@ -52,15 +52,15 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
 
     @Override
     public CompositeSettings getResult() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
         for (ComponentAndDialogComponent<?> component : components) {
             settings.add(getComponentAndSettings(component));
         }
         return new CompositeSettings(settings);
     }
 
-    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> component) {
-        return new ComponentAndSettingsPair<SettingsType>(component.getA(), component.getB().getResult());
+    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> component) {
+        return new ComponentAndSettings<SettingsType>(component.getA(), component.getB().getResult());
     }
 
     @Override

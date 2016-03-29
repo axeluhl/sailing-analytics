@@ -14,7 +14,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class PerspectiveCompositeTabbedSettingsDialogComponent implements SettingsDialogComponent<PerspectiveCompositeSettings> {
@@ -107,15 +107,15 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent implements Settin
     @Override
     public PerspectiveCompositeSettings getResult() {
         PerspectiveAndSettingsPair<?> perspectiveAndSettings = perspectiveAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveAndSettingsDialog) : null;
-        Collection<ComponentAndSettingsPair<?>> componentsAndSettings = new HashSet<>();
+        Collection<ComponentAndSettings<?>> componentsAndSettings = new HashSet<>();
         for (ComponentAndDialogComponent<?> componentAndSettingsDialog : componentsAndSettingsDialogs) {
             componentsAndSettings.add(getComponentAndSettings(componentAndSettingsDialog));
         }
         return new PerspectiveCompositeSettings(perspectiveAndSettings, componentsAndSettings);
     }
 
-    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> componentAndSettingsDialog) {
-        return new ComponentAndSettingsPair<SettingsType>(componentAndSettingsDialog.getComponent(), componentAndSettingsDialog.getSettingsDialog().getResult());
+    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> componentAndSettingsDialog) {
+        return new ComponentAndSettings<SettingsType>(componentAndSettingsDialog.getComponent(), componentAndSettingsDialog.getSettingsDialog().getResult());
     }
 
     private <SettingsType extends Settings> PerspectiveAndSettingsPair<SettingsType> getPerspectiveAndSettings(PerspectiveAndDialogComponent<SettingsType> perspectiveAndSettingsDialog) {

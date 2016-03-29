@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
@@ -89,16 +89,16 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentAndSettingsPair<?>> settings = new HashSet<>();
+        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
         for (Component<?> component : components) {
-            ComponentAndSettingsPair<?> componentAndSettings = getComponentAndSettings(component);
+            ComponentAndSettings<?> componentAndSettings = getComponentAndSettings(component);
             if (componentAndSettings != null) {
                 settings.add(componentAndSettings);
             }
@@ -106,11 +106,11 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
         return new CompositeSettings(settings);
     }
     
-    private <SettingsType extends Settings> ComponentAndSettingsPair<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentAndSettingsPair<SettingsType>(component, component.getSettings()) : null;
+    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentAndSettings<SettingsType>(component, component.getSettings()) : null;
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> void updateSettings(ComponentAndSettings<SettingsType> componentAndSettings) {
         componentAndSettings.getComponent().updateSettings(componentAndSettings.getSettings());
     }
 

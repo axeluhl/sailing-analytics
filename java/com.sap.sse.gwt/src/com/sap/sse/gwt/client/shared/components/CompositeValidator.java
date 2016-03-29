@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettingsPair;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
@@ -22,7 +22,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (ComponentAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -31,7 +31,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettings<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
         Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponent());

@@ -44,12 +44,12 @@ public class CompositeTabbedSettingsComponent implements Component<CompositeSett
  
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (ComponentAndSettingsPair<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> void updateSettings(ComponentAndSettings<SettingsType> componentAndSettings) {
         componentAndSettings.getComponent().updateSettings(componentAndSettings.getSettings());
     }
 
