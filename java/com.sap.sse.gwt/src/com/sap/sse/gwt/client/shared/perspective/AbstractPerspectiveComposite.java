@@ -44,7 +44,7 @@ public abstract class AbstractPerspectiveComposite<PLC extends PerspectiveLifecy
     
     private <ComponentSettingsType extends Settings> ComponentAndSettings<ComponentSettingsType> getComponentAndSettings(Component<ComponentSettingsType> component) {
         ComponentAndSettings<ComponentSettingsType> result = null;
-        if(component.hasSettings()) {
+        if (component.hasSettings()) {
             result = new ComponentAndSettings<ComponentSettingsType>(component, component.getSettings());
         }
         return result;

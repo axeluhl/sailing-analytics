@@ -32,7 +32,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
 /**
  * A perspective managing a header with a single leaderboard filling the rest of the screen.
- * @author Frank
+ * 
+ * @author Frank Mittag
  *
  */
 public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {

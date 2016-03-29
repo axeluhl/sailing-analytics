@@ -556,11 +556,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         return "";
     }
 
-    @Override
-    public List<Component<?>> getComponents() {
-        return components;
-    }
-    
     private void manageTimePanelToggleButton(boolean advanceTimePanelEnabled) {
         final Button toggleButton = getTimePanel().getAdvancedToggleButton();
         if (advanceTimePanelEnabled) {
