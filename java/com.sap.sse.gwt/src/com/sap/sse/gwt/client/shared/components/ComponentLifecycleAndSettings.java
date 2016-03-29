@@ -4,7 +4,7 @@ import com.sap.sse.common.settings.Settings;
 
 public class ComponentLifecycleAndSettings<ComponentLifecycleType extends ComponentLifecycle<?, SettingsType, ?>, SettingsType extends Settings> {
     private final ComponentLifecycleType componentLifecycle;
-    private SettingsType settings;
+    private final SettingsType settings;
 
     public ComponentLifecycleAndSettings(ComponentLifecycleType componentLifecycle, SettingsType settings) {
         super();
@@ -18,9 +18,5 @@ public class ComponentLifecycleAndSettings<ComponentLifecycleType extends Compon
     
     public SettingsType getSettings() {
         return settings;
-    }
-    
-    public void setSettings(SettingsType settings) {
-        this.settings = settings;
     }
 }
