@@ -21,6 +21,11 @@ public enum RaceLogRaceStatus {
 
     }
 
+    public static boolean isRunningOrFinished(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(STARTPHASE) || status.equals(RUNNING) || status.equals(FINISHING) || status.equals(FINISHED));
+    }
+
     public int getOrderNumber() {
         return orderNumber;
     }

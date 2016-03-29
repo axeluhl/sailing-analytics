@@ -2,7 +2,9 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.widget.Filter;
 
@@ -48,15 +50,20 @@ public class RaceFilter extends Filter {
             return createResults(items);
         }
         
-        List<RaceListDataType> filteredItems = new ArrayList<RaceListDataType>();
+        List<RaceListDataType> filteredItems = new ArrayList<>();
         RaceListDataTypeRace currentUnscheduledItem = null;
         RaceListDataTypeRace currentFinishedItem = null;
+        Map<String, Boolean> finalsStarted = new HashMap<>();
         int finishedItems = 0;
         int subItems = 0;
         List<RaceListDataTypeHeader> headersToRemove= new ArrayList<>();
         RaceListDataTypeHeader currentHeader = null;
-        
-        List<RaceListDataType> allItems = new ArrayList<RaceListDataType>(items);
+
+        List<RaceListDataType> allItems = new ArrayList<>(items);
+        detectStartedFinalsOrMedals(finalsStarted, allItems);
+
+        filterByFinalOrMedal(finalsStarted, headersToRemove, allItems);
+
         for (RaceListDataType item : allItems) {
             if (item instanceof RaceListDataTypeHeader) {
                 if (currentHeader != null && subItems > 0 && subItems == finishedItems) {
@@ -99,6 +106,38 @@ public class RaceFilter extends Filter {
         }
         removeFinishedSeries(filteredItems, headersToRemove);
         return createResults(filteredItems);
+    }
+
+    private void filterByFinalOrMedal(Map<String, Boolean> finalsStarted, List<RaceListDataTypeHeader> headersToRemove,
+        List<RaceListDataType> allItems) {
+        RaceListDataTypeHeader currentHeader = null;
+        for (RaceListDataType item : allItems) {
+            if (item instanceof RaceListDataTypeHeader) {
+                currentHeader = (RaceListDataTypeHeader) item;
+            } else if (item instanceof  RaceListDataTypeRace) {
+                RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
+                if (raceItem.getRace().getFleet().getOrdering() == 0 && !raceItem.getRace().getSeries().isMedal()) {
+                    String regattaName = raceItem.getRace().getRaceGroup().getName();
+                    if(finalsStarted.containsKey(regattaName) && currentHeader != null) {
+                        headersToRemove.add(currentHeader);
+                    }
+                }
+            }
+        }
+    }
+
+    private void detectStartedFinalsOrMedals(Map<String, Boolean> finalsStarted, List<RaceListDataType> allItems) {
+        for (RaceListDataType item : allItems) {
+            if (item instanceof RaceListDataTypeRace) {
+                RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
+                String regattaName = raceItem.getRace().getRaceGroup().getName();
+                if (raceItem.getRace().getFleet().getOrdering() != 0 || raceItem.getRace().getSeries().isMedal()) {
+                    if (RaceLogRaceStatus.isRunningOrFinished(raceItem.getCurrentStatus())) {
+                        finalsStarted.put(regattaName, true);
+                    }
+                }
+            }
+        }
     }
 
     private void removeFinishedSeries(List<RaceListDataType> filteredItems, List<RaceListDataTypeHeader> headersToRemove) {
