@@ -480,7 +480,9 @@ public class CrossTrackErrorCache extends AbstractRaceChangeListener {
     
     public void resume() {
         owner.addListener(this);
-        invalidate();
+        for (Competitor competitor : owner.getRace().getCompetitors()) {
+            cachePerCompetitor.triggerUpdate(competitor, null /* meaning: from the beginning of time */);
+        }
         cachePerCompetitor.resume();
     }
 }
