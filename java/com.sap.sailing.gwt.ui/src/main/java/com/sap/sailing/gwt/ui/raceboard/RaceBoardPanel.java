@@ -585,8 +585,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     
     private void manageTimePanelToggleButton(boolean advanceTimePanelEnabled) {
         final Button toggleButton = getTimePanel().getAdvancedToggleButton();
-
-        if(advanceTimePanelEnabled) {
+        if (advanceTimePanelEnabled) {
             toggleButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
