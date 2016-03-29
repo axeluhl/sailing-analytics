@@ -81,7 +81,6 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -100,7 +99,7 @@ import com.sap.sse.security.ui.client.UserService;
  * @author Frank Mittag, Axel Uhl (d043530)
  *
  */
-public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider
+public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> implements LeaderboardUpdateListener, PopupPositionProvider
 {
     private final SailingServiceAsync sailingService;
     private final MediaServiceAsync mediaService;
@@ -150,7 +149,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings;
-    private final RaceBoardPerspectiveLifecycle perspectiveLifecycle;
     private RaceBoardPerspectiveSettings settings;
     
     /**
@@ -168,9 +166,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super();
+        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle());
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
-        this.perspectiveLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle();
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -540,22 +537,8 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
     
     @Override
-    public String getLocalizedShortName() {
-        return perspectiveLifecycle.getLocalizedShortName();
-    }
-
-    @Override
     public Widget getEntryWidget() {
         return this;
-    }
-
-    public boolean hasSettings() {
-        return perspectiveLifecycle.hasSettings();
-    }
-
-    @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getSettingsDialogComponent() {
-        return perspectiveLifecycle.getSettingsDialogComponent(settings);
     }
 
     @Override

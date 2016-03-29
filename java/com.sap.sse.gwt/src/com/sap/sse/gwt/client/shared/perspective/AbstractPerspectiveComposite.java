@@ -11,18 +11,22 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * An abstract base class for perspectives with a widget.
  * @author Frank
  *
  */
-public abstract class AbstractPerspectiveComposite<SettingsType extends Settings> extends Composite implements Perspective<SettingsType> {
+public abstract class AbstractPerspectiveComposite<PLC extends PerspectiveLifecycle<?, SettingsType, ?>, SettingsType extends Settings> extends Composite implements Perspective<SettingsType> {
+
+    private final PLC perspectiveLifecycle;
 
     protected final List<Component<?>> components;
     
-    public AbstractPerspectiveComposite() {
+    public AbstractPerspectiveComposite(PLC perspectiveLifecycle) {
         this.components = new ArrayList<>();
+        this.perspectiveLifecycle = perspectiveLifecycle;
     }
     
     @Override 
@@ -65,4 +69,23 @@ public abstract class AbstractPerspectiveComposite<SettingsType extends Settings
     public List<Component<?>> getComponents() {
         return components;
     }
+    
+    @Override
+    public String getLocalizedShortName() {
+        return perspectiveLifecycle.getLocalizedShortName();
+    }
+
+    public boolean hasSettings() {
+        return perspectiveLifecycle.hasSettings();
+    }
+
+    @Override
+    public SettingsDialogComponent<SettingsType> getSettingsDialogComponent() {
+        return perspectiveLifecycle.getSettingsDialogComponent(getSettings());
+    }
+    
+    protected PLC getPerspectiveLifecycle() {
+        return perspectiveLifecycle;
+    }
+
 }
