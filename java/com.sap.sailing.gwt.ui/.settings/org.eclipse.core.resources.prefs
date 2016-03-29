@@ -13,6 +13,7 @@ encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages.properties=
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_de.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_ru.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_zh.properties=UTF-8
+encoding//src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_zh_CN.properties=UTF-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/client/media/MediaPlayerManagerComponent.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/datamining/presentation/AbstractResultsPresenter.java=utf-8
 encoding//src/main/java/com/sap/sailing/gwt/ui/datamining/presentation/PlainResultsPresenter.java=utf-8
