@@ -12,7 +12,8 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
  * An abstract base class for perspectives.
- * @author Frank
+ * 
+ * @author Frank Mittag
  *
  */
 public abstract class AbstractPerspective<SettingsType extends Settings> implements Perspective<SettingsType> {
