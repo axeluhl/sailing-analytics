@@ -21,7 +21,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
 
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         for (ComponentAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
@@ -34,7 +34,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettings<SettingsType> componentAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponent());
+        final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponent());
         if (validator != null) {
             errorMessage = validator.getErrorMessage(componentAndSettings.getSettings());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
