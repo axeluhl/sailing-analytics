@@ -14,13 +14,6 @@ public class CompositeLifecycleSettings extends AbstractSettings {
         return settingsPerComponentLifecycle;
     }
 
-//    public <C extends ComponentLifecycle<?, S, ?,?>, S extends Settings> void setSettingsOfComponentLifecycle(C componentLifecycle, S settings) {
-//        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
-//        if(componentLifecycleAndSettings != null) {
-//            componentLifecycleAndSettings.setSettings(settings);
-//        }
-//    }
-//
     public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<?,S,?> componentLifecycle) {
         S result = null;
         ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
