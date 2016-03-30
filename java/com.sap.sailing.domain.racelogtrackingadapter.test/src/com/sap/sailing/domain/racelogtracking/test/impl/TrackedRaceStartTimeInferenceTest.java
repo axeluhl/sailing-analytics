@@ -38,12 +38,11 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
-import com.sap.sse.common.Duration;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
-    private static final Duration BUFFER_DURATION = Duration.ONE_MINUTE.times(5);
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
     @Test
@@ -71,8 +70,8 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         //test inference via race start/end time in racelog
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
-        assertEquals(new MillisecondsTimePoint(10000).minus(BUFFER_DURATION), trackedRace.getStartOfTracking());
-        assertEquals(new MillisecondsTimePoint(20000).plus(BUFFER_DURATION), trackedRace.getEndOfTracking());
+        assertEquals(new MillisecondsTimePoint(10000).minus(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES), trackedRace.getStartOfTracking());
+        assertEquals(new MillisecondsTimePoint(20000).plus(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES), trackedRace.getEndOfTracking());
         
         
         //test inference via manually set start/end of tracking

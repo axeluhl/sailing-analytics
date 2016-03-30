@@ -308,6 +308,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
             notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
         }
+        updateStartAndEndOfTracking();
     }
 
     @Override

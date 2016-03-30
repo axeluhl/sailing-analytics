@@ -160,7 +160,7 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
-    private static final int TRACKING_BUFFER_IN_MINUTES = 5;
+    public static final int TRACKING_BUFFER_IN_MINUTES = 5;
 
     private static final long serialVersionUID = -4825546964220003507L;
 
@@ -734,7 +734,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TimePoint getStartOfTracking() {
-        updateStartAndEndOfTracking();//FIXME: unclear whether change listeners etc similar to DynamicTrackedRace can be used here for caching and invalidation
         return startOfTrackingReceived;
     }
     
@@ -750,11 +749,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         
         if (trackingTimesFromRaceLog != null){
             if (trackingTimesFromRaceLog.getA() != null){
-                setStartOfTrackingReceived(trackingTimesFromRaceLog.getA(), false);
+                startOfTrackingReceived = trackingTimesFromRaceLog.getA();
                 startOfTrackingFound = true;
             }
             if (trackingTimesFromRaceLog.getB() != null){
-                setEndOfTrackingReceived(trackingTimesFromRaceLog.getB(), false);
+                endOfTrackingReceived = trackingTimesFromRaceLog.getB();
                 endOfTrackingFound = true;
             }
         }
@@ -762,11 +761,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         if(!startOfTrackingFound || !endOfTrackingFound){
             if (startAndFinishedTimesFromRaceLog != null){
                 if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
-                    setStartOfTrackingReceived(startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES)), false);
+                    startOfTrackingReceived = startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
                     startOfTrackingFound = true;
                 }
                 if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null){
-                    setEndOfTrackingReceived(startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES)), false);
+                    endOfTrackingReceived = startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
                     endOfTrackingFound = true;
                 }
             }
@@ -795,11 +794,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
             
             if (!startOfTrackingFound && earliestMappingStart != null){
-                setStartOfTrackingReceived(earliestMappingStart, false);
+                startOfTrackingReceived = earliestMappingStart;
             }
             
             if (!endOfTrackingFound && latestMappingEnd != null){
-                setEndOfTrackingReceived(latestMappingEnd, false);
+                endOfTrackingReceived = latestMappingEnd;
             }
         }
     }
@@ -834,16 +833,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public void invalidateStartTime() {
         startTime = null;
         startTimeWithoutInferenceFromStartMarkPassings = null;
+        updateStartAndEndOfTracking();
     }
 
     public void invalidateEndTime() {
         endTime = null;
+        updateStartAndEndOfTracking();
     }
 
     protected void invalidateMarkPassingTimes() {
         synchronized (markPassingsTimes) {
             markPassingsTimes.clear();
         }
+        updateStartAndEndOfTracking();
     }
     
     /**
