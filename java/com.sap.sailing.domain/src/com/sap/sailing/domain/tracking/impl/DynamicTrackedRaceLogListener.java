@@ -156,20 +156,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private void analyze(RaceLog raceLog) {
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
-        analyseTrackingTimes(raceLog);
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
         }
         trackedRace.updateMarkPassingsAfterRaceLogChanges();
-    }
-
-    private void analyseTrackingTimes(RaceLog raceLog) {
-        Pair<TimePoint, TimePoint> times = createTrackingTimesFinder(raceLog).analyze();
-        if (times != null) {
-            trackedRace.setStartOfTrackingReceived(times.getA());
-            trackedRace.setEndOfTrackingReceived(times.getB());
-        }
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
@@ -321,12 +312,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
-        trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+        trackedRace.updateStartAndEndOfTracking();
     }
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
-        trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+        trackedRace.updateStartAndEndOfTracking();
     }
 
     @Override

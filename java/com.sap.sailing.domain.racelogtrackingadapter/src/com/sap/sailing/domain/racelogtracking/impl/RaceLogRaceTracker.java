@@ -425,14 +425,12 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
             trackedRace.updateStartAndEndOfTracking();
         }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
             trackedRace.updateStartAndEndOfTracking();
         }
     }
