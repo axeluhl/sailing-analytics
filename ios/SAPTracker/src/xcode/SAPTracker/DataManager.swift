@@ -26,10 +26,10 @@ public class DataManager: NSObject {
         print(managedObjectContext!)
         
         // store new locations to database
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DataManager.newLocation(_:)), name: LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "newLocation:", name: LocationManager.NotificationType.newLocation, object: nil)
         
         // save context when done tracking
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(DataManager.trackingStopped(_:)), name: LocationManager.NotificationType.trackingStopped, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "trackingStopped:", name: LocationManager.NotificationType.trackingStopped, object: nil)
     }
     
     deinit {

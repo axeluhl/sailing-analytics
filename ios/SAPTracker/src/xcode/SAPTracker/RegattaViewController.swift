@@ -183,7 +183,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 hoursLabel.text = String(format: "%.0f", arguments: [hours])
                 minutesLabel.text = String(format: "%.0f", arguments: [minutes])
                 loop?.invalidate()
-                loop = NSTimer(timeInterval: 60, target: self, selector: #selector(RegattaViewController.checkRegattaStatus), userInfo: nil, repeats: false)
+                loop = NSTimer(timeInterval: 60, target: self, selector: "checkRegattaStatus", userInfo: nil, repeats: false)
                 NSRunLoop.currentRunLoop().addTimer(loop!, forMode:NSRunLoopCommonModes)
             }
                 // during race
@@ -279,7 +279,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
         APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
             imageData: jpegData,
-            success: { (responseObject) -> Void in
+            success: { (AnyObject responseObject) -> Void in
                 // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
                 // "Additional Notes: Competitor profile image left out for now."
                 let responseDictionary = responseObject as![String: AnyObject]
@@ -289,7 +289,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
 				NSUserDefaults.standardUserDefaults().setBool(false, forKey: self.uploadKey)
 				NSUserDefaults.standardUserDefaults().synchronize()
             },
-            failure: { (error) -> Void in
+            failure: { (NSError error) -> Void in
                 let alertView = UIAlertView(title: NSLocalizedString("Failed to upload image", comment: ""), message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                 alertView.tag = AlertView.UploadFailed.rawValue;
 				alertView.show()
@@ -323,9 +323,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                     competitorId: DataManager.sharedManager.selectedCheckIn!.competitorId,
                     deviceUuid: DeviceUDIDManager.UDID,
                     toMillis: toMillis,
-                    success: { (operation, competitorResponseObject) -> Void in
+                    success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
                     },
-                    failure: { (operation, error) -> Void in
+                    failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                     }
                 )
                 DataManager.sharedManager.deleteCheckIn(DataManager.sharedManager.selectedCheckIn!)
