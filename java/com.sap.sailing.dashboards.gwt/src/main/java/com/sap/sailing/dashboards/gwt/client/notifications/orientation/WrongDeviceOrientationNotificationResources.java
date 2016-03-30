@@ -20,6 +20,9 @@ public interface WrongDeviceOrientationNotificationResources extends ClientBundl
     WrongDeviceNotificationGSS gss();
 
     public interface WrongDeviceNotificationGSS extends CssResource {
+        public String notification_background();
+        public String notification_background_shown();
+        public String notification_background_hidden();
         public String notification();
         public String shown();
         public String hidden();

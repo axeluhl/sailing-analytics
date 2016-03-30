@@ -45,19 +45,23 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         List<StartAnalysisCompetitorDTO> competitors = new ArrayList<StartAnalysisCompetitorDTO>();
         Waypoint secondWaypoint = trackedRace.getRace().getCourse().getFirstLeg().getTo();
         List<MarkPassing> markPassingsInOrder = convertMarkpPassingsIteratorToList(trackedRace.getMarkPassingsInOrder(secondWaypoint).iterator());
-        boolean isCompetitorOneOfFirstThree = false;
+        boolean isCompetitorNullOrOneOfFirstThreeCompetitors = false;
         for (int i = 0; i < MINIMUM_MARKPASSIINGS_AT_FIRST_MARK; i++) {
-            competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, i + 1, markPassingsInOrder.get(i).getCompetitor()));
-            if (markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
-                isCompetitorOneOfFirstThree = true;
+            if (markPassingsInOrder.size() - 1 >= i) {
+                competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, i+1, markPassingsInOrder.get(i).getCompetitor()));
+                if (competitor == null || markPassingsInOrder.get(i).getCompetitor().equals(competitor)) {
+                    isCompetitorNullOrOneOfFirstThreeCompetitors = true;
+                }
             }
         }
-
-        if (!isCompetitorOneOfFirstThree) {
+        if (competitor != null && !isCompetitorNullOrOneOfFirstThreeCompetitors) {
             int rankOfCompetitorWhilePassingSecondWaypoint = getRankOfCompetitorWhilePassingSecondWaypoint(competitor, trackedRace);
             competitors.add(createStartAnalysisCompetitorDTO(dashboardDispatchContext, trackedRace, rankOfCompetitorWhilePassingSecondWaypoint, competitor));
         }
-        startAnalysisDTO.competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().convertToCompetitorDTO(competitor);
+        if (competitor != null) {
+            startAnalysisDTO.competitor = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore().convertToCompetitorDTO(competitor);
+            logger.log(Level.INFO, "Created startanalysis for competitor"+competitor);
+        }
         startAnalysisDTO.startAnalysisCompetitorDTOs = competitors;
         final Boolean isGateStart = trackedRace.isGateStart();
         if(isGateStart == Boolean.TRUE){
@@ -77,7 +81,7 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
             startAnalysisDTO.tailLenghtInMilliseconds = ONE_MINUTE_INTERVALL_IN_MILLISECONDS;
         }
         startAnalysisDTO.regattaAndRaceIdentifier = trackedRace.getRaceIdentifier();
-        logger.log(Level.INFO, "Created startanalysis for competitor " + competitor.getName() + " and "+ trackedRace.getRace().getName());
+        logger.log(Level.INFO, "Created startanalysis for "+ trackedRace.getRace().getName());
         return startAnalysisDTO;
     }
 
@@ -185,8 +189,7 @@ public final class StartAnalysisDTOFactory extends AbstractStartAnalysisCreation
         }
     }
 
-    private static StartAnalysisCompetitorDTO createStartAnalysisCompetitorDTO(DashboardDispatchContext dashboardDispatchContext, TrackedRace trackedRace, int rank,
-            Competitor competitor) {
+    private static StartAnalysisCompetitorDTO createStartAnalysisCompetitorDTO(DashboardDispatchContext dashboardDispatchContext, TrackedRace trackedRace, int rank, Competitor competitor) {
         StartAnalysisCompetitorDTO startAnalysisCompetitorDTOsForRace = new StartAnalysisCompetitorDTO();
         startAnalysisCompetitorDTOsForRace.competitorDTO = dashboardDispatchContext.getRacingEventService().getBaseDomainFactory().getCompetitorStore()
                 .convertToCompetitorDTO(competitor);

@@ -47,10 +47,4 @@ public class CreateUserDialog extends AbstractUserDialog {
                     }
                 });
     }
-
-    @Override
-    public void show() {
-        super.show();
-        getNameBox().setFocus(true);
-    }
 }

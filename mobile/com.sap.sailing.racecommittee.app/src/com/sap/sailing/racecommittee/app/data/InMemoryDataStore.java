@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.data;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,9 +25,9 @@ import com.sap.sse.common.Util.Triple;
 public enum InMemoryDataStore implements DataStore {
     INSTANCE;
 
-    private HashMap<Serializable, EventBase> eventsById;
-    private HashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
-    private HashMap<Serializable, Mark> marksById;
+    private LinkedHashMap<Serializable, EventBase> eventsById;
+    private LinkedHashMap<SimpleRaceLogIdentifier, ManagedRace> managedRaceById;
+    private LinkedHashMap<Serializable, Mark> marksById;
     private CourseBase courseData;
     private SharedDomainFactory domainFactory;
 
@@ -40,9 +40,9 @@ public enum InMemoryDataStore implements DataStore {
 
     @Override
     public void reset() {
-        eventsById = new HashMap<>();
-        managedRaceById = new HashMap<>();
-        marksById = new HashMap<>();
+        eventsById = new LinkedHashMap<>();
+        managedRaceById = new LinkedHashMap<>();
+        marksById = new LinkedHashMap<>();
         courseData = null;
         domainFactory = new SharedDomainFactoryImpl(new AndroidRaceLogResolver());
 

@@ -67,7 +67,7 @@ public class RegattaDetailsCompositePO extends PageArea {
         if (entry != null) {
             WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
             removeAction.click();
-            ActionsHelper.acceptAlert(this.driver);
+            // ActionsHelper.acceptAlert(this.driver);
             // waitForAjaxRequests();
         }
     }

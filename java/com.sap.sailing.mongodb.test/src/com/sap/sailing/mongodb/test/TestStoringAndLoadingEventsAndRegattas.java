@@ -133,6 +133,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final String[] courseAreaNames = new String[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrott" };
         final URL officialWebsiteURL = new URL("http://official.website.com");
         final URL sailorsInfoWebsiteURL = new URL("http://sailorsinfo.website.com");
+        final URL sailorsInfoWebsiteURLDE = new URL("http://sailorsinfo-de.website.com");
         final Venue venue = new VenueImpl(venueName);
         
         for (String courseAreaName : courseAreaNames) {
@@ -147,7 +148,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         event.addLeaderboardGroup(lg2);
         event.setDescription(eventDescription);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURL(null, sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURL(Locale.GERMAN, sailorsInfoWebsiteURLDE);
         mof.storeEvent(event);
         
         DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
@@ -172,7 +174,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(eventName, loadedEvent.getName());
         assertEquals(eventDescription, loadedEvent.getDescription());
         assertEquals(event.getOfficialWebsiteURL(), loadedEvent.getOfficialWebsiteURL());
-        assertEquals(event.getSailorsInfoWebsiteURL(), loadedEvent.getSailorsInfoWebsiteURL());
+        assertEquals(sailorsInfoWebsiteURL, loadedEvent.getSailorsInfoWebsiteURL(null));
+        assertEquals(sailorsInfoWebsiteURLDE, loadedEvent.getSailorsInfoWebsiteURL(Locale.GERMAN));
+        assertEquals(2, loadedEvent.getSailorsInfoWebsiteURLs().size());
         assertEquals(2, Util.size(loadedEvent.getLeaderboardGroups()));
         Iterator<LeaderboardGroup> lgIter = loadedEvent.getLeaderboardGroups().iterator();
         assertSame(lg1, lgIter.next());
@@ -324,7 +328,6 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         assertEquals(3, Util.size(loadedVideo1.getTags()));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     /**
      * We expected that the migration code creates also an image URL for each image we create.
@@ -361,9 +364,9 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Event loadedEvent = dof.loadEvent(eventName);
         assertEquals(2, Util.size(loadedEvent.getImages()));
         assertEquals(1, Util.size(loadedEvent.getVideos()));
-        assertEquals(1, Util.size(loadedEvent.getImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getSponsorImageURLs()));
-        assertEquals(1, Util.size(loadedEvent.getVideoURLs()));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.GALLERY)));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.SPONSOR)));
+        assertEquals(1, Util.size(loadedEvent.getVideos()));
     }
     
     

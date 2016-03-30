@@ -15,6 +15,11 @@ class SettingsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         batterySavingSwitch.setOn(BatteryManager.sharedManager.batterySavingPreference, animated: true)
+		
+		// add logo to top left
+		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
+		let barButtonItem = UIBarButtonItem(customView: imageView)
+		navigationItem.leftBarButtonItem = barButtonItem
     }
 
     @IBAction func batterySavingChanged(sender: UISwitch) {

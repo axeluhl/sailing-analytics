@@ -13,28 +13,10 @@ body {
   font-weight: 500;
 }
 
-.eventDescription {
-  vertical-align: top;
-  height: 40px;
-}
-
 .repeatedInfoLabel {
   margin: 10px;
   font-size: 20px;
   font-weight: 700;
-}
-
-.eventLabel {
-  color: #fff;
-  vertical-align: top;
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.venueLabel {
-  color: #fff;
-  font-size: 18px;
-  vertical-align: top;
 }
 
 

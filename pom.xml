@@ -138,7 +138,7 @@
         
         <!-- WORKSPACE is an env set by Jenkins pointing to the build job's work directory.-->
         <ldi.android.sdk.parent.location>${env.WORKSPACE}</ldi.android.sdk.parent.location>
-        <ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-windows</ldi.android.sdk.location>
+        <ldi.android.sdk.location>${ldi.android.sdk.parent.location}/android-sdk-linux</ldi.android.sdk.location>
         
         <android.platform.version>22</android.platform.version>
         <android.api.groupId>android</android.api.groupId>

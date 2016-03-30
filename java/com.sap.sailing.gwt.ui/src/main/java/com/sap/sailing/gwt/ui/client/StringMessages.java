@@ -176,6 +176,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
+    String degreesUnit();
     @Override
     String close();
     String compareCompetitors();
@@ -1217,6 +1218,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
     String useInternalAlgorithm();
     String editMarkPassings();
+    String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
     String setSuppressedPassing();
@@ -1261,9 +1263,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueDescending();
     String sortBy();
     
-    String dashboardWindBotLoadingText();
-    String dashboardWindBotLoadingMessage();
-    String dashboardWindBotNotAvailable();
+    String dashboardHeader();
+    String dashboardNoWindBotAvailableHeader();
+    String dashboardNoWindBotAvailableMessage();
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
     String dashboardTrueWindDirection();
@@ -1274,10 +1276,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardAverageWindMinutes(int minutes);
     String dashboardWindChartHint();
     
+    String dashboardSelectCompetitor();
+    String dashboardStartAnalysesHeader();
     String dashboardNewStartAnalysisAvailable();
-    
-    String dashboardStartlineAdvantagesByWind();
-    String dashboardStartlineAdvantageByGeometry();
+    String dashboardNoStartAnalysesAvailableHeader();
+    String dashboardNoStartAnalysesAvailableMessage();
+    String dashboardNoStartlineAdvantagesByWindAvailableHeader();
+    String dashboardNoStartlineAdvantagesByWindAvailableMessage();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableHeader();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableMessage();
+    String dashboardStartlineAdvantagesByWindHeader();
+    String dashboardStartlineAdvantageByGeometryHeader();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
@@ -1478,8 +1487,37 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String create();
     String thereIsAlreadyAConfigurationForThisDevice();
     String enterDeviceIdentifierName();
+    String administration();
     String pleaseSelectALeaderboardGroup();
     String linkLeaderboardToLeaderboardGroupOfEvent();
     String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
     String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String createDefaultRegatta();
+    String doYouWantToCreateADefaultRegatta();
+    String defaultLocale();
+    String defaultSailorsInfoLinkInfoText();
+    String qrSync();
+    String thereIsNoIdentifierSet();
+    String couldNotObtainAccessTokenForUser(String message);
+    String raceManagerDeviceName();
+    String serverURLInvalid();
+    String serverURLEmpty();
+    String marks();
+    String addNewFix();
+    String pleaseSelectOtherTimepoint();
+    String confirmMove();
+    String confirmNewFix();
+    String selectAFixPositionBy();
+    String pleaseSelectAMark();
+    String markFixes();
+    String distanceFromAveragePosition();
+    String useATouchOptimizedUI();
+    String deleteFix();
+    String theDeletionOfThisFix();
+    String loadingMarkFixes();
+    String fixSuccessfullyAdded();
+    String fixPositionSuccessfullyEdited();
+    String fixSuccessfullyRemoved();
+    String dragToChangePosition();
+    String moveFix();
 }

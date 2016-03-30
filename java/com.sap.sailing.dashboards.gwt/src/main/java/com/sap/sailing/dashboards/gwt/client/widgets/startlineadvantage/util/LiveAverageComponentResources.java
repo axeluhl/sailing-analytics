@@ -17,8 +17,6 @@ public interface LiveAverageComponentResources extends ClientBundle {
     
     interface LiveAverageComponentGss extends CssResource {
         String live_average_component();
-        String header();
-        String header_container();
         String live_container();
         String average_container();
         String middle_line();
