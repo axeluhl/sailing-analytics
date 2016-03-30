@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
  * the {@link AdminConsoleEntryPoint}.
  */
 public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite {
-    private final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
+    final Set<TrackedRaceChangedListener> raceIsTrackedRaceChangeListener;
     private Button btnUntrack;
     private Button btnRemoveRace;
     private Button btnSetDelayToLive;

@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.PassingInstruction;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -50,6 +50,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -80,6 +81,18 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         importPanel.add(importContent);
         importContent.add(importWidget);
         importContent.add(deviceIdentifierTable);
+        trackedRacesListComposite.addTrackedRaceChangeListener(new TrackedRaceChangedListener() {
+            
+            @Override
+            public void racesStoppedTracking(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
+                loadAndRefreshLeaderboard(getSelectedLeaderboard().name, getSelectedRaceColumnWithFleet().getA().getName()); 
+            }
+            
+            @Override
+            public void racesRemoved(Iterable<? extends RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) {
+                loadAndRefreshLeaderboard(getSelectedLeaderboard().name, getSelectedRaceColumnWithFleet().getA().getName()); 
+            }
+        });
     }
 
     private static interface ShowWithBoatClass {
@@ -185,6 +198,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     
     private RaceLogTrackingState getTrackingState(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackingState;
+    }
+    
+    private boolean trackerExists(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+        return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackerExists;
     }
     
     private boolean isFinished(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
@@ -368,20 +385,40 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         });
     }
     
-    private void stopTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> selectedSet) {
-        Set<RaceDTO> races = new HashSet<RaceDTO>();
+    private void stopTracking(final Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> selectedSet) {
+        final List<RegattaAndRaceIdentifier> racesToStopTracking = new ArrayList<RegattaAndRaceIdentifier>();        
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTOWithNameBasedEquality : selectedSet) {
-            if (raceColumnDTOAndFleetDTOWithNameBasedEquality.getA().getRace(raceColumnDTOAndFleetDTOWithNameBasedEquality.getB()) != null && 
-                    raceColumnDTOAndFleetDTOWithNameBasedEquality.getA().getRace(raceColumnDTOAndFleetDTOWithNameBasedEquality.getB()).isTracked){
-                races.add(raceColumnDTOAndFleetDTOWithNameBasedEquality.getA().getRace(raceColumnDTOAndFleetDTOWithNameBasedEquality.getB()));
+            RaceDTO race = raceColumnDTOAndFleetDTOWithNameBasedEquality.getA().getRace(raceColumnDTOAndFleetDTOWithNameBasedEquality.getB());
+            if (race != null && race.isTracked){
+                racesToStopTracking.add(race.getRaceIdentifier());
             }   
         }
-        trackedRacesListComposite.stopTrackingRaces(races);
+        
+        sailingService.stopTrackingRaces(racesToStopTracking, new MarkedAsyncCallback<Void>(
+                new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Exception trying to stop tracking races " + racesToStopTracking + ": " + caught.getMessage());
+                    }
+        
+                    @Override
+                    public void onSuccess(Void result) {
+                        trackedRacesListComposite.regattaRefresher.fillRegattas();
+                        for (TrackedRaceChangedListener listener : trackedRacesListComposite.raceIsTrackedRaceChangeListener) {
+                            listener.racesStoppedTracking(racesToStopTracking);
+                        }
+                        
+                        for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumndDTOAndFleet : selectedSet) {
+                            loadAndRefreshLeaderboard(getSelectedLeaderboard().name, raceColumndDTOAndFleet.getA().getName()); 
+                        }
+                    }
+                }));
     }
 
     private void enableStartTrackingButtonIfAppropriateRacesSelected() {
         boolean onlyUntrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         boolean onlyTrackedRacesPresent = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
+        boolean onlyRacesWithNonExistentTracker = raceColumnTableSelectionModel.getSelectedSet().size() > 0;
         
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality race : raceColumnTableSelectionModel.getSelectedSet()) {
             if (getTrackingState(race).isForTracking() && isFinished(race)){
@@ -394,9 +431,13 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             } else {
                 onlyTrackedRacesPresent = false;
             }
+            
+            if (trackerExists(race)){
+                onlyRacesWithNonExistentTracker = false;
+            }
         }
         
-        if (!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent){
+        if ((!onlyTrackedRacesPresent && !onlyUntrackedRacesPresent)){
             startStopTrackingButton.setEnabled(false);
         }
         
@@ -405,7 +446,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             startStopTrackingButton.setEnabled(true);
         }
         
-        if (onlyUntrackedRacesPresent){
+        if (onlyUntrackedRacesPresent || onlyRacesWithNonExistentTracker){
             startStopTrackingButton.setDown(false);
             startStopTrackingButton.setEnabled(true);
         }
@@ -558,7 +599,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
-                    loadAndRefreshLeaderboard(leaderboard.name, raceColumn.getName());
+                    loadAndRefreshLeaderboard(leaderboard.name, getSelectedRaceColumnWithFleet().getA().getName());
                     trackedRacesListComposite.regattaRefresher.fillRegattas();
                 }
 
