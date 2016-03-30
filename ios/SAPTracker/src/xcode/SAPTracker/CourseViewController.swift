@@ -14,7 +14,7 @@ class CourseViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(CourseViewController.newLocation(_:)), name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
     }
 
     deinit {

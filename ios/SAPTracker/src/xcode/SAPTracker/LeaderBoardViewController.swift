@@ -16,7 +16,7 @@ class LeaderBoardViewController: UIViewController, UIWebViewDelegate, UIAlertVie
     override func viewDidLoad() {
         super.viewDidLoad()
         let serverUrl = DataManager.sharedManager.selectedCheckIn!.serverUrl
-//        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
+        let eventId = DataManager.sharedManager.selectedCheckIn!.eventId
         let leaderBoardName = DataManager.sharedManager.selectedCheckIn!.leaderBoardName.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding)!
         let url = "\(serverUrl)/gwt/Leaderboard.html?name=\(leaderBoardName)&showRaceDetails=false&embedded=true&hideToolbar=true"
         webView!.loadRequest(NSURLRequest(URL: NSURL(string: url)!))
