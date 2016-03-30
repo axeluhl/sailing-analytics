@@ -6215,4 +6215,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
     }
+
+    public Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>> getTrackingTimes(
+            Collection<Triple<String, String, String>> raceColumnsAndFleets) {
+        Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>>  trackingTimes = new HashMap<Triple<String, String, String>,Pair<TimePoint, TimePoint>>(); 
+        for (Triple<String, String, String> leaderboardRaceColumnFleetName : raceColumnsAndFleets) {
+            try {
+                trackingTimes.put(leaderboardRaceColumnFleetName, getTrackingTimes(leaderboardRaceColumnFleetName.getA(), 
+                        leaderboardRaceColumnFleetName.getB(), leaderboardRaceColumnFleetName.getC()));
+            } catch (Exception e) {
+                trackingTimes.put(leaderboardRaceColumnFleetName, null);
+            }
+        }
+        return trackingTimes;
+    }
 }
