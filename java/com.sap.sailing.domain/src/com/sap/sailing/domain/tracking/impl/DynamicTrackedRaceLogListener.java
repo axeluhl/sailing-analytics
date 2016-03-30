@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
@@ -38,7 +37,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -78,10 +76,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder createCourseDesignFinder(RaceLog raceLog) {
         return new LastPublishedCourseDesignFinder(raceLog);
-    }
-
-    private TrackingTimesFinder createTrackingTimesFinder(RaceLog raceLog) {
-        return new TrackingTimesFinder(raceLog);
     }
 
     private AbortingFlagFinder createAbortingFlagFinder(RaceLog raceLog) {
