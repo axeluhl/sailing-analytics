@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -46,7 +47,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -159,7 +159,6 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
@@ -230,6 +229,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -961,46 +961,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // don't need the lock anymore to update DB
         if (toRename instanceof Renamable) {
             mongoObjectFactory.renameLeaderboard(oldName, newName);
-            syncGroupsAfterLeaderboardChange(toRename, true);
         }
     }
 
     @Override
     public void updateStoredLeaderboard(Leaderboard leaderboard) {
         getMongoObjectFactory().storeLeaderboard(leaderboard);
-        syncGroupsAfterLeaderboardChange(leaderboard, true);
     }
 
     @Override
     public void updateStoredRegatta(Regatta regatta) {
         if (regatta.isPersistent()) {
             mongoObjectFactory.storeRegatta(regatta);
-        }
-    }
-
-    /**
-     * Checks all groups, if they contain a leaderboard with the name of the <code>updatedLeaderboard</code> and
-     * replaces the one in the group with the updated one.<br />
-     * This synchronizes things like the RaceIdentifier in the leaderboard columns.
-     */
-    private void syncGroupsAfterLeaderboardChange(Leaderboard updatedLeaderboard, boolean doDatabaseUpdate) {
-        boolean groupNeedsUpdate = false;
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if (leaderboard == updatedLeaderboard) {
-                    int index = leaderboardGroup.getIndexOf(leaderboard);
-                    leaderboardGroup.removeLeaderboard(leaderboard);
-                    leaderboardGroup.addLeaderboardAt(updatedLeaderboard, index);
-                    groupNeedsUpdate = true;
-                    // TODO we assume that the leaderboard names are unique, so we can break the inner loop here
-                    break;
-                }
-            }
-
-            if (doDatabaseUpdate && groupNeedsUpdate) {
-                mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
-            }
-            groupNeedsUpdate = false;
         }
     }
 
@@ -1059,12 +1031,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog) {
+    public Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint) {
         GPSFixTrack<Mark, GPSFix> track = null;
         // If no spanning track is found, the fix closest to the time point requested is used instead
         GPSFix nonSpanningFallback = null;
         for (TrackedRace trackedRace : leaderboard.getTrackedRaces()) {
-            GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
+            final GPSFixTrack<Mark, GPSFix> trackCandidate = trackedRace.getTrack(mark);
             if (trackCandidate != null) {
                 if (spansTimePoint(trackCandidate, timePoint)) {
                     track = trackCandidate;
@@ -1074,31 +1046,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             }
         }
-        if (track == null) { // no spanning track found in any tracked race, or no tracked races found
-            // try to load from store
-            DynamicGPSFixTrackImpl<Mark> loadedTrack = new DynamicGPSFixTrackImpl<Mark>(mark, 0);
-            track = loadedTrack;
-            Set<AbstractLog<?, ?>> logs = new HashSet<>();
-            logs.add(leaderboard.getRegattaLike().getRegattaLog());
-            if (raceLog == null) { // no race log explicitly provided --> use all race logs
-                for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    for (Fleet fleet : raceColumn.getFleets()) {
-                        logs.add(raceColumn.getRaceLog(fleet));
-                    }
-                }
-            } else {
-                logs.add(raceLog);
-            }
-            for (AbstractLog<?, ?> log : logs) {
-                try {
-                    getGPSFixStore().loadMarkTrack(loadedTrack, log, mark);
-                } catch (Exception e) {
-                    logger.log(Level.WARNING, "Couldn't load mark track for mark " + mark + " from log " + log, e);
-                }
-            }
-        }
-        Position result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
-        if (result == null) {
+        final Position result; 
+        if (track != null) {
+            result = track.getEstimatedPosition(timePoint, /* extrapolate */ false);
+        } else {
             result = nonSpanningFallback == null ? null : nonSpanningFallback.getPosition();
         }
         return result;
@@ -1752,7 +1703,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * {@link RaceColumn#getRaceIdentifier(Fleet) race identifier} equals that of <code>trackedRace</code>.
      */
     private void linkRaceToConfiguredLeaderboardColumns(TrackedRace trackedRace) {
-        boolean leaderboardHasChanged = false;
         RegattaAndRaceIdentifier trackedRaceIdentifier = trackedRace.getRaceIdentifier();
         for (Leaderboard leaderboard : getLeaderboards().values()) {
             for (RaceColumn column : leaderboard.getRaceColumns()) {
@@ -1760,15 +1710,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     if (trackedRaceIdentifier.equals(column.getRaceIdentifier(fleet))
                             && column.getTrackedRace(fleet) == null) {
                         column.setTrackedRace(fleet, trackedRace);
-                        leaderboardHasChanged = true;
                         replicate(new ConnectTrackedRaceToLeaderboardColumn(leaderboard.getName(), column.getName(),
                                 fleet.getName(), trackedRaceIdentifier));
                     }
                 }
-            }
-            if (leaderboardHasChanged) {
-                // Update the corresponding groups, to keep them in sync
-                syncGroupsAfterLeaderboardChange(leaderboard, /* doDatabaseUpdate */false);
             }
         }
     }
@@ -2675,12 +2620,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, 
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         result.setImages(images);
         result.setVideos(videos);
         return result;
@@ -2697,7 +2643,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
@@ -2721,7 +2667,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         event.setImages(images);
         event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
@@ -3165,8 +3111,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
                             + URLEncoder.encode(query.toString(), "UTF-8"));
                     logger.info("Searching remote server " + remoteRef + " for " + query);
-                    URLConnection urlConnection = eventsURL.openConnection();
-                    urlConnection.connect();
+                    URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);

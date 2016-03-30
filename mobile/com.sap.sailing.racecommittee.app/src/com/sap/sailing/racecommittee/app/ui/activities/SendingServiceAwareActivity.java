@@ -1,28 +1,35 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.util.Date;
+
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.data.http.UnauthorizedException;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
+import com.sap.sailing.android.shared.util.AuthCheckTask;
 import com.sap.sailing.android.shared.util.PrefUtils;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
-import java.util.Date;
+public abstract class SendingServiceAwareActivity extends ResilientActivity implements AuthCheckTask.AuthCheckTaskListener {
 
-public abstract class SendingServiceAwareActivity extends ResilientActivity {
-    
     private class MessageSendingServiceConnection implements ServiceConnection, MessageSendingServiceLogger {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -50,69 +57,67 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     }
 
     protected MenuItem menuItemLive;
-    protected int menuItemLiveId = -1;
 
     protected boolean boundSendingService = false;
     protected MessageSendingService sendingService;
     private MessageSendingServiceConnection sendingServiceConnection;
-    
+
     private String sendingServiceStatus = "";
-    
+
+    private static String TAG = SendingServiceAwareActivity.class.getName();
+
     public SendingServiceAwareActivity() {
-        this.sendingServiceConnection = new MessageSendingServiceConnection();
+        sendingServiceConnection = new MessageSendingServiceConnection();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        
+
         Intent intent = new Intent(this, MessageSendingService.class);
-        ExLog.i(this, this.getClass().getName(), "bindSendingService");
+        ExLog.i(this, TAG, "bindSendingService");
         bindService(intent, sendingServiceConnection, Context.BIND_AUTO_CREATE);
     }
-    
+
     @Override
     public void onStop() {
         super.onStop();
-        
-        if (boundSendingService) {
-            ExLog.i(this, this.getClass().getName(), "unbindSendingService");
-            unbindService(sendingServiceConnection);
-            boundSendingService = false;
-        }
+
+        ExLog.i(this, TAG, "unbindSendingService");
+        unbindService(sendingServiceConnection);
+        boundSendingService = false;
     }
 
     protected void updateSendingServiceInformation() {
         if (menuItemLive == null) {
-            ExLog.w(this, this.getClass().getName(), "updateSendingServiceInformation -> menuItemLive==null");
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> menuItemLive==null");
             return;
         }
         if (!boundSendingService) {
-            ExLog.w(this, this.getClass().getName(), "updateSendingServiceInformation -> !boundSendingService");
+            ExLog.w(this, TAG, "updateSendingServiceInformation -> !boundSendingService");
             return;
         }
 
         int errorCount = this.sendingService.getDelayedIntentsCount();
         if (errorCount > 0) {
-            ExLog.i(this, this.getClass().getName(), "updateSendingServiceInformation -> errorCount > 0");
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount > 0");
             menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, ThemeHelper.getColor(this, R.attr.sap_red_1)));
             Date lastSuccessfulSend = this.sendingService.getLastSuccessfulSend();
             String statusText = getString(R.string.events_waiting_to_be_sent);
-            sendingServiceStatus = String.format(statusText,
-                    errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
+            sendingServiceStatus = String.format(statusText, errorCount, lastSuccessfulSend == null ? getString(R.string.never) : lastSuccessfulSend);
         } else {
-            ExLog.i(this, this.getClass().getName(), "updateSendingServiceInformation -> errorCount <= 0");
-            menuItemLive.setIcon(BitmapHelper.getTintedDrawable(this, R.drawable.ic_share_white_36dp, getResources().getColor(android.R.color.white)));
+            ExLog.i(this, TAG, "updateSendingServiceInformation -> errorCount <= 0");
+            menuItemLive.setIcon(R.drawable.ic_share_white_36dp);
             sendingServiceStatus = getString(R.string.no_event_to_be_sent);
         }
     }
-    
+
     /**
      * @return the resource ID for the options menu, {@code 0} if none.
-     *          The menu item displaying the connection status is added automatically.
+     * The menu item displaying the connection status is added automatically.
      */
     protected abstract int getOptionsMenuResId();
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -123,17 +128,22 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
         }
         return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (R.id.options_menu_live == item.getItemId()) {
-            Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
+            if (AppPreferences.on(this).getAccessToken() == null) {
+                onException(null);
+            } else {
+                AuthCheckTask task = new AuthCheckTask(this, AppPreferences.on(this).getServerBaseURL(), this);
+                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
             return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
     }
-    
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         updateSendingServiceInformation();
@@ -143,5 +153,35 @@ public abstract class SendingServiceAwareActivity extends ResilientActivity {
     private String getLiveIconText() {
         return getString(R.string.connected_to_wp, PrefUtils.getString(this, R.string.preference_server_url_key,
                 R.string.preference_server_url_default), sendingServiceStatus, (boundSendingService ? "bound" : "unbound"));
+    }
+
+    @Override
+    public void onRequestReceived(Boolean authenticated) {
+        Toast.makeText(this, getLiveIconText(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onException(Exception exception) {
+        if (exception == null || exception instanceof UnauthorizedException) {
+            Context context = this;
+            if (getSupportActionBar() != null) {
+                context = getSupportActionBar().getThemedContext();
+            }
+            AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
+            builder.setTitle(getString(R.string.sending_exception_title));
+            builder.setMessage(getString(R.string.sending_exception_message));
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    AppPreferences.on(SendingServiceAwareActivity.this).setAccessToken(null);
+                    startActivity(new Intent(SendingServiceAwareActivity.this, PasswordActivity.class));
+                    finish();
+                }
+            });
+            builder.setNegativeButton(android.R.string.no, null);
+            builder.show();
+        } else {
+            onRequestReceived(true);
+        }
     }
 }

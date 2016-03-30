@@ -11,6 +11,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -29,12 +30,14 @@ import com.sap.sse.common.Util.Pair;
 public class EventsResource extends AbstractSailingServerResource {
 
     private Response getBadEventErrorResponse(String eventId) {
-        return  Response.status(Status.NOT_FOUND).entity("Could not find an event with id '" + eventId + "'.").type(MediaType.TEXT_PLAIN).build();
+        return Response.status(Status.NOT_FOUND).entity("Could not find an event with id '" + StringEscapeUtils.escapeHtml(eventId) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents() {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         JSONArray result = new JSONArray();
         for (EventBase event : getService().getAllEvents()) {
@@ -50,6 +53,8 @@ public class EventsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{eventId}")
     public Response getEvent(@PathParam("eventId") String eventId) {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ, eventId));
         Response response;
         UUID eventUuid;
         try {
@@ -76,6 +81,8 @@ public class EventsResource extends AbstractSailingServerResource {
     @Path("{eventId}/racestates")
     public Response getRaceStates(@PathParam("eventId") String eventId, @QueryParam("filterByLeaderboard") String filterByLeaderboard,
             @QueryParam("filterByCourseArea") String filterByCourseArea, @QueryParam("filterByDayOffset") String filterByDayOffset) {
+        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be authentication aware...
+        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ, eventId));
         Response response;
         UUID eventUuid;
         try {

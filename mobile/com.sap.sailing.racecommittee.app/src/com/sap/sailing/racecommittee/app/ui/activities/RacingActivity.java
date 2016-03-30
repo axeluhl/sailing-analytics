@@ -3,6 +3,8 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
@@ -17,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
@@ -29,12 +32,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.common.Wind;
@@ -45,6 +50,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -55,23 +61,23 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
 import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceInfoListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RacingActivity extends SessionActivity implements RaceInfoListener, RaceListCallbacks {
+public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
 
     private static final int RacesLoaderId = 2;
-    private static ProgressBar mProgressSpinner;
+    private ProgressBar mProgressSpinner;
 
     private IntentReceiver mReceiver;
     private ReadonlyDataManager dataManager;
@@ -115,8 +121,38 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
     }
 
+    private boolean resetEditFragments(@IdRes int id, String action) {
+        if (findViewById(id) != null) {
+            Fragment fragment = getFragmentManager().findFragmentById(id);
+            if (fragment == null) {
+                fragment = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
+            } else {
+                if (fragment instanceof BaseFragment) {
+                    BaseFragment base = (BaseFragment) fragment;
+                    if (base.onBackPressed()) {
+                        return true;
+                    }
+                }
+            }
+            if (fragment != null) {
+                LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+                manager.sendBroadcast(new Intent(action));
+                manager.sendBroadcast(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onBackPressed() {
+        if (resetEditFragments(R.id.race_edit, AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT)) {
+            return;
+        }
+        if (resetEditFragments(R.id.finished_edit, AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT)) {
+            return;
+        }
+
         Fragment fragment = getFragmentManager().findFragmentById(R.id.racing_view_container);
         if (!(fragment instanceof RaceInfoFragment || fragment instanceof WelcomeFragment)) {
             if (getFragmentManager().getBackStackEntryCount() > 0) {
@@ -143,7 +179,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         super.onCreate(savedInstanceState);
 
-        ThemeHelper.setTheme(this);
         setContentView(R.layout.racing_view);
 
         dataManager = DataManager.create(this);
@@ -151,8 +186,10 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
-            setOverflowIcon();
-            toolbar.setMinimumHeight((int) getResources().getDimension(R.dimen.biggerActionBarSize));
+            if (AppUtils.with(this).is10inch()) {
+                setOverflowIcon();
+                toolbar.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.biggerActionBarSize));
+            }
             setSupportActionBar(toolbar);
             mProgressSpinner = (ProgressBar) findViewById(R.id.progress_spinner);
         }
@@ -184,6 +221,13 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 Toast.makeText(this, getString(R.string.racing_course_area_missing), Toast.LENGTH_LONG).show();
             }
             loadNavDrawer(courseArea);
+            if (savedInstanceState != null) {
+                String raceID = (String) savedInstanceState.getSerializable(RACE);
+                if (raceID != null) {
+                    onRaceItemClicked(dataManager.getDataStore().getRace(raceID));
+                    return;
+                }
+            }
             loadWelcomeFragment();
         }
     }
@@ -194,10 +238,9 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
 
         mReceiver = new IntentReceiver();
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_SHOW);
-        filter.addAction(AppConstants.INTENT_ACTION_TIME_HIDE);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+        filter.addAction(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -257,12 +300,6 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     @Override
-    public void onResetTime() {
-        ExLog.i(this, TAG, "OnResetTime");
-        infoFragment.onResetTime();
-    }
-
-    @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
@@ -295,30 +332,30 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.options_menu_reset:
-            ExLog.i(this, TAG, "Clicked RESET RACE");
-            resetRace();
-            return true;
+            case R.id.options_menu_reset:
+                ExLog.i(this, TAG, "Clicked RESET RACE");
+                resetRace();
+                return true;
 
-        default:
-            return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
     public void onWindEntered(Wind windFix) {
-        TextView windValue = (TextView) findViewById(R.id.wind_value);
+        PanelButton windValue = (PanelButton) findViewById(R.id.button_wind);
         if (windFix != null) {
             if (windValue != null) {
-                windValue.setText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
+                windValue.setPanelText(String.format(getString(R.string.wind_info), windFix.getKnots(), windFix.getBearing().reverse().toString()));
             }
             if (mSelectedRace != null) {
-                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, /* isMagnetic */ true);
+                mSelectedRace.getState().setWindFix(MillisecondsTimePoint.now(), windFix, preferences.isMagnetic());
             }
 
             mWind = windFix;
         } else {
             if (windValue != null) {
-                windValue.setText(getString(R.string.wind_unknown));
+                windValue.setPanelText(getString(R.string.wind_unknown));
             }
         }
 
@@ -346,7 +383,7 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                     RacingActivity.this.startService(registerIntent);
                 }
             }
-        }).run();
+        }).start();
     }
 
     public void setProgressSpinnerVisibility(boolean visible) {
@@ -358,19 +395,18 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
             }
         }
 
-        View progress = findViewById(R.id.progress);
-        if (progress != null) {
+        if (mRaceList != null) {
             if (visible) {
-                progress.setVisibility(View.VISIBLE);
+                mRaceList.showSpinner(true);
             } else {
-                progress.setVisibility(View.GONE);
+                mRaceList.showSpinner(false);
             }
         }
     }
 
     private void setupActionBar(ManagedRace race) {
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(RaceHelper.getRaceName(race, " / "));
+            getSupportActionBar().setTitle(RaceHelper.getReverseRaceName(race, " / "));
         }
     }
 
@@ -405,6 +441,14 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
         }
     }
 
+    public LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> getRacesByGroup() {
+        if (mRaceList != null) {
+            return mRaceList.getRacesByGroup();
+        }
+        return null;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setOverflowIcon() {
         // Required to set overflow icon
         final String overflowDescription = getString(R.string.abc_action_menu_overflow_description);
@@ -421,9 +465,12 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
                 }
                 // Actual replacement of the icon
                 TintImageView overflow = (TintImageView) outViews.get(0);
-                overflow.setMinimumWidth((int) getResources().getDimension(R.dimen.bigger_over_flow_width));
-                overflow.setMinimumHeight((int) getResources().getDimension(R.dimen.bigger_over_flow_height));
-                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.overflow_icon_32dp, 6, 8);
+                overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
+                overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
+                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp, overflow.getMinimumWidth(), overflow.getMinimumHeight());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    overflow.setScaleType(ImageView.ScaleType.FIT_END);
+                }
                 overflow.setImageDrawable(new BitmapDrawable(getResources(), bitmap));
                 // Remove listener on layout
                 removeOnGlobalLayoutListener(decorView, this);
@@ -443,38 +490,65 @@ public class RacingActivity extends SessionActivity implements RaceInfoListener,
     }
 
     public void processIntent(Intent intent) {
-        String action = intent.getAction();
-        View view = findViewById(R.id.race_panel_top);
-        if (view != null) {
-            if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
-                view.setVisibility(View.GONE);
-            }
+        Fragment content;
+        Fragment extra = null;
+        Bundle args = new Bundle();
+        View view;
 
-            if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
-                view.setVisibility(View.VISIBLE);
-            }
+        String action = intent.getAction();
+        if (mSelectedRace != null) {
+            args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
         }
 
-        Bundle args = new Bundle();
-        args.putSerializable(AppConstants.RACE_ID_KEY, mSelectedRace.getId());
-        Fragment fragment;
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-        if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action) && findViewById(R.id.race_frame) != null) {
-            if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
-                fragment = RaceFlagViewerFragment.newInstance();
-            } else {
-                fragment = RaceFinishingFragment.newInstance();
+        if (AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT.equals(action)) {
+            view = findViewById(R.id.race_edit);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                extra = getFragmentManager().findFragmentById(R.id.race_edit);
+                if (extra != null) {
+                    transaction.remove(extra);
+                }
             }
-            fragment.setArguments(args);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.race_frame, fragment).commit();
+            if (findViewById(R.id.race_content) != null) {
+                if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
+                    content = RaceFlagViewerFragment.newInstance();
+                } else {
+                    content = RaceFinishingFragment.newInstance();
+                }
+                content.setArguments(args);
+                transaction.replace(R.id.race_content, content);
+            }
         }
 
         if (AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT.equals(action)) {
-            fragment = RaceSummaryFragment.newInstance(args);
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
-            transaction.replace(R.id.finished_content, fragment).commit();
+            view = findViewById(R.id.finished_edit);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                extra = getFragmentManager().findFragmentById(R.id.finished_edit);
+                if (extra != null) {
+                    transaction.remove(extra);
+                }
+            }
+            if (extra == null && findViewById(R.id.finished_content) != null) {
+                content = RaceSummaryFragment.newInstance(args);
+                transaction.replace(R.id.finished_content, content);
+            }
         }
+
+        if (AppConstants.INTENT_ACTION_REMOVE_PROTEST.equals(action)) {
+            view = findViewById(R.id.protest_time_fragment);
+            if (view != null) {
+                ViewHelper.setSiblingsVisibility(view, View.VISIBLE);
+                extra = getFragmentManager().findFragmentById(R.id.protest_time_fragment);
+                if (extra != null) {
+                    transaction.remove(extra);
+                }
+            }
+        }
+
+        transaction.commit();
     }
 
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {

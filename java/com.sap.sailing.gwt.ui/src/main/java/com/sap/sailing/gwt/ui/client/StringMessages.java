@@ -176,6 +176,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String secondsUnit();
     String secondsPerNauticalMileUnit();
     String metersUnit();
+    String degreesUnit();
     @Override
     String close();
     String compareCompetitors();
@@ -325,7 +326,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String messagingPortNumber();
     String servletPortNumber();
     String registeredAt(String string);
-    String replicatingFromMaster(String hostname, int jmsPort, int servletPort);
+    String replicatingFromMaster(String hostname, int jmsPort, int servletPort, String messagingHostname, String exchangeName);
     String showWindSpeedSeries();
     String showWindDirectionSeries();
     String fleet();
@@ -416,6 +417,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String scoringSchemeLowPointWithEliminationsAndRoundsWinnerGets07Description();
     String scoringSchemeLowPointForLeagueOverallLeaderboard();
     String scoringSchemeLowPointForLeagueOverallLeaderboardDescription();
+    String scoringSchemeHighPointEssOverall12();
+    String scoringSchemeHighPointEssOverall12Description();
+    String scoringSchemeHighPointFirstGetsTwelveOrEight();
+    String scoringSchemeHighPointFirstGetsTwelveOrEightDescription();
     String scoringSystem();
     String createFlexibleLeaderboard();
     String createRegattaLeaderboard();
@@ -1111,6 +1116,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String invalidSelection();
     String advancePassId();
     String pleaseSelectAScoringResult();
+    String timeZone();
     String eventOfficialWebsiteURL();
     String eventSailorsInfoWebsiteURL();
     String eventOverviewURL();
@@ -1212,6 +1218,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String timeBetweenRaceStartAndCompetitorStartInSecondsTooltip();
     String useInternalAlgorithm();
     String editMarkPassings();
+    String editMarkPositions();
     String removeFixedPassings();
     String setFixedPassing();
     String setSuppressedPassing();
@@ -1256,9 +1263,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String valueDescending();
     String sortBy();
     
-    String dashboardWindBotLoadingText();
-    String dashboardWindBotLoadingMessage();
-    String dashboardWindBotNotAvailable();
+    String dashboardHeader();
+    String dashboardNoWindBotAvailableHeader();
+    String dashboardNoWindBotAvailableMessage();
     String dashboardWindBot();
     String dashboardTrueWindSpeed();
     String dashboardTrueWindDirection();
@@ -1269,10 +1276,17 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String dashboardAverageWindMinutes(int minutes);
     String dashboardWindChartHint();
     
+    String dashboardSelectCompetitor();
+    String dashboardStartAnalysesHeader();
     String dashboardNewStartAnalysisAvailable();
-    
-    String dashboardStartlineAdvantagesByWind();
-    String dashboardStartlineAdvantageByGeometry();
+    String dashboardNoStartAnalysesAvailableHeader();
+    String dashboardNoStartAnalysesAvailableMessage();
+    String dashboardNoStartlineAdvantagesByWindAvailableHeader();
+    String dashboardNoStartlineAdvantagesByWindAvailableMessage();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableHeader();
+    String dashboardNoStartlineAdvantagesByGeometryAvailableMessage();
+    String dashboardStartlineAdvantagesByWindHeader();
+    String dashboardStartlineAdvantageByGeometryHeader();
     String dashboardRankAtFirstMark();
     String dashboardTeam();
     String dashboardDistanceToLineInM();
@@ -1442,12 +1456,68 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
+    String registerCompetitorsOnRace();
+    String doYouWantToRegisterCompetitorsDirectlyOnTheRace();
+    String doYouWantToDisableCompetitorsRegistrationsOnTheRace();
+    String warningDirectCompetitorRegistration();
+    String warningRegattaCompetitorRegistration();
+    String competitorRegistrationsOnRaceDisabled();
+    String addMarkToRegatta();
     String selectALeaderboardGroup();
     @Override
     String pleaseSelect();
     String requiresValidRegatta();
     String couldNotObtainRace(String regattaLikeName, String raceColumnName, String fleetName, String technicalErrorMessage);
     String errorTryingToCreateEmbeddedMap(String message);
+    String topN(int n);
     String transparentBufferLineOnHover();
     String bufferLineStrokeWeight();
+    String profile();
+    String showOnlyCompetitorsOfLog();
+    String maneuverType();
+    String confirmLosingCompetitorEditsWhenTogglingLogBasedView();
+    String removalOfMarkDisabledMayBeUsedInRaces(String raceNames);
+    String pleaseCreateAtLeastOneMappingBy();
+    String createDefaultLeaderboardGroup();
+    String matcherType();
+    String matchingDevices();
+    String addDevice();
+    String createDeviceConfiguration();
+    String forWhichDeviceShouldConfigurationApply();
+    String create();
+    String thereIsAlreadyAConfigurationForThisDevice();
+    String enterDeviceIdentifierName();
+    String administration();
+    String pleaseSelectALeaderboardGroup();
+    String linkLeaderboardToLeaderboardGroupOfEvent();
+    String doYouWantToLinkLeaderboardToLeaderboardGroupOfEvent(String leaderboardName, String eventName);
+    String failedToLinkLeaderboardToLeaderboardGroup(String leaderboardName, String leaderboardGroupName);
+    String createDefaultRegatta();
+    String doYouWantToCreateADefaultRegatta();
+    String defaultLocale();
+    String defaultSailorsInfoLinkInfoText();
+    String qrSync();
+    String thereIsNoIdentifierSet();
+    String couldNotObtainAccessTokenForUser(String message);
+    String raceManagerDeviceName();
+    String serverURLInvalid();
+    String serverURLEmpty();
+    String marks();
+    String addNewFix();
+    String pleaseSelectOtherTimepoint();
+    String confirmMove();
+    String confirmNewFix();
+    String selectAFixPositionBy();
+    String pleaseSelectAMark();
+    String markFixes();
+    String distanceFromAveragePosition();
+    String useATouchOptimizedUI();
+    String deleteFix();
+    String theDeletionOfThisFix();
+    String loadingMarkFixes();
+    String fixSuccessfullyAdded();
+    String fixPositionSuccessfullyEdited();
+    String fixSuccessfullyRemoved();
+    String dragToChangePosition();
+    String moveFix();
 }

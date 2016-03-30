@@ -6,6 +6,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
 
     String name();
+    String company();
     String password();
     String passwordRepeat();
     String loggedIn(String username);
@@ -21,8 +22,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String tryingToVerifyUser();
     String fetchingUserInformation();
     String signedInAs(String name);
+    String signedInAsTitle();
     String close();
     String loading();
+    String user();
     String users();
     String addURLFilter();
     String ok();
@@ -60,6 +63,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editEmail();
     String errorUpdatingEmail(String message);
     String successfullyUpdatedEmail(String username, String email);
+    String errorUpdatingUserProperties(String message);
+    String successfullyUpdatedUserProperties(String username);
     String forgotPassword();
     String errorDuringPasswordReset(String message);
     String cannotResetPasswordWithoutValidatedEmail(String username);
@@ -83,4 +88,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorCommunicatingWithServer();
     String editProfile();
     String allPermissions();
+    String oldPassword();
+    String newPasswordPlaceholder();
+    String oldPasswordPlaceholder();
+    String passwordRepeatPlaceholder();
+    String resetPassword();
+    String youAreNotSignedIn();
+    String youDontHaveRequiredPermission();
+    String accountConfirmation();
+    String error();
+    String refresh();
 }

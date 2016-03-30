@@ -3,15 +3,17 @@
 <module>
 	<inherits name='com.sap.sailing.gwt.ui.CommonConfigs'/>
 
-	<inherits name="com.sap.sailing.gwt.dispatch.Dispatch" />
+	<inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
 	
 	<!-- Other module inherits -->
-	<inherits name='com.sap.sse.gwt.theme.SSEThemeLibrary'/>
+	
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
+	<inherits name="com.sap.sse.security.ui.Authentication" />
+	<inherits name="com.sap.sse.security.ui.UserProfile" />
 	
 	<!-- Highcharts API -->
 	<inherits name='com.sap.sse.gwt.Highcharts' />
@@ -24,9 +26,7 @@
   	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
   	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 
-	<extend-property name="locale" values="en,de,zh,ru" />
-    <set-property name="locale" value="en,de,zh,ru" />
-	<set-property-fallback name="locale" value="en"/>
+	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
 	
 	<source path='client' />
 	<source path='shared' />

@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.desktop.partials.seriesheader.SeriesHeader;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class TabletAndDesktopSeriesView extends Composite implements SeriesView<AbstractSeriesTabPlace, SeriesView.Presenter> {
@@ -30,7 +29,7 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @UiField StringMessages i18n;
     
     @UiField(provided = true)
-    TabPanel<SeriesView.Presenter> tabPanelUi;
+    TabPanel<AbstractSeriesTabPlace, SeriesView.Presenter, SeriesTabView<AbstractSeriesTabPlace>> tabPanelUi;
     
     @UiField(provided = true)
     SeriesHeader seriesHeader;
@@ -46,8 +45,6 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
         seriesHeader = new SeriesHeader(currentPresenter);
         
         initWidget(uiBinder.createAndBindUi(this));
-
-        initBreadCrumbs();
     }
 
     @Override
@@ -68,21 +65,6 @@ public class TabletAndDesktopSeriesView extends Composite implements SeriesView<
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, SeriesView.Presenter>) e.getSelectedActivity());
-    }
-    
-    private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
-        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        addBreadCrumbItem(currentPresenter.getSeriesDTO().getDisplayName(),  currentPresenter.getCurrentEventSeriesNavigation());
-    }
-
-    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
-        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
-            @Override
-            public void run() {
-                placeNavigation.goToPlace();
-            }
-        });
     }
     
     @Override

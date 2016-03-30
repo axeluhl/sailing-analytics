@@ -112,6 +112,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return startTime;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -552,10 +557,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public GPSFixStore getGPSFixStore() {
         return null;
-    }
-
-    @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
     }
 
     @Override

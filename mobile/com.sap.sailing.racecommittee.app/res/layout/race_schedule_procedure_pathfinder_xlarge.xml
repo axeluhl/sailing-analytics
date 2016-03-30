@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/path_finder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_vertical"
+        android:background="?attr/sap_gray_black_30">
+
+        <Button
+            android:id="@+id/set_path_finder"
+            style="?attr/buttonSolidNormal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="@dimen/unscheduled_confirm_button_margin"
+            android:enabled="false"
+            android:text="@string/gate_start_set_pathfinder" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/path_finder"
+        android:background="?attr/sap_gray_black_30">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/label_area"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/default_margin_twice"
+            android:orientation="horizontal">
+
+            <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:floatLabelPaddingLeft="@dimen/float_label_padding"
+                app:floatLabelTextAppearance="?attr/floatLabel">
+
+                <EditText
+                    android:id="@+id/pathfinder_nat"
+                    style="?attr/editText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:hint="@string/gate_start_nationality"
+                    android:inputType="textCapCharacters"
+                    android:textAppearance="?attr/textNormal"
+                    android:textColor="?attr/white" />
+            </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+
+            <com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:floatLabelPaddingLeft="@dimen/float_label_padding"
+                app:floatLabelTextAppearance="?attr/floatLabel">
+
+                <EditText
+                    android:id="@+id/pathfinder_num"
+                    style="?attr/editText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:hint="@string/gate_start_number"
+                    android:inputType="number"
+                    android:textAppearance="?attr/textNormal"
+                    android:textColor="?attr/white" />
+            </com.sap.sailing.racecommittee.app.ui.views.FloatLabelLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

@@ -4,15 +4,44 @@
 <div id="mainContent">
 	<h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
 	<div class="innerContent">
-		<h5 class="articleSubheadline">December 2015</h5>
+        <h5 class="articleSubheadline">February 2016</h5>
 
-		<ul class="bulletList">
+        <ul class="bulletList">
+            <li>The website now features a user registration and authentication interface.
+                User accounts are currently used to grant special permissions to administrators and moderators.
+                New user specific features (e.g. preferences) will be available in the next couple of months.
+            </li>
+            <li>The RaceBoard URL Parameter "canReplayDuringLiveRaces" has been removed.
+                This parameter was used to allow users to trigger autoplay for live races on non-live points in time.
+                The permission "CAN_REPLAY_DURING_LIVE_RACES" and role "moderator" now grant this functionality to users.
+            </li>
+            <li>Mark positions are no longer interpolated between fixes. Instead, when a mark's track is asked for the
+                mark's position, the last known position at or before the time point requested will be used. The
+                "jumping" of marks in the UI that may otherwise be caused by this is ameliorated by introducing
+                the same CSS animation for the marks that is already used for the boats.
+            </li>
+        </ul>
+        
+	<h5 class="articleSubheadline">January 2016</h2>
+            <ul class="bulletList">
+                <li>Show maneuver markers on the race board by default
+                    (tacks, jibes and penalty circles) with a smaller icon, which
+                    shows an info bubble when the marker is clicked. 
+                    The icon turns green if the direction change is to starboard
+                    and red if to port.
+                </li>
+            </ul>
+        
+        <h5 class="articleSubheadline">December 2015</h5>
+            <ul class="bulletList">
+	        <li>The advantage line is now animated and moves smoothly with the boats.
+                </li>
 		    <li>New line hover behavior in race map. When the mouse is moved onto a line, for example the start line, a transparent,
-	                wider line is activated behind it that acts as a buffer for the thin line, where the text displayed by the hover is still shown.
-	                This makes it easier to hover over the lines. These wider lines can be made semi transparent instead of transparent 
-	                by unticking the corresponding checkbox in the settings of the race map. Furthermore the stroke weight of the wider lines can be
-	                configured in the same settings dialog.
-                    </li>
+	            wider line is activated behind it that acts as a buffer for the thin line, where the text displayed by the hover is still shown.
+	            This makes it easier to hover over the lines. These wider lines can be made semi transparent instead of transparent 
+	            by unticking the corresponding checkbox in the settings of the race map. Furthermore the stroke weight of the wider lines can be
+	            configured in the same settings dialog.
+            </li>
 		    <li>The race viewer (RaceBoard.html) now intelligently chooses a layout that suits the screen size.
 		        When only little horizontal space is available, only the sail number and nationality but not the
 		        competitor's long name is displayed by default. When vertical space is scarce, competitor and wind

@@ -7,13 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,30 +21,29 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 
 /**
- * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
+ * Defines the basic Layout of tabbed pages with tabs, an optional header and a content area.
  * <p/>
  * Created by pgtaboada on 25.11.14.
  */
 
-public class TabPanel<PRESENTER> extends Composite {
+public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PLACE, PRESENTER>> extends Composite {
     private static final Logger logger = Logger.getLogger(TabPanel.class.getName());
     private static TabPanelUiBinder ourUiBinder = GWT.create(TabPanelUiBinder.class);
-    private final Map<Class<Place>, TabView<Place, PRESENTER>> knownTabs = new LinkedHashMap<>();
-    private final Map<Class<Place>, String> knownTabTitles = new HashMap<>();
+    private final Map<Class<PLACE>, TABVIEW> knownTabs = new LinkedHashMap<>();
+    private final Map<Class<PLACE>, String> knownTabTitles = new HashMap<>();
 
     @UiField
     SimplePanel additionalHeader;
     @UiField
     SimplePanel tabContentPanelUi;
+    
+    // Should be TabBar<Class<PLACE>> but UiBinder causes weired generics errors related to the @UiHandler that would have a nested generic too. 
     @UiField
-    TabBar tabBar;
-    @UiField BreadcrumbPane breadcrumbs;
-    @UiField DivElement breadcrumbsContainer;
+    TabBar<Class<?>> tabBar;
     @UiField FlowPanel tabExtension;
-    private TabView<Place, PRESENTER> currentTab;
+    private TABVIEW currentTab;
     
 
     private final PlaceHistoryMapper historyMapper;
@@ -57,17 +53,13 @@ public class TabPanel<PRESENTER> extends Composite {
         this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
-        
-        if(ExperimentalFeatures.USE_NAVIGATION_PATH_DISPLAY_ON_DESKTOP) {
-            breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
-        }
     }
 
-    public TabView<?, PRESENTER> getCurrentTab() {
+    public TABVIEW getCurrentTab() {
         return currentTab;
     }
     
-    @UiChild
+    @UiChild(limit = 1)
     public void addHeader(Widget widget) {
         additionalHeader.setWidget(widget);
     }
@@ -81,13 +73,12 @@ public class TabPanel<PRESENTER> extends Composite {
      *            The label for the tab.
      */
     @UiChild
-    public void addTabContent(final TabView<Place, PRESENTER> tab, String title) {
-
+    public void addTabContent(final TABVIEW tab, String title) {
         GWT.log("Adding TAB: " + title);
         
         // TODO: check if place class already known, reject...
         tab.setPresenter(presenter);
-        final Class<Place> classForActivation = tab.getPlaceClassForActivation();
+        final Class<PLACE> classForActivation = tab.getPlaceClassForActivation();
         knownTabs.put(classForActivation, tab);
         knownTabTitles.put(classForActivation, title);
 
@@ -104,7 +95,7 @@ public class TabPanel<PRESENTER> extends Composite {
      * @param event
      */
     @UiHandler("tabBar")
-    void onTabSelection(SelectionEvent<Class<Place>> event) {
+    void onTabSelection(SelectionEvent<Class<?>> event) {
 
         TabView<?, PRESENTER> selectedTabActivity = knownTabs.get(event.getSelectedItem());
         if (selectedTabActivity != null) {
@@ -123,13 +114,13 @@ public class TabPanel<PRESENTER> extends Composite {
      * @param placeToGo
      *            the given place.
      */
-    public void activatePlace(Place placeToGo) {
+    public void activatePlace(PLACE placeToGo) {
         if (knownTabs.containsKey(placeToGo.getClass())) {
-            final TabView<Place, PRESENTER> newTab = knownTabs.get(placeToGo.getClass());
+            final TABVIEW newTab = knownTabs.get(placeToGo.getClass());
             
             if (newTab.getState() == State.NOT_AVAILABLE_REDIRECT
                     || newTab.getState() == State.NOT_AVAILABLE_SHOW_NEXT_AVAILABLE) {
-                for(TabView<Place, PRESENTER> tab : knownTabs.values()) {
+                for(TabView<PLACE, PRESENTER> tab : knownTabs.values()) {
                     if(tab.getState() == State.VISIBLE) {
                         // TODO is this redirect wanted? Just silently select another tab?
                         if (currentTab != null) {
@@ -152,7 +143,9 @@ public class TabPanel<PRESENTER> extends Composite {
                 // TODO better error handling
                 logger.log(Level.SEVERE, "Error while initializing Tab for place " + placeToGo.getClass().getName(), e);
             }
-            tabBar.select(placeToGo);
+            @SuppressWarnings("unchecked")
+            final Class<PLACE> placeClass = (Class<PLACE>) placeToGo.getClass();
+            tabBar.select(placeClass);
 
             currentTab = newTab;
 
@@ -169,19 +162,11 @@ public class TabPanel<PRESENTER> extends Composite {
         tabContentPanelUi.setWidget(widget);
     }
 
-    public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
-    }
-    
-    public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
-    }
-
     public HandlerRegistration addTabPanelPlaceSelectionEventHandler(TabPanelPlaceSelectionEvent.Handler handler) {
         return addHandler(handler, TabPanelPlaceSelectionEvent.TYPE);
     }
 
-    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?>> {
+    interface TabPanelUiBinder extends UiBinder<FlowPanel, TabPanel<?, ?, ?>> {
     }
 
     public String getCurrentTabTitle() {

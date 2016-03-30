@@ -101,6 +101,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return null;
     }
@@ -204,7 +209,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public boolean recordWind(Wind wind, WindSource windSource) {
+    public boolean recordWind(Wind wind, WindSource windSource, boolean applyFilter) {
         if (windSource.getType() == WindSourceType.EXPEDITION) {
             windTrack.add(wind);
             return true;
@@ -486,6 +491,27 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public Iterable<? extends RaceColumn> getRaceColumns() {
                         return null;
+                    }
+
+                    @Override
+                    public Iterable<Competitor> getCompetitorsRegisteredInRegattaLog() {
+                        return null;
+                    }
+
+                    @Override
+                    public void registerCompetitor(Competitor competitor) {   
+                    }
+
+                    @Override
+                    public void registerCompetitors(Iterable<Competitor> competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitor(Competitor competitor) {
+                    }
+
+                    @Override
+                    public void deregisterCompetitors(Iterable<Competitor> competitor) {
                     }
                 };
             }
@@ -906,10 +932,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
-    }
-
-    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 
@@ -1007,5 +1029,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateMarkPassingsAfterRaceLogChanges() {
     }
 }

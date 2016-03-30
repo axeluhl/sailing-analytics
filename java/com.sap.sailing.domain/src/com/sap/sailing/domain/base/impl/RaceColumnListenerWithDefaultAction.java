@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -91,6 +92,11 @@ public interface RaceColumnListenerWithDefaultAction extends RaceColumnListener 
 
     @Override
     default void raceLogEventAdded(RaceColumn raceColumn, RaceLogIdentifier raceLogIdentifier, RaceLogEvent event) {
+        defaultAction(); 
+    }
+
+    @Override
+    default void regattaLogEventAdded(RegattaLogEvent event) {
         defaultAction(); 
     }
 

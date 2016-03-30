@@ -57,6 +57,14 @@ public abstract class AbstractJaxRsApiTest {
         return new String(entity, "UTF-8");
     }
 
+    protected TimePoint parseTimepointFromJsonNumber(Long timePointAsJsonNumber) throws ParseException {
+        TimePoint result = null;
+        if(timePointAsJsonNumber != null) {
+            result = new MillisecondsTimePoint(timePointAsJsonNumber);
+        }
+        return result;
+    }
+
     protected TimePoint parseTimepointFromJsonString(String timePointAsJsonString) throws ParseException {
         TimePoint result = null;
         if(timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
@@ -71,7 +79,7 @@ public abstract class AbstractJaxRsApiTest {
         BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(123, competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(new Integer(i), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),

@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -135,20 +136,17 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Leaderboard getLeaderboardByName(String name);
 
     /**
-     * Looks at the mark tracks in the tracked races attached to the <code>leaderboard</code>. If it doesn't find a
+     * Looks at the mark tracks in the tracked races attached to the <code>leaderboard</code> and tries to find a
      * track for the <code>mark</code> requested there which has fixes before and after <code>timePoint</code> (to
-     * ensure that no track cropping has taken place, removing the fixes for the interesting time period), looks in the
-     * leaderboard's regatta log and the specific <code>raceLog</code> (if provided) or all race logs attached to the
-     * leaderboard (if not provided) for device mappings for the mark and tries to load fixes from the
-     * {@link GPSFixStore}. The latter is only necessary if the mark isn't found in any tracked race with fixes
-     * surrounding <code>timePoint</code> because should there be a tracked race in the leaderboard that has the mark
-     * then it will also have received the fixes from the {@link GPSFixStore} through the regatta log mapping.
+     * ensure that no track cropping has taken place, removing the fixes for the interesting time period). Note, that
+     * no lookup is performed in the {@link RegattaLog} of the {@code leaderboard}, so mark pings that have not yet
+     * been applied to a {@link TrackedRace} will not be considered by this method.
      * <p>
      * 
      * @return the position obtained by interpolation but never extrapolation from the track identified as described
      *         above
      */
-    Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint, RaceLog raceLog);
+    Position getMarkPosition(Mark mark, LeaderboardThatHasRegattaLike leaderboard, TimePoint timePoint);
 
     /**
      * Stops tracking all races of the regatta specified. This will also stop tracking wind for all races of this regatta.
@@ -372,7 +370,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, 
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
 
     /**
@@ -468,7 +466,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     ConcurrentHashMap<String, Regatta> getPersistentRegattasForRaceIDs();
     
     Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, Iterable<ImageDescriptor> images,
+            boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images,
             Iterable<VideoDescriptor> videos);
 
     void setRegattaForRace(Regatta regatta, String raceIdAsString);

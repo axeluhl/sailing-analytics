@@ -26,7 +26,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private String description;
     private List<? extends LeaderboardGroupBaseDTO> leaderboardGroups;
     private String officialWebsiteURL;
-    private String sailorsInfoWebsiteURL;
+    private Map<String, String> sailorsInfoWebsiteURLs;
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
 
@@ -56,12 +56,14 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
     public EventBaseDTO(List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         this.leaderboardGroups = leaderboardGroups;
         this.imageSizes = new HashMap<String, ImageSize>();
+        sailorsInfoWebsiteURLs = new HashMap<>();
     }
 
     public EventBaseDTO(String name, List<? extends LeaderboardGroupBaseDTO> leaderboardGroups) {
         super(name);
         this.leaderboardGroups = leaderboardGroups;
         this.imageSizes = new HashMap<String, ImageSize>();
+        sailorsInfoWebsiteURLs = new HashMap<>();
     }
 
     public ImageDTO getLogoImage() {
@@ -99,12 +101,27 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable {
         this.officialWebsiteURL = officialWebsiteURL;
     }
 
-    public String getSailorsInfoWebsiteURL() {
-        return sailorsInfoWebsiteURL;
+    public Map<String, String> getSailorsInfoWebsiteURLs() {
+        return sailorsInfoWebsiteURLs;
+    }
+    
+    public String getSailorsInfoWebsiteURL(String locale) {
+        return sailorsInfoWebsiteURLs.get(locale);
+    }
+    
+    public void setSailorsInfoWebsiteURL(String locale, String url) {
+        if(url == null || url.isEmpty()) {
+            sailorsInfoWebsiteURLs.remove(locale);
+        } else {
+            sailorsInfoWebsiteURLs.put(locale, url);
+        }
     }
 
-    public void setSailorsInfoWebsiteURL(String sailorsInfoWebsiteURL) {
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
+    public void setSailorsInfoWebsiteURLs(Map<String, String> sailorsInfoWebsiteURLs) {
+        this.sailorsInfoWebsiteURLs.clear();
+        if(sailorsInfoWebsiteURLs != null) {
+            this.sailorsInfoWebsiteURLs.putAll(sailorsInfoWebsiteURLs);
+        }
     }
 
     /**

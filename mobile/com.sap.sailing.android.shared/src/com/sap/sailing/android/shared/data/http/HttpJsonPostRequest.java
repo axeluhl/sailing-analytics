@@ -14,14 +14,20 @@ public class HttpJsonPostRequest extends HttpRequest {
     public final static String ContentType = "application/json;charset=UTF-8";
 
     private String requestBody;
+    private String accessToken;
 
     public HttpJsonPostRequest(URL requestUrl, Context context) {
-        this(requestUrl, null, context);
+        this(requestUrl, null, context, null);
     }
-    
+
     public HttpJsonPostRequest(URL requestUrl, String body, Context context) {
+        this(requestUrl, body, context, null);
+    }
+
+    public HttpJsonPostRequest(URL requestUrl, String body, Context context, String accessToken) {
         super(requestUrl, context);
         this.requestBody = body;
+        this.accessToken = accessToken;
     }
 
     @Override
@@ -32,11 +38,15 @@ public class HttpJsonPostRequest extends HttpRequest {
 
         connection.setRequestProperty("Content-Type", ContentType);
         connection.setRequestProperty("Accept", ContentType);
-
+        if (accessToken != null) {
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+        }
         OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream());
-        sendBody(outputStream);
-        outputStream.close();
-
+        try {
+            sendBody(outputStream);
+        } finally {
+            safeClose(outputStream);
+        }
         return new BufferedInputStream(connection.getInputStream());
     }
 

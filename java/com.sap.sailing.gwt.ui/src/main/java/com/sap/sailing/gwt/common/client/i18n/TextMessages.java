@@ -139,7 +139,6 @@ public interface TextMessages extends Messages {
     String latestRaceResultsHeadline();
     String latestRaceResultsIsNew();
     String latestRaceResultsIsUpdated();
-    String latestRaceResultsRaceCountLabel();
     String latestRaceResultsRaceCountUnit();
     String latestRaceResultsRefresh();
     String leaderboardQuickAccessLabel();
@@ -229,4 +228,15 @@ public interface TextMessages extends Messages {
 
     String strategySimulatorReadMore();
 
+    String impressum();
+
+    String playstoreCampaign();
+
+    String playstoreRacecommitteeApp();
+
+    String playstoreRacecommitteeBadge();
+
+    String appstoreStgTrainingstagebuch();
+
+    String appstoreBadgeSuffix();
 }

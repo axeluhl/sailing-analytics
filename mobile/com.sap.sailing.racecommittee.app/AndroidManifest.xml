@@ -14,9 +14,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <!--<uses-permission android:name="android.permission.CAMERA"/>-->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!--<uses-permission android:name="android.permission.RECORD_AUDIO"/>-->
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
@@ -33,7 +33,7 @@
         android:name=".RaceApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme.Light">
@@ -52,21 +52,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.RacingActivity"
-            android:screenOrientation="landscape"/>
-        <activity
-            android:name=".ui.activities.PreferenceActivity"
-            android:screenOrientation="landscape">
+        <activity android:name=".ui.activities.RacingActivity"/>
+        <activity android:name=".ui.activities.PasswordActivity"/>
+        <activity android:name=".ui.activities.PreferenceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activities.SystemInformationActivity"
-            android:screenOrientation="landscape"/>
+        <activity android:name=".ui.activities.SystemInformationActivity"/>
 
         <service
             android:name=".services.RaceStateService"

@@ -1,11 +1,14 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -92,24 +95,45 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
     private void updateDateTimeLabelAndTimeBoxFromDate(final TimePoint timePoint, final Label label, final BetterDateTimeBox dateTimeBox) {
         if (timePoint == null) {
             label.setText(stringMessages.notAvailable());
+            dateTimeBox.setValue(null);
         } else {
-            label.setText(dateTimeFormat.format(timePoint == null ? null : timePoint.asDate()));
-            dateTimeBox.setValue(timePoint==null ? null : timePoint.asDate());
+            label.setText(dateTimeFormat.format(timePoint.asDate()));
+            dateTimeBox.setValue(timePoint.asDate());
         }
     }
 
     private Widget createInputPanel() {
-        Grid content = new Grid(4, 2);
+        Grid content = new Grid(4, 3);
+        
+        Button startNow = new Button(stringMessages.now());
+        startNow.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                startTimeBox.setValue(new Date());
+            }
+        });
+        Button endNow = new Button(stringMessages.now());
+        endNow.addClickHandler(new ClickHandler() {
+            
+            @Override
+            public void onClick(ClickEvent event) {
+                endTimeBox.setValue(new Date());
+            }
+        });
+
         startTimeBox = createDateTimeBox(null);
         startTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(0, 0, createLabel(stringMessages.startOfTracking()));
         content.setWidget(0, 1, startTimeBox);
-
+        content.setWidget(0, 2, startNow);
+        
         endTimeBox = createDateTimeBox(null);
         endTimeBox.setFormat("dd/mm/yyyy hh:ii:ss");
         content.setWidget(1, 0, createLabel(stringMessages.endOfTracking()));
         content.setWidget(1, 1, endTimeBox);
-
+        content.setWidget(1, 2, endNow);
+        
         authorNameBox = createTextBox("Shore");
         content.setWidget(2, 0, createLabel(stringMessages.authorName()));
         content.setWidget(2, 1, authorNameBox);
@@ -142,13 +166,16 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
             }
         });
         currentPanel.add(refreshButton);
-
         current.add(currentPanel);
         return current;
     }
 
     @Override
     protected RaceLogSetTrackingTimesDTO getResult() {
+        return generateRaceLogSetTrackingTimesDTOWith(startTimeBox.getValue(), endTimeBox.getValue());
+    }
+    
+    private RaceLogSetTrackingTimesDTO generateRaceLogSetTrackingTimesDTOWith(Date startTime, Date endTime) {
         RaceLogSetTrackingTimesDTO dto = new RaceLogSetTrackingTimesDTO();
         dto.leaderboardName = leaderboardName;
         dto.raceColumnName = raceColumnName;
@@ -156,8 +183,8 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
         dto.authorName = authorNameBox.getValue();
         dto.authorPriority = authorPriorityBox.getValue();
         dto.logicalTimePoint = MillisecondsTimePoint.now();
-        dto.newStartOfTracking = startTimeBox.getValue() == null ? null : new MillisecondsTimePoint(startTimeBox.getValue());
-        dto.newEndOfTracking = endTimeBox.getValue() == null ? null : new MillisecondsTimePoint(endTimeBox.getValue());
+        dto.newStartOfTracking = startTime == null ? null : new MillisecondsTimePoint(startTime);
+        dto.newEndOfTracking = endTime == null ? null : new MillisecondsTimePoint(endTime);
         dto.currentStartOfTracking = currentStart;
         dto.currentEndOfTracking = currentEnd;
         return dto;

@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
@@ -23,8 +22,10 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.SeriesView.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class SeriesHeader extends Composite {
     private static SeriesHeaderUiBinder uiBinder = GWT.create(SeriesHeaderUiBinder.class);
@@ -70,7 +71,8 @@ public class SeriesHeader extends Composite {
     }
 
     private void initFields() {
-        String logoUrl = series.getLogoImage() != null ? series.getLogoImage().getSourceRef() : SeriesHeaderResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
+        String logoUrl = series.getLogoImage() != null ? series.getLogoImage().getSourceRef() :
+                SharedHomeResources.INSTANCE.defaultEventLogoImage().getSafeUri().asString();
         eventLogo.getStyle().setBackgroundImage("url(" + logoUrl + ")");
         eventLogo.setTitle(series.getDisplayName());
         eventName.setInnerText(series.getDisplayName());

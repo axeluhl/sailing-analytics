@@ -26,6 +26,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                         userManagementService
                                 .createSimpleUser(usernameEmailPassword.getUsername(),
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
+                                        /* fullName */ null, /* company */ null,
                                         EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {
@@ -45,11 +46,5 @@ public class CreateUserDialog extends AbstractUserDialog {
                     public void cancel() {
                     }
                 });
-    }
-
-    @Override
-    public void show() {
-        super.show();
-        getNameBox().setFocus(true);
     }
 }

@@ -1,7 +1,5 @@
 package com.sap.sailing.racecommittee.app;
 
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.SetStartTimeRaceFragment;
-
 public class AppConstants {
 
     //TODO replace it later with BuildConfig.APPLICATION_ID (Eclipse didn't know it)
@@ -33,8 +31,6 @@ public class AppConstants {
     // Login activity
     public final static String EventIdTag = "EventId";
 
-    public static final String RESET_TIME_FRAGMENT_IS_RESET = SetStartTimeRaceFragment.class.getName() + ".isReset";
-
     public static final int DefaultStartTimeMinuteOffset = 10;
 
     // Inner process events
@@ -42,7 +38,9 @@ public class AppConstants {
 
     public final static String INTENT_ACTION_EXTRA = "extra";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
-    public final static String INTENT_ACTION_TOGGLE_MODE = "mode";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
+    public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING = "more_timing";
     public final static String INTENT_ACTION_TOGGLE_COURSE = "course";
     public final static String INTENT_ACTION_TOGGLE_WIND = "wind";
     public final static String INTENT_ACTION_TOGGLE_TIME = "time";
@@ -63,6 +61,11 @@ public class AppConstants {
     public final static String INTENT_ACTION_TIME_HIDE = INTENT_ACTION_TIME + ".hide";
     public final static String INTENT_ACTION_TIME_SHOW = INTENT_ACTION_TIME + ".show";
 
+    public final static String INTENT_ACTION_CHECK_LOGIN = "show_empty_screen";
+    public final static String INTENT_ACTION_SHOW_ONBOARDING = "show_onboarding";
+    public final static String INTENT_ACTION_SHOW_LOGIN = "show_login";
+    public final static String INTENT_ACTION_VALID_DATA = "valid_data";
+
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
 
@@ -70,6 +73,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_SHOW_SUMMARY_CONTENT = PACKAGE_NAME + ".action.show.summary";
 
     public final static String INTENT_ACTION_SHOW_PROTEST = PACKAGE_NAME + ".action.show.protest";
+    public final static String INTENT_ACTION_REMOVE_PROTEST = PACKAGE_NAME + ".action.remove.protest";
 
     public final static String INTENT_ACTION_IS_TRACKING = PACKAGE_NAME + "action.is.tracking";
     public final static String INTENT_ACTION_IS_TRACKING_EXTRA = PACKAGE_NAME + "action.is.tracking.extra";

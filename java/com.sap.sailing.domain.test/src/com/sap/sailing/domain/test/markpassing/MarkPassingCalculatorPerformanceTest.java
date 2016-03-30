@@ -45,7 +45,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     @AfterClass
     public static void createXMLFile() throws IOException {
-        MeasurementXMLFile performanceReport = new MeasurementXMLFile(MarkPassingCalculatorPerformanceTest.class);
+        final MeasurementXMLFile performanceReport = new MeasurementXMLFile(MarkPassingCalculatorPerformanceTest.class);
         for (String key : result.keySet()) {
             MeasurementCase performanceReportCase = performanceReport.addCase(key);
             performanceReportCase.addMeasurement(new Measurement(key, result.get(key)));
@@ -72,7 +72,7 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
 
     @Test
     public void testChooser() {
-        long time = timeToAddCandidatesToChooser(500, 1, 25);
+        final long time = timeToAddCandidatesToChooser(500, 1, 25);
         System.out.println(time);
         result.put("ChooserPerformance", time);
         assertTrue(time < 5000);
@@ -96,16 +96,16 @@ public class MarkPassingCalculatorPerformanceTest extends AbstractMockedRaceMark
     }
 
     private CandidateImpl randomCan() {
-        int id = rnd.nextInt(3);
+        final int id = rnd.nextInt(3);
         return new CandidateImpl(id + 1, new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000)),
                 0.5 + 0.5 * rnd.nextDouble(),  Util.get(race.getRace().getCourse().getWaypoints(), id));
     }
 
     private GPSFixMoving rndFix() {
-        DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001,
+        final DegreePosition position = new DegreePosition(0.001 - rnd.nextDouble() * 0.001,
                 0.0002 - rnd.nextDouble() * 0.0004);
-        TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
-        SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
+        final TimePoint p = new MillisecondsTimePoint((long) (rnd.nextDouble() * 200000));
+        final SpeedWithBearing speed = new KnotSpeedWithBearingImpl(rnd.nextInt(11), new DegreeBearingImpl(rnd.nextInt(360)));
         return new GPSFixMovingImpl(position, p, speed);
     }
 }

@@ -4,6 +4,8 @@ public class FieldNames {
     
     public static enum User {
         NAME,
+        FULLNAME,
+        COMPANY,
         EMAIL,
         ACCOUNTS,
         ROLES, PERMISSIONS,

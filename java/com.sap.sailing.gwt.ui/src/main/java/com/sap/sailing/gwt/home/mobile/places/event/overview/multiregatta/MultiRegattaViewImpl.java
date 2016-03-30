@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatus;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
@@ -38,9 +37,7 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
         RegattaListPresenter<RegattasAndLiveRacesDTO> regattaListPresenter = 
                 new RegattaListPresenter<RegattasAndLiveRacesDTO>(regattaStatusUi);
         RegattaByBootCategoryFilter bootCategoryFilter = new RegattaByBootCategoryFilter();
-        if (ExperimentalFeatures.SHOW_BOAT_CATEGORY_FILTER_ON_MOBILE) {
-            regattaStatusUi.setFilterSectionWidget(bootCategoryFilter);
-        }
+        regattaStatusUi.setFilterSectionWidget(bootCategoryFilter);
         MultiRegattaViewImplFilterPresenter filterPresenter = 
                 new MultiRegattaViewImplFilterPresenter(bootCategoryFilter, regattaListPresenter);
         container.add(regattaStatusUi);

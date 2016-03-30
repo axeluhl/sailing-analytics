@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
@@ -22,10 +21,12 @@ import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
+import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class TabletAndDesktopRegattaEventView extends Composite implements EventRegattaView {
     
@@ -38,7 +39,7 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
 
     @UiField StringMessages i18n;
 
-    @UiField(provided = true) TabPanel<EventRegattaView.Presenter> tabPanelUi;
+    @UiField(provided = true) TabPanel<AbstractEventRegattaPlace, EventRegattaView.Presenter, RegattaTabView<AbstractEventRegattaPlace>> tabPanelUi;
     @UiField(provided = true) EventHeader eventHeader;
     
     private Presenter currentPresenter;
@@ -52,7 +53,6 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         eventHeader = new EventHeader(currentPresenter);
         initWidget(uiBinder.createAndBindUi(this));
-        initBreadCrumbs();
         
         if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
             final PlaceNavigation<SeriesDefaultPlace> currentEventSeriesNavigation = currentPresenter.getCurrentEventSeriesNavigation();
@@ -73,6 +73,11 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
             style.setFontSize(16, Unit.PX);
             style.setPadding(0.75, Unit.EM);
             tabPanelUi.addTabExtension(seriesAnchor);
+        } else {
+            String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
+            if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
+                tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
+            }
         }
     }
 
@@ -94,28 +99,6 @@ public class TabletAndDesktopRegattaEventView extends Composite implements Event
     @UiHandler("tabPanelUi")
     public void onTabSelection(TabPanelPlaceSelectionEvent e) {
         currentPresenter.handleTabPlaceSelection((TabView<?, EventRegattaView.Presenter>) e.getSelectedActivity());
-    }
-
-    private void initBreadCrumbs() {
-        addBreadCrumbItem(i18n.home(), currentPresenter.getHomeNavigation());
-        addBreadCrumbItem(i18n.events(), currentPresenter.getEventsNavigation());
-        if(currentPresenter.getEventDTO().getType() == EventType.SERIES_EVENT) {
-            addBreadCrumbItem(currentPresenter.getEventDTO().getSeriesName(),  currentPresenter.getCurrentEventSeriesNavigation());
-        }
-        addBreadCrumbItem(currentPresenter.getEventDTO().getLocationOrDisplayName(), currentPresenter.getCurrentEventNavigation());
-        
-        if(currentPresenter.showRegattaMetadata()) {
-            addBreadCrumbItem(currentPresenter.getRegattaMetadata().getDisplayName(), currentPresenter.getCurrentRegattaOverviewNavigation());
-        }
-    }
-
-    private void addBreadCrumbItem(String label, final PlaceNavigation<?> placeNavigation) {
-        tabPanelUi.addBreadcrumbItem(label, placeNavigation.getTargetUrl(), new Runnable() {
-            @Override
-            public void run() {
-                placeNavigation.goToPlace();
-            }
-        });
     }
 
     @Override

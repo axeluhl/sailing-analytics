@@ -1,0 +1,29 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n_sec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    <ui:with field="res" type="com.sap.sse.gwt.common.CommonSharedResources" />
+    <ui:with field="local_res" type="com.sap.sse.security.ui.authentication.UserManagementResources" />
+    <g:HTMLPanel>
+        <div class="{local_res.css.form_errors}" ui:field="formErrorUi"></div>
+        <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.username}" /></label>
+        <g:TextBox addStyleNames="{local_res.css.form_input}" ui:field="loginNameUi"/>
+        <label class="{local_res.css.form_label}"><ui:text from="{i18n_sec.password}" /></label>
+        <g:PasswordTextBox addStyleNames="{local_res.css.form_input}" ui:field="passwordUi"/>
+        <g:Anchor addStyleNames="{local_res.css.form_link}" ui:field="forgotPasswordUi"><ui:text from="{i18n_sec.forgotPassword}" /></g:Anchor>
+        <div class="{local_res.css.form_actions}">
+            <g:Anchor styleName="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimaryoutlined}" 
+                    ui:field="createAccountUi"><ui:text from="{i18n_sec.signUp}" /></g:Anchor>
+            <g:Anchor styleName="{local_res.css.form_action_button} {res.mainCss.button} {res.mainCss.buttonprimary} {res.mainCss.buttonarrowrightwhite}" 
+                    ui:field="signInUi"><ui:text from="{i18n_sec.signIn}" /></g:Anchor>
+        </div>
+        <div ui:field="socialLoginUi">
+            <div class="{local_res.css.form_social_seperator}">
+                <div class="{local_res.css.form_social_seperator_text}">TODO or</div>
+            </div>
+            <g:Anchor styleName="{local_res.css.form_social_button} {local_res.css.form_social_button_facebook}"
+                    ui:field="loginFacebookUi">TODO Login with Facebook</g:Anchor>
+            <g:Anchor styleName="{local_res.css.form_social_button} {local_res.css.form_social_button_google}"
+                    ui:field="loginGoogleUi">TODO Login with Google</g:Anchor>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

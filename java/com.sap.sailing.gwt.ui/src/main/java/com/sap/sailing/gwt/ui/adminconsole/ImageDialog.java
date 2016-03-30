@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -109,24 +110,30 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                busyIndicator.setBusy(true);
                 String imageUrlAsString = event.getValue();
-                ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString, new AsyncCallback<Util.Pair<Integer,Integer>>() {
-                    @Override
-                    public void onSuccess(Pair<Integer, Integer> imageSize) {
-                        busyIndicator.setBusy(false);
-                        if (imageSize != null) {
-                            widthInPxBox.setValue(imageSize.getA());
-                            heightInPxBox.setValue(imageSize.getB());
-                        }
-                        validate();
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        busyIndicator.setBusy(false);
-                    }
-                });
+                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
+                    widthInPxBox.setText("");
+                    heightInPxBox.setText("");
+                } else {
+                    busyIndicator.setBusy(true);
+                    ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString,
+                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
+                                @Override
+                                public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                    busyIndicator.setBusy(false);
+                                    if (imageSize != null) {
+                                        widthInPxBox.setValue(imageSize.getA());
+                                        heightInPxBox.setValue(imageSize.getB());
+                                    }
+                                    validate();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyIndicator.setBusy(false);
+                                }
+                            });
+                }
                 validate();
             }
         });
@@ -193,8 +200,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        imageURLAndUploadComposite.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return imageURLAndUploadComposite.getInitialFocusWidget();
     }
 }

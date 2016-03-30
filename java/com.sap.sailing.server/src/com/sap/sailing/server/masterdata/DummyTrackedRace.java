@@ -102,6 +102,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -527,10 +532,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public GPSFixStore getGPSFixStore() {
         return null;
-    }
-
-    @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
     }
 
     @Override
