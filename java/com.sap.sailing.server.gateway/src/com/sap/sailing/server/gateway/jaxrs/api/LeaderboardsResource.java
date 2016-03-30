@@ -539,7 +539,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    Util.addAll(raceColumn.getCourseMarks(), marks);
+                    Util.addAll(raceColumn.getAvailableMarks(), marks);
                 }
             }
         } else {
