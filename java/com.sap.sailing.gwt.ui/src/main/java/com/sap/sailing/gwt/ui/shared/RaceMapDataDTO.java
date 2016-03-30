@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 
 public class RaceMapDataDTO implements IsSerializable {
-    public Map<CompetitorDTO, List<GPSFixDTO>> boatPositions;
+    public Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions;
     public CoursePositionsDTO coursePositions;
     public List<SidelineDTO> courseSidelines;
     public LinkedHashMap<CompetitorDTO, QuickRankDTO> quickRanks;

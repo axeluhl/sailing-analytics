@@ -149,3 +149,7 @@
 .cellTableTotalColumn {
 	background-color: #e0e0e0 !important;
 }
+
+.cellTableSailIdColumn img {
+	max-width: none;
+}
