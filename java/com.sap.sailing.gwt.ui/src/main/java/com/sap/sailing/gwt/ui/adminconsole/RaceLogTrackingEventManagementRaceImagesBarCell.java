@@ -57,14 +57,8 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         if (startEndTrackingTime == null){
             result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
         } else {
-            if (startEndTrackingTime.getA() != null){
-                if (startEndTrackingTime.getB() != null){
-                    result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
-                } else {
-                    result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
-                }
-            } else {
-                result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+            if (startEndTrackingTime.getB() == null){
+                result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
         }
         
