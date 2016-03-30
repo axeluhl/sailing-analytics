@@ -35,6 +35,7 @@ import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
 public class CheckinManager {
 
@@ -167,7 +168,7 @@ public class CheckinManager {
                                 mark.setId(jsonMark.getString("id"));
                                 if (jsonMark.has("position")) {
                                     if (!jsonMark.get("position").equals(null)) {
-                                        JSONObject positionJson = jsonMark.getJSONObject("position");
+                                        JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
                                         MarkPingInfo ping = new MarkPingInfo();
                                         ping.setLatitude(positionJson.getString("latitude"));
                                         ping.setLongitude(positionJson.getString("longitude"));

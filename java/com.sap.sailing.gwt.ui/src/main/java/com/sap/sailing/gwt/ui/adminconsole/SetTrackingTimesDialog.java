@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
@@ -50,7 +49,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     private BetterDateTimeBox startTimeBox;
     private BetterDateTimeBox endTimeBox;
-    private ToggleButton startStopButton;
     private TextBox authorNameBox;
     private com.sap.sse.gwt.client.controls.IntegerBox authorPriorityBox;
 
@@ -90,13 +88,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
                         currentEnd = result == null ? null : result.getB();
                         updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
                         updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
-                        if (currentStart == null){
-                            setupStartStopButton(false);
-                        } else if (currentStart != null && currentEnd == null){
-                            setupStartStopButton(true);
-                        } else {
-                            setupStartStopButton(false);
-                        }
                     }
                 });
     }
@@ -109,10 +100,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
             label.setText(dateTimeFormat.format(timePoint.asDate()));
             dateTimeBox.setValue(timePoint.asDate());
         }
-    }
-
-    private void setupStartStopButton(boolean startTimeSet) {
-        startStopButton.setDown(startTimeSet);
     }
 
     private Widget createInputPanel() {
@@ -179,37 +166,6 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
             }
         });
         currentPanel.add(refreshButton);
-        
-        Image startImage = new Image(resources.startRaceLogTracking());
-        Image stopImage = new Image(resources.stopRaceLogTracking());
-        
-        startStopButton = new ToggleButton(startImage, stopImage, new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                RaceLogSetTrackingTimesDTO trackingTimesDTO;
-                if (startStopButton.isDown()){
-                    trackingTimesDTO = generateRaceLogSetTrackingTimesDTOWith(new Date(), null);
-                } else {
-                    trackingTimesDTO = generateRaceLogSetTrackingTimesDTOWith(startTimeBox.getValue(), new Date());
-                }
-                
-                service.setTrackingTimes(trackingTimesDTO, new AsyncCallback<Void>(){
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
-                    }
-
-                    @Override
-                    public void onSuccess(Void result) {
-                        refreshTimes();
-                        getCancelButton().click();
-                    }
-                });
-            }
-        });
-        
-        currentPanel.add(startStopButton);
-
         current.add(currentPanel);
         return current;
     }
