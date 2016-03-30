@@ -1710,6 +1710,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final RegattaLogRegisterCompetitorEvent result;
         if (comp == null) {
             result = null;
+            logger.log(Level.SEVERE, "Couldn't resolve competitor with ID "+dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name())+
+                    " from registration event with ID "+id+". Skipping this competitor registration.");
         } else {
             result = new RegattaLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, comp);
         }
