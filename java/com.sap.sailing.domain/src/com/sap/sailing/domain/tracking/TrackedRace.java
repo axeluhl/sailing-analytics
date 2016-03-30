@@ -101,6 +101,14 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * If no start time can be determined this way, <code>null</code> is returned.
      */
     TimePoint getStartOfRace();
+    
+    /**
+     * Like {@link #getStartOfRace()}, but ignoring any inference from start mark passings in case {@code inferred} is
+     * {@code false}. In this case, if no official start time was set, e.g., in the {@link RaceLog} or explicitly using
+     * {@link #getStartTimeReceived()}, {@code null} will be returned by this method even if start mark passings are
+     * present.
+     */
+    TimePoint getStartOfRace(boolean inferred);
 
     /**
      * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We

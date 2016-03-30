@@ -14,6 +14,7 @@ package com.sap.sailing.domain.common;
 public enum PassingInstruction {
     None(1, 2),
     Port(1),
+    Single_Unknown(1),
     Starboard(1),
     Gate(2),
     Line(2),

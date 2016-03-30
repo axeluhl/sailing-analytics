@@ -19,6 +19,11 @@ public class MillisecondsDurationImpl implements Duration {
     }
 
     @Override
+    public Duration abs() {
+        return millis >= 0 ? this : new MillisecondsDurationImpl(-millis);
+    }
+
+    @Override
     public double asSeconds() {
         return ((double) asMillis()) / 1000.;
     }

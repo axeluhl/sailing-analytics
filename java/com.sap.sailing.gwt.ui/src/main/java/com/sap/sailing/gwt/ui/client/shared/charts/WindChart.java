@@ -92,7 +92,7 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
     public WindChart(SailingServiceAsync sailingService, RegattaAndRaceIdentifier selectedRaceIdentifier, Timer timer,
             TimeRangeWithZoomProvider timeRangeWithZoomProvider, WindChartSettings settings, final StringMessages stringMessages, 
             AsyncActionsExecutor asyncActionsExecutor, ErrorReporter errorReporter, boolean compactChart) {
-        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.settings = settings;
         windSourceDirectionSeries = new HashMap<WindSource, Series>();
         windSourceSpeedSeries = new HashMap<WindSource, Series>();
@@ -188,7 +188,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
                  .getXAxis().setAxisTitle(null);
         }
         setSize("100%", "100%");
-        this.selectedRaceIdentifier = selectedRaceIdentifier;
         if (selectedRaceIdentifier != null) {
             clearCacheAndReload();
             if (isVisible()) {
@@ -542,12 +541,6 @@ public class WindChart extends AbstractRaceChart implements Component<WindChartS
             }
         }
      }
-
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
-    }
 
     @Override
     public void onResize() {

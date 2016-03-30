@@ -101,6 +101,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return null;
     }
