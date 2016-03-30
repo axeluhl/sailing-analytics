@@ -39,12 +39,17 @@ import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
+    /**
+     * tests the precedence order described in {@link TrackedRaceImpl#updateStartAndEndOfTracking()}
+     */
     @Test
     public void testStartTimeInferencePrecedenceOrder() throws TransformationException,
             NoCorrespondingServiceRegisteredException, InterruptedException {
@@ -70,8 +75,12 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         
         //test inference via race start/end time in racelog
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
-        assertEquals(new MillisecondsTimePoint(10000).minus(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES), trackedRace.getStartOfTracking());
-        assertEquals(new MillisecondsTimePoint(20000).plus(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES), trackedRace.getEndOfTracking());
+        MillisecondsTimePoint startOfRaceInRaceLog = new MillisecondsTimePoint(10000);
+        TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        MillisecondsTimePoint endOfRaceInRaceLog = new MillisecondsTimePoint(20000);
+        TimePoint expectedEndOfTracking = endOfRaceInRaceLog.plus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
+        assertEquals(expectedStartOfTracking, trackedRace.getStartOfTracking());
+        assertEquals(expectedEndOfTracking, trackedRace.getEndOfTracking());
         
         
         //test inference via manually set start/end of tracking
