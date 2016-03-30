@@ -211,6 +211,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 string.add(t.getName());
                 string.add(t.getSailID());
                 string.add(t.getBoatClass().getName());
+                string.add(t.getIdAsString());
                 return string;
             }
         };
