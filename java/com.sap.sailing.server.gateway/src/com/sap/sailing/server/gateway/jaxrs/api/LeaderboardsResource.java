@@ -558,13 +558,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                                     StringEscapeUtils.escapeHtml(leaderboardName)
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    Util.addAll(raceColumn.getCourseMarks(fleet), marks);
+                    Util.addAll(raceColumn.getAvailableMarks(fleet), marks);
                 }
             } else {
                 // Return all marks for a certain race column
                 // if all races have a tracked race return all marks part of at least one tracked race
                 // if at least one race doesn't have a tracked race, return also the marks defined in the RegattaLog
-                Util.addAll(raceColumn.getCourseMarks(), marks);
+                Util.addAll(raceColumn.getAvailableMarks(), marks);
             }
         }
         JSONArray array = new JSONArray();
