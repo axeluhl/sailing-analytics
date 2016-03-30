@@ -619,4 +619,6 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String fleetName) throws NotFoundException;
 
     Collection<CompetitorDTO> getCompetitorRegistrationsForLeaderboard(String leaderboardName) throws NotFoundException;
+
+    Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>> getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets);
 }

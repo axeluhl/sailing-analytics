@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
@@ -61,8 +60,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private CheckBox trackWind;
     private ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn;
     protected boolean regattaHasCompetitors = false; 
-    private AtomicInteger asyncCallBackCounter = new AtomicInteger(0);
-    private Map<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Pair<TimePoint,TimePoint>> raceWithStartAndEndOfTrackingTime = new HashMap<RaceColumnDTOAndFleetDTOWithNameBasedEquality, Pair<TimePoint,TimePoint>>();
+    private Map<Triple<String, String, String>, Pair<TimePoint,TimePoint>> raceWithStartAndEndOfTrackingTime = new HashMap<Triple<String, String, String>, Pair<TimePoint,TimePoint>>();
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -424,33 +422,34 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         final StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         regattaHasCompetitors = false;
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
-            raceColumnTable.getDataProvider().getList().clear();
+            List<Triple<String, String, String>> raceColumnsAndFleets = new ArrayList<Triple<String, String, String>>();
             for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
                 for (FleetDTO fleet : raceColumn.getFleets()) {
-                    asyncCallBackCounter.incrementAndGet();
-                    final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
-                    sailingService.getTrackingTimes(selectedLeaderboard.name, raceColumn.getName(), fleet.getName(),
-                            new AsyncCallback<Util.Pair<TimePoint,TimePoint>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(Pair<TimePoint, TimePoint> result) {
-                            raceWithStartAndEndOfTrackingTime.put(raceColumnDTOAndFleet, result);
-                            if (asyncCallBackCounter.decrementAndGet() == 0){
-                                for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
-                                    for (FleetDTO fleet : raceColumn.getFleets()) {
-                                        RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet2 = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
-                                        raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet2);
-                                    }
-                                }
-                            }
-                        }
-                    });
+                    raceColumnsAndFleets.add(new Triple<String, String, String>(selectedLeaderboard.name, raceColumn.getName(), fleet.getName()));
                 }
             }
+            
+            sailingService.getTrackingTimes(raceColumnsAndFleets,
+                    new AsyncCallback<Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>> result) {
+                    raceWithStartAndEndOfTrackingTime = result;
+                    
+                    raceColumnTable.getDataProvider().getList().clear();
+                    for (RaceColumnDTO raceColumn : selectedLeaderboard.getRaceList()) {
+                        for (FleetDTO fleet : raceColumn.getFleets()) {
+                            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet2 = new RaceColumnDTOAndFleetDTOWithNameBasedEquality(raceColumn, fleet);
+                            raceColumnTable.getDataProvider().getList().add(raceColumnDTOAndFleet2);
+                        }
+                    }
+                }
+            });
+            
             selectedLeaderBoardPanel.setVisible(true);
             selectedLeaderBoardPanel.setCaptionText("Details of leaderboard '" + selectedLeaderboard.name + "'");
             if (!selectedLeaderboard.type.isMetaLeaderboard()) {
@@ -465,7 +464,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     public Pair<TimePoint, TimePoint> getTrackingTimesFor(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet){
-        return raceWithStartAndEndOfTrackingTime.get(raceColumnDTOAndFleet);
+        return raceWithStartAndEndOfTrackingTime.get(new Triple<String, String, String>(getSelectedLeaderboard().name, raceColumnDTOAndFleet.getA().getName(), raceColumnDTOAndFleet.getB().getName()));
     }
 
     
