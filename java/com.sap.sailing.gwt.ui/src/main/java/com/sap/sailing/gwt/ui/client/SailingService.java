@@ -639,4 +639,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void editMarkFix(String leaderboardName, String raceColumnName, String fleetName, String markIdAsString, GPSFixDTO oldFix, Position newPosition) throws NotRevokableException;
 
+    Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>> getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets);
 }
