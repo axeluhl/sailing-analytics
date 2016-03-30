@@ -197,6 +197,7 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
                     @Override
                     public void onSuccess(Void result) {
                         refreshTimes();
+                        getCancelButton().click();
                     }
                 });
             }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.gwtbootstrap.client.ui.Lead;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -592,6 +593,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }).show();
     }
     
+    private void refreshTrackingActionButtons(){
+        leaderboardSelectionChanged();
+    }
+    
     private void showSetTrackingTimesDialog(RaceColumnDTO raceColumn, FleetDTO fleet) {
         new SetTrackingTimesDialog(sailingService, errorReporter, getSelectedLeaderboardName(), raceColumn.getName(),
                 fleet.getName(), stringMessages, new DataEntryDialog.DialogCallback<RaceLogSetTrackingTimesDTO>() {
@@ -603,10 +608,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError("Error while setting tracking times: " + caught.getMessage());
+                                refreshTrackingActionButtons();
                             }
 
                             @Override
                             public void onSuccess(Void result) {
+                                refreshTrackingActionButtons();
                             }
                             
                         });
@@ -614,7 +621,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     }
 
                     @Override
-                    public void cancel() {}
+                    public void cancel() {
+                        //toggle buttons in dialog lead to a change although dialog is canceled --> reload tracking times
+                        refreshTrackingActionButtons();
+                    }
                 }).show();
     }
 
