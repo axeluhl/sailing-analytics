@@ -6,7 +6,7 @@
     tools:showIn="@layout/race_panel_flags_ver">
 
     <RelativeLayout
-        android:id="@+id/more_flags_layer"
+        android:id="@+id/blue_first_flags_layer"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_centerInParent="true">
@@ -25,7 +25,7 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/side_button_imageSize"
-                    android:src="?attr/flags_more" />
+                    android:src="?attr/flags_blue_first" />
             </RelativeLayout>
 
             <TextView
@@ -37,7 +37,7 @@
         </LinearLayout>
 
         <FrameLayout
-            android:id="@+id/more_flags_lock"
+            android:id="@+id/blue_first_flags_lock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"

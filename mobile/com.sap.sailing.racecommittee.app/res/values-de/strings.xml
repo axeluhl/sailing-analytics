@@ -95,7 +95,8 @@
     <string name="retry">Wiederholen</string>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-    <string name="tracking_list">Ergebnisliste</string>
+    <string name="tracking_list_01">Teilnehmerliste</string>
+    <string name="tracking_list_02">Ergebnisliste</string>
     <string name="set_tracking_list">Ergebnisliste füllen</string>
     <string name="confirm_tracking_list">Ergebnisliste bestätigen</string>
     <string name="availableFinishingCompetitors">Segler</string>
@@ -465,7 +466,14 @@
     <string name="onboarding_input">Manuelle Eingabe</string>
     <string name="race_group">Group Race</string>
     <string name="wind_select_race">Select Race</string>
+    <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$s</string>
     <string name="get_started">Getting Started</string>
+    <string name="position">Position</string>
+    <string name="penalty">Strafe</string>
+    <string name="score">Punkte</string>
+    <string name="finishing_time">Zielzeit</string>
+    <string name="finishing_date">Zieldatum</string>
+    <string name="comment">Kommentar</string>
     <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=de#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request fehlgeschlagen. User ist nicht autorisiert.</string>
     <string name="server_url">Server</string>
@@ -481,5 +489,12 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Rechtweisend</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
+    <string-array name="sort_by_values">
+        <item>nach Segelnummer</item>
+        <item>nach Namen</item>
+    </string-array>
+
+    <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
+    <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
 
 </resources>
