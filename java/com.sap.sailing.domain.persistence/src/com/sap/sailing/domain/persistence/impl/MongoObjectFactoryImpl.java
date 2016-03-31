@@ -58,6 +58,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompe
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.ControlPointWithTwoMarks;
@@ -1364,6 +1365,14 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorMappingEvent event) {
         DBObject result = createBasicRegattaLogEventDBObject(event);
         result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName());
+        storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
+        result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
+        storeRegattaLogEvent(regattaLikeId, result);
+    }
+
+    public void storeRegattaLogEvent(RegattaLikeIdentifier regattaLikeId, RegattaLogDeviceCompetitorBravoMappingEventImpl event) {
+        DBObject result = createBasicRegattaLogEventDBObject(event);
+        result.put(FieldNames.REGATTA_LOG_EVENT_CLASS.name(), RegattaLogDeviceCompetitorBravoMappingEventImpl.class.getSimpleName());
         storeDeviceMappingEvent(event, result, FieldNames.REGATTA_LOG_FROM, FieldNames.REGATTA_LOG_TO);
         result.put(FieldNames.COMPETITOR_ID.name(), event.getMappedTo().getId());
         storeRegattaLogEvent(regattaLikeId, result);

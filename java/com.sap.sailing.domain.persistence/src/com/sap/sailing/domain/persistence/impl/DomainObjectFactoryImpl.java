@@ -103,6 +103,7 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitor
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogSetCompetitorTimeOnTimeFactorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -1647,6 +1648,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         String eventClass = (String) dbObject.get(FieldNames.REGATTA_LOG_EVENT_CLASS.name());
         if (eventClass.equals(RegattaLogDeviceCompetitorMappingEvent.class.getSimpleName())) {
             return loadRegattaLogDeviceCompetitorMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
+        } else if (eventClass.equals(RegattaLogDeviceCompetitorBravoMappingEventImpl.class.getSimpleName())) {
+            return loadRegattaLogDeviceCompetitorBravoMappingEvent(createdAt, author, logicalTimePoint, id, dbObject,
+                    regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogDeviceMarkMappingEvent.class.getSimpleName())) {
             return loadRegattaLogDeviceMarkMappingEvent(createdAt, author, logicalTimePoint, id, dbObject, regattaLogIdentifier, o);
         } else if (eventClass.equals(RegattaLogCloseOpenEndedDeviceMappingEvent.class.getSimpleName())) {
@@ -1819,6 +1823,43 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             assert removeResult.getN() == 1;
             // and then insert using the fixed storage implementation
             new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+        }
+        return result;
+    }
+
+    private RegattaLogDeviceCompetitorBravoMappingEventImpl loadRegattaLogDeviceCompetitorBravoMappingEvent(
+            TimePoint createdAt, AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id,
+            final DBObject dbObject, RegattaLikeIdentifier regattaLogIdentifier, DBObject outerDBObject) {
+        DeviceIdentifier device = null;
+        try {
+            device = loadDeviceId(deviceIdentifierServiceFinder, (DBObject) dbObject.get(FieldNames.DEVICE_ID.name()));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
+            e.printStackTrace();
+        }
+        Competitor mappedTo = baseDomainFactory.getExistingCompetitorById((Serializable) dbObject
+                .get(FieldNames.COMPETITOR_ID.name()));
+        @SuppressWarnings("deprecation")
+        // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
+        @SuppressWarnings("deprecation")
+        // used only for auto-migration; may be removed in future releases
+        final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
+        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM,
+                deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
+        final TimePoint from = times.getA();
+        final TimePoint to = times.getB();
+        final boolean needsMigration = times.getC();
+        final RegattaLogDeviceCompetitorBravoMappingEventImpl result = new RegattaLogDeviceCompetitorBravoMappingEventImpl(
+                createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
+        if (needsMigration) {
+            // remove old version of mapping event
+            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name())
+                    .remove(outerDBObject);
+            assert removeResult.getN() == 1;
+            // and then insert using the fixed storage implementation
+            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier,
+                    result);
         }
         return result;
     }
