@@ -175,18 +175,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                 }
             }
-
             race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
-
-            RaceGroupSeriesFleet fleet = race.getFleet();
-            if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
-                if (!TextUtils.isEmpty(race_name.getText())) {
-                    race_name.setText(race_name.getText() + " - " + fleet.getFleetName());
-                } else {
-                    race_name.setText(fleet.getFleetName());
-                }
-            }
-
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
