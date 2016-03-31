@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file datatype="javapropertyresourcebundle" original="/usr/sap/ljs/app/Converter_3242440909030428543/java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/common/client/i18n/TextMessages.properties" source-language="en">
+    <header>
+      <skl>
+        <internal-file crc="4a03d6f9d0cf4c777b97d54c25cef156" form="base64">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</internal-file>
+      </skl>
+      <phase-group>
+        <phase company-name="SAP AG" date="2016-03-21T09:44:04Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+      </phase-group>
+      <tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.0.0"/>
+    </header>
+    <body>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="chartSelectionHint" resname="chartSelectionHint">
+        <source>Hint: You can also use the leaderboard (on the LEADERBOARD tab) to select the competitors displayed in the chart.     </source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="chooseALanguage" resname="chooseALanguage">
+        <source>Choose a language</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="events" resname="events">
+        <source>Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="home" resname="home">
+        <source>Home</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="aboutUs" resname="aboutUs">
+        <source>About us</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contact" resname="contact">
+        <source>Contact</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sponsoring" resname="sponsoring">
+        <source>Sponsoring</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutions" resname="solutions">
+        <source>Solutions</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="blog" resname="blog">
+        <source>Blog</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="german" resname="german">
+        <source>Deutsch</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="english" resname="english">
+        <source>English</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="fullEventSchedule" resname="fullEventSchedule">
+        <source>Full event schedule</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="officalEventWebsite" resname="officalEventWebsite">
+        <source>Official event website</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leg" resname="leg">
+        <source>Leg</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="races" resname="races">
+        <source>Races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="moreInfo" resname="moreInfo">
+        <source>More info</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="viewAnalysis" resname="viewAnalysis">
+        <source>View analysis </source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="overallLeaderboard" resname="overallLeaderboard">
+        <source>Overall leaderboard</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseEnterASearchTerm" resname="pleaseEnterASearchTerm">
+        <source>Please enter a search term.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseTryAgain" resname="pleaseTryAgain">
+        <source>Please try again...</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="reloadPage" resname="reloadPage">
+        <source>Reload page</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorMessageLoadingData" resname="errorMessageLoadingData">
+        <source>An error occured while loading the data for this page.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="errorMessageNoSuchLeaderboard" resname="errorMessageNoSuchLeaderboard">
+        <source>Could not find a leaderboard with this name.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="raceNotScheduled" resname="raceNotScheduled">
+        <source>Not scheduled.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaDetails" resname="regattaDetails">
+        <source>Regatta details</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regatta" resname="regatta">
+        <source>Regatta</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="competitorsAnalytics" resname="competitorsAnalytics">
+        <source>Competitors Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="chooseChart" resname="chooseChart">
+        <source>Choose chart type</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="series" resname="series">
+        <source>Series</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaLeaderboards" resname="regattaLeaderboards">
+        <source>Regatta leaderboards</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="features" resname="features">
+        <source>Features</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="releaseNotes" resname="releaseNotes">
+        <source>Release notes</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="whatsNew" resname="whatsNew">
+        <source>What''s new</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="overview" resname="overview">
+        <source>Overview</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapSailing" resname="sapSailing">
+        <source>SAP Sailing</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="search" resname="search">
+        <source>Search</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="startSimulator" resname="startSimulator">
+        <source>Start Simulator</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownStartingInDays" resname="countdownStartingInDays">
+        <source>Days</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownDays" resname="countdownDays">
+        <source>Days</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownHours" resname="countdownHours">
+        <source>Hrs</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownMinutes" resname="countdownMinutes">
+        <source>Min</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownSeconds" resname="countdownSeconds">
+        <source>Sec</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownDay" resname="countdownDay">
+        <source>Day</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownHour" resname="countdownHour">
+        <source>Hour</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownMinute" resname="countdownMinute">
+        <source>Min</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="countdownSecond" resname="countdownSecond">
+        <source>Sec</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="live" resname="live">
+        <source>Live</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="finished" resname="finished">
+        <source>Finished</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="watchNow" resname="watchNow">
+        <source>Watch now</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="lastUpdate" resname="lastUpdate">
+        <source>Last Update</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboard" resname="leaderboard">
+        <source>Leaderboard</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxNewsUpdateMoreLink" resname="boxNewsUpdateMoreLink">
+        <source>Report news</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxNewsUpdateTitle" resname="boxNewsUpdateTitle">
+        <source>News Update</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarted1" resname="boxUpcomingRacesCountdownStarted1">
+        <source>Started</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarted2" resname="boxUpcomingRacesCountdownStarted2">
+        <source>hrs and</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarted3" resname="boxUpcomingRacesCountdownStarted3">
+        <source>minutes ago</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarting1" resname="boxUpcomingRacesCountdownStarting1">
+        <source>Starting in</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarting2" resname="boxUpcomingRacesCountdownStarting2">
+        <source>hrs and</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesCountdownStarting3" resname="boxUpcomingRacesCountdownStarting3">
+        <source>minutes</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesMoreLink" resname="boxUpcomingRacesMoreLink">
+        <source>Event Schedule</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxUpcomingRacesTitle" resname="boxUpcomingRacesTitle">
+        <source>Upcoming Races Today</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxWeather" resname="boxWeather">
+        <source>Weather</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="boxWeatherUnit" resname="boxWeatherUnit">
+        <source>KTS</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="defaultTitle" resname="defaultTitle">
+        <source>SAP Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventHeaderMedia" resname="eventHeaderMedia">
+        <source>Media</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventHeaderOverview" resname="eventHeaderOverview">
+        <source>Overview</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventHeaderRaces" resname="eventHeaderRaces">
+        <source>Schedule</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventHeaderRegattas" resname="eventHeaderRegattas">
+        <source>Regattas</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesHeaderOverview" resname="seriesHeaderOverview">
+        <source>About the Series</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesHeaderUpcoming" resname="seriesHeaderUpcoming">
+        <source>Upcoming</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesHeaderRecent" resname="seriesHeaderRecent">
+        <source>Recent Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesHeaderLeaderboard" resname="seriesHeaderLeaderboard">
+        <source>Leaderboard</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesOverviewHeaderRecent" resname="seriesOverviewHeaderRecent">
+        <source>Latest Series Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="seriesOverviewReadMore" resname="seriesOverviewReadMore">
+        <source>More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventsOverviewRecentEvents" resname="eventsOverviewRecentEvents">
+        <source>Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventsOverviewRecentCountries" resname="eventsOverviewRecentCountries">
+        <source>Countries</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventsOverviewRecentSailors" resname="eventsOverviewRecentSailors">
+        <source>Sailors</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventsOverviewRecentTrackedRaces" resname="eventsOverviewRecentTrackedRaces">
+        <source>Tracked Races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventResultsHeadline" resname="eventResultsHeadline">
+        <source>Winners and Results</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventResultsBoatClassesDropDown" resname="eventResultsBoatClassesDropDown">
+        <source>All Boat Classes</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewMoreEvents" resname="eventOverviewMoreEvents">
+        <source>More Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewRecentEvents" resname="eventOverviewRecentEvents">
+        <source>Recent Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingDate" resname="eventOverviewUpcomingDate">
+        <source>Date</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingEvent" resname="eventOverviewUpcomingEvent">
+        <source>Event</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingLocation" resname="eventOverviewUpcomingLocation">
+        <source>Location</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingSchedule" resname="eventOverviewUpcomingSchedule">
+        <source>Upcoming Schedule</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingSeries" resname="eventOverviewUpcomingSeries">
+        <source>Series</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventOverviewUpcomingTeaser" resname="eventOverviewUpcomingTeaser">
+        <source>More Events To Be Announced Soon!</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventQuickfinderTitle" resname="eventQuickfinderTitle">
+        <source>Event Quick-Finder</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaHeaderLeaderboard" resname="eventRegattaHeaderLeaderboard">
+        <source>Leaderboard</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaHeaderRaceRaces" resname="eventRegattaHeaderRaceRaces">
+        <source>Races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaListAllBoatClasses" resname="eventRegattaListAllBoatClasses">
+        <source>All boat classes</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardCompetitor" resname="eventRegattaLeaderboardCompetitor">
+        <source>Competitor</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardExtendLeaderboard" resname="eventRegattaLeaderboardExtendLeaderboard">
+        <source>Extend Leaderboard</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardFinishedMessage" resname="eventRegattaLeaderboardFinishedMessage">
+        <source>No more races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardLastScoreUpdate" resname="eventRegattaLeaderboardLastScoreUpdate">
+        <source>Last Score Update</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardName" resname="eventRegattaLeaderboardName">
+        <source>Name</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardRegattaRank" resname="eventRegattaLeaderboardRegattaRank">
+        <source>Regatta Rank</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaLeaderboardTotalPoints" resname="eventRegattaLeaderboardTotalPoints">
+        <source>Total Points</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceWatch" resname="eventRegattaRaceWatch">
+        <source>Watch live</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceAnalyse" resname="eventRegattaRaceAnalyse">
+        <source>Analyze Race</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceNotTracked" resname="eventRegattaRaceNotTracked">
+        <source>Not Tracked</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceFinished" resname="eventRegattaRaceFinished">
+        <source>Finished at:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceStarted" resname="eventRegattaRaceStarted">
+        <source>Started at:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceScheduled" resname="eventRegattaRaceScheduled">
+        <source>Scheduled for:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceRace" resname="eventRegattaRaceRace">
+        <source>Race</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceWind" resname="eventRegattaRaceWind">
+        <source>Wind Strength:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceWinner" resname="eventRegattaRaceWinner">
+        <source>Winner</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRaceLeader" resname="eventRegattaRaceLeader">
+        <source>Leader</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRacesLegendGps" resname="eventRegattaRacesLegendGps">
+        <source>Tracking</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRacesLegendWind" resname="eventRegattaRacesLegendWind">
+        <source>Wind Data</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRacesLegendVideo" resname="eventRegattaRacesLegendVideo">
+        <source>Video</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventRegattaRacesLegendAudio" resname="eventRegattaRacesLegendAudio">
+        <source>Audio</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="eventSponsorsTitle" resname="eventSponsorsTitle">
+        <source>Event Sponsorships</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerJobs" resname="footerJobs">
+        <source>Jobs</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerCopyright" resname="footerCopyright">
+        <source>© 2011-2016 SAP Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerLanguage" resname="footerLanguage">
+        <source>SAP Sailing in</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerLegal" resname="footerLegal">
+        <source>Legal Disclosure</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerPrivacy" resname="footerPrivacy">
+        <source>Privacy</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="footerFeedback" resname="footerFeedback">
+        <source>Feedback</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerEvents" resname="headerEvents">
+        <source>Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerHome" resname="headerHome">
+        <source>Home</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerLogo" resname="headerLogo">
+        <source>Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerSearch" resname="headerSearch">
+        <source>Search</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerSearchPlaceholder" resname="headerSearchPlaceholder">
+        <source>Search </source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerSolutions" resname="headerSolutions">
+        <source>Solutions</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="headerSponsoring" resname="headerSponsoring">
+        <source>Sponsoring</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsHeadline" resname="latestRaceResultsHeadline">
+        <source>Latest Official Race Results</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsIsNew" resname="latestRaceResultsIsNew">
+        <source>New</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsIsUpdated" resname="latestRaceResultsIsUpdated">
+        <source>Updated</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsRaceCountLabel" resname="latestRaceResultsRaceCountLabel">
+        <source>Result after</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsRaceCountUnit" resname="latestRaceResultsRaceCountUnit">
+        <source>races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="latestRaceResultsRefresh" resname="latestRaceResultsRefresh">
+        <source>refresh</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="leaderboardQuickAccessLabel" resname="leaderboardQuickAccessLabel">
+        <source>Leaderboard Quick Access</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainEventShowAll" resname="mainEventShowAll">
+        <source>Show All Events</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainEventTitle" resname="mainEventTitle">
+        <source>Latest Events from the Sailing World</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainMediaSubtitle" resname="mainMediaSubtitle">
+        <source>Get lost in the latest and most beautiful impressions from your favorite sailing event.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainMediaTitle" resname="mainMediaTitle">
+        <source>Photographers love Sailing</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainMediaVideosSubtitle" resname="mainMediaVideosSubtitle">
+        <source>Immerse yourself in the world of sailing and check out our latest events for more videos.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainMediaVideosTitle" resname="mainMediaVideosTitle">
+        <source>Recent Video Entries</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mainSponsorsReadMore" resname="mainSponsorsReadMore">
+        <source>Read More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mediaTeaserPhotosTitle" resname="mediaTeaserPhotosTitle">
+        <source>Photos</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="mediaTeaserVideosTitle" resname="mediaTeaserVideosTitle">
+        <source>Videos</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaCompetitors" resname="regattaCompetitors">
+        <source>Competitors</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaRaces" resname="regattaRaces">
+        <source>Races</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaTracked" resname="regattaTracked">
+        <source>Tracked</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaRegattaStarts" resname="regattaRegattaStarts">
+        <source>Regatta will start</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaPts" resname="regattaPts">
+        <source>Pts.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaCourse" resname="regattaCourse">
+        <source>Course</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaArea" resname="regattaArea">
+        <source>Area</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaFinishedAt" resname="regattaFinishedAt">
+        <source>Finished at</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaScheduledAt" resname="regattaScheduledAt">
+        <source>Scheduled at</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattaStartedAt" resname="regattaStartedAt">
+        <source>Started at</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="regattasResultsTitle" resname="regattasResultsTitle">
+        <source>Winner and Results</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultHeaderButton" resname="searchResultHeaderButton">
+        <source>Search</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultHeaderLabel" resname="searchResultHeaderLabel">
+        <source>Your Search</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultsFound" resname="searchResultsFound">
+        <source>result(s) found for</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultHeaderPlaceholder" resname="searchResultHeaderPlaceholder">
+        <source>Type in your searchkey</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultMore" resname="searchResultMore">
+        <source>More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSearch" resname="searchResultSearch">
+        <source>Search</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSearchAgain" resname="searchResultSearchAgain">
+        <source>Search again</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSortLabel" resname="searchResultSortLabel">
+        <source>Sort by</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSortNewest" resname="searchResultSortNewest">
+        <source>Recent</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSortOldest" resname="searchResultSortOldest">
+        <source>Oldest</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultSortRelevance" resname="searchResultSortRelevance">
+        <source>Relevance</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="searchResultCount" resname="searchResultCount">
+        <source>About 2,450 results where found for ''Schnitzel''</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sharingEmail" resname="sharingEmail">
+        <source>Send an email</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sharingFacebook" resname="sharingFacebook">
+        <source>Share on Facebook</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sharingTwitter" resname="sharingTwitter">
+        <source>Tweet about it</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="socialFooterShare" resname="socialFooterShare">
+        <source>Share this on </source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="socialFooterTitle" resname="socialFooterTitle">
+        <source>Recommend SAP Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSISHeadline" resname="solutionsSISHeadline">
+        <source>SAP in Sailing</source>
+        <note annotates="source" from="Developer">SOLUTIONS</note>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSAPHeadline" resname="solutionsSAPHeadline">
+        <source>SAP Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsRaceHeadline" resname="solutionsRaceHeadline">
+        <source>SAP Sailing Race Manager</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsPostHeadline" resname="solutionsPostHeadline">
+        <source>Post-Race Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsTrainingHeadline" resname="solutionsTrainingHeadline">
+        <source>Training Diary</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSimulatorHeadline" resname="solutionsSimulatorHeadline">
+        <source>Strategy Simulator</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapInSailing" resname="sapInSailing">
+        <source>SAP in Sailing</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing1" resname="contentSapInSailing1">
+        <source>Sailing provides the perfect platform for SAP to showcase solutions and help the sport run like never before. SAP’s involvement in the sport has transformed the sailing experience by providing tools, which:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing2" resname="contentSapInSailing2">
+        <source>Help sailors analyze performance and optimize strategy</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing3" resname="contentSapInSailing3">
+        <source>Bring fans closer to the action</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing4" resname="contentSapInSailing4">
+        <source>Provide the media with information and insights to deliver a greater informed commentary</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing5" resname="contentSapInSailing5">
+        <source>SAP has a longstanding involvement with sailing and has established a portfolio spanning across teams and regattas, including:</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing6" resname="contentSapInSailing6">
+        <source>Official Technology Partner of Travemünder Woche</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing7" resname="contentSapInSailing7">
+        <source>Technical Partner of the European Sailing Leagues</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing8" resname="contentSapInSailing8">
+        <source>Title sponsor of the SAP Extreme Sailing Team</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing9" resname="contentSapInSailing9">
+        <source>Official Technical Partner of the Extreme Sailing Series</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing10" resname="contentSapInSailing10">
+        <source>Premium Partner of Germany’s national sailing team, Audi Sailing Team Germany</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing11" resname="contentSapInSailing11">
+        <source>Premium Partner of the world’s largest regatta, Kieler Woche (Kiel Week)</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapInSailing12" resname="contentSapInSailing12">
+        <source>Title sponsor of the SAP 5O5 World Championships</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSAPText1" resname="solutionsSAPText1">
+        <source>By delivering real time analytics around race rankings, speeds, maneuvers, bearings etc., SAP is helping to simplify and demystify the complex sport of sailing.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSAPText2" resname="solutionsSAPText2">
+        <source>SAP Sailing Analytics provide insights and transparency to the world of sailing by utilizing Cloud and In-Memory Technology, processing GPS and wind measurement data in real time and visualizing contents in various frontends accessible from anywhere.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsRaceText" resname="solutionsRaceText">
+        <source>The SAP Race Committee App delivers greater efficiency and control to race organizers by automating and simplifying their manual tasks and communication during running sailing regattas. The Race Committee App helps simplify the operation of running and managing race events to help race committees operate smarter.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsPostText" resname="solutionsPostText">
+        <source>Access to data collected at sailing events gives sailors the opportunity to assess and analyse their performances to help develop strategies and sail better.<ph id="1">&lt;br&gt;</ph> SAP Business Analytics solutions provide sailors, coaches, fans and media with tools to browse and analyse historical data across many regattas and races. SAP HANA allows them to learn about performance patterns, tendencies and sailor profiles in a simple, fast and efficient way in order to optimize their own performance and develop successful strategies for future regattas.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsTrainingText" resname="solutionsTrainingText">
+        <source>The STG Training Diary supports the daily documentation and analysis of an athlete''s physical condition and training efforts in the areas of water training, physical training, boat work, mental, theory as well as other activities like education or travel.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="solutionsSimulatorText" resname="solutionsSimulatorText">
+        <source>Choosing the right strategy can provide great competitive advantage during a race. The Strategy Simulator simplifies determining the best sailing strategy for various wind conditions and water currents. Since wind and current can be changed in the simulation right away, the robustness of a strategy can be easily evaluated even for uncertain weather conditions.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapSailingAnalytics" resname="sapSailingAnalytics">
+        <source>SAP Sailing Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapSailingAnalytics1" resname="contentSapSailingAnalytics1">
+        <source>By delivering real time analytics around race rankings, speeds, maneuvers, bearings etc., SAP is helping to simplify and demystify the complex sport of sailing.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapSailingAnalytics2" resname="contentSapSailingAnalytics2">
+        <source>SAP Sailing Analytics provide insights and transparency to the world of sailing by utilizing Cloud and In-Memory Technology, processing GPS and wind measurement data in real time and visualizing contents in various frontends accessible from anywhere.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapSailingAnalyticsReadMore" resname="sapSailingAnalyticsReadMore">
+        <source>Read More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapSailingRaceManager" resname="sapSailingRaceManager">
+        <source>SAP Sailing Race Manager</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentSapSailingRaceManager" resname="contentSapSailingRaceManager">
+        <source>The SAP Sailing Race Manager delivers greater efficiency and control to race organizers by automating and simplifying their manual tasks and communication during running sailing regattas. The Race Committee App helps simplify the operation of running and managing race events to help race committees operate smarter.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="sapSailingRaceManagerReadMore" resname="sapSailingRaceManagerReadMore">
+        <source>Learn More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="postRaceAnalytics" resname="postRaceAnalytics">
+        <source>Post-Race Analytics</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentPostRaceAnalytics1" resname="contentPostRaceAnalytics1">
+        <source>Access to data collected at sailing events gives sailors the opportunity to assess and analyse their performances to help develop strategies and sail better.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentPostRaceAnalytics2" resname="contentPostRaceAnalytics2">
+        <source>SAP Business Analytics solutions provide sailors, coaches, fans and media with tools to browse and analyse historical data across many regattas and races. SAP HANA allows them to learn about performance patterns, tendencies and sailor profiles in a simple, fast and efficient way in order to optimize their own performance and develop successful strategies for future regattas.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="i18nDeSolutionsTrainingHeadline" resname="i18nDeSolutionsTrainingHeadline">
+        <source>SAP Sail Better – STG Training Diary</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="i18nDeSolutionsTrainingText" resname="i18nDeSolutionsTrainingText">
+        <source>The STG Training Diary supports the daily documentation and analysis of an athlete’s physical condition and training efforts in the areas of water training, physical training, boat work, mental, theory as well as other activities like education or travel.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="strategySimulator" resname="strategySimulator">
+        <source>Strategy Simulator</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="contentStrategySimulator" resname="contentStrategySimulator">
+        <source>Choosing the right strategy can provide great competitive advantage during a race. The Strategy Simulator simplifies determining the best sailing strategy for various wind conditions and water currents. Since wind and current can be changed in the simulation right away, the robustness of a strategy can be easily evaluated even for uncertain weather conditions.</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="strategySimulatorReadMore" resname="strategySimulatorReadMore">
+        <source>Learn More</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="impressum" resname="impressum">
+        <source>Imprint</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="playstoreCampaign" resname="playstoreCampaign">
+        <source>utm_source=sapsailing&amp;utm_medium=solutions&amp;utm_content=2016.02&amp;utm_campaign=solutions&amp;pcampaignid=2016.sapsailing.solutions</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="playstoreRacecommitteeApp" resname="playstoreRacecommitteeApp">
+        <source>https://play.google.com/store/apps/details?id=com.sap.sailing.racecommittee.app</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="playstoreRacecommitteeBadge" resname="playstoreRacecommitteeBadge">
+        <source>https://play.google.com/intl/en/badges/images/generic/en-play-badge.png</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appstoreStgTrainingstagebuch" resname="appstoreStgTrainingstagebuch">
+        <source>https://itunes.apple.com/de/app/stg-trainingstagebuch/id779563635?l=en&amp;amp;mt=8</source>
+      </trans-unit>
+      <trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appstoreBadgeSuffix" resname="appstoreBadgeSuffix">
+        <source>_en</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
