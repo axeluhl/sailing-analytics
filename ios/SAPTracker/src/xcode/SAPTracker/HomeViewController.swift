@@ -45,9 +45,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         // register for open custom URL events
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(openUrl(_:)), name: AppDelegate.NotificationType.openUrl, object: nil)
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "checkEULA:", name: UIApplicationWillEnterForegroundNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(checkEULA(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
 
         checkEULA(NSNotification.init(name: "", object: nil))
 
@@ -103,6 +103,12 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let url = notification.userInfo!["url"] as! String
         qrCodeManager!.parseUrl(url)
     }
+	
+	func _DEBUG_OPEN_URL() {
+		let url = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=9df7b4f6-611b-4be0-b028-c7b1bdd434c2"
+		let url2 = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=a5a00800-daf8-0131-89e6-60a44ce903c3"
+		qrCodeManager!.parseUrl(url2)
+	}
     
     // MARK: - UIActionSheetDelegate
     
@@ -187,8 +193,6 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
             case .Delete:
                 tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            default:
-                return
             }
     }
     
@@ -208,6 +212,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     // MARK: - Button actions
     
     @IBAction func scanButtonTap(sender: AnyObject) {
+		
+//		_DEBUG_OPEN_URL()
+//		return;
+		
         if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
             let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
             alertView.tag = AlertView.NoCameraAvailable.rawValue;

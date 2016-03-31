@@ -18,15 +18,15 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.shared.GPSFixDTO;
+import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 
 /**
- * Manages the cache of {@link GPSFixDTO}s for the competitors and the polylines encoding the tails that visualize the
+ * Manages the cache of {@link GPSFixDTOWithSpeedWindTackAndLegType}s for the competitors and the polylines encoding the tails that visualize the
  * course the boats took. The tails are based on the GPS fix data. This class offers methods to update the fixes and
  * the tails, making sure that the data is always managed consistently. In particular, it keeps an eye on
- * {@link GPSFixDTO#extrapolated extrapolated fixes}. Those are just a guess where a boat may have been and will need
+ * {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated fixes}. Those are just a guess where a boat may have been and will need
  * to be removed once actual data for that time is available.
  * 
  * @author Axel Uhl (d043530)
@@ -36,16 +36,16 @@ public class FixesAndTails {
     /**
      * Fixes of each competitors tail. If a list is contained for a competitor, the list contains a timely "contiguous"
      * list of fixes for the competitor. This means the server has no more data for the time interval covered, unless
-     * the last fix was {@link GPSFixDTO#extrapolated obtained by extrapolation}.
+     * the last fix was {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated obtained by extrapolation}.
      * <p>
      * 
-     * If the fixes for a competitor contain an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix is always
+     * If the fixes for a competitor contain an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, that fix is always
      * guaranteed to be the last element of the list when outside the execution of a method on this class. This in
      * particular means that when more fixes are added, and there is now one fix later than the extrapolated fix, the
      * extrapolated fix will be removed, re-establishing the invariant of an extrapolated fix always being the last
      * in the list.
      */
-    private final Map<CompetitorDTO, List<GPSFixDTO>> fixes;
+    private final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixes;
     
     /**
      * Tails of competitors currently displayed as overlays on the map. A tail may have an {@link MVCArray#getLength()
@@ -72,19 +72,19 @@ public class FixesAndTails {
 
     public FixesAndTails(CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
-        fixes = new HashMap<CompetitorDTO, List<GPSFixDTO>>();
+        fixes = new HashMap<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>>();
         tails = new HashMap<CompetitorDTO, Polyline>();
         firstShownFix = new HashMap<CompetitorDTO, Integer>();
         lastShownFix = new HashMap<CompetitorDTO, Integer>();
     }
 
     /**
-     * @return the list of fixes cached for the competitor; if a fix is {@link GPSFixDTO#extrapolated extrapolated}, it
+     * @return the list of fixes cached for the competitor; if a fix is {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated}, it
      *         must be the last fix in the list. <code>null</code> may be returned in no fixes are cached for
      *         <code>competitor</code>. The list returned is unmodifiable for the caller.
      */
-    public List<GPSFixDTO> getFixes(CompetitorDTO competitor) {
-        final List<GPSFixDTO> competitorFixes = fixes.get(competitor);
+    public List<GPSFixDTOWithSpeedWindTackAndLegType> getFixes(CompetitorDTO competitor) {
+        final List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = fixes.get(competitor);
         return competitorFixes == null ? null : Collections.unmodifiableList(competitorFixes);
     }
     
@@ -108,20 +108,20 @@ public class FixesAndTails {
     }
     
     /**
-     * When for a competitor the last fix obtained from the server is {@link GPSFixDTO#extrapolated extrapolated}, the quality
+     * When for a competitor the last fix obtained from the server is {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated}, the quality
      * of this fix depends on the time difference between the extrapolated fix's time point and the last non-extrapolated
      * fix's time point. This time difference in milliseconds is returned by this method, or <code>0</code> in case
      * the last fix for <code>competitor</code> is not extrapolated.
      */
     protected long getMillisecondsBetweenExtrapolatedAndLastNonExtrapolatedFix(CompetitorDTO competitor) {
-        List<GPSFixDTO> competitorFixes = getFixes(competitor);
+        List<GPSFixDTOWithSpeedWindTackAndLegType> competitorFixes = getFixes(competitor);
         final long result;
         if (competitorFixes == null || competitorFixes.size() < 2 || !competitorFixes.get(competitorFixes.size()-1).extrapolated) {
             result = 0;
         } else {
             // last fix is extrapolated and another fix present; check time difference
-            GPSFixDTO extrapolatedFix = competitorFixes.get(competitorFixes.size()-1);
-            GPSFixDTO fixBeforeExtrapolated = competitorFixes.get(competitorFixes.size()-2);
+            GPSFixDTOWithSpeedWindTackAndLegType extrapolatedFix = competitorFixes.get(competitorFixes.size()-1);
+            GPSFixDTOWithSpeedWindTackAndLegType fixBeforeExtrapolated = competitorFixes.get(competitorFixes.size()-2);
             result = extrapolatedFix.timepoint.getTime() - fixBeforeExtrapolated.timepoint.getTime();
         }
         return result;
@@ -137,13 +137,13 @@ public class FixesAndTails {
      */
     protected Polyline createTailAndUpdateIndices(final CompetitorDTO competitorDTO, Date from, Date to, TailFactory tailFactory) {
         List<LatLng> points = new ArrayList<LatLng>();
-        List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
+        List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
         int indexOfFirst = -1;
         int indexOfLast = -1;
         int i = 0;
         // TODO consider binary search to find beginning of interesting segment faster
-        for (Iterator<GPSFixDTO> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
-            GPSFixDTO fix = fixIter.next();
+        for (Iterator<GPSFixDTOWithSpeedWindTackAndLegType> fixIter = fixesForCompetitor.iterator(); fixIter.hasNext() && indexOfLast == -1;) {
+            GPSFixDTOWithSpeedWindTackAndLegType fix = fixIter.next();
             if (!fix.timepoint.before(to)) {
                 indexOfLast = i-1;
             } else {
@@ -187,7 +187,7 @@ public class FixesAndTails {
      * also {@link #updateTail}).
      * 
      * @param fixesForCompetitors
-     *            For each list the invariant must hold that an {@link GPSFixDTO#extrapolated extrapolated} fix must be
+     *            For each list the invariant must hold that an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix must be
      *            the last one in the list
      * @param overlapsWithKnownFixes
      *            if for a competitor whose fixes are provided in <code>fixesForCompetitors</code> this holds
@@ -211,15 +211,15 @@ public class FixesAndTails {
      *         we would be producing severe flicker. By delaying the command to the point when the update is applied we
      *         should avoid such flicker.
      */
-    protected Map<CompetitorDTO, Runnable> updateFixes(Map<CompetitorDTO, List<GPSFixDTO>> fixesForCompetitors,
+    protected Map<CompetitorDTO, Runnable> updateFixes(Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> fixesForCompetitors,
             Map<CompetitorDTO, Boolean> overlapsWithKnownFixes, TailFactory tailFactory, long timeForPositionTransitionMillis) {
         final Map<CompetitorDTO, Runnable> result = new HashMap<>();
         final Runnable noOp = new Runnable() { @Override public void run() {} };
-        for (final Map.Entry<CompetitorDTO, List<GPSFixDTO>> e : fixesForCompetitors.entrySet()) {
+        for (final Map.Entry<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> e : fixesForCompetitors.entrySet()) {
             if (e.getValue() != null && !e.getValue().isEmpty()) {
-                List<GPSFixDTO> fixesForCompetitor = fixes.get(e.getKey());
+                List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = fixes.get(e.getKey());
                 if (fixesForCompetitor == null) {
-                    fixesForCompetitor = new ArrayList<GPSFixDTO>();
+                    fixesForCompetitor = new ArrayList<GPSFixDTOWithSpeedWindTackAndLegType>();
                     fixes.put(e.getKey(), fixesForCompetitor);
                 }
                 if (!overlapsWithKnownFixes.get(e.getKey())) {
@@ -255,26 +255,26 @@ public class FixesAndTails {
      * competitor's tail, the tail is adjusted by inserting the corresponding fix.
      * <p>
      * 
-     * If the last fix so far was an {@link GPSFixDTO#extrapolated extrapolated} fix, and the merge leads to a different
+     * If the last fix so far was an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, and the merge leads to a different
      * fix being the last one shown, the previously last fix that was extrapolated will be removed. This way, at most
      * one extrapolated fix is shown, avoiding jitter on the map as actual fixes are received that obsolete the
      * extrapolated ones.<p>
      * 
      * Precondition: {@link #hasFixesFor(CompetitorDTO) hasFixesFor(competitorDTO)}<code>==true</code>
      * @param mergeThis
-     *            If this list contains an {@link GPSFixDTO#extrapolated extrapolated} fix, that fix must be the last in
+     *            If this list contains an {@link GPSFixDTOWithSpeedWindTackAndLegType#extrapolated extrapolated} fix, that fix must be the last in
      *            the list
      */
-    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTO> mergeThis, final long timeForPositionTransitionMillis) {
-        List<GPSFixDTO> intoThis = fixes.get(competitorDTO);
+    private void mergeFixes(CompetitorDTO competitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType> mergeThis, final long timeForPositionTransitionMillis) {
+        List<GPSFixDTOWithSpeedWindTackAndLegType> intoThis = fixes.get(competitorDTO);
         int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
         int indexOfLastShownFix = lastShownFix.get(competitorDTO) == null ? -1 : lastShownFix.get(competitorDTO);
         final Polyline tail = getTail(competitorDTO);
         int intoThisIndex = 0;
-        for (GPSFixDTO mergeThisFix : mergeThis) {
-            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, new Comparator<GPSFixDTO>() {
+        for (GPSFixDTOWithSpeedWindTackAndLegType mergeThisFix : mergeThis) {
+            intoThisIndex = Collections.binarySearch(intoThis, mergeThisFix, new Comparator<GPSFixDTOWithSpeedWindTackAndLegType>() {
                 @Override
-                public int compare(GPSFixDTO o1, GPSFixDTO o2) {
+                public int compare(GPSFixDTOWithSpeedWindTackAndLegType o1, GPSFixDTOWithSpeedWindTackAndLegType o2) {
                     return o1.timepoint.compareTo(o2.timepoint);
                 }
             });
@@ -396,7 +396,7 @@ public class FixesAndTails {
                     tailPreparer.run();
                 }
                 int vertexCount = tail.getPath().getLength();
-                final List<GPSFixDTO> fixesForCompetitor = getFixes(competitorDTO);
+                final List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitorDTO);
                 int indexOfFirstShownFix = firstShownFix.get(competitorDTO) == null ? -1 : firstShownFix.get(competitorDTO);
                 // remove fixes before what is now to be the beginning of the polyline:
                 while (indexOfFirstShownFix != -1 && vertexCount > 0
@@ -411,7 +411,7 @@ public class FixesAndTails {
                 while (indexOfFirstShownFix > 0
                         && !fixesForCompetitor.get(indexOfFirstShownFix - 1).timepoint.before(from)) {
                     indexOfFirstShownFix--;
-                    GPSFixDTO fix = fixesForCompetitor.get(indexOfFirstShownFix);
+                    GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfFirstShownFix);
                     tail.getPath().insertAt(0, coordinateSystem.toLatLng(fix.position));
                     vertexCount++;
                 }
@@ -431,7 +431,7 @@ public class FixesAndTails {
                 while (indexOfLastShownFix < fixesForCompetitor.size() - 1
                         && !fixesForCompetitor.get(indexOfLastShownFix + 1).timepoint.after(to)) {
                     indexOfLastShownFix++;
-                    GPSFixDTO fix = fixesForCompetitor.get(indexOfLastShownFix);
+                    GPSFixDTOWithSpeedWindTackAndLegType fix = fixesForCompetitor.get(indexOfLastShownFix);
                     tail.getPath().insertAt(vertexCount++, coordinateSystem.toLatLng(fix.position));
                     if (indexOfFirstShownFix < 0) { // empty tail before?
                         indexOfFirstShownFix = indexOfLastShownFix; // set to the first vertex inserted into tail
@@ -500,7 +500,7 @@ public class FixesAndTails {
         Map<CompetitorDTO, Boolean> overlapWithKnownFixes = new HashMap<CompetitorDTO, Boolean>();
         
         for (CompetitorDTO competitor : competitorsToShow) {
-            List<GPSFixDTO> fixesForCompetitor = getFixes(competitor);
+            List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor = getFixes(competitor);
             Date fromDate;
             Date toDate;
             Date timepointOfLastKnownFix = fixesForCompetitor == null ? null : getTimepointOfLastNonExtrapolated(fixesForCompetitor);
@@ -535,8 +535,8 @@ public class FixesAndTails {
                 overlapWithKnownFixes);
     }
 
-    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
-        for (GPSFixDTO fix : fixesForCompetitor) {
+    private Date getTimepointOfFirstNonExtrapolated(List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor) {
+        for (GPSFixDTOWithSpeedWindTackAndLegType fix : fixesForCompetitor) {
             if (!fix.extrapolated) {
                 return fix.timepoint;
             }
@@ -544,11 +544,11 @@ public class FixesAndTails {
         return null;
     }
 
-    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTO> fixesForCompetitor) {
+    private Date getTimepointOfLastNonExtrapolated(List<GPSFixDTOWithSpeedWindTackAndLegType> fixesForCompetitor) {
         if (!fixesForCompetitor.isEmpty()) {
-            for (ListIterator<GPSFixDTO> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
+            for (ListIterator<GPSFixDTOWithSpeedWindTackAndLegType> fixIter = fixesForCompetitor.listIterator(fixesForCompetitor.size() - 1); fixIter
                     .hasPrevious();) {
-                GPSFixDTO fix = fixIter.previous();
+                GPSFixDTOWithSpeedWindTackAndLegType fix = fixIter.previous();
                 if (!fix.extrapolated) {
                     return fix.timepoint;
                 }

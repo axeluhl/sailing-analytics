@@ -33,8 +33,8 @@ class GPSAccuracyView : UIView {
         barView.frame = bounds
         
         // add listeners
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(GPSAccuracyView.newLocation(_:)), name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(GPSAccuracyView.locationManagerFailed(_:)), name:LocationManager.NotificationType.locationManagerFailed, object: nil)
 
     }
 

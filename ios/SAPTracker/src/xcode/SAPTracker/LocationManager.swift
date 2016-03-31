@@ -42,7 +42,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if (CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied) {
             return NSLocalizedString("Please enable location services for this app.", comment: "")
         }
-        if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
+        if (coreLocationManager.respondsToSelector(#selector(CLLocationManager.requestAlwaysAuthorization))) {
             coreLocationManager.requestAlwaysAuthorization()
         }
         coreLocationManager.startUpdatingLocation()
@@ -62,13 +62,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [CLLocation]!) {
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations.last
         let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location!))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
-    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
         let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }

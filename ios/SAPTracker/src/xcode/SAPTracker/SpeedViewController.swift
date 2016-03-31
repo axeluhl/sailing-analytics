@@ -16,7 +16,7 @@ class SpeedViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(SpeedViewController.newLocation(_:)), name:LocationManager.NotificationType.newLocation, object: nil)
     }
     
     deinit {
@@ -25,8 +25,12 @@ class SpeedViewController: UIViewController {
     
     func newLocation(notification: NSNotification) {
         let ms = notification.userInfo!["speed"] as! Double
-        let kn = ms * knPerMs
-        speedLabel.text = String(format: "%0.1f kn", kn)
+        if(ms >= 0) {
+            let kn = ms * knPerMs
+            speedLabel.text = String(format: "%0.1f kn", kn)
+        } else {
+            speedLabel.text = "– kn"
+        }
     }
 
 }

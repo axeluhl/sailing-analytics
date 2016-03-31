@@ -30,6 +30,12 @@ public interface Duration extends Serializable, Comparable<Duration> {
     
     double asDays();
     
+    /**
+     * In case this duration is positive, it is returned unmodified. Otherwise, the duration is returned negated, resulting
+     * in a positive duration.
+     */
+    Duration abs();
+    
     Duration divide(long divisor);
     Duration divide(double divisor);
     double   divide(Duration duration);
