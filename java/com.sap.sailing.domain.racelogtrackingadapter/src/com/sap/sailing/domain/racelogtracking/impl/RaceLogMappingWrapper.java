@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -61,7 +62,16 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         updateMappings(newMappings);
     }
     
-    public <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
+    public <FixT extends Timed> void addListeners(final BiConsumer<ItemT, FixT> recorder,
+            BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> listenerConsumer) {
+        for (List<DeviceMapping<ItemT>> list : mappings.values()) {
+            for (DeviceMapping<ItemT> mapping : list) {
+                listenerConsumer.accept((device, fix) -> recordFix(device, fix, recorder), mapping.getDevice());
+            }
+        }
+    }
+    
+    private <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
         if (mappingsByDevice.get(device) != null) {
             for (DeviceMapping<ItemT> mapping : mappingsByDevice.get(device)) {
                 ItemT item = mapping.getMappedTo();
