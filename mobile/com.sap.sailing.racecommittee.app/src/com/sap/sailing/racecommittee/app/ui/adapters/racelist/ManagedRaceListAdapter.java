@@ -189,10 +189,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                         }
                         time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
                     }
-                    StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
-                    if (result != null && result.isDependentStartTime()) {
-//                        has_dependent_races.setVisibility(View.VISIBLE);
-                    }
                 }
                 if (state.getFinishedTime() != null) {
                     time.setVisibility(View.GONE);
