@@ -14,7 +14,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.FilterMod
 
 /**
  * Filters races by status.
- * 
+ * <p/>
  * For each "run" of unscheduled races only the first will be taken.
  * For each "run" of finished races only the last will be taken.
  */
@@ -50,7 +50,7 @@ public class RaceFilter extends Filter {
         if (filterMode == null || filterMode.equals(FilterMode.ALL)) {
             return createResults(items);
         }
-        
+
         List<RaceListDataType> filteredItems = new ArrayList<>();
         RaceListDataTypeRace currentUnscheduledItem = null;
         RaceListDataTypeRace currentFinishedItem = null;
@@ -59,7 +59,7 @@ public class RaceFilter extends Filter {
         Map<String, Boolean> finalsStarted = new HashMap<>();
         int finishedItems = 0;
         int subItems = 0;
-        List<RaceListDataTypeHeader> headersToRemove= new ArrayList<>();
+        List<RaceListDataTypeHeader> headersToRemove = new ArrayList<>();
         RaceListDataTypeHeader currentHeader = null;
 
         List<RaceListDataType> allItems = new ArrayList<>(items);
@@ -74,7 +74,7 @@ public class RaceFilter extends Filter {
                 }
                 RaceListDataTypeHeader headerItem = (RaceListDataTypeHeader) item;
                 filteredItems.add(headerItem);
-                
+
                 // new run for all types!
                 currentHeader = (RaceListDataTypeHeader) item;
                 currentUnscheduledItem = null;
@@ -83,7 +83,7 @@ public class RaceFilter extends Filter {
                 finishedItems = 0;
                 subItems = 0;
             } else if (item instanceof RaceListDataTypeRace) {
-                subItems ++;
+                subItems++;
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
                 boolean qualifying = raceItem.getRace().getFleet().getOrdering() == 0 || !raceItem.getRace().getSeries().isMedal();
                 RaceLogRaceStatus status = raceItem.getCurrentStatus();
@@ -94,16 +94,20 @@ public class RaceFilter extends Filter {
                     }
                     if (currentUnscheduledRaceName.equals(raceItem.getRaceName())) {
                         filteredItems.add(raceItem);
-                        currentUnscheduledItem = raceItem;
+                        if (currentlyRunningFleet == null) {
+                            currentUnscheduledItem = raceItem;
+                        }
                     }
                 }
                 if (currentUnscheduledItem == null && RaceLogRaceStatus.UNSCHEDULED.equals(status)) {
                     if (currentlyRunningFleet == null || currentlyRunningFleet.equals(raceItem.getFleet())) {
-                        filteredItems.add(raceItem);
                         currentUnscheduledItem = raceItem;
+                        if (!filteredItems.contains(raceItem)) {
+                            filteredItems.add(raceItem);
+                        }
                     }
                 } else if (RaceLogRaceStatus.FINISHED.equals(status)) {
-                    finishedItems ++;
+                    finishedItems++;
                     if (filteredItems.contains(currentFinishedItem)) {
                         filteredItems.remove(currentFinishedItem);
                     }
@@ -132,11 +136,11 @@ public class RaceFilter extends Filter {
         for (RaceListDataType item : allItems) {
             if (item instanceof RaceListDataTypeHeader) {
                 currentHeader = (RaceListDataTypeHeader) item;
-            } else if (item instanceof  RaceListDataTypeRace) {
+            } else if (item instanceof RaceListDataTypeRace) {
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
                 if (raceItem.getRace().getFleet().getOrdering() == 0 && !raceItem.getRace().getSeries().isMedal()) {
                     String regattaName = raceItem.getRace().getRaceGroup().getName();
-                    if(finalsStarted.containsKey(regattaName) && currentHeader != null) {
+                    if (finalsStarted.containsKey(regattaName) && currentHeader != null) {
                         headersToRemove.add(currentHeader);
                     }
                 }
