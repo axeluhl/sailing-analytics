@@ -21,9 +21,11 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.impl.DoubleVectorFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -112,6 +114,10 @@ public class Activator implements BundleActivator {
         // legacy type name; some DBs may still contain fixes marked with this old package name:
         properties.put(TypeBasedServiceFinder.TYPE, "com.sap.sailing.domain.tracking.impl.GPSFixMovingImpl");
         registrations.add(context.registerService(GPSFixMongoHandler.class, gpsFixMovingMongoHandler, properties));
+        properties.put(TypeBasedServiceFinder.TYPE, DoubleVectorFixImpl.class.getName());
+        registrations.add(context.registerService(GPSFixMongoHandler.class, new DoubleVectorFixMongoHandlerImpl(racingEventService.getMongoObjectFactory(),
+                racingEventService.getDomainObjectFactory()), properties));
+
         // Add an MBean for the service to the JMX bean server:
         RacingEventServiceMXBean mbean = new RacingEventServiceMXBeanImpl(racingEventService);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
