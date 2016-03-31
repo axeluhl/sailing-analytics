@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.common.tracking.impl;
 
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
@@ -15,9 +16,11 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public double get(String valueName) {
-        // TODO Auto-generated method stub
-//        int index = BravoSensorDataMetadata.INSTANCE.
-        return 0;
+        int index = BravoSensorDataMetadata.INSTANCE.getColumnIndex(valueName);
+        if(index <0) {
+            throw new IllegalArgumentException("Unknown value \"\" for " + getClass().getSimpleName());
+        }
+        return fix.get(index);
     }
 
     @Override
@@ -27,9 +30,7 @@ public class BravoFixImpl implements BravoFix {
 
     @Override
     public double getRideHeight() {
-        // TODO Auto-generated method stub
-//        fix.get(index);
-        return 0;
+        return fix.get(BravoSensorDataMetadata.INSTANCE.rideHeightColumn);
     }
 
 }
