@@ -3,21 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -32,7 +17,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -42,6 +26,21 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
@@ -162,14 +161,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         race.setUpdateIndicatorVisible(false);
                     }
                 } else {
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         update_badge.setVisibility(View.VISIBLE);
                     }
