@@ -10,9 +10,11 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
@@ -31,12 +33,14 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
     private static final Logger logger = Logger.getLogger(Activator.class.getName());
     
     private static BundleContext context;
-    
+    private ServiceTracker<SensorFixStore, SensorFixStore> sensorFixStoreTracker;
+
     public static BundleContext getContext() {
         return context;
     }
@@ -78,7 +82,12 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceImpl(), null));
         
-        registrations.add(context.registerService(TrackedRegattaListener.class, new RegattaLogSensorDataTrackerTrackedRegattaListener(), null));
+        sensorFixStoreTracker = ServiceTrackerFactory.createAndOpen(
+                context,
+                SensorFixStore.class);
+
+        registrations.add(context.registerService(TrackedRegattaListener.class,
+                new RegattaLogSensorDataTrackerTrackedRegattaListener(sensorFixStoreTracker), null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
@@ -86,7 +95,7 @@ public class Activator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         Activator.context = null;
-        
+        sensorFixStoreTracker.close();
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }

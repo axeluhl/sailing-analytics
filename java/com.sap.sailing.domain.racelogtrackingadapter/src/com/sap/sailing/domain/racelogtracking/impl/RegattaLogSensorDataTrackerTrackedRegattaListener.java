@@ -3,6 +3,10 @@ package com.sap.sailing.domain.racelogtracking.impl;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.osgi.util.tracker.ServiceTracker;
+
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 
@@ -11,6 +15,13 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
     private final ConcurrentHashMap<Serializable, TrackedRegatta> knownRegattas = new ConcurrentHashMap<Serializable, TrackedRegatta>();
     private final ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker> registeredTrackers = new ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker>();
 
+    private final ServiceTracker<SensorFixStore, SensorFixStore> sensorFixStoreTracker;
+
+    public RegattaLogSensorDataTrackerTrackedRegattaListener(
+            ServiceTracker<SensorFixStore, SensorFixStore> sensorFixStoreTracker) {
+        this.sensorFixStoreTracker = sensorFixStoreTracker;
+    }
+
     @Override
     public void regattaAdded(TrackedRegatta trackedRegatta) {
         Serializable regattaId = trackedRegatta.getRegatta().getId();
@@ -18,7 +29,8 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
             synchronized (knownRegattas) {
                 RegattaLogSensorDataTracker tracker = null;
                 try {
-                    tracker = new RegattaLogSensorDataTracker(trackedRegatta);
+                    tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) trackedRegatta,
+                            sensorFixStoreTracker.getService());
                     registeredTrackers.put(regattaId, tracker);
                 } finally {
                     if (tracker != null) {
