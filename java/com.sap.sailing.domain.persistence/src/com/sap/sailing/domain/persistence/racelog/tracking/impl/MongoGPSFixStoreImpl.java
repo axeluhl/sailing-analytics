@@ -11,8 +11,8 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -29,9 +29,9 @@ import com.sap.sse.common.WithID;
  *
  */
 public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
-    private final MongoSensorFixStore sensorFixStore;
+    private final SensorFixStore sensorFixStore;
 
-    public MongoGPSFixStoreImpl(MongoSensorFixStore sensorFixStore) {
+    public MongoGPSFixStoreImpl(SensorFixStore sensorFixStore) {
         this.sensorFixStore = sensorFixStore;
     }
 

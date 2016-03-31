@@ -31,7 +31,7 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.media.MediaDB;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -55,13 +55,13 @@ public class MasterDataImporterMediaTest {
         DomainObjectFactory domainObjectFactory = mock(DomainObjectFactory.class, Mockito.RETURNS_MOCKS);
         MongoObjectFactory mongoObjectFactory = mock(MongoObjectFactoryImpl.class);
         WindStore windStore = mock(WindStore.class);
-        GPSFixStore gpsFixStore = mock(GPSFixStore.class);
+        SensorFixStore sensorFixStore = mock(SensorFixStore.class);
 
         MediaDB mediaDb = mock(MediaDB.class);
         when(mediaDb.loadAllMediaTracks()).thenReturn(Arrays.asList(existingDbMediaTracks));
 
         racingEventService = spy(new RacingEventServiceImpl(domainObjectFactory, mongoObjectFactory, mediaDb,
-                windStore, gpsFixStore));
+                windStore, sensorFixStore));
     }
 
     @Test

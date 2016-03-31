@@ -136,6 +136,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -361,6 +362,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
+    private final SensorFixStore sensorFixStore;
 
     /**
      * This author should be used for server generated race log events
@@ -431,9 +433,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this(true, null);
     }
 
-    public RacingEventServiceImpl(WindStore windStore, GPSFixStore gpsFixStore,
+    public RacingEventServiceImpl(WindStore windStore, SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory) {
-        this(true, windStore, gpsFixStore, serviceFinderFactory);
+        this(true, windStore, sensorFixStore, serviceFinderFactory);
     }
 
     void setBundleContext(BundleContext bundleContext) {
@@ -466,7 +468,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
-            GPSFixStore gpsFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
+            SensorFixStore sensorFixStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -479,7 +481,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, gpsFixStore, serviceFinderFactory);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory);
     }
 
     /**
@@ -489,7 +491,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * persistence.
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, DomainObjectFactory> domainObjectFactoryProvider,
-            final MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore, GPSFixStore gpsFixStore) {
+            final MongoObjectFactory mongoObjectFactory, MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final DomainObjectFactory domainObjectFactory = domainObjectFactoryProvider.apply(raceLogResolver);
@@ -499,11 +501,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, gpsFixStore, null);
+        }, mediaDB, windStore, sensorFixStore, null);
     }
     
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
-            MediaDB mediaDB, WindStore windStore, GPSFixStore gpsFixStore) {
+            MediaDB mediaDB, WindStore windStore, SensorFixStore sensorFixStore) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             @Override public DomainObjectFactory getDomainObjectFactory() { return domainObjectFactory; }
@@ -511,7 +513,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, gpsFixStore, null);
+        }, mediaDB, windStore, sensorFixStore, null);
     }
 
     /**
@@ -524,7 +526,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            associations per race tracked.
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
-            WindStore windStore, GPSFixStore gpsFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
+            final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
         logger.info("Created " + this);
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
@@ -535,12 +537,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.mongoObjectFactory = constructorParameters.getMongoObjectFactory();
         this.mediaDB = mediaDb;
         this.competitorStore = constructorParameters.getCompetitorStore();
-        if (windStore == null) {
-            try {
-                windStore = MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory, domainObjectFactory);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            this.windStore = windStore == null ? MongoWindStoreFactory.INSTANCE.getMongoWindStore(mongoObjectFactory,
+                    domainObjectFactory) : windStore;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         this.competitorStore.addCompetitorUpdateListener(new CompetitorUpdateListener() {
             @Override
@@ -551,7 +552,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                         competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile()));
             }
         });
-        this.windStore = windStore;
         this.dataImportLock = new DataImportLockWithProgress();
 
         remoteSailingServerSet = new RemoteSailingServerSet(scheduler);
@@ -585,16 +585,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
         this.mediaLibrary = new MediaLibrary();
-        if (gpsFixStore == null) {
-            try {
-                gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(MongoSensorFixStoreFactory.INSTANCE
-                        .getMongoGPSFixStore(mongoObjectFactory, domainObjectFactory, serviceFinderFactory));
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
+        try {
+            this.sensorFixStore = sensorFixStore == null ? MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+                    mongoObjectFactory, domainObjectFactory, serviceFinderFactory) : sensorFixStore;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        this.gpsFixStore = gpsFixStore;
+        try {
+            this.gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(this.sensorFixStore);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
@@ -3005,6 +3008,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public GPSFixStore getGPSFixStore() {
         return gpsFixStore;
+    }
+    
+    @Override
+    public SensorFixStore getSensorFixStore() {
+        return sensorFixStore;
     }
 
     @Override
