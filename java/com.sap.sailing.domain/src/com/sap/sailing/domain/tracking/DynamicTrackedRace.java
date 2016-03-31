@@ -11,8 +11,8 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Timed;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -50,7 +50,7 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
-    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
             String trackName, TrackFactory<TrackT> newTrackFactory);
 
     /**

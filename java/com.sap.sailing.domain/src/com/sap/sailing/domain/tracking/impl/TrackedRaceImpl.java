@@ -103,6 +103,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.confidence.ConfidenceBasedWindAverager;
 import com.sap.sailing.domain.confidence.ConfidenceFactory;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
@@ -116,6 +117,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
@@ -124,6 +126,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -3953,7 +3956,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor,
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
             String trackName) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForRead(sensorTracksLock);
@@ -3964,7 +3967,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    protected <FixT extends Timed, TrackT extends DynamicTrack<FixT>> TrackT getOrCreateSensorTrack(
+    protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForWrite(sensorTracksLock);

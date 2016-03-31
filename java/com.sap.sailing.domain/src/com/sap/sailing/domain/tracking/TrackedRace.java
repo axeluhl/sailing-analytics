@@ -41,6 +41,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -50,7 +51,6 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
@@ -204,7 +204,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
 
-    <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
+    <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed

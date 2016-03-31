@@ -32,6 +32,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -658,7 +660,7 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
     
     @Override
-    public <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor,
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
             String trackName) {
         return null;
     }
