@@ -204,7 +204,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
 
-    <FixT extends Timed> Track<FixT> getSensorTrack(Competitor competitor, String trackName);
+    <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed

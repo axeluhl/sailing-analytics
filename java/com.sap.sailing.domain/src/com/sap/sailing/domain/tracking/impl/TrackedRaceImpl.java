@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,6 +125,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -3953,23 +3953,30 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     @Override
-    public <FixT extends Timed> Track<FixT> getSensorTrack(Competitor competitor, String trackName) {
+    public <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor,
+            String trackName) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForRead(sensorTracksLock);
-        Track<FixT> result = (Track) sensorTracks.get(key);
-        LockUtil.unlockAfterRead(sensorTracksLock);
-        return result;
+        try {
+            return (TrackT) sensorTracks.get(key);
+        } finally {
+            LockUtil.unlockAfterRead(sensorTracksLock);
+        }
     }
-    
-    protected <FixT extends Timed> DynamicTrack<FixT> getOrCreateSensorTrack(Competitor competitor, String trackName, Supplier<DynamicTrack<FixT>> newTrackFactory) {
+
+    protected <FixT extends Timed, TrackT extends DynamicTrack<FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForWrite(sensorTracksLock);
-        DynamicTrack<FixT> result = (DynamicTrack) sensorTracks.get(key);
-        if(result == null) {
-            result = newTrackFactory.get();
-            sensorTracks.put(key, (DynamicTrack<?>) result);
+        try {
+            TrackT result = (TrackT) sensorTracks.get(key);
+            if (result == null) {
+                result = newTrackFactory.get();
+                sensorTracks.put(key, result);
+            }
+            return result;
+        } finally {
+            LockUtil.unlockAfterWrite(sensorTracksLock);
         }
-        LockUtil.unlockAfterWrite(sensorTracksLock);
-        return result;
     }
 }

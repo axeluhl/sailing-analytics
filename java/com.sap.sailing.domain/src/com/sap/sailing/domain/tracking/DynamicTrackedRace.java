@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.tracking;
 
-import java.util.function.Supplier;
-
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -52,7 +50,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
-    <FixT extends Timed> DynamicTrack<FixT> getOrCreateSensorTrack(Competitor competitor, String trackName, Supplier<DynamicTrack<FixT>> newTrackFactory);
+    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
+            String trackName, TrackFactory<TrackT> newTrackFactory);
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the

@@ -42,6 +42,7 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicRaceDefinitionSet;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -53,6 +54,8 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
+import com.sap.sailing.domain.tracking.Track;
+import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -66,6 +69,7 @@ import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 
 public class MockedTrackedRace implements DynamicTrackedRace {
@@ -794,5 +798,17 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void updateMarkPassingsAfterRaceLogChanges() {
+    }
+    
+    @Override
+    public <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor,
+            String trackName) {
+        return null;
+    }
+
+    @Override
+    public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
+            String trackName, TrackFactory<TrackT> newTrackFactory) {
+        return null;
     }
 }

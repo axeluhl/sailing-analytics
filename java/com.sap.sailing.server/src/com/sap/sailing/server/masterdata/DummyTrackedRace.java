@@ -45,6 +45,7 @@ import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
@@ -59,6 +60,7 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 
 public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
@@ -628,5 +630,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+    
+    @Override
+    public <FixT extends Timed, TrackT extends Track<FixT>> TrackT getSensorTrack(Competitor competitor,
+            String trackName) {
+        return null;
     }
 }
