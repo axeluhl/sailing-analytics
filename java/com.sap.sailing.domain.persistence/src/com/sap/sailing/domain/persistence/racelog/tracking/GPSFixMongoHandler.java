@@ -2,7 +2,7 @@ package com.sap.sailing.domain.persistence.racelog.tracking;
 
 import com.mongodb.DBObject;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationHandler;
-import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sse.common.Timed;
 
 /**
  * For GPS Fixes, the fully qualified class name is the type used to identify
@@ -12,5 +12,5 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
  * @author Fredrik Teschke
  *
  */
-public interface GPSFixMongoHandler extends TransformationHandler<GPSFix, DBObject> {
+public interface GPSFixMongoHandler<T extends Timed> extends TransformationHandler<T, DBObject> {
 }

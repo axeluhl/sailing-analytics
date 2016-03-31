@@ -152,5 +152,8 @@ public enum FieldNames {
     VIDEO_TAGS, VIDEO_THUMBNAIL_URL, VIDEO_LENGTH_IN_SECONDS,
     
     // sailors info fileds
-    SAILORS_INFO_URL, SAILORS_INFO_LOCALE;
+    SAILORS_INFO_URL, SAILORS_INFO_LOCALE,
+    
+    // double vector fixes
+    FIX;
 }

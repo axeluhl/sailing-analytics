@@ -15,14 +15,14 @@ import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandl
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
-public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSFixMongoHandler> {
+public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSFixMongoHandler<?>> {
     private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
     private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
-    private final GPSFixMongoHandler movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
-    private final GPSFixMongoHandler handler = new GPSFixMongoHandlerImpl(mof, dof);
+    private final GPSFixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
+    private final GPSFixMongoHandler<?> handler = new GPSFixMongoHandlerImpl(mof, dof);
 
     @Override
-    public GPSFixMongoHandler findService(String fixType) {
+    public GPSFixMongoHandler<?> findService(String fixType) {
         if (fixType.equals(GPSFixMovingImpl.class.getName()) ||
                 fixType.equals(CompactGPSFixMovingImpl.class.getName())) return movingHandler;
         if (fixType.equals(GPSFixImpl.class.getName()) ||
@@ -31,11 +31,11 @@ public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSF
     }
 
     @Override
-    public void setFallbackService(GPSFixMongoHandler fallback) {
+    public void setFallbackService(GPSFixMongoHandler<?> fallback) {
     }
     
     @Override
-    public Set<GPSFixMongoHandler> findAllServices() {
-        return new HashSet<GPSFixMongoHandler>(Arrays.asList(movingHandler, handler));
+    public Set<GPSFixMongoHandler<?>> findAllServices() {
+        return new HashSet<GPSFixMongoHandler<?>>(Arrays.asList(movingHandler, handler));
     }
 }

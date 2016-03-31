@@ -12,7 +12,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sse.common.TimePoint;
 
-public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler {
+public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler<GPSFix> {
     private final MongoObjectFactoryImpl mof;
     private final DomainObjectFactoryImpl dof;
 

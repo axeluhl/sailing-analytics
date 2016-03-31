@@ -97,7 +97,7 @@ import difflib.PatchFailedException;
  * @author Fredrik Teschke
  * 
  */
-public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
+public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener<GPSFix> {
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;

@@ -131,6 +131,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDB;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
@@ -586,8 +587,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.mediaLibrary = new MediaLibrary();
         if (gpsFixStore == null) {
             try {
-                gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(mongoObjectFactory,
-                        domainObjectFactory, serviceFinderFactory);
+                gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(MongoSensorFixStoreFactory.INSTANCE
+                        .getMongoGPSFixStore(mongoObjectFactory, domainObjectFactory, serviceFinderFactory));
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);

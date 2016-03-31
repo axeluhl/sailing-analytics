@@ -39,6 +39,7 @@ import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
+import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -71,8 +72,10 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
     
     @Before
     public void setUp() throws Exception, UnknownHostException, InterruptedException {
-        final GPSFixStore gpsFixStore = MongoGPSFixStoreFactory.INSTANCE.getMongoGPSFixStore(PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
-                PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), /* serviceFinderFactory */ null);
+        final GPSFixStore gpsFixStore = MongoGPSFixStoreFactory.INSTANCE
+                .getMongoGPSFixStore(MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+                        PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
+                        PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), /* serviceFinderFactory */null));
         Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptors = super.basicSetUp(
                 /* dropDB */true, /* master=null means create a new one */null,
                 /* replica=null means create a new one */null);
