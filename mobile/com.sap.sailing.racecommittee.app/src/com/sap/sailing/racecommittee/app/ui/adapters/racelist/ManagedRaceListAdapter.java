@@ -3,21 +3,6 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -32,7 +17,6 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
@@ -42,6 +26,21 @@ import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
@@ -162,31 +161,16 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         race.setUpdateIndicatorVisible(false);
                     }
                 } else {
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         update_badge.setVisibility(View.VISIBLE);
                     }
                 }
             }
-
             race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
-
-            RaceGroupSeriesFleet fleet = race.getFleet();
-            if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
-                if (!TextUtils.isEmpty(race_name.getText())) {
-                    race_name.setText(race_name.getText() + " - " + fleet.getFleetName());
-                } else {
-                    race_name.setText(fleet.getFleetName());
-                }
-            }
-
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
@@ -204,10 +188,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                             textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
                         }
                         time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-                    }
-                    StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
-                    if (result != null && result.isDependentStartTime()) {
-//                        has_dependent_races.setVisibility(View.VISIBLE);
                     }
                 }
                 if (state.getFinishedTime() != null) {
