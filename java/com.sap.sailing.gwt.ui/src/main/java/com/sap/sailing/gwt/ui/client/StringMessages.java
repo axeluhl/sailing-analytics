@@ -1520,4 +1520,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String fixSuccessfullyRemoved();
     String dragToChangePosition();
     String moveFix();
+    String currentRideHeightInMeters();
+    String currentRideHeightInMetersTooltip();
+    String currentOrAverageRideHeightInMeters();
+    String currentOrAverageRideHeightInMetersTooltip();
 }
