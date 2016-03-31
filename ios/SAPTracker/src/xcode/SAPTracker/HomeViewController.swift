@@ -45,9 +45,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         // register for open custom URL events
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(openUrl(_:)), name: AppDelegate.NotificationType.openUrl, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(HomeViewController.openUrl(_:)), name: AppDelegate.NotificationType.openUrl, object: nil)
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(checkEULA(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(HomeViewController.checkEULA(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
 
         checkEULA(NSNotification.init(name: "", object: nil))
 
