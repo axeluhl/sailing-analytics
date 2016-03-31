@@ -18,6 +18,7 @@ import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.GPSFixJsonDeserializer;
@@ -76,6 +77,8 @@ public class Activator implements BundleActivator {
 
         registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceImpl(), null));
+        
+        registrations.add(context.registerService(TrackedRegattaListener.class, new RegattaLogSensorDataTrackerTrackedRegattaListener(), null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
