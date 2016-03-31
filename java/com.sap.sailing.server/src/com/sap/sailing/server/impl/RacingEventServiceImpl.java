@@ -147,6 +147,7 @@ import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.EmptyTrackedRegattaListener;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
@@ -157,6 +158,7 @@ import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
@@ -405,6 +407,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private SailingServerConfiguration sailingServerConfiguration;
 
+    private final TrackedRegattaListener trackedRegattaListener;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -442,6 +446,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         this.bundleContext = bundleContext;
     }
 
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
+        this(clearPersistentCompetitorStore, serviceFinderFactory, null);
+    }
+    
     /**
      * Like {@link #RacingEventServiceImpl()}, but allows callers to specify that the persistent competitor collection
      * be cleared before the service starts.
@@ -451,7 +459,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors
      *            created and stored during previous service executions will initially be loaded.
      */
-    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory) {
+    public RacingEventServiceImpl(boolean clearPersistentCompetitorStore, final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener) {
         this((final RaceLogResolver raceLogResolver)-> {
             return new ConstructorParameters() {
             private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(serviceFinderFactory);
@@ -464,7 +472,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory ,trackedRegattaListener);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -481,7 +489,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return competitorStore.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return competitorStore; }
             };
-        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory);
+        }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null);
     }
 
     /**
@@ -501,7 +509,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, sensorFixStore, null);
+        }, mediaDB, windStore, sensorFixStore, null, null);
     }
     
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -513,7 +521,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             @Override public DomainFactory getBaseDomainFactory() { return domainObjectFactory.getBaseDomainFactory(); }
             @Override public CompetitorStore getCompetitorStore() { return getBaseDomainFactory().getCompetitorStore(); }
             };
-        }, mediaDB, windStore, sensorFixStore, null);
+        }, mediaDB, windStore, sensorFixStore, null, null);
     }
 
     /**
@@ -526,7 +534,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            associations per race tracked.
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider, MediaDB mediaDb,
-            final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory) {
+            final WindStore windStore, final SensorFixStore sensorFixStore, TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListener trackedRegattaListener) {
         logger.info("Created " + this);
         final ConstructorParameters constructorParameters = constructorParametersProvider.apply(this);
         this.domainObjectFactory = constructorParameters.getDomainObjectFactory();
@@ -600,6 +608,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
+
+        this.trackedRegattaListener = trackedRegattaListener == null ? EmptyTrackedRegattaListener.INSTANCE : trackedRegattaListener;
 
         sailingServerConfiguration = domainObjectFactory.loadServerConfiguration();
         final Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = loadStoredEvents();
@@ -2107,6 +2117,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new TrackRegatta(regatta.getRegattaIdentifier()));
                 regattaTrackingCache.put(regatta, result);
                 ensureRegattaIsObservedForDefaultLeaderboardAndAutoLeaderboardLinking(result);
+
+                trackedRegattaListener.regattaAdded(result);
             }
             return result;
         } finally {
@@ -2130,6 +2142,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             LockUtil.unlockAfterWrite(regattaTrackingCacheLock);
         }
         stopObservingRegattaForRedaultLeaderboardAndAutoLeaderboardLinking(trackedRegatta);
+        trackedRegattaListener.regattaRemoved(trackedRegatta);
     }
 
     @Override

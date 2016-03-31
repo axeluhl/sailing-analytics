@@ -57,6 +57,8 @@ public class Activator implements BundleActivator {
     private ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService> masterDataImportClassLoaderServiceTracker;
     
     private ServiceTracker<PolarDataService, PolarDataService> polarDataServiceTracker;
+
+    private OSGiBasedTrackedRegattaListener trackedRegattaListener;
     
     public Activator() {
         clearPersistentCompetitors = Boolean.valueOf(System.getProperty(CLEAR_PERSISTENT_COMPETITORS_PROPERTY_NAME, ""+false));
@@ -68,12 +70,14 @@ public class Activator implements BundleActivator {
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
         
+        trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
+        
         // At this point the OSGi resolver is used as device type service finder.
         // In the case that we are not in an OSGi context (e.g. running a JUnit test instead),
         // this code block is not run, and the test case can inject some other type of finder
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
-        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory);
+        racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory, trackedRegattaListener);
         
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
@@ -135,6 +139,7 @@ public class Activator implements BundleActivator {
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }
+        trackedRegattaListener.close();
         registrations.clear();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
