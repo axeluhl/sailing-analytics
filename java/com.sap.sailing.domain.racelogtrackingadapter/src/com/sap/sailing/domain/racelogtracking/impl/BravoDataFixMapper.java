@@ -5,18 +5,21 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackImpl;
 
 public class BravoDataFixMapper implements SensorFixMapper<DoubleVectorFix, DynamicTrack<DoubleVectorFix>, Competitor> {
+    
+    private static final String TRACK_NAME = "BravoFixTrack";
 
     @Override
     public DynamicTrack<DoubleVectorFix> getTrack(DynamicTrackedRace race, Competitor key) {
-        // TODO Auto-generated method stub
-        return null;
+        String lockName = TRACK_NAME + " for " + key;
+        return race.getOrCreateSensorTrack(key, TRACK_NAME, () -> new DynamicTrackImpl<DoubleVectorFix>(lockName));
     }
 
     @Override
     public void addFix(DynamicTrack<DoubleVectorFix> track, DoubleVectorFix fix) {
-        // TODO Auto-generated method stub
+        track.add(fix);
     }
 
 }
