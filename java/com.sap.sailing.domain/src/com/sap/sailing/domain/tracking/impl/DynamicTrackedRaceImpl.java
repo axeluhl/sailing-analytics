@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,6 +44,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -57,6 +59,7 @@ import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
@@ -1011,4 +1014,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
 
+    @Override
+    public <FixT extends Timed> DynamicTrack<FixT> getOrCreateSensorTrack(Competitor competitor, String trackName,
+            Supplier<DynamicTrack<FixT>> newTrackFactory) {
+        return super.getOrCreateSensorTrack(competitor, trackName, newTrackFactory);
+    }
 }

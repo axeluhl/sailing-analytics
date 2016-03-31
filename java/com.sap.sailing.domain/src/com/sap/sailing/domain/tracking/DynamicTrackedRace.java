@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.tracking;
 
+import java.util.function.Supplier;
+
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -12,6 +14,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 public interface DynamicTrackedRace extends TrackedRace {
     void recordFix(Competitor competitor, GPSFixMoving fix);
@@ -48,6 +51,8 @@ public interface DynamicTrackedRace extends TrackedRace {
      * new track will be created in case no track was present for <code>mark</code> so far.
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
+    
+    <FixT extends Timed> DynamicTrack<FixT> getOrCreateSensorTrack(Competitor competitor, String trackName, Supplier<DynamicTrack<FixT>> newTrackFactory);
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the

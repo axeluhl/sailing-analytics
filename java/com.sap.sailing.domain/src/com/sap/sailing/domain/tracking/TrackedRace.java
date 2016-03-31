@@ -50,6 +50,7 @@ import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
@@ -202,6 +203,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * The raw, updating feed of a single competitor participating in this race
      */
     GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
+
+    <FixT extends Timed> Track<FixT> getSensorTrack(Competitor competitor, String trackName);
 
     /**
      * Tells the leg on which the <code>competitor</code> was at time <code>at</code>. If the competitor hasn't passed

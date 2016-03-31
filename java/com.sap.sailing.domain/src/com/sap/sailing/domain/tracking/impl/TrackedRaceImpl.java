@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -116,6 +117,7 @@ import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
+import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
@@ -273,6 +275,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected final MarkPassingCalculator markPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
+
+    private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
     
     private final Map<String, Sideline> courseSidelines;
 
@@ -379,6 +383,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * must be established again after de-serialization by invoking {@link #setRaceLogResolver}.
      */
     private transient RaceLogResolver raceLogResolver;
+    
+    private final NamedReentrantReadWriteLock sensorTracksLock;
 
     /**
      * Constructs the tracked race with one-design ranking.
@@ -531,6 +537,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } else {
             markPassingCalculator = null;
         }
+        sensorTracks = new HashMap<>();
+        sensorTracksLock = new NamedReentrantReadWriteLock("sensorTracksLock", true);
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
@@ -3942,5 +3950,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
              result.addAll(new RegattaLogDefinedMarkAnalyzer(log).analyze());
          }
          return result;
+    }
+    
+    @Override
+    public <FixT extends Timed> Track<FixT> getSensorTrack(Competitor competitor, String trackName) {
+        Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        LockUtil.lockForRead(sensorTracksLock);
+        Track<FixT> result = (Track) sensorTracks.get(key);
+        LockUtil.unlockAfterRead(sensorTracksLock);
+        return result;
+    }
+    
+    protected <FixT extends Timed> DynamicTrack<FixT> getOrCreateSensorTrack(Competitor competitor, String trackName, Supplier<DynamicTrack<FixT>> newTrackFactory) {
+        Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        LockUtil.lockForWrite(sensorTracksLock);
+        DynamicTrack<FixT> result = (DynamicTrack) sensorTracks.get(key);
+        if(result == null) {
+            result = newTrackFactory.get();
+            sensorTracks.put(key, (DynamicTrack<?>) result);
+        }
+        LockUtil.unlockAfterWrite(sensorTracksLock);
+        return result;
     }
 }
