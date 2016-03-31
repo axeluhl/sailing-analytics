@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +35,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
     private final static DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss.SSSSSS");
-    private final BravoSensorDataMetadata metadata = new BravoSensorDataMetadata();
+    private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
     private final String BOF = "jjlDATE\tjjlTIME";
 
     public void importFixes(InputStream inputStream, Callback callback, String sourceName)
@@ -98,9 +97,9 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
         Instant instant = day.toInstant(ZoneOffset.UTC);
         TimePoint fixTp = new MillisecondsTimePoint(Date.from(instant));
-        double[] fixData = new double[metadata.getColumns().length];
+        double[] fixData = new double[metadata.getColumns().size()];
         for (int i = 0; i < fixData.length; i++) {
-            fixData[i] = Double.valueOf(contentTokens[colIndices.get(metadata.getColumns()[i])]);
+            fixData[i] = Double.valueOf(contentTokens[colIndices.get(metadata.getColumns().get(i))]);
         }
         return new DoubleVectorFixImpl(fixTp, fixData);
     }
@@ -108,7 +107,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndices = new HashMap<>();
-        List<String> columns = Arrays.asList(metadata.getColumns());
+        List<String> columns = metadata.getColumns();
         for (int j = 0; j < headerTokens.length; j++) {
             String header = headerTokens[j];
             colIndices.put(header, columns.indexOf(header));
