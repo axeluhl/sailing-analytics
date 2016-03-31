@@ -228,7 +228,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
-    void getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier,
+    void getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier,
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
@@ -780,4 +780,6 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<MarkTracksDTO> callback);
+    void getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets,
+            AsyncCallback<Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>>> asyncCallback);
 }
