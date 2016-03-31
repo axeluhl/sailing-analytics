@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.sensordata;
+package com.sap.sailing.domain.common.sensordata;
 
 public enum KnownSensorDataTypes {
     BRAVO(BravoSensorDataMetadata.INSTANCE);

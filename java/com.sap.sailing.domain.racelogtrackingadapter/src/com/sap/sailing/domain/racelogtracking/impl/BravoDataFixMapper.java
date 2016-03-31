@@ -1,11 +1,11 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
-import com.sap.sailing.domain.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.SensorFixTrackImpl;

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.sensordata;
+package com.sap.sailing.domain.common.sensordata;
 
 import java.util.Arrays;
 import java.util.Collections;

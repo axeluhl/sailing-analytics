@@ -18,9 +18,9 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
+import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
-import com.sap.sailing.domain.sensordata.BravoSensorDataMetadata;
-import com.sap.sailing.domain.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
