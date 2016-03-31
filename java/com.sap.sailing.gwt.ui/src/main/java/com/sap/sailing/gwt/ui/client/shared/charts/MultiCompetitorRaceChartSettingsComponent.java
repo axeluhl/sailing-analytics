@@ -36,6 +36,7 @@ public class MultiCompetitorRaceChartSettingsComponent extends AbstractChartSett
         availableDetailsTypes.add(DetailType.DISTANCE_TO_START_LINE);
         availableDetailsTypes.add(DetailType.BEAT_ANGLE);
         availableDetailsTypes.add(DetailType.COURSE_OVER_GROUND_TRUE_DEGREES);
+        availableDetailsTypes.add(DetailType.RACE_CURRENT_RIDE_HEIGHT_IN_METERS);
         
         if (hasOverallLeaderboard) {
             availableDetailsTypes.add(DetailType.OVERALL_RANK);

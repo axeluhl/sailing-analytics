@@ -266,6 +266,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceF
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -2925,6 +2926,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 if (trackedLeg != null) {
                     Bearing beatAngle = trackedLeg.getBeatAngle(timePoint, cache);
                     result = beatAngle == null ? null : Math.abs(beatAngle.getDegrees());
+                }
+                break;
+            case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
+                final BravoFixTrack bravoFixTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                if (bravoFixTrack != null) {
+                    result = bravoFixTrack.getRideHeight(timePoint);
                 }
                 break;
             default:
