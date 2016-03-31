@@ -9,6 +9,7 @@ import java.util.Map;
 import android.widget.Filter;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.FilterMode;
 
 /**
@@ -53,6 +54,8 @@ public class RaceFilter extends Filter {
         List<RaceListDataType> filteredItems = new ArrayList<>();
         RaceListDataTypeRace currentUnscheduledItem = null;
         RaceListDataTypeRace currentFinishedItem = null;
+        String currentUnscheduledRaceName = "";
+        RaceGroupSeriesFleet currentlyRunningFleet = null;
         Map<String, Boolean> finalsStarted = new HashMap<>();
         int finishedItems = 0;
         int subItems = 0;
@@ -76,16 +79,30 @@ public class RaceFilter extends Filter {
                 currentHeader = (RaceListDataTypeHeader) item;
                 currentUnscheduledItem = null;
                 currentFinishedItem = null;
+                currentlyRunningFleet = null;
                 finishedItems = 0;
                 subItems = 0;
             } else if (item instanceof RaceListDataTypeRace) {
                 subItems ++;
                 RaceListDataTypeRace raceItem = (RaceListDataTypeRace) item;
+                boolean qualifying = raceItem.getRace().getFleet().getOrdering() == 0 || !raceItem.getRace().getSeries().isMedal();
                 RaceLogRaceStatus status = raceItem.getCurrentStatus();
-                if (currentUnscheduledItem == null && status.equals(RaceLogRaceStatus.UNSCHEDULED)) {
-                    filteredItems.add(raceItem);
-                    currentUnscheduledItem = raceItem;
-                } else if (status.equals(RaceLogRaceStatus.FINISHED)) {
+                // Preserve first unscheduled races that belong to the first race column of the leaderboard
+                if (qualifying && RaceLogRaceStatus.UNSCHEDULED.equals(status)) {
+                    if (currentUnscheduledRaceName.equals("")) {
+                        currentUnscheduledRaceName = raceItem.getRaceName();
+                    }
+                    if (currentUnscheduledRaceName.equals(raceItem.getRaceName())) {
+                        filteredItems.add(raceItem);
+                        currentUnscheduledItem = raceItem;
+                    }
+                }
+                if (currentUnscheduledItem == null && RaceLogRaceStatus.UNSCHEDULED.equals(status)) {
+                    if (currentlyRunningFleet == null || currentlyRunningFleet.equals(raceItem.getFleet())) {
+                        filteredItems.add(raceItem);
+                        currentUnscheduledItem = raceItem;
+                    }
+                } else if (RaceLogRaceStatus.FINISHED.equals(status)) {
                     finishedItems ++;
                     if (filteredItems.contains(currentFinishedItem)) {
                         filteredItems.remove(currentFinishedItem);
@@ -95,6 +112,7 @@ public class RaceFilter extends Filter {
                     currentUnscheduledItem = null;
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     filteredItems.add(raceItem);
+                    currentlyRunningFleet = raceItem.getFleet();
                     // new run for all types!
                     currentUnscheduledItem = null;
                     currentFinishedItem = null;
