@@ -44,6 +44,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
+		
+		if window!.rootViewController is SplashScreenDummy {
+			let storyboard = UIStoryboard(name: "Main", bundle: nil)
+			let vc = storyboard.instantiateViewControllerWithIdentifier("rootViewController") 
+			self.window!.rootViewController = vc
+		}
+				
         let rootViewController = self.window!.rootViewController as! UINavigationController
         rootViewController.popToRootViewControllerAnimated(false)
         rootViewController.dismissViewControllerAnimated(false, completion: nil)

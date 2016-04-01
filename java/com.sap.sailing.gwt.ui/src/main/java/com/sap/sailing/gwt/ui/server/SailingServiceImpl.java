@@ -447,6 +447,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
@@ -1112,10 +1113,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             return null;
         }
     }
-
+    
     @Override
     public void stopTrackingRaces(Iterable<RegattaAndRaceIdentifier> regattaAndRaceIdentifiers) throws Exception {
-        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {
+        for (RegattaAndRaceIdentifier regattaAndRaceIdentifier : regattaAndRaceIdentifiers) {            
             getService().apply(new StopTrackingRace(regattaAndRaceIdentifier));
         }
     }
@@ -2350,7 +2351,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         if (regatta != null && regatta.races != null) {
             for (RaceDTO race : regatta.races) {
-                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRaceAndRegatta(race, regatta.getRegattaIdentifier());
+                List<StrippedLeaderboardDTO> leaderboard = getLeaderboardsByRaceAndRegatta(race.getName(), regatta.getRegattaIdentifier());
                 if (leaderboard != null && !leaderboard.isEmpty()) {
                     results.addAll(leaderboard);
                 }
@@ -2364,7 +2365,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(RaceDTO race, RegattaIdentifier regattaIdentifier) {
+    public List<StrippedLeaderboardDTO> getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier) {
         List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         for (Leaderboard leaderboard : leaderboards.values()) {
@@ -2375,7 +2376,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         TrackedRace trackedRace = raceInLeaderboard.getTrackedRace(fleet);
                         if (trackedRace != null) {
                             RaceDefinition trackedRaceDef = trackedRace.getRace();
-                            if (trackedRaceDef.getName().equals(race.getName())) {
+                            if (trackedRaceDef.getName().equals(raceName)) {
                                 results.add(createStrippedLeaderboardDTO(leaderboard, false, false));
                                 break;
                             }
@@ -5356,12 +5357,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
                 null : mapping.getTimeRange().to().asDate();
         MappableToDevice item = null;
-        if (mapping.getMappedTo() instanceof Competitor) {
+        final WithID mappedTo = mapping.getMappedTo();
+        if (mappedTo == null) {
+            throw new RuntimeException("Device mapping not mapped to any object");
+        } else if (mappedTo instanceof Competitor) {
             item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
-        } else if (mapping.getMappedTo() instanceof Mark) {
+        } else if (mappedTo instanceof Mark) {
             item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
         } else {
-            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
+            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type, but not "+mappedTo.getClass().getName());
         }
         //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
         //has a large performance implact for GWT.

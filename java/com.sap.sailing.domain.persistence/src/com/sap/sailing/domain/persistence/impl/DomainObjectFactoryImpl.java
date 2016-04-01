@@ -1615,8 +1615,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             loadRegattaLogEvents(result, query, identifier);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new regatta log
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data. Check MongoDB settings.");
-            logger.log(Level.SEVERE, "loadRegattaLog", t);
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data for "+identifier+". Check MongoDB settings.", t);
         }
         return result;
     }
@@ -1708,7 +1707,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogRegisterCompetitorEvent loadRegattaLogRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         Competitor comp = getCompetitorByID(dbObject);
-        return new RegattaLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, comp);
+        final RegattaLogRegisterCompetitorEvent result;
+        if (comp == null) {
+            result = null;
+            logger.log(Level.SEVERE, "Couldn't resolve competitor with ID "+dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name())+
+                    " from registration event with ID "+id+". Skipping this competitor registration.");
+        } else {
+            result = new RegattaLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, comp);
+        }
+        return result;
     }
 
     private RegattaLogCloseOpenEndedDeviceMappingEvent loadRegattaLogCloseOpenEndedDeviceMappingEvent(TimePoint createdAt,
