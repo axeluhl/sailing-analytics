@@ -23,6 +23,7 @@ public class CompetitorJsonConstants {
     public static final String FIELD_DISPLAY_COLOR = "displayColor";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_FLAG_IMAGE_URI = "flagImageUri";
+    public static final String FIELD_TEAM_IMAGE_URI = "teamImageUri";
     public static final String FIELD_TIME_ON_TIME_FACTOR = "timeOnTimeFactor";
     public static final String FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE = "timeOnDistanceAllowanceInSecondsPerNauticalMile";
 }
