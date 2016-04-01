@@ -18,13 +18,18 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     enum AlertView: Int {
         case CheckOut, Image, UploadFailed
     }
-    
+	
+	struct RegattaViewUserDefaults {
+		static let UploadDidFail = "UploadDidFail"
+	}
+	    
     var sourceTypes = [UIImagePickerControllerSourceType]()
     var sourceTypeNames = [String]()
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var yourTeamPhotoButton: UIButton!
     @IBOutlet weak var editTeamPhotoButton: UIButton!
+	@IBOutlet weak var retryUploadTeamPhotoButton: UIButton!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var flagImageView: UIImageView!
     @IBOutlet weak var sailLabel: UILabel!
@@ -55,6 +60,10 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         dateFormatter.dateFormat = "MMM d, yyyy, h:mm a" // As per request - see mail 19.02.2016
         super.init(coder: aDecoder)!
     }
+	
+	var uploadKey: String {
+		return RegattaViewUserDefaults.UploadDidFail + "_" + DataManager.sharedManager.selectedCheckIn!.competitorId
+	}
     
     override func viewDidLoad() {
         
@@ -62,13 +71,15 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         navigationItem.title = DataManager.sharedManager.selectedCheckIn!.leaderBoardName
 
         openEventButton.setTitle(NSLocalizedString("Show Event", comment: ""), forState: UIControlState.Normal)
+		
+		retryUploadTeamPhotoButton.hidden = !NSUserDefaults.standardUserDefaults().boolForKey(uploadKey)
         
         // set regatta image, either load it from server or load from core data
         if DataManager.sharedManager.selectedCheckIn?.userImage != nil {
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
             self.yourTeamPhotoButton.hidden = true
         } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
-            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
+            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl! + "sa")
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest,
                 placeholderImage: nil,
@@ -78,10 +89,12 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 },
                 failure: { (request:NSURLRequest!,response:NSHTTPURLResponse!, error:NSError!) -> Void in
                     self.editTeamPhotoButton.hidden = true
+					self.yourTeamPhotoButton.hidden = !self.retryUploadTeamPhotoButton.hidden
                 }
             )
         } else {
             self.editTeamPhotoButton.hidden = true
+			self.yourTeamPhotoButton.hidden = !self.retryUploadTeamPhotoButton.hidden
         }
         if (DataManager.sharedManager.selectedCheckIn?.competitor != nil) {
             let competitor = DataManager.sharedManager.selectedCheckIn!.competitor!
@@ -261,6 +274,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         imageView.image = image
         yourTeamPhotoButton.hidden = true
         editTeamPhotoButton.hidden = false
+		retryUploadTeamPhotoButton.hidden = true
         let jpegData = UIImageJPEGRepresentation(image, 0.8)
         DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
         APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
@@ -271,14 +285,21 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 let responseDictionary = responseObject as![String: AnyObject]
                 let imageUrl = (responseDictionary["teamImageUri"]) as! String;
                 DataManager.sharedManager.selectedCheckIn!.imageUrl = imageUrl;
+				
+				NSUserDefaults.standardUserDefaults().setBool(false, forKey: self.uploadKey)
+				NSUserDefaults.standardUserDefaults().synchronize()
             },
             failure: { (NSError error) -> Void in
                 let alertView = UIAlertView(title: NSLocalizedString("Failed to upload image", comment: ""), message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                 alertView.tag = AlertView.UploadFailed.rawValue;
-                alertView.show()
+				alertView.show()
+				
+				NSUserDefaults.standardUserDefaults().setBool(true, forKey: self.uploadKey)
+				NSUserDefaults.standardUserDefaults().synchronize()
+				self.retryUploadTeamPhotoButton.hidden = false
         })
     }
-    
+		
     // MARK: - Check-out
     func showCheckOutAlertView() {
         let alertView = UIAlertView(title: NSLocalizedString("Check-out of Regatta?", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("OK", comment: ""))

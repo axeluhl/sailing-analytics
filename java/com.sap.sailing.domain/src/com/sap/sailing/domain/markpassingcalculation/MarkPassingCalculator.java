@@ -231,8 +231,7 @@ public class MarkPassingCalculator {
             @Override
             public void run() {
                 logger.finer("Calculating MarkPassings for " + c + " (" + Util.size(fixes) + " new fixes)");
-                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c,
-                        fixes);
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
                 logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates and will remove "
                         + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
                 chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());

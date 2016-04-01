@@ -19,6 +19,7 @@ import org.junit.rules.ExpectedException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -158,7 +159,6 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void canDenote_Add_Track() throws MalformedURLException, FileNotFoundException, URISyntaxException,
             Exception {
-
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
         RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         RaceLog raceLog = column.getRaceLog(fleet);
@@ -176,10 +176,11 @@ public class CreateAndTrackWithRaceLogTest {
         addFixes0(dev1);
         raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(t(), author, t(), UUID.randomUUID(), 0));
         raceLog.add(new RaceLogRegisterCompetitorEventImpl(t(), author, 0, comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
 
-        // now there is a trackedrace
+        // now there is a tracked race
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
@@ -211,6 +212,7 @@ public class CreateAndTrackWithRaceLogTest {
                 t(0), t(10)));
         addFixes0(dev1);
         regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), t(), author, UUID.randomUUID(), comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
 
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);

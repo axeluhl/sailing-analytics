@@ -241,8 +241,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     public void pingMark(RegattaLog log, Mark mark, GPSFix gpsFix, RacingEventService service) {
         final PingDeviceIdentifierImpl device = new PingDeviceIdentifierImpl();
         final TimePoint timePoint = gpsFix.getTimePoint();
-        final RegattaLogEvent mapping = new RegattaLogDeviceMarkMappingEventImpl(timePoint,
-                timePoint, service.getServerAuthor(), UUID.randomUUID(), mark, device, timePoint, timePoint);
+        final TimePoint now = MillisecondsTimePoint.now();
+        final RegattaLogEvent mapping = new RegattaLogDeviceMarkMappingEventImpl(now,
+                now, service.getServerAuthor(), UUID.randomUUID(), mark, device, timePoint, timePoint);
         log.add(mapping);
         try {
             service.getGPSFixStore().storeFix(device, gpsFix);

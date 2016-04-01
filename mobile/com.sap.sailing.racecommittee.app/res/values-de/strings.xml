@@ -482,4 +482,7 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">Missweisend</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Kursanzeige</string>
 
+    <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
+    <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+
 </resources>
