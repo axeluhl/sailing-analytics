@@ -19,7 +19,7 @@
 
     <dimen name="preference_margin">16dp</dimen>
     <dimen name="preference_line_margin">0dp</dimen>
-    <item name="preference_columns" format="integer" type="integer">2</item>
+    <item name="preference_columns" format="integer" type="integer">1</item>
 
     <!-- race state dependent -->
     <!-- login -->

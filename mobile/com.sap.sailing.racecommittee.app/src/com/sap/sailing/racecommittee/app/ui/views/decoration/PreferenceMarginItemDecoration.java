@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PreferenceMarginItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -20,7 +19,7 @@ public class PreferenceMarginItemDecoration extends RecyclerView.ItemDecoration 
 
     public PreferenceMarginItemDecoration(Context context, int margin) {
         mMargin = margin;
-        mBackground = new ColorDrawable(ThemeHelper.getColor(context, R.attr.sap_gray_black_30));
+        mBackground = new ColorDrawable(context.getResources().getColor(R.color.light_sap_gray_black_30));
         mItemHeight = context.getResources().getDimensionPixelSize(R.dimen.preference_item_height);
     }
 

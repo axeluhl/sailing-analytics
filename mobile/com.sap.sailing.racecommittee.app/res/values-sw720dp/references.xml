@@ -17,5 +17,6 @@
     <item name="race_schedule_procedure_pathfinder" type="layout">@layout/race_schedule_procedure_pathfinder_xlarge</item>
     <item name="race_schedule_procedure_timing" type="layout">@layout/race_schedule_procedure_timing_xlarge</item>
     <item name="toolbar" type="layout">@layout/toolbar_xlarge</item>
+    <item name="toolbar_pref" type="layout">@layout/toolbar_pref_xlarge</item>
 
 </resources>

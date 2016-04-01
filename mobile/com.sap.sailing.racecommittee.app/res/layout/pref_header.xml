@@ -15,7 +15,7 @@
         android:drawablePadding="32dp"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textAppearance="?attr/textXSmall"
+        android:paddingRight="8dp"
         tools:text="@string/settings_category_general" />
 
     <View
@@ -24,5 +24,5 @@
         android:layout_height="@dimen/thin_line"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="@dimen/preference_line_margin"
-        android:background="?attr/sap_gray" />
+        android:background="@color/light_sap_gray" />
 </RelativeLayout>
