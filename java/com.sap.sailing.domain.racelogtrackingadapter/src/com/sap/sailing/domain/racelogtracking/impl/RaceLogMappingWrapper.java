@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -35,10 +37,10 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         this.regattaLog = regattaLog;
     }
     
-    public <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(
+    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(
             Function<RegattaLog, RegattaLogDeviceMappingFinder<ItemT>> mappingFinder, boolean loadIfNotCovered,
-            Function<ItemT, TrackT> trackFactory, BiConsumer<TrackT, DeviceMapping<ItemT>> trackLoader)
-            throws DoesNotHaveRegattaLogException {
+            Function<ItemT, TrackT> trackFactory, TrackLaoder<TrackT, ItemT> trackLoader)
+            throws DoesNotHaveRegattaLogException, TransformationException {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = mappingFinder.apply(regattaLog).analyze();
@@ -50,7 +52,7 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
                     for (DeviceMapping<ItemT> newMapping : newMappings.get(item)) {
                         if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
                             try {
-                                trackLoader.accept(track, newMapping);
+                                trackLoader.loadTracks(track, newMapping);
                             } catch (NoCorrespondingServiceRegisteredException exc) {
                                 logger.log(Level.WARNING, "Could not load track " + newMapping.getMappedTo());
                             }
@@ -62,16 +64,21 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         updateMappings(newMappings);
     }
     
-    public <FixT extends Timed> void addListeners(final BiConsumer<ItemT, FixT> recorder,
-            BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> listenerConsumer) {
+    <FixT extends Timed> void addListeners(final BiConsumer<ItemT, FixT> recorder,
+            BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> addListener) {
         for (List<DeviceMapping<ItemT>> list : mappings.values()) {
             for (DeviceMapping<ItemT> mapping : list) {
-                listenerConsumer.accept((device, fix) -> recordFix(device, fix, recorder), mapping.getDevice());
+                addListener.accept((device, fix) -> recordFix(device, fix, recorder), mapping.getDevice());
             }
         }
     }
     
-    private <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
+    <FixT extends Timed> void removeListeners(Consumer<GPSFixReceivedListener<FixT>> removeListener) {
+        // FIXME manage listeners to remove the correct ones
+        removeListener.accept(null);
+    }
+    
+    <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
         if (mappingsByDevice.get(device) != null) {
             for (DeviceMapping<ItemT> mapping : mappingsByDevice.get(device)) {
                 ItemT item = mapping.getMappedTo();
@@ -111,5 +118,12 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
             }
         }
     }
+
+    @FunctionalInterface
+    interface TrackLaoder<TrackT extends DynamicTrack<?>, ItemT extends WithID> {
+        void loadTracks(TrackT track, DeviceMapping<ItemT> mapping) throws TransformationException;
+    }
+    
+    
 
 }
