@@ -1802,23 +1802,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
             e.printStackTrace();
         }
+        final Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
         Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
-                (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
-        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
-        final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
-        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
-        final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
-        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
-        final TimePoint from = times.getA();
-        final TimePoint to = times.getB();
-        final boolean needsMigration = times.getC();
-        final RegattaLogDeviceCompetitorMappingEventImpl result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
-        if (needsMigration) {
-            // remove old version of mapping event
-            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
-            assert removeResult.getN() == 1;
-            // and then insert using the fixed storage implementation
-            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+                competitorId);
+        final RegattaLogDeviceCompetitorMappingEventImpl result;
+        if (mappedTo == null) {
+            logger.severe("Found a "+RegattaLogDeviceCompetitorMappingEventImpl.class.getName()+
+                    " event but couldn't find competitor with ID "+competitorId);
+            result = null;
+        } else {
+            @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+            final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
+            @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+            final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
+            Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
+            final TimePoint from = times.getA();
+            final TimePoint to = times.getB();
+            final boolean needsMigration = times.getC();
+            result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
+            if (needsMigration) {
+                // remove old version of mapping event
+                WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+                assert removeResult.getN() == 1;
+                // and then insert using the fixed storage implementation
+                new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+            }
         }
         return result;
     }
