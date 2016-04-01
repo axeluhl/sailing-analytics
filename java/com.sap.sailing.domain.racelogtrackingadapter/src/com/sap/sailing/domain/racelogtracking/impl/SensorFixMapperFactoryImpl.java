@@ -11,7 +11,7 @@ import com.sap.sse.common.Timed;
 public class SensorFixMapperFactoryImpl implements SensorFixMapperFactory {
 
     @Override
-    public <FixT extends Timed, TrackT extends Track<FixT>> SensorFixMapper<FixT, TrackT, Competitor>
+    public <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor>
             createCompetitorMapper(RegattaLogDeviceCompetitorMappingEvent event) {
         // TODO use interfaces to determine event type
         if (event instanceof RegattaLogDeviceCompetitorBravoMappingEventImpl) {

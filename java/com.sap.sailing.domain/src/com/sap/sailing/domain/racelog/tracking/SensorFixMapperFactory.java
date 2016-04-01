@@ -7,9 +7,9 @@ import com.sap.sse.common.Timed;
 
 public interface SensorFixMapperFactory {
 
-    <FixT extends Timed, TrackT extends Track<FixT>> SensorFixMapper<FixT, TrackT, Competitor> 
+    <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor> 
             createCompetitorMapper(RegattaLogDeviceCompetitorMappingEvent event);
     
-//    <FixT extends Timed, TrackT extends Track<FixT>> SensorFixMapper<FixT, TrackT, Mark> 
+//    <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Mark> 
 //            createMarkMapper(RegattaLogDeviceMarkMappingEvent event);
 }
