@@ -1,1 +1,1 @@
-${git.branch}-${git.commit.id.abbrev} (${git.commit.time})
+ubilabs--rcapp--bug-3450-8c0c286 (Fri Apr 01 10:45:04 CEST 2016)
