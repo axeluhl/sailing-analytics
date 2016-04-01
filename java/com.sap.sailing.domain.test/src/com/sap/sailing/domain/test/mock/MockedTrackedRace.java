@@ -1052,4 +1052,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         return null;
     }
+
+    @Override
+    public boolean isWithinStartAndEndOfTracking(TimePoint timePoint) {
+        return true;
+    }
 }

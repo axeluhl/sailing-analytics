@@ -160,7 +160,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void recordFix(Competitor competitor, GPSFixMoving fix) {
-        if (isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
+        if (isWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
@@ -181,16 +181,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void recordFix(Mark mark, GPSFix fix) {
         final TimePoint fixTimePoint = fix.getTimePoint();
-        if (isFixWithinStartAndEndOfTracking(fixTimePoint)) {
+        if (isWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         }
     }
 
-    /**
-     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
-     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
-     */
-    private boolean isFixWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
+    @Override
+    public boolean isWithinStartAndEndOfTracking(final TimePoint fixTimePoint) {
         return (getStartOfTracking() == null || getStartOfTracking().compareTo(fixTimePoint) <= 0) &&
             (getEndOfTracking() == null || getEndOfTracking().compareTo(fixTimePoint) >= 0);
     }

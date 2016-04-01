@@ -95,6 +95,12 @@ public interface DynamicTrackedRace extends TrackedRace {
      * calculate the end of tracking.
      */
     void setEndOfTrackingReceived(TimePoint endOfTrackingReceived);
+    
+    /**
+     * A time point is considered "in" if it is (inclusively) between {@link #getStartOfTracking()} and {@link #getEndOfTracking()}.
+     * A <code>null</code> value for one of the two interval demarcations means an open-ended interval.
+     */
+    boolean isWithinStartAndEndOfTracking(TimePoint timePoint);
 
     void setMillisecondsOverWhichToAverageSpeed(long millisecondsOverWhichToAverageSpeed);
 

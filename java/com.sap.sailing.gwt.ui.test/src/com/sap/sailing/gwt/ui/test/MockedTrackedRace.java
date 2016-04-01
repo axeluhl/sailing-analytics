@@ -811,4 +811,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             String trackName, TrackFactory<TrackT> newTrackFactory) {
         return null;
     }
+    
+    @Override
+    public boolean isWithinStartAndEndOfTracking(TimePoint timePoint) {
+        return true;
+    }
 }
