@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
-        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -29,8 +28,8 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="XA8-DM-z3j" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4Bv-Zq-ZzP"/>
-                            <constraint firstItem="XA8-DM-z3j" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="20" id="EFm-df-I71"/>
-                            <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="XA8-DM-z3j" secondAttribute="trailing" constant="20" id="KiK-A3-oaY"/>
+                            <constraint firstItem="XA8-DM-z3j" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="30" id="EFm-df-I71"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="XA8-DM-z3j" secondAttribute="trailing" constant="30" id="KiK-A3-oaY"/>
                             <constraint firstItem="XA8-DM-z3j" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="TsS-GE-Hlz"/>
                         </constraints>
                     </view>
