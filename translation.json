@@ -8,7 +8,9 @@
                "sourceFolderPath":"java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/client",
                "sourceFilters":[  
                   "StringMessages*.properties"
-               ]
+               ],
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             },
 			{  
                "sourceFolderPath":"java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/common/client/i18n",
