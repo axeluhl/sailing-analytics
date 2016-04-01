@@ -283,7 +283,6 @@
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
 		7F4EEDBA1A6D2BAC0026F711 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */; };
-		7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
 		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
 		7F83F15B19F154F000C53328 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7F83F15919F154F000C53328 /* Main.storyboard */; };
@@ -648,7 +647,6 @@
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
 		7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
-		7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplashScreenDummy.swift; sourceTree = "<group>"; };
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1080,7 +1078,6 @@
 				7FD9D3021A1236080058FEAD /* Extensions.swift */,
 				7F87CAA51A2CD6BA0076C617 /* Appearance.h */,
 				7F87CAA61A2CD6BA0076C617 /* Appearance.m */,
-				7F72C7391A2DC51900F48EE8 /* SplashScreenDummy.swift */,
 				9E95C3D51C723AB30016632B /* Constants.swift */,
 			);
 			name = Helpers;
@@ -1222,7 +1219,6 @@
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = RRE8EFVCE3;
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
@@ -1621,7 +1617,6 @@
 				7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */,
 				7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */,
 				7FCDB6641A1636610075D7D9 /* LeaderBoard.swift in Sources */,
-				7F72C73A1A2DC51900F48EE8 /* SplashScreenDummy.swift in Sources */,
 				C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
