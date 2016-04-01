@@ -5833,7 +5833,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
- competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
     }
     
     @Override
