@@ -8,27 +8,17 @@
 
 import Foundation
 
-/* Helper class used for created launch screens. */
-class SplashScreenDummy: UIViewController {
- 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // add logo to top left
-        let imageView = UIImageView(image: UIImage(named: "sap_logo"))
-        let barButtonItem = UIBarButtonItem(customView: imageView)
-        navigationItem.leftBarButtonItem = barButtonItem
+final class SplashScreenDummy: UIViewController {
 
-        //UIApplication.sharedApplication().statusBarHidden = true
-     }
+	override func viewDidAppear(animated: Bool) {
+		super.viewDidAppear(animated)
+		
+		weak var weakself = self
+		dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+			let storyboard = UIStoryboard(name: "Main", bundle: nil)
+			let vc = storyboard.instantiateViewControllerWithIdentifier("rootViewController") 
+			vc.modalTransitionStyle = .CrossDissolve
+			weakself?.presentViewController(vc, animated: true, completion: nil)
+		}
+	}
 }
-
-/* Uncomment this when creating launch screens. */
-/*
-extension UINavigationBar {
-    public override func sizeThatFits(size: CGSize) -> CGSize {
-        let newSize = CGSizeMake(UIScreen.mainScreen().bounds.width,  64)
-        return newSize
-    }
-}
-*/
