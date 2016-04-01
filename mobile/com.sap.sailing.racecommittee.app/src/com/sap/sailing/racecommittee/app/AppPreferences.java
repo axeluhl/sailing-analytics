@@ -466,4 +466,9 @@ public class AppPreferences {
     public void setNeedConfigRefresh(boolean refresh) {
         preferences.edit().putBoolean(context.getString(R.string.preference_config_needs_refresh_key), refresh).commit();
     }
+
+    public String showNonPublic() {
+        return preferences.getBoolean(context.getString(R.string.preference_non_public_events_key),
+            context.getResources().getBoolean(R.bool.preference_non_public_events_default)) ? "true" : "false";
+    }
 }
