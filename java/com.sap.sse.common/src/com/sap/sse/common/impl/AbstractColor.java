@@ -22,13 +22,13 @@ public abstract class AbstractColor implements Color {
     private static Map<String, Color> createColorMap() {
         HashMap<String,Color> map = new HashMap<String, Color>();
         String name;
-        for(Field field: Color.class.getFields()){
-            if(field.getClass().isAssignableFrom(Color.class)){
+        for (Field field : Color.class.getFields()) {
+            if (field.getClass().isAssignableFrom(Color.class)) {
                 name = field.getName().toLowerCase().replace("_", "");
                 try {
                     map.put(name, (Color) field.get(null));
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                   //ignore this case, and don't add something to the map.
+                    // ignore this case, and don't add something to the map.
                 }
             }
         }
@@ -44,6 +44,6 @@ public abstract class AbstractColor implements Color {
     }
 
     public static Color getColorByLowercaseNameStatic(String lowercaseColorName) {
-            return colorNameToColor.get(lowercaseColorName);
+        return colorNameToColor.get(lowercaseColorName);
     }
 }
