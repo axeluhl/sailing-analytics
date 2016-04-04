@@ -48,9 +48,9 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
     }
 
     protected DeviceMapping<ItemT> createMapping(DeviceIdentifier device, ItemT item,
-            TimePoint from, TimePoint to, Serializable originalEventId) {
+            TimePoint from, TimePoint to, Serializable originalEventId, Class<?> type) {
         return new DeviceMappingImpl<ItemT>(item, device, new TimeRangeImpl(from, to),
-                Collections.singletonList(originalEventId));
+                Collections.singletonList(originalEventId), type);
     }
 
     private List<RegattaLogDeviceMappingEvent<ItemT>> getMappingEventsForItem(Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> map, ItemT item) {
@@ -103,7 +103,7 @@ public abstract class RegattaLogDeviceMappingFinder<ItemT extends WithID> extend
             if (to == null) {
                 to = closingTimePoint;
             }
-            result.add(createMapping(event.getDevice(), item, from, to, event.getId()));
+            result.add(createMapping(event.getDevice(), item, from, to, event.getId(), event.getClass()));
         }
         return result;
     }

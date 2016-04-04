@@ -141,7 +141,7 @@ public class TopLevelMasterData implements Serializable {
         }
         DeviceIdentifier device = mappingEvent.getDevice();
         gpsFixStore.loadTrack(track, new DeviceMappingImpl<WithID>(mappingEvent.getMappedTo(), device,
-                new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo())));
+                new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo()), mappingEvent.getClass()));
         if (!relevantFixes.containsKey(device)) {
             relevantFixes.put(device, new HashSet<>());
         }

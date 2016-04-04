@@ -5460,11 +5460,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
             //expect UUIDs
-            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds);
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
         } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
                     ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds);
+            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else {
             throw new RuntimeException("Can only map devices to competitors or marks");
         }
