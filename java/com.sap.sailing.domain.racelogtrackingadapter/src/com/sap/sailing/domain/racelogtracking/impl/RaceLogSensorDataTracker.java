@@ -20,7 +20,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.RaceLogMappingWrapper.TrackLaoder;
+import com.sap.sailing.domain.racelogtracking.impl.RaceLogMappingWrapper.TrackLoader;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -28,16 +28,30 @@ import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 
-public class RaceLogSensorDataTracker implements GPSFixReceivedListener<DoubleVectorFix> {
+public class RaceLogSensorDataTracker {
     private static final Logger logger = Logger.getLogger(RaceLogSensorDataTracker.class.getName());
 
     private final SensorFixStore sensorFixStore;
-    private final AbstractRaceChangeListener raceChangeListener;
-    private DynamicTrackedRace trackedRace;
+    private final DynamicTrackedRace trackedRace;
     private final RegattaLog regattaLog;
-    private final RegattaLogEventVisitor regattaLogEventVisitor;
     private final RaceLogMappingWrapper<Competitor> competitorMappings;
+    private final RegattaLogEventVisitor regattaLogEventVisitor;
+    private final AbstractRaceChangeListener raceChangeListener;
     private final SensorFixMapperFactory mapperFactory = new SensorFixMapperFactoryImpl();
+    private final GPSFixReceivedListener<DoubleVectorFix> listener = new GPSFixReceivedListener<DoubleVectorFix>() {
+        @Override
+        public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
+            // FIXME calculate event to create correct competitor mappper
+            SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = mapperFactory
+                    .createCompetitorMapper(null);
+            competitorMappings.recordFix(device, fix, (comp, fixToRecord) -> {
+                DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, comp);
+                if (trackedRace.isWithinStartAndEndOfTracking(fixToRecord.getTimePoint()) && track != null) {
+                    mapper.addFix(track, fixToRecord);
+                }
+            });
+        }
+    };
 
     public RaceLogSensorDataTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
             SensorFixStore sensorFixStore) {
@@ -49,7 +63,8 @@ public class RaceLogSensorDataTracker implements GPSFixReceivedListener<DoubleVe
         regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                sensorFixStore.addListener(RaceLogSensorDataTracker.this, event.getDevice());
+                sensorFixStore.addListener(listener, event.getDevice());
+                // TODO update mappings ???
             }
         };
         regattaLog.addListener(regattaLogEventVisitor);
@@ -75,19 +90,14 @@ public class RaceLogSensorDataTracker implements GPSFixReceivedListener<DoubleVe
         try {
             // FIXME Use correct MappingFinder for Bravo Fix Data
             Function<RegattaLog, RegattaLogDeviceMappingFinder<Competitor>> mappingFinder = RegattaLogDeviceCompetitorMappingFinder::new;
-            TrackLaoder<DynamicSensorFixTrack<SensorFix>, Competitor> trackLoader = (track, mapping) -> sensorFixStore.loadFixes(
+            TrackLoader<DynamicSensorFixTrack<SensorFix>, Competitor> trackLoader = (track, mapping) -> sensorFixStore.loadFixes(
                     (DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
             competitorMappings.updateMappings(mappingFinder, false, (comp) -> mapper.getTrack(trackedRace, comp), trackLoader);
         } catch (DoesNotHaveRegattaLogException | NoCorrespondingServiceRegisteredException | TransformationException e) {
             logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
         }
         // add listeners for devices in mappings already present
-        competitorMappings.addListeners((Competitor comp, DoubleVectorFix fix) -> {
-            DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, comp);
-            if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
-                mapper.addFix(track, fix);
-            }
-        }, sensorFixStore::addListener);
+        competitorMappings.addListeners(listener, sensorFixStore::addListener);
         logger.info(String.format("Started tracking race-log race (%s)", regattaLog));
         // this wakes up all waiting race handles
         synchronized (this) {
@@ -97,21 +107,8 @@ public class RaceLogSensorDataTracker implements GPSFixReceivedListener<DoubleVe
 
     public void stop() {
         regattaLog.removeListener(regattaLogEventVisitor);
-        sensorFixStore.removeListener(this);
-        competitorMappings.removeListeners(sensorFixStore::removeListener);
+        sensorFixStore.removeListener(listener);
         trackedRace.removeListener(raceChangeListener);
-    }
-
-    @Override
-    public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
-        // FIXME calculate event to create correct competitor mappper
-        SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = mapperFactory.createCompetitorMapper(null);
-        competitorMappings.recordFix(device, fix, (comp,  fixToRecord) -> {
-            DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, comp);
-            if (trackedRace.isWithinStartAndEndOfTracking(fixToRecord.getTimePoint()) && track != null) {
-                mapper.addFix(track, fixToRecord);
-            }
-        });
     }
 
 }

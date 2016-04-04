@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,7 +38,7 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
     
     <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(
             Function<RegattaLog, RegattaLogDeviceMappingFinder<ItemT>> mappingFinder, boolean loadIfNotCovered,
-            Function<ItemT, TrackT> trackFactory, TrackLaoder<TrackT, ItemT> trackLoader)
+            Function<ItemT, TrackT> trackFactory, TrackLoader<TrackT, ItemT> trackLoader)
             throws DoesNotHaveRegattaLogException, TransformationException {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
@@ -64,6 +63,15 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         updateMappings(newMappings);
     }
     
+    <FixT extends Timed> void addListeners(GPSFixReceivedListener<FixT> listener,
+            BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> addListener) {
+        for (List<DeviceMapping<ItemT>> list : mappings.values()) {
+            for (DeviceMapping<ItemT> mapping : list) {
+                addListener.accept(listener, mapping.getDevice());
+            }
+        }
+    }
+    
     <FixT extends Timed> void addListeners(final BiConsumer<ItemT, FixT> recorder,
             BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> addListener) {
         for (List<DeviceMapping<ItemT>> list : mappings.values()) {
@@ -71,11 +79,6 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
                 addListener.accept((device, fix) -> recordFix(device, fix, recorder), mapping.getDevice());
             }
         }
-    }
-    
-    <FixT extends Timed> void removeListeners(Consumer<GPSFixReceivedListener<FixT>> removeListener) {
-        // FIXME manage listeners to remove the correct ones
-        removeListener.accept(null);
     }
     
     <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
@@ -120,10 +123,8 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
     }
 
     @FunctionalInterface
-    interface TrackLaoder<TrackT extends DynamicTrack<?>, ItemT extends WithID> {
+    interface TrackLoader<TrackT extends DynamicTrack<?>, ItemT extends WithID> {
         void loadTracks(TrackT track, DeviceMapping<ItemT> mapping) throws TransformationException;
     }
-    
-    
 
 }
