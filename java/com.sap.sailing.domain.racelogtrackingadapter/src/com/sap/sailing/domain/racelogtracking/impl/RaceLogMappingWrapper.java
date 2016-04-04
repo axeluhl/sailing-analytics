@@ -72,21 +72,11 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         }
     }
     
-    <FixT extends Timed> void addListeners(final BiConsumer<ItemT, FixT> recorder,
-            BiConsumer<GPSFixReceivedListener<FixT>, DeviceIdentifier> addListener) {
-        for (List<DeviceMapping<ItemT>> list : mappings.values()) {
-            for (DeviceMapping<ItemT> mapping : list) {
-                addListener.accept((device, fix) -> recordFix(device, fix, recorder), mapping.getDevice());
-            }
-        }
-    }
-    
-    <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<ItemT, FixT> recorder) {
+    <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix, BiConsumer<DeviceMapping<ItemT>, FixT> recorder) {
         if (mappingsByDevice.get(device) != null) {
             for (DeviceMapping<ItemT> mapping : mappingsByDevice.get(device)) {
-                ItemT item = mapping.getMappedTo();
                 if (mapping.getTimeRange().includes(fix.getTimePoint())) {
-                    recorder.accept(item, fix);
+                    recorder.accept(mapping, fix);
                 }
             }
         }
