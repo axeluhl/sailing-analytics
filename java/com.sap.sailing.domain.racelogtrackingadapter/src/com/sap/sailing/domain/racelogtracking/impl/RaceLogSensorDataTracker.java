@@ -7,7 +7,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
@@ -88,8 +88,8 @@ public class RaceLogSensorDataTracker {
         // FIXME calculate event to create correct competitor mappper
         SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = mapperFactory.createCompetitorMapper(null);
         try {
-            // FIXME Use correct MappingFinder for Bravo Fix Data
-            Function<RegattaLog, RegattaLogDeviceMappingFinder<Competitor>> mappingFinder = RegattaLogDeviceCompetitorMappingFinder::new;
+            // TODO Use generic mapping finder for sensor data
+            Function<RegattaLog, RegattaLogDeviceMappingFinder<Competitor>> mappingFinder = RegattaLogDeviceCompetitorBravoMappingFinder::new;
             TrackLoader<DynamicSensorFixTrack<SensorFix>, Competitor> trackLoader = (track, mapping) -> sensorFixStore.loadFixes(
                     (DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
             competitorMappings.updateMappings(mappingFinder, false, (comp) -> mapper.getTrack(trackedRace, comp), trackLoader);
