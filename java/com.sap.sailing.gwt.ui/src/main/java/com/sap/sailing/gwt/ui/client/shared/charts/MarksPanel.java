@@ -78,6 +78,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 final Date timePoint = parent.timer.getTime();
+                select(mark);
                 if (parent.hasFixAtTimePoint(mark, timePoint)) {
                     parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
                 } else {
