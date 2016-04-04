@@ -10,6 +10,9 @@ public interface SensorFixMapperFactory {
     <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor> 
             createCompetitorMapper(RegattaLogDeviceCompetitorMappingEvent event);
     
+    <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor> 
+            createCompetitorMapper(Class<?> eventType);
+    
 //    <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Mark> 
 //            createMarkMapper(RegattaLogDeviceMarkMappingEvent event);
 }
