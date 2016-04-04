@@ -255,30 +255,32 @@ public class TimePanelFragment extends BasePanelFragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            View view = new View(context);
-            String action = intent.getAction();
-            if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
-                uncheckMarker(view);
-            }
-            if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
-                if (intent.getExtras() != null) {
-                    String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                    if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
-                        uncheckMarker(mRaceHeader);
-                    } else {
-                        uncheckMarker(view);
+            if (isAdded()) {
+                View view = new View(context);
+                String action = intent.getAction();
+                if (AppConstants.INTENT_ACTION_CLEAR_TOGGLE.equals(action)) {
+                    uncheckMarker(view);
+                }
+                if (AppConstants.INTENT_ACTION_TOGGLE.equals(action)) {
+                    if (intent.getExtras() != null) {
+                        String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                        if (AppConstants.INTENT_ACTION_TOGGLE_TIME.equals(data)) {
+                            uncheckMarker(mRaceHeader);
+                        } else {
+                            uncheckMarker(view);
+                        }
                     }
                 }
-            }
 
-            view = getActivity().findViewById(R.id.race_panel_time);
-            if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
-                if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
-                    view.setVisibility(View.GONE);
-                }
+                view = getActivity().findViewById(R.id.race_panel_time);
+                if (getActivity().findViewById(R.id.race_edit) == null && view != null) {
+                    if (AppConstants.INTENT_ACTION_TIME_HIDE.equals(action)) {
+                        view.setVisibility(View.GONE);
+                    }
 
-                if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
-                    view.setVisibility(View.VISIBLE);
+                    if (AppConstants.INTENT_ACTION_TIME_SHOW.equals(action)) {
+                        view.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         }
