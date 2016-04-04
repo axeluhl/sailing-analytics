@@ -434,6 +434,8 @@
     <string name="preference_allow_dependent_races_header">Relative Startzeit</string>
     <string name="preference_allow_dependent_races_description">Aktiviert relative Startzeiten zwischen Rennen</string>
     <string name="preference_dependent_races_offset_header">Standard Offset der relativen Startzeit (Minuten)</string>
+    <string name="preference_allow_edit_race_factor_header">Rennfaktor ändern</string>
+    <string name="preference_allow_edit_race_factor_description">Rennleiter können den Rennfaktor je Rennen ändern</string>
     <string name="error_finished_time">Die ausgewählte Zielzeit liegt vor der Zeit, der ersten Schiffeinfahrt. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_finishing_time">Die ausgewählte Zeit is vor dem Rennstart. Bitte überprüfe die Uhrzeit.</string>
     <string name="error_time_in_future">Die ausgewählte Zeit liegt in der Zukunft. Bitte überprüfe die Uhrzeit.</string>
@@ -496,5 +498,6 @@
 
     <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+    <string name="race_factor">Faktor</string>
 
 </resources>

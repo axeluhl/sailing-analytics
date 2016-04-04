@@ -7,33 +7,39 @@
             android:defaultValue="@string/preference_racing_procedure_override_default"
             android:key="@string/preference_racing_procedure_override_key"
             android:summary="@string/override_default_start_procedure_type_select_description"
-            android:title="@string/override_default_start_procedure_type_select_header"/>
+            android:title="@string/override_default_start_procedure_type_select_header" />
 
         <ListPreference
             android:defaultValue="@string/preference_course_designer_override_default"
             android:key="@string/preference_course_designer_override_key"
-            android:title="@string/override_default_course_designer_type_select_header"/>
+            android:title="@string/override_default_course_designer_type_select_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_allow_dependent_races_default"
             android:key="@string/preference_allow_dependent_races_key"
             android:summary="@string/preference_allow_dependent_races_description"
-            android:title="@string/preference_allow_dependent_races_header"/>
+            android:title="@string/preference_allow_dependent_races_header" />
 
         <com.sap.sailing.racecommittee.app.ui.views.IntegerEditTextPreference
             android:defaultValue="@integer/preference_dependent_races_offset_default"
             android:key="@string/preference_dependent_races_offset_key"
             android:numeric="integer"
-            android:title="@string/preference_dependent_races_offset_header"/>
+            android:title="@string/preference_dependent_races_offset_header" />
 
         <SwitchPreference
             android:defaultValue="@bool/preference_heading_with_declination_subtracted_default"
             android:key="@string/preference_heading_with_declination_subtracted_key"
-            android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"
-            android:switchTextOff="@string/preference_heading_with_declination_subtracted_is_disabled"
-            android:summaryOn="@string/preference_heading_with_declination_subtracted_summary_is_enabled"
             android:summaryOff="@string/preference_heading_with_declination_subtracted_summary_is_disabled"
-            android:title="@string/preference_heading_with_declination_subtracted_enabled"/>
+            android:summaryOn="@string/preference_heading_with_declination_subtracted_summary_is_enabled"
+            android:switchTextOff="@string/preference_heading_with_declination_subtracted_is_disabled"
+            android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"
+            android:title="@string/preference_heading_with_declination_subtracted_enabled" />
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_allow_edit_race_factor_default"
+            android:key="@string/preference_allow_edit_race_factor_key"
+            android:summary="@string/preference_allow_edit_race_factor_description"
+            android:title="@string/preference_allow_edit_race_factor_header" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="RRS26">
@@ -42,19 +48,19 @@
             android:defaultValue="@string/preference_racing_procedure_classflag_default"
             android:key="@string/preference_racing_procedure_rrs26_classflag_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_classflag_header"/>
+            android:title="@string/preference_racing_procedure_classflag_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_rrs26_hasxray_default"
             android:key="@string/preference_racing_procedure_rrs26_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
-            android:title="@string/preference_racing_procedure_hasxray_header"/>
+            android:title="@string/preference_racing_procedure_hasxray_header" />
 
         <com.sap.sailing.racecommittee.app.ui.views.FixedMultiSelectListPreference
             android:defaultValue="@array/preference_racing_procedure_rrs26_startmode_flags_default"
             android:key="@string/preference_racing_procedure_rrs26_startmode_flags_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_rrs26_startmode_flags_header"/>
+            android:title="@string/preference_racing_procedure_rrs26_startmode_flags_header" />
 
     </PreferenceCategory>
 
@@ -64,25 +70,25 @@
             android:defaultValue="@string/preference_racing_procedure_classflag_default"
             android:key="@string/preference_racing_procedure_gatestart_classflag_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_classflag_header"/>
+            android:title="@string/preference_racing_procedure_classflag_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_gatestart_hasxray_default"
             android:key="@string/preference_racing_procedure_gatestart_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
-            android:title="@string/preference_racing_procedure_hasxray_header"/>
+            android:title="@string/preference_racing_procedure_hasxray_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_gatestart_haspathfinder_default"
             android:key="@string/preference_racing_procedure_gatestart_haspathfinder_key"
             android:summary="@string/preference_racing_procedure_gatestart_haspathfinder_description"
-            android:title="@string/preference_racing_procedure_gatestart_haspathfinder_header"/>
+            android:title="@string/preference_racing_procedure_gatestart_haspathfinder_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default"
             android:key="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key"
             android:summary="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description"
-            android:title="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header"/>
+            android:title="@string/preference_racing_procedure_gatestart_hasadditionalgolfdowntime_header" />
 
     </PreferenceCategory>
 
@@ -92,13 +98,13 @@
             android:defaultValue="@string/preference_racing_procedure_classflag_default"
             android:key="@string/preference_racing_procedure_ess_classflag_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_classflag_header"/>
+            android:title="@string/preference_racing_procedure_classflag_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_ess_hasxray_default"
             android:key="@string/preference_racing_procedure_ess_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
-            android:title="@string/preference_racing_procedure_hasxray_header"/>
+            android:title="@string/preference_racing_procedure_hasxray_header" />
 
     </PreferenceCategory>
 
@@ -108,13 +114,13 @@
             android:defaultValue="@string/preference_racing_procedure_classflag_default"
             android:key="@string/preference_racing_procedure_basic_classflag_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_classflag_header"/>
+            android:title="@string/preference_racing_procedure_classflag_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_basic_hasxray_default"
             android:key="@string/preference_racing_procedure_basic_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
-            android:title="@string/preference_racing_procedure_hasxray_header"/>
+            android:title="@string/preference_racing_procedure_hasxray_header" />
 
     </PreferenceCategory>
 
@@ -124,13 +130,13 @@
             android:defaultValue="@string/preference_racing_procedure_classflag_default"
             android:key="@string/preference_racing_procedure_league_classflag_key"
             android:summary="@string/empty"
-            android:title="@string/preference_racing_procedure_classflag_header"/>
+            android:title="@string/preference_racing_procedure_classflag_header" />
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_league_hasxray_default"
             android:key="@string/preference_racing_procedure_league_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
-            android:title="@string/preference_racing_procedure_hasxray_header"/>
+            android:title="@string/preference_racing_procedure_hasxray_header" />
 
     </PreferenceCategory>
 </PreferenceScreen>

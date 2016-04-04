@@ -28,6 +28,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartPathFinderFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFactorFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.WindFragment;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
@@ -48,6 +49,7 @@ public class SetupPanelFragment extends BasePanelFragment {
     private PanelButton mButtonPathfinder;
     private PanelButton mButtonTiming;
     private PanelButton mButtonRaceGroup;
+    private PanelButton mButtonFactor;
     private PanelButton mButtonCourse;
     private PanelButton mButtonWind;
 
@@ -100,6 +102,11 @@ public class SetupPanelFragment extends BasePanelFragment {
         mButtonRaceGroup = ViewHelper.get(layout, R.id.button_race_group);
         if (mButtonRaceGroup != null) {
             mButtonRaceGroup.setListener(new ButtonRaceGroupListener());
+        }
+
+        mButtonFactor = ViewHelper.get(layout, R.id.button_factor);
+        if (mButtonFactor != null) {
+            mButtonFactor.setListener(new ButtonFactorListener());
         }
 
         mButtonCourse = ViewHelper.get(layout, R.id.button_course);
@@ -160,6 +167,11 @@ public class SetupPanelFragment extends BasePanelFragment {
             }
             if (mButtonRaceGroup != null) {
                 mButtonRaceGroup.setVisibility(View.GONE);
+            }
+
+            if (mButtonFactor != null) {
+                mButtonFactor.setVisibility(preferences.isRaceFactorChangeAllow() ? View.VISIBLE : View.GONE);
+                mButtonFactor.setPanelText("");
             }
 
             if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
@@ -332,11 +344,14 @@ public class SetupPanelFragment extends BasePanelFragment {
                 resetFragment(mButtonTiming.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), GateStartTimingFragment.class);
                 mButtonTiming.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
+            if (mButtonFactor != null && !mButtonFactor.equals(view)) {
+                resetFragment(mButtonFactor.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), RaceFactorFragment.class);
+                mButtonFactor.setMarkerLevel(PanelButton.LEVEL_NORMAL);
+            }
             if (mButtonCourse != null && !mButtonCourse.equals(view)) {
                 resetFragment(mButtonCourse.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
                 mButtonCourse.setMarkerLevel(PanelButton.LEVEL_NORMAL);
             }
-
             if (mButtonWind != null && !mButtonWind.equals(view)) {
                 resetFragment(mButtonWind.isLocked(), getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), WindFragment.class);
                 mButtonWind.setMarkerLevel(PanelButton.LEVEL_NORMAL);
@@ -423,7 +438,7 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         @Override
         public void onChangedSwitch(PanelButton view, boolean isChecked) {
-
+            // no-op
         }
     }
 
@@ -524,6 +539,33 @@ public class SetupPanelFragment extends BasePanelFragment {
         }
     }
 
+    private class ButtonFactorListener implements PanelButton.PanelButtonClick {
+        private final String TAG = ButtonFactorListener.class.getName();
+
+        @Override
+        public void onClick(PanelButton view) {
+            sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_FACTOR);
+            switch (view.toggleMarker()) {
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
+                    break;
+
+                case LEVEL_TOGGLED:
+//                    replaceFragment(RaceFactorFragment.newInstance(BaseFragment.START_MODE_PLANNED));
+                    break;
+
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+            }
+            view.disableToggle();
+        }
+
+        @Override
+        public void onChangedSwitch(PanelButton view, boolean isChecked) {
+            // no-op
+        }
+    }
+
     private class ButtonCourseListener implements PanelButton.PanelButtonClick {
         private final String TAG = ButtonCourseListener.class.getName();
 
@@ -536,7 +578,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace(), getActivity()));
+                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace()));
                     break;
 
                 default:
@@ -598,6 +640,8 @@ public class SetupPanelFragment extends BasePanelFragment {
                         uncheckMarker(mButtonPathfinder);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING.equals(data)) {
                         uncheckMarker(mButtonTiming);
+                    } else if (AppConstants.INTENT_ACTION_TOGGLE_FACTOR.equals(data)) {
+                        uncheckMarker(mButtonFactor);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_COURSE.equals(data)) {
                         uncheckMarker(mButtonCourse);
                     } else if (AppConstants.INTENT_ACTION_TOGGLE_WIND.equals(data)) {

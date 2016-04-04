@@ -106,6 +106,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         initStartTime();
         initStartMode();
+        initFactor();
         initCourse();
         initWind();
         lastTick = MillisecondsTimePoint.now().minus(2000);
@@ -120,11 +121,24 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
+    private void initFactor() {
+        if (preferences.isRaceFactorChangeAllow()) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    openFragment(RaceFactorFragment.newInstance(START_MODE_PRESETUP));
+                }
+            };
+            SelectionItem factorItem = new SelectionItem(getString(R.string.race_factor), null, null, false, false, runnable);
+            mItems.add(factorItem);
+        }
+    }
+
     private void initCourse() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace(), getActivity()));
+                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace()));
             }
         };
         SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, false, false, runnable);
