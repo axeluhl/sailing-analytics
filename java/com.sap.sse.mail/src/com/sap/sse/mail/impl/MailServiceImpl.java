@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -21,6 +22,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -73,7 +75,11 @@ public class MailServiceImpl implements ReplicableMailService {
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
                     msg.setFrom(new InternetAddress(mailProperties.getProperty("mail.from", "root@sapsailing.com")));
-                    msg.setSubject(subject);
+                    try {
+                        msg.setSubject(MimeUtility.encodeText(subject, "utf-8", "B"));
+                    } catch (UnsupportedEncodingException e) {
+                        msg.setSubject(subject);
+                    }
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
                     
                     // this fixes the DCH MIME type error 

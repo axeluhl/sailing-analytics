@@ -75,6 +75,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
                 trackedRace.setStartOfTrackingReceived(null);
                 trackedRace.setEndOfTrackingReceived(null);
                 trackedRace.setStartTimeReceived(null);
+                logger.info("Received isInitialized()==false for race "+race.getName());
             } else {
                 IStartStopData startEndTrackingTimesData = event.getB();
                 if (startEndTrackingTimesData != null) {
@@ -88,6 +89,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
                             : getSimulator() == null ? new MillisecondsTimePoint(endTrackingTime) : getSimulator()
                                     .advance(new MillisecondsTimePoint(endTrackingTime));
                     trackedRace.setEndOfTrackingReceived(endOfTracking);
+                    logger.info("Received tracking times update for race "+race.getName()+": "+startOfTracking+".."+endOfTracking);
                 }
                 IStartStopData startEndRaceTimesData = event.getC();
                 if (startEndRaceTimesData != null) {
@@ -96,6 +98,7 @@ public class RaceStartedAndFinishedReceiver extends AbstractReceiverWithQueue<IR
                             startTime) : getSimulator().advance(new MillisecondsTimePoint(startTime));
                     trackedRace.setStartTimeReceived(startOfRace);
                     // Note that end of race can't currently be set on a tracked race
+                    logger.info("Received race start time update for race "+race.getName()+": "+startTime);
                 }
             }
         } else {
