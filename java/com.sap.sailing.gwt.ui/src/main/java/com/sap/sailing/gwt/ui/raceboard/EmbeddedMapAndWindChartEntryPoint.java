@@ -42,6 +42,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -192,6 +193,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             windChart = null;
         }
         createRaceBoardInOneScreenMode(raceMap, windChart);
+        timeRangeWithZoomProvider.setTimeRange(new MillisecondsTimePoint(timer.getTime()).minus(Duration.ONE_MINUTE.times(15)).asDate(),
+                new MillisecondsTimePoint(timer.getTime()).plus(Duration.ONE_MINUTE.times(3)).asDate());
         timer.setTime(timer.getTime().getTime()-1000l);
     }  
 
