@@ -22,5 +22,10 @@ public class SensorDataImportWidget extends AbstractFileImportWidget implements 
     protected void getImporterTypes(AsyncCallback<Collection<String>> callback) {
         callback.onSuccess(Collections.singletonList(KnownSensorDataTypes.BRAVO.name()));
     }
+    
+    public KnownSensorDataTypes getSelectedImporterType() {
+        String stringValue = preferredImporterUi.getSelectedValue();
+        return stringValue == null ? null : KnownSensorDataTypes.valueOf(stringValue);
+    }
 
 }
