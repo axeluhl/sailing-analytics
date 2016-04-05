@@ -138,10 +138,13 @@ public class RaceFilter extends Filter {
                     }
                     int fleetCount = fleetItemCount.get(getFleetName(raceItem));
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
+                    currentlyRunningFleet = raceItem.getFleet();
+                    currentUnscheduledItem = null;
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     int fleetCount = fleetItemCount.get(getFleetName(raceItem));
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                     filteredItems.add(raceItem);
+                    currentUnscheduledItem = null;
                     currentlyRunningFleet = raceItem.getFleet();
                 }
             }
