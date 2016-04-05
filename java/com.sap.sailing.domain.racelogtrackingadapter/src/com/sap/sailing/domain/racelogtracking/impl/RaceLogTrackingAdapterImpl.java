@@ -284,18 +284,16 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
             Locale locale) throws MailException {
         StringBuilder occuredExceptions = new StringBuilder();
-
         for (Competitor competitor : competitors) {
             final String toAddress = competitor.getEmail();
             if (toAddress != null) {
                 String leaderboardName = leaderboard.getName();
                 String competitorName = competitor.getName();
-
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
                         event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
                 String logoUrl = null;
-                List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
+                final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
                 if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
                     logoUrl = imagesWithTag.get(0).getURL().toString();
                 }
