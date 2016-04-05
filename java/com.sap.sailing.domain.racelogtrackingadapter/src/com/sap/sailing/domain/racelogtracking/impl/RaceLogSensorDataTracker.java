@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
@@ -21,6 +20,7 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogMappingWrapper.TrackLoader;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -95,10 +95,11 @@ public class RaceLogSensorDataTracker {
                 sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
                         mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
             };
-            // FIXME calculate event to create correct competitor mappper
-            SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = 
-                    mapperFactory.createCompetitorMapper((RegattaLogDeviceCompetitorMappingEvent) null);
-            competitorMappings.updateMappings(mappingFinder, false, (comp) -> mapper.getTrack(trackedRace, comp), trackLoader);
+            Function<DeviceMapping<Competitor>, DynamicSensorFixTrack<SensorFix>> trackFactory = (
+                    DeviceMapping<Competitor> deviceMapping) -> mapperFactory
+                    .<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>> createCompetitorMapper(
+                            deviceMapping.getEventType()).getTrack(trackedRace, deviceMapping.getMappedTo());
+            competitorMappings.updateMappings(mappingFinder, false, trackFactory, trackLoader);
         } catch (DoesNotHaveRegattaLogException | NoCorrespondingServiceRegisteredException | TransformationException e) {
             logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
         }

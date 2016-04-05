@@ -38,18 +38,18 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
     
     <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(
             Function<RegattaLog, RegattaLogDeviceMappingFinder<ItemT>> mappingFinder, boolean loadIfNotCovered,
-            Function<ItemT, TrackT> trackFactory, TrackLoader<TrackT, ItemT> trackLoader)
+            Function<DeviceMapping<ItemT>, TrackT> trackFactory, TrackLoader<TrackT, ItemT> trackLoader)
             throws DoesNotHaveRegattaLogException, TransformationException {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = mappingFinder.apply(regattaLog).analyze();
         if (loadIfNotCovered) {
             for (ItemT item : newMappings.keySet()) {
-                TrackT track = trackFactory.apply(item);
                 List<DeviceMapping<ItemT>> oldMappings = mappings.get(item);
                 if (oldMappings != null) {
                     for (DeviceMapping<ItemT> newMapping : newMappings.get(item)) {
                         if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
+                            TrackT track = trackFactory.apply(newMapping);
                             try {
                                 trackLoader.loadTracks(track, newMapping);
                             } catch (NoCorrespondingServiceRegisteredException exc) {
