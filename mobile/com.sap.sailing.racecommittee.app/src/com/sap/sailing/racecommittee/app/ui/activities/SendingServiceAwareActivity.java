@@ -22,10 +22,10 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.Mes
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingServiceLogger;
 import com.sap.sailing.android.shared.ui.activities.ResilientActivity;
 import com.sap.sailing.android.shared.util.AuthCheckTask;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public abstract class SendingServiceAwareActivity extends ResilientActivity implements AuthCheckTask.AuthCheckTaskListener {
