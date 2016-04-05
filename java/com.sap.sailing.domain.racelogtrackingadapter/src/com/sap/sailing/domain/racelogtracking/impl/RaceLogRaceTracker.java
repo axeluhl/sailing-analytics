@@ -340,7 +340,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
         markMappingsByDevices.clear();
         markMappingsByDevices.putAll(transformToMappingsByDevice(markMappings));
-        trackedRace.updateStartAndEndOfTracking();
     }
 
     private void onDeviceMarkMappingEvent(RegattaLogDeviceMarkMappingEvent event) {
@@ -414,7 +413,6 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         competitorMappings.putAll(newMappings);
         competitorMappingsByDevices.clear();
         competitorMappingsByDevices.putAll(transformToMappingsByDevice(competitorMappings));
-        trackedRace.updateStartAndEndOfTracking();
     }
 
     private void onStartTrackingEvent(RaceLogStartTrackingEvent event) {
