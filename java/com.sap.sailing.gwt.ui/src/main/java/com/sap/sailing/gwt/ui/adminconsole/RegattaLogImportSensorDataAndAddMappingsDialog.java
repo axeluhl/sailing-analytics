@@ -15,16 +15,17 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
+import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
-import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDialog<Collection<DeviceMappingDTO>> {
+public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDialog<Collection<TypedDeviceMappingDTO>> {
     private final String leaderboardName;
     private final SensorDataImportWidget importWidget;
     private final TrackFileImportDeviceIdentifierTableWrapper deviceIdTable;
@@ -39,12 +40,12 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
 
     public RegattaLogImportSensorDataAndAddMappingsDialog(SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final StringMessages stringMessages, String leaderboardName,
-            DialogCallback<Collection<DeviceMappingDTO>> callback) {
+            DialogCallback<Collection<TypedDeviceMappingDTO>> callback) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
                 stringMessages.add(), stringMessages.cancel(),
-                new DataEntryDialog.Validator<Collection<DeviceMappingDTO>>() {
+                new DataEntryDialog.Validator<Collection<TypedDeviceMappingDTO>>() {
                     @Override
-                    public String getErrorMessage(Collection<DeviceMappingDTO> valueToValidate) {
+                    public String getErrorMessage(Collection<TypedDeviceMappingDTO> valueToValidate) {
                         return valueToValidate.isEmpty() ? "!! Please create at least one mapping by [...] !!" : null;
                     }
                 }, true, callback);
@@ -147,13 +148,13 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
     }
 
     @Override
-    protected Collection<DeviceMappingDTO> getResult() {
-        List<DeviceMappingDTO> result = new ArrayList<>();
+    protected Collection<TypedDeviceMappingDTO> getResult() {
+        List<TypedDeviceMappingDTO> result = new ArrayList<>();
+        KnownSensorDataTypes dataType = importWidget.getSelectedImporterType();
         for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
             DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
             MappableToDevice mappedTo = mappings.get(device);
-            DeviceMappingDTO mapping = new DeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null);
-            result.add(mapping);
+            result.add(new TypedDeviceMappingDTO(deviceIdDto, device.from, device.to, mappedTo, null, dataType));
         }
         return result;
     }

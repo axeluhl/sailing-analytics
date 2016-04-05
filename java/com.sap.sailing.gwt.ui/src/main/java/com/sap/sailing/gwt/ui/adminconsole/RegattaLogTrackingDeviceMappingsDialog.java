@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
@@ -274,12 +275,56 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
     private void importFixes() {
         new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                new RegattaLogImportDialogCallback()).show();
+                new DialogCallback<Collection<DeviceMappingDTO>>() {
+                    @Override
+                    public void ok(Collection<DeviceMappingDTO> editedObject) {
+                        for (DeviceMappingDTO mapping : editedObject) {
+                            sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                                    new AsyncCallback<Void>() {
+                                        @Override
+                                        public void onSuccess(Void result) {
+                                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
+                                        }
+
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            errorReporter.reportError(caught.getMessage());
+                                        }
+                                    });
+                        }
+                    }
+
+                    @Override
+                    public void cancel() {
+                    }
+                }).show();
     }
     
     private void importFoiling() {
         new RegattaLogImportSensorDataAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
-                new RegattaLogImportDialogCallback()).show();
+                new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
+            @Override
+            public void ok(Collection<TypedDeviceMappingDTO> editedObject) {
+                for (TypedDeviceMappingDTO mapping : editedObject) {
+                    sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
+                            new AsyncCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            RegattaLogTrackingDeviceMappingsDialog.this.refresh();
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError(caught.getMessage());
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void cancel() {
+            }
+        }).show();
     }
 
     private FieldUpdater<DeviceMappingDTO, String> getActionColFieldUpdater() {
@@ -335,25 +380,4 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         return null;
     }
     
-    private class RegattaLogImportDialogCallback implements DialogCallback<Collection<DeviceMappingDTO>> {
-        @Override
-        public void ok(Collection<DeviceMappingDTO> editedObject) {
-            for (DeviceMappingDTO mapping : editedObject) {
-                sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        RegattaLogTrackingDeviceMappingsDialog.this.refresh();
-                    }
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError(caught.getMessage());
-                    }
-                });
-            }
-        }
-
-        @Override
-        public void cancel() {
-        }
-    }
 }
