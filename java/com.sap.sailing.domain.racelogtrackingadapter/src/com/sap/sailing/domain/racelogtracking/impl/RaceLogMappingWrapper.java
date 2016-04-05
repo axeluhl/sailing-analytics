@@ -46,7 +46,7 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
         if (loadIfNotCovered) {
             for (ItemT item : newMappings.keySet()) {
                 List<DeviceMapping<ItemT>> oldMappings = mappings.get(item);
-                if (oldMappings != null) {
+//                if (oldMappings != null) {
                     for (DeviceMapping<ItemT> newMapping : newMappings.get(item)) {
                         if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
                             TrackT track = trackFactory.apply(newMapping);
@@ -57,7 +57,7 @@ public class RaceLogMappingWrapper<ItemT extends WithID> {
                             }
                         }
                     }
-                }
+//                }
             }
         }
         updateMappings(newMappings);

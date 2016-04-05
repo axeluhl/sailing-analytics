@@ -100,7 +100,7 @@ public class RaceLogSensorDataTracker {
                     DeviceMapping<Competitor> deviceMapping) -> mapperFactory
                     .<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>> createCompetitorMapper(
                             deviceMapping.getEventType()).getTrack(trackedRace, deviceMapping.getMappedTo());
-            competitorMappings.updateMappings(mappingFinder, false, trackFactory, trackLoader);
+            competitorMappings.updateMappings(mappingFinder, true, trackFactory, trackLoader);
         } catch (DoesNotHaveRegattaLogException | NoCorrespondingServiceRegisteredException | TransformationException e) {
             logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
         }
