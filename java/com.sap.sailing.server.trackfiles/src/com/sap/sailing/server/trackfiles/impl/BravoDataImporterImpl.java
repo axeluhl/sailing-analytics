@@ -108,11 +108,11 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndices = new HashMap<>();
         List<String> columns = metadata.getColumns();
-        for (int j = 0; j < headerTokens.length; j++) {
+        for (int j = 2; j < headerTokens.length; j++) {
             String header = headerTokens[j];
             colIndices.put(header, columns.indexOf(header));
         }
-        if (colIndices.size() != columns.size()) {
+        if (colIndices.size() != columns.size() || !colIndices.keySet().containsAll(columns)) {
             LOG.log(Level.SEVERE, "Missing headers");
             throw new RuntimeException("Missing headers in import files");
         }
