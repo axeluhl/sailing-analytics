@@ -160,8 +160,8 @@ public class RaceFilter extends Filter {
         if (!fleetItemCount.containsKey(fleetName)) {
             fleetItemCount.put(fleetName, 0);
         }
-        int count = fleetItemCount.get(fleetName);
-        fleetItemCount.put(fleetName, count++);
+        int count = fleetItemCount.get(fleetName) + 1;
+        fleetItemCount.put(fleetName, count);
     }
 
     private void filterByFinalOrMedal(Map<String, Boolean> finalsStarted, List<RaceListDataTypeHeader> headersToRemove,
