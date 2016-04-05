@@ -718,7 +718,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto, AsyncCallback<Void> callback);
     
-    void addDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback);
+    void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto, AsyncCallback<Void> callback);
 
     void doesRegattaLogContainCompetitors(String name, AsyncCallback<Boolean> regattaLogCallBack);
 

@@ -306,8 +306,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             @Override
             public void ok(Collection<TypedDeviceMappingDTO> editedObject) {
                 for (TypedDeviceMappingDTO mapping : editedObject) {
-                    sailingService.addDeviceMappingToRegattaLog(leaderboardName, mapping,
-                            new AsyncCallback<Void>() {
+                    sailingService.addTypedDeviceMappingToRegattaLog(leaderboardName, mapping, new AsyncCallback<Void>() {
                         @Override
                         public void onSuccess(Void result) {
                             RegattaLogTrackingDeviceMappingsDialog.this.refresh();

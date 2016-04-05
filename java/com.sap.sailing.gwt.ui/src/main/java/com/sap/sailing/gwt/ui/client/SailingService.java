@@ -572,7 +572,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void addDeviceMappingToRegattaLog(String leaderboardName, DeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
     
-    void addDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
+    void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException;
 
     boolean doesRegattaLogContainCompetitors(String name) throws DoesNotHaveRegattaLogException;

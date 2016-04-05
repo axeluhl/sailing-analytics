@@ -5446,7 +5446,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void addDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
+    public void addTypedDeviceMappingToRegattaLog(String leaderboardName, TypedDeviceMappingDTO dto)
             throws NoCorrespondingServiceRegisteredException, TransformationException, DoesNotHaveRegattaLogException {
         RegattaLog regattaLog = getRegattaLogInternal(leaderboardName);
         DeviceMapping<?> mapping = convertToDeviceMapping(dto);
