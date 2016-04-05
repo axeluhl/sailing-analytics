@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <declare-styleable name="HeaderLayout">
+        <attr name="headerText" format="reference|string" />
+        <attr name="showChevron" format="boolean" />
+    </declare-styleable>
+
     <declare-styleable name="PanelButton">
         <attr name="buttonHeader" format="reference|string" />
 

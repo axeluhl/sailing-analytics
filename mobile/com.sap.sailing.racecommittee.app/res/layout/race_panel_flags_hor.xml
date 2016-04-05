@@ -79,19 +79,35 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/more_flags"
+            android:id="@+id/blue_first_flags"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <ImageView
-                android:id="@+id/more_flags_marker"
+                android:id="@+id/first_blue_flags_marker"
                 android:layout_width="@dimen/thin_line"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:src="?attr/marker"/>
 
-            <include layout="@layout/panel_button_more"/>
+            <include layout="@layout/panel_button_blue_first"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/blue_last_flags"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/blue_down_flags_marker"
+                android:layout_width="@dimen/thin_line"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:src="?attr/marker"/>
+
+            <include layout="@layout/panel_button_blue_last"/>
         </RelativeLayout>
 
         <RelativeLayout

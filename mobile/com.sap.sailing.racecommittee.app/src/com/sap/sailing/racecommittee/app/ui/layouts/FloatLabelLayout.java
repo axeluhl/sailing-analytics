@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.ui.views;
+package com.sap.sailing.racecommittee.app.ui.layouts;
 
 /*
  * Copyright 2014 Chris Banes
