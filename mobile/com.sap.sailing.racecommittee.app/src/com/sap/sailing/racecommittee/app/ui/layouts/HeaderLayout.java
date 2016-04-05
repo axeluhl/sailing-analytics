@@ -1,5 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.layouts;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.racecommittee.app.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -7,9 +10,6 @@ import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class HeaderLayout extends RelativeLayout {
 
