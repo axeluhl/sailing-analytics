@@ -45,7 +45,6 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
         return isResultEntryEnabled;
     }
 
-    @Override
     public void setResultEntryEnabled(Boolean isResultEntryEnabled) {
         this.isResultEntryEnabled = isResultEntryEnabled;
     }

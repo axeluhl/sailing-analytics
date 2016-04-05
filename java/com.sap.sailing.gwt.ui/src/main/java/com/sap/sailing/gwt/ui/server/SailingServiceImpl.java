@@ -303,6 +303,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -4864,43 +4865,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
-            config.setClassFlag(dto.rrs26Configuration.classFlag);
-            config.setHasIndividualRecall(dto.rrs26Configuration.hasIndividualRecall);
-            config.setResultEntryEnabled(dto.rrs26Configuration.isResultEntryEnabled);
+            applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
             config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
             configuration.setRRS26Configuration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
-            config.setClassFlag(dto.gateStartConfiguration.classFlag);
-            config.setHasIndividualRecall(dto.gateStartConfiguration.hasIndividualRecall);
-            config.setResultEntryEnabled(dto.rrs26Configuration.isResultEntryEnabled);
+            applyGeneralRacingProcedureConfigProperties(dto.gateStartConfiguration, config);
             config.setHasPathfinder(dto.gateStartConfiguration.hasPathfinder);
             config.setHasAdditionalGolfDownTime(dto.gateStartConfiguration.hasAdditionalGolfDownTime);
             configuration.setGateStartConfiguration(config);
         }
         if (dto.essConfiguration != null) {
             ESSConfigurationImpl config = new ESSConfigurationImpl();
-            config.setClassFlag(dto.essConfiguration.classFlag);
-            config.setHasIndividualRecall(dto.essConfiguration.hasIndividualRecall);
-            config.setResultEntryEnabled(dto.rrs26Configuration.isResultEntryEnabled);
+            applyGeneralRacingProcedureConfigProperties(dto.essConfiguration, config);
             configuration.setESSConfiguration(config);
         }
         if (dto.basicConfiguration != null) {
             RacingProcedureConfigurationImpl config = new RacingProcedureConfigurationImpl();
-            config.setClassFlag(dto.basicConfiguration.classFlag);
-            config.setHasIndividualRecall(dto.basicConfiguration.hasIndividualRecall);
-            config.setResultEntryEnabled(dto.rrs26Configuration.isResultEntryEnabled);
+            applyGeneralRacingProcedureConfigProperties(dto.basicConfiguration, config);
             configuration.setBasicConfiguration(config);
         }
         if (dto.leagueConfiguration != null) {
             LeagueConfigurationImpl config = new LeagueConfigurationImpl();
-            config.setClassFlag(dto.leagueConfiguration.classFlag);
-            config.setHasIndividualRecall(dto.leagueConfiguration.hasIndividualRecall);
-            config.setResultEntryEnabled(dto.rrs26Configuration.isResultEntryEnabled);
+            applyGeneralRacingProcedureConfigProperties(dto.leagueConfiguration, config);
             configuration.setLeagueConfiguration(config);
         }
         return configuration;
+    }
+
+    private void applyGeneralRacingProcedureConfigProperties(RacingProcedureConfigurationDTO racingProcedureConfigurationDTO,
+            RacingProcedureConfigurationImpl config) {
+        config.setClassFlag(racingProcedureConfigurationDTO.classFlag);
+        config.setHasIndividualRecall(racingProcedureConfigurationDTO.hasIndividualRecall);
+        config.setResultEntryEnabled(racingProcedureConfigurationDTO.isResultEntryEnabled);
     }
 
     @Override

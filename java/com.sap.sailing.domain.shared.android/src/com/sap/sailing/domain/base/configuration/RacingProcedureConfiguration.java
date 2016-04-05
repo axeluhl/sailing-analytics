@@ -36,12 +36,4 @@ public interface RacingProcedureConfiguration extends Serializable {
      */
     Boolean isResultEntryEnabled();
 
-    /**
-     * May/shall the result entry control be used to capture results? If not, only the
-     * photo feature for the hardcopy will be availble. Otherwise, a rank editor is offered
-     * in the app which submits the score updates which then will be applied to the leaderboard
-     * immediately.
-     */
-    void setResultEntryEnabled(Boolean isResultEntryEnabled);
-
 }
