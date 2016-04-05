@@ -50,8 +50,6 @@ import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
@@ -114,7 +112,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -198,9 +195,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The end of tracking time as announced by the tracking infrastructure.
      */
     private TimePoint endOfTrackingReceived;
+
     /**
      * The start and end of tracking inferred via RaceLog, the received timepoint (see above) and mapping intervals.
-     * For the precedence order see #updateStartAndEndOfTracking
+     * For the precedence order see {@link #updateStartAndEndOfTracking()}.
      */
     private TimePoint startOfTracking;
     private TimePoint endOfTracking;
@@ -746,21 +744,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Updates the start and end of tracking in the following precedence order:
      * 
-     * 1) start/end of tracking in Racelog
-     * 2) manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}
-     * 3) start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES
-     * 4) earliest mapping start/latest mapping end
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol
      */
     public void updateStartAndEndOfTracking() {
         final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
         final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
-        
         TimePoint oldStartOfTracking = getStartOfTracking();
         TimePoint oldEndOfTracking = getEndOfTracking();
-        
         boolean startOfTrackingFound = false;
         boolean endOfTrackingFound = false;
-        
+        // check race log
         if (trackingTimesFromRaceLog != null){
             if (trackingTimesFromRaceLog.getA() != null){
                 startOfTracking = trackingTimesFromRaceLog.getA();
@@ -771,22 +768,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 endOfTrackingFound = true;
             }
         }
-        
-        if(!startOfTrackingFound || !endOfTrackingFound){
+        // check "received" variants coming from a connector directly
+        if (!startOfTrackingFound || !endOfTrackingFound){
             if (startOfTrackingReceived != null && !startOfTrackingFound){
                 startOfTrackingFound = true;
                 startOfTracking = startOfTrackingReceived;
             }
-            
             if (endOfTrackingReceived != null && !endOfTrackingFound){
                 endOfTrackingFound = true;
                 endOfTracking = endOfTrackingReceived;
             }
         }
-        
-        
-        if(!startOfTrackingFound || !endOfTrackingFound){
-            if (startAndFinishedTimesFromRaceLog != null){
+        // check for start/finished times in race log and add a few minutes on the ends
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startAndFinishedTimesFromRaceLog != null) {
                 if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
                     startOfTracking = startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
                     startOfTrackingFound = true;
@@ -797,62 +792,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 }
             }
         }
-        
-        if(!startOfTrackingFound || !endOfTrackingFound){
-            TimePoint earliestMappingStart = new MillisecondsTimePoint(Long.MAX_VALUE);
-            TimePoint latestMappingEnd = new MillisecondsTimePoint(Long.MIN_VALUE);
-            Map<Mark, List<DeviceMapping<Mark>>> markMappings = new HashMap<Mark, List<DeviceMapping<Mark>>>();
-            Map<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new HashMap<Competitor, List<DeviceMapping<Competitor>>>();
-            for (RegattaLog regattaLog: attachedRegattaLogs.values()){
-                 competitorMappings.putAll(new RegattaLogDeviceCompetitorMappingFinder(regattaLog).analyze());
-                 markMappings.putAll(new RegattaLogDeviceMarkMappingFinder(regattaLog).analyze());
-            }
-            for (List<? extends DeviceMapping<?>> list : competitorMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
-                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
-                }
-            }
-            for (List<? extends DeviceMapping<?>> list : markMappings.values()) {
-                for (DeviceMapping<?> mapping : list) {
-                    earliestMappingStart = getUpdatedEarliestMappingStart(earliestMappingStart, mapping.getTimeRange().from());
-                    latestMappingEnd = getUpdatedLatestMappingEnd(latestMappingEnd, mapping.getTimeRange().to());
-                }
-            }
-            
-            if (!startOfTrackingFound && earliestMappingStart != null){
-                startOfTracking = earliestMappingStart;
-            }
-            
-            if (!endOfTrackingFound && latestMappingEnd != null){
-                endOfTracking = latestMappingEnd;
-            }
-        }
-        
         startOfTrackingChanged(oldStartOfTracking, false);
         endOfTrackingChanged(oldEndOfTracking, false);
     }
-
-    private TimePoint getUpdatedEarliestMappingStart(TimePoint earliestMappingStart, final TimePoint from) {
-        if (from == null) {
-            earliestMappingStart = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
-        } else if (earliestMappingStart != null && from.before(earliestMappingStart)) {
-            earliestMappingStart = from;
-        }
-        return earliestMappingStart;
-    }
-
-    private TimePoint getUpdatedLatestMappingEnd(TimePoint latestMappingEnd, final TimePoint to) {
-        if (to == null) {
-            latestMappingEnd = null; // no further updates; one open interval means startOfTracking shall be the beginning of time
-        } else if (latestMappingEnd != null && to.after(latestMappingEnd)) {
-            latestMappingEnd = to;
-        }
-        return latestMappingEnd;
-    }
-    
-    
-    
 
     @Override
     public TimePoint getEndOfTracking() {
