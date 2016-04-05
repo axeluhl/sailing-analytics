@@ -335,12 +335,12 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         htmlText.append("</head>");
         htmlText.append("<body>");
         if (hasLogoUrl) {
-            htmlText.append("<p class='qr'><img src='" + logoUrl + "'  title='").append(url).append("'></p> ");
+            htmlText.append("<p class='qr'><img src='").append(logoUrl).append("' /></p> ");
         }
         htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
         htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
                 .append("</b></p> ");
-        htmlText.append("<p class='qr'><img src='cid:image'  title='").append(url).append("'></p> ");
+        htmlText.append("<p class='qr'><img src='cid:image'  title='").append(url).append("' /></p> ");
         htmlText.append("<p class='spacer'>").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
         if (hasIOSAppUrl) {
             htmlText.append("<a class='b' href='").append(IOS_DEEP_LINK_PREFIX + url).append("'>")
