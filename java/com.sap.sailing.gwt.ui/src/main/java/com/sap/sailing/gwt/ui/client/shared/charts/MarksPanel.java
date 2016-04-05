@@ -38,6 +38,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         this.markDataProvider = markDataProvider;
         setTitle(stringMessages.marks());
         markTable = new FlushableSortedCellTableWithStylableHeaders<MarkDTO>(10000, tableResources);
+        markTable.setStyleName("EditMarkPositionMarkTable");
         SortableColumn<MarkDTO, String> markNameColumn = new SortableColumn<MarkDTO, String>(new TextCell(), SortingOrder.NONE) {
             @Override
             public String getValue(MarkDTO object) {
@@ -77,6 +78,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
             @Override
             public void update(int index, final MarkDTO mark, String value) {
                 final Date timePoint = parent.timer.getTime();
+                select(mark);
                 if (parent.hasFixAtTimePoint(mark, timePoint)) {
                     parent.showNotification(stringMessages.pleaseSelectOtherTimepoint(), NotificationType.ERROR);
                 } else {
@@ -154,7 +156,7 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
         return null;               
     }
     
-    public void deselectMark() {//FIXME
+    public void deselectMark() {
         markTable.getSelectionModel().setSelected(getSelectedMark(), false);
     }
 

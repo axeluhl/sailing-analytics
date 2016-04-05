@@ -698,11 +698,12 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getActiveFileStorageServiceName(AsyncCallback<String> callback);
 
     void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO event,
-            String leaderboardName, Collection<CompetitorDTO> competitors, String localeInfo,
+            String leaderboardName, Collection<CompetitorDTO> competitors, String iOSAppUrl, String androidAppUrl,
+            String localeInfo,
             AsyncCallback<Void> callback);
 
     void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto, String leaderboardName,
-            String emails, String localeInfoName, AsyncCallback<Void> callback);
+            String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName, AsyncCallback<Void> callback);
             
     void getLeaderboardGroupsByEventId(UUID id, AsyncCallback<ArrayList<LeaderboardGroupDTO>> callback);
 

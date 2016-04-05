@@ -462,4 +462,14 @@ public class AppPreferences {
         return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key),
                 context.getResources().getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
     }
+
+    public String showNonPublic() {
+        return preferences.getBoolean(context.getString(R.string.preference_non_public_events_key),
+            context.getResources().getBoolean(R.bool.preference_non_public_events_default)) ? "true" : "false";
+    }
+
+    public boolean showRaceResults() {
+        return preferences.getBoolean(context.getString(R.string.preference_race_results_key),
+            context.getResources().getBoolean(R.bool.preference_race_results_default));
+    }
 }

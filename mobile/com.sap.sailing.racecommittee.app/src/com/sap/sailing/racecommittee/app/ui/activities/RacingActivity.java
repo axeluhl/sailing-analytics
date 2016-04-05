@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseArea;
@@ -65,8 +66,8 @@ import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -150,6 +151,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             return;
         }
         if (resetEditFragments(R.id.finished_edit, AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT)) {
+            return;
+        }
+
+        if (mRaceList.isDrawerOpen()) {
+            mRaceList.closeDrawer();
             return;
         }
 
@@ -515,7 +521,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                     content = RaceFlagViewerFragment.newInstance();
                 } else {
-                    content = RaceFinishingFragment.newInstance();
+                    if (preferences.showRaceResults()) {
+                        content = TrackingListFragment.newInstance(args, 1);
+                    } else {
+                        content = RaceFinishingFragment.newInstance();
+                    }
                 }
                 content.setArguments(args);
                 transaction.replace(R.id.race_content, content);

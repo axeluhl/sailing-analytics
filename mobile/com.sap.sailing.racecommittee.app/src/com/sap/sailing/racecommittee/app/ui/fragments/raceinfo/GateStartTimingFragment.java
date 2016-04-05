@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateSt
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -44,10 +45,9 @@ public class GateStartTimingFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_timing, container, false);
 
-        View caption = ViewHelper.get(layout, R.id.header_text);
-        if (caption != null) {
-            caption.setOnClickListener(new View.OnClickListener() {
-
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     goHome();
@@ -156,7 +156,6 @@ public class GateStartTimingFragment extends BaseFragment {
                     }
                     if (mTimeGolf != null) {
                         golf = mTimeGolf.getValue() * ONE_MINUTE_MILLISECONDS;
-
                     }
 
                     GateStartRacingProcedure procedure = getRaceState().getTypedRacingProcedure();
