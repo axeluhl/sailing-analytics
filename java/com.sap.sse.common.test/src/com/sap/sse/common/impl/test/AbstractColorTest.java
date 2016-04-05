@@ -42,9 +42,9 @@ public class AbstractColorTest {
     @Test
     public void testHSL() throws Exception {
         Color color = AbstractColor.getCssColor("hsl(360, 100%, 100%)");
-        Assert.assertEquals("#FFFFFF", color.getAsHtml());
+        Assert.assertEquals("#FF00FF", color.getAsHtml());
         color = AbstractColor.getCssColor("HSL(360,     1.0, 1.0)");
-        Assert.assertEquals("#FFFFFF", color.getAsHtml());
+        Assert.assertEquals("#FF00FF", color.getAsHtml());
         color = AbstractColor.getCssColor("hsl(360,     1.0, 1.0,435,789)");
         Assert.assertEquals(null, color);
     }
@@ -52,9 +52,9 @@ public class AbstractColorTest {
     @Test
     public void testHSLA() throws Exception {
         Color color = AbstractColor.getCssColor("hsla(360, 100%, 100%,hjhb)");
-        Assert.assertEquals("#FFFFFF", color.getAsHtml());
+        Assert.assertEquals("#FF00FF", color.getAsHtml());
         color = AbstractColor.getCssColor("HSLa(360,     1.0, 1.0,0.4)");
-        Assert.assertEquals("#FFFFFF", color.getAsHtml());
+        Assert.assertEquals("#FF00FF", color.getAsHtml());
         color = AbstractColor.getCssColor("hsla(360,     1.0, 1.0,435,789)");
         Assert.assertEquals(null, color);
     }
