@@ -457,7 +457,7 @@ public class FixesAndTails {
      * data from {@link #firstShownFix} and {@link #lastShownFix}.
      */
     protected void removeTail(CompetitorDTO competitor) {
-        Polyline removedTail = tails.remove(competitor);
+        final Polyline removedTail = tails.remove(competitor);
         if (removedTail != null) {
             removedTail.setMap(null);
         }
@@ -470,7 +470,7 @@ public class FixesAndTails {
      * {@link #firstShownFix} and {@link #lastShownFix} entries for <code>competitor</code> are set to <code>-1</code>.
      */
     private void clearTail(CompetitorDTO competitor) {
-        Polyline tail = tails.get(competitor);
+        final Polyline tail = tails.get(competitor);
         if (tail != null) {
             tail.getPath().clear();
             firstShownFix.put(competitor, -1);
