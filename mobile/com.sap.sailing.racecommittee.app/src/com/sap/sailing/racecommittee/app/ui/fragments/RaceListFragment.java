@@ -451,28 +451,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 mViewItems.add(new RaceListDataTypeHeader(fleets.get(0), false));
                 // ... and add all the sorted race views!
                 List<RaceListDataTypeRace> raceListDataTypeRaces = getRaceListDataTypeRaces(mRacesByGroup, fleets);
-                if (fleetsEqual(fleets)) {
-                    raceListDataTypeRaces = sortRaceList(raceListDataTypeRaces, fleets.size());
-                }
+                raceListDataTypeRaces = sortRaceList(raceListDataTypeRaces, fleets.size());
                 for (RaceListDataTypeRace raceListDataTypeRace : raceListDataTypeRaces) {
                     mViewItems.add(raceListDataTypeRace);
                 }
             }
         }
-    }
-
-    private boolean fleetsEqual(List<RaceGroupSeriesFleet> fleets) {
-        if (!fleets.isEmpty()) {
-            int lastFleetOrder = fleets.get(0).getFleet().getOrdering();
-            for (RaceGroupSeriesFleet fleet : fleets) {
-                int currentFleetOrder = fleet.getFleet().getOrdering();
-                if (currentFleetOrder != lastFleetOrder) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     private List<RaceListDataTypeRace> sortRaceList(List<RaceListDataTypeRace> raceList, int fleetSize) {
