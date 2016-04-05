@@ -118,7 +118,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         setProgressSpinnerVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+        getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea))).forceLoad();
     }
 
     private boolean resetEditFragments(@IdRes int id, String action) {
@@ -246,6 +246,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
+        filter.addAction(AppConstants.INTENT_ACTION_RELOAD_RACES);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -340,6 +341,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             case R.id.options_menu_reset:
                 ExLog.i(this, TAG, "Clicked RESET RACE");
                 resetRace();
+                return true;
+
+            case R.id.options_menu_role:
+                logoutSession();
                 return true;
 
             default:
@@ -551,6 +556,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                     transaction.remove(extra);
                 }
             }
+        }
+
+        if (AppConstants.INTENT_ACTION_RELOAD_RACES.equals(action)) {
+            loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
         }
 
         transaction.commit();

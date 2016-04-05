@@ -496,5 +496,6 @@
 
     <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+    <string name="options_menu_role">Rolle wechseln</string>
 
 </resources>
