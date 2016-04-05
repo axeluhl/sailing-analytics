@@ -53,7 +53,6 @@ public class RaceFilter extends Filter {
 
         List<RaceListDataType> filteredItems = new ArrayList<>();
         RaceListDataTypeRace currentUnscheduledItem = null;
-        RaceListDataTypeRace currentFinishedItem = null;
         String currentUnscheduledRaceName = "";
         String currentRegattaName = "";
         RaceGroupSeriesFleet currentlyRunningFleet = null;
@@ -100,9 +99,9 @@ public class RaceFilter extends Filter {
                 }
                 fleetItemCount.clear();
                 lastRunningRaceInFleet.clear();
+                currentUnscheduledRaceName = "";
                 currentRegattaName = previousHeader.getRaceGroup().getName();
                 currentUnscheduledItem = null;
-                currentFinishedItem = null;
                 currentlyRunningFleet = null;
                 finishedItems = 0;
                 subItems = 0;
@@ -134,20 +133,16 @@ public class RaceFilter extends Filter {
                     }
                 } else if (RaceLogRaceStatus.FINISHED.equals(status)) {
                     finishedItems++;
-                    if (filteredItems.contains(currentFinishedItem)) {
-                        filteredItems.remove(currentFinishedItem);
+                    if (filteredItems.contains(raceItem)) {
+                        filteredItems.remove(raceItem);
                     }
-                    filteredItems.add(raceItem);
-                    currentFinishedItem = raceItem;
-                    currentUnscheduledItem = null;
+                    int fleetCount = fleetItemCount.get(getFleetName(raceItem));
+                    lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                 } else if (RaceLogRaceStatus.isActive(status)) {
                     int fleetCount = fleetItemCount.get(getFleetName(raceItem));
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                     filteredItems.add(raceItem);
                     currentlyRunningFleet = raceItem.getFleet();
-                    // new run for all types!
-                    currentUnscheduledItem = null;
-                    currentFinishedItem = null;
                 }
             }
         } if (previousHeader != null && subItems > 0 && subItems == finishedItems) {
