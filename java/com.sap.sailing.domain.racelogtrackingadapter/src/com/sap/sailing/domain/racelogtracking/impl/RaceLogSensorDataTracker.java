@@ -28,6 +28,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 
 public class RaceLogSensorDataTracker {
     private static final Logger logger = Logger.getLogger(RaceLogSensorDataTracker.class.getName());
@@ -51,6 +53,30 @@ public class RaceLogSensorDataTracker {
                     mapper.addFix(track, fixToRecord);
                 }
             });
+        }
+    };
+    private TimePoint startOfTracking;
+    private TimePoint endOfTracking;
+    private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
+        
+        @Override
+        public void startOfTrackingChanged(TimePoint startOfTracking) {
+            final TimePoint oldStartOfTracking = RaceLogSensorDataTracker.this.startOfTracking;
+            RaceLogSensorDataTracker.this.startOfTracking = startOfTracking;
+            if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
+                    (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
+                loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking);
+            }
+        }
+        
+        @Override
+        public void endOfTrackingChanged(TimePoint endOfTracking) {
+            final TimePoint oldEndOfTracking = RaceLogSensorDataTracker.this.endOfTracking;
+            RaceLogSensorDataTracker.this.endOfTracking = endOfTracking;
+            if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
+                    (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
+                loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking);
+            }
         }
     };
 
@@ -78,12 +104,28 @@ public class RaceLogSensorDataTracker {
                     stopTracking();
                 }
             }
+            
+            @Override
+            public void startOfTrackingChanged(TimePoint startOfTracking) {
+            }
+            
+            @Override
+            public void endOfTrackingChanged(TimePoint endOfTracking) {
+            }
         };
         trackedRace.addListener(raceChangeListener);
     }
 
+    protected void loadGPSFixesForExtendedTimeRange(TimePoint oldEndOfTracking, TimePoint endOfTracking2) {
+        // TODO Auto-generated method stub
+        
+    }
+
     private void startTracking() {
         regattaLog.addListener(regattaLogEventVisitor);
+        trackedRace.addListener(trackingTimesRaceChangeListener);
+        this.startOfTracking = trackedRace.getStartOfTracking();
+        this.endOfTracking = trackedRace.getEndOfTracking();
         
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         
@@ -93,6 +135,7 @@ public class RaceLogSensorDataTracker {
             TrackLoader<DynamicSensorFixTrack<SensorFix>, Competitor> trackLoader = (track, mapping) -> {
                 SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = 
                         mapperFactory.createCompetitorMapper(mapping.getEventType());
+                // TODO also use startOfTracking/endOfTracking to not load unnecessary fixes
                 sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
                         mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
             };
@@ -116,6 +159,7 @@ public class RaceLogSensorDataTracker {
     public void stopTracking() {
         regattaLog.removeListener(regattaLogEventVisitor);
         sensorFixStore.removeListener(listener);
+        trackedRace.removeListener(trackingTimesRaceChangeListener);
     }
     
     public void stop() {
