@@ -56,10 +56,10 @@ public class RaceFilter extends Filter {
         String currentUnscheduledRaceName = "";
         String currentRegattaName = "";
         RaceGroupSeriesFleet currentlyRunningFleet = null;
-        boolean showCurrentFleet = true;
+        boolean showCurrentFleet;
         Map<String, Boolean> finalsStarted = new HashMap<>();
         int finishedItems = 0;
-        int subItems = 0;
+        int subItems = -1;
 
         List<RaceListDataTypeHeader> headersToRemove = new ArrayList<>();
         RaceListDataTypeHeader previousHeader = null;
@@ -73,6 +73,7 @@ public class RaceFilter extends Filter {
 
         for (RaceListDataType item : allItems) {
             if (item instanceof RaceListDataTypeHeader) {
+                showCurrentFleet = subItems < 0 || (subItems > 0 && subItems != finishedItems);
                 if (previousHeader != null && subItems > 0 && subItems == finishedItems && !showCurrentFleet) {
                     headersToRemove.add(previousHeader);
                 }
@@ -148,7 +149,8 @@ public class RaceFilter extends Filter {
                     currentlyRunningFleet = raceItem.getFleet();
                 }
             }
-        } if (previousHeader != null && subItems > 0 && subItems == finishedItems) {
+        }
+        if (previousHeader != null && subItems > 0 && subItems == finishedItems) {
             headersToRemove.add(previousHeader);
         }
         removeFinishedSeries(filteredItems, headersToRemove);
