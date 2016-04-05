@@ -496,7 +496,7 @@
 
     <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
-    <string name="preference_race_results_header">Zeige Rennliste</string>
+    <string name="preference_race_results_header">Erlaube Rennlistenbearbeitung</string>
     <string name="preference_race_results_summary">Erlaube Race-Manager die Zieleinlaufliste in der Finishing-Phase zu bearbeiten</string>
 
 </resources>
