@@ -144,7 +144,6 @@ public class RaceFilter extends Filter {
                     int fleetCount = fleetItemCount.get(getFleetName(raceItem));
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                     filteredItems.add(raceItem);
-                    currentUnscheduledItem = null;
                     currentlyRunningFleet = raceItem.getFleet();
                 }
             }
