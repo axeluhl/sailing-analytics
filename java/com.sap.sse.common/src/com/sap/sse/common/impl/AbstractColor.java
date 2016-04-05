@@ -25,15 +25,17 @@ public abstract class AbstractColor implements Color {
      * accepts all colors in the css-format (see http://www.w3schools.com/cssref/css_colors_legal.asp)
      */
     public static Color getCssColor(String color) {
-        String[] colorWithName = color.split("[()]");
-        switch (colorWithName[0].trim().toLowerCase()) {
-        case "rgb":
-        case "rgba":
-            return getRGBColor(colorWithName[1]);
-        case "hsl":
-        case "hsla":
-        case "hsv":
-            return getHSVColor(colorWithName[1]);
+        String[] colorWithName = color.trim().split("[()]");
+        if (colorWithName.length == 2) {
+            switch (colorWithName[0].trim().toLowerCase()) {
+            case "rgb":
+            case "rgba":
+                return getRGBColor(colorWithName[1]);
+            case "hsl":
+            case "hsla":
+            case "hsv":
+                return getHSVColor(colorWithName[1]);
+            }
         }
         Color resultColor = getColorByLowercaseNameStatic(color.toLowerCase().replace(" ", ""));
         if (resultColor == null) {
