@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -18,6 +17,7 @@ import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -48,14 +48,10 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             listView.setAdapter(new AbortFlagsAdapter(getActivity(), this, flag));
         }
 
-        TextView headerText = ViewHelper.get(layout, R.id.header_text);
-        if (headerText != null) {
-            headerText.setText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-        }
-
-        View headerLayout = ViewHelper.get(layout, R.id.header_layout);
-        if (headerLayout != null) {
-            headerLayout.setOnClickListener(new View.OnClickListener() {
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
+            header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
+            header.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);

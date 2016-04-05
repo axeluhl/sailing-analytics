@@ -535,6 +535,16 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
+    public boolean isDrawerOpen() {
+        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(Gravity.LEFT);
+    }
+
+    public void closeDrawer() {
+        if (mDrawerLayout != null) {
+            mDrawerLayout.closeDrawer(Gravity.LEFT);
+        }
+    }
+
     private void unregisterOnAllRaces() {
         for (ManagedRace managedRace : mManagedRacesById.values()) {
             managedRace.getState().removeChangedListener(stateListener);
