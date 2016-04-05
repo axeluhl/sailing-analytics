@@ -524,4 +524,7 @@
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
+    <string name="preference_race_results_header">Show Race Results</string>
+    <string name="preference_race_results_summary">Allow race manager to edit race result while finishing phase</string>
+
 </resources>
