@@ -23,9 +23,6 @@ public abstract class AbstractColor implements Color {
 
     /**
      * accepts all colors in the css-format (see http://www.w3schools.com/cssref/css_colors_legal.asp)
-     * 
-     * @param color
-     * @return
      */
     public static Color getCssColor(String color) {
         String[] colorWithName = color.split("[()]");

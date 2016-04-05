@@ -1,5 +1,7 @@
 package com.sap.sse.common.impl.test;
 
+import static org.junit.Assert.assertNull;
+
 import org.junit.Test;
 
 import com.sap.sse.common.impl.AbstractColor;
@@ -37,6 +39,7 @@ public class AbstractColorTest {
         Assert.assertEquals(null, color);
     }
 
+    @Test
     public void testHSL() throws Exception {
         Color color = AbstractColor.getCssColor("hsl(360, 100%, 100%)");
         Assert.assertEquals("#FFFFFF", color.getAsHtml());
@@ -46,6 +49,7 @@ public class AbstractColorTest {
         Assert.assertEquals(null, color);
     }
 
+    @Test
     public void testHSLA() throws Exception {
         Color color = AbstractColor.getCssColor("hsla(360, 100%, 100%,hjhb)");
         Assert.assertEquals("#FFFFFF", color.getAsHtml());
@@ -55,11 +59,17 @@ public class AbstractColorTest {
         Assert.assertEquals(null, color);
     }
 
+    @Test
     public void testColorName() {
         Color color = AbstractColor.getCssColor("BrOwn");
         Assert.assertEquals(Color.BROWN, color);
         color = AbstractColor.getCssColor("caffee");
         Assert.assertEquals("#CAFFEE", color.getAsHtml());
+    }
+    
+    @Test
+    public void testRgbWithoutParentheses() {
+        assertNull(AbstractColor.getCssColor("rgb"));
     }
 
 }
