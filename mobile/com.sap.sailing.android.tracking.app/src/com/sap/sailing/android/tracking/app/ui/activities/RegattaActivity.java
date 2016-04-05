@@ -225,16 +225,24 @@ public class RegattaActivity extends AbstractRegattaActivity
         }
     }
 
+    private URL getTeamImageApiUrl(String competitorId) throws MalformedURLException {
+        URL url = new URL(checkinUrl.urlString);
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(url.getProtocol());
+        sb.append("://");
+        sb.append(url.getHost());
+        sb.append(":");
+        //get given port by check-in url or standard http(s) protocol port by defaultPort
+        sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
+        sb.append(prefs.getServerCompetiorTeamPath(competitorId));
+
+        return new URL(sb.toString());
+    }
+
     public void askServerAboutTeamImageUrl(final ImageView imageView) {
         try {
-            URL url = new URL(checkinUrl.urlString);
-            StringBuilder sb = new StringBuilder("http://");
-            sb.append(url.getHost());
-            sb.append(":");
-            sb.append((url.getPort() == -1) ? 80 : url.getPort());
-            sb.append(prefs.getServerCompetiorTeamPath(competitor.id));
-
-            HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(new URL(sb.toString()), this);
+            HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(getTeamImageApiUrl(competitor.id), this);
             NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
                 @Override
                 public void performAction(JSONObject response) {

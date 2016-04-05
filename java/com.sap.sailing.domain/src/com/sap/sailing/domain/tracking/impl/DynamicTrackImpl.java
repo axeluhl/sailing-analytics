@@ -17,4 +17,9 @@ public class DynamicTrackImpl<FixType extends Timed> extends TrackImpl<FixType> 
     public boolean add(FixType fix) {
         return super.add(fix);
     }
+
+    @Override
+    public boolean add(FixType fix, boolean replace) {
+        return super.add(fix, replace);
+    }
 }

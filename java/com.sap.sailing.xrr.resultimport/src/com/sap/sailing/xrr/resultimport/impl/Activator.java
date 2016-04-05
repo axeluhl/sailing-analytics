@@ -11,7 +11,7 @@ import com.sap.sailing.xrr.resultimport.ParserFactory;
 
 public class Activator extends AbstractFileBasedScoreCorrectionProviderActivator {
     private static final String SCAN_DIR_PATH_PROPERTY_NAME = "xrr.results";
-    private static final String DEFAULT_SCAN_DIR = "xrrresults";
+    private static final String DEFAULT_SCAN_DIR = "xrrftp";
     
     public Activator() {
         super(SCAN_DIR_PATH_PROPERTY_NAME, DEFAULT_SCAN_DIR);
