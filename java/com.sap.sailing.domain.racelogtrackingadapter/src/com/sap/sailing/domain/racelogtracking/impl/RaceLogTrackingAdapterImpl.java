@@ -297,7 +297,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 String logoUrl = null;
                 List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
                 if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
-                    logoUrl = imagesWithTag.get(0).getURL().getPath();
+                    logoUrl = imagesWithTag.get(0).getURL().toString();
                 }
                 try {
                     sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url, iOSAppUrl,
@@ -401,7 +401,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         String logoUrl = null;
         List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
-            logoUrl = imagesWithTag.get(0).getURL().getPath();
+            logoUrl = imagesWithTag.get(0).getURL().toString();
         }
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
         String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
