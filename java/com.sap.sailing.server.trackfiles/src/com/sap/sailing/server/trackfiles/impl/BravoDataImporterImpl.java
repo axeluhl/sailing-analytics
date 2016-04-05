@@ -98,25 +98,27 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
         Instant instant = day.toInstant(ZoneOffset.UTC);
         TimePoint fixTp = new MillisecondsTimePoint(Date.from(instant));
         double[] fixData = new double[metadata.getColumns().size()];
-        for (int i = 0; i < fixData.length; i++) {
-            fixData[i] = Double.valueOf(contentTokens[colIndices.get(metadata.getColumns().get(i))]);
+        for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
+            String columnName = metadata.getColumns().get(columnIndexInFix);
+            Integer columnIndexInFile = colIndices.get(columnName);
+            fixData[columnIndexInFix] = Double.valueOf(contentTokens[columnIndexInFile]);
         }
         return new DoubleVectorFixImpl(fixTp, fixData);
     }
 
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
-        Map<String, Integer> colIndices = new HashMap<>();
-        List<String> columns = metadata.getColumns();
+        Map<String, Integer> colIndicesInFile = new HashMap<>();
         for (int j = 2; j < headerTokens.length; j++) {
             String header = headerTokens[j];
-            colIndices.put(header, columns.indexOf(header));
+            colIndicesInFile.put(header, j);
         }
-        if (colIndices.size() != columns.size() || !colIndices.keySet().containsAll(columns)) {
+        List<String> columnsInFix = metadata.getColumns();
+        if (colIndicesInFile.size() != columnsInFix.size() || !colIndicesInFile.keySet().containsAll(columnsInFix)) {
             LOG.log(Level.SEVERE, "Missing headers");
             throw new RuntimeException("Missing headers in import files");
         }
-        return colIndices;
+        return colIndicesInFile;
     }
 
     private String[] split(String line) {
