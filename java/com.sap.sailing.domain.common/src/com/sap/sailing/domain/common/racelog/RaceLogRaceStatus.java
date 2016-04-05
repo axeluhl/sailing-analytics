@@ -14,6 +14,11 @@ public enum RaceLogRaceStatus {
     RaceLogRaceStatus(int orderNumber) {
         this.orderNumber = orderNumber;
     }
+
+    public static boolean isPreRunning(RaceLogRaceStatus status) {
+        return status != null &&
+            (status.equals(SCHEDULED) || status.equals(STARTPHASE));
+    }
     
     public static boolean isActive(RaceLogRaceStatus status) {
         return status != null &&

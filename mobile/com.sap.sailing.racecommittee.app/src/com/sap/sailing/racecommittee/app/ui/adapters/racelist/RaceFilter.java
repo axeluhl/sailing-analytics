@@ -141,7 +141,10 @@ public class RaceFilter extends Filter {
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                     currentlyRunningFleet = raceItem.getFleet();
                     currentUnscheduledItem = null;
-                } else if (RaceLogRaceStatus.isActive(status)) {
+                } else if(RaceLogRaceStatus.isPreRunning(status)) {
+                    filteredItems.add(raceItem);
+                }
+                else if (RaceLogRaceStatus.isActive(status)) {
                     int fleetCount = fleetItemCount.get(getFleetName(raceItem));
                     lastRunningRaceInFleet.put(getFleetName(raceItem), fleetCount);
                     filteredItems.add(raceItem);
