@@ -11,7 +11,7 @@ public enum BravoSensorDataMetadata implements SensorDataMetadata {
     INSTANCE;
 
     private final String RIDE_HEIGHT = "RideHeight";
-    private List<String> columns = Collections.unmodifiableList(Arrays.asList( "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ", "ImuSensor_Pitch",
+    private final List<String> columns = Collections.unmodifiableList(Arrays.asList( "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ", "ImuSensor_Pitch",
             "ImuSensor_Roll", "ImuSensor_Yaw", "ImuSensor_LinearAccX", "ImuSensor_LinearAccY", "ImuSensor_LinearAccZ",
             "Hb_Z", "Dn_Z", RIDE_HEIGHT, "Db_Z", "Heel", "Trim", "HeightSensor_Distance", "LKF_ride_hgh",
             "LKF_ride_hgh_Position", "LKF_ride_hgh_Velocity", "LKF_ride_hgh_Acceleration",
