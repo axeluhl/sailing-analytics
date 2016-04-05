@@ -212,11 +212,7 @@ public class FlagPanelFragment extends BasePanelFragment {
                 changeVisibility(mRecallFlags, null, View.GONE);
                 changeVisibility(mCourseFlags, null, View.GONE);
                 changeVisibility(mBlueFirstFlag, null, View.GONE);
-                if (preferences.showRaceResults()) {
-                    changeVisibility(mBlueLastFlag, null, View.VISIBLE);
-                } else {
-                    changeVisibility(mBlueLastFlag, null, View.GONE);
-                }
+                changeVisibility(mBlueLastFlag, null, preferences.showRaceResults() ? View.VISIBLE : View.GONE);
 
                 uncheckMarker(mRecallFlags);
                 uncheckMarker(mCourseFlags);
