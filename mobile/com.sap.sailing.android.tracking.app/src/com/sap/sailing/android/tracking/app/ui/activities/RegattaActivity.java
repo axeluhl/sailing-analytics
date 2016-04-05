@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -204,25 +205,51 @@ public class RegattaActivity extends AbstractRegattaActivity
 
         getRegattaFragment().setChangePhotoButtonHidden(true);
 
-        ImageView imageView = (ImageView) findViewById(R.id.userImage);
+        final ImageView imageView = (ImageView) findViewById(R.id.userImage);
+        imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                int measuredWidth = imageView.getMeasuredWidth();
+                int measuredHeight = imageView.getMeasuredHeight();
+                setTeamImage(imageView, measuredWidth, measuredHeight);
+                return true;
+            }
+        });
+
+        final ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
+        flagImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                flagImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                int measuredWidth = flagImageView.getMeasuredWidth();
+                int measuredHeight = flagImageView.getMeasuredHeight();
+                setFlagImage(flagImageView, measuredWidth, measuredHeight);
+                return true;
+            }
+        });
+    }
+
+    private void setTeamImage(ImageView imageView, int width, int height) {
         String fileName = getLeaderboardImageFileName(leaderboard.name);
-        Bitmap storedImage = getStoredImage(fileName, imageView.getWidth(), imageView.getHeight());
+        Bitmap storedImage = getStoredImage(fileName, width, height);
         if (storedImage == null) {
             askServerAboutTeamImageUrl(imageView);
         } else {
             imageView.setImageBitmap(storedImage);
             userImageUpdated();
         }
+    }
 
-        ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
+    private void setFlagImage(ImageView imageView, int width, int height) {
         String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
-        Bitmap storedFlagImage = getStoredImage(flagFileName, flagImageView.getWidth(), flagImageView.getHeight());
+        Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
         if (storedFlagImage == null) {
             String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
                     competitor.countryCode.toLowerCase(Locale.getDefault()));
-            new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
+            new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
         } else {
-            flagImageView.setImageBitmap(storedFlagImage);
+            imageView.setImageBitmap(storedFlagImage);
         }
     }
 
