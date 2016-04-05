@@ -2,6 +2,8 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.events.click.ClickMapHandler;
+import com.google.gwt.maps.client.events.mousemove.MouseMoveMapEvent;
+import com.google.gwt.maps.client.events.mousemove.MouseMoveMapHandler;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapEvent;
 import com.google.gwt.maps.client.events.mouseout.MouseOutMapHandler;
 import com.google.gwt.maps.client.events.mouseover.MouseOverMapEvent;
@@ -42,6 +44,12 @@ public class Hoverline {
         hoverline.addMouseOutMoveHandler(new MouseOutMapHandler() {
             @Override
             public void onEvent(MouseOutMapEvent event) {
+                hoverline.setVisible(false);
+            }
+        });
+        map.getMap().addMouseMoveHandler(new MouseMoveMapHandler() {
+            @Override
+            public void onEvent(MouseMoveMapEvent event) {
                 hoverline.setVisible(false);
             }
         });

@@ -331,7 +331,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     private void onLoadMarksSucceeded(Collection<Mark> data) {
         mMarks.clear();
         mMarks.addAll(data);
-        Collections.sort(mMarks, new NaturalNamedComparator());
+        Collections.sort(mMarks, new NaturalNamedComparator<Mark>());
     }
 
     private void fillCourseElement() {

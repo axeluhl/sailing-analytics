@@ -108,4 +108,7 @@
         <item>Dark</item>
         <item>Light</item>
     </string-array>
+
+    <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
+    <bool name="preference_non_public_events_default" translatable="false">false</bool>
 </resources>
