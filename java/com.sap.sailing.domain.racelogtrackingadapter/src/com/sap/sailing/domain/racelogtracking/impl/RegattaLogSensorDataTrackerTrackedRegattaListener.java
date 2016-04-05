@@ -1,7 +1,9 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -11,10 +13,10 @@ import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.RacingEventService;
 
 public class RegattaLogSensorDataTrackerTrackedRegattaListener implements TrackedRegattaListener {
-
-    private final ConcurrentHashMap<Serializable, TrackedRegatta> knownRegattas = new ConcurrentHashMap<Serializable, TrackedRegatta>();
-    private final ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker> registeredTrackers = new ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker>();
-
+    private static final Logger log = Logger.getLogger(RegattaLogSensorDataTrackerTrackedRegattaListener.class
+            .getName());
+    private final Map<Serializable, TrackedRegatta> knownRegattas = new ConcurrentHashMap<Serializable, TrackedRegatta>();
+    private final Map<Serializable, RegattaLogSensorDataTracker> registeredTrackers = new ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker>();
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     public RegattaLogSensorDataTrackerTrackedRegattaListener(
@@ -28,16 +30,13 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
         if (knownRegattas.putIfAbsent(regattaId, trackedRegatta) == null) {
             synchronized (knownRegattas) {
                 RegattaLogSensorDataTracker tracker = null;
-                try {
-                    tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) trackedRegatta,
-                            racingEventServiceTracker.getService().getSensorFixStore());
-                    registeredTrackers.put(regattaId, tracker);
-                } finally {
-                    if (tracker != null) {
-                        tracker.stop();
-                    }
-                }
+                tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) trackedRegatta,
+                        racingEventServiceTracker.getService().getSensorFixStore());
+                registeredTrackers.put(regattaId, tracker);
+                log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
             }
+        } else {
+            log.warning("Regatta already known, not adding sensor twice");
         }
     }
 
@@ -47,7 +46,9 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
             Serializable regattaId = trackedRegatta.getRegatta().getId();
             try {
                 RegattaLogSensorDataTracker tracker = registeredTrackers.get(trackedRegatta.getRegatta().getId());
-                tracker.stop();
+                if (tracker != null) {
+                    tracker.stop();
+                }
             } finally {
                 knownRegattas.remove(regattaId);
                 registeredTrackers.remove(regattaId);
