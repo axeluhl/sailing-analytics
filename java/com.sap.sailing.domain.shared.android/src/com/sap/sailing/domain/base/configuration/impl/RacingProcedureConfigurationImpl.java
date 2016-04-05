@@ -8,8 +8,21 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
     private static final long serialVersionUID = 8501755084811977792L;
     
     private Flags classFlag;
-    private Boolean hasInidividualRecall;@Override
     
+    /**
+     * Can a user trigger an individual recall by using the X-Ray flag?
+     */
+    private Boolean hasIndividualRecall;
+    
+    /**
+     * May/shall the result entry control be used to capture results? If not, only the
+     * photo feature for the hardcopy will be availble. Otherwise, a rank editor is offered
+     * in the app which submits the score updates which then will be applied to the leaderboard
+     * immediately.
+     */
+    private Boolean isResultEntryEnabled;
+    
+    @Override
     public Flags getClassFlag() {
         return classFlag;
     }
@@ -19,12 +32,22 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
     }
 
     @Override
-    public Boolean hasInidividualRecall() {
-        return hasInidividualRecall;
+    public Boolean hasIndividualRecall() {
+        return hasIndividualRecall;
     }
 
-    public void setHasInidividualRecall(Boolean hasInidividualRecall) {
-        this.hasInidividualRecall = hasInidividualRecall;
+    public void setHasIndividualRecall(Boolean hasInidividualRecall) {
+        this.hasIndividualRecall = hasInidividualRecall;
+    }
+
+    @Override
+    public Boolean isResultEntryEnabled() {
+        return isResultEntryEnabled;
+    }
+
+    @Override
+    public void setResultEntryEnabled(Boolean isResultEntryEnabled) {
+        this.isResultEntryEnabled = isResultEntryEnabled;
     }
 
     protected RacingProcedureConfiguration copy() {
@@ -33,7 +56,8 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
     
     protected RacingProcedureConfiguration copy(RacingProcedureConfigurationImpl target) {
         target.setClassFlag(this.getClassFlag());
-        target.setHasInidividualRecall(this.hasInidividualRecall());
+        target.setHasIndividualRecall(this.hasIndividualRecall());
+        target.setResultEntryEnabled(this.isResultEntryEnabled());
         return target;
     }
 
@@ -43,8 +67,11 @@ public class RacingProcedureConfigurationImpl implements RacingProcedureConfigur
         if (update.getClassFlag() != null) {
             target.setClassFlag(update.getClassFlag());
         }
-        if (update.hasInidividualRecall() != null) {
-            target.setHasInidividualRecall(update.hasInidividualRecall());
+        if (update.hasIndividualRecall() != null) {
+            target.setHasIndividualRecall(update.hasIndividualRecall());
+        }
+        if (update.isResultEntryEnabled() != null) {
+            target.setResultEntryEnabled(update.isResultEntryEnabled());
         }
         return target;
     }

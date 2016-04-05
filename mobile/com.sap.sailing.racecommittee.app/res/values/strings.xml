@@ -205,6 +205,8 @@
     <string name="preference_racing_procedure_classflag_header">Class Flag</string>
     <string name="preference_racing_procedure_hasxray_header">Individual Recall</string>
     <string name="preference_racing_procedure_hasxray_description">Activate this option to enable individual recall</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">Result Entry</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">Activate this option to enable entering of results while and after finishing the race</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_description">Activate this option to enable choosing the Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Activate this option to enable choosing the additional Golf-Down time</string>
@@ -524,7 +526,4 @@
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
-    <string name="preference_race_results_header">Enable Race\'s result editor</string>
-    <string name="preference_race_results_summary">Allow race manager to edit race result while finishing phase</string>
-
 </resources>
