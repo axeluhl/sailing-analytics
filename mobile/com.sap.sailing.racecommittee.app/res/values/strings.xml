@@ -108,7 +108,8 @@
     <string name="retry">Retry</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="tracking_list">Tracking List</string>
+    <string name="tracking_list_01">Competitor List</string>
+    <string name="tracking_list_02">Tracking List</string>
     <string name="availableFinishingCompetitors">Competitors</string>
     <string name="choose_blue_flag_finishing">Finish race</string>
     <string name="drag_handle_description">Drag handle</string>
@@ -185,11 +186,11 @@
     <string name="set_tracking_list">Set tracking list</string>
     <string name="confirm_tracking_list">Confirm tracking list</string>
     <string name="snap">Snap</string>
-    <string name="logout_dialog_title">Sign out</string>
+    <string name="logout_dialog_title">@string/logout</string>
     <string name="logout_dialog_message">Do you want to sign out and sign in as a new user? All your races will still be monitored.</string>
     <string name="change_dialog_title">Change Regatta</string>
     <string name="change_dialog_message">Do you want to change a regatta and/or the area? Currently monitored races will be disconnected.</string>
-    <string name="logout">Logout</string>
+    <string name="logout">Sign out</string>
     <string name="loading_configuration">Loading configuration&#8230;</string>
     <string name="loading_configuration_failed">There was an error loading the configuration.</string>
     <string name="loading_configuration_not_found">There was no remote configuration found for this device.</string>
@@ -492,7 +493,13 @@
     <string name="onboarding_input">Manual Input</string>
     <string name="race_group">Group Racing</string>
     <string name="wind_select_race">Select Race</string>
+    <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$s</string>
     <string name="get_started">Getting Started</string>
+    <string name="position">Position</string>
+    <string name="penalty">Penalty</string>
+    <string name="score">Score</string>
+    <string name="finishing_time">Finishing Time</string>
+    <string name="comment">Comment</string>
     <string name="get_started_url">https://www.sapsailing.com/gwt/Home.html?locale=en#SolutionsPlace:navigationTab=RaceCommitteeApp</string>
     <string name="user_unauthorized">Request failed. User is unauthorized.</string>
     <string name="server_url">Server</string>
@@ -508,6 +515,12 @@
     <string name="preference_heading_with_declination_subtracted_summary_is_enabled">Magnetic</string>
     <string name="preference_heading_with_declination_subtracted_summary_is_disabled">North-based</string>
     <string name="preference_heading_with_declination_subtracted_enabled">Heading</string>
+    <string name="finishing_date">Finishing Date</string>
+    <string name="date_short" translatable="false">yyyy-MM-dd</string>
+    <string-array name="sort_by_values">
+        <item>by Sail Id</item>
+        <item>by Name</item>
+    </string-array>
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>

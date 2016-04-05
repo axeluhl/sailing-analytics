@@ -2,11 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <include
+    <com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout
         android:id="@+id/header"
-        layout="@layout/race_schedule_course_header" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:headerText="@string/course"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -59,9 +62,7 @@
                 android:id="@+id/new_course"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/bottom_bar"
-                android:layout_marginLeft="@dimen/side_padding"
-                android:layout_marginRight="@dimen/side_padding" />
+                android:layout_above="@id/bottom_bar" />
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>
