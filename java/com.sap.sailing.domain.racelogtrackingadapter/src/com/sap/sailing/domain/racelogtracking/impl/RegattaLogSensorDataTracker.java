@@ -16,34 +16,43 @@ public class RegattaLogSensorDataTracker {
 
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
+    private final SensorFixStore sensorFixStore;
 
     public RegattaLogSensorDataTracker(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore) {
         this.trackedRegatta = trackedRegatta;
+        this.sensorFixStore = sensorFixStore;
         raceListener = new RaceListener() {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
-                removeRaceLogSensorDataTracker(trackedRace.getRaceIdentifier());
+                RegattaLogSensorDataTracker.this.raceRemoved(trackedRace);
             }
             @Override
             public void raceAdded(TrackedRace trackedRace) {
-                if (trackedRace instanceof DynamicTrackedRace) {
-                    DynamicTrackedRace dynamicTrackedRace = (DynamicTrackedRace) trackedRace;
-                    RegattaAndRaceIdentifier raceIdentifier = dynamicTrackedRace.getRaceIdentifier();
-                    DynamicTrackedRace existingRace = knownTrackedRaces.putIfAbsent(raceIdentifier, dynamicTrackedRace);
-                    if (existingRace != null) {
-                        removeRaceLogSensorDataTracker(raceIdentifier);
-                    } else {
-                        RaceLogSensorDataTracker dataTracker = new RaceLogSensorDataTracker(
-                                (DynamicTrackedRace) trackedRace, trackedRegatta,
-                                sensorFixStore);
-                        dataTrackers.put(raceIdentifier, dataTracker);
-                    }
-                }
+                RegattaLogSensorDataTracker.this.raceAdded(trackedRace);
             }
         };
         
         trackedRegatta.addRaceListener(raceListener);
-        
+    }
+    
+    public void raceRemoved(TrackedRace trackedRace) {
+        removeRaceLogSensorDataTracker(trackedRace.getRaceIdentifier());
+    }
+    
+    public void raceAdded(TrackedRace trackedRace) {
+        if (trackedRace instanceof DynamicTrackedRace) {
+            DynamicTrackedRace dynamicTrackedRace = (DynamicTrackedRace) trackedRace;
+            RegattaAndRaceIdentifier raceIdentifier = dynamicTrackedRace.getRaceIdentifier();
+            DynamicTrackedRace existingRace = knownTrackedRaces.putIfAbsent(raceIdentifier, dynamicTrackedRace);
+            if (existingRace != null) {
+                removeRaceLogSensorDataTracker(raceIdentifier);
+            } else {
+                RaceLogSensorDataTracker dataTracker = new RaceLogSensorDataTracker(
+                        (DynamicTrackedRace) trackedRace, trackedRegatta,
+                        sensorFixStore);
+                dataTrackers.put(raceIdentifier, dataTracker);
+            }
+        }
     }
 
     public void stop() {
