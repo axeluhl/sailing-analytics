@@ -68,7 +68,6 @@ public class RaceLogSensorDataTracker {
                 // TODO update mappings ???
             }
         };
-        regattaLog.addListener(regattaLogEventVisitor);
 
         raceChangeListener = new AbstractRaceChangeListener() {
             @Override
@@ -76,7 +75,7 @@ public class RaceLogSensorDataTracker {
                 if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
                     startTracking();
                 } else {
-                    stop();
+                    stopTracking();
                 }
             }
         };
@@ -84,6 +83,8 @@ public class RaceLogSensorDataTracker {
     }
 
     private void startTracking() {
+        regattaLog.addListener(regattaLogEventVisitor);
+        
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         
         try {
@@ -112,9 +113,13 @@ public class RaceLogSensorDataTracker {
         }
     }
 
-    public void stop() {
+    public void stopTracking() {
         regattaLog.removeListener(regattaLogEventVisitor);
         sensorFixStore.removeListener(listener);
+    }
+    
+    public void stop() {
+        stopTracking();
         trackedRace.removeListener(raceChangeListener);
     }
 
