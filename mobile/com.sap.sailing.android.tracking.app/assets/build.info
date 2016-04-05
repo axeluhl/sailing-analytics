@@ -1,1 +1,1 @@
-ubilabs--tracking_app--develop-4364294 (Mon Apr 04 21:16:40 CEST 2016)
+${git.branch}-${git.commit.id.abbrev} (${git.commit.time})
