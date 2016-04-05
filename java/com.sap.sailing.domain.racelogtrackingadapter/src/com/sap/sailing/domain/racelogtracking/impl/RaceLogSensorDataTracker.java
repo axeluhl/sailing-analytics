@@ -104,14 +104,6 @@ public class RaceLogSensorDataTracker {
                     stopTracking();
                 }
             }
-            
-            @Override
-            public void startOfTrackingChanged(TimePoint startOfTracking) {
-            }
-            
-            @Override
-            public void endOfTrackingChanged(TimePoint endOfTracking) {
-            }
         };
         trackedRace.addListener(raceChangeListener);
     }
