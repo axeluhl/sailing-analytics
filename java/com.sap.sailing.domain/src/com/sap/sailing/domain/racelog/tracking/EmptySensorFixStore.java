@@ -13,11 +13,11 @@ public enum EmptySensorFixStore implements SensorFixStore {
     INSTANCE;
 
     @Override
-    public void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
+    public void addListener(FixReceivedListener listener, DeviceIdentifier device) {
     }
 
     @Override
-    public void removeListener(GPSFixReceivedListener listener) {
+    public void removeListener(FixReceivedListener listener) {
     }
 
     @Override

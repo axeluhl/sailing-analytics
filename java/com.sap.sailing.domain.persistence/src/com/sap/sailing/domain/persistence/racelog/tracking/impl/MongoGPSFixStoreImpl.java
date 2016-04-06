@@ -11,7 +11,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -69,12 +69,12 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public synchronized void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
+    public synchronized void addListener(FixReceivedListener listener, DeviceIdentifier device) {
         sensorFixStore.addListener(listener, device);
     }
 
     @Override
-    public synchronized void removeListener(GPSFixReceivedListener listener) {
+    public synchronized void removeListener(FixReceivedListener listener) {
         sensorFixStore.removeListener(listener);
     }
 

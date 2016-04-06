@@ -20,7 +20,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.SensorFix;
-import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
@@ -76,7 +76,7 @@ public class RaceLogSensorDataTracker {
         }
     };
     private final SensorFixMapperFactory mapperFactory = new SensorFixMapperFactoryImpl();
-    private final GPSFixReceivedListener<DoubleVectorFix> listener = new GPSFixReceivedListener<DoubleVectorFix>() {
+    private final FixReceivedListener<DoubleVectorFix> listener = new FixReceivedListener<DoubleVectorFix>() {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
             competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {

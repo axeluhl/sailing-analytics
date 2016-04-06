@@ -63,7 +63,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -97,7 +97,7 @@ import difflib.PatchFailedException;
  * @author Fredrik Teschke
  * 
  */
-public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener<GPSFix> {
+public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSFix> {
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;

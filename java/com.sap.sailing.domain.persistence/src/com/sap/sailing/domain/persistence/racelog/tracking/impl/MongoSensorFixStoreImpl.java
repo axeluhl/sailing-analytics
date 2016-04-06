@@ -23,7 +23,7 @@ import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -47,7 +47,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     private final DBCollection fixesCollection;
     private final DBCollection metadataCollection;
     private final MongoObjectFactoryImpl mongoOF;
-    private final Map<DeviceIdentifier, Set<GPSFixReceivedListener>> listeners = new HashMap<>();
+    private final Map<DeviceIdentifier, Set<FixReceivedListener>> listeners = new HashMap<>();
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory,
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
@@ -138,19 +138,19 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     }
 
     private void notifyListeners(DeviceIdentifier device, Timed fix) {
-        for (GPSFixReceivedListener listener : Util.get(listeners, device, Collections.<GPSFixReceivedListener>emptySet())) {
+        for (FixReceivedListener listener : Util.get(listeners, device, Collections.<FixReceivedListener>emptySet())) {
             listener.fixReceived(device, fix);
         }
     }
 
     @Override
-    public synchronized void addListener(GPSFixReceivedListener listener, DeviceIdentifier device) {
+    public synchronized void addListener(FixReceivedListener listener, DeviceIdentifier device) {
         Util.addToValueSet(listeners, device, listener);
     }
 
     @Override
-    public synchronized void removeListener(GPSFixReceivedListener listener) {
-        for (Set<GPSFixReceivedListener> set : listeners.values()) {
+    public synchronized void removeListener(FixReceivedListener listener) {
+        for (Set<FixReceivedListener> set : listeners.values()) {
             set.remove(listener);
         }
     }
