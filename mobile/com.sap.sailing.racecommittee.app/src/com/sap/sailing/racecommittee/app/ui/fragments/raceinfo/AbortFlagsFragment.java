@@ -164,7 +164,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                         if (!isSelected(selectedRaces, abort)) {
                             RaceState raceState = abort.getState();
                             Duration startTimeDiff = raceState.getStartTimeFinderResult().getStartTimeDiff();
-                            SimpleRaceLogIdentifier parent = Util.get(raceState.getStartTimeFinderResult().getRacesDependingOn(), 0);
+                            SimpleRaceLogIdentifier parent = Util.get(raceState.getStartTimeFinderResult().getDependingOnRaces(), 0);
                             abortRace(raceState);
                             raceState.forceNewDependentStartTime(now, startTimeDiff, parent);
                         }

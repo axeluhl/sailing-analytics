@@ -84,7 +84,7 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
         for (ManagedRace item : mSelected) {
             StartTimeFinderResult result = item.getState().getStartTimeFinderResult();
             if (result.isDependentStartTime()) {
-                if (RaceHelper.getSimpleRaceLogIdentifier(race).equals(Util.get(result.getRacesDependingOn(), 0))) {
+                if (RaceHelper.getSimpleRaceLogIdentifier(race).equals(Util.get(result.getDependingOnRaces(), 0))) {
                     return pos;
                 }
             }
@@ -99,7 +99,7 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
         if (result.isDependentStartTime()) {
             for (ManagedRace item : mSelected) {
                 pos++;
-                if (RaceHelper.getSimpleRaceLogIdentifier(item).equals(Util.get(result.getRacesDependingOn(), 0))) {
+                if (RaceHelper.getSimpleRaceLogIdentifier(item).equals(Util.get(result.getDependingOnRaces(), 0))) {
                     return pos;
                 }
             }

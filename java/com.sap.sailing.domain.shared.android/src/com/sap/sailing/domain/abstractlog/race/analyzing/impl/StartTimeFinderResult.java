@@ -10,7 +10,7 @@ import com.sap.sse.common.Util;
 public class StartTimeFinderResult {
     public static enum ResolutionFailed { RACE_LOG_UNRESOLVED, CYCLIC_DEPENDENCY, NO_START_TIME_SET };
     
-    private final Iterable<SimpleRaceLogIdentifier> racesDependingOn;
+    private final Iterable<SimpleRaceLogIdentifier> dependingOnRaces;
     private final TimePoint startTime;
     
     /**
@@ -28,11 +28,11 @@ public class StartTimeFinderResult {
         this(racesDependingOn, /* startTime */ null, startTimeDiff, resolutionFailed);
     }
     
-    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> racesDependingOn, TimePoint startTime, Duration startTimeDiff,
+    public StartTimeFinderResult(Iterable<SimpleRaceLogIdentifier> dependingOnRaces, TimePoint startTime, Duration startTimeDiff,
             ResolutionFailed resolutionFailed) {
         this.startTime = startTime;
         this.startTimeDiff = startTimeDiff;
-        this.racesDependingOn = racesDependingOn;
+        this.dependingOnRaces = dependingOnRaces;
         this.resolutionFailed = resolutionFailed;
     }
 
@@ -44,8 +44,8 @@ public class StartTimeFinderResult {
         return resolutionFailed;
     }
 
-    public Iterable<SimpleRaceLogIdentifier> getRacesDependingOn() {
-        return racesDependingOn;
+    public Iterable<SimpleRaceLogIdentifier> getDependingOnRaces() {
+        return dependingOnRaces;
     }
 
     public TimePoint getStartTime() {
@@ -61,14 +61,14 @@ public class StartTimeFinderResult {
     }
 
     public boolean isDependentStartTime() {
-        return racesDependingOn != null && !Util.isEmpty(racesDependingOn);
+        return dependingOnRaces != null && !Util.isEmpty(dependingOnRaces);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((racesDependingOn == null) ? 0 : racesDependingOn.hashCode());
+        result = prime * result + ((dependingOnRaces == null) ? 0 : dependingOnRaces.hashCode());
         result = prime * result + ((resolutionFailed == null) ? 0 : resolutionFailed.hashCode());
         result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
         result = prime * result + ((startTimeDiff == null) ? 0 : startTimeDiff.hashCode());
@@ -84,10 +84,10 @@ public class StartTimeFinderResult {
         if (getClass() != obj.getClass())
             return false;
         StartTimeFinderResult other = (StartTimeFinderResult) obj;
-        if (racesDependingOn == null) {
-            if (other.racesDependingOn != null)
+        if (dependingOnRaces == null) {
+            if (other.dependingOnRaces != null)
                 return false;
-        } else if (!racesDependingOn.equals(other.racesDependingOn))
+        } else if (!dependingOnRaces.equals(other.dependingOnRaces))
             return false;
         if (resolutionFailed != other.resolutionFailed)
             return false;

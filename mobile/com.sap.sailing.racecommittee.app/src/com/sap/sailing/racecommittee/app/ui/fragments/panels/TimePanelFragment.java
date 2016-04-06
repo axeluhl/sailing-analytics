@@ -154,7 +154,7 @@ public class TimePanelFragment extends BasePanelFragment {
             if (result != null) {
                 mLinkedRace = result.isDependentStartTime();
                 if (mLinkedRace && mHeaderTime != null && result.getResolutionFailed() == NO_START_TIME_SET) {
-                    SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                    SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                     ManagedRace race = DataManager.create(getActivity()).getDataStore().getRace(identifier);
                     mHeaderTime.setText(getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper.getShortReverseRaceName(race, " / ", getRace())));
                 }
