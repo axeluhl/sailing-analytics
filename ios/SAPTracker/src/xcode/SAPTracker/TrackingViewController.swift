@@ -39,6 +39,23 @@ class TrackingViewController : UIViewController {
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector:"locationManagerFailed:", name:LocationManager.NotificationType.locationManagerFailed, object: nil)
     }
+	
+	// MARK:- Buttons
+	
+	/* Stop tracking, go back to regattas view */
+	@IBAction func stopTrackingButtonTapped(sender: AnyObject) {
+		
+		let alertController = UIAlertController(title: NSLocalizedString("Stop tracking?", comment: ""), message: "", preferredStyle: .Alert)
+		let aCancel = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
+		alertController.addAction(aCancel)
+		let aStop = UIAlertAction(title: NSLocalizedString("Stop", comment: ""), style: .Default) { action in
+			LocationManager.sharedManager.stopTracking()
+			SendGPSFixController.sharedManager.checkIn = nil
+			self.dismissViewControllerAnimated(true, completion: nil)
+		}
+		alertController.addAction(aStop)
+		presentViewController(alertController, animated: true, completion: nil)
+	}
 
     // MARK:- Notifications
     

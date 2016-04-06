@@ -12,6 +12,7 @@ class AboutViewController: UIViewController {
     
     @IBOutlet weak var versionDescriptionLabel: UILabel!
     @IBOutlet weak var versionLabel: UILabel!
+	@IBOutlet weak var textView: UITextView!
     
     override func viewDidLoad() {
         super.viewDidLoad();
@@ -21,7 +22,16 @@ class AboutViewController: UIViewController {
         } else {
             versionLabel.text = "-"
         }
+		
+		// add logo to top left
+		let imageView = UIImageView(image: UIImage(named: "sap_logo"))
+		let barButtonItem = UIBarButtonItem(customView: imageView)
+		navigationItem.leftBarButtonItem = barButtonItem
     }
+
+	override func viewDidLayoutSubviews() {		
+		textView.scrollRectToVisible(CGRect(x: 0, y: 0, width: 1, height: 1), animated: false)
+	}
     
     @IBAction func done(sender: AnyObject) {
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)

@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.AppUtils;
@@ -18,11 +17,13 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.StartProcedureItem;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class StartProcedureFragment extends BaseFragment {
 
     private final ArrayList<StartProcedureItem> startProcedure = new ArrayList<>();
+    private HeaderLayout mHeader;
 
     public StartProcedureFragment() {
 
@@ -40,9 +41,9 @@ public class StartProcedureFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.race_schedule_procedure, container, false);
 
-        LinearLayout headerText = ViewHelper.get(layout, R.id.header_text);
-        if (headerText != null) {
-            headerText.setOnClickListener(new View.OnClickListener() {
+        mHeader = ViewHelper.get(layout, R.id.header);
+        if (mHeader != null) {
+            mHeader.setHeaderOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
@@ -62,8 +63,7 @@ public class StartProcedureFragment extends BaseFragment {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
                     if (AppUtils.with(getActivity()).isLand()) {
-                        View header = getView().findViewById(R.id.header);
-                        header.setVisibility(View.GONE);
+                        mHeader.setVisibility(View.GONE);
                     }
                     break;
 

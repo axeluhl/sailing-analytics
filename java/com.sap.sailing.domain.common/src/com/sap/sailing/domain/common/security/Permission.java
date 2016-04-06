@@ -28,6 +28,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     MANAGE_USERS,
     MANAGE_FILE_STORAGE,
     MANAGE_MARK_PASSINGS,
+    MANAGE_MARK_POSITIONS,
     CAN_REPLAY_DURING_LIVE_RACES,
     
     // back-end permissions
@@ -35,7 +36,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     REGATTA,
     LEADERBOARD,
     LEADERBOARD_GROUP,
-    TRACKED_RACE
+    TRACKED_RACE,
     ;
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface

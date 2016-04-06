@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -32,10 +33,8 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -147,6 +146,11 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             } else {
                 fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
             }
+            if (fleet_series.getText().length() == 0) {
+                fleet_series.setVisibility(View.GONE);
+            } else {
+                fleet_series.setVisibility(View.VISIBLE);
+            }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
             protest_image.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -162,31 +166,16 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (convertView != null) {
                 if (mSelectedRace != null && mSelectedRace.equals(race)) {
                     setMarker(1 - getLevel());
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         race.setUpdateIndicatorVisible(false);
                     }
                 } else {
-//                    convertView.setBackgroundColor(getContext().getResources().getColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray)));
-
                     if (race.isUpdateIndicatorVisible()) {
                         update_badge.setVisibility(View.VISIBLE);
                     }
                 }
             }
-
             race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
-
-            RaceGroupSeriesFleet fleet = race.getFleet();
-            if (fleet != null && !TextUtils.isEmpty(fleet.getFleetName())) {
-                if (!TextUtils.isEmpty(race_name.getText())) {
-                    race_name.setText(race_name.getText() + " - " + fleet.getFleetName());
-                } else {
-                    race_name.setText(fleet.getFleetName());
-                }
-            }
-
             RaceState state = race.getRace().getState();
             if (state != null) {
                 if (state.getStartTime() != null) {
@@ -204,10 +193,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                             textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
                         }
                         time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-                    }
-                    StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
-                    if (result != null && result.isDependentStartTime()) {
-//                        has_dependent_races.setVisibility(View.VISIBLE);
                     }
                 }
                 if (state.getFinishedTime() != null) {
@@ -244,7 +229,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         if (depends_on != null) {
             StartTimeFinderResult result = race.getRace().getState().getStartTimeFinderResult();
             if (result != null && result.isDependentStartTime()) {
-                SimpleRaceLogIdentifier identifier = Util.get(result.getRacesDependingOn(), 0);
+                SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                 ManagedRace depending_race = DataManager.create(getContext()).getDataStore().getRace(identifier);
                 depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
                     .getShortReverseRaceName(depending_race, " / ", race.getRace())));
