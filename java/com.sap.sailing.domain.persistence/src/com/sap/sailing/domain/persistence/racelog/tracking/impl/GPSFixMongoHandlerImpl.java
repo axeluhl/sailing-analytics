@@ -9,10 +9,10 @@ import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sse.common.TimePoint;
 
-public class GPSFixMongoHandlerImpl implements GPSFixMongoHandler<GPSFix> {
+public class GPSFixMongoHandlerImpl implements FixMongoHandler<GPSFix> {
     private final MongoObjectFactoryImpl mof;
     private final DomainObjectFactoryImpl dof;
 

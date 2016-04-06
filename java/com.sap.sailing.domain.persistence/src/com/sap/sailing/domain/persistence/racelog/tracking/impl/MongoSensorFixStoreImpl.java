@@ -21,7 +21,7 @@ import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -42,7 +42,7 @@ import com.sap.sse.common.impl.TimeRangeImpl;
  */
 public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     private static final Logger logger = Logger.getLogger(MongoSensorFixStoreImpl.class.getName());
-    private final TypeBasedServiceFinder<GPSFixMongoHandler<?>> fixServiceFinder;
+    private final TypeBasedServiceFinder<FixMongoHandler<?>> fixServiceFinder;
     private final TypeBasedServiceFinder<DeviceIdentifierMongoHandler> deviceServiceFinder;
     private final DBCollection fixesCollection;
     private final DBCollection metadataCollection;
@@ -53,7 +53,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         if (serviceFinderFactory != null) {
-            fixServiceFinder = (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(GPSFixMongoHandler.class);
+            fixServiceFinder = (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
             deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         } else {
             fixServiceFinder = null;
@@ -102,7 +102,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         try {
             Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
             String type = fix.getClass().getName();
-            GPSFixMongoHandler<FixT> mongoHandler = (GPSFixMongoHandler) fixServiceFinder.findService(type);
+            FixMongoHandler<FixT> mongoHandler = (FixMongoHandler) fixServiceFinder.findService(type);
             Object fixObject = mongoHandler.transformForth(fix);
             DBObject entry = new BasicDBObjectBuilder().add(FieldNames.DEVICE_ID.name(), dbDeviceId)
                     .add(FieldNames.GPSFIX_TYPE.name(), type).add(FieldNames.GPSFIX.name(), fixObject).get();

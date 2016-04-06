@@ -10,19 +10,19 @@ import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
-import com.sap.sailing.domain.persistence.racelog.tracking.GPSFixMongoHandler;
+import com.sap.sailing.domain.persistence.racelog.tracking.FixMongoHandler;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMongoHandlerImpl;
 import com.sap.sailing.domain.persistence.racelog.tracking.impl.GPSFixMovingMongoHandlerImpl;
 import com.sap.sse.common.TypeBasedServiceFinder;
 
-public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSFixMongoHandler<?>> {
+public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<FixMongoHandler<?>> {
     private final MongoObjectFactoryImpl mof = new MongoObjectFactoryImpl(null);
     private final DomainObjectFactoryImpl dof = new DomainObjectFactoryImpl(null, null);
-    private final GPSFixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
-    private final GPSFixMongoHandler<?> handler = new GPSFixMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> movingHandler = new GPSFixMovingMongoHandlerImpl(mof, dof);
+    private final FixMongoHandler<?> handler = new GPSFixMongoHandlerImpl(mof, dof);
 
     @Override
-    public GPSFixMongoHandler<?> findService(String fixType) {
+    public FixMongoHandler<?> findService(String fixType) {
         if (fixType.equals(GPSFixMovingImpl.class.getName()) ||
                 fixType.equals(CompactGPSFixMovingImpl.class.getName())) return movingHandler;
         if (fixType.equals(GPSFixImpl.class.getName()) ||
@@ -31,11 +31,11 @@ public class MockGPSFixMongoServiceFinder implements TypeBasedServiceFinder<GPSF
     }
 
     @Override
-    public void setFallbackService(GPSFixMongoHandler<?> fallback) {
+    public void setFallbackService(FixMongoHandler<?> fallback) {
     }
     
     @Override
-    public Set<GPSFixMongoHandler<?>> findAllServices() {
-        return new HashSet<GPSFixMongoHandler<?>>(Arrays.asList(movingHandler, handler));
+    public Set<FixMongoHandler<?>> findAllServices() {
+        return new HashSet<FixMongoHandler<?>>(Arrays.asList(movingHandler, handler));
     }
 }
