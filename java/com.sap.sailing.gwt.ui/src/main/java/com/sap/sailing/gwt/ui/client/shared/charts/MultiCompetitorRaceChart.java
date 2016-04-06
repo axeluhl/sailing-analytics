@@ -38,7 +38,8 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
             final ErrorReporter errorReporter, boolean compactChart, boolean allowTimeAdjust,
             final String leaderboardGroupName, String leaderboardName) {
         super(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, errorReporter,
-                /*show initially*/ DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, compactChart, allowTimeAdjust, leaderboardGroupName, leaderboardName);
+                /* show initially */DetailType.WINDWARD_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD, null, compactChart,
+                allowTimeAdjust, leaderboardGroupName, leaderboardName);
         if (leaderboardGroupName != null) {
             sailingService.getLeaderboardGroupByName(leaderboardGroupName, false,
                     new AsyncCallback<LeaderboardGroupDTO>() {
@@ -65,13 +66,16 @@ public class MultiCompetitorRaceChart extends AbstractCompetitorRaceChart<MultiC
 
     @Override
     public SettingsDialogComponent<MultiCompetitorRaceChartSettings> getSettingsDialogComponent() {
-        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(getAbstractSettings(), getSelectedDetailType()), getStringMessages(), hasOverallLeaderboard);
+        return new MultiCompetitorRaceChartSettingsComponent(new MultiCompetitorRaceChartSettings(
+                getAbstractSettings(), getSelectedFirstDetailType(), getSelectedSecondDetailType()),
+                getStringMessages(), hasOverallLeaderboard);
     }
 
     @Override
     public void updateSettings(MultiCompetitorRaceChartSettings newSettings) {
         boolean settingsChanged = updateSettingsOnly(newSettings);
-        boolean selectedDetailTypeChanged = setSelectedDetailType(newSettings.getDetailType());
+        boolean selectedDetailTypeChanged = setSelectedDetailTypes(newSettings.getFirstDetailType(),
+                newSettings.getSecondDetailType());
         if (selectedDetailTypeChanged || settingsChanged) {
             clearChart();
             timeChanged(timer.getTime(), null);

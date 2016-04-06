@@ -3,14 +3,21 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.sap.sailing.domain.common.DetailType;
 
 public class MultiCompetitorRaceChartSettings extends ChartSettings {
-    private final DetailType detailType;
+    private final DetailType firstDetailType;
+    private final DetailType secondDetailType;
 
-    public MultiCompetitorRaceChartSettings(ChartSettings superResult, DetailType detailType) {
+    public MultiCompetitorRaceChartSettings(ChartSettings superResult, DetailType firstDetailType,
+            DetailType secondDetailType) {
         super(superResult);
-        this.detailType = detailType;
+        this.firstDetailType = firstDetailType;
+        this.secondDetailType = secondDetailType;
     }
 
-    public DetailType getDetailType() {
-        return detailType;
+    public DetailType getFirstDetailType() {
+        return firstDetailType;
+    }
+
+    public DetailType getSecondDetailType() {
+        return secondDetailType;
     }
 }
