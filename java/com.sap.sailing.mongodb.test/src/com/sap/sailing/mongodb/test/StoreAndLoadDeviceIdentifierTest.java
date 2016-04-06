@@ -17,7 +17,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompeti
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.impl.DomainObjectFactoryImpl;
@@ -49,7 +48,7 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
 
     protected MongoObjectFactoryImpl mongoFactory;
     protected DomainObjectFactoryImpl domainFactory;
-    protected RegattaLog RegattaLog;
+    protected RegattaLog regattaLog;
     
     private TimePoint now() {
         return MillisecondsTimePoint.now();
@@ -71,35 +70,28 @@ public class StoreAndLoadDeviceIdentifierTest extends AbstractMongoDBTest {
                 .getMongoObjectFactory(getMongoService(), factory);
         domainFactory = (DomainObjectFactoryImpl) PersistenceFactory.INSTANCE
                 .getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);
-
-        RegattaLog = loadRegattaLog();
+        regattaLog = loadRegattaLog();
     }
     
     private DeviceIdentifier storeAndLoad(DeviceIdentifier device, TypeBasedServiceFinderFactory forStoring, TypeBasedServiceFinderFactory forLoading) {
         createFactories(forStoring);
-        Competitor c = new CompetitorImpl("a", "a", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
-        
-        RegattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 0,
+        Competitor c = DomainFactory.INSTANCE.getOrCreateCompetitor("a", "a", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(now(), now(), author, 0,
                 c, device, now(), now()));
-        
         createFactories(forLoading);
-        
         RegattaLog loadedRegattaLog = loadRegattaLog();
         loadedRegattaLog.lockForRead();
         assertEquals(1, Util.size(loadedRegattaLog.getRawFixes()));
         RegattaLogDeviceCompetitorMappingEvent mapping = (RegattaLogDeviceCompetitorMappingEvent) loadedRegattaLog.getRawFixes().iterator().next();
         loadedRegattaLog.unlockAfterRead();
-        
         return mapping.getDevice();
     }
     
     @Test
     public void testNormal() throws TransformationException, NoCorrespondingServiceRegisteredException {
         TypeBasedServiceFinderFactory factory = new MockSmartphoneImeiServiceFinderFactory();
-
         DeviceIdentifier smartphone = new SmartphoneImeiIdentifier("abc");
         DeviceIdentifier loaded = storeAndLoad(smartphone, factory, factory);
-        
         assertEquals(smartphone, loaded);
     }
     
