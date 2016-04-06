@@ -16,10 +16,21 @@ public class BravoFixTrackImpl extends SensorFixTrackImpl<BravoFix> implements D
 
     @Override
     public Double getRideHeight(TimePoint timePoint) {
-        BravoFix fix = getFirstFixAtOrAfter(timePoint);
-        if(fix != null) {
-            return fix.getRideHeight();
+        BravoFix fixAfter = getFirstFixAtOrAfter(timePoint);
+        if(fixAfter != null && fixAfter.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixAfter.getRideHeight();
         }
-        return null;
+        BravoFix fixBefore = getLastFixAtOrBefore(timePoint);
+        if(fixBefore != null && fixBefore.getTimePoint().compareTo(timePoint) == 0) {
+            // exact match of timepoint -> no interpolation necessary
+            return fixBefore.getRideHeight();
+        }
+        if(fixAfter == null || fixBefore == null) {
+            // the fix is out of the TimeRange where we have fixes
+            return null;
+        }
+        // TODO interpolate if necessary
+        return fixBefore.getRideHeight();
     }
 }
