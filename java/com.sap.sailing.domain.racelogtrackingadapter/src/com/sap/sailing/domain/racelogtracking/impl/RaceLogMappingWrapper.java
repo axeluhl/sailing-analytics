@@ -14,7 +14,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -27,12 +26,6 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
 
     private final ConcurrentMap<ItemT, List<DeviceMapping<ItemT>>> mappings = new ConcurrentHashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMapping<ItemT>>> mappingsByDevice = new HashMap<>();
-
-    private final RegattaLogDeviceMappingFinder<ItemT> mappingFinder;
-
-    public RaceLogMappingWrapper(RegattaLogDeviceMappingFinder<ItemT> mappingFinder) {
-        this.mappingFinder = mappingFinder;
-    }
     
     public void forEachMapping(Consumer<DeviceMapping<ItemT>> callback) {
         forEachMapping((item, mapping) -> callback.accept(mapping));
@@ -71,11 +64,13 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
             }
         }
     }
+    
+    protected abstract Map<ItemT, List<DeviceMapping<ItemT>>> calculateMappings();
 
     <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings() {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
-        Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = this.mappingFinder.analyze();
+        Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = calculateMappings();
         updateMappings(newMappings);
     }
     

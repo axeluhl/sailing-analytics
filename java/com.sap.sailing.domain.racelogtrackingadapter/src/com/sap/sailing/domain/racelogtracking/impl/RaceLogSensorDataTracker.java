@@ -1,5 +1,10 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +28,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -31,7 +37,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogSensorDataTracker {
@@ -39,10 +44,30 @@ public class RaceLogSensorDataTracker {
 
     private final SensorFixStore sensorFixStore;
     private final DynamicTrackedRace trackedRace;
-    private final RegattaLog regattaLog;
     private final RaceLogMappingWrapper<Competitor> competitorMappings;
-    private final RegattaLogEventVisitor regattaLogEventVisitor;
-    private final AbstractRaceChangeListener raceChangeListener;
+    private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
+        @Override
+        public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+            logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+            updateMappingsAndAddListeners();
+        }
+        
+        @Override
+        public void visit(RegattaLogCloseOpenEndedDeviceMappingEvent event) {
+            logger.log(Level.FINE, "Mapping closed: " + event.getDeviceMappingEventId());
+            updateMappingsAndAddListeners();
+        }
+    };
+    private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
+                startTracking();
+            } else {
+                stopTracking();
+            }
+        }
+    };
     private final SensorFixMapperFactory mapperFactory = new SensorFixMapperFactoryImpl();
     private final GPSFixReceivedListener<DoubleVectorFix> listener = new GPSFixReceivedListener<DoubleVectorFix>() {
         @Override
@@ -81,13 +106,34 @@ public class RaceLogSensorDataTracker {
             }
         }
     };
+    private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
+
+    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
+        @Override
+        public void regattaLogAttached(RegattaLog regattaLog) {
+            synchronized (knownRegattaLogs) {
+                addRegattaLogUnlocked(regattaLog);
+            }
+        }
+    };
+
+    private final DynamicTrackedRegatta trackedRegatta;
 
     public RaceLogSensorDataTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
             SensorFixStore sensorFixStore) {
         this.trackedRace = trackedRace;
+        this.trackedRegatta = regatta;
         this.sensorFixStore = sensorFixStore;
-        this.regattaLog = regatta.getRegatta().getRegattaLog();
-        this.competitorMappings = new RaceLogMappingWrapper<Competitor>(new RegattaLogDeviceCompetitorBravoMappingFinder(regattaLog)) {
+        
+        this.competitorMappings = new RaceLogMappingWrapper<Competitor>() {
+            @Override
+            protected Map<Competitor, List<DeviceMapping<Competitor>>> calculateMappings() {
+                synchronized (knownRegattaLogs) {
+                    Map<Competitor, List<DeviceMapping<Competitor>>> result = new HashMap<>();
+                    knownRegattaLogs.forEach((log) -> result.putAll(new RegattaLogDeviceCompetitorBravoMappingFinder(log).analyze()));
+                    return result;
+                }
+            }
             @Override
             protected void mappingRemoved(DeviceMapping<Competitor> mapping) {
                 RaceLogSensorDataTracker.this.mappingRemoved(mapping);
@@ -105,30 +151,6 @@ public class RaceLogSensorDataTracker {
             
         };
 
-        regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
-            @Override
-            public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
-                updateMappingsAndAddListeners();
-            }
-            
-            @Override
-            public void visit(RegattaLogCloseOpenEndedDeviceMappingEvent event) {
-                logger.log(Level.FINE, "Mapping closed: " + event.getDeviceMappingEventId());
-                updateMappingsAndAddListeners();
-            }
-        };
-
-        raceChangeListener = new AbstractRaceChangeListener() {
-            @Override
-            public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-                if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
-                    startTracking();
-                } else {
-                    stopTracking();
-                }
-            }
-        };
         trackedRace.addListener(raceChangeListener);
     }
     
@@ -168,17 +190,23 @@ public class RaceLogSensorDataTracker {
     }
 
     private void startTracking() {
-        regattaLog.addListener(regattaLogEventVisitor);
+        trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        synchronized (knownRegattaLogs) {
+            trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
+            // FIXME RegattaLogs are correctly added to the TrackedRace for RaceLog tracking only
+            addRegattaLogUnlocked(trackedRegatta.getRegatta().getRegattaLog());
+        }
+        
         trackedRace.addListener(trackingTimesRaceChangeListener);
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
         
         updateMappingsAndAddListeners();
-        logger.info(String.format("Started tracking race-log race (%s)", regattaLog));
-        // this wakes up all waiting race handles
-        synchronized (this) {
-            this.notifyAll();
-        }
+    }
+
+    private void addRegattaLogUnlocked(RegattaLog log) {
+        log.addListener(regattaLogEventVisitor);
+        knownRegattaLogs.add(log);
     }
 
     private void updateMappingsAndAddListeners() {
@@ -189,7 +217,11 @@ public class RaceLogSensorDataTracker {
     }
 
     public void stopTracking() {
-        regattaLog.removeListener(regattaLogEventVisitor);
+        trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        synchronized (knownRegattaLogs) {
+            knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
+            knownRegattaLogs.clear();
+        }
         sensorFixStore.removeListener(listener);
         trackedRace.removeListener(trackingTimesRaceChangeListener);
     }
