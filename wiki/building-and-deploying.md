@@ -41,6 +41,14 @@ $ git push -f origin release:release
 </pre>
 
 Give the build server some time (20-30 Minutes) until it will have the release ready.
+
+### Example with Hudson
+Deploying jobs from hudson to `releases.sapsailing.com` is quite simple.
+
+- login as `hudson@<build server>`
+- go to `/home/hudson/repo/jobs/{jobname}/workspace`
+- execute `./configuration/buildAndUpdateProduct.sh -n build -w trac@sapsailing.com release` for triggering the upload
+
 ## Working with Environments
 
 There exist a number of preconfigured environment configurations at [releases.sapsailing.com/environments](http://releases.sapsailing.com/environments). Such an environment can be automagically applied to your instance by changing to the servers directory and then executing the `refreshInstance.sh` script with the parameter `install-env <environment-name>`. This will update your env.sh. Make sure to afterwards restart your server.
