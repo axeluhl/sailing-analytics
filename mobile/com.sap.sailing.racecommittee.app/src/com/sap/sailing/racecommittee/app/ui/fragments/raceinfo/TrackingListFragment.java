@@ -77,8 +77,8 @@ public class TrackingListFragment extends BaseFragment
     private TextView mPageTitle;
     private Spinner mSortSpinner;
 
-    private Comparator mComparator;
-    private ArrayList<Comparator> mComparators;
+    private Comparator<Competitor> mComparator;
+    private List<Comparator<Competitor>> mComparators;
 
     public TrackingListFragment() {
         mCompetitorData = new ArrayList<>();
@@ -163,7 +163,7 @@ public class TrackingListFragment extends BaseFragment
 
         mComparators = new ArrayList<>();
         mComparators.add(new CompetitorSailIdComparator());
-        mComparators.add(new NaturalNamedComparator());
+        mComparators.add(new NaturalNamedComparator<Competitor>());
 
         mFinishedData = initializeFinishList();
         loadCompetitors();

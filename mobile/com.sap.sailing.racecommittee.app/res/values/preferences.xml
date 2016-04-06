@@ -110,5 +110,8 @@
     </string-array>
 
     <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
-    <bool name="preference_non_public_events_default" translatable="false">false</bool>
+    <bool name="preference_non_public_events_default">false</bool>
+    <string name="preference_race_results_key" translatable="false">allow_race_results</string>
+    <bool name="preference_race_results_default">false</bool>
+
 </resources>

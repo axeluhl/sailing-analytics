@@ -78,6 +78,9 @@ public class FinishedButtonFragment extends BasePanelFragment {
         mList = ViewHelper.get(layout, R.id.list_button);
         if (mList != null) {
             mList.setOnClickListener(new ListClick());
+            if (!preferences.showRaceResults()) {
+                mList.setVisibility(View.GONE);
+            }
         }
         mListLock = ViewHelper.get(layout, R.id.list_lock);
 

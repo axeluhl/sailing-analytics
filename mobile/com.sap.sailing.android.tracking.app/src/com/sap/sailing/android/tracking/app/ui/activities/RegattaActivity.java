@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,6 +40,7 @@ import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractRegattaActivity;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperError;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperFailureListener;
@@ -52,7 +54,6 @@ import com.sap.sailing.android.tracking.app.upload.UploadResult;
 import com.sap.sailing.android.tracking.app.upload.UploadTeamImageTask;
 import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
-import com.sap.sailing.android.tracking.app.utils.BitmapHelper;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
@@ -204,24 +205,51 @@ public class RegattaActivity extends AbstractRegattaActivity
 
         getRegattaFragment().setChangePhotoButtonHidden(true);
 
-        ImageView imageView = (ImageView) findViewById(R.id.userImage);
-        Bitmap storedImage = getStoredImage(getLeaderboardImageFileName(leaderboard.name));
+        final ImageView imageView = (ImageView) findViewById(R.id.userImage);
+        imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                int measuredWidth = imageView.getMeasuredWidth();
+                int measuredHeight = imageView.getMeasuredHeight();
+                setTeamImage(imageView, measuredWidth, measuredHeight);
+                return true;
+            }
+        });
+
+        final ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
+        flagImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                flagImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                int measuredWidth = flagImageView.getMeasuredWidth();
+                int measuredHeight = flagImageView.getMeasuredHeight();
+                setFlagImage(flagImageView, measuredWidth, measuredHeight);
+                return true;
+            }
+        });
+    }
+
+    private void setTeamImage(ImageView imageView, int width, int height) {
+        String fileName = getLeaderboardImageFileName(leaderboard.name);
+        Bitmap storedImage = getStoredImage(fileName, width, height);
         if (storedImage == null) {
             askServerAboutTeamImageUrl(imageView);
         } else {
             imageView.setImageBitmap(storedImage);
             userImageUpdated();
         }
+    }
 
-        ImageView flagImageView = (ImageView) findViewById(R.id.flag_image);
-        Bitmap storedFlagImage = getStoredImage(getFlagImageFileName(competitor.countryCode.toLowerCase(Locale
-                .getDefault())));
+    private void setFlagImage(ImageView imageView, int width, int height) {
+        String flagFileName = getFlagImageFileName(competitor.countryCode.toLowerCase(Locale.getDefault()));
+        Bitmap storedFlagImage = getStoredImage(flagFileName, width, height);
         if (storedFlagImage == null) {
             String urlStr = String.format("%s/gwt/images/flags/%s.png", event.server,
                     competitor.countryCode.toLowerCase(Locale.getDefault()));
-            new DownloadFlagImageTask(flagImageView, competitor.countryCode).execute(urlStr);
+            new DownloadFlagImageTask(imageView, competitor.countryCode).execute(urlStr);
         } else {
-            flagImageView.setImageBitmap(storedFlagImage);
+            imageView.setImageBitmap(storedFlagImage);
         }
     }
 
@@ -314,14 +342,13 @@ public class RegattaActivity extends AbstractRegattaActivity
      *
      * @return
      */
-    private Bitmap getStoredImage(String fileName) {
+    private Bitmap getStoredImage(String fileName, int width, int height) {
         File pictureFile = getImageFile(fileName);
         if (pictureFile == null || !pictureFile.exists()) {
             return null;
         }
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        return BitmapFactory.decodeFile(pictureFile.getAbsolutePath(), options);
+        Bitmap.Config preferredConfig = Bitmap.Config.ARGB_8888;
+        return BitmapHelper.decodeSampleBitmapFromFile(pictureFile.getAbsolutePath(), width, height, preferredConfig);
     }
 
     /**
@@ -594,7 +621,7 @@ public class RegattaActivity extends AbstractRegattaActivity
 
         protected void onPostExecute(File result) {
             if (result != null && result.exists()) {
-                bmImage.setImageBitmap(BitmapHelper.getBitmapFromFile(result, bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight()));
+                bmImage.setImageBitmap(BitmapHelper.decodeSampleBitmapFromFile(result.getPath(), bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight(), null));
                 userImageUpdated();
             } else {
                 ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);

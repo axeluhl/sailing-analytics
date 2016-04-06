@@ -148,6 +148,7 @@
                     android:layout_height="fill_parent"
                     android:scaleType="fitXY"
                     android:contentDescription="@string/content_description_flag_icon"
+                    android:adjustViewBounds="true"
                     android:textColor="@color/white"/>
             </RelativeLayout>
 
