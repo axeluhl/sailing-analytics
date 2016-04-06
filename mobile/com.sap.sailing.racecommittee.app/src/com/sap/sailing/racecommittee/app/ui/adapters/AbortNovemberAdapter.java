@@ -5,6 +5,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,12 +16,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sse.common.Util;
 
 public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdapter.ViewHolder> {
 
@@ -45,7 +43,7 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final ManagedRace race = mRaces.get(position);
-        boolean selected = (getRace(race) != null);
+        boolean selected = mSelected.contains(race);
 
         holder.race.setText(RaceHelper.getShortReverseRaceName(race, " / ", mCurrentRace));
         holder.race.setOnClickListener(new View.OnClickListener() {
@@ -58,13 +56,10 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
         holder.selected.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                remove(race);
                 if (isChecked) {
-                    int pos = getParentPos(race);
-                    if (pos == mSelected.size()) {
-                        pos = getFirstChild(race);
-                    }
-                    mSelected.add(pos, race);
+                    mSelected.add(race);
+                } else {
+                    mSelected.remove(race);
                 }
             }
         });
@@ -77,47 +72,6 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
 
     public List<ManagedRace> getSelected() {
         return mSelected;
-    }
-
-    private int getFirstChild(ManagedRace race) {
-        int pos = 0;
-        for (ManagedRace item : mSelected) {
-            StartTimeFinderResult result = item.getState().getStartTimeFinderResult();
-            if (result.isDependentStartTime()) {
-                if (RaceHelper.getSimpleRaceLogIdentifier(race).equals(Util.get(result.getDependingOnRaces(), 0))) {
-                    return pos;
-                }
-            }
-            pos++;
-        }
-        return pos;
-    }
-
-    private int getParentPos(ManagedRace race) {
-        int pos = 0;
-        StartTimeFinderResult result = race.getState().getStartTimeFinderResult();
-        if (result.isDependentStartTime()) {
-            for (ManagedRace item : mSelected) {
-                pos++;
-                if (RaceHelper.getSimpleRaceLogIdentifier(item).equals(Util.get(result.getDependingOnRaces(), 0))) {
-                    return pos;
-                }
-            }
-        }
-        return pos;
-    }
-
-    private boolean remove(ManagedRace race) {
-        return mSelected.remove(race);
-    }
-
-    private ManagedRace getRace(ManagedRace race) {
-        for (ManagedRace item : mSelected) {
-            if (item.equals(race)) {
-                return item;
-            }
-        }
-        return null;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
