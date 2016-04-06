@@ -67,7 +67,7 @@ public class RaceLogSensorDataTracker {
             RaceLogSensorDataTracker.this.startOfTracking = startOfTracking;
             if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
                     (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
-                loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking);
+                loadFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking);
             }
         }
         
@@ -77,7 +77,7 @@ public class RaceLogSensorDataTracker {
             RaceLogSensorDataTracker.this.endOfTracking = endOfTracking;
             if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
                     (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
-                loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking);
+                loadFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking);
             }
         }
     };
@@ -144,7 +144,7 @@ public class RaceLogSensorDataTracker {
         // TODO can the new time range be bigger than the old one? In this case we would need to load the additional time range.
     }
 
-    protected void loadGPSFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
+    protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
         competitorMappings.forEachMapping((mapping) -> loadFixes(
                 new TimeRangeImpl(loadFixesFrom, loadFixesTo).intersection(mapping.getTimeRange()), mapping));
     }
