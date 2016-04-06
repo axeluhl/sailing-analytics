@@ -69,12 +69,12 @@ public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
     }
 
     @Override
-    public synchronized void addListener(FixReceivedListener listener, DeviceIdentifier device) {
+    public synchronized void addListener(FixReceivedListener<GPSFix> listener, DeviceIdentifier device) {
         sensorFixStore.addListener(listener, device);
     }
 
     @Override
-    public synchronized void removeListener(FixReceivedListener listener) {
+    public synchronized void removeListener(FixReceivedListener<GPSFix> listener) {
         sensorFixStore.removeListener(listener);
     }
 
