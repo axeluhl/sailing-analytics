@@ -23,7 +23,7 @@ public class RideHeightQualityMinMaxRender extends MinMaxRenderer {
             if (doubleValue > 1.26) barStyle = BACKGROUND_BAR_STYLE_GOOD;
             else if (doubleValue >= 0.74) barStyle = BACKGROUND_BAR_STYLE_OK;
             else barStyle = BACKGROUND_BAR_STYLE_BAD;
-            sb.append(TEMPLATES.render(nullSafeValue, barStyle, nullSafeTitle, getPercentage(row)));
+            sb.append(TEMPLATES.render(nullSafeValue, barStyle, nullSafeTitle, 100));
         }
     }
 
