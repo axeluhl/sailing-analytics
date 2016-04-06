@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -22,7 +21,6 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.WithID;
 
 public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
-    private static final Logger logger = Logger.getLogger(RaceLogMappingWrapper.class.getName());
 
     private final ConcurrentMap<ItemT, List<DeviceMapping<ItemT>>> mappings = new ConcurrentHashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMapping<ItemT>>> mappingsByDevice = new HashMap<>();
