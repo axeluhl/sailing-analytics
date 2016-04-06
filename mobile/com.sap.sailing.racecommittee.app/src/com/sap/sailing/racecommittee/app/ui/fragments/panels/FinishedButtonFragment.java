@@ -78,9 +78,6 @@ public class FinishedButtonFragment extends BasePanelFragment {
         mList = ViewHelper.get(layout, R.id.list_button);
         if (mList != null) {
             mList.setOnClickListener(new ListClick());
-            if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
-                mList.setVisibility(View.GONE);
-            }
         }
         mListLock = ViewHelper.get(layout, R.id.list_lock);
 
@@ -97,6 +94,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+
+        if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
+            mList.setVisibility(View.GONE);
+        }
     }
 
     @Override
