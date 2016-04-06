@@ -637,4 +637,9 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
             String trackName) {
         return null;
     }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
 }

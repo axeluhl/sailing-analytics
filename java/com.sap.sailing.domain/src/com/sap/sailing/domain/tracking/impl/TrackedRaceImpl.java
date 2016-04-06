@@ -126,6 +126,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
+import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
 import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackFactory;
@@ -388,6 +389,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient RaceLogResolver raceLogResolver;
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
+    
+    private transient Set<RegattaLogAttachmentListener> regattaLogAttachmentListeners;
 
     /**
      * Constructs the tracked race with one-design ranking.
@@ -548,6 +551,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
+        
+        regattaLogAttachmentListeners = new HashSet<>();
     }
 
     @Override
@@ -642,6 +647,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
+        regattaLogAttachmentListeners = new HashSet<>();
     }
 
     /**
@@ -3234,6 +3240,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
+            informListenersAboutAttachedRegattaLog(log);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
         }
@@ -3405,6 +3412,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
         }
+    }
+    
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return new HashSet<>(attachedRegattaLogs.values());
     }
 
     @Override
@@ -3981,5 +3993,27 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+    }
+    
+    @Override
+    public void addRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
+        synchronized (regattaLogAttachmentListeners) {
+            regattaLogAttachmentListeners.add(listener);
+        }
+    }
+    
+    @Override
+    public void removeRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
+        synchronized (regattaLogAttachmentListeners) {
+            regattaLogAttachmentListeners.remove(listener);
+        }
+    }
+
+    private void informListenersAboutAttachedRegattaLog(RegattaLog regattaLog) {
+        Iterable<RegattaLogAttachmentListener> listeners;
+        synchronized (regattaLogAttachmentListeners) {
+            listeners = new ArrayList<>(regattaLogAttachmentListeners);
+        }
+        listeners.forEach((listener) -> listener.regattaLogAttached(regattaLog));
     }
 }

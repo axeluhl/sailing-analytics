@@ -1057,4 +1057,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public boolean isWithinStartAndEndOfTracking(TimePoint timePoint) {
         return true;
     }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
 }

@@ -713,6 +713,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     void attachRegattaLog(RegattaLog regattaLog);
     
+    Iterable<RegattaLog> getAttachedRegattaLogs();
+    
     /**
      * Attaches a {@link RaceExecutionOrderProvider} to make a {@link TrackedRace} aware
      * which races are scheduled around it in the execution order of a {@link Regatta}.
@@ -885,5 +887,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
+    }
+    
+    default void addRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
+    }
+    
+    default void removeRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
     }
 }

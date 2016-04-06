@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -815,5 +816,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public boolean isWithinStartAndEndOfTracking(TimePoint timePoint) {
         return true;
+    }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
     }
 }

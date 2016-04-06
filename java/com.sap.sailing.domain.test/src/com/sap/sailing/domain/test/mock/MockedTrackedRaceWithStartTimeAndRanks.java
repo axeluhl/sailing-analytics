@@ -662,4 +662,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
             String trackName) {
         return null;
     }
+
+    @Override
+    public Iterable<RegattaLog> getAttachedRegattaLogs() {
+        return Collections.emptySet();
+    }
 }
