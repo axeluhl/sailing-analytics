@@ -267,6 +267,7 @@
     <string name="flags_course">Kurs</string>
     <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
+    <string name="flags_dependent_races">von abhängigen Rennen</string>
     <string name="wind_info">%2$s / %1$s kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
@@ -498,5 +499,9 @@
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
     <string name="preference_race_results_header">Erlaube Rennlistenbearbeitung</string>
     <string name="preference_race_results_summary">Erlaube Race-Manager die Zieleinlaufliste in der Finishing-Phase zu bearbeiten</string>
+
+    <string name="abort_title">Rennen abbrechen</string>
+    <string name="abort_hint">Welche laufenden Rennen möchten Sie abbrechen?</string>
+    <string name="abort_dismiss">Verwerfen</string>
 
 </resources>

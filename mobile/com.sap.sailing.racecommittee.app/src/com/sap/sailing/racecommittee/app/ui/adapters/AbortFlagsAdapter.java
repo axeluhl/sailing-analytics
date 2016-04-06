@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +33,9 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
     private Context mContext;
     private ArrayList<AbortFlag> mFlags;
     private AbortFlagItemClick mListener;
+    private boolean showButton;
 
-    public AbortFlagsAdapter(Context context, AbortFlagItemClick listener, Flags flags) {
+    public AbortFlagsAdapter(@NonNull Context context, @NonNull AbortFlagItemClick listener, @NonNull Flags flags) {
         mContext = context;
         mListener = listener;
 
@@ -41,6 +43,8 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         addFlag(flags.name().toLowerCase(Locale.US), Flags.NONE);
         addFlag(flags.name().toLowerCase(Locale.US), Flags.HOTEL);
         addFlag(flags.name().toLowerCase(Locale.US), Flags.ALPHA);
+
+        showButton = !Flags.NOVEMBER.equals(flags);
     }
 
     private void addFlag(String primaryFlag, Flags otherFlag) {
@@ -131,7 +135,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         final Button confirm = ViewHelper.get(convertView, R.id.confirm);
         if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
-            if (item.touched) {
+            if (item.touched && showButton) {
                 confirm.setVisibility(View.VISIBLE);
             }
 
@@ -150,6 +154,9 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
                 public void onClick(View v) {
                     for (AbortFlag flag : mFlags) {
                         flag.touched = flag.file_name.equals(item.file_name);
+                        if (flag.touched && !showButton) {
+                            mListener.onClick(item.flag);
+                        }
                     }
                     notifyDataSetChanged();
                 }
