@@ -44,6 +44,10 @@ public class StartTimeFinderResult {
         return resolutionFailed;
     }
 
+    /**
+     * @return the chain of races on which this race's start time depends; the first entry will have an absolute start
+     *         time; the last one is the one on which this race's start time depends immediately
+     */
     public Iterable<SimpleRaceLogIdentifier> getDependingOnRaces() {
         return dependingOnRaces;
     }
