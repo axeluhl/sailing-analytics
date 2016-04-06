@@ -460,7 +460,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         return null;
     }
 
-    public List<ManagedRace> getChildRaces(ManagedRace currentRace, @Nullable RaceLogRaceStatus[] state) {
+    public List<ManagedRace> getRacesWithStartTimeImmediatelyDependingOn(ManagedRace currentRace, @Nullable RaceLogRaceStatus[] state) {
         StartTimeFinderResult result;
         SimpleRaceLogIdentifier identifier;
         ArrayList<ManagedRace> list = new ArrayList<>();
@@ -468,7 +468,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         for (ManagedRace race : lastSeenRaces) {
             result = race.getState().getStartTimeFinderResult();
             if (result.isDependentStartTime()) {
-                identifier = Util.get(result.getDependingOnRaces(), 0);
+                identifier = Util.get(result.getDependingOnRaces(), 0); // immediately depending on
                 if (dataStore.getRace(identifier).equals(currentRace)) {
                     if (state == null) {
                         list.add(race);

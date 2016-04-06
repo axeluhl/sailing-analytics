@@ -156,33 +156,32 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                List<ManagedRace> selectedRaces = adapter.getSelected();
-                for (ManagedRace race : selectedRaces) {
-                    List<ManagedRace> racesToAbort = activity
-                        .getChildRaces(race, new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING });
-                    for (ManagedRace abort : racesToAbort) {
-                        if (!isSelected(selectedRaces, abort)) {
-                            RaceState raceState = abort.getState();
+                final List<ManagedRace> racesToAbort = adapter.getSelected();
+                for (final ManagedRace raceToAbort : racesToAbort) {
+                    final List<ManagedRace> dependentRaces = activity
+                        .getRacesWithStartTimeImmediatelyDependingOn(raceToAbort, new RaceLogRaceStatus[] {
+                                RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING, RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED });
+                    for (final ManagedRace dependentRace : dependentRaces) {
+                        RaceState raceState = dependentRace.getState();
+                        if (!racesToAbort.contains(dependentRace)) {
                             Duration startTimeDiff = raceState.getStartTimeFinderResult().getStartTimeDiff();
                             SimpleRaceLogIdentifier parent = Util.get(raceState.getStartTimeFinderResult().getDependingOnRaces(), 0);
                             abortRace(raceState);
                             raceState.forceNewDependentStartTime(now, startTimeDiff, parent);
+                        } else {
+                            raceState.forceNewStartTime(now, raceState.getStartTimeFinderResult().getStartTime());
                         }
                     }
-
-                    List<ManagedRace> racesToLeave = activity
-                        .getChildRaces(race, new RaceLogRaceStatus[] { RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED });
-                    for (ManagedRace leave : racesToLeave) {
-                        leave.getState().forceNewStartTime(now, leave.getState().getStartTimeFinderResult().getStartTime());
-                    }
-                    if (!getRace().equals(race)) {
-                        abortRace(race.getState());
+                    if (!getRace().equals(raceToAbort)) {
+                        abortRace(raceToAbort.getState());
                     }
                 }
-                if (flag != Flags.NONE) {
+                if (!racesToAbort.isEmpty() && flag != Flags.NONE) {
                     setProtestTime();
                 }
-                abortRace(getRaceState());
+                if (racesToAbort.contains(getRace())) {
+                    abortRace(getRaceState());
+                }
             }
 
             private void abortRace(RaceState raceState) {
@@ -198,15 +197,6 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         int maxItemHeight = (int) getItemHeight(activity) * races.size() + getActivity().getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
         lp.height = Math.min(maxItemHeight, (int) getMaxScreenHeight(activity));
         dialog.getWindow().setAttributes(lp);
-    }
-
-    private boolean isSelected(List<ManagedRace> selectedRaces, ManagedRace race) {
-        for (ManagedRace selected : selectedRaces) {
-            if (selected.equals(race)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private float getItemHeight(Activity activity) {

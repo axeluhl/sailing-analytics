@@ -108,13 +108,7 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
     }
 
     private boolean remove(ManagedRace race) {
-        for (ManagedRace item : mSelected) {
-            if (item.equals(race)) {
-                mSelected.remove(item);
-                return true;
-            }
-        }
-        return false;
+        return mSelected.remove(race);
     }
 
     private ManagedRace getRace(ManagedRace race) {
