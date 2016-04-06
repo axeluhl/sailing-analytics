@@ -220,6 +220,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * finished the leg, the speed over ground at the time the competitor finished the leg is returned.
      */
     SpeedWithBearing getSpeedOverGround(TimePoint at);
+    
+    /**
+     * Returns <code>null</code> in case this leg's competitor hasn't started the leg yet. If in the leg at
+     * <code>timePoint</code>, returns the current ride height for this time point. If the competitor has already
+     * finished the leg, the ride height at the time the competitor finished the leg is returned.
+     */
+    Double getRideHeight(TimePoint at);
 
     /**
      * Computes the distance along the wind track to the wind-projected position of the race's overall leader. If leader

@@ -1731,6 +1731,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 speedOverGroundInKnots = speedOverGround == null ? null : speedOverGround.getKnots();
             }
             result.currentSpeedOverGroundInKnots = speedOverGroundInKnots == null ? null : speedOverGroundInKnots;
+            result.currentRideHeightInMeters = trackedLeg.getRideHeight(timePoint);
             Distance distanceTraveled = trackedLeg.getDistanceTraveled(timePoint);
             result.distanceTraveledInMeters = distanceTraveled == null ? null : distanceTraveled.getMeters();
             Distance distanceTraveledConsideringGateStart = trackedLeg.getDistanceTraveledConsideringGateStart(timePoint);
