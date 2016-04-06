@@ -91,6 +91,13 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * for the entire leg (and no further) is computed.
      */
     Speed getAverageSpeedOverGround(TimePoint timePoint);
+    
+    /**
+     * Computes the competitor's average ride height for this leg from the beginning of the leg up to time
+     * <code>timePoint</code>. If the competitor already completed the leg at <code>timePoint</code> and the respective
+     * mark passing event was already received, the average ride height for the entire leg (and no further) is computed.
+     */
+    Double getAverageRideHeight(TimePoint timePoint);
 
     /**
      * @return <code>null</code> if the competitor hasn't started this leg yet, otherwise the fix where the maximum speed was

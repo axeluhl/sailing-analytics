@@ -184,6 +184,19 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     @Override
+    public Double getAverageRideHeight(TimePoint timePoint) {
+        MarkPassing legStart = getMarkPassingForLegStart();
+        if (legStart != null) {
+            BravoFixTrack track = getTrackedRace().getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
+            if (track != null) {
+                TimePoint endTimePoint = hasFinishedLeg(timePoint) ? getMarkPassingForLegEnd().getTimePoint() : timePoint;
+                return track.getAverageRideHeight(legStart.getTimePoint(), endTimePoint);
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Util.Pair<GPSFixMoving, Speed> getMaximumSpeedOverGround(TimePoint timePoint) {
         // fetch all fixes on this leg so far and determine their maximum speed
         MarkPassing legStart = getMarkPassingForLegStart();
