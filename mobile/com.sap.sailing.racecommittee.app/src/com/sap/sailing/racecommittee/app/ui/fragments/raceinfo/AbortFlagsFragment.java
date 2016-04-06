@@ -1,18 +1,25 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -23,12 +30,13 @@ import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.AbortFlagsAdapter.AbortFlagItemClick;
+import com.sap.sailing.racecommittee.app.ui.adapters.AbortNovemberAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemClick {
@@ -61,7 +69,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
             header.setHeaderText(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)));
-            header.setOnClickListener(new View.OnClickListener() {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -90,7 +98,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
             case NOVEMBER:
                 logFlag(flag);
-                abortChildRaces(now, state, flag);
+                abortRunningRaces(now, flag);
                 break;
 
             default:
@@ -134,79 +142,85 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
-    private void abortChildRaces(final TimePoint now, final RaceState state, final Flags flag) {
-        RacingActivity activity = (RacingActivity) getActivity();
-        final List<ManagedRace> races = activity
-            .getChildRaces(getRace(), new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING });
-
-        if (races.size() > 0) {
-            final ArrayList<String> raceList = new ArrayList<>();
-            for (ManagedRace race : races) {
-                raceList.add(RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
-            }
-            final ArrayList<ManagedRace> raceChecked = new ArrayList<>();
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-            builder.setTitle(getArguments().getString(HEADER_TEXT, getString(R.string.not_available)) + " " + getString(R.string.flags_dependent_races));
-            builder.setMultiChoiceItems(raceList.toArray(new String[raceList.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                    ManagedRace race = races.get(which);
-                    if (raceChecked.contains(race)) {
-                        raceChecked.remove(race);
-                    }
-                    if (isChecked) {
-                        raceChecked.add(race);
-                    }
-                }
-            });
-            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    for (ManagedRace race : races) {
-                        RaceState raceState = race.getState();
-                        if (raceChecked.contains(race)) {
+    private void abortRunningRaces(final TimePoint now, final Flags flag) {
+        final RacingActivity activity = (RacingActivity) getActivity();
+        final LinkedHashMap<String, ManagedRace> races = activity.getRunningRaces();
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppTheme_AlertDialog);
+        View layout = LayoutInflater.from(builder.getContext()).inflate(R.layout.race_november_dialog, null);
+        RecyclerView recyclerView = (RecyclerView) layout.findViewById(R.id.abort_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        final AbortNovemberAdapter adapter = new AbortNovemberAdapter(races, getRace());
+        recyclerView.setAdapter(adapter);
+        builder.setTitle(R.string.abort_title);
+        builder.setView(layout);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                List<ManagedRace> selectedRaces = adapter.getSelected();
+                for (ManagedRace race : selectedRaces) {
+                    List<ManagedRace> racesToAbort = activity
+                        .getChildRaces(race, new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING });
+                    for (ManagedRace abort : racesToAbort) {
+                        if (!isSelected(selectedRaces, abort)) {
+                            RaceState raceState = abort.getState();
                             Duration startTimeDiff = raceState.getStartTimeFinderResult().getStartTimeDiff();
-                            raceState.setAborted(now, /* postponed */ false, flag);
-                            raceState.setAdvancePass(now);
-                            raceState.forceNewDependentStartTime(now, startTimeDiff, RaceHelper.getSimpleRaceLogIdentifier(getRace()));
-                        } else {
-                            raceState.forceNewStartTime(now, raceState.getStartTimeFinderResult().getStartTime());
+                            SimpleRaceLogIdentifier parent = Util.get(raceState.getStartTimeFinderResult().getRacesDependingOn(), 0);
+                            abortRace(raceState);
+                            raceState.forceNewDependentStartTime(now, startTimeDiff, parent);
                         }
                     }
-                    abortRace(now, state, flag);
+
+                    List<ManagedRace> racesToLeave = activity
+                        .getChildRaces(race, new RaceLogRaceStatus[] { RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED });
+                    for (ManagedRace leave : racesToLeave) {
+                        leave.getState().forceNewStartTime(now, leave.getState().getStartTimeFinderResult().getStartTime());
+                    }
+                    if (!getRace().equals(race)) {
+                        abortRace(race.getState());
+                    }
                 }
-            });
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    abortRace(now, state, flag);
+                if (flag != Flags.NONE) {
+                    setProtestTime();
                 }
-            });
-            builder.setCancelable(false);
-            builder.show();
-        } else {
-            abortRace(now, state, flag);
-        }
+                abortRace(getRaceState());
+            }
+
+            private void abortRace(RaceState raceState) {
+                raceState.setAborted(now, /* postponed */ false, flag);
+                raceState.setAdvancePass(now);
+            }
+        });
+        builder.setNegativeButton(R.string.abort_dismiss, null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        int maxItemHeight = (int) getItemHeight(activity) * races.size() + getActivity().getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
+        lp.height = Math.min(maxItemHeight, (int) getMaxScreenHeight(activity));
+        dialog.getWindow().setAttributes(lp);
     }
 
-    private void abortRace(TimePoint now, RaceState state, Flags flag) {
-        fixStartTime(now);
-        state.setAborted(now, /* postponed */ false, flag);
-        if (flag != Flags.NONE) {
-            setProtestTime();
+    private boolean isSelected(List<ManagedRace> selectedRaces, ManagedRace race) {
+        for (ManagedRace selected : selectedRaces) {
+            if (selected.equals(race)) {
+                return true;
+            }
         }
-        state.setAdvancePass(now);
+        return false;
     }
 
-    private void fixStartTime(TimePoint now) {
-        RacingActivity activity = (RacingActivity) getActivity();
-        List<ManagedRace> races = activity
-            .getChildRaces(getRace(), new RaceLogRaceStatus[] { RaceLogRaceStatus.PRESCHEDULED, RaceLogRaceStatus.SCHEDULED,
-                RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED });
+    private float getItemHeight(Activity activity) {
+        TypedValue value = new android.util.TypedValue();
+        activity.getTheme().resolveAttribute(android.R.attr.listPreferredItemHeight, value, true);
+        TypedValue.coerceToString(value.type, value.data);
+        DisplayMetrics metrics = new android.util.DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        return value.getDimension(metrics);
+    }
 
-        for (ManagedRace race : races) {
-            race.getState().forceNewStartTime(now, race.getState().getStartTimeFinderResult().getStartTime());
-        }
+    private float getMaxScreenHeight(Activity activity) {
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        return metrics.heightPixels * 0.85f;
     }
 }

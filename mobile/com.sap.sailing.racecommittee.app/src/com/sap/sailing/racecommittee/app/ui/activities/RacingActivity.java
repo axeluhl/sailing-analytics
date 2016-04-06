@@ -484,6 +484,18 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         return list;
     }
 
+    public LinkedHashMap<String, ManagedRace> getRunningRaces() {
+        LinkedHashMap<String, ManagedRace> list = new LinkedHashMap<>();
+        for (ManagedRace race : lastSeenRaces) {
+            if (RaceLogRaceStatus.RUNNING.equals(race.getStatus())) {
+                if (!list.containsKey(race.getId())) {
+                    list.put(race.getId(), race);
+                }
+            }
+        }
+        return list;
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setOverflowIcon() {
         // Required to set overflow icon

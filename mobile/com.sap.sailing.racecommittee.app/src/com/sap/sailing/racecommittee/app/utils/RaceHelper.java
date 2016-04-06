@@ -108,7 +108,7 @@ public class RaceHelper {
                 raceName += seriesName;
             }
             if (maxElements >= 3) {
-                raceName += groupName;
+                raceName += delimiter + groupName;
             }
         }
 
