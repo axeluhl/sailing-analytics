@@ -1,17 +1,16 @@
 package com.sap.sailing.domain.racelogtracking.impl;
 
-import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -21,15 +20,19 @@ import com.sap.sailing.domain.racelog.tracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
-import com.sap.sailing.domain.racelogtracking.impl.RaceLogMappingWrapper.TrackLoader;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogSensorDataTracker {
     private static final Logger logger = Logger.getLogger(RaceLogSensorDataTracker.class.getName());
@@ -44,14 +47,13 @@ public class RaceLogSensorDataTracker {
     private final GPSFixReceivedListener<DoubleVectorFix> listener = new GPSFixReceivedListener<DoubleVectorFix>() {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
-            // FIXME calculate event to create correct competitor mappper
-            competitorMappings.recordFix(device, fix, (mapping, fixToRecord) -> {
+            competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
                 SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper =
                         mapperFactory.createCompetitorMapper(mapping.getEventType());
-                DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
-                if (trackedRace.isWithinStartAndEndOfTracking(fixToRecord.getTimePoint()) && track != null) {
-                    mapper.addFix(track, fixToRecord);
-                }
+                        DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
+                        if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
+                            mapper.addFix(track, fix);
+                        }
             });
         }
     };
@@ -85,13 +87,35 @@ public class RaceLogSensorDataTracker {
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
         this.regattaLog = regatta.getRegatta().getRegattaLog();
-        this.competitorMappings = new RaceLogMappingWrapper<Competitor>(regattaLog);
+        this.competitorMappings = new RaceLogMappingWrapper<Competitor>(new RegattaLogDeviceCompetitorBravoMappingFinder(regattaLog)) {
+            @Override
+            protected void mappingRemoved(DeviceMapping<Competitor> mapping) {
+                RaceLogSensorDataTracker.this.mappingRemoved(mapping);
+            }
+
+            @Override
+            protected void mappingAdded(DeviceMapping<Competitor> mapping) {
+                RaceLogSensorDataTracker.this.mappingAdded(mapping);
+            }
+
+            @Override
+            protected void mappingChanged(DeviceMapping<Competitor> oldMapping, DeviceMapping<Competitor> newMapping) {
+                RaceLogSensorDataTracker.this.mappingChanged(oldMapping, newMapping);
+            }
+            
+        };
 
         regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                sensorFixStore.addListener(listener, event.getDevice());
-                // TODO update mappings ???
+                logger.log(Level.FINE, "New mapping for: " + event.getMappedTo() + "; device: " + event.getDevice());
+                updateMappingsAndAddListeners();
+            }
+            
+            @Override
+            public void visit(RegattaLogCloseOpenEndedDeviceMappingEvent event) {
+                logger.log(Level.FINE, "Mapping closed: " + event.getDeviceMappingEventId());
+                updateMappingsAndAddListeners();
             }
         };
 
@@ -107,10 +131,39 @@ public class RaceLogSensorDataTracker {
         };
         trackedRace.addListener(raceChangeListener);
     }
+    
+    private void mappingRemoved(DeviceMapping<Competitor> mapping) {
+        // TODO if tracks are always associated to only one device mapping, we could remove tracks here
+    }
 
-    protected void loadGPSFixesForExtendedTimeRange(TimePoint oldEndOfTracking, TimePoint endOfTracking2) {
-        // TODO Auto-generated method stub
+    private void mappingAdded(DeviceMapping<Competitor> mapping) {
+        loadFixes(getTrackingTimeRange().intersection(mapping.getTimeRange()), mapping);
+    }
+
+    private void mappingChanged(DeviceMapping<Competitor> oldMapping, DeviceMapping<Competitor> newMapping) {
+        // TODO can the new time range be bigger than the old one? In this case we would need to load the additional time range.
+    }
+
+    protected void loadGPSFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
+        competitorMappings.forEachMapping((mapping) -> loadFixes(
+                new TimeRangeImpl(loadFixesFrom, loadFixesTo).intersection(mapping.getTimeRange()), mapping));
+    }
+
+    private void loadFixes(TimeRange timeRangeToLoad, DeviceMapping<Competitor> mapping) {
+        SensorFixMapper<Timed, Track<?>, Competitor> mapper = mapperFactory.createCompetitorMapper(mapping.getEventType());
         
+        Track<?> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
+        try {
+            sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
+                    timeRangeToLoad.from(), timeRangeToLoad.to(), true);
+        } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
+            logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo() + "; device: " + mapping.getDevice());
+        }
+    }
+    
+    private TimeRange getTrackingTimeRange() {
+        return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
+                endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
     }
 
     private void startTracking() {
@@ -119,33 +172,19 @@ public class RaceLogSensorDataTracker {
         this.startOfTracking = trackedRace.getStartOfTracking();
         this.endOfTracking = trackedRace.getEndOfTracking();
         
-        // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
-        
-        try {
-            // TODO Use generic mapping finder for sensor data
-            Function<RegattaLog, RegattaLogDeviceMappingFinder<Competitor>> mappingFinder = RegattaLogDeviceCompetitorBravoMappingFinder::new;
-            TrackLoader<DynamicSensorFixTrack<SensorFix>, Competitor> trackLoader = (track, mapping) -> {
-                SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper = 
-                        mapperFactory.createCompetitorMapper(mapping.getEventType());
-                // TODO also use startOfTracking/endOfTracking to not load unnecessary fixes
-                sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
-                        mapping.getTimeRange().from(), mapping.getTimeRange().to(), true);
-            };
-            Function<DeviceMapping<Competitor>, DynamicSensorFixTrack<SensorFix>> trackFactory = (
-                    DeviceMapping<Competitor> deviceMapping) -> mapperFactory
-                    .<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>> createCompetitorMapper(
-                            deviceMapping.getEventType()).getTrack(trackedRace, deviceMapping.getMappedTo());
-            competitorMappings.updateMappings(mappingFinder, true, trackFactory, trackLoader);
-        } catch (DoesNotHaveRegattaLogException | NoCorrespondingServiceRegisteredException | TransformationException e) {
-            logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
-        }
-        // add listeners for devices in mappings already present
-        competitorMappings.addListeners(listener, sensorFixStore::addListener);
+        updateMappingsAndAddListeners();
         logger.info(String.format("Started tracking race-log race (%s)", regattaLog));
         // this wakes up all waiting race handles
         synchronized (this) {
             this.notifyAll();
         }
+    }
+
+    private void updateMappingsAndAddListeners() {
+        competitorMappings.updateMappings();
+        
+        // add listeners for devices in mappings already present
+        competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
     }
 
     public void stopTracking() {
