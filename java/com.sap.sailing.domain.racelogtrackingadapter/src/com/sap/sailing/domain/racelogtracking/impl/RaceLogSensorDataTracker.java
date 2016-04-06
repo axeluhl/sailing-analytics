@@ -134,6 +134,7 @@ public class RaceLogSensorDataTracker {
     
     private void mappingRemoved(DeviceMapping<Competitor> mapping) {
         // TODO if tracks are always associated to only one device mapping, we could remove tracks here
+        // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
     }
 
     private void mappingAdded(DeviceMapping<Competitor> mapping) {
