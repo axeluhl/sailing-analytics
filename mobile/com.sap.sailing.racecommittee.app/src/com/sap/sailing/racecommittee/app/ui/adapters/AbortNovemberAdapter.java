@@ -45,7 +45,7 @@ public class AbortNovemberAdapter extends RecyclerView.Adapter<AbortNovemberAdap
         final ManagedRace race = mRaces.get(position);
         boolean selected = mSelected.contains(race);
 
-        holder.race.setText(RaceHelper.getShortReverseRaceName(race, " / ", mCurrentRace));
+        holder.race.setText(RaceHelper.getReverseRaceName(race, " / "));
         holder.race.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
