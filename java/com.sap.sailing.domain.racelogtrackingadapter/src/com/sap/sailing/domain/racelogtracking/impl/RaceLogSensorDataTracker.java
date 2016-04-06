@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
@@ -57,6 +58,12 @@ public class RaceLogSensorDataTracker {
             logger.log(Level.FINE, "Mapping closed: " + event.getDeviceMappingEventId());
             updateMappingsAndAddListeners();
         }
+        
+        @Override
+        public void visit(RegattaLogRevokeEvent event) {
+            logger.log(Level.FINE, "Mapping revoked for: " + event.getRevokedEventId());
+            updateMappingsAndAddListeners();
+        };
     };
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
