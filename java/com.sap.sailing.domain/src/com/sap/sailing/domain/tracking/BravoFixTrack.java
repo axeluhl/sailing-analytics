@@ -7,4 +7,6 @@ public interface BravoFixTrack extends SensorFixTrack<BravoFix> {
     public static final String TRACK_NAME = "BravoFixTrack";
     
     Double getRideHeight(TimePoint timePoint);
+    
+    Double getAverageRideHeight(TimePoint from, TimePoint to);
 }

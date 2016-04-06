@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.util.OptionalDouble;
+import java.util.Spliterator;
+import java.util.stream.StreamSupport;
+
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
@@ -32,5 +36,20 @@ public class BravoFixTrackImpl extends SensorFixTrackImpl<BravoFix> implements D
         }
         // TODO interpolate if necessary
         return fixBefore.getRideHeight();
+    }
+    
+    @Override
+    public Double getAverageRideHeight(TimePoint from, TimePoint to) {
+        try {
+            lockForRead();
+            Spliterator<BravoFix> fixes = getFixes(from, true, to, true).spliterator();
+            OptionalDouble average = StreamSupport.stream(fixes, false).mapToDouble(BravoFix::getRideHeight).average();
+            if (average.isPresent()) {
+                return average.getAsDouble();
+            }
+        } finally {
+            unlockAfterRead();
+        }
+        return null;
     }
 }
