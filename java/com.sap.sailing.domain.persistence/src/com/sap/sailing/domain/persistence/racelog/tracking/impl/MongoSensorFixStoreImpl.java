@@ -47,7 +47,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     private final DBCollection fixesCollection;
     private final DBCollection metadataCollection;
     private final MongoObjectFactoryImpl mongoOF;
-    private final Map<DeviceIdentifier, Set<FixReceivedListener>> listeners = new HashMap<>();
+    private final Map<DeviceIdentifier, Set<FixReceivedListener<? extends Timed>>> listeners = new HashMap<>();
 
     public MongoSensorFixStoreImpl(MongoObjectFactory mongoObjectFactory,
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
@@ -66,7 +66,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     public <T extends Timed> T loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
         String type = (String) object.get(FieldNames.GPSFIX_TYPE.name());
         DBObject fixObject = (DBObject) object.get(FieldNames.GPSFIX.name());
-        return (T) fixServiceFinder.findService(type).transformBack(fixObject);
+        return this.<T>findService(type).transformBack(fixObject);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         try {
             Object dbDeviceId = MongoObjectFactoryImpl.storeDeviceId(deviceServiceFinder, device);
             String type = fix.getClass().getName();
-            FixMongoHandler<FixT> mongoHandler = (FixMongoHandler) fixServiceFinder.findService(type);
+            FixMongoHandler<FixT> mongoHandler = findService(type);
             Object fixObject = mongoHandler.transformForth(fix);
             DBObject entry = new BasicDBObjectBuilder().add(FieldNames.DEVICE_ID.name(), dbDeviceId)
                     .add(FieldNames.GPSFIX_TYPE.name(), type).add(FieldNames.GPSFIX.name(), fixObject).get();
@@ -137,20 +137,22 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         notifyListeners(device, fix);
     }
 
-    private void notifyListeners(DeviceIdentifier device, Timed fix) {
-        for (FixReceivedListener listener : Util.get(listeners, device, Collections.<FixReceivedListener>emptySet())) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, FixT fix) {
+        for (FixReceivedListener<FixT> listener : Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
+                (Map) listeners, device, Collections.emptySet())) {
             listener.fixReceived(device, fix);
         }
     }
 
     @Override
-    public synchronized void addListener(FixReceivedListener listener, DeviceIdentifier device) {
+    public synchronized void addListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device) {
         Util.addToValueSet(listeners, device, listener);
     }
 
     @Override
-    public synchronized void removeListener(FixReceivedListener listener) {
-        for (Set<FixReceivedListener> set : listeners.values()) {
+    public synchronized void removeListener(FixReceivedListener<? extends Timed> listener) {
+        for (Set<FixReceivedListener<? extends Timed>> set : listeners.values()) {
             set.remove(listener);
         }
     }
@@ -187,4 +189,10 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         }
         return ((Number) result.get(FieldNames.NUM_FIXES.name())).longValue();
     }
+    
+    @SuppressWarnings("unchecked")
+    private <FixT extends Timed> FixMongoHandler<FixT> findService(String type) {
+        return (FixMongoHandler<FixT>) fixServiceFinder.findService(type);
+    }
+
 }

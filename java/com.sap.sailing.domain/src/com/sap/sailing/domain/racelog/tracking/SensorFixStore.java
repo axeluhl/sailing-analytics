@@ -22,12 +22,12 @@ public interface SensorFixStore {
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}
      * is stored through the {@link #storeFix(DeviceIdentifier, GPSFix)} method.
      */
-    void addListener(FixReceivedListener listener, DeviceIdentifier device);
+    void addListener(FixReceivedListener<? extends Timed> listener, DeviceIdentifier device);
 
     /**
      * Remove the registrations of the listener for all devices.
      */
-    void removeListener(FixReceivedListener listener);
+    void removeListener(FixReceivedListener<? extends Timed> listener);
     
     TimeRange getTimeRangeCoveredByFixes(DeviceIdentifier device) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
