@@ -1,5 +1,17 @@
 package com.sap.sailing.android.tracking.app.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -13,21 +25,22 @@ import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.CourseAreaJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.EventBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.LeaderboardGroupBaseJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.VenueJsonDeserializer;
+import com.sap.sse.common.Util;
+import com.sap.sse.shared.media.ImageDescriptor;
 
 public class CheckinManager {
 
@@ -71,9 +84,8 @@ public class CheckinManager {
         URLData urlData = new URLData();
         urlData.uriStr = uri.toString();
         urlData.server = scheme + "://" + uri.getHost();
-        urlData.port = (uri.getPort() == -1) ? 80 : uri.getPort();
-        urlData.hostWithPort = urlData.server + ":" + urlData.port;
-
+        urlData.port = uri.getPort();
+        urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
         Exception exception = null;
         try {
             String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
@@ -82,9 +94,7 @@ public class CheckinManager {
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
             urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
             urlData.leaderboardName = leaderboardNameFromQR;
-
             urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(activity)));
-
             urlData.eventUrl = urlData.hostWithPort + prefs.getServerEventPath(urlData.eventId);
             urlData.leaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
             urlData.competitorUrl = urlData.hostWithPort + prefs.getServerCompetitorPath(urlData.competitorId);
@@ -106,14 +116,12 @@ public class CheckinManager {
     private void getLeaderBoardFromServer(final URLData urlData, HttpGetRequest getLeaderboardRequest) {
         NetworkHelper.getInstance(activity)
             .executeHttpJsonRequestAsync(getLeaderboardRequest, new NetworkHelper.NetworkHelperSuccessListener() {
-
                 @Override
                 public void performAction(JSONObject response) {
 
                     final String leaderboardName;
 
                     try {
-                        //TODO use constants
                         leaderboardName = response.getString("name");
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.leaderboardUrl + ", Error: " + e.getMessage());
@@ -145,28 +153,31 @@ public class CheckinManager {
 
             @Override
             public void performAction(JSONObject response) {
-
+                EventBaseJsonDeserializer deserializer = new EventBaseJsonDeserializer(
+                        new VenueJsonDeserializer(new CourseAreaJsonDeserializer(new SharedDomainFactoryImpl(
+                                new RaceLogResolver() {
+                                    @Override
+                                    public RaceLog resolve(SimpleRaceLogIdentifier identifier) {
+                                        return null;
+                                    }
+                                }))), new LeaderboardGroupBaseJsonDeserializer());
                 try {
-                    //TODO use constants
-                    urlData.eventId = response.getString("id");
-                    urlData.eventName = response.getString("name");
-                    urlData.eventStartDateStr = response.getString("startDate");
-                    urlData.eventEndDateStr = response.getString("endDate");
-
-                    JSONArray imageUrls = response.getJSONArray("imageURLs");
-
-                    if (imageUrls.length() > 0) {
-                        urlData.eventFirstImageUrl = imageUrls.getString(0);
+                    final EventBase event = deserializer.deserialize((org.json.simple.JSONObject) new JSONParser().parse(response.toString()));
+                    urlData.eventId = event.getId().toString();
+                    urlData.eventName = event.getName();
+                    urlData.eventStartDateStr = ""+event.getStartDate().asMillis();
+                    urlData.eventEndDateStr = ""+event.getEndDate().asMillis();
+                    Iterable<ImageDescriptor> imageUrls = event.getImages();
+                    if (!Util.isEmpty(imageUrls)) {
+                        urlData.eventFirstImageUrl = imageUrls.iterator().next().getURL().toString();
                     } else {
                         urlData.eventFirstImageUrl = null;
                     }
-
-                } catch (JSONException e) {
+                } catch (JsonDeserializationException | ParseException e) {
                     ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.eventUrl + ", Error: " + e.getMessage());
                     handleApiError();
                     return;
                 }
-
                 HttpGetRequest getCompetitorRequest;
                 try {
                     getCompetitorRequest = new HttpGetRequest(new URL(urlData.competitorUrl), activity);
@@ -190,18 +201,16 @@ public class CheckinManager {
     private void getCompetitorFromServer(HttpGetRequest getCompetitorRequest, final URLData urlData, final String leaderboardName) {
         NetworkHelper.getInstance(activity)
             .executeHttpJsonRequestAsync(getCompetitorRequest, new NetworkHelper.NetworkHelperSuccessListener() {
-
                 @Override
                 public void performAction(JSONObject response) {
                     activity.dismissProgressDialog();
-
                     try {
-                        // TODO review constants
                         urlData.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
                         urlData.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
                         urlData.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
                         urlData.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
                         urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
+                        // TODO Bug 3358: get optional team image from CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

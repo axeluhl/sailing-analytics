@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
 import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.BuildConfig;
 import com.sap.sailing.racecommittee.app.R;
@@ -182,6 +183,8 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
+
+
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

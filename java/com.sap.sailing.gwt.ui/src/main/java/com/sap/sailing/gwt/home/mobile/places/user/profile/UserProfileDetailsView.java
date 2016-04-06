@@ -1,15 +1,15 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.sap.sailing.gwt.home.mobile.partials.userdetails.UserDetails;
-import com.sap.sailing.gwt.home.shared.usermanagement.decorator.NotLoggedInPresenter;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
+import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
+import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
+import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsView;
 
-public interface UserProfileDetailsView extends IsWidget {
+public interface UserProfileDetailsView extends IsWidget, NeedsAuthenticationContext {
     
-    void setUserManagementContext(AuthenticationContext userManagementContext); 
+    UserDetailsView getUserDetailsView();
 
-    public interface Presenter extends UserDetails.Presenter, NotLoggedInPresenter {
+    public interface Presenter extends NotLoggedInPresenter {
     }
 }
 

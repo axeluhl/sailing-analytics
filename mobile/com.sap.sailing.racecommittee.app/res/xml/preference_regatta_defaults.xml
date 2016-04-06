@@ -26,6 +26,14 @@
             android:numeric="integer"
             android:title="@string/preference_dependent_races_offset_header"/>
 
+        <SwitchPreference
+            android:defaultValue="@bool/preference_heading_with_declination_subtracted_default"
+            android:key="@string/preference_heading_with_declination_subtracted_key"
+            android:switchTextOn="@string/preference_heading_with_declination_subtracted_is_enabled"
+            android:switchTextOff="@string/preference_heading_with_declination_subtracted_is_disabled"
+            android:summaryOn="@string/preference_heading_with_declination_subtracted_summary_is_enabled"
+            android:summaryOff="@string/preference_heading_with_declination_subtracted_summary_is_disabled"
+            android:title="@string/preference_heading_with_declination_subtracted_enabled"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="RRS26">
@@ -41,6 +49,12 @@
             android:key="@string/preference_racing_procedure_rrs26_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
             android:title="@string/preference_racing_procedure_hasxray_header"/>
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_rrs26_resultentryenabled_default"
+            android:key="@string/preference_racing_procedure_rrs26_resultentryenabled_key"
+            android:summary="@string/preference_racing_procedure_resultentryenabled_description"
+            android:title="@string/preference_racing_procedure_resultentryenabled_header"/>
 
         <com.sap.sailing.racecommittee.app.ui.views.FixedMultiSelectListPreference
             android:defaultValue="@array/preference_racing_procedure_rrs26_startmode_flags_default"
@@ -63,6 +77,12 @@
             android:key="@string/preference_racing_procedure_gatestart_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
             android:title="@string/preference_racing_procedure_hasxray_header"/>
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_gatestart_resultentryenabled_default"
+            android:key="@string/preference_racing_procedure_gatestart_resultentryenabled_key"
+            android:summary="@string/preference_racing_procedure_resultentryenabled_description"
+            android:title="@string/preference_racing_procedure_resultentryenabled_header"/>
 
         <CheckBoxPreference
             android:defaultValue="@bool/preference_racing_procedure_gatestart_haspathfinder_default"
@@ -92,6 +112,12 @@
             android:summary="@string/preference_racing_procedure_hasxray_description"
             android:title="@string/preference_racing_procedure_hasxray_header"/>
 
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_ess_resultentryenabled_default"
+            android:key="@string/preference_racing_procedure_ess_resultentryenabled_key"
+            android:summary="@string/preference_racing_procedure_resultentryenabled_description"
+            android:title="@string/preference_racing_procedure_resultentryenabled_header"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Basic Start">
@@ -108,6 +134,12 @@
             android:summary="@string/preference_racing_procedure_hasxray_description"
             android:title="@string/preference_racing_procedure_hasxray_header"/>
 
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_basic_resultentryenabled_default"
+            android:key="@string/preference_racing_procedure_basic_resultentryenabled_key"
+            android:summary="@string/preference_racing_procedure_resultentryenabled_description"
+            android:title="@string/preference_racing_procedure_resultentryenabled_header"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="League Start">
@@ -123,6 +155,12 @@
             android:key="@string/preference_racing_procedure_league_hasxray_key"
             android:summary="@string/preference_racing_procedure_hasxray_description"
             android:title="@string/preference_racing_procedure_hasxray_header"/>
+
+        <CheckBoxPreference
+            android:defaultValue="@bool/preference_racing_procedure_league_resultentryenabled_default"
+            android:key="@string/preference_racing_procedure_league_resultentryenabled_key"
+            android:summary="@string/preference_racing_procedure_resultentryenabled_description"
+            android:title="@string/preference_racing_procedure_resultentryenabled_header"/>
 
     </PreferenceCategory>
 </PreferenceScreen>

@@ -7,13 +7,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceHistoryMapper;
-import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiChild;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView.State;
 
 /**
- * Defines whole layout for site, including the header with the breadcrumbs and tab bar, and the content.
+ * Defines the basic Layout of tabbed pages with tabs, an optional header and a content area.
  * <p/>
  * Created by pgtaboada on 25.11.14.
  */
@@ -41,10 +38,10 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
     SimplePanel additionalHeader;
     @UiField
     SimplePanel tabContentPanelUi;
+    
+    // Should be TabBar<Class<PLACE>> but UiBinder causes weired generics errors related to the @UiHandler that would have a nested generic too. 
     @UiField
-    TabBar tabBar;
-    @UiField BreadcrumbPane breadcrumbs;
-    @UiField DivElement breadcrumbsContainer;
+    TabBar<Class<?>> tabBar;
     @UiField FlowPanel tabExtension;
     private TABVIEW currentTab;
     
@@ -56,15 +53,13 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
         this.presenter = presenter;
         this.historyMapper = historyMapper;
         initWidget(ourUiBinder.createAndBindUi(this));
-        
-        breadcrumbsContainer.getStyle().setDisplay(Display.NONE);
     }
 
     public TABVIEW getCurrentTab() {
         return currentTab;
     }
     
-    @UiChild
+    @UiChild(limit = 1)
     public void addHeader(Widget widget) {
         additionalHeader.setWidget(widget);
     }
@@ -77,7 +72,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      * @param title
      *            The label for the tab.
      */
-    @SuppressWarnings("unchecked")
     @UiChild
     public void addTabContent(final TABVIEW tab, String title) {
         GWT.log("Adding TAB: " + title);
@@ -90,7 +84,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
 
         if(tab.getState() == State.VISIBLE) {
             String link = "#" + historyMapper.getToken(tab.placeToFire());
-            tabBar.addTab(title, (Class<Place>) classForActivation, link);
+            tabBar.addTab(title, classForActivation, link);
         }
     }
 
@@ -101,7 +95,7 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      * @param event
      */
     @UiHandler("tabBar")
-    void onTabSelection(SelectionEvent<Class<Place>> event) {
+    void onTabSelection(SelectionEvent<Class<?>> event) {
 
         TabView<?, PRESENTER> selectedTabActivity = knownTabs.get(event.getSelectedItem());
         if (selectedTabActivity != null) {
@@ -149,7 +143,9 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
                 // TODO better error handling
                 logger.log(Level.SEVERE, "Error while initializing Tab for place " + placeToGo.getClass().getName(), e);
             }
-            tabBar.select(placeToGo);
+            @SuppressWarnings("unchecked")
+            final Class<PLACE> placeClass = (Class<PLACE>) placeToGo.getClass();
+            tabBar.select(placeClass);
 
             currentTab = newTab;
 
@@ -164,14 +160,6 @@ public class TabPanel<PLACE extends Place, PRESENTER, TABVIEW extends TabView<PL
      */
     public void overrideCurrentContentInTab(IsWidget widget) {
         tabContentPanelUi.setWidget(widget);
-    }
-
-    public void addBreadcrumbItem(String title, String link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
-    }
-    
-    public void addBreadcrumbItem(String title, SafeUri link, final Runnable runnable) {
-        breadcrumbs.addBreadcrumbItem(title, link, runnable);
     }
 
     public HandlerRegistration addTabPanelPlaceSelectionEventHandler(TabPanelPlaceSelectionEvent.Handler handler) {

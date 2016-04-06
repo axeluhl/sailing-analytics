@@ -1,7 +1,7 @@
 apply plugin: "com.android.application"
 apply from: "../git.gradle"
 
-def packageName="com.sap.sailing.buoy.positioning.app"
+def packageName="com.sap.sailing.android.buoy.positioning.app"
 def verCode=1
 
 android {
@@ -74,7 +74,7 @@ dependencies {
     /* Google Play Services */
     compile "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
-    /* licence dialog */
+    /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 
     /* local dependencies */

@@ -58,8 +58,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
         json.put(CompetitorJsonConstants.FIELD_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
         json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-        if(competitor.getFlagImage() != null) {
+        if (competitor.getFlagImage() != null) {
             json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
+        }
+        if (competitor.getTeam().getImage() != null) {
+            json.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI, competitor.getTeam().getImage().toString());
         }
         return json;
     }

@@ -26,11 +26,12 @@ public class LeagueConfigurationJsonDeserializer extends RacingProcedureConfigur
     }
 
     @Override
-    protected LeagueConfiguration createResult(JSONObject object, Boolean individualRecall, Flags classFlag)
+    protected LeagueConfiguration createResult(JSONObject object, Boolean individualRecall, Boolean resultEntryEnabled, Flags classFlag)
             throws JsonDeserializationException {
         LeagueConfigurationImpl result = new LeagueConfigurationImpl();
         result.setClassFlag(classFlag);
-        result.setHasInidividualRecall(individualRecall);
+        result.setHasIndividualRecall(individualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
         return result;
     }
 

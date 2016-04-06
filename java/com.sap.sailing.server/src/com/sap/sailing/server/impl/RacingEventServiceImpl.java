@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -228,6 +229,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -2618,12 +2620,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Event createEventWithoutReplication(String eventName, String eventDescription, TimePoint startDate,
-            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, 
+            TimePoint endDate, String venue, boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, 
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         Event result = new EventImpl(eventName, startDate, endDate, venue, isPublic, id);
         addEvent(result);
         result.setDescription(eventDescription);
         result.setOfficialWebsiteURL(officialWebsiteURL);
+        result.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         result.setImages(images);
         result.setVideos(videos);
         return result;
@@ -2640,7 +2643,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
-            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL sailorsInfoWebsiteURL,
+            String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs,
             Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         final Event event = eventsById.get(id);
         if (event == null) {
@@ -2664,7 +2667,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         event.setLeaderboardGroups(leaderboardGroups);
         event.setOfficialWebsiteURL(officialWebsiteURL);
-        event.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL);
+        event.setSailorsInfoWebsiteURLs(sailorsInfoWebsiteURLs);
         event.setImages(images);
         event.setVideos(videos);
         // TODO consider use diffutils to compute diff between old and new leaderboard groups list and apply the patch
@@ -3108,8 +3111,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
                             + URLEncoder.encode(query.toString(), "UTF-8"));
                     logger.info("Searching remote server " + remoteRef + " for " + query);
-                    URLConnection urlConnection = eventsURL.openConnection();
-                    urlConnection.connect();
+                    URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);

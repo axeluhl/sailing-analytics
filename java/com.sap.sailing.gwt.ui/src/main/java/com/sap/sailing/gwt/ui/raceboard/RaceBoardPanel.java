@@ -22,8 +22,6 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.SimpleEventBus;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -33,6 +31,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProvider;
 import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -48,6 +47,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -71,14 +71,9 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactory;
-import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
-import com.sap.sse.security.ui.authentication.AuthenticationManager;
-import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
-import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
+import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuView;
 import com.sap.sse.security.ui.authentication.view.AuthenticationMenuViewImpl;
-import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationView;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -113,6 +108,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private EditMarkPassingsPanel editMarkPassingPanel;
+    private EditMarkPositionPanel editMarkPositionPanel;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -129,7 +125,8 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private final AuthenticationMenuView userManagementMenuView;
     private boolean currentRaceHasBeenSelectedOnce;
     
-    private static final RaceBoardMainCss MAIN_CSS = RaceBoardResources.INSTANCE.mainCss();
+    private final RaceBoardResources raceBoardResources = RaceBoardResources.INSTANCE; 
+    private final RaceBoardMainCss mainCss = raceBoardResources.mainCss();
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     /**
@@ -168,17 +165,17 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         raceInformationHeader.setStyleName("RegattaRaceInformation-Header");
         regattaAndRaceTimeInformationHeader = new FlowPanel();
         regattaAndRaceTimeInformationHeader.setStyleName("RegattaAndRaceTime-Header");
-        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), MAIN_CSS.usermanagement_loggedin(), MAIN_CSS.usermanagement_open());
-        this.userManagementMenuView.asWidget().setStyleName(MAIN_CSS.usermanagement_icon());
+        this.userManagementMenuView = new AuthenticationMenuViewImpl(new Anchor(), mainCss.usermanagement_loggedin(), mainCss.usermanagement_open());
+        this.userManagementMenuView.asWidget().setStyleName(mainCss.usermanagement_icon());
         timeRangeWithZoomModel = new TimeRangeWithZoomModel();
         componentViewers = new ArrayList<ComponentViewer>();
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(selectedRaceIdentifier, competitorsAndTheirBoats);
         competitorSelectionProvider = new CompetitorSelectionModel(/* hasMultiSelection */ true, colorProvider);
                 
-        raceMapResources.combinedWindPanelStyle().ensureInjected();
+        raceMapResources.raceMapStyle().ensureInjected();
         raceMap = new RaceMap(sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, showMapControls, getConfiguration().isShowViewStreamlets(), getConfiguration().isShowViewStreamletColors(), getConfiguration().isShowViewSimulation(),
-                selectedRaceIdentifier, raceMapResources.combinedWindPanelStyle(), /* showHeaderPanel */ true) {
+                selectedRaceIdentifier, raceMapResources, /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -250,10 +247,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
      *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
      *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
      *            the charts are created.
-     * @param isScreenLargeEnoughToInitiallyDisplayLeaderboard TODO
      */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event, FlowPanel mainPanel,
-            boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
+            boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+            RaceMap raceMap, UserService userService) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> components = new ArrayList<Component<?>>();
@@ -268,17 +265,21 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             components.add(windChart);
-            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
-                    stringMessages, competitorSelectionProvider, errorReporter, timer);
-            editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
-            editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-            components.add(editMarkPassingPanel);
         }
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
+                stringMessages, competitorSelectionProvider, errorReporter, timer);
+        editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+        components.add(editMarkPassingPanel);
+        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
+                asyncActionsExecutor, errorReporter);
+        editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+        components.add(editMarkPositionPanel);
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
         this.setupUserManagementControlPanel(userService);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -298,18 +299,10 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     }
     
     private void setupUserManagementControlPanel(UserService userService) {
-        MAIN_CSS.ensureInjected();
-        EventBus eventBus = new SimpleEventBus();
+        mainCss.ensureInjected();
         FlyoutAuthenticationView display = new RaceBoardAuthenticationView();
-        AuthenticationManager manager = new AuthenticationManagerImpl(userService, eventBus,
-                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createEmailValidationLink(), 
-                com.sap.sailing.gwt.ui.raceboard.EntryPointLinkFactory.createPasswordResetLink());
-        AuthenticationClientFactory clientFactory = new AuthenticationClientFactoryImpl(manager, RaceBoardResources.INSTANCE);
-        AuthenticationCallbackImpl callback = new AuthenticationCallbackImpl();
-        AuthenticationPlaceManagementController userManagementController = 
-                new AuthenticationPlaceManagementController(clientFactory, callback, display, eventBus);
-        callback.setController(userManagementController);
-        new FlyoutAuthenticationPresenter(display, userManagementMenuView, userManagementController, eventBus, manager.getAuthenticationContext());
+        new GenericAuthentication(userService, userManagementMenuView, display, 
+                SailingAuthenticationEntryPointLinkFactory.INSTANCE, raceBoardResources);
         if (!ExperimentalFeatures.SHOW_USER_MANAGEMENT_ON_RACEBOARD) {
             regattaAndRaceTimeInformationHeader.getElement().getStyle().setRight(10, Unit.PX);
             userManagementMenuView.asWidget().removeFromParent();
@@ -415,6 +408,9 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);
+        }
+        if (editMarkPositionPanel != null) {
+            editMarkPositionPanel.setLeaderboard(leaderboard);
         }
     }
 

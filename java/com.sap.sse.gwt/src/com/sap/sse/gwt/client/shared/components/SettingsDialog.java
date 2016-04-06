@@ -74,12 +74,7 @@ public class SettingsDialog<SettingsType extends Settings> extends DataEntryDial
     }
 
     @Override
-    public void show() {
-        super.show();
-        FocusWidget focusWidget = settingsDialogComponent.getFocusWidget();
-        if (focusWidget != null) {
-            focusWidget.setFocus(true);
-        }
+    protected FocusWidget getInitialFocusWidget() {
+        return settingsDialogComponent.getFocusWidget();
     }
-    
 }

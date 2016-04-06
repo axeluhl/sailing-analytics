@@ -13,7 +13,6 @@
     <string name="tracker_stopped">SAP Sail InSight stopped</string>
     <string name="title_activity_regatta">Regatta</string>
     <string name="title_activity_leaderboard">Leader board</string>
-    <string name="title_activity_event">Event</string>
     <string name="title_activity_start">Set Up GPS Tracker</string>
     <string name="title_activity_tracking">Tracking</string>
     <string name="please_confirm">Please confirm</string>
@@ -28,7 +27,7 @@
     <string name="add_photo_select">Photo</string>
     <string name="checking_in">Checking in&#8230;</string>
     <string name="checking_out">Checking out&#8230;</string>
-    <string name="getting_event">Getting event informatiopn&#8230;</string>
+    <string name="getting_event">Getting event information&#8230;</string>
     <string name="getting_leaderboard">Getting leaderboard information&#8230;</string>
     <string name="getting_competitor">Getting competitor information&#8230;</string>
     <string name="error">Error</string>

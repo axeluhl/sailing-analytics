@@ -17,7 +17,7 @@ public class CompetitorsDataHandler extends DataHandler<Collection<Competitor>> 
     
     @Override
     public boolean hasCachedResults() {
-        return race.getCompetitors() != null;
+        return race.getCompetitors() != null && race.getCompetitors().size() != 0;
     }
     
     @Override

@@ -28,7 +28,7 @@
         <item name="sap_light_gray">@color/dark_sap_light_gray</item>
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
-        <item name="white">@color/dark_white</item>
+        <item name="white">@color/white_dark</item>
         <item name="white_invert">@color/constant_black</item>
 
         <!-- styles -->
@@ -37,6 +37,7 @@
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
         <item name="round">@style/AppTheme.Dark.Round</item>
+        <item name="round_transparent">@style/AppTheme.Dark.RoundTransparent</item>
         <item name="text">@style/AppTheme.Dark.Text</item>
         <item name="textXXSmall">@style/AppTheme.Dark.Text.XXSmall</item>
         <item name="textXSmall">@style/AppTheme.Dark.Text.XSmall</item>
@@ -105,11 +106,13 @@
         <item name="chevron_left">@drawable/ic_chevron_left_white_24dp</item>
         <item name="chevron_right">@drawable/ic_chevron_right_white_24dp</item>
 
-        <item name="flag_first_blue">@drawable/flag_first_blue_32dp_dark</item>
+        <item name="flag_blue_first">@drawable/flag_blue_first_32dp_dark</item>
+        <item name="flag_blue_last">@drawable/flag_blue_last_32dp_dark</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_64dp_dark</item>
+        <item name="flags_blue_first">@drawable/flag_blue_first_64dp_dark</item>
+        <item name="flags_blue_last">@drawable/flag_blue_last_64dp_dark</item>
         <item name="flags_course">@drawable/flags_course_64dp_dark</item>
-        <item name="flags_more">@drawable/flags_more_64dp_dark</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_dark</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_dark</item>
     </style>
@@ -120,6 +123,11 @@
 
     <style name="AppTheme.Dark.Round">
         <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">@dimen/logout_padding</item>
+    </style>
+
+    <style name="AppTheme.Dark.RoundTransparent">
+        <item name="android:background">@drawable/round_button_transparent</item>
         <item name="android:padding">@dimen/logout_padding</item>
     </style>
 

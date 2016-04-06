@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.dashboards.gwt.client.widgets.startlineadvantage.course.StartLineAdvantageByGeometryWidget;
 import com.sap.sailing.dashboards.gwt.client.widgets.windbot.WindBotWidget;
 import com.sap.sailing.dashboards.gwt.client.widgets.windbot.charts.VerticalWindChartClickListener;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -33,9 +32,6 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
 
     @UiField
     public HTMLPanel liveAveragePanel;
-
-    @UiField
-    public DivElement header;
 
     @UiField
     SpanElement liveNumber;
@@ -78,12 +74,11 @@ public class LiveAverageComponent extends Composite implements HasWidgets, Verti
      *            sets a special size
      * 
      * */
-    public LiveAverageComponent(String header, String unit) {
+    public LiveAverageComponent(String unit) {
         LiveAverageComponentResources.INSTANCE.gss().ensureInjected();
         stringConstants = StringMessages.INSTANCE;
         initWidget(uiBinder.createAndBindUi(this));
         liveAveragePanel.getElement().getStyle().setProperty("backgroundColor", "white");
-        this.header.setInnerText(header);
         this.liveUnit.setInnerText(unit);
         this.averageUnit.setInnerText(unit);
         // Lifts the degrees unit string "°". Otherwise it would be too small.

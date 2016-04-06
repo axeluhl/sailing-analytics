@@ -112,6 +112,10 @@ To deploy an Android project (for example com.sap.sailing.racecommittee.app) to 
 3. Select your attached device in the device selection screen
 4. The app should be started after deployment
 
+#### Further hints
+
+If you are working with a linux-system and you get the error message `error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory` try to install  lib32z1 and lib32stdc++6.
+
 ####Steps to consider for using other modules
 1. For Eclipse Build
    * MANIFEST.MF , add module names unter dependencies
