@@ -247,6 +247,8 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                             // the race on which raceToAbort depends immediately is NOT to be aborted
                             actions.add(new AbortAction(raceToAbort, now, flag));
                         }
+                    } else {
+                        actions.add(new AbortAction(raceToAbort, now, flag));
                     }
                     for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148 comment #2
                         final RaceState raceStateOfDependentRace = dependentRace.getState();
