@@ -3,6 +3,7 @@ package com.sap.sailing.domain.racelogtracking.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -69,8 +70,11 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.qrcode.QRCodeGenerationUtil;
+import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.util.impl.NonGwtUrlHelper;
 
 public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
@@ -277,20 +281,25 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException {
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
+            Locale locale) throws MailException {
         StringBuilder occuredExceptions = new StringBuilder();
-
         for (Competitor competitor : competitors) {
             final String toAddress = competitor.getEmail();
             if (toAddress != null) {
                 String leaderboardName = leaderboard.getName();
                 String competitorName = competitor.getName();
-
                 String url = DeviceMappingConstants.getDeviceMappingForRegattaLogUrl(serverUrlWithoutTrailingSlash,
                         event.getId().toString(), leaderboardName, DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                         competitor.getId().toString(), NonGwtUrlHelper.INSTANCE);
+                String logoUrl = null;
+                final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
+                if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
+                    logoUrl = imagesWithTag.get(0).getURL().toString();
+                }
                 try {
-                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url);
+                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url, iOSAppUrl,
+                            androidAppUrl, logoUrl);
                 } catch (MailException e) {
                     occuredExceptions.append(e.getMessage() + "\r\n");
                 }
@@ -302,29 +311,68 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     private void sendInvitationEmail(Locale locale, final String toAddress, String leaderboardName, String invitee,
-            String url) throws MailException {
-        String subject = String.format("%s %s",
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "trackingInvitationFor"), invitee);
+            String url, String iOSAppUrl, String androidAppUrl, String logoUrl) throws MailException {
+        final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
+        String subject = String.format("%s %s", B.get(locale, "trackingInvitationFor"), invitee);
 
         // taken from http://www.tutorialspoint.com/javamail_api/javamail_api_send_inlineimage_in_email.htm
         BodyPart messageTextPart = new MimeBodyPart();
-        String htmlText = String.format("<h1>%s %s</h1>" + "<p>%s <b>%s</b></p>"
-                + "<img src=\"cid:image\" title=\"%s\"><br/><b>%s</b>: <a href=\"%s\">%s</a><br/><b>%s</b>: <a href=\"%s\">%s</a>",
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "welcomeTo"), leaderboardName,
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "scanQRCodeOrVisitUrlToRegisterAs"), invitee,
-                url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "iOSUsers"),
-                IOS_DEEP_LINK_PREFIX+url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"),
-                RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "androidUsers"),
-                url, RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "alternativelyVisitThisLink"));
+
+        boolean hasIOSAppUrl = iOSAppUrl != null && !iOSAppUrl.isEmpty();
+        boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
+        boolean hasLogoUrl = logoUrl != null && !logoUrl.isEmpty();
+        StringBuilder htmlText = new StringBuilder();
+        htmlText.append("<html>");
+        htmlText.append("<head>");
+        htmlText.append("<style>");
+        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}");
+        htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}");
+        htmlText.append(".qr {margin: 10px;height:250px; width: auto;}");
+        htmlText.append(".spacer {margin-top: 50px;}");
+        htmlText.append("</style>");
+        htmlText.append("</head>");
+        htmlText.append("<body>");
+        if (hasLogoUrl) {
+            htmlText.append("<p class='qr'><img src='").append(logoUrl).append("' /></p> ");
+        }
+        htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
+        htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
+                .append("</b></p> ");
+        htmlText.append("<p class='qr'><img src='cid:image'  title='").append(url).append("' /></p> ");
+        htmlText.append("<p class='spacer'>").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
+        if (hasIOSAppUrl) {
+            htmlText.append("<a class='b' href='").append(IOS_DEEP_LINK_PREFIX + url).append("'>")
+                    .append(B.get(locale, "iOSUsers")).append("</a> ");
+        }
+        if (hasAndroidAppUrl) {
+            htmlText.append("<a class='b' href='").append(url).append("'>").append(B.get(locale, "androidUsers"))
+                    .append("</a> ");
+        }
+        if (hasIOSAppUrl || hasAndroidAppUrl) {
+            htmlText.append("<p class='spacer'>").append(B.get(locale, "appStoreInstallText")).append("</p> ");
+        }
+        if (hasIOSAppUrl) {
+
+            htmlText.append("<a class='b' href='").append(iOSAppUrl).append("'>").append(B.get(locale, "appIos"))
+                    .append("</a> ");
+        }
+        if (hasAndroidAppUrl) {
+            htmlText.append("<a class='b' href='").append(androidAppUrl).append("'>")
+                    .append(B.get(locale, "appAndroid")).append("</a> ");
+        }
+        htmlText.append("<p class='spacer' />");
+        htmlText.append("</body>");
+        htmlText.append("</html>");
 
         try {
-            messageTextPart.setContent(htmlText, "text/html");
+            messageTextPart.setContent(htmlText.toString(), "text/html");
 
             BodyPart messageImagePart = new MimeBodyPart();
             InputStream imageIs = QRCodeGenerationUtil.create(url, 250);
             DataSource imageDs = new ByteArrayDataSource(imageIs, "image/png");
             messageImagePart.setDataHandler(new DataHandler(imageDs));
             messageImagePart.setHeader("Content-ID", "<image>");
+            messageImagePart.setHeader("Content-Disposition", "inline;filename=\"qr.png\"");
 
             MimeMultipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageTextPart);
@@ -339,7 +387,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, Locale locale) throws MailException {
+            String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
 
         StringBuilder occuredExceptions = new StringBuilder();
 
@@ -348,13 +396,19 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
         String eventId = event.getId().toString();
 
+        String logoUrl = null;
+        List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
+        if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
+            logoUrl = imagesWithTag.get(0).getURL().toString();
+        }
         // http://<host>/buoy-tender/checkin?event_id=<event-id>&leaderboard_name=<leaderboard-name>
         String url = DeviceMappingConstants.getBuoyTenderInvitationUrl(serverUrlWithoutTrailingSlash, leaderboardName,
                 eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
                 sendInvitationEmail(locale, toAddress, leaderboardName,
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url);
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, iOSAppUrl, androidAppUrl,
+                        logoUrl);
             } catch (MailException e) {
                 occuredExceptions.append(e.getMessage() + "\r\n");
             }

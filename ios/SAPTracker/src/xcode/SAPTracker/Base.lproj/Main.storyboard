@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="3xl-Yh-rPF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -210,6 +210,7 @@
                         <outlet property="btnScan" destination="Ieu-ch-jeI" id="FWs-OF-b4i"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
                         <outlet property="tableViewHeight" destination="yuo-wx-0A1" id="pFK-q1-1DI"/>
+                        <outlet property="vSplashScreen" destination="4Od-pk-xCd" id="3sj-Mx-34I"/>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="Settings" id="Xxn-jp-xEB"/>
@@ -217,6 +218,26 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
+                <view contentMode="scaleToFill" id="4Od-pk-xCd">
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="applogo" translatesAutoresizingMaskIntoConstraints="NO" id="K04-Lb-fSm">
+                            <rect key="frame" x="117.5" y="220" width="365" height="96"/>
+                            <constraints>
+                                <constraint firstAttribute="width" secondItem="K04-Lb-fSm" secondAttribute="height" multiplier="365:96" id="iTN-7Q-YkX"/>
+                            </constraints>
+                        </imageView>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="K04-Lb-fSm" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="4Od-pk-xCd" secondAttribute="leading" constant="30" id="0ML-xS-Lk4"/>
+                        <constraint firstItem="K04-Lb-fSm" firstAttribute="width" secondItem="K04-Lb-fSm" secondAttribute="height" multiplier="365:96" id="YeC-DN-aQX"/>
+                        <constraint firstItem="K04-Lb-fSm" firstAttribute="centerY" secondItem="4Od-pk-xCd" secondAttribute="centerY" id="lJN-eB-asJ"/>
+                        <constraint firstItem="K04-Lb-fSm" firstAttribute="centerX" secondItem="4Od-pk-xCd" secondAttribute="centerX" id="lP3-oq-Tj2"/>
+                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="K04-Lb-fSm" secondAttribute="trailing" constant="30" id="tNv-UR-6vj"/>
+                    </constraints>
+                </view>
             </objects>
             <point key="canvasLocation" x="1222" y="-307"/>
         </scene>
@@ -1457,38 +1478,6 @@ Cg
             </objects>
             <point key="canvasLocation" x="436" y="-1945"/>
         </scene>
-        <!--Splash Screen Dummy-->
-        <scene sceneID="PwG-Yg-AQc">
-            <objects>
-                <viewController id="3xl-Yh-rPF" customClass="SplashScreenDummy" customModule="SAPTracker" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Hws-lE-q8T"/>
-                        <viewControllerLayoutGuide type="bottom" id="igh-Dw-QZa"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="Lwx-VP-jF5">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="applogo" translatesAutoresizingMaskIntoConstraints="NO" id="oHR-Ls-GFI">
-                                <rect key="frame" x="118" y="252" width="365" height="96"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" secondItem="oHR-Ls-GFI" secondAttribute="height" multiplier="365:96" id="wUK-xV-MEN"/>
-                                </constraints>
-                            </imageView>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="oHR-Ls-GFI" firstAttribute="centerX" secondItem="Lwx-VP-jF5" secondAttribute="centerX" id="Hnb-6z-1mn"/>
-                            <constraint firstItem="oHR-Ls-GFI" firstAttribute="centerY" secondItem="Lwx-VP-jF5" secondAttribute="centerY" id="XuX-Kd-dD3"/>
-                            <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="oHR-Ls-GFI" secondAttribute="trailing" constant="20" id="gbR-Rb-T28"/>
-                            <constraint firstItem="oHR-Ls-GFI" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Lwx-VP-jF5" secondAttribute="leadingMargin" constant="20" id="gwk-4S-Gth"/>
-                        </constraints>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dIP-aR-r8r" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="436" y="-988"/>
-        </scene>
         <!--Leader Board-->
         <scene sceneID="BcW-Cr-BGq">
             <objects>
@@ -1570,7 +1559,7 @@ Cg
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -33,11 +33,11 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
-import com.sap.sailing.android.tracking.app.ui.activities.EventActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -186,7 +186,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
             } else {
-                showNoGPSError();
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
             break;
         case R.id.add_photo_button:
@@ -201,20 +201,6 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         default:
             break;
         }
-    }
-
-    private void showNoGPSError() {
-        new AlertDialog.Builder(getActivity())
-            .setCancelable(true).setTitle(getString(R.string.warning))
-            .setMessage(getString(R.string.enable_gps))
-            .setNegativeButton(getString(R.string.no), null)
-            .setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    LocationHelper.openLocationSettings(getActivity());
-                }
-            })
-            .show();
     }
 
     public void setChangePhotoButtonHidden(boolean hidden) {
@@ -322,8 +308,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
             scale = (int) Math.pow(
                     2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
-                            / Math.log(0.5)));
+                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -348,8 +333,10 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
     private void startEventActivity() {
         RegattaActivity activity = (RegattaActivity) getActivity();
-        Intent intent = new Intent(getActivity(), EventActivity.class);
-        intent.putExtra(EventActivity.EVENT, activity.event);
+        AppPreferences preferences = new AppPreferences(getActivity());
+        EventInfo eventInfo = activity.event;
+        String url = eventInfo.server + preferences.getServerEventUrl(eventInfo.id);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(intent);
     }
 

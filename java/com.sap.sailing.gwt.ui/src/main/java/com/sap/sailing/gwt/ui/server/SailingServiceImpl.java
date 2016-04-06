@@ -452,6 +452,7 @@ import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.WithID;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
@@ -5367,12 +5368,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
                 null : mapping.getTimeRange().to().asDate();
         MappableToDevice item = null;
-        if (mapping.getMappedTo() instanceof Competitor) {
+        final WithID mappedTo = mapping.getMappedTo();
+        if (mappedTo == null) {
+            throw new RuntimeException("Device mapping not mapped to any object");
+        } else if (mappedTo instanceof Competitor) {
             item = baseDomainFactory.convertToCompetitorDTO((Competitor) mapping.getMappedTo());
-        } else if (mapping.getMappedTo() instanceof Mark) {
+        } else if (mappedTo instanceof Mark) {
             item = convertToMarkDTO((Mark) mapping.getMappedTo(), null);
         } else {
-            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type");
+            throw new RuntimeException("Can only handle Competitor or Mark as mapped item type, but not "+mappedTo.getClass().getName());
         }
         //Only deal with UUIDs - otherwise we would have to pass Serializable to browser context - which
         //has a large performance implact for GWT.
@@ -5858,7 +5862,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void inviteCompetitorsForTrackingViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String localeInfoName) throws MailException {
+            String leaderboardName, Collection<CompetitorDTO> competitorDtos, String iOSAppUrl, String androidAppUrl,
+            String localeInfoName) throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Set<Competitor> competitors = new HashSet<>();
         for (CompetitorDTO c : competitorDtos) {
@@ -5866,16 +5871,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteCompetitorsForTrackingViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                competitors, getLocale(localeInfoName));
+                competitors, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
     }
     
     @Override
     public void inviteBuoyTenderViaEmail(String serverUrlWithoutTrailingSlash, EventDTO eventDto,
-            String leaderboardName, String emails, String localeInfoName) throws MailException {
+            String leaderboardName, String emails, String iOSAppUrl, String androidAppUrl, String localeInfoName)
+            throws MailException {
         Event event = getService().getEvent(eventDto.id);
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         getRaceLogTrackingAdapter().inviteBuoyTenderViaEmail(event, leaderboard, serverUrlWithoutTrailingSlash,
-                emails, getLocale(localeInfoName));
+                emails, iOSAppUrl, androidAppUrl, getLocale(localeInfoName));
     }
 
     @Override

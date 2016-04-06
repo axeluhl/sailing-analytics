@@ -9,11 +9,11 @@ import android.content.Context;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.ui.utils.BuoyHelper;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sse.common.Color;
 
 public class MapMarkerImpl implements MapMarker {

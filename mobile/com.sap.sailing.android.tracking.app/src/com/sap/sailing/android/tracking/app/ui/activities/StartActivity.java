@@ -28,6 +28,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         prefs = new AppPreferences(this);
         if (getSupportActionBar() != null) {

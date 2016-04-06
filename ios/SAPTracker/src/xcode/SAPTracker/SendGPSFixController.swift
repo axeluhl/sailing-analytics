@@ -43,7 +43,7 @@ class SendGPSFixController: NSObject {
     
     /* See if any rows need to be uploaded. Schedule timer again. */
     func timer() {
-        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:#selector(SendGPSFixController.timer), userInfo:nil, repeats:false)
+        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
 
         // get last 100 locations
@@ -80,7 +80,7 @@ class SendGPSFixController: NSObject {
         APIManager.sharedManager.initManager(serverUrl)
         if APIManager.sharedManager.networkAvailable {
             APIManager.sharedManager.postGPSFixes(DeviceUDIDManager.UDID, gpsFixes: gpsFixes,
-                success: { (operation, competitorResponseObject) -> Void in
+                success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
                     print("sent GPS fixes")
                     for gpsFix in gpsFixes {
                         DataManager.sharedManager.managedObjectContext!.deleteObject(gpsFix)
@@ -88,7 +88,7 @@ class SendGPSFixController: NSObject {
                     let notification = NSNotification(name: NotificationType.gpsFixesSynced, object: self)
                     NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
                 },
-                failure: { (operation, error) -> Void in
+                failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
                     print("error sending GPS fixes")
             })
         }

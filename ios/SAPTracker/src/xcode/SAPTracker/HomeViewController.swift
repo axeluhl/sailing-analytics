@@ -25,12 +25,15 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var activityIndicatorView: UIActivityIndicatorView!
+	@IBOutlet var vSplashScreen: UIView!
     
     var fetchedResultsController: NSFetchedResultsController?
     private var qrCodeManager: QRCodeManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+		
+		loadSplashScreen()		
 
         // set QR manager, needed in case app is being open by custom URL
         qrCodeManager = QRCodeManager(delegate: self)
@@ -45,9 +48,9 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
         
         // register for open custom URL events
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(openUrl(_:)), name: AppDelegate.NotificationType.openUrl, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "openUrl:", name: AppDelegate.NotificationType.openUrl, object: nil)
 
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(checkEULA(_:)), name: UIApplicationWillEnterForegroundNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "checkEULA:", name: UIApplicationWillEnterForegroundNotification, object: nil)
 
         checkEULA(NSNotification.init(name: "", object: nil))
 
@@ -61,6 +64,50 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         let barButtonItem = UIBarButtonItem(customView: imageView)
         navigationItem.leftBarButtonItem = barButtonItem
     }
+	
+	func loadSplashScreen() {		
+		
+		if let keyWindow = UIApplication.sharedApplication().keyWindow {
+			
+			vSplashScreen.translatesAutoresizingMaskIntoConstraints = false
+			keyWindow.addSubview(vSplashScreen)
+			
+			let lcTop = NSLayoutConstraint(item: vSplashScreen, 
+			                               attribute: NSLayoutAttribute.Top, 
+			                               relatedBy: NSLayoutRelation.Equal, 
+			                               toItem: keyWindow, 
+			                               attribute: NSLayoutAttribute.Top, 
+			                               multiplier: 1.0, 
+			                               constant: 0)
+			let lcBottom = NSLayoutConstraint(item: vSplashScreen, 
+			                                  attribute: NSLayoutAttribute.Bottom, 
+			                                  relatedBy: NSLayoutRelation.Equal, 
+			                                  toItem: keyWindow, 
+			                                  attribute: NSLayoutAttribute.Bottom, 
+			                                  multiplier: 1.0, 
+			                                  constant: 0)
+			let lcLeft = NSLayoutConstraint(item: vSplashScreen, 
+			                                attribute: NSLayoutAttribute.Left, 
+			                                relatedBy: NSLayoutRelation.Equal, 
+			                                toItem: keyWindow, 
+			                                attribute: NSLayoutAttribute.Left, 
+			                                multiplier: 1.0, 
+			                                constant: 0)
+			let lcRight = NSLayoutConstraint(item: vSplashScreen, 
+		                                  attribute: NSLayoutAttribute.Right, 
+		                                  relatedBy: NSLayoutRelation.Equal, 
+		                                  toItem: keyWindow, 
+		                                  attribute: NSLayoutAttribute.Right, 
+		                                  multiplier: 1.0, 
+		                                  constant: 0)
+			keyWindow.addConstraints([lcTop, lcBottom, lcLeft, lcRight])
+			
+			weak var weakself = self
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(2 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				weakself?.vSplashScreen.removeFromSuperview()
+			}
+		}
+	}
 
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -193,6 +240,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
             case .Delete:
                 tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            default:
+                return
             }
     }
     
