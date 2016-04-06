@@ -1615,8 +1615,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             loadRegattaLogEvents(result, query, identifier);
         } catch (Throwable t) {
             // something went wrong during DB access; report, then use empty new regatta log
-            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data. Check MongoDB settings.");
-            logger.log(Level.SEVERE, "loadRegattaLog", t);
+            logger.log(Level.SEVERE, "Error connecting to MongoDB, unable to load recorded regatta log data for "+identifier+". Check MongoDB settings.", t);
         }
         return result;
     }
@@ -1708,7 +1707,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogRegisterCompetitorEvent loadRegattaLogRegisterCompetitorEvent(TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         Competitor comp = getCompetitorByID(dbObject);
-        return new RegattaLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, comp);
+        final RegattaLogRegisterCompetitorEvent result;
+        if (comp == null) {
+            result = null;
+            logger.log(Level.SEVERE, "Couldn't resolve competitor with ID "+dbObject.get(FieldNames.REGATTA_LOG_COMPETITOR_ID.name())+
+                    " from registration event with ID "+id+". Skipping this competitor registration.");
+        } else {
+            result = new RegattaLogRegisterCompetitorEventImpl(createdAt, logicalTimePoint, author, id, comp);
+        }
+        return result;
     }
 
     private RegattaLogCloseOpenEndedDeviceMappingEvent loadRegattaLogCloseOpenEndedDeviceMappingEvent(TimePoint createdAt,
@@ -1795,23 +1802,31 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             logger.log(Level.WARNING, "Could not load deviceId for RaceLogEvent", e);
             e.printStackTrace();
         }
+        final Serializable competitorId = (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name());
         Competitor mappedTo = baseDomainFactory.getExistingCompetitorById(
-                (Serializable) dbObject.get(FieldNames.COMPETITOR_ID.name()));
-        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
-        final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
-        @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
-        final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
-        Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
-        final TimePoint from = times.getA();
-        final TimePoint to = times.getB();
-        final boolean needsMigration = times.getC();
-        final RegattaLogDeviceCompetitorMappingEventImpl result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
-        if (needsMigration) {
-            // remove old version of mapping event
-            WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
-            assert removeResult.getN() == 1;
-            // and then insert using the fixed storage implementation
-            new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+                competitorId);
+        final RegattaLogDeviceCompetitorMappingEventImpl result;
+        if (mappedTo == null) {
+            logger.severe("Found a "+RegattaLogDeviceCompetitorMappingEventImpl.class.getName()+
+                    " event but couldn't find competitor with ID "+competitorId);
+            result = null;
+        } else {
+            @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+            final FieldNames deprecatedFromFieldName = FieldNames.RACE_LOG_FROM;
+            @SuppressWarnings("deprecation") // used only for auto-migration; may be removed in future releases
+            final FieldNames deprecatedToFieldName = FieldNames.RACE_LOG_TO;
+            Triple<TimePoint, TimePoint, Boolean> times = loadFromToTimePoint(dbObject, FieldNames.REGATTA_LOG_FROM, deprecatedFromFieldName, FieldNames.REGATTA_LOG_TO, deprecatedToFieldName);
+            final TimePoint from = times.getA();
+            final TimePoint to = times.getB();
+            final boolean needsMigration = times.getC();
+            result = new RegattaLogDeviceCompetitorMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo, device, from, to);
+            if (needsMigration) {
+                // remove old version of mapping event
+                WriteResult removeResult = database.getCollection(CollectionNames.REGATTA_LOGS.name()).remove(outerDBObject);
+                assert removeResult.getN() == 1;
+                // and then insert using the fixed storage implementation
+                new MongoObjectFactoryImpl(database, serviceFinderFactory).storeRegattaLogEvent(regattaLogIdentifier, result);
+            }
         }
         return result;
     }

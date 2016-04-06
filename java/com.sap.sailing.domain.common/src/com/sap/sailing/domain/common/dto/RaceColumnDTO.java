@@ -129,6 +129,24 @@ public class RaceColumnDTO extends NamedDTO implements Serializable {
         return start;
     }
     
+    public Date getStartOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.startOfTracking;
+        }
+        return start;
+    }
+    
+    public Date getEndOfTracking(FleetDTO fleet){
+        Date start = null;
+        RaceDTO raceDTO = racesPerFleet.get(fleet);
+        if (raceDTO != null && raceDTO.isTracked) {
+            start = raceDTO.trackedRace.endOfTracking;
+        }
+        return start;
+    }
+    
     /**
      * @return The {@link PlacemarkOrderDTO places} or <code>null</code>, if no places are available
      */

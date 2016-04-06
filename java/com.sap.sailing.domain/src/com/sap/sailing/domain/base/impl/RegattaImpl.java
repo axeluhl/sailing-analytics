@@ -792,6 +792,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForRegatta);
-        deregisterer.analyze();
+        deregisterer.deregister(deregisterer.analyze());
     }
 }
