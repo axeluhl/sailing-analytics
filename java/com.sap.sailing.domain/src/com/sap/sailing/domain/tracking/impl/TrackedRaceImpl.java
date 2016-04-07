@@ -4071,7 +4071,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForRead(sensorTracksLock);
         try {
-            return (TrackT) sensorTracks.get(key);
+            return getTrackInternal(key);
         } finally {
             LockUtil.unlockAfterRead(sensorTracksLock);
         }
@@ -4082,7 +4082,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForWrite(sensorTracksLock);
         try {
-            TrackT result = (TrackT) sensorTracks.get(key);
+            TrackT result = getTrackInternal(key);
             if (result == null) {
                 result = newTrackFactory.get();
                 sensorTracks.put(key, result);
@@ -4091,6 +4091,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <TrackT extends SensorFixTrack<?>> TrackT getTrackInternal(Pair<Competitor, String> key) {
+        return (TrackT) sensorTracks.get(key);
     }
     
     @Override
