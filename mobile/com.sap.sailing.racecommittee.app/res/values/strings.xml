@@ -499,6 +499,7 @@
     <string name="added_to_result_list">Added \'%1$s\' to result list at position %2$s</string>
     <string name="get_started">Getting Started</string>
     <string name="position">Position</string>
+    <string name="server_deeplink_message">Server successfully changed to %1$s.</string>
     <string name="penalty">Penalty</string>
     <string name="score">Score</string>
     <string name="finishing_time">Finishing Time</string>

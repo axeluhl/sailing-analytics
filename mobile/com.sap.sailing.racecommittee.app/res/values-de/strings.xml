@@ -472,6 +472,7 @@
     <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$s</string>
     <string name="get_started">Getting Started</string>
     <string name="position">Position</string>
+    <string name="server_deeplink_message">Server erfolgreich geändert auf %1$s.</string>
     <string name="penalty">Strafe</string>
     <string name="score">Punkte</string>
     <string name="finishing_time">Zielzeit</string>
