@@ -213,9 +213,17 @@ public abstract class BaseRacingProcedure extends BaseRaceStateChangedListener i
 
     @Override
     public boolean hasIndividualRecall() {
-        return configuration.hasInidividualRecall() == null ? hasIndividualRecallByDefault() : configuration
-                .hasInidividualRecall();
+        return configuration.hasIndividualRecall() == null ? hasIndividualRecallByDefault() : configuration
+                .hasIndividualRecall();
     }
+
+    @Override
+    public boolean isResultEntryEnabled() {
+        return configuration.isResultEntryEnabled() == null ? isResultEntryEnabledByDefault() : configuration
+                .isResultEntryEnabled();
+    }
+
+    protected abstract Boolean isResultEntryEnabledByDefault();
 
     protected abstract boolean hasIndividualRecallByDefault();
 
