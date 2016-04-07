@@ -21,6 +21,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mail
 Import-Package: com.google.zxing;version="3.1.0",
  com.mongodb,
+ com.sap.sse.shared.media,
  javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.mail.util;version="1.4.0",
