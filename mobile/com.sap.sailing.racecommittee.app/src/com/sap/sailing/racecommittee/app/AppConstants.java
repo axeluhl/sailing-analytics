@@ -68,6 +68,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_SHOW_ONBOARDING = "show_onboarding";
     public final static String INTENT_ACTION_SHOW_LOGIN = "show_login";
     public final static String INTENT_ACTION_VALID_DATA = "valid_data";
+    public final static String INTENT_ACTION_SHOW_WELCOME = "show_welcome";
 
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
