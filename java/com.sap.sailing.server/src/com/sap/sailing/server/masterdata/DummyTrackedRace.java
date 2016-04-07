@@ -629,4 +629,8 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
     }
+
+    @Override
+    public void updateStartAndEndOfTracking() {
+    }
 }

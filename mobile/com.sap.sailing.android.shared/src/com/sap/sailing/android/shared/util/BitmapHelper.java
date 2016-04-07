@@ -1,4 +1,4 @@
-package com.sap.sailing.racecommittee.app.utils;
+package com.sap.sailing.android.shared.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -16,8 +16,20 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.TypedValue;
 import android.view.View;
 
+/**
+ * Utility class for decoding Bitmap files and requiring Drawables.
+ */
 public class BitmapHelper {
 
+    /**
+     * Decodes a bitmap resource, calculates its sample size, and returns the size-reduced Bitmap for that resource.
+     *
+     * @param res the resource to decode
+     * @param resId the resource ID
+     * @param reqWidth the required width of the output Bitmap
+     * @param reqHeight the required height of the output Bitmap
+     * @return the down-sampled decoded Bitmap
+     */
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight) {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -32,9 +44,22 @@ public class BitmapHelper {
         return BitmapFactory.decodeResource(res, resId, options);
     }
 
-    public static Bitmap decodeSampleBitmapFromFile(String fileName, int reqWidth, int reqHeight) {
+    /**
+     * Decodes a bitmap file, calculates its sample size, and returns the size-reduced Bitmap for that file.
+     *
+     * @param fileName the absolute path of the file to decode
+     * @param reqWidth the required width of the output Bitmap
+     * @param reqHeight the required height of the output Bitmap
+     * @param preferredConfig additional preferred config (optional, can be null)
+     * @return the down-sampled decoded Bitmap
+     */
+    public static Bitmap decodeSampleBitmapFromFile(String fileName, int reqWidth, int reqHeight,
+                                                    Bitmap.Config preferredConfig) {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
+        if (preferredConfig != null) {
+            options.inPreferredConfig = preferredConfig;
+        }
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(fileName, options);
 
@@ -67,6 +92,13 @@ public class BitmapHelper {
         return inSampleSize;
     }
 
+    /**
+     * Gets a Drawable from the provided attribute resource.
+     *
+     * @param context the context
+     * @param attrRes the attribute resource
+     * @return the Drawable of the resource
+     */
     public static Drawable getAttrDrawable(Context context, @AttrRes int attrRes) {
         Drawable drawable = null;
         TypedValue value = new TypedValue();
@@ -80,6 +112,13 @@ public class BitmapHelper {
         return drawable;
     }
 
+    /**
+     * Gets a Drawable from the provided attribute identifier.
+     *
+     * @param context the context
+     * @param attr the attribute identifier specifying a Drawable resource
+     * @return the Drawable of the resource
+     */
     public static Drawable getAttrDrawable(Context context, String attr) {
         int attrRes = context.getResources().getIdentifier(attr, "attr", context.getPackageName());
         if (attrRes != 0) {
@@ -88,6 +127,12 @@ public class BitmapHelper {
         return null;
     }
 
+    /**
+     * Sets the given Drawable as background for the given View.
+     *
+     * @param view the view that gets its background set
+     * @param drawable the Drawable for the background
+     */
     // @SuppressWarnings, but it is handled correctly
     @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -99,6 +144,14 @@ public class BitmapHelper {
         }
     }
 
+    /**
+     * Tints a drawable given by its resource ID in the given color.
+     *
+     * @param context the context
+     * @param drawableResId the resource ID of the drawable to tint
+     * @param color the color in which the drawable should be tinted
+     * @return the tinted Drawable
+     */
     public static Drawable getTintedDrawable(Context context, @DrawableRes int drawableResId, int color) {
         Drawable drawable = ContextCompat.getDrawable(context, drawableResId);
         drawable = DrawableCompat.wrap(drawable).mutate();
@@ -106,6 +159,12 @@ public class BitmapHelper {
         return drawable;
     }
 
+    /**
+     * Creates a Bitmap from the given Drawable. Uses {@link Bitmap.Config#ARGB_8888}.
+     *
+     * @param drawable the source Drawable
+     * @return the Bitmap for that Drawable
+     */
     public static Bitmap toBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();

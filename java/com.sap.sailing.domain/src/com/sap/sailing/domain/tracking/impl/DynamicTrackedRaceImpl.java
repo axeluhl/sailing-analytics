@@ -308,6 +308,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
             notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
         }
+        updateStartAndEndOfTracking();
     }
 
     @Override
@@ -978,6 +979,13 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
+        updateStartAndEndOfTracking();
+    }
+    
+    @Override
+    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+        logger.info("Finished time of race "+getRace().getName()+" updated by race committee to "+newFinishedTime);
+        updateStartAndEndOfTracking();
     }
     
     @Override
@@ -1010,5 +1018,4 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
-
 }
