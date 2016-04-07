@@ -52,6 +52,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
 import com.sap.sailing.gwt.ui.shared.CompetitorsRaceDataDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -90,9 +91,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final String leaderboardGroupName;
     private final String leaderboardName;
     private long stepSize = 5000;
-    private final Map<CompetitorDTO, Series> dataSeriesFirstDetailTypeByCompetitor = new HashMap<CompetitorDTO, Series>();
-    private final Map<CompetitorDTO, Series> dataSeriesSecondDetailTypeByCompetitor = new HashMap<CompetitorDTO, Series>();
-    private final Map<CompetitorDTO, Series> markPassingSeriesByCompetitor = new HashMap<CompetitorDTO, Series>();
+    private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
+    private final Map<Pair<CompetitorDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();
     private Long timeOfEarliestRequestInMillis;
     private Long timeOfLatestRequestInMillis;
     
@@ -140,10 +140,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * Attention: We can't reuse the old chart when the detail changes because HighChart does not support the inverting of the Y-Axis  
      */
     private Chart createChart() {
-        GWT.debugger();
+
         Chart chart = new Chart().setZoomType(BaseChart.ZoomType.X)
                 .setPersistent(true)
                 .setWidth100()
+                .setAlignTicks(true)
                 .setHeight100()
                 .setMarginLeft(65)
                 .setMarginRight(65)
@@ -154,14 +155,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 .setBorderRadius(0)
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()))
-                .setLinePlotOptions(
-                        new LinePlotOptions()
-                                .setLineWidth(LINE_WIDTH)
-                                .setMarker(
-                                        new Marker().setEnabled(false).setHoverState(
-                                                new Marker().setEnabled(true).setRadius(4))).setShadow(false)
-                                .setHoverStateLineWidth(LINE_WIDTH));
+                .setChartSubtitle(new ChartSubtitle().setText(stringMessages.clickAndDragToZoomIn()));
         chart.setStyleName(chartsCss.chartStyle());
         ChartUtil.useCheckboxesToShowAndHide(chart);
 
@@ -184,7 +178,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             chart.getYAxis(0).setStartOnTick(false).setShowFirstLabel(false);
             chart.getYAxis(1).setStartOnTick(false).setShowFirstLabel(false).setOpposite(true);
         } else {
-            chart.getYAxis().setStartOnTick(false).setShowFirstLabel(false);
+            chart.getYAxis(0).setStartOnTick(false).setShowFirstLabel(false);
+            chart.setLinePlotOptions(new LinePlotOptions()
+                    .setLineWidth(LINE_WIDTH)
+                    .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
+                    .setShadow(false).setHoverStateLineWidth(LINE_WIDTH));
         }
         chart.getXAxis().setType(Axis.Type.DATE_TIME).setMaxZoom(60 * 1000); // 1 minute
         chart.getXAxis().setLabels(new XAxisLabels().setFormatter(new AxisLabelsFormatter() {
@@ -196,9 +194,10 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         timePlotLine = chart.getXAxis().createPlotLine().setColor("#656565").setWidth(1.5).setDashStyle(DashStyle.SOLID);
 
         if (compactChart) {
-            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(2)
+            chart.setSpacingBottom(10).setSpacingLeft(10).setSpacingRight(10).setSpacingTop(20)
                     .setOption("legend/margin", 2).setOption("title/margin", 5).setChartSubtitle(null).getXAxis()
                     .setAxisTitleText(null);
+            chart.setTitle("");
         }
 
         return chart;
@@ -281,7 +280,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     }
     
     private boolean chartContainsNoData() {
-        for (Series competitorSeries : dataSeriesFirstDetailTypeByCompetitor.values()) {
+        for (Series competitorSeries : dataSeriesForDetailTypeAndCompetitor.values()) {
             if (competitorSeries.getPoints().length != 0) {
                 return false;
             }
@@ -302,21 +301,25 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        Series competitorSeries = dataSeriesFirstDetailTypeByCompetitor.get(competitor);
-        if (competitorSeries != null) {
-            chart.removeSeries(competitorSeries, false);
-        }
-        Series competitorMarkPassingSeries = markPassingSeriesByCompetitor.get(competitor);
-        if (competitorMarkPassingSeries != null) {
-            chart.removeSeries(competitorMarkPassingSeries, false);
-        }
-        
-        if (isVisible()) {
-             if (hasSelectedCompetitors()) {
-                 chart.redraw();
-             } else {
-                 setWidget(noCompetitorsSelectedLabel);
-             }
+        for (Pair<CompetitorDTO, DetailType> coDePair : dataSeriesForDetailTypeAndCompetitor.keySet()) {
+            if (!coDePair.getA().equals(competitor)) {
+                continue;
+            }
+            Series competitorSeries = dataSeriesForDetailTypeAndCompetitor.get(coDePair);
+            if (competitorSeries != null) {
+                chart.removeSeries(competitorSeries, false);
+            }
+            Series competitorMarkPassingSeries = markPassingSeriesByCompetitor.get(competitor);
+            if (competitorMarkPassingSeries != null) {
+                chart.removeSeries(competitorMarkPassingSeries, false);
+            }
+            if (isVisible()) {
+                if (hasSelectedCompetitors()) {
+                    chart.redraw();
+                } else {
+                    setWidget(noCompetitorsSelectedLabel);
+                }
+            }
         }
     }
 
@@ -328,10 +331,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             boolean append) {
         // Make sure the busy indicator is removed at this point, or plotting the data results in an exception
         setWidget(chart);
-        List<Series> chartSeries = Arrays.asList(chart.getSeries());
         for (CompetitorDTO competitor : chartData.getCompetitors()) {
             Series competitorDataSeries = getOrCreateCompetitorDataSeries(retrievedDataType, competitor);
-            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitor);
+            Series markPassingSeries = getOrCreateCompetitorMarkPassingSeries(competitorDataSeries, retrievedDataType,
+                    competitor);
+            
             CompetitorRaceDataDTO competitorData = chartData.getCompetitorData(competitor);
             if (competitorData != null) {
                 Date toDate = timer.getLiveTimePointAsDate();
@@ -376,9 +380,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 }
                 setSeriesPoints(competitorDataSeries, newRaceDataPoints);
                 // Adding the series if chart doesn't contain it
+                List<Series> chartSeries = Arrays.asList(chart.getSeries());
                 if (!chartSeries.contains(competitorDataSeries)) {
                     chart.addSeries(competitorDataSeries);
                     chart.addSeries(markPassingSeries);
+                    
                 }
             }
         }
@@ -405,21 +411,30 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * @return A series in the chart, that can be used to show the data of a specific competitor.
      */
     protected Series getOrCreateCompetitorDataSeries(DetailType seriesDetailType, final CompetitorDTO competitor) {
-        Series result = seriesDetailMap(seriesDetailType).get(competitor);
+        final Pair<CompetitorDTO, DetailType> coDePair = new Pair<CompetitorDTO, DetailType>(competitor,
+                seriesDetailType);
+        final int yAxisIndex = yAxisIndex(seriesDetailType);
+        Series result = this.dataSeriesForDetailTypeAndCompetitor.get(coDePair);
         if (result == null) {
-            int yAxisIndex = yAxisIndex(seriesDetailType);
-            result = chart.createSeries().setType(Series.Type.LINE).setName(competitor.getName()).setYAxis(yAxisIndex);
+            result = chart.createSeries().setType(Series.Type.LINE);
 
+            if (hasSecondYAxis()) {
+                result.setName(DetailTypeFormatter.format(seriesDetailType) + " " + competitor.getName());
+            } else {
+                result.setName(competitor.getName());
+            }
             result.setPlotOptions(new LinePlotOptions()
                     .setLineWidth(LINE_WIDTH)
-                    .setDashStyle(yAxisIndex == 1 ? PlotLine.DashStyle.SOLID : PlotLine.DashStyle.LONG_DASH)
+                    .setDashStyle(yAxisIndex == 0 ? PlotLine.DashStyle.SOLID : PlotLine.DashStyle.LONG_DASH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml()).setSelected(true));
+                    .setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
+                    .setSelected(true));
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
-
-            seriesDetailMap(seriesDetailType).put(competitor, result);
+            dataSeriesForDetailTypeAndCompetitor.put(coDePair, result);
         }
+
+        result.setYAxis(yAxisIndex);
         return result;
     }
 
@@ -428,15 +443,22 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
      * @param competitor
      * @return A series in the chart, that can be used to show the mark passings.
      */
-    private Series getOrCreateCompetitorMarkPassingSeries(CompetitorDTO competitor) {
-        Series result = markPassingSeriesByCompetitor.get(competitor);
+    private Series getOrCreateCompetitorMarkPassingSeries(Series linkedCompetitorSeries, DetailType seriesDetailType,
+            CompetitorDTO competitor) {
+        final Pair<CompetitorDTO, DetailType> coDePair = new Pair<CompetitorDTO, DetailType>(competitor,
+                seriesDetailType);
+        Series result = markPassingSeriesByCompetitor.get(coDePair);
+        final int yAxisIndex = yAxisIndex(seriesDetailType);
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
                     .setName(stringMessages.markPassing() + " " + competitor.getName());
-            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
+            result.setPlotOptions(new ScatterPlotOptions().setLinkedTo(linkedCompetitorSeries)
+                    .setColor(
+                    competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
                     .setSelected(true));
-            markPassingSeriesByCompetitor.put(competitor, result);
+            markPassingSeriesByCompetitor.put(coDePair, result);
         }
+        result.setYAxis(yAxisIndex);
         return result;
     }
 
@@ -449,14 +471,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             // appears
             String titleFromDetailTypes = chartTitleFromDetailTypes();
             chart.setTitle(new ChartTitle().setText(titleFromDetailTypes), null);
-        }
-    }
-
-    private Map<CompetitorDTO, Series> seriesDetailMap(DetailType seriesDetailType) {
-        if (selectedSecondDetailType != null && seriesDetailType == selectedSecondDetailType) {
-            return dataSeriesSecondDetailTypeByCompetitor;
-        } else {
-            return dataSeriesFirstDetailTypeByCompetitor;
         }
     }
 
@@ -484,8 +498,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     protected void clearChart() {
         timeOfEarliestRequestInMillis = null;
         timeOfLatestRequestInMillis = null;
-        dataSeriesFirstDetailTypeByCompetitor.clear();
-        dataSeriesSecondDetailTypeByCompetitor.clear();
+        dataSeriesForDetailTypeAndCompetitor.clear();
         markPassingSeriesByCompetitor.clear();
         chart.removeAllSeries();
     }
@@ -569,34 +582,41 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
                 }
             }
-            chart.setTitle(new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+
             final String unitY0 = DetailTypeFormatter.getUnit(getSelectedFirstDetailType());
             final String labelY0 = unitY0.isEmpty() ? "" : "[" + unitY0 + "]";
             final String unitY1 = hasSecondYAxis() ? DetailTypeFormatter.getUnit(getSelectedSecondDetailType()) : null;
             final String labelY1 = hasSecondYAxis() ? (unitY1.isEmpty() ? "" : "[" + unitY1 + "]") : null;
+
             if (!compactChart) {
+                chart.setTitle(new ChartTitle().setText(chartTitleFromDetailTypes()), null);
+                if (hasSecondYAxis()) {
+                    chart.getYAxis(0).setAxisTitleText(
+                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
+                    chart.getYAxis(1).setOpposite(true)
+                            .setAxisTitleText(DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
+                } else {
+                    chart.getYAxis(0).setAxisTitleText(
+                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
+                    chart.getYAxis(1).setAxisTitleText("");
+                }
+            } else {
+                chart.setTitle(new ChartTitle().setText(""), null);
                 if (hasSecondYAxis()) {
                     chart.getYAxis(0).setAxisTitleText(
                             DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
                     chart.getYAxis(1).setAxisTitleText(
                             DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
                 } else {
-                    chart.getYAxis().setAxisTitleText(
-                            DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
-                }
-            } else {
-                if (hasSecondYAxis()) {
-                    chart.getYAxis(0).setAxisTitleText(labelY0);
-                    chart.getYAxis(1).setAxisTitleText(labelY1);
-                } else {
-                    chart.getYAxis().setAxisTitleText(labelY0);
+                    chart.getYAxis(0).setAxisTitleText(labelY0).setGridLineWidth(0);
+                    chart.getYAxis(1).setAxisTitleText("").setOpposite(true);
                 }
             }
             if (hasSecondYAxis()) {
-                chart.getYAxis(0).setReversed(isY0AxisReversed());
-                chart.getYAxis(1).setReversed(isY1AxisReversed());
+                chart.getYAxis(0).setReversed(isY0AxisReversed()).setOpposite(false);
+                chart.getYAxis(1).setReversed(isY1AxisReversed()).setOpposite(true);
             } else {
-                chart.getYAxis().setReversed(isY0AxisReversed());
+                chart.getYAxis(0).setReversed(isY0AxisReversed());
             }
             final NumberFormat numberFormatY0 = DetailTypeFormatter.getNumberFormat(selectedFirstDetailType);
             final NumberFormat numberFormatY1 = hasSecondYAxis() ? DetailTypeFormatter
@@ -752,4 +772,5 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             FilterSet<CompetitorDTO, ? extends Filter<CompetitorDTO>> newFilterSet) {
         // nothing to do; if it changes the filtered competitor list, a separate call to filteredCompetitorsListChanged will occur
     }
+
 }

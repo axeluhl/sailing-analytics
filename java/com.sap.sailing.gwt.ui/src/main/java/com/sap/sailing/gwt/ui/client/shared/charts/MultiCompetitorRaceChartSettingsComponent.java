@@ -64,13 +64,16 @@ public class MultiCompetitorRaceChartSettingsComponent extends
         mainPanel.add(chartFirstTypeSelectionListBox);
         chartSecondTypeSelectionListBox = dialog.createListBox(/* isMultiSelect */false);
         i = 0;
-        chartSecondTypeSelectionListBox.addItem("--", "--");
         for (DetailType detailType : availableDetailsTypes) {
             chartSecondTypeSelectionListBox.addItem(DetailTypeFormatter.format(detailType), detailType.name());
             if (detailType == initialSecondDetailType) {
                 chartSecondTypeSelectionListBox.setSelectedIndex(i);
             }
             i++;
+        }
+        chartSecondTypeSelectionListBox.addItem("--", "--");
+        if (initialSecondDetailType == null) {
+            chartSecondTypeSelectionListBox.setSelectedIndex(chartSecondTypeSelectionListBox.getItemCount() - 1);
         }
         mainPanel.add(chartSecondTypeSelectionListBox);
         mainPanel.add(new Label(stringMessages.stepSizeInSeconds()));
@@ -83,6 +86,9 @@ public class MultiCompetitorRaceChartSettingsComponent extends
     public MultiCompetitorRaceChartSettings getResult() {
         DetailType newFirstDetailType = findSelectedTypeFor(chartFirstTypeSelectionListBox);
         DetailType newSecondDetailType = findSelectedTypeFor(chartSecondTypeSelectionListBox);
+        if (com.sap.sse.common.Util.equalsWithNull(newFirstDetailType, newSecondDetailType)) {
+            newSecondDetailType = null;
+        }
         return new MultiCompetitorRaceChartSettings(getAbstractResult(), newFirstDetailType, newSecondDetailType);
     }
 
