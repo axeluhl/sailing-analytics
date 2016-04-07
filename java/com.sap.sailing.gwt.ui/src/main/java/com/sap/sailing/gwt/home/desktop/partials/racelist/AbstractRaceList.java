@@ -90,8 +90,8 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
         ColumnSortList sortList = this.cellTable.getColumnSortList();
         List<ColumnSortInfo> oldSortInfos;
         if (sortList.size() == 0) {
-            boolean ascending = startTimeColumn.getPreferredSortingOrder().isAscending();
-            oldSortInfos = Collections.singletonList(new ColumnSortInfo(startTimeColumn, ascending));
+            boolean ascending = getDefaultSortColumn().getPreferredSortingOrder().isAscending();
+            oldSortInfos = Collections.singletonList(new ColumnSortInfo(getDefaultSortColumn(), ascending));
         } else {
             oldSortInfos = new ArrayList<ColumnSortList.ColumnSortInfo>(sortList.size());
             for (int i = sortList.size() - 1; i >= 0; i--) {
@@ -102,6 +102,10 @@ public abstract class AbstractRaceList<T extends RaceMetadataDTO<? extends Abstr
             Column<T, ?> column = (Column<T, ?>) sortInfo.getColumn();
             this.cellTable.sortColumn(column);
         }
+    }
+    
+    protected SortableRaceListColumn<T, ?> getDefaultSortColumn() {
+        return raceNameColumn;
     }
     
     protected void add(SortableRaceListColumn<T, ?> column) {
