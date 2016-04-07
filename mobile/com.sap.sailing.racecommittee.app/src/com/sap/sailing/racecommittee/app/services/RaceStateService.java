@@ -146,10 +146,12 @@ public class RaceStateService extends Service {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
+        registeredLogListeners.clear();
 
         for (Entry<ManagedRace, RaceStateEventScheduler> entry : registeredStateEventSchedulers.entrySet()) {
             entry.getKey().getState().setStateEventScheduler(null);
         }
+        registeredStateEventSchedulers.clear();
 
         for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
             for (Pair<PendingIntent,RaceStateEvents> intentPair : intents) {
