@@ -9,6 +9,10 @@
         <item name="android:windowTitleStyle">@style/AlertDialogHeader</item>
     </style>
 
+    <style name="AppTheme.AlertDialog.FloatLabel">
+        <item name="android:textColor">@color/dialog_color_text</item>
+    </style>
+
     <style name="AppTheme.Dialog" parent="AppTheme.AlertDialog">
         <item name="android:windowNoTitle">false</item>
     </style>
@@ -21,7 +25,7 @@
     <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark">
         <item name="android:textColorSecondary">@color/constant_white</item>
     </style>
-    
+
     <style name="ToolBarRacingStyle" parent="ToolBarStyle">
         <item name="drawerArrowStyle">@style/DrawerButton</item>
         <item name="titleTextStyle">@style/RacingToolBarTitle</item>

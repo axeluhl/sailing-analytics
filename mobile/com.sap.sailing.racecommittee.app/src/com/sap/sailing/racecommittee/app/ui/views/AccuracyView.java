@@ -19,18 +19,16 @@ public class AccuracyView extends LinearLayout {
     private ImageView mSegment03;
 
     public AccuracyView(Context context) {
-        super(context);
-
-        init();
+        this(context, null);
     }
 
     public AccuracyView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        init();
+        this(context, attrs, 0);
     }
 
-    private void init() {
+    public AccuracyView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+
         inflate(getContext(), R.layout.accuracy, this);
     }
 

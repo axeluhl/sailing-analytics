@@ -36,7 +36,7 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/side_padding"
                 android:layout_marginRight="@dimen/side_padding"
-                android:src="?attr/flag_first_blue" />
+                android:src="?attr/flag_blue_first" />
 
             <TextView
                 android:id="@+id/header_headline"

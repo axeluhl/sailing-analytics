@@ -28,15 +28,14 @@ public class GateStartConfigurationJsonDeserializer extends RacingProcedureConfi
     }
     
     @Override
-    protected GateStartConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag) throws JsonDeserializationException {
+    protected GateStartConfiguration createResult(JSONObject object, Boolean inidividualRecall, Boolean resultEntryEnabled, Flags classFlag) throws JsonDeserializationException {
     	GateStartConfigurationImpl result = new GateStartConfigurationImpl();
     	result.setClassFlag(classFlag);
-    	result.setHasInidividualRecall(inidividualRecall);
-    	
+    	result.setHasIndividualRecall(inidividualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
     	if (object.containsKey(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER)) {
-    	    result.setHasInidividualRecall((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER));
+    	    result.setHasIndividualRecall((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_PATHFINDER));
     	}
-    	
         if (object.containsKey(GateStartConfigurationJsonSerializer.FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME)) {
             result.setHasAdditionalGolfDownTime((Boolean)object.get(GateStartConfigurationJsonSerializer.FIELD_HAS_ADDITIONAL_GOLF_DOWN_TIME));
         }
