@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.event;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.wind.WindStatisticsDTO;
 import com.sap.sse.common.Duration;
 
@@ -50,5 +51,15 @@ public class RaceListRaceDTO extends RaceMetadataDTO<WindStatisticsDTO> {
     }
     public void setAudioCount(int audioCount) {
         this.audioCount = audioCount;
+    }
+    
+    @Override
+    public int compareTo(SimpleRaceMetadataDTO o) {
+        if (o instanceof RaceListRaceDTO) {
+            RaceListRaceDTO other = (RaceListRaceDTO) o;
+            final int compareByNaturalOrder = Integer.compare(getNaturalOrder(), other.getNaturalOrder());
+            return compareByNaturalOrder != 0 ? compareByNaturalOrder : super.compareTo(other);
+        }
+        return super.compareTo(o);
     }
 }
