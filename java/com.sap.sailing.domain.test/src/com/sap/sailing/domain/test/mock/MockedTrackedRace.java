@@ -1042,6 +1042,14 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public void updateStartAndEndOfTracking() {
+    }
+
+    @Override
+    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+    }
+
+    @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
             String trackName) {
         return null;

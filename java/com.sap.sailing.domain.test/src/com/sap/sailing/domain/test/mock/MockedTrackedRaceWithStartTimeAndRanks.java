@@ -656,6 +656,10 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
     }
+
+    @Override
+    public void updateStartAndEndOfTracking() { 
+    }
     
     @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,

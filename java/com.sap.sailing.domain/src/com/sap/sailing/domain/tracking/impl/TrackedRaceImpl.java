@@ -40,6 +40,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
@@ -162,6 +163,8 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
+    public static final int TRACKING_BUFFER_IN_MINUTES = 5;
+
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -198,6 +201,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The end of tracking time as announced by the tracking infrastructure.
      */
     private TimePoint endOfTrackingReceived;
+
+    /**
+     * The start and end of tracking inferred via RaceLog, the received timepoint (see above) and mapping intervals.
+     * For the precedence order see {@link #updateStartAndEndOfTracking()}.
+     */
+    private TimePoint startOfTracking;
+    private TimePoint endOfTracking;
 
     /**
      * Race start time as announced by the tracking infrastructure
@@ -745,27 +755,85 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TimePoint getStartOfTracking() {
-        return startOfTrackingReceived;
+        return startOfTracking;
+    }
+    
+    /**
+     * Updates the start and end of tracking in the following precedence order:
+     * 
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol
+     */
+    public void updateStartAndEndOfTracking() {
+        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+        final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
+        TimePoint oldStartOfTracking = getStartOfTracking();
+        TimePoint oldEndOfTracking = getEndOfTracking();
+        boolean startOfTrackingFound = false;
+        boolean endOfTrackingFound = false;
+        // check race log
+        if (trackingTimesFromRaceLog != null){
+            if (trackingTimesFromRaceLog.getA() != null){
+                startOfTracking = trackingTimesFromRaceLog.getA();
+                startOfTrackingFound = true;
+            }
+            if (trackingTimesFromRaceLog.getB() != null){
+                endOfTracking = trackingTimesFromRaceLog.getB();
+                endOfTrackingFound = true;
+            }
+        }
+        // check "received" variants coming from a connector directly
+        if (!startOfTrackingFound || !endOfTrackingFound){
+            if (startOfTrackingReceived != null && !startOfTrackingFound){
+                startOfTrackingFound = true;
+                startOfTracking = startOfTrackingReceived;
+            }
+            if (endOfTrackingReceived != null && !endOfTrackingFound){
+                endOfTrackingFound = true;
+                endOfTracking = endOfTrackingReceived;
+            }
+        }
+        // check for start/finished times in race log and add a few minutes on the ends
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startAndFinishedTimesFromRaceLog != null) {
+                if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
+                    startOfTracking = startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+                    startOfTrackingFound = true;
+                }
+                if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null){
+                    endOfTracking = startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+                    endOfTrackingFound = true;
+                }
+            }
+        }
+        startOfTrackingChanged(oldStartOfTracking, false);
+        endOfTrackingChanged(oldEndOfTracking, false);
     }
 
     @Override
     public TimePoint getEndOfTracking() {
-        return endOfTrackingReceived;
+        return endOfTracking;
     }
 
     public void invalidateStartTime() {
         startTime = null;
         startTimeWithoutInferenceFromStartMarkPassings = null;
+        updateStartAndEndOfTracking();
     }
 
     public void invalidateEndTime() {
         endTime = null;
+        updateStartAndEndOfTracking();
     }
 
     protected void invalidateMarkPassingTimes() {
         synchronized (markPassingsTimes) {
             markPassingsTimes.clear();
         }
+        updateStartAndEndOfTracking();
     }
     
     /**
@@ -785,6 +853,20 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         return null;
+    }
+    
+    @Override
+    public Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
+        //Only one of the RaceLogs should have valid data, so one doesn't have to compare all the 
+        //start/finished time values in order to find the earliest startTime/latestFinishedTime
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            TimePoint startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            if (startTime != null || finishedTime != null){
+                return new Util.Pair<TimePoint, TimePoint>(startTime, finishedTime);
+            }
+        }
+        return null;        
     }
 
     /**
@@ -1859,12 +1941,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setStartOfTrackingReceived(final TimePoint startOfTracking, final boolean waitForGPSFixesToLoad) {
-        final TimePoint oldStartOfTracking = this.startOfTrackingReceived;
+        final TimePoint oldStartOfTracking = getStartOfTracking();
         this.startOfTrackingReceived = startOfTracking;
-        if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
-                (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
-            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+startOfTracking);
-            loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
+        updateStartAndEndOfTracking();
+        startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+    }
+    
+    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad){
+        TimePoint inferedStartOfTracking = getStartOfTracking();
+        if (!Util.equalsWithNull(oldStartOfTracking, inferedStartOfTracking) &&
+                (inferedStartOfTracking == null || (oldStartOfTracking != null && inferedStartOfTracking.before(oldStartOfTracking)))) {
+            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+inferedStartOfTracking);
+            loadGPSFixesForExtendedTimeRange(inferedStartOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
         }
     }
 
@@ -1878,11 +1966,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected void setEndOfTrackingReceived(final TimePoint endOfTracking, final boolean waitForGPSFixesToLoad) {
         final TimePoint oldEndOfTracking = this.endOfTrackingReceived;
         this.endOfTrackingReceived = endOfTracking;
-        if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
-                (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
-            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+endOfTracking);
-            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking, waitForGPSFixesToLoad);
+        updateStartAndEndOfTracking();
+        endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
+    }
+    
+    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad){
+        TimePoint inferedEndOfTracking = getEndOfTracking();
+
+        if (!Util.equalsWithNull(oldEndOfTracking, inferedEndOfTracking) &&
+                (inferedEndOfTracking == null || (oldEndOfTracking != null && inferedEndOfTracking.after(oldEndOfTracking)))) {
+            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferedEndOfTracking);
+            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, inferedEndOfTracking, waitForGPSFixesToLoad);
         }
+
     }
 
     /**
@@ -3359,6 +3455,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (TrackedRaceImpl.this) {
             attachedRaceLogs.put(raceLog.getId(), raceLog);
             notifyAll();
+            updateStartAndEndOfTracking();
         }
     }
 
@@ -3412,6 +3509,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
         }
+        updateStartAndEndOfTracking();
     }
     
     @Override

@@ -307,6 +307,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.CoursePositionsDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
+import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
@@ -4825,30 +4826,35 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (configuration.getRRS26Configuration() != null) {
             dto.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             dto.rrs26Configuration.classFlag = configuration.getRRS26Configuration().getClassFlag();
-            dto.rrs26Configuration.hasIndividualRecall = configuration.getRRS26Configuration().hasInidividualRecall();
+            dto.rrs26Configuration.hasIndividualRecall = configuration.getRRS26Configuration().hasIndividualRecall();
+            dto.rrs26Configuration.isResultEntryEnabled = configuration.getRRS26Configuration().isResultEntryEnabled();
             dto.rrs26Configuration.startModeFlags = configuration.getRRS26Configuration().getStartModeFlags();
         }
         if (configuration.getGateStartConfiguration() != null) {
             dto.gateStartConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.GateStartConfigurationDTO();
             dto.gateStartConfiguration.classFlag = configuration.getGateStartConfiguration().getClassFlag();
-            dto.gateStartConfiguration.hasIndividualRecall = configuration.getGateStartConfiguration().hasInidividualRecall();
+            dto.gateStartConfiguration.hasIndividualRecall = configuration.getGateStartConfiguration().hasIndividualRecall();
+            dto.gateStartConfiguration.isResultEntryEnabled = configuration.getGateStartConfiguration().isResultEntryEnabled();
             dto.gateStartConfiguration.hasPathfinder = configuration.getGateStartConfiguration().hasPathfinder();
             dto.gateStartConfiguration.hasAdditionalGolfDownTime = configuration.getGateStartConfiguration().hasAdditionalGolfDownTime();
         }
         if (configuration.getESSConfiguration() != null) {
             dto.essConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.ESSConfigurationDTO();
             dto.essConfiguration.classFlag = configuration.getESSConfiguration().getClassFlag();
-            dto.essConfiguration.hasIndividualRecall = configuration.getESSConfiguration().hasInidividualRecall();
+            dto.essConfiguration.hasIndividualRecall = configuration.getESSConfiguration().hasIndividualRecall();
+            dto.essConfiguration.isResultEntryEnabled = configuration.getESSConfiguration().isResultEntryEnabled();
         }
         if (configuration.getBasicConfiguration() != null) {
             dto.basicConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO();
             dto.basicConfiguration.classFlag = configuration.getBasicConfiguration().getClassFlag();
-            dto.basicConfiguration.hasIndividualRecall = configuration.getBasicConfiguration().hasInidividualRecall();
+            dto.basicConfiguration.hasIndividualRecall = configuration.getBasicConfiguration().hasIndividualRecall();
+            dto.basicConfiguration.isResultEntryEnabled = configuration.getBasicConfiguration().isResultEntryEnabled();
         }
         if (configuration.getLeagueConfiguration() != null) {
             dto.leagueConfiguration = new DeviceConfigurationDTO.RegattaConfigurationDTO.LeagueConfigurationDTO();
             dto.leagueConfiguration.classFlag = configuration.getLeagueConfiguration().getClassFlag();
-            dto.leagueConfiguration.hasIndividualRecall = configuration.getLeagueConfiguration().hasInidividualRecall();
+            dto.leagueConfiguration.hasIndividualRecall = configuration.getLeagueConfiguration().hasIndividualRecall();
+            dto.leagueConfiguration.isResultEntryEnabled = configuration.getLeagueConfiguration().isResultEntryEnabled();
         }
         return dto;
     }
@@ -4870,38 +4876,40 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         configuration.setDefaultCourseDesignerMode(dto.defaultCourseDesignerMode);
         if (dto.rrs26Configuration != null) {
             RRS26ConfigurationImpl config = new RRS26ConfigurationImpl();
-            config.setClassFlag(dto.rrs26Configuration.classFlag);
-            config.setHasInidividualRecall(dto.rrs26Configuration.hasIndividualRecall);
+            applyGeneralRacingProcedureConfigProperties(dto.rrs26Configuration, config);
             config.setStartModeFlags(dto.rrs26Configuration.startModeFlags);
             configuration.setRRS26Configuration(config);
         }
         if (dto.gateStartConfiguration != null) {
             GateStartConfigurationImpl config = new GateStartConfigurationImpl();
-            config.setClassFlag(dto.gateStartConfiguration.classFlag);
-            config.setHasInidividualRecall(dto.gateStartConfiguration.hasIndividualRecall);
+            applyGeneralRacingProcedureConfigProperties(dto.gateStartConfiguration, config);
             config.setHasPathfinder(dto.gateStartConfiguration.hasPathfinder);
             config.setHasAdditionalGolfDownTime(dto.gateStartConfiguration.hasAdditionalGolfDownTime);
             configuration.setGateStartConfiguration(config);
         }
         if (dto.essConfiguration != null) {
             ESSConfigurationImpl config = new ESSConfigurationImpl();
-            config.setClassFlag(dto.essConfiguration.classFlag);
-            config.setHasInidividualRecall(dto.essConfiguration.hasIndividualRecall);
+            applyGeneralRacingProcedureConfigProperties(dto.essConfiguration, config);
             configuration.setESSConfiguration(config);
         }
         if (dto.basicConfiguration != null) {
             RacingProcedureConfigurationImpl config = new RacingProcedureConfigurationImpl();
-            config.setClassFlag(dto.basicConfiguration.classFlag);
-            config.setHasInidividualRecall(dto.basicConfiguration.hasIndividualRecall);
+            applyGeneralRacingProcedureConfigProperties(dto.basicConfiguration, config);
             configuration.setBasicConfiguration(config);
         }
         if (dto.leagueConfiguration != null) {
             LeagueConfigurationImpl config = new LeagueConfigurationImpl();
-            config.setClassFlag(dto.leagueConfiguration.classFlag);
-            config.setHasInidividualRecall(dto.leagueConfiguration.hasIndividualRecall);
+            applyGeneralRacingProcedureConfigProperties(dto.leagueConfiguration, config);
             configuration.setLeagueConfiguration(config);
         }
         return configuration;
+    }
+
+    private void applyGeneralRacingProcedureConfigProperties(RacingProcedureConfigurationDTO racingProcedureConfigurationDTO,
+            RacingProcedureConfigurationImpl config) {
+        config.setClassFlag(racingProcedureConfigurationDTO.classFlag);
+        config.setHasIndividualRecall(racingProcedureConfigurationDTO.hasIndividualRecall);
+        config.setResultEntryEnabled(racingProcedureConfigurationDTO.isResultEntryEnabled);
     }
 
     @Override

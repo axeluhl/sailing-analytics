@@ -19,7 +19,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
@@ -57,6 +59,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
@@ -145,6 +148,18 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
                     @Override
                     public void visit(RaceLogEndOfTrackingEvent event) {
                         RaceLogRaceTracker.this.onEndOfTrackingEvent(event);
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogStartTimeEvent event) {
+                        trackedRace.updateStartAndEndOfTracking();
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogRaceStatusEvent event) {
+                        if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+                            trackedRace.updateStartAndEndOfTracking();
+                        }
                     }
                 };
                 visitors.put(log, visitor);
@@ -408,13 +423,13 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+            trackedRace.updateStartAndEndOfTracking();
         }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+            trackedRace.updateStartAndEndOfTracking();
         }
     }
 

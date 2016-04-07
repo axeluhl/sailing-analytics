@@ -28,4 +28,8 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
         return String.format("%s.%s", super.getId(), escapeIdentifierFragment(getRaceName()));
     }
 
+    @Override
+    public String toString() {
+        return getRaceName() + " - " + getFleet().getName();
+    }
 }
