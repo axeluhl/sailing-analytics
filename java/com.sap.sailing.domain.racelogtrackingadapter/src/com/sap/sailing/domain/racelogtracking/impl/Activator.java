@@ -14,6 +14,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
+import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
+import com.sap.sailing.domain.racelogsensortracking.impl.SensorFixMapperFactoryImpl;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
@@ -40,6 +42,7 @@ public class Activator implements BundleActivator {
     
     private static BundleContext context;
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> sensorFixMapperTracker;
 
     public static BundleContext getContext() {
         return context;
@@ -81,13 +84,17 @@ public class Activator implements BundleActivator {
 
         registrations.add(context.registerService(MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceImpl(), null));
+        registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
+        
+        sensorFixMapperTracker = (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
         
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(
                 context,
                 RacingEventService.class);
 
         registrations.add(context.registerService(TrackedRegattaListener.class,
-                new RegattaLogSensorDataTrackerTrackedRegattaListener(racingEventServiceTracker), null));
+                new RegattaLogSensorDataTrackerTrackedRegattaListener(racingEventServiceTracker,
+                        new SensorFixMapperFactoryImpl(sensorFixMapperTracker)), null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
@@ -96,6 +103,7 @@ public class Activator implements BundleActivator {
     public void stop(BundleContext context) throws Exception {
         Activator.context = null;
         racingEventServiceTracker.close();
+        sensorFixMapperTracker.close();
         for (ServiceRegistration<?> reg : registrations) {
             reg.unregister();
         }

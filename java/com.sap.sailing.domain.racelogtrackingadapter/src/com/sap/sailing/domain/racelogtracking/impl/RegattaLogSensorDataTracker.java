@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -16,11 +17,14 @@ public class RegattaLogSensorDataTracker {
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
     private final SensorFixStore sensorFixStore;
+    private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RegattaLogSensorDataTracker(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore) {
+    public RegattaLogSensorDataTracker(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore,
+            final SensorFixMapperFactory sensorFixMapperFactory) {
         this.trackedRegatta = trackedRegatta;
         this.sensorFixStore = sensorFixStore;
-        raceListener = new RaceListener() {
+        this.sensorFixMapperFactory = sensorFixMapperFactory;
+        this.raceListener = new RaceListener() {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
                 RegattaLogSensorDataTracker.this.raceRemoved(trackedRace);
@@ -47,7 +51,7 @@ public class RegattaLogSensorDataTracker {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
             RaceLogSensorDataTracker dataTracker = new RaceLogSensorDataTracker((DynamicTrackedRace) trackedRace,
-                    trackedRegatta, sensorFixStore);
+                    trackedRegatta, sensorFixStore, sensorFixMapperFactory);
             dataTrackers.put(raceIdentifier, dataTracker);
         }
     }

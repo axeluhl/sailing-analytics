@@ -22,8 +22,8 @@ import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
-import com.sap.sailing.domain.racelog.tracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -75,13 +75,12 @@ public class RaceLogSensorDataTracker {
             }
         }
     };
-    private final SensorFixMapperFactory mapperFactory = new SensorFixMapperFactoryImpl();
     private final FixReceivedListener<DoubleVectorFix> listener = new FixReceivedListener<DoubleVectorFix>() {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
             competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
                 SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper =
-                        mapperFactory.createCompetitorMapper(mapping.getEventType());
+                        sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
                         DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
                         if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
                             mapper.addFix(track, fix);
@@ -125,12 +124,14 @@ public class RaceLogSensorDataTracker {
     };
 
     private final DynamicTrackedRegatta trackedRegatta;
+    private final SensorFixMapperFactory sensorFixMapperFactory;
 
     public RaceLogSensorDataTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
-            SensorFixStore sensorFixStore) {
+            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
         this.trackedRace = trackedRace;
         this.trackedRegatta = regatta;
         this.sensorFixStore = sensorFixStore;
+        this.sensorFixMapperFactory = sensorFixMapperFactory;
         
         this.competitorMappings = new RaceLogMappingWrapper<Competitor>() {
             @Override
@@ -180,8 +181,7 @@ public class RaceLogSensorDataTracker {
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMapping<Competitor> mapping) {
-        SensorFixMapper<Timed, Track<?>, Competitor> mapper = mapperFactory.createCompetitorMapper(mapping.getEventType());
-        
+        SensorFixMapper<Timed, Track<?>, Competitor> mapper = sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
         Track<?> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
         try {
             sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
@@ -218,7 +218,6 @@ public class RaceLogSensorDataTracker {
 
     private void updateMappingsAndAddListeners() {
         competitorMappings.updateMappings();
-        
         // add listeners for devices in mappings already present
         competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
     }

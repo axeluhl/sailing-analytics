@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
@@ -18,10 +19,13 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
     private final Map<Serializable, TrackedRegatta> knownRegattas = new ConcurrentHashMap<Serializable, TrackedRegatta>();
     private final Map<Serializable, RegattaLogSensorDataTracker> registeredTrackers = new ConcurrentHashMap<Serializable, RegattaLogSensorDataTracker>();
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
+    private final SensorFixMapperFactory sensorFixMapperFactory;
 
     public RegattaLogSensorDataTrackerTrackedRegattaListener(
-            ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker) {
+            ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker,
+            SensorFixMapperFactory sensorFixMapperFactory) {
         this.racingEventServiceTracker = racingEventServiceTracker;
+        this.sensorFixMapperFactory = sensorFixMapperFactory;
     }
 
     @Override
@@ -31,7 +35,7 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
             synchronized (knownRegattas) {
                 RegattaLogSensorDataTracker tracker = null;
                 tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) trackedRegatta,
-                        racingEventServiceTracker.getService().getSensorFixStore());
+                        racingEventServiceTracker.getService().getSensorFixStore(), sensorFixMapperFactory);
                 registeredTrackers.put(regattaId, tracker);
                 log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
             }
