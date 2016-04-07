@@ -5360,9 +5360,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
         String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().asMillis() == Long.MIN_VALUE ? 
+        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
                 null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
+        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
                 null : mapping.getTimeRange().to().asDate();
         MappableToDevice item = null;
         final WithID mappedTo = mapping.getMappedTo();
