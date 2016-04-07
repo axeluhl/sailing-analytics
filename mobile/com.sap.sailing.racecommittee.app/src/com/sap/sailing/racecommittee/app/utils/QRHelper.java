@@ -2,15 +2,15 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import java.net.URL;
 
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
+import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
-
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-import com.sap.sse.common.Util;
 
 public class QRHelper {
 
@@ -26,10 +26,10 @@ public class QRHelper {
 
     public boolean saveData(String content) {
         try {
-            Util.Pair<String, String> connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
+            DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
 
-            String identifier = connectionConfiguration.getA();
-            URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getB());
+            String identifier = connectionConfiguration.getDeviceIdentifier();
+            URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
 
             if (apkUrl != null) {
                 String serverUrl = UrlHelper.getServerUrl(apkUrl);
