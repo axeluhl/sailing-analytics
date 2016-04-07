@@ -13,6 +13,7 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> extends Simp
     private String course;
     private String boatClass;
     private WIND wind;
+    private int naturalOrder;
 
     protected RaceMetadataDTO() {
     }
@@ -72,6 +73,14 @@ public abstract class RaceMetadataDTO<WIND extends AbstractWindDTO> extends Simp
 
     public void setRegattaDisplayName(String regattaDisplayName) {
         this.regattaDisplayName = regattaDisplayName;
+    }
+    
+    public int getNaturalOrder() {
+        return naturalOrder;
+    }
+    
+    public void setNaturalOrder(int naturalOrder) {
+        this.naturalOrder = naturalOrder;
     }
     
     @Override
