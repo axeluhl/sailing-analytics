@@ -408,12 +408,17 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // add all received races to the service
                 for (ManagedRace race : races) {
                     Intent registerIntent = new Intent(RacingActivity.this, RaceStateService.class);
                     registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
                     registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
                     RacingActivity.this.startService(registerIntent);
                 }
+
+                Intent cleanupIntent = new Intent(RacingActivity.this, RaceStateService.class);
+                cleanupIntent.setAction(AppConstants.INTENT_ACTION_CLEANUP_RACES);
+                RacingActivity.this.startService(cleanupIntent);
             }
         }).start();
     }
