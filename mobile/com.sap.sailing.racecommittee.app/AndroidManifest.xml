@@ -51,6 +51,22 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="*"
+                    android:scheme="http"
+                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"/>
+
+                <data
+                    android:host="*"
+                    android:scheme="https"
+                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"/>
+            </intent-filter>
         </activity>
         <activity android:name=".ui.activities.RacingActivity"/>
         <activity android:name=".ui.activities.PasswordActivity"/>

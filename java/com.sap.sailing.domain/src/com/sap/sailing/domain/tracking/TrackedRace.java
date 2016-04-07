@@ -873,6 +873,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
         return null;
     }
+    
+    default Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
+        return null;
+    }
 
     /**
      * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
@@ -883,4 +887,15 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
     }
+    
+    /**
+     * Forces update of start and end of tracking.
+     * Adheres to the following precedence order
+     * 
+     * 1) RaceLogStartOfTrackingEvent/RaceLogEndOfTrackingEvent
+     * 2) RaceLogStartTimeEvent - x Minutes, Race finished + x Minutes
+     * 3) Earliest Mapping, Latest Mapping (of Marks and Competitors)
+     * 4) Leave previously (manually set start/end of tracking)
+     */
+    public void updateStartAndEndOfTracking();
 }
