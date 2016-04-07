@@ -748,7 +748,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
      * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
-     * </ol
+     * </ol>
      */
     public void updateStartAndEndOfTracking() {
         final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
@@ -769,12 +769,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             }
         }
         // check "received" variants coming from a connector directly
-        if (!startOfTrackingFound || !endOfTrackingFound){
-            if (startOfTrackingReceived != null && !startOfTrackingFound){
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startOfTrackingReceived != null && !startOfTrackingFound) {
                 startOfTrackingFound = true;
                 startOfTracking = startOfTrackingReceived;
             }
-            if (endOfTrackingReceived != null && !endOfTrackingFound){
+            if (endOfTrackingReceived != null && !endOfTrackingFound) {
                 endOfTrackingFound = true;
                 endOfTracking = endOfTrackingReceived;
             }
@@ -825,7 +825,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * tracking specification (see bug 3196). This method uses the {@link TrackingTimesFinder} to
      * analyze all {@link #attachedRaceLogs race logs attached} to find tracking times specifications.
      * If no tracking times specification is found at all, <code>null</code> is returned. Note that
-     * even when a valid pair is returned, the components may be <code>null</code>.
+     * even when a valid pair is returned, the components may be <code>null</code>. This may either
+     * indicate that no event for that part of the tracking interval was found, or that an event
+     * was found that explicitly specified {@code null} to force an open interval on that end.
      */
     @Override
     public Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
