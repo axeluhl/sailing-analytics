@@ -489,12 +489,6 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
-        //attach regatta logs
-        for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
-            if (log instanceof RegattaLog) {
-                trackedRace.attachRegattaLog((RegattaLog) log);
-            }
-        }
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         try {
             updateCompetitorMappings(false);

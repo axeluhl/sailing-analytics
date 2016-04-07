@@ -24,6 +24,7 @@ import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
+import com.sap.sailing.domain.racelogsensortracking.impl.FixLoadingTask;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -113,13 +114,26 @@ public class RaceLogSensorDataTracker {
         }
     };
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
+    
+    private final FixLoadingTask fixLoadingTask;
 
     private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
         @Override
         public void regattaLogAttached(RegattaLog regattaLog) {
+            try {
+                fixLoadingTask.waitForLoadingFromGPSFixStoreToFinishRunning();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void regattaLogAboutToBeAttached(RegattaLog regattaLog) {
             synchronized (knownRegattaLogs) {
                 addRegattaLogUnlocked(regattaLog);
             }
+            updateMappingsAndAddListeners();
         }
     };
 
@@ -132,6 +146,7 @@ public class RaceLogSensorDataTracker {
         this.trackedRegatta = regatta;
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
+        this.fixLoadingTask = new FixLoadingTask(trackedRace);
         
         this.competitorMappings = new RaceLogMappingWrapper<Competitor>() {
             @Override
@@ -200,8 +215,6 @@ public class RaceLogSensorDataTracker {
         trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
             trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
-            // FIXME RegattaLogs are correctly added to the TrackedRace for RaceLog tracking only
-            addRegattaLogUnlocked(trackedRegatta.getRegatta().getRegattaLog());
         }
         
         trackedRace.addListener(trackingTimesRaceChangeListener);
@@ -217,9 +230,11 @@ public class RaceLogSensorDataTracker {
     }
 
     private void updateMappingsAndAddListeners() {
+        fixLoadingTask.loadFixesForLog(() -> {
         competitorMappings.updateMappings();
         // add listeners for devices in mappings already present
         competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
+        }, "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
     }
 
     public void stopTracking() {

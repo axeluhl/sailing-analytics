@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -3336,7 +3337,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
             loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
-            informListenersAboutAttachedRegattaLog(log);
         } else {
             logger.severe("Got a request to attach log for an empty log!");
         }
@@ -3502,10 +3502,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
         loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
+        informListenersBeforeAttachingRegattaLog(regattaLog);
         try {
             // The log is attached to the tracked race by a background thread; this method wants
             // to guarantee that the log is at least really attached to the TrackedRace before returning:
             waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+            informListenersAboutAttachedRegattaLog(regattaLog);
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
         }
@@ -4111,12 +4113,28 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             regattaLogAttachmentListeners.remove(listener);
         }
     }
-
-    private void informListenersAboutAttachedRegattaLog(RegattaLog regattaLog) {
+    
+    private void informRegattaLogAttachmentListeners(RegattaLog regattaLog, BiConsumer<RegattaLogAttachmentListener, RegattaLog> listenerCaller) {
         Iterable<RegattaLogAttachmentListener> listeners;
         synchronized (regattaLogAttachmentListeners) {
             listeners = new ArrayList<>(regattaLogAttachmentListeners);
         }
-        listeners.forEach((listener) -> listener.regattaLogAttached(regattaLog));
+        listeners.forEach((listener) -> listenerCaller.accept(listener, regattaLog));
+    }
+    
+    private void informListenersBeforeAttachingRegattaLog(RegattaLog regattaLog) {
+        informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAboutToBeAttached);
+    }
+
+    private void informListenersAboutAttachedRegattaLog(RegattaLog regattaLog) {
+        informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAttached);
+    }
+
+    public void lockForSerializationRead() {
+        LockUtil.lockForRead(getSerializationLock());
+    }
+    
+    public void unlockAfterSerializationRead() {
+        LockUtil.unlockAfterRead(getSerializationLock());
     }
 }

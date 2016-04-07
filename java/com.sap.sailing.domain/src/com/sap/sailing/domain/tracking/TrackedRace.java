@@ -909,4 +909,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     default void removeRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
     }
+    
+    default void lockForSerializationRead() {
+    }
+    
+    default void unlockAfterSerializationRead() {
+    }
 }

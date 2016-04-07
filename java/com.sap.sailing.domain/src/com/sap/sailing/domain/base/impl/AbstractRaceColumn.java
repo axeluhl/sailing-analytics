@@ -106,6 +106,10 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
                 }
             }
             if (trackedRace != null) {
+                RegattaLog regattaLog = getRegattaLog();
+                if(regattaLog != null) {
+                    trackedRace.attachRegattaLog(regattaLog);
+                }
                 final RaceLog raceLog = getRaceLog(fleet);
                 if (raceLog != null) {
                     trackedRace.attachRaceLog(raceLog);
