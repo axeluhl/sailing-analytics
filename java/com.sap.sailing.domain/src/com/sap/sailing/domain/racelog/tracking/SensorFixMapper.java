@@ -10,4 +10,6 @@ public interface SensorFixMapper<FixT extends Timed, TrackT extends Track<?>, K 
     TrackT getTrack(DynamicTrackedRace race, K key);
 
     void addFix(TrackT track, FixT fix);
+    
+    boolean isResponsibleFor(Class<?> eventType);
 }
