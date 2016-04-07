@@ -136,13 +136,15 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getRaceNameColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
+            private final NaturalComparator raceNameComparator = new NaturalComparator(false);
             @Override
-            protected String getComparisonValue(T object) {
-                return object.getRaceName();
+            public int compare(T o1, T o2) {
+                final int compNatural = Integer.compare(o1.getNaturalOrder(), o2.getNaturalOrder());
+                return compNatural != 0 ? compNatural : raceNameComparator.compare(o1.getRaceName(), o2.getRaceName());
             }
         };
-        return new SortableRaceListColumn<T, String>(I18N.race(), cell, comparator) {
+        return new SortableRaceListColumn<T, String>(I18N.race(), cell, comparator, SortingOrder.DESCENDING) {
             @Override
             public String getHeaderStyle() {
                 return CSS.raceslist_head_item();
@@ -187,11 +189,12 @@ public class RaceListColumnFactory {
     }
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListStartTimeColumn<T> getStartTimeColumn() {
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Date>(new NullSafeComparableComparator<Date>(true)) {
-            @Override
-            protected Date getComparisonValue(T object) {
-                return object.getStart();
-            }
+        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
+            final private NullSafeComparableComparator<Date> startDateComparator = new NullSafeComparableComparator<>(true);
+            public int compare(T o1, T o2) {
+                final int compStartDate = startDateComparator.compare(o1.getStart(), o2.getStart());
+                return compStartDate != 0 ? compStartDate : Integer.compare(o1.getNaturalOrder(), o2.getNaturalOrder());
+            };
         };
         return new SortableRaceListStartTimeColumn<T>(comparator);
     }
