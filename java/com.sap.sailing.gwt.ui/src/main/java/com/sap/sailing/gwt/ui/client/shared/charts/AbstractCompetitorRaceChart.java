@@ -566,6 +566,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             DetailType newSelectedSecondDetailType) {
         boolean hasDetailTypeChanged = !Util.equalsWithNull(newSelectedFirstDetailType, this.selectedFirstDetailType)
                 || !Util.equalsWithNull(newSelectedSecondDetailType, this.selectedSecondDetailType);
+        if (newSelectedSecondDetailType == null && selectedSecondDetailType != null) {
+            chart.getYAxis(1).setAxisTitleText("");
+        }
         if (hasDetailTypeChanged) {
             final boolean oldReversedY0Axis = isY0AxisReversed();
             final boolean oldReversedY1Axis = isY1AxisReversed();
@@ -608,16 +611,23 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     chart.getYAxis(1).setAxisTitleText(
                             DetailTypeFormatter.format(selectedSecondDetailType) + " " + labelY1);
                 } else {
-                    chart.getYAxis(0).setAxisTitleText(labelY0).setGridLineWidth(0);
-                    chart.getYAxis(1).setAxisTitleText("").setOpposite(true);
+                    chart.getYAxis(0).setAxisTitleText(labelY0);
+
                 }
             }
             if (hasSecondYAxis()) {
-                chart.getYAxis(0).setReversed(isY0AxisReversed()).setOpposite(false);
-                chart.getYAxis(1).setReversed(isY1AxisReversed()).setOpposite(true);
+                chart.getYAxis(0).setReversed(isY0AxisReversed()).setOpposite(false)
+                        .setGridLineWidth(1)
+                        .setMinorGridLineWidth(0).setMinorGridLineColor("transparent");
+                chart.getYAxis(1).setReversed(isY1AxisReversed()).setOpposite(true)
+                        .setGridLineWidth(1)
+                        .setGridLineDashStyle(DashStyle.LONG_DASH)
+                        .setMinorGridLineWidth(0).setMinorGridLineColor("transparent")
+                        .setMinorTickIntervalAuto();
             } else {
                 chart.getYAxis(0).setReversed(isY0AxisReversed());
             }
+            chart.setAlignTicks(hasSecondYAxis());
             final NumberFormat numberFormatY0 = DetailTypeFormatter.getNumberFormat(selectedFirstDetailType);
             final NumberFormat numberFormatY1 = hasSecondYAxis() ? DetailTypeFormatter
                     .getNumberFormat(selectedSecondDetailType) : null;
