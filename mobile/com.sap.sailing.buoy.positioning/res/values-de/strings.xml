@@ -4,6 +4,7 @@
     <string name="course_type">Kurstyp</string>
     <string name="marks">Kursmarkierungen</string>
     <string name="set_position">Position setzen</string>
+    <string name="set_position_disabled">POSITION SETZEN\nBitte GPS aktivieren</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen&#8230;</string>
     <string name="set">Gesetzt</string>

@@ -1,5 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
+import java.text.DecimalFormat;
+
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +13,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.AbsoluteSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,8 +42,6 @@ import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
-
-import java.text.DecimalFormat;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();
@@ -71,9 +74,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
 
-        setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
-        setPositionButton.setVisibility(View.GONE);
-        setPositionButton.setOnClickListener(clickListener);
+        setUpSetPositionButton(layout, clickListener);
 
         resetPositionButton = ViewHelper.get(layout, R.id.marker_reset_position_button);
         resetPositionButton.setOnClickListener(clickListener);
@@ -109,6 +110,17 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
         initMarkerReceiver();
         checkGPS();
+    }
+
+    private void setUpSetPositionButton(View layout, ClickListener clickListener) {
+        setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
+        setPositionButton.setEnabled(false);
+        String text = getString(R.string.set_position_disabled);
+        SpannableString disabledButtonText = new SpannableString(text);
+        AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(10, true);
+        disabledButtonText.setSpan(absoluteSizeSpan, text.indexOf("\n"), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        setPositionButton.setText(disabledButtonText);
+        setPositionButton.setOnClickListener(clickListener);
     }
 
     private void checkGPS() {
@@ -178,7 +190,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         if (getActivity() instanceof PositioningActivity) {
             lastKnownLocation = location;
             reportGPSQuality(lastKnownLocation.getAccuracy());
-            setPositionButton.setVisibility(View.VISIBLE);
+            setPositionButton.setEnabled(true);
+            setPositionButton.setAllCaps(true);
+            setPositionButton.setText(R.string.set_position);
             setUpTextUI(lastKnownLocation);
             updateMap();
         }
