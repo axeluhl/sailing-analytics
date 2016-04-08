@@ -438,8 +438,12 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
         final Waypoint second = c2.getWaypoint();
         final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
-        final Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
-        result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
+        if (totalGreatCircleDistance == null) {
+            result = 0; // no distance known; cannot tell; low probability
+        } else {
+            final Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
+            result = getProbabilityOfActualDistanceGivenGreatCircleDistance(totalGreatCircleDistance, actualDistanceTraveled);
+        }
         return result;
     }
 
@@ -485,8 +489,13 @@ public class CandidateChooserImpl implements CandidateChooser {
                 legsAreBetweenCandidates = true;
             }
             if (legsAreBetweenCandidates) {
-                totalGreatCircleDistance = totalGreatCircleDistance.add(
-                        waypointPositionAndDistanceCache.getMinimumDistance(from, leg.getLeg().getTo(), timePoint));
+                final Distance minimumDistanceToNextWaypoint = waypointPositionAndDistanceCache.getMinimumDistance(from, leg.getLeg().getTo(), timePoint);
+                if (minimumDistanceToNextWaypoint == null) {
+                    totalGreatCircleDistance = null;
+                    break;
+                } else {
+                    totalGreatCircleDistance = totalGreatCircleDistance.add(minimumDistanceToNextWaypoint);
+                }
             }
         }
         return totalGreatCircleDistance;
