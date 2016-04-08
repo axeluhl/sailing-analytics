@@ -40,6 +40,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
@@ -169,9 +170,9 @@ public class CheckinManager {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
                                 MarkInfo mark = new MarkInfo();
                                 mark.setCheckinDigest(checkinDigest);
-                                mark.setClassName(jsonMark.getString("@class"));
-                                mark.setName(jsonMark.getString("name"));
-                                mark.setId(jsonMark.getString("id"));
+                                mark.setClassName(jsonMark.getString(MarkJsonSerializer.FIELD_CLASS));
+                                mark.setName(jsonMark.getString(MarkJsonSerializer.FIELD_NAME));
+                                mark.setId(jsonMark.getString(MarkJsonSerializer.FIELD_ID));
                                 if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
                                     if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
@@ -190,7 +191,7 @@ public class CheckinManager {
                                         pings.add(ping);
                                     }
                                 }
-                                mark.setType(jsonMark.getString("type"));
+                                mark.setType(jsonMark.getString(MarkJsonSerializer.FIELD_TYPE));
                                 marks.add(mark);
                             }
                             urlData.marks = marks;
