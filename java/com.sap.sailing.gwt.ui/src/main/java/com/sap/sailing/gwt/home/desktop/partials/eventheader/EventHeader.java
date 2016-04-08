@@ -15,6 +15,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -157,10 +158,12 @@ public class EventHeader extends Composite {
         if(!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
+            UIObject.ensureDebugId(eventState, "EventStateLabelDiv");
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            UIObject.ensureDebugId(dropdownEventState, "EventStateLabelDiv");
             hide(staticTitle);
             initDropdown();
         }
