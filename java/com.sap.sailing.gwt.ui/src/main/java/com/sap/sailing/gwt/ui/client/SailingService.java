@@ -505,6 +505,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     Collection<String> getGPSFixImporterTypes();
     
+    Collection<String> getSensorDataImporterTypes();
+    
     List<TrackFileImportDeviceIdentifierDTO> getTrackFileImportDeviceIds(List<String> uuids)
             throws NoCorrespondingServiceRegisteredException, TransformationException;
     

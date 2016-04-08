@@ -268,6 +268,7 @@ import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayService;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayServiceFactory;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -5604,15 +5605,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public Collection<String> getGPSFixImporterTypes() {
+        return getRegisteredImporterTypes(GPSFixImporter.class);
+    }
+    
+    @Override
+    public Collection<String> getSensorDataImporterTypes() {
+        return getRegisteredImporterTypes(DoubleVectorFixImporter.class);
+    }
+    
+    private <T> Collection<String> getRegisteredImporterTypes(Class<T> referenceClass) {
         Set<String> result = new HashSet<>();
-        Collection<ServiceReference<GPSFixImporter>> refs = Collections.emptyList();
         try {
-            refs = Activator.getDefault(). getServiceReferences(GPSFixImporter.class, null);
-        } catch (InvalidSyntaxException e) {
-            //shouldn't happen, as we are passing null for the filter
-        }
-        for (ServiceReference<GPSFixImporter> ref : refs) {
-            result.add((String) ref.getProperty(TypeBasedServiceFinder.TYPE));
+            for (ServiceReference<T> reference : Activator.getDefault().getServiceReferences(referenceClass, null)) {
+                result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
+            }
+        } catch (InvalidSyntaxException exc) {
+            // shouldn't happen, as we are passing null for the filter
         }
         return result;
     }
