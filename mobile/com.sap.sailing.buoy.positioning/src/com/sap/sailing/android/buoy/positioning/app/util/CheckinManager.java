@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -29,12 +30,17 @@ import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
 public class CheckinManager {
@@ -157,8 +163,8 @@ public class CheckinManager {
                         try {
                             JSONArray markArray = response.getJSONArray("marks");
                             String checkinDigest = generateCheckindigest(urlData.uriStr);
-                            List<MarkInfo> marks = new ArrayList<MarkInfo>();
-                            List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
+                            List<MarkInfo> marks = new ArrayList<>();
+                            List<MarkPingInfo> pings = new ArrayList<>();
                             for (int i = 0; i < markArray.length(); i++) {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
                                 MarkInfo mark = new MarkInfo();
@@ -166,14 +172,20 @@ public class CheckinManager {
                                 mark.setClassName(jsonMark.getString("@class"));
                                 mark.setName(jsonMark.getString("name"));
                                 mark.setId(jsonMark.getString("id"));
-                                if (jsonMark.has("position")) {
-                                    if (!jsonMark.get("position").equals(null)) {
+                                if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
+                                    if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
                                         MarkPingInfo ping = new MarkPingInfo();
-                                        ping.setLatitude(positionJson.getString("latitude"));
-                                        ping.setLongitude(positionJson.getString("longitude"));
-                                        ping.setTimestamp(positionJson.getInt("timestamp"));
-                                        ping.setAccuracy(positionJson.getDouble("accuracy"));
+                                        FlatGPSFixJsonDeserializer deserializer = new FlatGPSFixJsonDeserializer();
+                                        org.json.simple.JSONObject simplePosition;
+                                        simplePosition = JsonHelper.convertToSimple(positionJson);
+                                        GPSFix gpsFix = deserializer.deserialize(simplePosition);
+                                        // Latitude and longitude are stored as string values for SQLite database
+                                        ping.setLatitude("" + gpsFix.getPosition().getLatDeg());
+                                        ping.setLongitude("" + gpsFix.getPosition().getLngDeg());
+                                        // Timestamp is simply stored as int for SQLite database
+                                        ping.setTimestamp((int)gpsFix.getTimePoint().asMillis());
+                                        ping.setAccuracy(positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         ping.setMarkId(mark.getId());
                                         pings.add(ping);
                                     }
@@ -185,7 +197,7 @@ public class CheckinManager {
                             urlData.pings = pings;
                             saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
 
-                        } catch (JSONException e) {
+                        } catch (JSONException | ParseException | JsonDeserializationException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
                                     + ", Error: " + e.getMessage());
                             if (activity != null) {
