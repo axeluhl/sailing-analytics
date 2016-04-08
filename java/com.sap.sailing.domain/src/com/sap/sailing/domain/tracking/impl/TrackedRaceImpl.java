@@ -84,6 +84,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
@@ -751,7 +752,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * </ol>
      */
     public void updateStartAndEndOfTracking() {
-        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
         final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
         TimePoint oldStartOfTracking = getStartOfTracking();
         TimePoint oldEndOfTracking = getEndOfTracking();
@@ -759,12 +760,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean endOfTrackingFound = false;
         // check race log
         if (trackingTimesFromRaceLog != null){
-            if (trackingTimesFromRaceLog.getA() != null){
-                startOfTracking = trackingTimesFromRaceLog.getA();
+            if (trackingTimesFromRaceLog.getA() != null) {
+                startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                 startOfTrackingFound = true;
             }
-            if (trackingTimesFromRaceLog.getB() != null){
-                endOfTracking = trackingTimesFromRaceLog.getB();
+            if (trackingTimesFromRaceLog.getB() != null) {
+                endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
                 endOfTrackingFound = true;
             }
         }
@@ -830,9 +831,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * was found that explicitly specified {@code null} to force an open interval on that end.
      */
     @Override
-    public Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            Pair<TimePoint, TimePoint> result = new TrackingTimesFinder(raceLog).analyze();
+            Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> result = new TrackingTimesFinder(raceLog).analyze();
             if (result != null) {
                 return result;
             }
