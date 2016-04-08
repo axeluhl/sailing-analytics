@@ -51,7 +51,6 @@ public abstract class AbstractFileImportWidget extends Composite {
         getImporterTypes(new AsyncCallback<Collection<String>>() {
             @Override
             public void onSuccess(Collection<String> result) {
-                if (result.size() > 1) preferredImporterUi.addItem("");
                 for (String importType : result) preferredImporterUi.addItem(importType);
             }
             

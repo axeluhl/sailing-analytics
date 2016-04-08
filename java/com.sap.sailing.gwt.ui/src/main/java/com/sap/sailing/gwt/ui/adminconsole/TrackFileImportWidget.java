@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -16,8 +17,21 @@ public class TrackFileImportWidget extends AbstractFileImportWidget implements I
     }
     
     @Override
-    protected void getImporterTypes(AsyncCallback<Collection<String>> callback) {
-        sailingService.getGPSFixImporterTypes(callback);
+    protected void getImporterTypes(final AsyncCallback<Collection<String>> callback) {
+        sailingService.getGPSFixImporterTypes(new AsyncCallback<Collection<String>>() {
+            @Override
+            public void onSuccess(Collection<String> result) {
+                ArrayList<String> importerTypes = new ArrayList<String>(result.size() + 1);
+                importerTypes.add("");
+                importerTypes.addAll(result);
+                callback.onSuccess(importerTypes);
+            }
+            
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+        });
     }
     
 }
