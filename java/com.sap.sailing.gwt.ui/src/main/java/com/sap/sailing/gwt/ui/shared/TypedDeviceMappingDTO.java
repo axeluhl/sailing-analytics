@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 
 public class TypedDeviceMappingDTO extends DeviceMappingDTO {
     
-    public KnownSensorDataTypes dataType;
+    public String dataType;
     
     protected TypedDeviceMappingDTO() {}
     
     public TypedDeviceMappingDTO(DeviceIdentifierDTO deviceId, Date from, Date to, MappableToDevice mappedTo,
-            List<UUID> originalRaceLogEventIds, KnownSensorDataTypes dataType) {
+            List<UUID> originalRaceLogEventIds, String dataType) {
         super(deviceId, from, to, mappedTo, originalRaceLogEventIds);
         this.dataType = dataType;
     }

@@ -15,7 +15,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
-import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
@@ -150,7 +149,7 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
     @Override
     protected Collection<TypedDeviceMappingDTO> getResult() {
         List<TypedDeviceMappingDTO> result = new ArrayList<>();
-        KnownSensorDataTypes dataType = importWidget.getSelectedImporterType();
+        String dataType = importWidget.getSelectedImporterType();
         for (TrackFileImportDeviceIdentifierDTO device : mappings.keySet()) {
             DeviceIdentifierDTO deviceIdDto = new DeviceIdentifierDTO("FILE", device.uuidAsString);
             MappableToDevice mappedTo = mappings.get(device);

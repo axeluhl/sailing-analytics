@@ -88,7 +88,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEnde
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
@@ -220,7 +219,6 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
-import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -5474,12 +5472,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
         if (dto.mappedTo instanceof CompetitorDTO) {
-            Competitor competitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
-            if (dto.dataType == KnownSensorDataTypes.BRAVO) {
-                event = new RegattaLogDeviceCompetitorBravoMappingEventImpl(now, now, getService().getServerAuthor(),
-                        UUID.randomUUID(), competitor, mapping.getDevice(), from, to);
-            }
+            DoubleVectorFixImporter importer = getRegisteredImporter(DoubleVectorFixImporter.class, dto.dataType);
+            event = importer.createEvent(now, now, getService().getServerAuthor(), UUID.randomUUID(),
+                    getCompetitor((CompetitorDTO) dto.mappedTo), mapping.getDevice(), from, to);
         } else {
             throw new RuntimeException("Can only map devices to competitors");
         }
@@ -5613,16 +5608,32 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return getRegisteredImporterTypes(DoubleVectorFixImporter.class);
     }
     
-    private <T> Collection<String> getRegisteredImporterTypes(Class<T> referenceClass) {
+    private <S> Collection<String> getRegisteredImporterTypes(Class<S> referenceClass) {
         Set<String> result = new HashSet<>();
-        try {
-            for (ServiceReference<T> reference : Activator.getDefault().getServiceReferences(referenceClass, null)) {
-                result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
-            }
-        } catch (InvalidSyntaxException exc) {
-            // shouldn't happen, as we are passing null for the filter
+        for (ServiceReference<S> reference : getRegisteredServiceReferences(referenceClass)) {
+            result.add((String) reference.getProperty(TypeBasedServiceFinder.TYPE));
         }
         return result;
+    }
+    
+    private <S extends DoubleVectorFixImporter> S getRegisteredImporter(Class<S> referenceClass, String type)
+            throws NoCorrespondingServiceRegisteredException {
+        for (ServiceReference<S> reference : getRegisteredServiceReferences(referenceClass)) {
+            S importer = Activator.getDefault().getService(reference);
+            if (importer != null && importer.getType().equals(type)) {
+                return importer;
+            }
+        }
+        throw new NoCorrespondingServiceRegisteredException("No importer service found!", type, referenceClass.getName());
+    }
+    
+    private <S> Collection<ServiceReference<S>> getRegisteredServiceReferences(Class<S> referenceClass) {
+        try {
+            return Activator.getDefault().getServiceReferences(referenceClass, null);
+        } catch (InvalidSyntaxException e) {
+            // shouldn't happen, as we are passing null for the filter
+        }
+        return Collections.emptyList();
     }
     
     @Override
