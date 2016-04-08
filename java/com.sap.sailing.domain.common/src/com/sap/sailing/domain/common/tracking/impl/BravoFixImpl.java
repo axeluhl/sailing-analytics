@@ -17,8 +17,8 @@ public class BravoFixImpl implements BravoFix {
     @Override
     public double get(String valueName) {
         int index = BravoSensorDataMetadata.INSTANCE.getColumnIndex(valueName);
-        if(index <0) {
-            throw new IllegalArgumentException("Unknown value \"\" for " + getClass().getSimpleName());
+        if (index < 0) {
+            throw new IllegalArgumentException("Unknown value \"" + valueName + "\" for " + getClass().getSimpleName());
         }
         return fix.get(index);
     }
