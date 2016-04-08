@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -18,9 +19,13 @@ import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorBravoMappingEventImpl;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
-import com.sap.sailing.domain.common.sensordata.KnownSensorDataTypes;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
+import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sailing.domain.trackimport.DoubleVectorFixImporter;
@@ -127,6 +132,14 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
 
     @Override
     public String getType() {
-        return KnownSensorDataTypes.BRAVO.name();
+        return "BRAVO";
+    }
+    
+    @Override
+    public RegattaLogDeviceCompetitorSensorDataMappingEvent createEvent(TimePoint createdAt, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, Serializable id, Competitor mappedTo, DeviceIdentifier device,
+            TimePoint from, TimePoint to) {
+        return new RegattaLogDeviceCompetitorBravoMappingEventImpl(createdAt, logicalTimePoint, author, id, mappedTo,
+                device, from, to);
     }
 }
