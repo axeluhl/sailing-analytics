@@ -206,10 +206,13 @@ public class WaypointPositionAndDistanceCache {
                     Distance minDist = null;
                     for (final Mark w1m : w1.getMarks()) {
                         for (final Mark w2m : w2.getMarks()) {
-                            final Distance w1mToW2m = getApproximatePosition(w1m, roundedToTimeRangeCenter).getDistance(
-                                    getApproximatePosition(w2m, roundedToTimeRangeCenter));
-                            if (minDist == null || minDist.compareTo(w1mToW2m) > 0) {
-                                minDist = w1mToW2m;
+                            final Position approximatePositionW1m = getApproximatePosition(w1m, roundedToTimeRangeCenter);
+                            final Position approximatePositionW2m = getApproximatePosition(w2m, roundedToTimeRangeCenter);
+                            if (approximatePositionW1m != null && approximatePositionW2m != null) {
+                                final Distance w1mToW2m = approximatePositionW1m.getDistance(approximatePositionW2m);
+                                if (minDist == null || minDist.compareTo(w1mToW2m) > 0) {
+                                    minDist = w1mToW2m;
+                                }
                             }
                         }
                     }
