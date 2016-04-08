@@ -48,7 +48,6 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparableComparator;
 import com.sap.sailing.gwt.ui.shared.util.NullSafeComparatorWrapper;
-import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.NaturalComparator;
@@ -201,10 +200,12 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceListRaceDTO> SortableRaceListColumn<T, String> getDurationColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, Duration>(new NullSafeComparableComparator<Duration>(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
             @Override
-            protected Duration getComparisonValue(T object) {
-                return object.getDuration();
+            public int compare(T o1, T o2) {
+                if (o1.getDuration() == null) return isAscending() ? 1 : -1;
+                if (o2.getDuration() == null) return isAscending() ? -1 : 1;
+                return o1.getDuration().compareTo(o2.getDuration());
             }
         };
         return new SortableRaceListColumn<T, String>(I18N.durationPlain(), cell, comparator) {
