@@ -1,17 +1,18 @@
 package com.sap.sailing.android.buoy.positioning.app.adapter;
 
+import java.text.DecimalFormat;
+import java.util.List;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.ResourceCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
+
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract;
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
-
-import java.text.DecimalFormat;
-import java.util.List;
 
 public class MarkAdapter extends ResourceCursorAdapter {
 
@@ -26,7 +27,7 @@ public class MarkAdapter extends ResourceCursorAdapter {
         String name = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_NAME));
         String markID = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
         List<MarkPingInfo> markPings = DatabaseHelper.getInstance().getMarkPings(context, markID);
-        String setText = "";
+        String setText;
         if (markPings.isEmpty()) {
             setText = context.getString(R.string.not_set);
         } else {
