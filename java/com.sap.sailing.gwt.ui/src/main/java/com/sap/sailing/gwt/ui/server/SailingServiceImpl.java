@@ -179,6 +179,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -4927,10 +4928,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
-        return times == null ? null : new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times = new TrackingTimesFinder(raceLog).analyze();
+        return times;
     }
 
     @Override
@@ -6099,9 +6100,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                             final RegattaLog regattaLog = raceColumn.getRegattaLog();
                             final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
-                            final Pair<TimePoint, TimePoint> trackingTimes = trackingTimesFinder.analyze();
+                            final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
                             try {
-                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark, trackingTimes.getA(), trackingTimes.getB());
+                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark,
+                                        trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
                             }
@@ -6232,9 +6234,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    public Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>> getTrackingTimes(
+    @Override
+    public Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(
             Collection<Triple<String, String, String>> raceColumnsAndFleets) {
-        Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>>  trackingTimes = new HashMap<Triple<String, String, String>,Pair<TimePoint, TimePoint>>(); 
+        Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> trackingTimes = new HashMap<>(); 
         for (Triple<String, String, String> leaderboardRaceColumnFleetName : raceColumnsAndFleets) {
             try {
                 trackingTimes.put(leaderboardRaceColumnFleetName, getTrackingTimes(leaderboardRaceColumnFleetName.getA(), 

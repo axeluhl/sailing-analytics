@@ -59,6 +59,7 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
@@ -198,9 +199,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     @Override
     public void stop(boolean preemptive) {
         RaceLog raceLog = params.getRaceLog();
-        final Pair<TimePoint, TimePoint> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null || trackingTimes.getB() == null) {
-            // seems the first time tracking for this race is started; enter "now" as start of tracking
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null) {
+            // seems the first time tracking for this race is stopped; enter "now" as end of tracking
             // into the race log
             raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
         }
@@ -453,9 +454,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
         RaceLogDenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
-        final Pair<TimePoint, TimePoint> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null) {
-            // seems the first time tracking for this race is started; enter "now" as start of tracking
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (trackingTimes == null || trackingTimes.getA() == null || trackingTimes.getA().getTimePoint() == null) {
+            // the start of tracking interval is unset or set to null; enter "now" as start of tracking
             // into the race log
             raceLog.add(new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
         }
