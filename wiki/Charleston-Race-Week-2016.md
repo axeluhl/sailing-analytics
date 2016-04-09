@@ -31,7 +31,9 @@ EVENT=56f62045-de57-4c5e-be6c-a2339d9c9ece
 - Master URL: `crw2016-master.sapsailing.com`
 - Visitor URL: `crw2016.sapsailing.com`
 
-### Instances used
+### AWS instances
+
+All instaces are from AWS Instance type `c3.4xlarge` (16 Cores, 30GB RAM)
 
 **EU-West Ireland**
 
@@ -51,9 +53,7 @@ EVENT=56f62045-de57-4c5e-be6c-a2339d9c9ece
   - Internal DNS: `ip-172-30-2-176.ec2.internal`
   - External DNS: `ec2-52-90-229-141.compute-1.amazonaws.com`
 
-### Starting up further masters
-
-All instaces are from AWS Instance type `c3.4xlarge` (16 Cores, 30GB RAM)
+#### Starting up further masters
 
 ```
 MONGODB_NAME=crw2016
@@ -66,7 +66,7 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 EVENT=56f62045-de57-4c5e-be6c-a2339d9c9ece
 ```
 
-### Starting up further replicas
+#### Starting up further replicas
 
 ```
 INSTALL_FROM_RELEASE=build-201604090936
