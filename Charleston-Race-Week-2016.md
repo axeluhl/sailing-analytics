@@ -17,7 +17,7 @@ The VPN setup can be easily expanded to further regions like APJ.
 ### Load balancers and Route53
 
 This setup requires two ELB's; one in each region. Put instances behind the according ELB in your region as usual.
-The only difference here is, that Route53 entries differ a little bit from the usual standard. There are event subdomain entries (crw2016) for different geo-based locations set, which will handle and forward requests to the "best" load balancer which is set up in each region. See (here)[https://wiki.sapsailing.com/wiki/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_howto_using-latency-based-dns-across-regions] for the basic setup of latency-based or geo-based Route53 entries.
+The only difference here is, that Route53 entries differ a little bit from the usual standard. There are event subdomain entries (crw2016) for different geo-based locations set, which will handle and forward requests to the "best" load balancer which is set up in each region. See [here](https://wiki.sapsailing.com/wiki/amazon-ec2#amazon-ec2-for-sap-sailing-analytics_howto_using-latency-based-dns-across-regions) for the basic setup of latency-based or geo-based Route53 entries.
 
 ### Instances used
 
