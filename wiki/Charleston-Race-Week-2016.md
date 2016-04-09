@@ -27,6 +27,10 @@ REPLICATION_CHANNEL=crw2016
 EVENT=56f62045-de57-4c5e-be6c-a2339d9c9ece
 ```
 
+### Event URL
+- Master URL: `crw2016-master.sapsailing.com`
+- Visitor URL: `crw2016.sapsailing.com`
+
 ### Instances used
 
 **EU-West Ireland**
