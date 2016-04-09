@@ -1,6 +1,6 @@
 ## Server Landscape
 
-### Interconnect AWS regions
+### Inter-connect AWS regions
 
 For being able to serve low latency connection to the american continent we run several replica server in front of an ELB in AWS region US-East (N.Virginia).
 
