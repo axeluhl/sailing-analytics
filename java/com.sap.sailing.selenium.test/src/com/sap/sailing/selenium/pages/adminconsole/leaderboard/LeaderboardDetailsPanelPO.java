@@ -121,7 +121,7 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     
     public List<RaceDescriptor> getRaces() {
         List<RaceDescriptor> result = new ArrayList<>();
-        CellTablePO<DataEntryPO> racesTable = getRacesTable();
+        LeaderboardRacesTablePO racesTable = getRacesTable();
         for(DataEntryPO entry : racesTable.getEntries()) {
             result.add(createRaceDescriptor(entry));
         }
@@ -179,7 +179,7 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     }
     
     private DataEntryPO findRace(RaceDescriptor race) {
-        CellTablePO<DataEntryPO> racesTable = getRacesTable();
+        LeaderboardRacesTablePO racesTable = getRacesTable();
         for(DataEntryPO entry : racesTable.getEntries()) {
             RaceDescriptor descriptor = createRaceDescriptor(entry);
             if (descriptor.equals(race)) {
@@ -206,8 +206,8 @@ public class LeaderboardDetailsPanelPO extends PageArea {
         return null;
     }
     
-    private CellTablePO<DataEntryPO> getRacesTable() {
-        return new GenericCellTablePO<>(this.driver, this.racesCellTable, DataEntryPO.class);
+    public LeaderboardRacesTablePO getRacesTable() {
+        return new LeaderboardRacesTablePO(driver, this.racesCellTable);
     }
     
     private CellTablePO<DataEntryPO> getTrackedRacesTable() {
