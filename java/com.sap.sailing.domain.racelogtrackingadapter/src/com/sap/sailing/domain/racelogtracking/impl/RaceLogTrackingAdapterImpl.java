@@ -203,7 +203,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
-                    CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
+                    CourseBase newCourse = new CourseDataImpl(course.getName());
                     TimePoint now = MillisecondsTimePoint.now();
                     int i = 0;
                     for (Waypoint oldWaypoint : course.getWaypoints()) {

@@ -5220,18 +5220,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        String name = String.format("Course for %s - %s - %s", leaderboardName, raceColumnName, fleetName);
-        
+        String courseName = "Course of " + raceColumnName;
+        if(!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
+            courseName += "- " + fleetName; 
+        }
         CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (lastPublishedCourse == null) {
-            lastPublishedCourse = new CourseDataImpl(name);
+            lastPublishedCourse = new CourseDataImpl(courseName);
         }
         
         List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
         for (Pair<ControlPointDTO, PassingInstruction> waypointDTO : courseDTO) {
             controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
         }
-        Course course = new CourseImpl(name, lastPublishedCourse.getWaypoints());
+        Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
         
         try {
             course.update(controlPoints, baseDomainFactory);
