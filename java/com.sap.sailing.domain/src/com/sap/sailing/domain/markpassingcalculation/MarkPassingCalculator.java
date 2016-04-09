@@ -72,7 +72,7 @@ public class MarkPassingCalculator {
             chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
         }
         if (listen) {
-            final Thread listenerThread = new Thread(new Listen(), "MarkPassingCalculator for race " + race.getRace().getName());
+            final Thread listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
             listenerThread.setDaemon(true);
             listenerThread.start();
         }
@@ -88,10 +88,16 @@ public class MarkPassingCalculator {
      * 
      */
     private class Listen implements Runnable {
+        private final String raceName;
+        
+        public Listen(String raceName) {
+            this.raceName = raceName;
+        }
+
         @Override
         public void run() {
             try {
-                logger.fine("MarkPassingCalculator is listening");
+                logger.info("MarkPassingCalculator is listening on race "+raceName);
                 boolean finished = false;
                 Map<Competitor, List<GPSFix>> competitorFixes = new HashMap<>();
                 Map<Mark, List<GPSFix>> markFixes = new HashMap<>();
@@ -104,64 +110,64 @@ public class MarkPassingCalculator {
                 List<Competitor> unsuppressedMarkPassings = new ArrayList<>();
                 while (!finished) {
                     try {
-                    logger.finer("MPC is checking the queue");
-                    List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
-                    try {
-                        allNewFixInsertions.add(listener.getQueue().take());
-                    } catch (InterruptedException e) {
-                        logger.log(Level.SEVERE, "MarkPassingCalculator threw exception " + e.getMessage()
-                                + " while waiting for new GPSFixes");
-                    }
-                    listener.getQueue().drainTo(allNewFixInsertions);
-                    logger.finer("MPC recieved "+ allNewFixInsertions.size()+" new updates.");
-                    for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
-                        if (listener.isEndMarker(fixInsertion)) {
-                            logger.info("Stopping "+MarkPassingCalculator.this+"'s listener");
-                            finished = true;
-                        } else {
-                            fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
-                                    smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                    suppressedMarkPassings, unsuppressedMarkPassings);
+                        logger.finer("MPC for "+raceName+" is checking the queue");
+                        List<StorePositionUpdateStrategy> allNewFixInsertions = new ArrayList<>();
+                        try {
+                            allNewFixInsertions.add(listener.getQueue().take());
+                        } catch (InterruptedException e) {
+                            logger.log(Level.SEVERE, "MarkPassingCalculator for "+raceName+" threw exception " + e.getMessage()
+                                    + " while waiting for new GPSFixes");
                         }
-                    }
-                    if (!suspended) {
-                        if (smallestChangedWaypointIndex != null) {
-                            Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
-                                    .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
-                            chooser.removeWaypoints(removedWaypoints);
-                            chooser.addWaypoints(addedWaypoints);
-                            for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
-                                    .entrySet()) {
-                                Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                        listener.getQueue().drainTo(allNewFixInsertions);
+                        logger.finer("MPC for "+raceName+" recieved "+ allNewFixInsertions.size()+" new updates.");
+                        for (StorePositionUpdateStrategy fixInsertion : allNewFixInsertions) {
+                            if (listener.isEndMarker(fixInsertion)) {
+                                logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
+                                finished = true;
+                            } else {
+                                fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
+                                        smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
+                                        suppressedMarkPassings, unsuppressedMarkPassings);
                             }
                         }
-                        updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
-                                unsuppressedMarkPassings);
-                        computeMarkPasses(competitorFixes, markFixes);
-                        competitorFixes.clear();
-                        markFixes.clear();
-                        addedWaypoints.clear();
-                        removedWaypoints.clear();
-                        smallestChangedWaypointIndex = null;
-                        fixedMarkPassings.clear();
-                        removedFixedMarkPassings.clear();
-                        suppressedMarkPassings.clear();
+                        if (!suspended) {
+                            if (smallestChangedWaypointIndex != null) {
+                                Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
+                                        .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
+                                chooser.removeWaypoints(removedWaypoints);
+                                chooser.addWaypoints(addedWaypoints);
+                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
+                                        .entrySet()) {
+                                    Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                                    chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                }
+                            }
+                            updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
+                                    unsuppressedMarkPassings);
+                            computeMarkPasses(competitorFixes, markFixes);
+                            competitorFixes.clear();
+                            markFixes.clear();
+                            addedWaypoints.clear();
+                            removedWaypoints.clear();
+                            smallestChangedWaypointIndex = null;
+                            fixedMarkPassings.clear();
+                            removedFixedMarkPassings.clear();
+                            suppressedMarkPassings.clear();
                             unsuppressedMarkPassings.clear();
                         }
                     } catch (Exception e) {
-                        logger.severe("Error while calculating markpassings: " + e.getMessage());
+                        logger.severe("Error while calculating markpassings for race "+raceName+": " + e.getMessage());
                     }
                 }
             } finally {
-                logger.info("MarkPassingCalculator Listen thread terminating");
+                logger.info("MarkPassingCalculator Listen thread terminating for race "+raceName);
             }
         }
 
         private void updateManuallySetMarkPassings(List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                 List<Pair<Competitor, Integer>> removedMarkPassings,
                 List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unsuppressedMarkPassings) {
-            logger.finest("Updating manually edited MarkPassings");
+            logger.finest("Updating manually edited MarkPassings for race "+raceName);
             for (Pair<Competitor, Integer> pair : suppressedMarkPassings) {
                 chooser.suppressMarkPassings(pair.getA(), pair.getB());
             }
@@ -187,7 +193,7 @@ public class MarkPassingCalculator {
          */
         private void computeMarkPasses(Map<Competitor, List<GPSFix>> newCompetitorFixes,
                 Map<Mark, List<GPSFix>> newMarkFixes) {
-            logger.finer("Calculating markpassings with " + newCompetitorFixes.size() + " new competitor Fixes and "
+            logger.finer("Calculating markpassings for race "+raceName+" with " + newCompetitorFixes.size() + " new competitor Fixes and "
                     + newMarkFixes.size() + "new mark fixes.");
             Map<Competitor, Set<GPSFix>> combinedCompetitorFixes = new HashMap<>();
 
@@ -230,9 +236,10 @@ public class MarkPassingCalculator {
 
             @Override
             public void run() {
-                logger.finer("Calculating MarkPassings for " + c + " (" + Util.size(fixes) + " new fixes)");
+                logger.finer("Calculating MarkPassings for race "+raceName+", competitor " + c + " (" + Util.size(fixes) + " new fixes)");
                 Util.Pair<Iterable<Candidate>, Iterable<Candidate>> candidateDeltas = finder.getCandidateDeltas(c, fixes);
-                logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates and will remove "
+                logger.finer("Received " + Util.size(candidateDeltas.getA()) + " new Candidates for race "+raceName+
+                        " and competitor "+c+" and will remove "
                         + Util.size(candidateDeltas.getB()) + " old Candidates for " + c);
                 chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB());
             }
