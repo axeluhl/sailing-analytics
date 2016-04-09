@@ -28,7 +28,7 @@ public class PersistenceTest {
         ResultUrlRegistry resultUrlRegistry = new ResultUrlRegistryImpl(mongoObjectFactory, domainObjectFactory);
 
         String testProviderName = "TestProvider";
-        URL testUrl = new URL("http://www.yachtscoring.com/results_xrr.cfm?Spec_Race=6&eid=1220");
+        URL testUrl = new URL("http://www.yachtscoring.com/results_xrr_auto.cfm?eid=1220");
         resultUrlRegistry.registerResultUrl(testProviderName, testUrl);
 
         Map<String, Set<URL>> resultUrls = domainObjectFactory.loadResultUrls();

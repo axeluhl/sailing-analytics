@@ -1,16 +1,13 @@
 package com.sap.sailing.yachtscoring.resultimport;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.resultimport.ResultDocumentDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
-import com.sap.sailing.resultimport.impl.ResultDocumentDescriptorImpl;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
 import com.sap.sailing.xrr.resultimport.impl.UrlBasedXRRResultDocumentProvider;
 import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
@@ -44,12 +41,9 @@ public class YachtscoringResultDocumentProvider extends UrlBasedXRRResultDocumen
                         String regattaName = division.getTitle();
                         String boatClass = division.getTitle();
                         try {
-                            String requestUrl = url.toString() + "?Class=" + URLEncoder.encode(boatClass, "UTF-8");
+                            String requestUrl = url.toString() + "&Class=" + URLEncoder.encode(boatClass, "UTF-8");
                             URL urlByClass = new URL(requestUrl);
-                            URLConnection eventResultConn = urlByClass.openConnection();
-                            InputStream is = (InputStream) eventResultConn.getContent();
-                            
-                            result.add(new ResultDocumentDescriptorImpl(is, requestUrl, xrrDocumentDateAndTime,
+                            result.add(new UrlResultDocumentDescriptorImpl(urlByClass, requestUrl, xrrDocumentDateAndTime,
                                     eventName, regattaName, boatClass));
                         } catch (IOException e) {
                             e.printStackTrace();

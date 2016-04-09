@@ -133,6 +133,6 @@ public class ScoreCorrectionProviderImpl implements ScoreCorrectionProvider, Res
 
     @Override
     public String getOptionalSampleURL() {
-        return "http://www.yachtscoring.com/xrr/1220_ys_xrr.xml";
+        return "http://www.yachtscoring.com/results_xrr_auto.cfm?eid=1220";
     }
 }
