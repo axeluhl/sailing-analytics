@@ -40,9 +40,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class KeyWestRaceWeek2016_ParserTest {
     private static final String KEYWESTRACEWEEEK2016_TESTFILE_XRR = "event1390_KeyWestRaceWeek2016_xrr.xml";
-    private static final String KEYWESTRACEWEEEK2016_EVENT_NAME = "Key West Race Week 2016";
+    private static final String KEYWESTRACEWEEEK2016_EVENT_NAME = "Quantum Key West Race Week 2016, Key West, FL, USA";
 
-    private static final String BOAT_CLASS_J111 = "J 111";
+    private static final String BOAT_CLASS_J88 = "J 88";
     private static final String BOAT_CLASS_MELGES24 = "Melges 24";
     
     private static final String RESOURCES = "resources/";
@@ -65,7 +65,7 @@ public class KeyWestRaceWeek2016_ParserTest {
                     Date _J111Date = DatatypeConverter.parseDateTime("2016-01-19T12:55:08.000Z").getTime();
                     Date _Melges24Date = DatatypeConverter.parseDateTime("2016-01-19T12:55:08.000Z").getTime();
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(KEYWESTRACEWEEEK2016_TESTFILE_XRR),
-                            null, new MillisecondsTimePoint(_J111Date), KEYWESTRACEWEEEK2016_EVENT_NAME , null, BOAT_CLASS_J111));
+                            null, new MillisecondsTimePoint(_J111Date), KEYWESTRACEWEEEK2016_EVENT_NAME , null, BOAT_CLASS_J88));
                     result.add(new ResultDocumentDescriptorImpl(getInputStream(KEYWESTRACEWEEEK2016_TESTFILE_XRR),
                             null, new MillisecondsTimePoint(_Melges24Date), KEYWESTRACEWEEEK2016_EVENT_NAME , null, BOAT_CLASS_MELGES24));
                     
@@ -95,7 +95,7 @@ public class KeyWestRaceWeek2016_ParserTest {
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(KEYWESTRACEWEEEK2016_EVENT_NAME);
         assertNotNull(resultsForKeyWestRaceWeek);
 
-        assertEquals(1, resultsForKeyWestRaceWeek.size());
+        assertEquals(2, resultsForKeyWestRaceWeek.size());
     }
     
     @Test
@@ -105,21 +105,21 @@ public class KeyWestRaceWeek2016_ParserTest {
                 getTestDocumentProvider(), ParserFactory.INSTANCE, resultUrlRegistry);
         Map<String, Set<com.sap.sse.common.Util.Pair<String, TimePoint>>> hasResultsFor = scoreCorrectionProvider.getHasResultsForBoatClassFromDateByEventName();
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(KEYWESTRACEWEEEK2016_EVENT_NAME);
-        com.sap.sse.common.Util.Pair<String, TimePoint> resultForJ111 = null;
+        com.sap.sse.common.Util.Pair<String, TimePoint> resultForJ88 = null;
         for(com.sap.sse.common.Util.Pair<String, TimePoint> result: resultsForKeyWestRaceWeek) {
-            if(result.getA().equals(BOAT_CLASS_J111)) {
-                resultForJ111 = result;
+            if(result.getA().equals(BOAT_CLASS_J88)) {
+                resultForJ88 = result;
                 break;
             }
         }
-        assertNotNull(resultForJ111);
+        assertNotNull(resultForJ88);
         
-        RegattaScoreCorrections _J111Result = scoreCorrectionProvider.getScoreCorrections(KEYWESTRACEWEEEK2016_EVENT_NAME, BOAT_CLASS_J111,
-                resultForJ111.getB());
-        assertNotNull(_J111Result);
-        Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _J111Result.getScoreCorrectionsForRaces();
+        RegattaScoreCorrections _J88Result = scoreCorrectionProvider.getScoreCorrections(KEYWESTRACEWEEEK2016_EVENT_NAME, BOAT_CLASS_J88,
+                resultForJ88.getB());
+        assertNotNull(_J88Result);
+        Iterable<ScoreCorrectionsForRace> scoreCorrectionsForRaces = _J88Result.getScoreCorrectionsForRaces();
         assertNotNull(scoreCorrectionsForRaces);
-        assertEquals(8, Util.size(scoreCorrectionsForRaces)); 
+        assertEquals(10, Util.size(scoreCorrectionsForRaces)); 
     }
 
 }

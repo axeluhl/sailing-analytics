@@ -95,7 +95,7 @@ public class CharlstonRaceWeek2015_ParserTest {
         Set<com.sap.sse.common.Util.Pair<String, TimePoint>> resultsForKeyWestRaceWeek = hasResultsFor.get(CHARLSTONRACEWEEK2015_EVENT_NAME);
         assertNotNull(resultsForKeyWestRaceWeek);
 
-        assertEquals(1, resultsForKeyWestRaceWeek.size());
+        assertEquals(2, resultsForKeyWestRaceWeek.size());
     }
     
     @Test
