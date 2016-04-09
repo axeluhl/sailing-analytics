@@ -43,9 +43,9 @@ public class ScoreCorrectionForRaceResult implements ScoreCorrectionsForRace {
                 RaceResult raceResult = (RaceResult) o;
                 if (raceIDs.contains(raceResult.getRaceID())) {
                     Team team = parser.getTeam(raceResult.getTeamID());
-                    if(team != null) {
+                    if (team != null) {
                         Boat boat = parser.getBoat(team.getBoatID());
-                        if( boat != null) {
+                        if (boat != null) {
                             result.add(boat.getSailNumber());
                         } else {
                             logger.severe("Could not find a boat for ID " + team.getBoatID() + " for team with ID " + 

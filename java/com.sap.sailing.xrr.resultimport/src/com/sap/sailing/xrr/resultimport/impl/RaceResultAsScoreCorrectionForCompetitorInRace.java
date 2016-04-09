@@ -46,9 +46,9 @@ public class RaceResultAsScoreCorrectionForCompetitorInRace implements ScoreCorr
                 RaceResult raceResult = (RaceResult) o;
                 if (raceIDs.contains(raceResult.getRaceID())) {
                     Team team = parser.getTeam(raceResult.getTeamID());
-                    if(team != null) {
+                    if (team != null) {
                         Boat boat = parser.getBoat(team.getBoatID());
-                        if(boat != null) {
+                        if (boat != null) {
                             String teamSailID = boat.getSailNumber();
                             if (sailID.equals(teamSailID)) {
                                 result = raceResult;
