@@ -77,3 +77,7 @@ MONGODB_NAME=crw2016-replica
 EVENT_ID=56f62045-de57-4c5e-be6c-a2339d9c9ece
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
+
+## Result import
+- [single file](www.yachtscoring.com/results_xrr_auto.cfm?eid=1220): search e.g. for "Division" and take `Title=""`
+- take content of `Title=""` and put it to get parameter at [link](http://www.yachtscoring.com/results_xrr_auto.cfm?eid=1220&Class=XYZ)
