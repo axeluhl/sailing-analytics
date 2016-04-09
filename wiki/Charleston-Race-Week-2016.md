@@ -53,6 +53,8 @@ EVENT=56f62045-de57-4c5e-be6c-a2339d9c9ece
 
 ### Starting up further masters
 
+All instaces are from AWS Instance type `c3.4xlarge` (16 Cores, 30GB RAM)
+
 ```
 MONGODB_NAME=crw2016
 REPLICATION_CHANNEL=crw2016
