@@ -333,33 +333,33 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         htmlText.append("</head>");
         htmlText.append("<body>");
         if (hasLogoUrl) {
-            htmlText.append("<p><img src='").append(logoUrl).append("' /></p> ");
+            htmlText.append("<p><img src=\"").append(logoUrl).append("\" /></p> ");
         }
         htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
         htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
                 .append("</b></p> ");
-        htmlText.append("<p class='qr'><img src='cid:image'  title='").append(url).append("' /></p> ");
-        htmlText.append("<p class='spacer'>").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
+        htmlText.append("<p class=\"qr\"><img src=\"cid:image\"  title=\"").append(url).append("\" /></p> ");
+        htmlText.append("<p class=\"spacer\">").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
         if (hasIOSAppUrl) {
-            htmlText.append("<a class='b' href='").append(IOS_DEEP_LINK_PREFIX + url).append("'>")
+            htmlText.append("<a class=\"b\" href=\"").append(IOS_DEEP_LINK_PREFIX + url).append("\">")
                     .append(B.get(locale, "iOSUsers")).append("</a> ");
         }
         if (hasAndroidAppUrl) {
-            htmlText.append("<a class='b' href='").append(url).append("'>").append(B.get(locale, "androidUsers"))
+            htmlText.append("<a class=\"b\" href=\"").append(url).append("\">").append(B.get(locale, "androidUsers"))
                     .append("</a> ");
         }
         if (hasIOSAppUrl || hasAndroidAppUrl) {
-            htmlText.append("<p class='spacer'>").append(B.get(locale, "appStoreInstallText")).append("</p> ");
+            htmlText.append("<p class=\"spacer\">").append(B.get(locale, "appStoreInstallText")).append("</p> ");
         }
         if (hasIOSAppUrl) {
-            htmlText.append("<a class='b' href='").append(iOSAppUrl).append("'>").append(B.get(locale, "appIos"))
+            htmlText.append("<a class=\"b\" href=\"").append(iOSAppUrl).append("\">").append(B.get(locale, "appIos"))
                     .append("</a> ");
         }
         if (hasAndroidAppUrl) {
-            htmlText.append("<a class='b' href='").append(androidAppUrl).append("'>")
+            htmlText.append("<a class=\"b\" href=\"").append(androidAppUrl).append("\">")
                     .append(B.get(locale, "appAndroid")).append("</a> ");
         }
-        htmlText.append("<p class='spacer' />");
+        htmlText.append("<p class=\"spacer\" />");
         htmlText.append("</body>");
         htmlText.append("</html>");
 
