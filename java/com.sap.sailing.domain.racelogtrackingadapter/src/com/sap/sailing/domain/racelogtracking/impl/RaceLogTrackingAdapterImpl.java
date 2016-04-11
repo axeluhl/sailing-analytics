@@ -333,7 +333,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         htmlText.append("</head>");
         htmlText.append("<body>");
         if (hasLogoUrl) {
-            htmlText.append("<p class='qr'><img src='").append(logoUrl).append("' /></p> ");
+            htmlText.append("<p><img src='").append(logoUrl).append("' /></p> ");
         }
         htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
         htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
