@@ -324,11 +324,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         StringBuilder htmlText = new StringBuilder();
         htmlText.append("<html>");
         htmlText.append("<head>");
-        htmlText.append("<style>");
-        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}");
-        htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}");
-        htmlText.append(".qr {margin: 10px;height:250px; width: auto;}");
-        htmlText.append(".spacer {margin-top: 50px;}");
+        htmlText.append("<style>\n");
+        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
+        htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}\n");
+        htmlText.append(".qr {margin: 10px;height:250px; width: auto;}\n");
+        htmlText.append(".spacer {margin-top: 50px;}\n");
         htmlText.append("</style>");
         htmlText.append("</head>");
         htmlText.append("<body>");
@@ -352,7 +352,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             htmlText.append("<p class='spacer'>").append(B.get(locale, "appStoreInstallText")).append("</p> ");
         }
         if (hasIOSAppUrl) {
-
             htmlText.append("<a class='b' href='").append(iOSAppUrl).append("'>").append(B.get(locale, "appIos"))
                     .append("</a> ");
         }
