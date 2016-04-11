@@ -96,7 +96,6 @@ public class OnlineDataManager extends DataManager {
     }
 
     public void addRaces(Collection<ManagedRace> data) {
-        //TODO Exception
         int index = 0;
         for (ManagedRace race : data) {
             dataStore.addRace(index++, race);
