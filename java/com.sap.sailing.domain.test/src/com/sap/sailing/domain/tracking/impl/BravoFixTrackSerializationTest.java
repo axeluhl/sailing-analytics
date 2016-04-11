@@ -1,0 +1,96 @@
+package com.sap.sailing.domain.tracking.impl;
+
+import static com.sap.sse.common.impl.MillisecondsTimePoint.now;
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
+import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
+import com.sap.sailing.domain.test.TrackBasedTest;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.TimePoint;
+
+public class BravoFixTrackSerializationTest {
+    
+    private DynamicBravoFixTrack track;
+    
+    @Before
+    public void setUp() {
+        track = new BravoFixTrackImpl(TrackBasedTest.createCompetitor("SAP Saling"));
+    }
+    
+    @Test
+    public void testWithZeroValueFix() throws ClassNotFoundException, IOException {
+        addToTrackAndAssertRideHeight(new TestFixData(now().minus(Duration.ONE_MINUTE), 0.0));
+    }
+    
+    @Test
+    public void testWithSingleFix() throws ClassNotFoundException, IOException {
+        addToTrackAndAssertRideHeight(new TestFixData(now().minus(Duration.ONE_MINUTE), 0.6543));
+    }
+    
+    @Test
+    public void testWithMultipleFixes() throws ClassNotFoundException, IOException {
+        addToTrackAndAssertRideHeight(new TestFixData(now().minus(Duration.ONE_MINUTE), 1.0249),
+                new TestFixData(now().minus(Duration.ONE_MINUTE.times(2)), 0.9140),
+                new TestFixData(now().minus(Duration.ONE_MINUTE.times(3)), 0.3721),
+                new TestFixData(now().minus(Duration.ONE_MINUTE.times(4)), 0.7942),
+                new TestFixData(now().minus(Duration.ONE_MINUTE.times(5)), 0.6203));
+    }
+    
+    private void addToTrackAndAssertRideHeight(TestFixData... testFixData) throws ClassNotFoundException, IOException {
+        List<TestFixData> testFixDataList = Arrays.asList(testFixData);
+        testFixDataList.forEach(TestFixData::addBravoFixToTrack);
+        BravoFixTrack track = getDeserializedTrack();
+        testFixDataList.forEach(testData -> assertRideHeight(track, testData));
+    }
+    
+    private void assertRideHeight(BravoFixTrack track, TestFixData testFixData) {
+        assertRideHeight(track, testFixData.timePoint, testFixData.rideHeight);
+    }
+    
+    private void assertRideHeight(BravoFixTrack track, TimePoint timePoint, double expected) {
+        assertEquals(expected, track.getRideHeight(timePoint), 0.0);
+    }
+    
+    private BravoFixTrack getDeserializedTrack() throws ClassNotFoundException, IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream ous = new ObjectOutputStream(baos);
+        ous.writeObject(track);
+        ous.close();
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+        BravoFixTrack deserializedInstance = (BravoFixTrack) ois.readObject();
+        ois.close();
+        return deserializedInstance;
+    }
+    
+    private class TestFixData {
+        private final TimePoint timePoint;
+        private final double rideHeight;
+        
+        private TestFixData(TimePoint timePoint, double rideHeight) {
+            this.timePoint = timePoint;
+            this.rideHeight = rideHeight;
+        }
+        
+        private void addBravoFixToTrack() {
+            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.getColumns().size()];
+            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+            track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)));
+        }
+    }
+
+}
