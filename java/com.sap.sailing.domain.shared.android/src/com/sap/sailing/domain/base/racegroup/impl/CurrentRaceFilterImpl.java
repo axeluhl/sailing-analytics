@@ -12,19 +12,16 @@ import com.sap.sailing.domain.base.racegroup.IsFleetFragment;
 import com.sap.sailing.domain.base.racegroup.IsRaceFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroupFragment;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-public class CurrentRaceFilterImpl <ITEM extends RaceGroupFragment, SERIES extends IsFleetFragment, RACE extends IsRaceFragment> implements CurrentRaceFilter<ITEM,SERIES,RACE> {
+
+public class CurrentRaceFilterImpl<ITEM extends RaceGroupFragment, SERIES extends IsFleetFragment, RACE extends IsRaceFragment>
+        implements CurrentRaceFilter<ITEM, SERIES, RACE> {
 
     @Override
     public List<ITEM> filterCurrentRaces(Collection<ITEM> allItems) {
-        
         Map<SERIES, List<RACE>> filteredRace = filterRaces(allItems);
-        
         filteredRace = removeAllListsBevorLastStarted(filteredRace);
-        
         return convertBackToList(filteredRace);
     }
-
-    
 
     @SuppressWarnings("unchecked")
     private List<ITEM> convertBackToList(Map<SERIES, List<RACE>> filteredRaces) {
@@ -37,80 +34,72 @@ public class CurrentRaceFilterImpl <ITEM extends RaceGroupFragment, SERIES exten
         return result;
     }
 
-
-
-    private Map<SERIES, List<RACE>> removeEmtyLists(
-            Map<SERIES, List<RACE>> filteredRaces) {
+    private Map<SERIES, List<RACE>> removeEmtyLists(Map<SERIES, List<RACE>> filteredRaces) {
         Map<SERIES, List<RACE>> result = new LinkedHashMap<>();
         for (SERIES currentKey : filteredRaces.keySet()) {
-            if(!filteredRaces.get(currentKey).isEmpty()){
+            if (!filteredRaces.get(currentKey).isEmpty()) {
                 result.put(currentKey, filteredRaces.get(currentKey));
             }
         }
         return result;
     }
 
-
-
     private Map<SERIES, List<RACE>> removeAllListsBevorLastStarted(Map<SERIES, List<RACE>> filteredRaces) {
         Map<SERIES, List<RACE>> result;
         SERIES keyOfLastStartedRace = null;
         for (SERIES currentKey : filteredRaces.keySet()) {
-            if(containsActiceRace(filteredRaces.get(currentKey))){
+            if (containsActiceRace(filteredRaces.get(currentKey))) {
                 keyOfLastStartedRace = currentKey;
             }
         }
-        if(keyOfLastStartedRace != null){
+        if (keyOfLastStartedRace != null) {
             result = new LinkedHashMap<>();
             boolean found = false;
             for (SERIES currentKey : filteredRaces.keySet()) {
-                if(found){
+                if (found) {
                     result.put(currentKey, filteredRaces.get(currentKey));
-                }
-            else if(currentKey.equals(keyOfLastStartedRace)){
-                    found=true;
+                } else if (currentKey.equals(keyOfLastStartedRace)) {
+                    found = true;
                     result.put(currentKey, filteredRaces.get(currentKey));
                 }
             }
-        }else{
-            result =  filteredRaces;
+        } else {
+            result = filteredRaces;
         }
         return result;
     }
 
-
-
     private boolean containsActiceRace(List<RACE> races) {
         for (RACE race : races) {
-            if(RaceLogRaceStatus.isRunningOrFinished(race.getCurrentStatus())){
+            if (RaceLogRaceStatus.isRunningOrFinished(race.getCurrentStatus())) {
                 return true;
             }
         }
         return false;
     }
 
-
-
     /**
      * method maps the races to fleets/series and removes all that should be not shown with "A follows B" relationship
      * 
-     * @param allItems All SORTED Items
+     * @param allItems
+     *            All SORTED Items
      * @return all current Races mapped to there fleet/series
      */
     private Map<SERIES, List<RACE>> filterRaces(Collection<ITEM> allItems) {
         Map<SERIES, List<RACE>> mappedItems = mapItems(allItems);
         List<RACE> newValueForKey = null;
-        SeriesBase firstSeries =  mappedItems.keySet().iterator().next().getSeries();
-        for(SERIES currentKey : mappedItems.keySet()){
-            newValueForKey = filterWithFollowing(mappedItems.get(currentKey), currentKey.getSeries().equals(firstSeries));
+        SeriesBase firstSeries = mappedItems.keySet().iterator().next().getSeries();
+        for (SERIES currentKey : mappedItems.keySet()) {
+            newValueForKey = filterWithFollowing(mappedItems.get(currentKey),
+                    currentKey.getSeries().equals(firstSeries));
             mappedItems.put(currentKey, newValueForKey);
         }
-        
+
         return mappedItems;
     }
 
     /**
-     * Filters a List (with races of the same series and fleet). 
+     * Filters a List (with races of the same series and fleet).
      * 
      * @param list
      * @return
@@ -118,11 +107,11 @@ public class CurrentRaceFilterImpl <ITEM extends RaceGroupFragment, SERIES exten
     private List<RACE> filterWithFollowing(List<RACE> races, boolean isFirstSeries) {
         List<RACE> result = new LinkedList<>();
         boolean addNext = isFirstSeries;
-        for(RACE currentRace: races){
-            if(hasShowingStatus(currentRace)){
+        for (RACE currentRace : races) {
+            if (hasShowingStatus(currentRace)) {
                 result.add(currentRace);
                 addNext = true;
-            }else if(addNext){
+            } else if (addNext) {
                 result.add(currentRace);
                 addNext = false;
             }
@@ -137,11 +126,13 @@ public class CurrentRaceFilterImpl <ITEM extends RaceGroupFragment, SERIES exten
      * @return
      */
     private boolean hasShowingStatus(RACE currentRace) {
-        return RaceLogRaceStatus.isActive(currentRace.getCurrentStatus()) || RaceLogRaceStatus.isActive(currentRace.getCurrentStatus());
+        return RaceLogRaceStatus.isActive(currentRace.getCurrentStatus())
+                || RaceLogRaceStatus.isActive(currentRace.getCurrentStatus());
     }
 
-    /** 
+    /**
      * maps the Races to there Fleet/series
+     * 
      * @param allItems
      * @return
      */
@@ -150,22 +141,21 @@ public class CurrentRaceFilterImpl <ITEM extends RaceGroupFragment, SERIES exten
         Map<SERIES, List<RACE>> resultMap = new LinkedHashMap<>();
         SERIES currentKey = null;
         List<RACE> currentValue = null;
-        for(ITEM currentItem: allItems){
-            if(currentItem instanceof IsFleetFragment){
-                if(currentKey!=null && currentValue != null){
+        for (ITEM currentItem : allItems) {
+            if (currentItem instanceof IsFleetFragment) {
+                if (currentKey != null && currentValue != null) {
                     resultMap.put(currentKey, currentValue);
                 }
-                    currentKey = (SERIES) currentItem;
-                    currentValue = new LinkedList<>();
-            }else{
+                currentKey = (SERIES) currentItem;
+                currentValue = new LinkedList<>();
+            } else {
                 currentValue.add((RACE) currentItem);
             }
         }
-        if(currentKey!=null && currentValue != null){
+        if (currentKey != null && currentValue != null) {
             resultMap.put(currentKey, currentValue);
         }
-        
+
         return resultMap;
     }
-
 }
