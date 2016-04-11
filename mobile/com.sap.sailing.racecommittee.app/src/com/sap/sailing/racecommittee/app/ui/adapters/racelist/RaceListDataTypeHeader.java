@@ -2,10 +2,11 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.IsFleetFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 
-public class RaceListDataTypeHeader implements RaceListDataType {
+public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment {
 
     private RaceGroupSeriesFleet data;
     private boolean isFleetVisible;
