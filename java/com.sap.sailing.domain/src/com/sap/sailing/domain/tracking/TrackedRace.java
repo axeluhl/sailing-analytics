@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -870,7 +871,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return null;
     }
 
-    default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    default Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
         return null;
     }
     
@@ -889,13 +890,13 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     }
     
     /**
-     * Forces update of start and end of tracking.
-     * Adheres to the following precedence order
+     * Updates the start and end of tracking in the following precedence order:
      * 
-     * 1) RaceLogStartOfTrackingEvent/RaceLogEndOfTrackingEvent
-     * 2) RaceLogStartTimeEvent - x Minutes, Race finished + x Minutes
-     * 3) Earliest Mapping, Latest Mapping (of Marks and Competitors)
-     * 4) Leave previously (manually set start/end of tracking)
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol>
      */
     public void updateStartAndEndOfTracking();
 }

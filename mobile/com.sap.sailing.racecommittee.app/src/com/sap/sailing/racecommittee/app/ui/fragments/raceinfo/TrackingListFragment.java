@@ -70,8 +70,8 @@ public class TrackingListFragment extends BaseFragment
 
     private RecyclerView.Adapter<FinishListAdapter.ViewHolder> mFinishedAdapter;
     private CompetitorAdapter mCompetitorAdapter;
-    private ArrayList<CompetitorResultWithIdImpl> mFinishedData;
-    private ArrayList<Competitor> mCompetitorData;
+    private List<CompetitorResultWithIdImpl> mFinishedData;
+    private List<Competitor> mCompetitorData;
     private int mId = 0;
     private HeaderLayout mHeader;
     private TextView mPageTitle;
@@ -81,7 +81,7 @@ public class TrackingListFragment extends BaseFragment
     private List<Comparator<Competitor>> mComparators;
 
     public TrackingListFragment() {
-        mCompetitorData = new ArrayList<>();
+        mCompetitorData = Collections.synchronizedList(new ArrayList<Competitor>());
     }
 
     public static TrackingListFragment newInstance(Bundle args, int startMode) {
@@ -164,6 +164,7 @@ public class TrackingListFragment extends BaseFragment
         mComparators = new ArrayList<>();
         mComparators.add(new CompetitorSailIdComparator());
         mComparators.add(new NaturalNamedComparator<Competitor>());
+        mComparator = mComparators.get(0);
 
         mFinishedData = initializeFinishList();
         loadCompetitors();
@@ -235,7 +236,6 @@ public class TrackingListFragment extends BaseFragment
             }
         }
 
-        mComparator = mComparators.get(0);
         Util.addAll(getRace().getCompetitors(), mCompetitorData);
         sortCompetitors();
         mCompetitorAdapter.notifyDataSetChanged();
@@ -286,7 +286,7 @@ public class TrackingListFragment extends BaseFragment
             domainFactory.getCompetitorStore().allowCompetitorResetToDefaults(competitor);
         }
 
-        Loader<?> competitorLoaders = getLoaderManager()
+        final Loader<?> competitorLoader = getLoaderManager()
             .initLoader(0, null, dataManager.createCompetitorsLoader(getRace(), new LoadClient<Collection<Competitor>>() {
 
                 @Override
@@ -296,14 +296,14 @@ public class TrackingListFragment extends BaseFragment
 
                 @Override
                 public void onLoadSucceeded(Collection<Competitor> data, boolean isCached) {
-                    if (isAdded()) {
+                    if (isAdded() && !isCached) {
                         onLoadCompetitorsSucceeded(data);
                     }
                 }
-
             }));
+
         // Force load to get non-cached remote competitors...
-        competitorLoaders.forceLoad();
+        competitorLoader.forceLoad();
     }
 
     protected void onLoadCompetitorsSucceeded(Collection<Competitor> data) {
@@ -336,8 +336,8 @@ public class TrackingListFragment extends BaseFragment
         return DataManager.create(getActivity()).getDataStore().getDomainFactory().getCompetitorStore();
     }
 
-    private ArrayList<CompetitorResultWithIdImpl> initializeFinishList() {
-        ArrayList<CompetitorResultWithIdImpl> positioning = new ArrayList<>();
+    private List<CompetitorResultWithIdImpl> initializeFinishList() {
+        List<CompetitorResultWithIdImpl> positioning = Collections.synchronizedList(new ArrayList<CompetitorResultWithIdImpl>());
         if (getRaceState() != null && getRaceState().getFinishPositioningList() != null) {
             for (CompetitorResult results : getRaceState().getFinishPositioningList()) {
                 positioning.add(new CompetitorResultWithIdImpl(mId, results));
