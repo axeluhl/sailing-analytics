@@ -244,6 +244,28 @@ public class AppPreferences {
         }
     }
 
+    public boolean getRacingProcedureIsResultEntryEnabled(RacingProcedureType type) {
+        String key = getRacingProcedureIsResultEntryEnabledKey(type);
+        return preferences.getBoolean(key, false);
+    }
+
+    private String getRacingProcedureIsResultEntryEnabledKey(RacingProcedureType type) {
+        switch (type) {
+        case RRS26:
+            return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
+        case GateStart:
+            return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
+        case ESS:
+            return key(R.string.preference_racing_procedure_ess_resultentryenabled_key);
+        case BASIC:
+            return key(R.string.preference_racing_procedure_basic_resultentryenabled_key);
+        case LEAGUE:
+            return key(R.string.preference_racing_procedure_league_resultentryenabled_key);
+        default:
+            throw new IllegalArgumentException("Unknown racing procedure type.");
+        }
+    }
+    
     public Set<Flags> getRRS26StartmodeFlags() {
         Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
         Set<Flags> flags = new HashSet<>();
@@ -360,18 +382,23 @@ public class AppPreferences {
     }
 
     public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
-        String numberOfRoundsString = numberOfRounds.name();
+        final String numberOfRoundsString = numberOfRounds.name();
         preferences.edit().putString(HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).commit();
     }
 
     public void setRacingProcedureClassFlag(RacingProcedureType type, Flags flag) {
-        String key = getRacingProcedureClassFlagKey(type);
+        final String key = getRacingProcedureClassFlagKey(type);
         preferences.edit().putString(key, flag.name()).commit();
     }
 
     public void setRacingProcedureHasIndividualRecall(RacingProcedureType type, Boolean hasRecall) {
-        String key = getRacingProcedureHasIndividualRecallKey(type);
+        final String key = getRacingProcedureHasIndividualRecallKey(type);
         preferences.edit().putBoolean(key, hasRecall).commit();
+    }
+
+    public void setRacingProcedureIsResultEntryEnabled(RacingProcedureType type, Boolean resultEntryEnabled) {
+        final String key = getRacingProcedureIsResultEntryEnabledKey(type);
+        preferences.edit().putBoolean(key, resultEntryEnabled).commit();
     }
 
     public void setRRS26StartmodeFlags(Set<Flags> flags) {

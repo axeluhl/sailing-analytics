@@ -20,8 +20,7 @@ public abstract class DataEntryDialogPO extends PageArea {
     @FindBy(how = BySeleniumId.class, using = "CancelButton")
     private WebElement cancelButton;
     
-
-    public DataEntryDialogPO(WebDriver driver, WebElement element) {
+    protected DataEntryDialogPO(WebDriver driver, WebElement element) {
         super(driver, element);
     }
     

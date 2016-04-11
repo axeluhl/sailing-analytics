@@ -31,7 +31,7 @@ public class RRS26ConfigurationJsonDeserializer extends RacingProcedureConfigura
     }
     
     @Override
-    protected RacingProcedureConfiguration createResult(JSONObject object, Boolean inidividualRecall, Flags classFlag)
+    protected RacingProcedureConfiguration createResult(JSONObject object, Boolean inidividualRecall, Boolean resultEntryEnabled, Flags classFlag)
             throws JsonDeserializationException {
         List<Flags> startModeFlags = null;
         if (object.containsKey(RRS26ConfigurationJsonSerializer.FIELD_START_MODE_FLAGS)) {
@@ -42,10 +42,10 @@ public class RRS26ConfigurationJsonDeserializer extends RacingProcedureConfigura
                 startModeFlags.add(Flags.valueOf(value.toString()));
             }
         }
-
         RRS26ConfigurationImpl result = new RRS26ConfigurationImpl();
         result.setClassFlag(classFlag);
-        result.setHasInidividualRecall(inidividualRecall);
+        result.setHasIndividualRecall(inidividualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
         result.setStartModeFlags(startModeFlags);
         return result;
     }

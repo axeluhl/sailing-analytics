@@ -1,6 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,16 +9,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.racecommittee.app.R;
 
 public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.ViewHolder> {
 
+    private static final String TAG = CompetitorAdapter.class.getName();
+
     private Context mContext;
-    private ArrayList<Competitor> mData;
+    private List<Competitor> mData;
     private CompetitorClick mListener;
 
-    public CompetitorAdapter(Context context, ArrayList<Competitor> data) {
+    public CompetitorAdapter(Context context, List<Competitor> data) {
         mContext = context;
         mData = data;
     }
@@ -42,6 +45,8 @@ public class CompetitorAdapter extends RecyclerView.Adapter<CompetitorAdapter.Vi
             if (holder.competitor != null) {
                 holder.competitor.setText(name);
             }
+        } else {
+            ExLog.e(mContext, TAG, "Competitor at position " + position + " was unexpected null");
         }
     }
 

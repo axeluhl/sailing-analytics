@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.view.ViewCompat;
@@ -11,22 +13,20 @@ import android.widget.TextView;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-
-import java.util.ArrayList;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
     private Context mContext;
-    private ArrayList<CompetitorResultWithIdImpl> mCompetitor;
+    private List<CompetitorResultWithIdImpl> mCompetitor;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, ArrayList<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitor) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;

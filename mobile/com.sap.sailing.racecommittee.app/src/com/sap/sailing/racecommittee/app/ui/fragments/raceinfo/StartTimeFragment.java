@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -44,7 +45,6 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
@@ -243,7 +243,7 @@ public class StartTimeFragment extends BaseFragment
                     StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
                         mStartTimeOffset = result.getStartTimeDiff();
-                        mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                        mRaceId = Util.get(result.getDependingOnRaces(), 0);
                     }
                     break;
 

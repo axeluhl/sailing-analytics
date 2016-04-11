@@ -191,7 +191,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix) {
+    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval) {
     }
 
     @Override
@@ -481,7 +481,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void recordFix(Mark mark, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval) {
     }
 
     @Override
@@ -794,5 +794,13 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void updateMarkPassingsAfterRaceLogChanges() {
+    }
+
+    @Override
+    public void updateStartAndEndOfTracking() {
+    }
+
+    @Override
+    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
     }
 }

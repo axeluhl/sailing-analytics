@@ -78,6 +78,8 @@
     <dimen name="competitor_edit_width">200dp</dimen>
     <dimen name="dialog_top_padding">24dp</dimen>
 
+    <dimen name="abort_dialog_height">215dp</dimen>
+
     <!-- custom dimens (float, integer) -->
     <item name="picker_scale" format="float" type="integer">1</item>
     <item name="flag_size" format="integer" type="integer">32</item>

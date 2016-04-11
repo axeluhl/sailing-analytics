@@ -52,8 +52,8 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     }
     
     private DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboard() {
-            WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaDialog"); //$NON-NLS-1$
-            return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
+        WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaLeaderboardDialog"); //$NON-NLS-1$
+        return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
     }
 
     public RegattaListCompositePO getRegattaList() {
