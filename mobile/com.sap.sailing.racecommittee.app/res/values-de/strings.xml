@@ -199,6 +199,8 @@
     <string name="preference_racing_procedure_classflag_header">Klassenflagge</string>
     <string name="preference_racing_procedure_hasxray_header">Einzelrückruf</string>
     <string name="preference_racing_procedure_hasxray_description">Diese Option aktiviert den Einzelrückruf</string>
+    <string name="preference_racing_procedure_resultentryenabled_header">Rennliste</string>
+    <string name="preference_racing_procedure_resultentryenabled_description">Aktiviere diese Option, um die Rennliste während und nach der Zieleinfahrt bearbeiten zu können</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_description">Diese Option aktiviert den Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_haspathfinder_header">Pathfinder</string>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_description">Diese Option aktiviert das Wählen der zusätzlichen Golfflaggenzeit.</string>
@@ -267,6 +269,7 @@
     <string name="flags_course">Kurs</string>
     <string name="flags_more">Zieleinlauf</string>
     <string name="flags_postpone">Verschieben</string>
+    <string name="flags_dependent_races">von abhängigen Rennen</string>
     <string name="wind_info">%2$s / %1$s kn</string>
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
@@ -469,6 +472,7 @@
     <string name="added_to_result_list">\'%1$s\' zur Ergebnisliste hinzugefügt an Position %2$s</string>
     <string name="get_started">Getting Started</string>
     <string name="position">Position</string>
+    <string name="server_deeplink_message">Server erfolgreich geändert auf %1$s.</string>
     <string name="penalty">Strafe</string>
     <string name="score">Punkte</string>
     <string name="finishing_time">Zielzeit</string>
@@ -496,7 +500,9 @@
 
     <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
-    <string name="preference_race_results_header">Erlaube Rennlistenbearbeitung</string>
-    <string name="preference_race_results_summary">Erlaube Race-Manager die Zieleinlaufliste in der Finishing-Phase zu bearbeiten</string>
+
+    <string name="abort_title">Rennen abbrechen</string>
+    <string name="abort_hint">Welche laufenden Rennen möchten Sie abbrechen?</string>
+    <string name="abort_dismiss">Verwerfen</string>
 
 </resources>

@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -61,6 +62,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
@@ -284,6 +286,17 @@ public class LoginActivity extends BaseActivity
             for (String address : addresses) {
                 ExLog.i(this, TAG, "IP-Addresses: " + address);
             }
+        }
+
+        String action = getIntent().getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.app_name);
+            if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
+                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
+            }
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
         }
 
         // This is required to reactivate the loader manager after configuration change (screen rotation)

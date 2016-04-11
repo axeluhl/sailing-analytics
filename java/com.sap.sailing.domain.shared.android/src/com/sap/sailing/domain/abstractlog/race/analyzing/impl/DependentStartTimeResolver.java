@@ -46,7 +46,7 @@ public class DependentStartTimeResolver {
                     resultOfDependentRace.setStartTimeDiff(startTimeDifference);
                     result = resultOfDependentRace;
                 } else {
-                    result = new StartTimeFinderResult(resultOfDependentRace.getRacesDependingOn(),
+                    result = new StartTimeFinderResult(resultOfDependentRace.getDependingOnRaces(),
                             resultOfDependentRace.getStartTime().plus(startTimeDifference), startTimeDifference);
                 }
             }

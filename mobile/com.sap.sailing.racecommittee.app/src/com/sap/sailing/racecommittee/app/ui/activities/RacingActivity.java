@@ -6,6 +6,47 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import android.support.annotation.Nullable;
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -36,42 +77,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.services.RaceStateService;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
-import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
@@ -87,6 +92,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
     private TimePoint startTime;
+    private Collection<ManagedRace> lastSeenRaces = null;
 
     private Serializable getCourseAreaIdFromIntent() {
         if (getIntent() == null || getIntent().getExtras() == null) {
@@ -454,6 +460,43 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         return null;
     }
 
+    public List<ManagedRace> getRacesWithStartTimeImmediatelyDependingOn(ManagedRace currentRace, @Nullable RaceLogRaceStatus[] state) {
+        StartTimeFinderResult result;
+        SimpleRaceLogIdentifier identifier;
+        ArrayList<ManagedRace> list = new ArrayList<>();
+        DataStore dataStore = dataManager.getDataStore();
+        for (ManagedRace race : lastSeenRaces) {
+            result = race.getState().getStartTimeFinderResult();
+            if (result.isDependentStartTime()) {
+                identifier = Util.get(result.getDependingOnRaces(), 0); // immediately depending on
+                if (dataStore.getRace(identifier).equals(currentRace)) {
+                    if (state == null) {
+                        list.add(race);
+                    } else {
+                        for (RaceLogRaceStatus status : state) {
+                            if (status.equals(race.getStatus())) {
+                                list.add(race);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    public LinkedHashMap<String, ManagedRace> getRunningRaces() {
+        LinkedHashMap<String, ManagedRace> list = new LinkedHashMap<>();
+        for (ManagedRace race : lastSeenRaces) {
+            if (RaceLogRaceStatus.RUNNING.equals(race.getStatus())) {
+                if (!list.containsKey(race.getId())) {
+                    list.put(race.getId(), race);
+                }
+            }
+        }
+        return list;
+    }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setOverflowIcon() {
         // Required to set overflow icon
@@ -473,7 +516,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 TintImageView overflow = (TintImageView) outViews.get(0);
                 overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
-                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp, overflow.getMinimumWidth(), overflow.getMinimumHeight());
+                Bitmap bitmap = BitmapHelper
+                    .decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp, overflow.getMinimumWidth(), overflow
+                        .getMinimumHeight());
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     overflow.setScaleType(ImageView.ScaleType.FIT_END);
                 }
@@ -521,7 +566,8 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                     content = RaceFlagViewerFragment.newInstance();
                 } else {
-                    if (preferences.showRaceResults()) {
+                    if (preferences.getRacingProcedureIsResultEntryEnabled(mSelectedRace.getState().
+                            getRacingProcedure().getType())) {
                         content = TrackingListFragment.newInstance(args, 1);
                     } else {
                         content = RaceFinishingFragment.newInstance();
@@ -564,7 +610,6 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
 
         private CourseArea courseArea;
-        private Collection<ManagedRace> lastSeenRaces = null;
 
         public RaceLoadClient(CourseArea courseArea) {
             this.courseArea = courseArea;
@@ -575,16 +620,15 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             setProgressSpinnerVisibility(false);
             AlertDialog.Builder builder = new AlertDialog.Builder(RacingActivity.this, R.style.AppTheme_AlertDialog);
             builder.setMessage(String.format(getString(R.string.generic_load_failure), ex.getMessage())).setTitle(getString(R.string.loading_failure))
-                .setIcon(R.drawable.ic_warning_grey_600_36dp).setCancelable(true)
-                .setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        setProgressSpinnerVisibility(true);
+                .setCancelable(true).setPositiveButton(getString(R.string.retry), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    setProgressSpinnerVisibility(true);
 
-                        ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
-                        getLoaderManager().restartLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
-                        dialog.cancel();
-                    }
-                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    ExLog.i(RacingActivity.this, TAG, "Issuing a reload of managed races");
+                    getLoaderManager().restartLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), RaceLoadClient.this));
+                    dialog.cancel();
+                }
+            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     dialog.cancel();
                 }

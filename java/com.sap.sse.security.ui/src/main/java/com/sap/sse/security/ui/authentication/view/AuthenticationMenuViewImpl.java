@@ -1,5 +1,6 @@
 package com.sap.sse.security.ui.authentication.view;
 
+import com.google.gwt.debug.client.DebugInfo;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Anchor;
@@ -35,6 +36,7 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
                 presenter.toggleFlyout();
             }
         });
+        this.anchor.ensureDebugId("authenticationMenu");
     }
 
     @Override
@@ -50,11 +52,19 @@ public class AuthenticationMenuViewImpl implements AuthenticationMenuView {
     @Override
     public void setAuthenticated(boolean authenticated) {
         anchor.setStyleName(loggedInStyle, authenticated);
+        setDebugDataAttribute("data-auth", authenticated);
     }
     
     @Override
     public void setOpen(boolean open) {
         anchor.setStyleName(openStyle, open);
+        setDebugDataAttribute("data-open", open);
+    }
+    
+    private void setDebugDataAttribute(String name, boolean value) {
+        if (DebugInfo.isDebugIdEnabled()) {
+            anchor.getElement().setAttribute(name, String.valueOf(value));
+        }
     }
 
 }
