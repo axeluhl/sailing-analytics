@@ -32,7 +32,7 @@ public class RecordMarkGPSFixForExistingTrack extends RecordMarkGPSFix {
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = getTrackedRace(toState);
         Mark mark = getMarkById(trackedRace);
-        trackedRace.recordFix(mark, getFix());
+        trackedRace.recordFix(mark, getFix(), /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
         return null;
     }
 
