@@ -124,13 +124,14 @@ public class MarkPassingCalculator {
                             if (listener.isEndMarker(fixInsertion)) {
                                 logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
                                 finished = true;
+                                break;
                             } else {
                                 fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
                                         smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
                                         suppressedMarkPassings, unsuppressedMarkPassings);
                             }
                         }
-                        if (!suspended) {
+                        if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex != null) {
                                 Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
                                         .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
@@ -156,7 +157,7 @@ public class MarkPassingCalculator {
                             unsuppressedMarkPassings.clear();
                         }
                     } catch (Exception e) {
-                        logger.severe("Error while calculating markpassings for race "+raceName+": " + e.getMessage());
+                        logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
                     }
                 }
             } finally {
