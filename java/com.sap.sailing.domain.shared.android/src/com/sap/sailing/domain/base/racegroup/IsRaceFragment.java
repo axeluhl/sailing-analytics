@@ -2,6 +2,6 @@ package com.sap.sailing.domain.base.racegroup;
 
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
-public interface IsRaceFragment {
+public interface IsRaceFragment extends RaceGroupFragment {
     RaceLogRaceStatus getCurrentStatus();
 }
