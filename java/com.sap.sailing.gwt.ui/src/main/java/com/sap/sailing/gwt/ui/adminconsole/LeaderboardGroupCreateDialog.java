@@ -24,9 +24,9 @@ public class LeaderboardGroupCreateDialog extends LeaderboardGroupDialog {
         useOverallLeaderboardCheckBox.setValue(false);
     }
 
-    public void setFieldsBasedOnEventName(String name) {
+    public void setFieldsBasedOnEventName(String name, String description) {
         nameEntryField.setText(name);
-        descriptionEntryField.setText(name);
+        descriptionEntryField.setText(description);
         validate();
     }
 }

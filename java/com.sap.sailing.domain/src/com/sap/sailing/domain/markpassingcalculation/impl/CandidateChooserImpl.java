@@ -542,14 +542,16 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
         for (Candidate can : wrongCandidates) {
-            logger.finest("Removing all edges containing " + can + "of "+ c);
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.finest("Removing all edges containing " + can + "of "+ c);
+            }
             candidates.get(c).remove(can);
             Map<Candidate, Set<Edge>> edges = allEdges.get(c);
             edges.remove(can);
             for (Set<Edge> set : edges.values()) {
                 for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
                     final Edge e = i.next();
-                    if (e.getStart().equals(can) || e.getEnd().equals(can)) {
+                    if (e.getStart() == can || e.getEnd() == can) {
                         i.remove();
                     }
                 }
