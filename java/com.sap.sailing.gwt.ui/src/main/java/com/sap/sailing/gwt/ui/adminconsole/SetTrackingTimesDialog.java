@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -76,16 +77,16 @@ public class SetTrackingTimesDialog extends DataEntryDialogWithBootstrap<RaceLog
 
     private void refreshTimes() {
         service.getTrackingTimes(leaderboardName, raceColumnName, fleetName,
-                new AsyncCallback<Util.Pair<TimePoint, TimePoint>>() {
+                new AsyncCallback<Util.Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(Pair<TimePoint, TimePoint> result) {
-                        currentStart = result == null ? null : result.getA();
-                        currentEnd = result == null ? null : result.getB();
+                    public void onSuccess(Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> result) {
+                        currentStart = result == null || result.getA() == null ? null : result.getA().getTimePoint();
+                        currentEnd = result == null || result.getB() == null ? null : result.getB().getTimePoint();
                         updateDateTimeLabelAndTimeBoxFromDate(currentStart, currentStartLabel, startTimeBox);
                         updateDateTimeLabelAndTimeBoxFromDate(currentEnd, currentEndLabel, endTimeBox);
                     }
