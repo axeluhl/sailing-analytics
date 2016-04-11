@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.persistence.racelog.tracking.impl;
+package com.sap.sailing.domain.racelog.impl;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.FixReceivedListener;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -28,10 +28,10 @@ import com.sap.sse.common.WithID;
  * @author Fredrik Teschke
  *
  */
-public class MongoGPSFixStoreImpl implements MongoGPSFixStore {
+public class GPSFixStoreImpl implements GPSFixStore {
     private final SensorFixStore sensorFixStore;
 
-    public MongoGPSFixStoreImpl(SensorFixStore sensorFixStore) {
+    public GPSFixStoreImpl(SensorFixStore sensorFixStore) {
         this.sensorFixStore = sensorFixStore;
     }
 

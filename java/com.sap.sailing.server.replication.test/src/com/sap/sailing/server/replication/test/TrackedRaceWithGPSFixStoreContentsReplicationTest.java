@@ -37,9 +37,8 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.persistence.MongoWindStoreFactory;
 import com.sap.sailing.domain.persistence.PersistenceFactory;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStore;
-import com.sap.sailing.domain.persistence.racelog.tracking.MongoGPSFixStoreFactory;
 import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFactory;
+import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -58,7 +57,7 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.testsupport.AbstractServerReplicationTestSetUp.ReplicationServiceTestImpl;
 
 /**
- * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link MongoGPSFixStore} that
+ * Runs the same tests as {@link TrackedRaceContentsReplicationTest}, but with a non-empty {@link GPSFixStore} that
  * has special serialization requirements.
  * 
  * @author Axel Uhl (d043530)
@@ -72,8 +71,7 @@ public class TrackedRaceWithGPSFixStoreContentsReplicationTest extends AbstractS
     
     @Before
     public void setUp() throws Exception, UnknownHostException, InterruptedException {
-        final GPSFixStore gpsFixStore = MongoGPSFixStoreFactory.INSTANCE
-                .getMongoGPSFixStore(MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
+        final GPSFixStore gpsFixStore = new GPSFixStoreImpl(MongoSensorFixStoreFactory.INSTANCE.getMongoGPSFixStore(
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), /* serviceFinderFactory */null));
         Pair<ReplicationServiceTestImpl<RacingEventService>, ReplicationMasterDescriptor> replicationDescriptors = super.basicSetUp(
