@@ -11,15 +11,16 @@ import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.impl.BravoFixTrackImpl;
 
-public class BravoDataFixMapper implements SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<BravoFix>, Competitor> {
+public class BravoDataFixMapper implements SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, BravoFix>, Competitor> {
 
     @Override
-    public DynamicSensorFixTrack<BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
-        return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, () -> new BravoFixTrackImpl(key));
+    public DynamicSensorFixTrack<Competitor, BravoFix> getTrack(DynamicTrackedRace race, Competitor key) {
+        return race.getOrCreateSensorTrack(key, BravoFixTrack.TRACK_NAME, 
+                () -> new BravoFixTrackImpl<Competitor>(key, BravoFixTrack.TRACK_NAME));
     }
 
     @Override
-    public void addFix(DynamicSensorFixTrack<BravoFix> track, DoubleVectorFix fix) {
+    public void addFix(DynamicSensorFixTrack<Competitor, BravoFix> track, DoubleVectorFix fix) {
         track.add(new BravoFixImpl(fix));
     }
     

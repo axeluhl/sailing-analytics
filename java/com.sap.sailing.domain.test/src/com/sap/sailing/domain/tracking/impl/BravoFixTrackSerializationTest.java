@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -25,11 +26,12 @@ import com.sap.sse.common.TimePoint;
 
 public class BravoFixTrackSerializationTest {
     
-    private DynamicBravoFixTrack track;
+    private DynamicBravoFixTrack<Competitor> track;
     
     @Before
     public void setUp() {
-        track = new BravoFixTrackImpl(TrackBasedTest.createCompetitor("SAP Extreme Sailing Team"));
+        Competitor competitor = TrackBasedTest.createCompetitor("SAP Extreme Sailing Team");
+        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME);
     }
     
     @Test
@@ -72,25 +74,26 @@ public class BravoFixTrackSerializationTest {
     private void addToTrackAndAssertRideHeight(TestFixData... testFixData) throws ClassNotFoundException, IOException {
         List<TestFixData> testFixDataList = Arrays.asList(testFixData);
         testFixDataList.forEach(TestFixData::addBravoFixToTrack);
-        BravoFixTrack track = getDeserializedTrack();
+        BravoFixTrack<Competitor> track = getDeserializedTrack();
         testFixDataList.forEach(testData -> assertRideHeight(track, testData));
     }
     
-    private void assertRideHeight(BravoFixTrack track, TestFixData testFixData) {
+    private void assertRideHeight(BravoFixTrack<Competitor> track, TestFixData testFixData) {
         assertRideHeight(track, testFixData.timePoint, testFixData.rideHeight);
     }
     
-    private void assertRideHeight(BravoFixTrack track, TimePoint timePoint, double expected) {
+    private void assertRideHeight(BravoFixTrack<Competitor> track, TimePoint timePoint, double expected) {
         assertEquals(expected, track.getRideHeight(timePoint), 0.0);
     }
     
-    private BravoFixTrack getDeserializedTrack() throws ClassNotFoundException, IOException {
+    @SuppressWarnings("unchecked")
+    private BravoFixTrack<Competitor> getDeserializedTrack() throws ClassNotFoundException, IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream ous = new ObjectOutputStream(baos);
         ous.writeObject(track);
         ous.close();
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-        BravoFixTrack deserializedInstance = (BravoFixTrack) ois.readObject();
+        BravoFixTrack<Competitor> deserializedInstance = (BravoFixTrack<Competitor>) ois.readObject();
         ois.close();
         return deserializedInstance;
     }

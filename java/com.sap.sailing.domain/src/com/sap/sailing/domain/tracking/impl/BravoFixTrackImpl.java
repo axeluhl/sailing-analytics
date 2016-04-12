@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.tracking.impl;
 
+import java.io.Serializable;
 import java.util.OptionalDouble;
 import java.util.Spliterator;
 import java.util.stream.StreamSupport;
@@ -11,11 +12,13 @@ import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
-public class BravoFixTrackImpl extends SensorFixTrackImpl<BravoFix> implements DynamicBravoFixTrack {
-    private static final long serialVersionUID = 3045856366552398911L;
+public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, BravoFix>
+        implements DynamicBravoFixTrack<ItemType> {
+    private static final long serialVersionUID = 5517848726456424386L;
 
-    public BravoFixTrackImpl(WithID trackedItem) {
-        super(BravoSensorDataMetadata.INSTANCE.getColumns(), BravoFixTrack.TRACK_NAME + " for " + trackedItem);
+    public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
+        super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getColumns(), 
+                BravoFixTrack.TRACK_NAME + " for " + trackedItem);
     }
 
     @Override

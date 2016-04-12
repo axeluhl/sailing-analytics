@@ -662,8 +662,8 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
     
     @Override
-    public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
-            String trackName) {
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
         return null;
     }
 

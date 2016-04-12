@@ -80,9 +80,9 @@ public class RaceLogSensorDataTracker {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
             competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
-                SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<SensorFix>, Competitor> mapper =
+                SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper =
                         sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
-                        DynamicSensorFixTrack<SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
+                        DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
                         if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
                             mapper.addFix(track, fix);
                         }
