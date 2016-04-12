@@ -1,7 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.activities;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -122,7 +124,7 @@ public class RegattaActivity extends AbstractRegattaActivity {
                 manager.callServerAndGenerateCheckinData();
                 return true;
             case R.id.check_out:
-                checkOut();
+                displayCheckoutConfirmationDialog();
                 return true;
             case R.id.about:
                 AboutHelper.showInfoActivity(this);
@@ -156,6 +158,20 @@ public class RegattaActivity extends AbstractRegattaActivity {
         if (BuildConfig.DEBUG) {
             ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
         }
+    }
+
+    private void displayCheckoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.warning);
+        builder.setMessage(R.string.checkout_warning_message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                checkOut();
+            }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.show();
     }
 
     private void checkOut(){
