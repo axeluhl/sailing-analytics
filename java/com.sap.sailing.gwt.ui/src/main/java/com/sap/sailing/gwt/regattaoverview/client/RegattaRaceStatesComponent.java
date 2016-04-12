@@ -892,6 +892,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
+        case Single_Unknown:
+            return stringMessages.toSide() + " " + stringMessages.unknown();
         case Port:
             return stringMessages.toSide() + " " + stringMessages.portSide();
         case Starboard:

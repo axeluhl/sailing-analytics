@@ -8,9 +8,9 @@ import android.graphics.drawable.LayerDrawable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 
 public class BuoyHelper {
 

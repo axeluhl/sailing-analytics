@@ -9,9 +9,9 @@ Require-Bundle: com.google.gwt.osgi;bundle-version="2.7.0",
  com.sap.sse.common,
  com.sap.sse.filestorage
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.gwt.core.ext,
- com.google.gwt.core.ext.linker,
- com.google.gwt.core.ext.linker.impl,
+Import-Package: com.google.gwt.core.ext;resolution:=optional,
+ com.google.gwt.core.ext.linker;resolution:=optional,
+ com.google.gwt.core.ext.linker.impl;resolution:=optional,
  javax.servlet;version="2.6.0",
  javax.servlet.descriptor;version="2.6.0",
  javax.servlet.http;version="2.6.0",

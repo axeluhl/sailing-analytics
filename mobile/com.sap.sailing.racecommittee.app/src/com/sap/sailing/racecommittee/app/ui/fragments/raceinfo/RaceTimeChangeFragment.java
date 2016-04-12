@@ -3,6 +3,7 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Calendar;
+import java.util.Locale;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -20,6 +20,7 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.TimePoint;
@@ -56,9 +57,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_time_change, container, false);
-
-        return layout;
+        return inflater.inflate(R.layout.race_time_change, container, false);
     }
 
     @Override
@@ -66,28 +65,33 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         super.onActivityCreated(savedInstanceState);
 
         View layout = getView();
-
         if (layout == null) {
             return;
         }
 
         final Calendar calendar = Calendar.getInstance();
-        TextView headerText = (TextView) layout.findViewById(R.id.header_headline);
-        if (headerText != null) {
+        HeaderLayout header = (HeaderLayout) layout.findViewById(R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeFragment();
+                }
+            });
             switch (getArguments().getInt(TIME_MODE, START_TIME_MODE)) {
                 case  START_TIME_MODE:
                     calendar.setTime(getRaceState().getStartTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_start));
+                    header.setHeaderText(getString(R.string.race_summary_start));
                     break;
 
                 case FINISHING_TIME_MODE:
                     calendar.setTime(getRaceState().getFinishingTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_finish_begin));
+                    header.setHeaderText(getString(R.string.race_summary_finish_begin));
                     break;
 
                 case FINISHED_TIME_MODE:
                     calendar.setTime(getRaceState().getFinishedTime().asDate());
-                    headerText.setText(getString(R.string.race_summary_finish_end));
+                    header.setHeaderText(getString(R.string.race_summary_finish_end));
                     break;
             }
         }
@@ -151,7 +155,7 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
             mSecondPicker.setFormatter(new NumberPicker.Formatter() {
                 @Override
                 public String format(int i) {
-                    return String.format("%02d", i);
+                    return String.format(Locale.US, "%02d", i);
                 }
             });
             mSecondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
@@ -177,16 +181,6 @@ public class RaceTimeChangeFragment extends BaseFragment implements View.OnClick
         View setTime = layout.findViewById(R.id.set_date_time);
         if (setTime != null) {
             setTime.setOnClickListener(this);
-        }
-
-        View header = layout.findViewById(R.id.header);
-        if (header != null) {
-            header.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    closeFragment();
-                }
-            });
         }
     }
 

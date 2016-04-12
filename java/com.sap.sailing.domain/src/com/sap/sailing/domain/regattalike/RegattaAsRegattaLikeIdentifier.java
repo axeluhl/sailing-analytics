@@ -49,4 +49,9 @@ public class RegattaAsRegattaLikeIdentifier implements RegattaLikeIdentifier {
     public String getIdentifierType() {
         return Regatta.class.getName();
     }
+    
+    @Override
+    public String toString() {
+        return getClass().getName()+": regattaName="+getName();
+    }
 }

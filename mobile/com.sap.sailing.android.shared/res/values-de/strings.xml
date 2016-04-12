@@ -43,4 +43,10 @@
     <string name="eula">Datenschutz</string>
     <string name="license_information">Lizenzhinweise</string>
 
+    <!-- Dialog -->
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="warning">Warnung</string>
+    <string name="enable_gps">GPS ist nicht aktiviert. Diese App erfordert GPS Positionen. Möchten Sie GPS in den Einstellungen aktivieren?</string>
+
 </resources>

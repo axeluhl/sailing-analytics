@@ -40,6 +40,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
@@ -83,6 +84,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
@@ -156,6 +158,8 @@ import difflib.Patch;
 import difflib.PatchFailedException;
 
 public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials implements CourseListener {
+    public static final int TRACKING_BUFFER_IN_MINUTES = 5;
+
     private static final long serialVersionUID = -4825546964220003507L;
 
     private static final Logger logger = Logger.getLogger(TrackedRaceImpl.class.getName());
@@ -194,6 +198,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private TimePoint endOfTrackingReceived;
 
     /**
+     * The start and end of tracking inferred via RaceLog, the received timepoint (see above) and mapping intervals.
+     * For the precedence order see {@link #updateStartAndEndOfTracking()}.
+     */
+    private TimePoint startOfTracking;
+    private TimePoint endOfTracking;
+
+    /**
      * Race start time as announced by the tracking infrastructure
      */
     private TimePoint startTimeReceived;
@@ -202,7 +213,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The calculated race start time
      */
     private TimePoint startTime;
-
+    
+    /**
+     * Maintained in lock-step with {@link #startTime}, only that {@code null} will be contained if {@link #startTime}
+     * was only inferred from start mark passings and no other, more official, information such as
+     * {@link #getStartTimeReceived()} or a start time coming from an attached {@link RaceLog}.
+     */
+    private TimePoint startTimeWithoutInferenceFromStartMarkPassings;
+    
     /**
      * The calculated race end time
      */
@@ -423,7 +441,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         this.startToNextMarkCacheInvalidationListeners = new ConcurrentHashMap<Mark, TrackedRaceImpl.StartToNextMarkCacheInvalidationListener>();
         this.maneuverCache = createManeuverCache();
         this.markTracks = new ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>>();
-        this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         this.gpsFixStore = gpsFixStore;
         int i = 0;
         for (Waypoint waypoint : race.getCourse().getWaypoints()) {
@@ -444,7 +461,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 getOrCreateTrack(mark);
             }
         }
-        
         trackedLegs = new LinkedHashMap<Leg, TrackedLeg>();
         race.getCourse().lockForRead();
         try {
@@ -469,6 +485,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     MarkPassingsByTimeAndCompetitorIdComparator.INSTANCE));
         }
         markPassingsTimes = new ArrayList<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>>();
+        this.crossTrackErrorCache = new CrossTrackErrorCache(this);
         loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
         // When this tracked race is to be serialized, wait for the loading from stores to complete.
         new Thread("Mongo wind loader for tracked race " + getRace().getName()) {
@@ -722,26 +739,85 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public TimePoint getStartOfTracking() {
-        return startOfTrackingReceived;
+        return startOfTracking;
+    }
+    
+    /**
+     * Updates the start and end of tracking in the following precedence order:
+     * 
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol>
+     */
+    public void updateStartAndEndOfTracking() {
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+        final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
+        TimePoint oldStartOfTracking = getStartOfTracking();
+        TimePoint oldEndOfTracking = getEndOfTracking();
+        boolean startOfTrackingFound = false;
+        boolean endOfTrackingFound = false;
+        // check race log
+        if (trackingTimesFromRaceLog != null){
+            if (trackingTimesFromRaceLog.getA() != null) {
+                startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
+                startOfTrackingFound = true;
+            }
+            if (trackingTimesFromRaceLog.getB() != null) {
+                endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
+                endOfTrackingFound = true;
+            }
+        }
+        // check "received" variants coming from a connector directly
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startOfTrackingReceived != null && !startOfTrackingFound) {
+                startOfTrackingFound = true;
+                startOfTracking = startOfTrackingReceived;
+            }
+            if (endOfTrackingReceived != null && !endOfTrackingFound) {
+                endOfTrackingFound = true;
+                endOfTracking = endOfTrackingReceived;
+            }
+        }
+        // check for start/finished times in race log and add a few minutes on the ends
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startAndFinishedTimesFromRaceLog != null) {
+                if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
+                    startOfTracking = startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+                    startOfTrackingFound = true;
+                }
+                if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null){
+                    endOfTracking = startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
+                    endOfTrackingFound = true;
+                }
+            }
+        }
+        startOfTrackingChanged(oldStartOfTracking, false);
+        endOfTrackingChanged(oldEndOfTracking, false);
     }
 
     @Override
     public TimePoint getEndOfTracking() {
-        return endOfTrackingReceived;
+        return endOfTracking;
     }
 
     public void invalidateStartTime() {
         startTime = null;
+        startTimeWithoutInferenceFromStartMarkPassings = null;
+        updateStartAndEndOfTracking();
     }
 
     public void invalidateEndTime() {
         endTime = null;
+        updateStartAndEndOfTracking();
     }
 
     protected void invalidateMarkPassingTimes() {
         synchronized (markPassingsTimes) {
             markPassingsTimes.clear();
         }
+        updateStartAndEndOfTracking();
     }
     
     /**
@@ -750,17 +826,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * tracking specification (see bug 3196). This method uses the {@link TrackingTimesFinder} to
      * analyze all {@link #attachedRaceLogs race logs attached} to find tracking times specifications.
      * If no tracking times specification is found at all, <code>null</code> is returned. Note that
-     * even when a valid pair is returned, the components may be <code>null</code>.
+     * even when a valid pair is returned, the components may be <code>null</code>. This may either
+     * indicate that no event for that part of the tracking interval was found, or that an event
+     * was found that explicitly specified {@code null} to force an open interval on that end.
      */
     @Override
-    public Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            Pair<TimePoint, TimePoint> result = new TrackingTimesFinder(raceLog).analyze();
+            Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> result = new TrackingTimesFinder(raceLog).analyze();
             if (result != null) {
                 return result;
             }
         }
         return null;
+    }
+    
+    @Override
+    public Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
+        //Only one of the RaceLogs should have valid data, so one doesn't have to compare all the 
+        //start/finished time values in order to find the earliest startTime/latestFinishedTime
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            TimePoint startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
+            TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
+            if (startTime != null || finishedTime != null){
+                return new Util.Pair<TimePoint, TimePoint>(startTime, finishedTime);
+            }
+        }
+        return null;        
     }
 
     /**
@@ -771,13 +863,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     @Override
     public TimePoint getStartOfRace() {
-        if (startTime == null) {
+        return getStartOfRace(/* inferred */ true);
+    }
+
+    @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        final TimePoint result;
+        // check if we have in our caching fields what is asked:
+        if (inferred && startTime != null) {
+            result = startTime;
+        } else if (!inferred && startTimeWithoutInferenceFromStartMarkPassings != null) {
+            result = startTimeWithoutInferenceFromStartMarkPassings;
+        } else {
+            // no cache match; re-calculate
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 }
                 startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
                 if (startTime != null) {
+                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
                     if (logger.isLoggable(Level.FINEST)) {
                         logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     }
@@ -789,12 +894,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.finest("No start time found in race logs for race "+getRace().getName());
                 }
                 startTime = getStartTimeReceived();
+                if (startTime != null) {
+                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
+                }
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
                 // If no official start time was received, try to estimate the start time using the mark passings for
                 // the start line.
                 final Waypoint firstWaypoint;
                 if (getTrackedRegatta().getRegatta().useStartTimeInference() && (firstWaypoint = getRace().getCourse().getFirstWaypoint()) != null) {
+                    // in this "if" branch update only startTime, not startTimeWithoutInferenceFromStartMarkPassings
                     if (startTimeReceived != null) {
                         // plausibility check for start time received, based on start mark passings; if no boat started within
                         // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
@@ -828,8 +937,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     }
                 }
             }
+            if (inferred) {
+                result = startTime;
+            } else {
+                result = startTimeWithoutInferenceFromStartMarkPassings;
+            }
         }
-        return startTime;
+        return result;
     }
 
     /**
@@ -1498,7 +1612,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return getOrCreateTrack(mark, false);
     }
     
-    private GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark, boolean createIfNotExistent){
+    private GPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark, boolean createIfNotExistent) {
         GPSFixTrack<Mark, GPSFix> result = markTracks.get(mark);
         if (result == null) {
             // try again, this time with more expensive synchronization
@@ -1813,12 +1927,18 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setStartOfTrackingReceived(final TimePoint startOfTracking, final boolean waitForGPSFixesToLoad) {
-        final TimePoint oldStartOfTracking = this.startOfTrackingReceived;
+        final TimePoint oldStartOfTracking = getStartOfTracking();
         this.startOfTrackingReceived = startOfTracking;
-        if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
-                (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
-            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+startOfTracking);
-            loadGPSFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
+        updateStartAndEndOfTracking();
+        startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+    }
+    
+    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad){
+        TimePoint inferedStartOfTracking = getStartOfTracking();
+        if (!Util.equalsWithNull(oldStartOfTracking, inferedStartOfTracking) &&
+                (inferedStartOfTracking == null || (oldStartOfTracking != null && inferedStartOfTracking.before(oldStartOfTracking)))) {
+            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+inferedStartOfTracking);
+            loadGPSFixesForExtendedTimeRange(inferedStartOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
         }
     }
 
@@ -1832,11 +1952,19 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     protected void setEndOfTrackingReceived(final TimePoint endOfTracking, final boolean waitForGPSFixesToLoad) {
         final TimePoint oldEndOfTracking = this.endOfTrackingReceived;
         this.endOfTrackingReceived = endOfTracking;
-        if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
-                (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
-            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+endOfTracking);
-            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking, waitForGPSFixesToLoad);
+        updateStartAndEndOfTracking();
+        endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
+    }
+    
+    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad){
+        TimePoint inferedEndOfTracking = getEndOfTracking();
+
+        if (!Util.equalsWithNull(oldEndOfTracking, inferedEndOfTracking) &&
+                (inferedEndOfTracking == null || (oldEndOfTracking != null && inferedEndOfTracking.after(oldEndOfTracking)))) {
+            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferedEndOfTracking);
+            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, inferedEndOfTracking, waitForGPSFixesToLoad);
         }
+
     }
 
     /**
@@ -3248,22 +3376,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     logger.info("Finished loading competitor tracks for " + getRace().getName());
                     logger.info("Started loading mark tracks for " + getRace().getName());
                     for (Mark mark : getMarksFromRegattaLogs()) {
-                        try {
-                            gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
-                                    log, mark, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
-                            if (getOrCreateTrack(mark).getFirstRawFix() == null) {
-                                logger.fine("Loading mark positions from outside of start/end of tracking interval ("+
-                                        startOfTimeWindowToLoad+".."+endOfTimeWindowToLoad+
-                                        ") because no fixes were found in that interval");
-                                // got an empty track for the mark; try again without constraining the mapping interval
-                                // by start/end of tracking to at least attempt to get fixes at all in case there were any
-                                // within the device mapping interval specified
-                                gpsFixStore.loadMarkTrack((DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark),
-                                        log, mark, /* startOfTimeWindowToLoad */ null, /* endOfTimeWindowToLoad */ null);
-                            }
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load track for " + mark, e);
-                        }
+                        final DynamicGPSFixTrack<Mark, GPSFix> markTrack = (DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark);
+                        loadMarkTrack(log, mark, markTrack, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
                     }
                     logger.info("Finished loading mark tracks for " + getRace().getName());
                 } finally {
@@ -3288,6 +3402,32 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     /**
+     * Loads the GPS fixes for a mark from the {@link #gpsFixStore} and adds them to {@code intoTrack}. The device
+     * mappings are expected to be found in {@code logWithDeviceMappings}. The fixes added have to be within
+     * {@code from} and {@code to}, inclusively, with one exception: if no fix is found within this interval at all, all
+     * fixes found for the mark are loaded to make sure that any position data that may give a hint for the interval
+     * requests is loaded.
+     */
+    private void loadMarkTrack(final RegattaLog logWithDeviceMappings, Mark mark,
+            final DynamicGPSFixTrack<Mark, GPSFix> intoTrack, final TimePoint from, final TimePoint to) {
+        try {
+            gpsFixStore.loadMarkTrack(intoTrack, logWithDeviceMappings, mark, from, to);
+            if (intoTrack.getFirstRawFix() == null) {
+                logger.fine("Loading mark positions from outside of start/end of tracking interval ("+
+                        from+".."+to+
+                        ") because no fixes were found in that interval");
+                // got an empty track for the mark; try again without constraining the mapping interval
+                // by start/end of tracking to at least attempt to get fixes at all in case there were any
+                // within the device mapping interval specified
+                gpsFixStore.loadMarkTrack(intoTrack,
+                        logWithDeviceMappings, mark, /* startOfTimeWindowToLoad */ null, /* endOfTimeWindowToLoad */ null);
+            }
+        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+            logger.log(Level.WARNING, "Could not load track for " + mark, e);
+        }
+    }
+
+    /**
      * Tells if currently the race is loading GPS fixes from the {@link GPSFixStore}. Clients may {@link Object#wait()} on <code>this</code>
      * object and will be notified whenever a change of this flag's value occurs.
      */
@@ -3300,6 +3440,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (TrackedRaceImpl.this) {
             attachedRaceLogs.put(raceLog.getId(), raceLog);
             notifyAll();
+            updateStartAndEndOfTracking();
         }
     }
 
@@ -3353,6 +3494,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
         }
+        updateStartAndEndOfTracking();
     }
 
     @Override

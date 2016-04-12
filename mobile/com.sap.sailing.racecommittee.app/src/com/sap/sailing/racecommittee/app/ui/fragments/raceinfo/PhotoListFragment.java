@@ -29,6 +29,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sailing.racecommittee.app.ui.views.decoration.PaddingItemDecoration;
 import com.sap.sailing.racecommittee.app.utils.CameraHelper;
 import com.sap.sailing.racecommittee.app.utils.MailHelper;
@@ -101,12 +102,12 @@ public class PhotoListFragment extends BaseFragment {
             });
         }
 
-        View home = ViewHelper.get(layout, R.id.header_text);
-        if (home != null) {
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
             if (getActivity().findViewById(R.id.finished_edit) == null) {
-                ViewHelper.get(layout, R.id.photo_header).setVisibility(View.GONE);
+                header.setVisibility(View.GONE);
             } else {
-                home.setOnClickListener(new View.OnClickListener() {
+                header.setHeaderOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);

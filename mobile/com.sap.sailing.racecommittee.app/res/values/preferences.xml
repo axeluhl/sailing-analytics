@@ -51,6 +51,8 @@
     <string name="preference_racing_procedure_rrs26_classflag_key" translatable="false">rrs26ClassFlag</string>
     <string name="preference_racing_procedure_rrs26_hasxray_key" translatable="false">rrs26IndividualRecall</string>
     <bool name="preference_racing_procedure_rrs26_hasxray_default">true</bool>
+    <string name="preference_racing_procedure_rrs26_resultentryenabled_key" translatable="false">rrs26ResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_rrs26_resultentryenabled_default">false</bool>
     <string name="preference_racing_procedure_rrs26_startmode_flags_key" translatable="false">rrs26StartmodeFlags</string>
     <string-array name="preference_racing_procedure_rrs26_startmode_flags_default">
         <item>PAPA</item>
@@ -61,20 +63,28 @@
     <string name="preference_racing_procedure_gatestart_classflag_key" translatable="false">gateStartClassFlag</string>
     <string name="preference_racing_procedure_gatestart_hasxray_key" translatable="false">gateStartIndividualRecall</string>
     <bool name="preference_racing_procedure_gatestart_hasxray_default">false</bool>
+    <string name="preference_racing_procedure_gatestart_resultentryenabled_key" translatable="false">gateStartResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_gatestart_resultentryenabled_default">false</bool>
     <string name="preference_racing_procedure_gatestart_haspathfinder_key" translatable="false">gateStartPathfinder</string>
     <bool name="preference_racing_procedure_gatestart_haspathfinder_default">true</bool>
     <string name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key" translatable="false">gateStartHasAdditionalGolfDownTime</string>
     <bool name="preference_racing_procedure_gatestart_hasadditionalgolfdowntime_default">true</bool>
-	<string name="preference_racing_procedure_ess_classflag_key" translatable="false">essClassFlag</string>
+    <string name="preference_racing_procedure_ess_classflag_key" translatable="false">essClassFlag</string>
     <string name="preference_racing_procedure_ess_hasxray_key" translatable="false">essIndividualRecall</string>
     <bool name="preference_racing_procedure_ess_hasxray_default">true</bool>
-	<string name="preference_racing_procedure_basic_classflag_key" translatable="false">basicClassFlag</string>
+    <string name="preference_racing_procedure_ess_resultentryenabled_key" translatable="false">essResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_ess_resultentryenabled_default">false</bool>
+    <string name="preference_racing_procedure_basic_classflag_key" translatable="false">basicClassFlag</string>
     <string name="preference_racing_procedure_basic_hasxray_key" translatable="false">basicIndividualRecall</string>
     <bool name="preference_racing_procedure_basic_hasxray_default">false</bool>
-	<string name="preference_racing_procedure_league_classflag_key" translatable="false">leagueClassFlag</string>
+    <string name="preference_racing_procedure_basic_resultentryenabled_key" translatable="false">basicResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_basic_resultentryenabled_default">true</bool>
+    <string name="preference_racing_procedure_league_classflag_key" translatable="false">leagueClassFlag</string>
     <string name="preference_racing_procedure_league_hasxray_key" translatable="false">leagueIndividualRecall</string>
     <bool name="preference_racing_procedure_league_hasxray_default">false</bool>
-
+    <string name="preference_racing_procedure_league_resultentryenabled_key" translatable="false">leagueResultEntryEnabled</string>
+    <bool name="preference_racing_procedure_league_resultentryenabled_default">true</bool>
+    
     <string name="preference_regatta_specific_save_key" translatable="false">basicIndividualRecall</string>
     <string name="preference_heading_with_declination_subtracted_key" translatable="false">preferenceHeadingWithDeclinationSubtracted</string>
     <bool name="preference_heading_with_declination_subtracted_default">true</bool>
@@ -108,4 +118,7 @@
         <item>Dark</item>
         <item>Light</item>
     </string-array>
+
+    <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
+    <bool name="preference_non_public_events_default">false</bool>
 </resources>

@@ -27,6 +27,8 @@ public class ActionsHelper {
     
     public static final String REFRESH_RACE_ACTION = "ACTION_REFRESH_RACE";
     
+    public static final String SET_START_TIME_ACTION = "ACTION_SET_STARTTIME";
+    
     public static WebElement findEditAction(SearchContext context) {
         return context.findElement(By.xpath(String.format(ACTION_XPATH, EDIT_ACTION)));
     }
@@ -49,6 +51,10 @@ public class ActionsHelper {
     
     public static WebElement findRefreshAction(SearchContext context) {
         return context.findElement(By.xpath(String.format(ACTION_XPATH, REFRESH_RACE_ACTION)));
+    }
+    
+    public static WebElement findSetStartTimeAction(SearchContext context) {
+        return context.findElement(By.xpath(String.format(ACTION_XPATH, SET_START_TIME_ACTION)));
     }
     
     public static void acceptAlert(WebDriver driver) {

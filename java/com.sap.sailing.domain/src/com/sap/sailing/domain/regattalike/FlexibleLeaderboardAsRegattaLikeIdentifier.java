@@ -49,4 +49,9 @@ public class FlexibleLeaderboardAsRegattaLikeIdentifier implements RegattaLikeId
     public String getIdentifierType() {
         return FlexibleLeaderboard.class.getName();
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName()+": leaderboardName="+getName();
+    }
 }

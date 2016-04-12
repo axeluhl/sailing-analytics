@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -19,6 +18,7 @@ import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItemAdapter;
+import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.NaturalComparator;
 
@@ -40,9 +40,9 @@ public class CourseFragmentName extends CourseFragment {
 
         mListView = (ListView) layout.findViewById(R.id.listView);
 
-        LinearLayout headerText = ViewHelper.get(layout, R.id.header_text);
-        if (headerText != null) {
-            headerText.setOnClickListener(new View.OnClickListener() {
+        HeaderLayout header = ViewHelper.get(layout, R.id.header);
+        if (header != null) {
+            header.setHeaderOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {

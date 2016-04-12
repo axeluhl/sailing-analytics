@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmed
 import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFlagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
@@ -22,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.AbortingFlagFinder
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.WindFixesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
 import com.sap.sailing.domain.base.Competitor;
@@ -31,12 +31,12 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingUpdateListener;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceLogWindFixDeclinationHelper;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -76,10 +76,6 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private LastPublishedCourseDesignFinder createCourseDesignFinder(RaceLog raceLog) {
         return new LastPublishedCourseDesignFinder(raceLog);
-    }
-
-    private TrackingTimesFinder createTrackingTimesFinder(RaceLog raceLog) {
-        return new TrackingTimesFinder(raceLog);
     }
 
     private AbortingFlagFinder createAbortingFlagFinder(RaceLog raceLog) {
@@ -154,20 +150,11 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     private void analyze(RaceLog raceLog) {
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
-        analyseTrackingTimes(raceLog);
         if (markPassingUpdateListener != null) {
             markPassingDataFinder = new MarkPassingDataFinder(raceLog);
             analyzeMarkPassings();
         }
         trackedRace.updateMarkPassingsAfterRaceLogChanges();
-    }
-
-    private void analyseTrackingTimes(RaceLog raceLog) {
-        Pair<TimePoint, TimePoint> times = createTrackingTimesFinder(raceLog).analyze();
-        if (times != null) {
-            trackedRace.setStartOfTrackingReceived(times.getA());
-            trackedRace.setEndOfTrackingReceived(times.getB());
-        }
     }
 
     private void analyzeCourseDesign(CourseBase courseBaseProvidedByEvent) {
@@ -319,11 +306,18 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
-        trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+        trackedRace.updateStartAndEndOfTracking();
     }
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
-        trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+        trackedRace.updateStartAndEndOfTracking();
+    }
+
+    @Override
+    public void visit(RaceLogRaceStatusEvent event) {
+        if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+            trackedRace.invalidateEndTime();
+        }
     }
 }

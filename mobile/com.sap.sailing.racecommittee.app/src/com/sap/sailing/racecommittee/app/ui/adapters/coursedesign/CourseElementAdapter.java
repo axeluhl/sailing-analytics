@@ -17,6 +17,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.R;
@@ -24,7 +25,6 @@ import com.sap.sailing.racecommittee.app.domain.impl.CourseListDataElementWithId
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.BaseDraggableSwipeViewHolder;
 import com.sap.sailing.racecommittee.app.ui.utils.MarkImageHelper;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView.ViewHolder> {
@@ -178,6 +178,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
         if (PassingInstruction.Port.equals(direction)) {
             return "P";
+        }
+        if (PassingInstruction.Single_Unknown.equals(direction)) {
+            return "U";
         }
         if (PassingInstruction.Starboard.equals(direction)) {
             return "S";

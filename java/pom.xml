@@ -176,6 +176,8 @@
         <module>com.sap.sailing.manage2sail</module>
         <module>com.sap.sailing.manage2sail.resultimport</module>
         <module>com.sap.sailing.manage2sail.resultimport.test</module>
+        <module>com.sap.sailing.yachtscoring.resultimport</module>
+        <module>com.sap.sailing.yachtscoring.resultimport.test</module>
         <module>com.sap.sailing.simulator.test</module>
         <module>com.sap.sailing.server.trackfiles.test</module>
         <module>com.sap.sailing.selenium.test</module>
