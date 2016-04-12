@@ -29,7 +29,7 @@ public class BravoFixTrackSerializationTest {
     
     @Before
     public void setUp() {
-        track = new BravoFixTrackImpl(TrackBasedTest.createCompetitor("SAP Saling"));
+        track = new BravoFixTrackImpl(TrackBasedTest.createCompetitor("SAP Extreme Sailing Team"));
     }
     
     @Test
@@ -49,6 +49,24 @@ public class BravoFixTrackSerializationTest {
                 new TestFixData(now().minus(Duration.ONE_MINUTE.times(3)), 0.3721),
                 new TestFixData(now().minus(Duration.ONE_MINUTE.times(4)), 0.7942),
                 new TestFixData(now().minus(Duration.ONE_MINUTE.times(5)), 0.6203));
+    }
+    
+    @Test
+    public void testWithTwoFixesWithSameTimePointNoReplacement() throws ClassNotFoundException, IOException {
+        TimePoint timePoint = now().minus(Duration.ONE_MINUTE);
+        TestFixData testFixData1 = new TestFixData(timePoint, 1.0000);
+        TestFixData testFixData2 = new TestFixData(timePoint, 0.5000);
+        Arrays.asList(testFixData1, testFixData2).forEach(TestFixData::addBravoFixToTrack);
+        assertRideHeight(getDeserializedTrack(), testFixData1);
+    }
+    
+    @Test
+    public void testWithTwoFixesWithSameTimePointWithReplacement() throws ClassNotFoundException, IOException {
+        TimePoint timePoint = now().minus(Duration.ONE_MINUTE);
+        TestFixData testFixData1 = new TestFixData(timePoint, 1.0000);
+        TestFixData testFixData2 = new TestFixData(timePoint, 0.5000);
+        Arrays.asList(testFixData1, testFixData2).forEach(TestFixData::replaceBravoFixOnTrack);
+        assertRideHeight(getDeserializedTrack(), testFixData2);
     }
     
     private void addToTrackAndAssertRideHeight(TestFixData... testFixData) throws ClassNotFoundException, IOException {
@@ -87,9 +105,17 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addBravoFixToTrack() {
+            addOrReplaceBravoFixToTrack(false);
+        }
+        
+        private void replaceBravoFixOnTrack() {
+            addOrReplaceBravoFixToTrack(true);
+        }
+        
+        private void addOrReplaceBravoFixToTrack(boolean replace) {
             double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.getColumns().size()];
             fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
-            track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)));
+            track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)), replace);
         }
     }
 
