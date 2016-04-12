@@ -24,6 +24,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -82,7 +83,6 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -731,7 +731,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void setTrackingTimes(RaceLogSetTrackingTimesDTO dto, AsyncCallback<Void> callback);
 
     void getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName,
-            AsyncCallback<Pair<TimePoint, TimePoint>> callback);
+            AsyncCallback<Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> callback);
 
     /**
      * Copies one race's competitor set to other races.
@@ -787,5 +787,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getMarkTracks(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<MarkTracksDTO> callback);
     void getTrackingTimes(Collection<Triple<String, String, String>> raceColumnsAndFleets,
-            AsyncCallback<Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>>> asyncCallback);
+            AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>> asyncCallback);
 }
