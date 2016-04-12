@@ -19,11 +19,11 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 
 public class CurrentRaceFilterImplTest {
 
-    private CurrentRaceFilter<RaceGroupFragment, SeriesFragment, RaceFragment> fixture;
+    private CurrentRaceFilter fixture;
 
     @Before
     public void setUp() {
-        fixture = new CurrentRaceFilterImpl<>();
+        fixture = new CurrentRaceFilterImpl();
     }
 
     @Test
