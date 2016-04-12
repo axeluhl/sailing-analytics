@@ -17,6 +17,7 @@ import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 
 public class PingHelper {
     private static String TAG = PingHelper.class.getName();
@@ -43,10 +44,8 @@ public class PingHelper {
     public Boolean storePingInDatabase(Context context, Location location, MarkInfo mark) {
         MarkPingInfo pingInfo = new MarkPingInfo();
         pingInfo.setMarkId(mark.getId());
-        pingInfo.setLatitude("" + location.getLatitude());
-        pingInfo.setLongitude("" + location.getLongitude());
+        pingInfo.setGpsFix(GPSFixImpl.create(location.getLongitude(), location.getLatitude(), location.getTime()));
         pingInfo.setAccuracy(location.getAccuracy());
-        pingInfo.setTimestamp((int) location.getTime());
         try {
             DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
         } catch (GeneralDatabaseHelperException e) {

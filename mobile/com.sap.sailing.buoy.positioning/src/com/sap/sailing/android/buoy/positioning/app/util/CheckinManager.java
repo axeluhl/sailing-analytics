@@ -183,11 +183,7 @@ public class CheckinManager {
                                         org.json.simple.JSONObject simplePosition;
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
-                                        // Latitude and longitude are stored as string values for SQLite database
-                                        ping.setLatitude("" + gpsFix.getPosition().getLatDeg());
-                                        ping.setLongitude("" + gpsFix.getPosition().getLngDeg());
-                                        // Timestamp is simply stored as int for SQLite database
-                                        ping.setTimestamp((int)gpsFix.getTimePoint().asMillis());
+                                        ping.setGpsFix(gpsFix);
                                         ping.setAccuracy(positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         ping.setMarkId(mark.getId());
                                         pings.add(ping);

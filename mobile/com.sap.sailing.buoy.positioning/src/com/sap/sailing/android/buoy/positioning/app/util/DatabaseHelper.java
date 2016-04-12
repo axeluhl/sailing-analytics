@@ -27,6 +27,7 @@ import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkPingInfo;
 import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 
 public class DatabaseHelper {
 
@@ -108,9 +109,10 @@ public class DatabaseHelper {
             while (!mpc.isAfterLast()) {
                 MarkPingInfo markPingInfo = new MarkPingInfo();
                 markPingInfo.setMarkId(markID);
-                markPingInfo.setTimestamp(mpc.getInt((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
-                markPingInfo.setLongitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
-                markPingInfo.setLatitude(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+                long timeStamp = Long.parseLong(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
+                double longitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
+                double latitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
+                markPingInfo.setGpsFix(GPSFixImpl.create(longitude, latitude, timeStamp));
                 markPingInfo.setAccuracy(mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
                 marks.add(markPingInfo);
                 mpc.moveToNext();

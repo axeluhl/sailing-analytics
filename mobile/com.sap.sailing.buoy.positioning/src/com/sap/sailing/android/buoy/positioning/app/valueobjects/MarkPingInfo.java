@@ -2,15 +2,19 @@ package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.common.tracking.GPSFix;
+
 public class MarkPingInfo {
     private Serializable markId;
-    private String longitude;
-    private String latitude;
+    private GPSFix gpsFix;
     private double accuracy;
-    private int timestamp;
 
     public Serializable getMarkId() {
         return markId;
+    }
+
+    public void setGpsFix(GPSFix fix) {
+        gpsFix = fix;
     }
 
     public void setMarkId(Serializable markId) {
@@ -18,19 +22,11 @@ public class MarkPingInfo {
     }
 
     public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+        return "" + gpsFix.getPosition().getLngDeg();
     }
 
     public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
+        return "" + gpsFix.getPosition().getLatDeg();
     }
 
     public double getAccuracy() {
@@ -41,11 +37,7 @@ public class MarkPingInfo {
         this.accuracy = accuracy;
     }
 
-    public int getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(int timestamp) {
-        this.timestamp = timestamp;
+    public long getTimestamp() {
+        return gpsFix.getTimePoint().asMillis();
     }
 }
