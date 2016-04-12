@@ -38,7 +38,6 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogSensorDataTracker {
@@ -89,27 +88,21 @@ public class RaceLogSensorDataTracker {
             });
         }
     };
-    private TimePoint startOfTracking;
-    private TimePoint endOfTracking;
+
     private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
         
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
-            final TimePoint oldStartOfTracking = RaceLogSensorDataTracker.this.startOfTracking;
-            RaceLogSensorDataTracker.this.startOfTracking = startOfTracking;
-            if (!Util.equalsWithNull(oldStartOfTracking, startOfTracking) &&
-                    (startOfTracking == null || (oldStartOfTracking != null && startOfTracking.before(oldStartOfTracking)))) {
-                loadFixesForExtendedTimeRange(startOfTracking, oldStartOfTracking);
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+            if ((newStartOfTracking == null || (oldStartOfTracking != null && newStartOfTracking
+                    .before(oldStartOfTracking)))) {
+                loadFixesForExtendedTimeRange(newStartOfTracking, oldStartOfTracking);
             }
         }
         
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
-            final TimePoint oldEndOfTracking = RaceLogSensorDataTracker.this.endOfTracking;
-            RaceLogSensorDataTracker.this.endOfTracking = endOfTracking;
-            if (!Util.equalsWithNull(oldEndOfTracking, endOfTracking) &&
-                    (endOfTracking == null || (oldEndOfTracking != null && endOfTracking.after(oldEndOfTracking)))) {
-                loadFixesForExtendedTimeRange(oldEndOfTracking, endOfTracking);
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+            if (newEndOfTracking == null || (oldEndOfTracking != null && newEndOfTracking.after(oldEndOfTracking))) {
+                loadFixesForExtendedTimeRange(oldEndOfTracking, newEndOfTracking);
             }
         }
     };
@@ -207,9 +200,10 @@ public class RaceLogSensorDataTracker {
     }
     
     private TimeRange getTrackingTimeRange() {
-        return new TimeRangeImpl(startOfTracking == null ? TimePoint.BeginningOfTime : startOfTracking,
-                endOfTracking == null ? TimePoint.EndOfTime : endOfTracking);
+        return new TimeRangeImpl(getStartOfTracking() == null ? TimePoint.BeginningOfTime : getStartOfTracking(),
+                getEndOfTracking() == null ? TimePoint.EndOfTime : getEndOfTracking());
     }
+
 
     private void startTracking() {
         trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
@@ -218,9 +212,6 @@ public class RaceLogSensorDataTracker {
         }
         
         trackedRace.addListener(trackingTimesRaceChangeListener);
-        this.startOfTracking = trackedRace.getStartOfTracking();
-        this.endOfTracking = trackedRace.getEndOfTracking();
-        
         updateMappingsAndAddListeners();
     }
 
@@ -252,4 +243,11 @@ public class RaceLogSensorDataTracker {
         trackedRace.removeListener(raceChangeListener);
     }
 
+    private TimePoint getStartOfTracking() {
+        return trackedRace.getStartOfTracking();
+    }
+
+    private TimePoint getEndOfTracking() {
+        return trackedRace.getEndOfTracking();
+    }
 }

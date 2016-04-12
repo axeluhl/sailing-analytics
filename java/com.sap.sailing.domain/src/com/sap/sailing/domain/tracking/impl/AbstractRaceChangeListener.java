@@ -50,12 +50,12 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     }
 
     @Override
-    public void startOfTrackingChanged(TimePoint startOfTracking) {
+    public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
         defaultAction();
     }
 
     @Override
-    public void endOfTrackingChanged(TimePoint endOfTracking) {
+    public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
         defaultAction();
     }
 

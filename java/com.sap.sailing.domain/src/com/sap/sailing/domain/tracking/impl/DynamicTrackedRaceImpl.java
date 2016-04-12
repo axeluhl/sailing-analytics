@@ -415,12 +415,12 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         notifyListeners(listener -> listener.windSourcesToExcludeChanged(windSourcesToExclude));
     }
 
-    private void notifyListenersStartOfTrackingChanged(TimePoint startOfTracking) {
-        notifyListeners(listener -> listener.startOfTrackingChanged(startOfTracking));
+    private void notifyListenersStartOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+        notifyListeners(listener -> listener.startOfTrackingChanged(oldStartOfTracking, newStartOfTracking));
     }
 
-    private void notifyListenersEndOfTrackingChanged(TimePoint endOfTracking) {
-        notifyListeners(listener -> listener.endOfTrackingChanged(endOfTracking));
+    private void notifyListenersEndOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+        notifyListeners(listener -> listener.endOfTrackingChanged(oldEndOfTracking, newEndOfTracking));
     }
 
     private void notifyListenersStartTimeReceivedChanged(TimePoint startTimeReceived) {
@@ -817,9 +817,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
+        TimePoint oldStartOfTracking = getStartOfTracking();
+        if (!Util.equalsWithNull(startOfTrackingReceived, oldStartOfTracking)) {
             super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersStartOfTrackingChanged(getStartOfTracking());
+            notifyListenersStartOfTrackingChanged(oldStartOfTracking, startOfTrackingReceived);
         }
     }
 
@@ -833,9 +834,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * potentially extended tracking interval to finish before returning from this method.
      */
     public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
+        TimePoint oldEndOfTracking = getEndOfTracking();
+        if (!Util.equalsWithNull(endOfTrackingReceived, oldEndOfTracking)) {
             super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersEndOfTrackingChanged(getEndOfTracking());
+            notifyListenersEndOfTrackingChanged(oldEndOfTracking, endOfTrackingReceived);
         }
     }
 

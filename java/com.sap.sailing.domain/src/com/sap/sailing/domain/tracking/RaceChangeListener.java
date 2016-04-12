@@ -34,9 +34,9 @@ public interface RaceChangeListener extends CourseListener {
 
     void windAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage);
 
-    void startOfTrackingChanged(TimePoint startOfTracking);
+    void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking);
     
-    void endOfTrackingChanged(TimePoint endOfTracking);
+    void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking);
     
     void startTimeReceivedChanged(TimePoint startTimeReceived);
     

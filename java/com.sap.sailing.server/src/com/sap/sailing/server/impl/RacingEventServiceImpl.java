@@ -1622,13 +1622,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
-        public void startOfTrackingChanged(TimePoint startOfTracking) {
-            replicate(new UpdateStartOfTracking(getRaceIdentifier(), startOfTracking));
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+            replicate(new UpdateStartOfTracking(getRaceIdentifier(), newStartOfTracking));
         }
 
         @Override
-        public void endOfTrackingChanged(TimePoint endOfTracking) {
-            replicate(new UpdateEndOfTracking(getRaceIdentifier(), endOfTracking));
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+            replicate(new UpdateEndOfTracking(getRaceIdentifier(), newEndOfTracking));
         }
 
         @Override
