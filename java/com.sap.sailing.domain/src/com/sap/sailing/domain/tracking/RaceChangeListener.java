@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sse.common.TimePoint;
 
 
@@ -54,4 +55,8 @@ public interface RaceChangeListener extends CourseListener {
     void windSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude);
 
     void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus);
+    
+    void trackAdded(DynamicSensorFixTrack<Competitor, ?> track);
+    
+    void fixAdded(Competitor competitor, String trackName, SensorFix fix);
 }

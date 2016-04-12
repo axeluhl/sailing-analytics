@@ -52,6 +52,7 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceAbortedListener;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
+import com.sap.sailing.domain.tracking.SensorFixTrackListener;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
@@ -61,6 +62,7 @@ import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -485,6 +487,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListeners(Competitor competitor, Map<Waypoint, MarkPassing> oldMarkPassings, Iterable<MarkPassing> markPassings) {
         notifyListeners(listener -> listener.markPassingReceived(competitor, oldMarkPassings, markPassings));
+    }
+    
+    private void notifyListeners(DynamicSensorFixTrack<Competitor, ?> track) {
+        notifyListeners(listener -> listener.trackAdded(track));
+    }
+    
+    private void notifyListeners(Competitor competitor, String trackName, SensorFix fix) {
+        notifyListeners(listener -> listener.fixAdded(competitor, trackName, fix));
     }
 
     /**
@@ -1052,5 +1062,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
         super.addSensorTrack(competitor, trackName, track);
+    }
+    
+    @Override
+    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+            DynamicSensorFixTrack<Competitor, FixT> track) {
+        super.addSensorTrackInternal(key, track);
+        track.addListener(new SensorFixTrackListener<Competitor, FixT>() {
+            private static final long serialVersionUID = 6143309919537011377L;
+
+            @Override
+            public boolean isTransient() {
+                return true;
+            }
+
+            @Override
+            public void fixReceived(FixT fix, Competitor item, String trackName, boolean firstFixInTrack) {
+                notifyListeners(item, trackName, fix);
+            }
+        });
+        notifyListeners(track);
     }
 }

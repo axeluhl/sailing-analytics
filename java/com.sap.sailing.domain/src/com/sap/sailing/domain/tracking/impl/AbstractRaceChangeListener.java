@@ -9,6 +9,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
@@ -111,6 +113,16 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
 
     @Override
     public void waypointRemoved(int zeroBasedIndex, Waypoint waypointThatGotRemoved) {
+        defaultAction();
+    }
+    
+    @Override
+    public void trackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+        defaultAction();
+    }
+    
+    @Override
+    public void fixAdded(Competitor competitor, String trackName, SensorFix fix) {
         defaultAction();
     }
 }

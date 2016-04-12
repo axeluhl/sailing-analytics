@@ -4089,8 +4089,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TrackT result = getTrackInternal(key);
             if (result == null) {
                 result = newTrackFactory.get();
-                // TODO add listener (replicate fix) and replicate track
-                sensorTracks.put(key, result);
+                addSensorTrackInternal(key, result);
             }
             return result;
         } finally {
@@ -4108,11 +4107,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             + competitor.getName() + "; trackName: " + trackName);
                 }
             } else {
-                // TODO add
+                this.addSensorTrackInternal(key, track);
             }
         } finally {
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
+    }
+    
+    protected <FixT extends SensorFix> void addSensorTrackInternal(Pair<Competitor, String> key,
+            DynamicSensorFixTrack<Competitor, FixT> track) {
+        sensorTracks.put(key, track);
     }
 
     @SuppressWarnings("unchecked")

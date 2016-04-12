@@ -109,6 +109,7 @@ import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -145,6 +146,7 @@ import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
+import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.EmptyTrackedRegattaListener;
@@ -186,6 +188,8 @@ import com.sap.sailing.server.operationaltransformation.CreateOrUpdateDeviceConf
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.DataImportFailed;
 import com.sap.sailing.server.operationaltransformation.RecordCompetitorGPSFix;
+import com.sap.sailing.server.operationaltransformation.RecordCompetitorSensorFix;
+import com.sap.sailing.server.operationaltransformation.RecordCompetitorSensorFixTrack;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFix;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForExistingTrack;
 import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMarkTrack;
@@ -1702,6 +1706,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         @Override
         public void speedAveragingChanged(long oldMillisecondsOverWhichToAverage, long newMillisecondsOverWhichToAverage) {
             replicate(new UpdateWindAveragingTime(getRaceIdentifier(), newMillisecondsOverWhichToAverage));
+        }
+        
+        @Override
+        public void trackAdded(DynamicSensorFixTrack<Competitor, ?> track) {
+            replicate(new RecordCompetitorSensorFixTrack(getRaceIdentifier(), track));
+        }
+        
+        @Override
+        public void fixAdded(Competitor competitor, String trackName, SensorFix fix) {
+            replicate(new RecordCompetitorSensorFix(getRaceIdentifier(), competitor, trackName, fix));
         }
 
         private RegattaAndRaceIdentifier getRaceIdentifier() {
