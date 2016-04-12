@@ -1,6 +1,10 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.tracking.BravoFix;
+import java.io.Serializable;
 
-public interface DynamicBravoFixTrack extends BravoFixTrack, DynamicSensorFixTrack<BravoFix> {
+import com.sap.sailing.domain.common.tracking.BravoFix;
+import com.sap.sse.common.WithID;
+
+public interface DynamicBravoFixTrack<ItemType extends WithID & Serializable> extends BravoFixTrack<ItemType>,
+        DynamicSensorFixTrack<ItemType, BravoFix> {
 }

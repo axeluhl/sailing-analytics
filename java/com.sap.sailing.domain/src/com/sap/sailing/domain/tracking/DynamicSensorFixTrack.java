@@ -1,7 +1,11 @@
 package com.sap.sailing.domain.tracking;
 
-import com.sap.sailing.domain.common.tracking.SensorFix;
+import java.io.Serializable;
 
-public interface DynamicSensorFixTrack<FixT extends SensorFix> extends SensorFixTrack<FixT>, DynamicTrack<FixT> {
+import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sse.common.WithID;
+
+public interface DynamicSensorFixTrack<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
+        SensorFixTrack<ItemType, FixT>, DynamicTrack<FixT> {
 
 }

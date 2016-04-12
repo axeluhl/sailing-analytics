@@ -4070,8 +4070,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          return result;
     }
     
-    public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
-            String trackName) {
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForRead(sensorTracksLock);
         try {
@@ -4081,7 +4081,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
 
-    protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(
+    protected <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);
         LockUtil.lockForWrite(sensorTracksLock);
@@ -4089,6 +4089,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             TrackT result = getTrackInternal(key);
             if (result == null) {
                 result = newTrackFactory.get();
+                // TODO add listener (replicate fix) and replicate track
                 sensorTracks.put(key, result);
             }
             return result;
@@ -4096,9 +4097,26 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
     }
+    
+    protected void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+        Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        LockUtil.lockForWrite(sensorTracksLock);
+        try {
+            if(getTrackInternal(key) != null) {
+                if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.WARNING)) {
+                    logger.warning(SensorFixTrack.class.getName() + " already exists for competitor: "
+                            + competitor.getName() + "; trackName: " + trackName);
+                }
+            } else {
+                // TODO add
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(sensorTracksLock);
+        }
+    }
 
     @SuppressWarnings("unchecked")
-    private <TrackT extends SensorFixTrack<?>> TrackT getTrackInternal(Pair<Competitor, String> key) {
+    private <TrackT extends SensorFixTrack<Competitor, ?>> TrackT getTrackInternal(Pair<Competitor, String> key) {
         return (TrackT) sensorTracks.get(key);
     }
     

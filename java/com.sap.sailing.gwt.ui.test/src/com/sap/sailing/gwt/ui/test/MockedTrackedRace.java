@@ -810,20 +810,20 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
     
     @Override
-    public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
-            String trackName) {
+    public <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(
+            Competitor competitor, String trackName) {
         return null;
     }
     
     @Override
-    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getDynamicSensorTrack(Competitor competitor,
-            String trackName) {
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
+            Competitor competitor, String trackName) {
         return null;
     }
 
     @Override
-    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
-            String trackName, TrackFactory<TrackT> newTrackFactory) {
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         return null;
     }
     
@@ -840,5 +840,9 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
             boolean onlyWhenInTrackingTimeInterval) {
+    }
+    
+    @Override
+    public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
     }
 }

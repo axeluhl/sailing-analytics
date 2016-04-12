@@ -79,11 +79,11 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
-    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
-            String trackName, TrackFactory<TrackT> newTrackFactory);
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
+            Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory);
     
-    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getDynamicSensorTrack(Competitor competitor,
-            String trackName);
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
+            Competitor competitor, String trackName);
 
     void recordSensorFix(Competitor competitor, String trackName, SensorFix fix, boolean onlyWhenInTrackingTimeInterval);
 
@@ -179,5 +179,7 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
+
+    void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
 
 }
