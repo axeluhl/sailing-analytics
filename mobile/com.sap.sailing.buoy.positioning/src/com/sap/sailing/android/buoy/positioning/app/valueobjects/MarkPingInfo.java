@@ -1,17 +1,19 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
+import java.io.Serializable;
+
 public class MarkPingInfo {
-    private String markId;
+    private Serializable markId;
     private String longitude;
     private String latitude;
     private double accuracy;
     private int timestamp;
 
-    public String getMarkId() {
+    public Serializable getMarkId() {
         return markId;
     }
 
-    public void setMarkId(String markId) {
+    public void setMarkId(Serializable markId) {
         this.markId = markId;
     }
 

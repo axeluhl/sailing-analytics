@@ -1,35 +1,29 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-public class MarkInfo {
+import java.io.Serializable;
 
-    private String markId;
-    private String name;
-    private String type;
+import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.common.MarkType;
+
+public class MarkInfo extends MarkImpl{
+
     private String className;
     private String checkinDigest;
 
-    public String getId() {
-        return markId;
+    public static MarkInfo create(MarkImpl mark) {
+        return new MarkInfo(mark.getId(), mark.getName(), mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern());
     }
 
-    public void setId(String id) {
-        this.markId = id;
+    public MarkInfo(String name) {
+        super(name);
     }
 
-    public String getName() {
-        return name;
+    public MarkInfo(Serializable id, String name) {
+        super(id, name);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public MarkInfo(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+        super(id, name, type, color, shape, pattern);
     }
 
     public String getClassName() {
@@ -55,27 +49,23 @@ public class MarkInfo {
         if (o == null || getClass() != o.getClass())
             return false;
 
-        MarkInfo info = (MarkInfo) o;
+        MarkInfo markInfo = (MarkInfo) o;
 
-        if (markId != null ? !markId.equals(info.markId) : info.markId != null)
+        if(!super.equals(markInfo)) {
             return false;
-        if (name != null ? !name.equals(info.name) : info.name != null)
+        }
+
+        if (!className.equals(markInfo.className))
             return false;
-        if (type != null ? !type.equals(info.type) : info.type != null)
-            return false;
-        if (className != null ? !className.equals(info.className) : info.className != null)
-            return false;
-        return !(checkinDigest != null ? !checkinDigest.equals(info.checkinDigest) : info.checkinDigest != null);
+        return checkinDigest.equals(markInfo.checkinDigest);
 
     }
 
     @Override
     public int hashCode() {
-        int result = markId != null ? markId.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (className != null ? className.hashCode() : 0);
-        result = 31 * result + (checkinDigest != null ? checkinDigest.hashCode() : 0);
+        int result = super.hashCode();
+        result = 31 * result + className.hashCode();
+        result = 31 * result + checkinDigest.hashCode();
         return result;
     }
 }

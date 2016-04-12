@@ -30,7 +30,7 @@ public class PingHelper {
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
 
-            String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId());
+            String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString());
 
             context.startService(MessageSendingService.createMessageIntent(context, postUrlStr, null,
                     UUID.randomUUID(), fixJson.toString(), callback));

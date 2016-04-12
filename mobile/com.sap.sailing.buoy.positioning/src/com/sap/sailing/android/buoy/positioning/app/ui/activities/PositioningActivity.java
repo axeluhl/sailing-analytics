@@ -60,7 +60,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
         setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
         for (MarkInfo mark : marks) {
-            if (mark.getId().equals(markerID)) {
+            if (mark.getId().toString().equals(markerID)) {
                 setMarkInfo(mark);
                 break;
             }
@@ -139,6 +139,6 @@ public class PositioningActivity extends BaseActivity implements pingListener {
 
     @Override
     public void updatePing() {
-        setPingFromDatabase(markInfo.getId());
+        setPingFromDatabase(markInfo.getId().toString());
     }
 }

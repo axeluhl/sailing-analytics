@@ -39,6 +39,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
@@ -168,11 +169,12 @@ public class CheckinManager {
                             List<MarkPingInfo> pings = new ArrayList<>();
                             for (int i = 0; i < markArray.length(); i++) {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
-                                MarkInfo mark = new MarkInfo();
+                                org.json.simple.JSONObject simpleMark;
+                                simpleMark = JsonHelper.convertToSimple(jsonMark);
+                                MarkJsonDeserializer markDeserializer = new MarkJsonDeserializer();
+                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark));
                                 mark.setCheckinDigest(checkinDigest);
                                 mark.setClassName(jsonMark.getString(MarkJsonSerializer.FIELD_CLASS));
-                                mark.setName(jsonMark.getString(MarkJsonSerializer.FIELD_NAME));
-                                mark.setId(jsonMark.getString(MarkJsonSerializer.FIELD_ID));
                                 if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
                                     if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
@@ -191,7 +193,6 @@ public class CheckinManager {
                                         pings.add(ping);
                                     }
                                 }
-                                mark.setType(jsonMark.getString(MarkJsonSerializer.FIELD_TYPE));
                                 marks.add(mark);
                             }
                             urlData.marks = marks;
