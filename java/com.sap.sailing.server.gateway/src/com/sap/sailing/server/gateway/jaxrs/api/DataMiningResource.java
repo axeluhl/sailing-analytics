@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -18,6 +19,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
@@ -42,12 +44,49 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
  */
 @Path("/v1/datamining")
 public class DataMiningResource extends AbstractSailingServerResource {
-
-    private static final String AVG_SPEED_PER_COMPETITOR_LEG_TYPE = "AvgSpeed_Per_Competitor-LegType";
-    private static final String SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE = "SumDistance_Per_Competitor-LegType";
-    private static final String SUM_MANEUVERS_PER_COMPETITOR = "SumManeuvers_Per_Competitor";
     
+    private SailingPredefinedQueries predefinedDataMiningQueries;
+
     private static final Function<Distance, Number> distanceMetersExtractor = (distance) -> distance.getMeters();
+    
+    public final static String QUERY_AVERAGE_SPEED_PER_REGATTA_RACE = "AvgSpeed_Per_Regatta-Race";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE = "AvgSpeed_Per_Competitor-LegType";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR = "AvgSpeed_Per_Competitor";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE = "DistanceTraveled_Per_Competitor-LegType";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR = "DistanceTraveled_Per_Competitor";
+    public final static String QUERY_MANEUVERS_PER_COMPETITOR = "Maneuvers_Per_Competitor";
+
+    public List<PredefinedQueryIdentifier> getPredefinedRegattaDataMiningQueries() {
+        return getPredefinedQueriesByNames(
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE,
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR,
+                QUERY_MANEUVERS_PER_COMPETITOR);
+    }
+
+    public List<PredefinedQueryIdentifier> getPredefinedRaceDataMiningQueries() {
+        return getPredefinedQueriesByNames(
+                QUERY_AVERAGE_SPEED_PER_REGATTA_RACE, 
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE,
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR,
+                QUERY_MANEUVERS_PER_COMPETITOR);
+    }
+
+    public List<PredefinedQueryIdentifier> getPredefinedQueriesByNames(String... names) {
+        List<PredefinedQueryIdentifier> result = new ArrayList<>();
+        SailingPredefinedQueries predefinedMiningQueries = getPredefinedMiningQueries();
+        for(PredefinedQueryIdentifier id: predefinedMiningQueries.getQueries().keySet()) {
+            for(String name: names) {
+                if(id.getIdentifier().equals(name)) {
+                    result.add(id);
+                }
+            }
+        }
+        return result;
+    }
 
     public DataMiningServer getDataMiningServer() {
         @SuppressWarnings("unchecked")
@@ -74,12 +113,13 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 type(MediaType.TEXT_PLAIN).build();
     }
 
-//    @GET
-//    @Produces("application/json;charset=UTF-8")
-//    public Response getPredefinedQueries() {
-//        return predefinedQueryIdentifiersToJSON(getDataMiningServer().getPredefinedQueryIdentifiers());
-//    }
-    
+    private SailingPredefinedQueries getPredefinedMiningQueries() {
+        if (predefinedDataMiningQueries == null) {
+            predefinedDataMiningQueries = new SailingPredefinedQueries();
+        }
+        return predefinedDataMiningQueries;
+    }
+
     public Response predefinedQueryIdentifiersToJSON(Iterable<PredefinedQueryIdentifier> identifiers) {
         JSONArray predefinedQueryNames = new JSONArray();
         for (PredefinedQueryIdentifier identifier : identifiers) {
@@ -93,26 +133,12 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
     
-//    @GET
-//    @Produces("application/json;charset=UTF-8")
-//    @Path("{identifier}")
-//    public Response runPredefinedQuery(@PathParam("identifier") String identifier) {
-//        Response response;
-//        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(identifier);
-//        if (queryDefinitionDTO == null) {
-//            response = getBadIdentifierErrorResponse(identifier);
-//        } else {
-//            response = runQuery(queryDefinitionDTO);
-//        }
-//        return response;
-//    }
-    
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -126,12 +152,17 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return response;
     }
 
+    public Response avgSpeedPerCompetitor(String regattaName) {
+        String json = "{}";
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+    
     public Response avgSpeedPerCompetitorAndLegType(String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -150,12 +181,17 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return response;
     }
 
-    public Response sumDistancePerCompetitorAndLegType(String regattaName) {
+    public Response avgSpeedPerCompetitor(String regattaName, String raceName) {
+        String json = "{}";
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+    
+    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -169,12 +205,17 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return response;
     }
 
-    public Response sumDistancePerCompetitorAndLegType(String regattaName, String raceName) {
+    public Response sumDistanceTraveledPerCompetitor(String regattaName) {
+        String json = "{}";
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
+    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -193,12 +234,17 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return response;
     }
 
+    public Response sumDistanceTraveledPerCompetitor(String regattaName, String raceName) {
+        String json = "{}";
+        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    }
+
     public Response sumManeuversPerCompetitor(String regattaName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
@@ -214,10 +260,10 @@ public class DataMiningResource extends AbstractSailingServerResource {
 
     public Response sumManeuversPerCompetitor(String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
+            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         } else {
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();

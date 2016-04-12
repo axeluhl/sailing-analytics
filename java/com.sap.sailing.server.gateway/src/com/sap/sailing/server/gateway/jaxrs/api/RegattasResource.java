@@ -76,6 +76,15 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 public class RegattasResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(RegattasResource.class.getName());
 
+    private DataMiningResource dataMiningResource;
+    
+    private DataMiningResource getDataMiningResource() {
+        if (dataMiningResource == null) {
+            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
+        }
+        return dataMiningResource;
+    }
+
     private Response getBadRegattaErrorResponse(String regattaName) {
         return Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
@@ -1040,24 +1049,11 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
     
-    private DataMiningResource dataMiningResource;
-    
-    private DataMiningResource getDataMiningResource() {
-        if (dataMiningResource == null) {
-            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
-        }
-        return dataMiningResource;
-    }
-
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("datamining")
     public Response getRegattaPredefinedQueries() {
-        // TODO Fetch the predefined queries for regattas dynamically
-        ArrayList<PredefinedQueryIdentifier> predefinedRegattaQueries = new ArrayList<>();
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"));
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumDistance_Per_Competitor-LegType", "Sum of the traveled Distance grouped by Competitor Team Name and Leg Type"));
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumManeuvers_Per_Competitor", "Sum of the performed Maneuvers grouped by Competitor Team Name"));
+        List<PredefinedQueryIdentifier> predefinedRegattaQueries = getDataMiningResource().getPredefinedRegattaDataMiningQueries();
         return getDataMiningResource().predefinedQueryIdentifiersToJSON(predefinedRegattaQueries);
     }
 
@@ -1106,7 +1102,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName);
+            response = getDataMiningResource().sumDistanceTraveledPerCompetitorAndLegType(regattaName);
         }
         return response;
     }
@@ -1125,7 +1121,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName, raceName);
+                response = getDataMiningResource().sumDistanceTraveledPerCompetitorAndLegType(regattaName, raceName);
             }
         }
         return response;
@@ -1165,5 +1161,74 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor")
+    public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().avgSpeedPerCompetitor(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor")
+    public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().avgSpeedPerCompetitor(regattaName, raceName);
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/SumDistance_Per_Competitor")
+    public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().sumDistanceTraveledPerCompetitor(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/SumDistance_Per_Competitor")
+    public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().sumDistanceTraveledPerCompetitor(regattaName, raceName);
+            }
+        }
+        return response;
+    }
 }
