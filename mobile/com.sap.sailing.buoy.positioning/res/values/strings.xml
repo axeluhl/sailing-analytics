@@ -5,7 +5,8 @@
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
     <string name="set_position">Set Position</string>
-    <string name="set_position_disabled">SET POSITION\nPlease activate GPS</string>
+    <string name="set_position_disabled_gps">SET POSITION\nPlease activate GPS</string>
+    <string name="set_position_no_gps_yet">POSITION SETZEN\nWaiting for GPS connection</string>
     <string name="reset_position">Reset Position</string>
     <string name="getting_marks">Getting race marks&#8230;</string>
     <string name="set">set</string>

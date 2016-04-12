@@ -115,7 +115,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         setPositionButton.setEnabled(false);
-        String text = getString(R.string.set_position_disabled);
+        boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
+        int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
+        String text = getString(buttonTextId);
         SpannableString disabledButtonText = new SpannableString(text);
         AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(10, true);
         disabledButtonText.setSpan(absoluteSizeSpan, text.indexOf("\n"), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
