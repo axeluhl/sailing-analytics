@@ -814,6 +814,12 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             String trackName) {
         return null;
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getDynamicSensorTrack(Competitor competitor,
+            String trackName) {
+        return null;
+    }
 
     @Override
     public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
@@ -829,5 +835,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public Iterable<RegattaLog> getAttachedRegattaLogs() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
+            boolean onlyWhenInTrackingTimeInterval) {
     }
 }

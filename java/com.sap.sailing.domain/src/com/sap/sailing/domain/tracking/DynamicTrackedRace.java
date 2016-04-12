@@ -81,6 +81,11 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getOrCreateSensorTrack(Competitor competitor,
             String trackName, TrackFactory<TrackT> newTrackFactory);
+    
+    <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getDynamicSensorTrack(Competitor competitor,
+            String trackName);
+
+    void recordSensorFix(Competitor competitor, String trackName, SensorFix fix, boolean onlyWhenInTrackingTimeInterval);
 
     /**
      * Updates all mark passings for <code>competitor</code> for this race. The mark passings must be provided in the

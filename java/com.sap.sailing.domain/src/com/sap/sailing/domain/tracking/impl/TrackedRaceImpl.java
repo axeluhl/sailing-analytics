@@ -4070,7 +4070,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
          return result;
     }
     
-    @Override
     public <FixT extends SensorFix, TrackT extends SensorFixTrack<FixT>> TrackT getSensorTrack(Competitor competitor,
             String trackName) {
         Pair<Competitor, String> key = new Pair<>(competitor, trackName);

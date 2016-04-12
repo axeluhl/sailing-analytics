@@ -1027,4 +1027,23 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory) {
         return super.getOrCreateSensorTrack(competitor, trackName, newTrackFactory);
     }
+    
+    @Override
+    public <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<FixT>> TrackT getDynamicSensorTrack(Competitor competitor,
+            String trackName) {
+        return super.getSensorTrack(competitor, trackName);
+    }
+    
+    @Override
+    public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix, boolean onlyWhenInTrackingTimesInterval) {
+        if (!onlyWhenInTrackingTimesInterval || isWithinStartAndEndOfTracking(fix.getTimePoint())) {
+            DynamicSensorFixTrack<SensorFix> track = getSensorTrack(competitor, trackName);
+            if (track != null) {
+                if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
+                    logger.finest(""+competitor.getName() + ": " + fix);
+                }
+                track.add(fix); // the track notifies this tracked race which in turn notifies its listeners
+            }
+        }
+    }
 }
