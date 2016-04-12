@@ -27,4 +27,6 @@
 
     <string name="options_menu_checkout">Checkout</string>
 
+    <string name="no_marks_message">Kein Bojen</string>
+
 </resources>

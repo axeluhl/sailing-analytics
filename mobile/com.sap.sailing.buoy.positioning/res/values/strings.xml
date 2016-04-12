@@ -29,4 +29,6 @@
 
     <string name="options_menu_checkout">Checkout</string>
 
+    <string name="no_marks_message">No marks</string>
+
 </resources>
