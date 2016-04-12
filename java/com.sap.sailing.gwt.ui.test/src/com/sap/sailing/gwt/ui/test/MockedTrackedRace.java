@@ -841,4 +841,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     public void recordSensorFix(Competitor competitor, String trackName, SensorFix fix,
             boolean onlyWhenInTrackingTimeInterval) {
     }
+    
+    @Override
+    public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+    }
 }

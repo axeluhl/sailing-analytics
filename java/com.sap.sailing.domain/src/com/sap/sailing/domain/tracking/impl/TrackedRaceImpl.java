@@ -4097,6 +4097,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.unlockAfterWrite(sensorTracksLock);
         }
     }
+    
+    protected void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+        Pair<Competitor, String> key = new Pair<>(competitor, trackName);
+        LockUtil.lockForWrite(sensorTracksLock);
+        try {
+            if(getTrackInternal(key) != null) {
+                if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.WARNING)) {
+                    logger.warning(SensorFixTrack.class.getName() + " already exists for competitor: "
+                            + competitor.getName() + "; trackName: " + trackName);
+                }
+            } else {
+                // TODO add
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(sensorTracksLock);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private <TrackT extends SensorFixTrack<Competitor, ?>> TrackT getTrackInternal(Pair<Competitor, String> key) {

@@ -1046,4 +1046,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
         }
     }
+    
+    @Override
+    public void addSensorTrack(Competitor competitor, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
+        super.addSensorTrack(competitor, trackName, track);
+    }
 }

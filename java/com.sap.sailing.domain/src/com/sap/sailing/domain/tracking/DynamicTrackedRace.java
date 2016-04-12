@@ -180,4 +180,6 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void invalidateEndTime();
 
+    void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
+
 }
