@@ -12,11 +12,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
  * 
  * @author Charlotte Proeller (D062347)
  * @author Axel Uhl (d043530)
- *
- * @param <ITEM>
- * @param <SERIES>
- * @param <RACE>
  */
-public interface CurrentRaceFilter <ITEM extends RaceGroupFragment, SERIES extends IsFleetFragment, RACE extends IsRaceFragment> {
-    List<ITEM> filterCurrentRaces(Collection<ITEM> allItems);
+public interface CurrentRaceFilter {
+    <T extends RaceGroupFragment> List<T> filterCurrentRaces(Collection<T> allItems);
 }
