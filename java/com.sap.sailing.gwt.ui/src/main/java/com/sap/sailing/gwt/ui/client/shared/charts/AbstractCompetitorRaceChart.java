@@ -309,7 +309,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (competitorSeries != null) {
                 chart.removeSeries(competitorSeries, false);
             }
-            Series competitorMarkPassingSeries = markPassingSeriesByCompetitor.get(competitor);
+            Series competitorMarkPassingSeries = markPassingSeriesByCompetitor.get(coDePair);
             if (competitorMarkPassingSeries != null) {
                 chart.removeSeries(competitorMarkPassingSeries, false);
             }
@@ -576,7 +576,9 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             this.selectedSecondDetailType = newSelectedSecondDetailType;
             // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
             // Because we need this functionality we need to recreate the chart each time the YAxis changes
-            if (oldReversedY0Axis != isY0AxisReversed() || oldReversedY1Axis != isY1AxisReversed()) {
+            // if (oldReversedY0Axis != isY0AxisReversed() || oldReversedY1Axis != isY1AxisReversed()) {
+            // WORKAROUND: re-creating chart every time since introduction of dual y-axis, since there is no way to
+            // reset/ delete axis.
                 chart = createChart();
                 if (isZoomed) {
                     com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
@@ -584,7 +586,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
                 }
-            }
+            // }
 
             final String unitY0 = DetailTypeFormatter.getUnit(getSelectedFirstDetailType());
             final String labelY0 = unitY0.isEmpty() ? "" : "[" + unitY0 + "]";
