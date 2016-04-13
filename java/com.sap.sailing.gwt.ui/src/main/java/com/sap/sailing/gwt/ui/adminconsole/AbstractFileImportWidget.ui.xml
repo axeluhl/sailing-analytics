@@ -23,7 +23,7 @@
 	        <g:FileUpload name="file" ui:field="fileUploadUi"/>
 	        <g:ListBox name="preferredImporter" ui:field="preferredImporterUi" height="21px"/>
 	        <g:Button styleName="" ui:field="importButtonUi"/>
-	        <g:Image resource="{res.transparentGif}" width="16px" height="16px" ui:field="loadingImageUi"/>
+	        <g:Image resource="{res.transparentGif}" addStyleNames="{style.loadingImage}" ui:field="loadingImageUi"/>
         </g:HTMLPanel>
     </g:FormPanel>
 </ui:UiBinder> 
