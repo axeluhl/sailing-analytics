@@ -62,7 +62,7 @@ public class RaceGroupFactory {
         return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, courseArea, series, configuration);
     }
 
-    public Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
+    private Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {

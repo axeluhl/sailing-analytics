@@ -91,6 +91,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     private boolean mUpdateList = true;
     private ArrayList<RaceListDataType> mViewItems;
     private View mProgress;
+    
     private BaseRaceStateChangedListener stateListener = new BaseRaceStateChangedListener() {
         @Override
         public void onStartTimeChanged(ReadonlyRaceState state) {
@@ -200,9 +201,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         RaceListDataTypeRace.initializeTemplates(this);
-
         if (mListView != null) {
             mAdapter = new ManagedRaceListAdapter(getActivity(), mViewItems);
             mListView.setAdapter(mAdapter);
@@ -497,16 +496,12 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public void setupOn(Collection<ManagedRace> races) {
         ExLog.i(getActivity(), TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), races.size()));
-
         unregisterOnAllRaces();
-
         mManagedRacesById.clear();
-
         for (ManagedRace managedRace : races) {
             mManagedRacesById.put(managedRace.getId(), managedRace);
         }
         registerOnAllRaces();
-
         initializeViewElements();
         // prepare views and do initial filtering
         filterChanged();

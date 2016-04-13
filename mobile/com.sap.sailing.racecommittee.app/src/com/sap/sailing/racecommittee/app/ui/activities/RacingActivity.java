@@ -643,13 +643,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
                 lastSeenRaces = data;
-
                 registerOnService(data);
                 mRaceList.setupOn(data);
-
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
-
             setProgressSpinnerVisibility(false);
         }
     }

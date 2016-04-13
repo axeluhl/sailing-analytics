@@ -30,14 +30,14 @@ public class CurrentRaceFilterImplTest {
     public void easyRaceGroupTest() throws Exception {
         SeriesBase seriesBase = Mockito.mock(SeriesBase.class);
         List<RaceGroupFragment> values = new ArrayList<>();
-        SeriesFragment fristSerie = new SeriesFragment(seriesBase);
-        values.add(fristSerie);
+        SeriesFragment fristSeries = new SeriesFragment(seriesBase);
+        values.add(fristSeries);
         RaceFragment firstRace = new RaceFragment(RaceLogRaceStatus.UNSCHEDULED);
         values.add(firstRace);
 
         List<RaceGroupFragment> result = fixture.filterCurrentRaces(values);
         Assert.assertThat(result.size(), Matchers.equalTo(2));
-        Assert.assertThat(result.get(0), Matchers.equalTo(fristSerie));
+        Assert.assertThat(result.get(0), Matchers.equalTo(fristSeries));
         Assert.assertThat(result.get(1), Matchers.equalTo(firstRace));
     }
 

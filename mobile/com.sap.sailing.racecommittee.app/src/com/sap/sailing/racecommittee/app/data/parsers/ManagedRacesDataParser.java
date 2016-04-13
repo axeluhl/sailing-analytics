@@ -29,6 +29,11 @@ import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
+/**
+ * Produces an collection of {@link ManagedRace} objects whose order is determined by the order of the {@link RaceGroup}s
+ * as provided by the JSON object, and within each {@link RaceGroup} by the order of the series in the group, and within
+ * the series by the order of the "race rows" as provided by the server.
+ */
 public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace>> {
 
     private final JsonDeserializer<RaceGroup> deserializer;
@@ -45,11 +50,9 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     public Collection<ManagedRace> parse(Reader reader) throws Exception {
         Object parsedResult = JSONValue.parse(reader);
         JSONArray jsonArray = Helpers.toJSONArraySafe(parsedResult);
-
         Collection<ManagedRace> managedRaces = new ArrayList<ManagedRace>();
         for (Object element : jsonArray) {
             JSONObject json = Helpers.toJSONObjectSafe(element);
-
             RaceGroup group = deserializer.deserialize(json);
             addManagedRaces(managedRaces, group);
         }
