@@ -38,6 +38,8 @@
     <attr name="editText" format="reference"/>
     <attr name="floatLabel" format="reference"/>
 
+    <attr name="factor_background" format="reference"/>
+
     <!-- drawable -->
     <attr name="add" format="reference"/>
     <attr name="access_time_18dp" format="reference"/>

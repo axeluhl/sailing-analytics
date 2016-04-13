@@ -507,5 +507,6 @@
     <string name="abort_title">Rennen abbrechen</string>
     <string name="abort_hint">Welche laufenden Rennen möchten Sie abbrechen?</string>
     <string name="abort_dismiss">Verwerfen</string>
+    <string name="explicit_factor">x %1$s</string>
 
 </resources>

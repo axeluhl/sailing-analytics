@@ -678,16 +678,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
     private JSONObject getJsonForColumnFactors(final Leaderboard leaderboard, final Iterable<RaceColumn> raceColumns) {
         final JSONObject json = new JSONObject();
-        json.put("leaderboard_name", leaderboard.getName());
-        json.put("leaderboard_display_name", leaderboard.getDisplayName());
+        json.put(RaceColumnConstants.LEADERBOARD_NAME, leaderboard.getName());
+        json.put(RaceColumnConstants.LEADERBOARD_DISPLAY_NAME, leaderboard.getDisplayName());
         final JSONArray raceColumnsAsJson = new JSONArray();
-        json.put("race_columns", raceColumnsAsJson);
+        json.put(RaceColumnConstants.RACE_COLUMNS, raceColumnsAsJson);
         for (final RaceColumn rc : raceColumns) {
             final JSONObject raceColumnAsJson = new JSONObject();
             raceColumnsAsJson.add(raceColumnAsJson);
-            raceColumnAsJson.put("race_column_name", rc.getName());
-            raceColumnAsJson.put("explicit_factor", rc.getExplicitFactor());
-            raceColumnAsJson.put("factor", rc.getFactor());
+            raceColumnAsJson.put(RaceColumnConstants.RACE_COLUMN_NAME, rc.getName());
+            raceColumnAsJson.put(RaceColumnConstants.EXPLICIT_FACTOR, rc.getExplicitFactor());
+            raceColumnAsJson.put(RaceColumnConstants.FACTOR, rc.getFactor());
         }
         return json;
     }

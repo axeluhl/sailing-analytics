@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.panels;
 
+import java.text.DecimalFormat;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +55,8 @@ public class SetupPanelFragment extends BasePanelFragment {
     private PanelButton mButtonCourse;
     private PanelButton mButtonWind;
 
+    private DecimalFormat mFactorFormat;
+
     public SetupPanelFragment() {
         mReceiver = new IntentReceiver();
     }
@@ -75,6 +79,8 @@ public class SetupPanelFragment extends BasePanelFragment {
             default:
                 layout = inflater.inflate(R.layout.race_panel_setup, container, false);
         }
+
+        mFactorFormat = new DecimalFormat(container.getContext().getString(R.string.race_factor_format));
 
         mStateListener = new RaceStateChangedListener();
         mProcedureListener = new RaceProcedureChangedListener();
@@ -169,11 +175,6 @@ public class SetupPanelFragment extends BasePanelFragment {
                 mButtonRaceGroup.setVisibility(View.GONE);
             }
 
-            if (mButtonFactor != null) {
-                mButtonFactor.setVisibility(preferences.isRaceFactorChangeAllow() ? View.VISIBLE : View.GONE);
-                mButtonFactor.setPanelText("");
-            }
-
             if (getRaceState().getRacingProcedure() instanceof RRS26RacingProcedure) {
                 if (mButtonMode != null) {
                     RRS26RacingProcedure typedProcedure = getRaceState().getTypedRacingProcedure();
@@ -198,6 +199,11 @@ public class SetupPanelFragment extends BasePanelFragment {
                     mButtonRaceGroup.setPanelSwitch(getRaceState().isAdditionalScoringInformationEnabled(AdditionalScoringInformationType.MAX_POINTS_DECREASE_MAX_SCORE));
                 }
             }
+        }
+
+        if (mButtonFactor != null) {
+            mButtonFactor.setVisibility(preferences.isRaceFactorChangeAllow() ? View.VISIBLE : View.GONE);
+            mButtonFactor.setPanelText(mFactorFormat.format(getRace().getExplicitFactor()));
         }
 
         if (mButtonCourse != null) {

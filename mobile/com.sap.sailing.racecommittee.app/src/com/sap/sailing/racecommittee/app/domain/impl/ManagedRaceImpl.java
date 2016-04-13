@@ -31,6 +31,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
     private ManagedRaceCalculator calculator;
+    private Double factor;
 
     public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
         this.state = state;
@@ -175,6 +176,16 @@ public class ManagedRaceImpl implements ManagedRace {
             }
         }
         return result;
+    }
+
+    @Override
+    public Double getExplicitFactor() {
+        return factor;
+    }
+
+    @Override
+    public void setExplicitFactor(Double factor) {
+        this.factor = factor;
     }
 
     @Override

@@ -3,10 +3,42 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
+import android.annotation.TargetApi;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.widget.TintImageView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -16,12 +48,14 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -47,42 +81,13 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import android.annotation.TargetApi;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.internal.widget.TintImageView;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.Window;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
     private static final String WIND = "wind";
     private static final String RACE = "race";
 
     private static final int RacesLoaderId = 2;
+
     private ProgressBar mProgressSpinner;
 
     private IntentReceiver mReceiver;
@@ -607,6 +612,39 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         transaction.commit();
     }
 
+    private void loadRaceColumnFactors(Collection<ManagedRace> data) {
+        HashSet<String> leaderboards = new HashSet<>();
+        for (ManagedRace race : data) {
+            if (!leaderboards.contains(race.getRaceGroup().getName())) {
+                leaderboards.add(race.getRaceGroup().getName());
+            }
+        }
+        Random random = new Random();
+        for (String leaderboard : leaderboards) {
+            Bundle args = new Bundle();
+            args.putString(OnlineDataManager.LEADERBOARD, leaderboard);
+            getLoaderManager().initLoader(random.nextInt(), args, dataManager.createRaceColumnFactorLoader(new RaceColumnFactorLoadClient()));
+        }
+    }
+
+    private class RaceColumnFactorLoadClient implements LoadClient<RaceColumnFactorImpl> {
+
+        @Override
+        public void onLoadFailed(Exception reason) {
+            ExLog.e(RacingActivity.this, TAG, "Error loading race columns factors: " + reason.getMessage());
+        }
+
+        @Override
+        public void onLoadSucceeded(RaceColumnFactorImpl data, boolean isCached) {
+            for (ManagedRace race : dataManager.getDataStore().getRaces()) {
+                if (data.getRaceColumns().containsKey(race.getRaceName())) {
+                    RaceColumnFactorImpl.RaceColumn column = data.getRaceColumns().get(race.getRaceName());
+                    race.setExplicitFactor(column.getExplicitFactor());
+                }
+            }
+        }
+    }
+
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
 
         private CourseArea courseArea;
@@ -646,6 +684,8 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
                 registerOnService(data);
                 mRaceList.setupOn(data);
+
+                loadRaceColumnFactors(data);
 
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
