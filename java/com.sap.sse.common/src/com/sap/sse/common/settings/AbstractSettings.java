@@ -1,8 +1,14 @@
 package com.sap.sse.common.settings;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sse.common.settings.value.SettingsValue;
+import com.sap.sse.common.settings.value.Value;
 
 /**
  * Common superclass for custom Settings used by Components. The following example shows how to implement custom
@@ -51,13 +57,51 @@ import java.util.Map;
  */
 public abstract class AbstractSettings extends AbstractSetting implements Settings {
 
-    private Map<String, Setting> childSettings = new HashMap<>();
+    private SettingsValue value;
+    private transient Map<String, Setting> childSettings = new HashMap<>();
 
     public AbstractSettings() {
+        value = new SettingsValue();
+        addChildSettings();
     }
 
     public AbstractSettings(String name, AbstractSettings settings) {
         super(name, settings);
+        value = (SettingsValue) settings.getValue(name);
+        if(value == null) {
+            value = new SettingsValue();
+            settings.setValue(name, value);
+        }
+        settings.setValue(name, value);
+        addChildSettings();
+    }
+    
+    protected void adoptValue(SettingsValue value) {
+        this.value = value;
+    }
+    
+    protected SettingsValue getInnerValueObject() {
+        return value;
+    }
+    
+    @GwtIncompatible
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        addChildSettings();
+    }
+    
+    // TODO make abstract when all Settings are ported to the new system
+    protected void addChildSettings() {
+    }
+    
+    // TODO make protected
+    public Value getValue(String settingName) {
+        return value.getValue(settingName);
+    }
+    
+    // TODO make protected
+    public void setValue(String settingName, Value value) {
+        this.value.setValue(settingName, value);
     }
 
     protected void addSetting(String name, Setting setting) {

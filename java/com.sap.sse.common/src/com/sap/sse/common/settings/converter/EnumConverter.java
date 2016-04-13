@@ -2,6 +2,8 @@ package com.sap.sse.common.settings.converter;
 
 import com.sap.sse.common.settings.StringToEnumConverter;
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.value.StringValue;
+import com.sap.sse.common.settings.value.Value;
 
 public class EnumConverter<T extends Enum<T>> implements ValueConverter<T> {
 
@@ -29,5 +31,15 @@ public class EnumConverter<T extends Enum<T>> implements ValueConverter<T> {
     @Override
     public T fromStringValue(String stringValue) {
         return stringValue == null ? null : stringToEnumConverter.fromString(stringValue);
+    }
+
+    @Override
+    public T fromValue(Value value) {
+        return fromStringValue(((StringValue) value).getValue());
+    }
+
+    @Override
+    public Value toValue(T value) {
+        return new StringValue(toStringValue(value));
     }
 }

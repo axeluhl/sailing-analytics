@@ -3,31 +3,35 @@ package com.sap.sse.common.settings.base;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.ValueConverter;
 import com.sap.sse.common.settings.ValueSetting;
+import com.sap.sse.common.settings.value.Value;
 
 public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T> implements ValueSetting<T> {
     
     private T defaultValue;
-    
-    private T value;
 
     protected AbstractValueSetting(String name, AbstractSettings settings, T defaultValue, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter);
         this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        resetToDefault();
     }
-
+    
     @Override
     public T getValue() {
-        return value;
+        Value value = settings.getValue(settingName);
+        if(value == null) {
+            return null;
+        }
+        return getValueConverter().fromValue(value);
     }
 
     @Override
     public void setValue(T value) {
-        this.value = value;
+        settings.setValue(settingName, getValueConverter().toValue(value));
     }
 
     @Override
     public boolean isDefaultValue() {
+        T value = getValue();
         if(value == defaultValue) {
             return true;
         }
@@ -40,18 +44,19 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     
     @Override
     public void resetToDefault() {
-        this.value = defaultValue;
+        setValue(defaultValue);
     }
     
     @Override
     public String toString() {
-        return "" +  value;
+        return "" +  getValue();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        T value = getValue();
         result = prime * result + ((value == null) ? 0 : value.hashCode());
         return result;
     }
@@ -66,10 +71,12 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
             return false;
         @SuppressWarnings("rawtypes")
         AbstractValueSetting other = (AbstractValueSetting) obj;
+        T value = getValue();
+        Object otherValue = other.getValue();
         if (value == null) {
-            if (other.value != null)
+            if (otherValue != null)
                 return false;
-        } else if (!value.equals(other.value))
+        } else if (!value.equals(otherValue))
             return false;
         return true;
     }

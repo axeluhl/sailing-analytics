@@ -3,11 +3,13 @@ package com.sap.sse.common.settings.converter;
 import java.util.UUID;
 
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.value.UUIDValue;
+import com.sap.sse.common.settings.value.Value;
 
 public class UUIDConverter implements ValueConverter<UUID> {
-    
+
     public static final UUIDConverter INSTANCE = new UUIDConverter();
-    
+
     private UUIDConverter() {
     }
 
@@ -29,5 +31,15 @@ public class UUIDConverter implements ValueConverter<UUID> {
     @Override
     public UUID fromStringValue(String stringValue) {
         return stringValue == null ? null : UUID.fromString(stringValue);
+    }
+
+    @Override
+    public UUID fromValue(Value value) {
+        return ((UUIDValue) value).getValue();
+    }
+
+    @Override
+    public Value toValue(UUID value) {
+        return new UUIDValue(value);
     }
 }

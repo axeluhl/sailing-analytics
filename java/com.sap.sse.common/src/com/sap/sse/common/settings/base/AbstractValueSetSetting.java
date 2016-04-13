@@ -1,6 +1,5 @@
 package com.sap.sse.common.settings.base;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,10 +8,12 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.ValueConverter;
 import com.sap.sse.common.settings.ValueSetSetting;
+import com.sap.sse.common.settings.value.Value;
+import com.sap.sse.common.settings.value.ValueCollectionValue;
+import com.sap.sse.common.settings.value.ValueSetValue;
 
-public abstract class AbstractValueSetSetting<T> extends AbstractValueCollectionSetting<T> implements ValueSetSetting<T> {
+public abstract class AbstractValueSetSetting<T> extends AbstractValueCollectionSetting<T, Set<Value>> implements ValueSetSetting<T> {
     
-    private final Set<T> values = new HashSet<>();
     private final Set<T> defaultValues = new HashSet<>();
     private final boolean emptyIsDefault;
     
@@ -36,19 +37,21 @@ public abstract class AbstractValueSetSetting<T> extends AbstractValueCollection
     }
     
     @Override
-    protected Collection<T> getInnerCollection() {
-        return values;
+    protected ValueCollectionValue<Set<Value>> createValue() {
+        return new ValueSetValue();
     }
     
     @Override
     public boolean isDefaultValue() {
-        return (emptyIsDefault && values.isEmpty())
-                || (values.size() == defaultValues.size() && values.containsAll(defaultValues));
+        ValueCollectionValue<Set<Value>> value = getValue();
+        return (emptyIsDefault && value.isEmpty())
+                || (value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
     }
     
     @Override
     public Iterable<T> getValues() {
-        if(emptyIsDefault && values.isEmpty()) {
+        ValueCollectionValue<Set<Value>> value = getValue();
+        if(emptyIsDefault && (value == null || value.isEmpty())) {
             return Collections.unmodifiableCollection(defaultValues);
         }
         return super.getValues();

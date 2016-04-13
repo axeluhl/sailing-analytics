@@ -3,11 +3,13 @@ package com.sap.sse.common.settings.converter;
 import java.math.BigDecimal;
 
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.value.DecimalValue;
+import com.sap.sse.common.settings.value.Value;
 
 public class DecimalConverter implements ValueConverter<BigDecimal> {
-    
+
     public static final DecimalConverter INSTANCE = new DecimalConverter();
-    
+
     private DecimalConverter() {
     }
 
@@ -29,5 +31,15 @@ public class DecimalConverter implements ValueConverter<BigDecimal> {
     @Override
     public BigDecimal fromStringValue(String stringValue) {
         return stringValue == null ? null : new BigDecimal(stringValue);
+    }
+
+    @Override
+    public BigDecimal fromValue(Value value) {
+        return ((DecimalValue) value).getValue();
+    }
+
+    @Override
+    public Value toValue(BigDecimal value) {
+        return new DecimalValue(value);
     }
 }

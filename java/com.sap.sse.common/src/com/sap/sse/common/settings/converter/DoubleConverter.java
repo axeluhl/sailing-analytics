@@ -1,11 +1,13 @@
 package com.sap.sse.common.settings.converter;
 
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.value.DoubleValue;
+import com.sap.sse.common.settings.value.Value;
 
 public class DoubleConverter implements ValueConverter<Double> {
-    
+
     public static final DoubleConverter INSTANCE = new DoubleConverter();
-    
+
     private DoubleConverter() {
     }
 
@@ -27,5 +29,15 @@ public class DoubleConverter implements ValueConverter<Double> {
     @Override
     public Double fromStringValue(String stringValue) {
         return stringValue == null ? null : Double.valueOf(stringValue);
+    }
+
+    @Override
+    public Double fromValue(Value value) {
+        return ((DoubleValue) value).getValue();
+    }
+
+    @Override
+    public Value toValue(Double value) {
+        return new DoubleValue(value);
     }
 }

@@ -23,22 +23,32 @@ import com.sap.sse.common.settings.StringToEnumConverter;
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class TestOuterSettings extends AbstractSettings {
-        private SimpleTestSettings nested = new SimpleTestSettings("nested", this);
+        private SimpleTestSettings nested;
 
         public TestOuterSettings() {
+        }
+        
+        @Override
+        protected void addChildSettings() {
+            nested = new SimpleTestSettings("nested", this);
         }
     }
 
     private static class TestListSettings extends AbstractSettings {
-        private SettingsList<SimpleTestSettings> l = new SettingsList<>("l", this, SimpleTestSettings::new);
+        private SettingsList<SimpleTestSettings> l;
 
         public TestListSettings() {
+        }
+        
+        @Override
+        protected void addChildSettings() {
+            l = new SettingsList<>("l", this, SimpleTestSettings::new);
         }
     }
 
     private static class SimpleTestSettings extends AbstractSettings {
-        private final StringSetting string = new StringSetting("string", this);
-        private final DecimalSetting num = new DecimalSetting("num", this);
+        private StringSetting string;
+        private DecimalSetting num;
 
         public SimpleTestSettings() {
         }
@@ -50,6 +60,12 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
 
         public SimpleTestSettings(String name, AbstractSettings parent) {
             super(name, parent);
+        }
+        
+        @Override
+        protected void addChildSettings() {
+            string = new StringSetting("string", this);
+            num = new DecimalSetting("num", this);
         }
     }
 

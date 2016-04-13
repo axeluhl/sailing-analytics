@@ -1,11 +1,13 @@
 package com.sap.sse.common.settings.converter;
 
 import com.sap.sse.common.settings.ValueConverter;
+import com.sap.sse.common.settings.value.StringValue;
+import com.sap.sse.common.settings.value.Value;
 
 public class StringConverter implements ValueConverter<String> {
-    
+
     public static final StringConverter INSTANCE = new StringConverter();
-    
+
     private StringConverter() {
     }
 
@@ -29,4 +31,13 @@ public class StringConverter implements ValueConverter<String> {
         return stringValue;
     }
 
+    @Override
+    public String fromValue(Value value) {
+        return ((StringValue) value).getValue();
+    }
+
+    @Override
+    public Value toValue(String value) {
+        return new StringValue(value);
+    }
 }

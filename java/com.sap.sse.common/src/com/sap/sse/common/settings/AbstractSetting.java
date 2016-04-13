@@ -4,11 +4,18 @@ package com.sap.sse.common.settings;
 
 public abstract class AbstractSetting implements Setting {
     
-    public AbstractSetting(String name, AbstractSettings settings) {
-        settings.addSetting(name, this);
+    protected final AbstractSettings settings;
+    protected final String settingName;
+
+    public AbstractSetting(String settingName, AbstractSettings settings) {
+        this.settingName = settingName;
+        this.settings = settings;
+        if(settings != null) {
+            settings.addSetting(settingName, this);
+        }
     }
     
     public AbstractSetting() {
+        this(null, null);
     }
-
 }
