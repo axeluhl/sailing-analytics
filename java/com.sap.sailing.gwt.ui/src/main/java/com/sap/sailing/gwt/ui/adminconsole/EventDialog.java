@@ -34,6 +34,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -141,7 +142,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         };
 
         courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(valueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
