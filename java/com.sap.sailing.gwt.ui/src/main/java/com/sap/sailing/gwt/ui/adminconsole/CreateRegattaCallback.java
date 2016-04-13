@@ -156,7 +156,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             public void cancel() {
             }
         });
-        dialog.ensureDebugId("CreateDefaultRegattaDialog");
+        dialog.ensureDebugId("CreateDefaultRegattaLeaderboardDialog");
         dialog.show();
     }
     

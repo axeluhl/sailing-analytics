@@ -966,11 +966,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String setRacingProcedureConfiguration();
     String racingProcedureConfiguration();
     String activateIndividualRecall();
+    String activateResultEntry();
     String rrs26Start();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
     String individualRecallHelpText();
+    String resultEntryHelpText();
     String startmodeFlags(); 
     String startmodeFlagsHelpText();
     String gateStart();
@@ -1509,6 +1511,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String confirmNewFix();
     String selectAFixPositionBy();
     String pleaseSelectAMark();
+
+    String playstoreRacecommitteeApp();
+    String playstoreTrackingApp();
+    String playStoreBuoypositioningApp();
+
+    String playstoreBadge();
+    String appstoreSapSailingInsight();
+    String appstoreStgTrainingstagebuch();
+    String appstoreBadgeSuffix();
+    
     String markFixes();
     String distanceFromAveragePosition();
     String useATouchOptimizedUI();

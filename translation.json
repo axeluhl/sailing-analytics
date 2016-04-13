@@ -23,7 +23,21 @@
             }
          ]
       },
-	  {  
+      {
+         "collectionName":"RacelogTracking",
+         "folders":[  
+            {  
+               "sourceFolderPath":"java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages",
+               "sourceFilters":[  
+                  "TrackingStringMessages*.properties"
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
          "collectionName":"DataMining",
          "folders":[  
             {  
@@ -37,7 +51,7 @@
             }
          ]
       },
-	  {  
+      {
          "collectionName":"SseGwtUi",
          "folders":[  
             {  

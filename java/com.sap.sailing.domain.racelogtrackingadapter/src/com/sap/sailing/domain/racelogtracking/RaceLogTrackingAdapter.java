@@ -21,6 +21,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.impl.RaceLogRaceTracker;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -87,15 +88,17 @@ public interface RaceLogTrackingAdapter {
      * @throws MailException
      */
     void inviteCompetitorsForTrackingViaEmail(Event event, Leaderboard leaderboard,
-            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, Locale locale) throws MailException;
+            String serverUrlWithoutTrailingSlash, Set<Competitor> competitors, String iOSAppUrl, String androidAppUrl,
+            Locale locale) throws MailException;
 
     /**
      * Invite buoy tenders for buoy pinging via the Buoy Tender App by sending out emails.
      * 
+     * @param appUrl
      * @throws MailException
      */
     void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
-            String emails, Locale locale) throws MailException;
+            String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException;
 
     /**
      * Copy the course in the newest {@link RaceLogCourseDesignChangedEvent} in {@code from} race log to the {@code to}

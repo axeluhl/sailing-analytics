@@ -28,6 +28,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
@@ -45,7 +46,6 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
@@ -64,7 +64,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private CheckBox trackWind;
     private ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell> raceActionColumn;
     protected boolean regattaHasCompetitors = false; 
-    private Map<Triple<String, String, String>, Pair<TimePoint,TimePoint>> raceWithStartAndEndOfTrackingTime = new HashMap<Triple<String, String, String>, Pair<TimePoint,TimePoint>>();
+    private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -477,14 +477,14 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             }
             
             sailingService.getTrackingTimes(raceColumnsAndFleets,
-                    new AsyncCallback<Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>>>() {
+                    new AsyncCallback<Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>>>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error retrieving tracking times: " + caught.getMessage());
                 }
 
                 @Override
-                public void onSuccess(Map<Triple<String, String, String>, Pair<TimePoint, TimePoint>> result) {
+                public void onSuccess(Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> result) {
                     raceWithStartAndEndOfTrackingTime = result;
                     
                     raceColumnTable.getDataProvider().getList().clear();
@@ -510,7 +510,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         }
     }
     
-    public Pair<TimePoint, TimePoint> getTrackingTimesFor(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet){
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFor(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleet){
         return raceWithStartAndEndOfTrackingTime.get(new Triple<String, String, String>(getSelectedLeaderboard().name, raceColumnDTOAndFleet.getA().getName(), raceColumnDTOAndFleet.getB().getName()));
     }
 
@@ -682,7 +682,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         new InviteBuoyTenderDialog(stringMessages, sailingService, leaderBoardName, errorReporter, new DialogCallback<Triple<EventDTO, String, String>>() {
             @Override
             public void ok(Triple<EventDTO, String, String> result) {
-                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(), getLocaleInfo(), new AsyncCallback<Void>() {
+                sailingService.inviteBuoyTenderViaEmail(result.getB(), result.getA(), leaderBoardName, result.getC(),
+                        null,
+                        stringMessages.playStoreBuoypositioningApp(),
+                        getLocaleInfo(), new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Window.alert(stringMessages.sendingMailsFailed() + caught.getMessage());

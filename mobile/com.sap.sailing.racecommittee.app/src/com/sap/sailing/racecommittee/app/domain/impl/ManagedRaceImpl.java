@@ -176,4 +176,9 @@ public class ManagedRaceImpl implements ManagedRace {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "ManagedRaceImpl [identifier=" + identifier + "]";
+    }
 }

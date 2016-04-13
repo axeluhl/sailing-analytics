@@ -11,6 +11,8 @@
         android:id="@+id/timer_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/side_padding"
+        android:layout_marginRight="@dimen/side_padding"
         android:layout_marginTop="@dimen/header_margin_top"
         android:gravity="center"
         android:singleLine="true"
@@ -30,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/time_marker"
         android:layout_centerHorizontal="true"
-        android:baselineAligned="false"
-        android:layout_marginBottom="@dimen/side_padding">
+        android:layout_marginBottom="@dimen/side_padding"
+        android:baselineAligned="false">
 
 
         <RelativeLayout
@@ -45,9 +47,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/linked_locked_area"
                 android:textColor="?attr/white"
                 android:textSize="@dimen/panel_button_caption_size"
-                android:layout_toRightOf="@+id/linked_locked_area"
                 tools:text="@string/time_start"/>
 
             <LinearLayout
@@ -80,9 +82,9 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/start_time_container"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/side_padding"
-            android:layout_centerVertical="true">
+            android:layout_toRightOf="@+id/start_time_container">
 
             <TextView
                 android:id="@+id/current_time"
