@@ -79,7 +79,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
             self.yourTeamPhotoButton.hidden = true
         } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
-            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl! + "sa")
+            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest,
                 placeholderImage: nil,
