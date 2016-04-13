@@ -82,28 +82,41 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
 
     private static class TestEnumListSettings extends AbstractSettings {
-        private final EnumListSetting<TextOperator.Operators> l = new EnumListSetting<>("l", this,
-                new StringToEnumConverter<TextOperator.Operators>() {
-                    @Override
-                    public Operators fromString(String stringValue) {
-                        return TextOperator.Operators.valueOf(stringValue);
-                    }
-                });
+        private EnumListSetting<TextOperator.Operators> l;
 
-        public TestEnumListSettings() {
+        @Override
+        protected void addChildSettings() {
+            l = new EnumListSetting<>("l", this,
+                    new StringToEnumConverter<TextOperator.Operators>() {
+                @Override
+                public Operators fromString(String stringValue) {
+                    return TextOperator.Operators.valueOf(stringValue);
+                }
+            });
         }
     }
 
     private static class DuplicateFieldSettings extends AbstractSettings {
         @SuppressWarnings("unused")
-        private final StringSetting humba = new StringSetting("humba", this);
+        private StringSetting humba;
         @SuppressWarnings("unused")
-        private final DecimalSetting bumba = new DecimalSetting("humba", this);
+        private DecimalSetting bumba;
+        
+        @Override
+        protected void addChildSettings() {
+            humba = new StringSetting("humba", this);
+            bumba = new DecimalSetting("humba", this);
+        }
     }
     
     private static class DisallowedKeySettings extends AbstractSettings {
         @SuppressWarnings("unused")
-        private final StringSetting disallowedKey= new StringSetting("disallowed.key", this);
+        private StringSetting disallowedKey;
+        
+        @Override
+        protected void addChildSettings() {
+            disallowedKey= new StringSetting("disallowed.key", this);
+        }
     }
 
     protected abstract <T extends Settings> SOT serialize(T settings) throws Exception;

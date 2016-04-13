@@ -13,11 +13,10 @@ import com.sap.sse.common.settings.StringSetSetting;
 import com.sap.sse.common.settings.UUIDSetSetting;
 
 public final class RegattaRaceStatesSettings extends AbstractSettings {
-    private final UUIDSetSetting visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this, true);
-    private final StringSetSetting visibleRegattas = new StringSetSetting("visibleRegattas", this, true);
-    private final BooleanSetting showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
-    private final BooleanSetting showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces",
-            this, true);
+    private UUIDSetSetting visibleCourseAreas;
+    private StringSetSetting visibleRegattas;
+    private BooleanSetting showOnlyRacesOfSameDay;
+    private BooleanSetting showOnlyCurrentlyRunningRaces;
 
     public RegattaRaceStatesSettings() {
     }
@@ -35,6 +34,14 @@ public final class RegattaRaceStatesSettings extends AbstractSettings {
         this.visibleRegattas.setValues(visibleRegattas);
         this.showOnlyRacesOfSameDay.setValue(showOnlyRacesOfSameDay);
         this.showOnlyCurrentlyRunningRaces.setValue(showOnlyCurrentlyRunningRaces);
+    }
+    
+    @Override
+    protected void addChildSettings() {
+        visibleCourseAreas = new UUIDSetSetting("visibleCourseAreas", this, true);
+        visibleRegattas = new StringSetSetting("visibleRegattas", this, true);
+        showOnlyRacesOfSameDay = new BooleanSetting("showOnlyRacesOfSameDay", this, false);
+        showOnlyCurrentlyRunningRaces = new BooleanSetting("showOnlyCurrentlyRunningRaces", this, true);
     }
 
     public Iterable<UUID> getVisibleCourseAreas() {
