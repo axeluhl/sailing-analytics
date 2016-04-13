@@ -184,10 +184,10 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             courseAreaDTO.setName(courseAreaName);
             courseAreas.add(courseAreaDTO);
         }
-        for (ImageDTO image: imagesListComposite.getAllImages()) {
+        for (ImageDTO image : imagesListComposite.getAllImages()) {
             result.addImage(image);
         }
-        for (VideoDTO video: videosListComposite.getAllVideos()) {
+        for (VideoDTO video : videosListComposite.getAllVideos()) {
             result.addVideo(video);
         }
         result.venue = new VenueDTO(venueEntryField.getText(), courseAreas);
