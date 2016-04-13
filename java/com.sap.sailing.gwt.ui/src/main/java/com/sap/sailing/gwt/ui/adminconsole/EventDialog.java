@@ -76,8 +76,9 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             if (courseAreaNotEmpty) {
                 for (CourseAreaDTO courseArea : eventToValidate.venue.getCourseAreas()) {
                     courseAreaNotEmpty = courseArea.getName() != null && courseArea.getName().length() > 0;
-                    if (!courseAreaNotEmpty)
+                    if (!courseAreaNotEmpty) {
                         break;
+                    }
                 }
             }
 
