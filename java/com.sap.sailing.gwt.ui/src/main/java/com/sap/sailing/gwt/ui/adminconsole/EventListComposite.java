@@ -659,7 +659,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> getCourseAreasToAdd(final EventDTO oldEvent, final EventDTO updatedEvent) {
-        // FIXME bug 3594: duplicate names lead to serious trouble and course areas cannot be removed easily anymore
         List<CourseAreaDTO> courseAreasToAdd = new ArrayList<CourseAreaDTO>(updatedEvent.venue.getCourseAreas());
         courseAreasToAdd.removeAll(oldEvent.venue.getCourseAreas());
         List<CourseAreaDTO> courseAreasToRemove = new ArrayList<CourseAreaDTO>(oldEvent.venue.getCourseAreas());

@@ -36,7 +36,6 @@ import com.sap.sailing.gwt.ui.shared.VenueDTO;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringConstantsListEditorComposite;
-import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -51,12 +50,12 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
     protected UUID id;
     protected TextBox officialWebsiteURLEntryField;
     protected Map<String, TextBox> sailorsInfoWebsiteURLEntryFields = new HashMap<>();
-    protected StringListInlineEditorComposite courseAreaNameList;
+    protected CourseAreaListInlineEditorComposite courseAreaNameList;
     protected StringConstantsListEditorComposite leaderboardGroupList;
     protected Map<String, LeaderboardGroupDTO> availableLeaderboardGroupsByName;
-    protected ImagesListComposite imagesListComposite; 
-    protected VideosListComposite videosListComposite; 
-
+    protected ImagesListComposite imagesListComposite;
+    protected VideosListComposite videosListComposite;
+    
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
         private StringMessages stringMessages;
@@ -140,11 +139,17 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                 validate();
             }
         };
+        final ValueChangeHandler<Iterable<CourseAreaDTO>> courseAreaValueChangeHandler = new ValueChangeHandler<Iterable<CourseAreaDTO>>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Iterable<CourseAreaDTO>> event) {
+                validate();
+            }
+        };
 
-        courseAreaNameList = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+        courseAreaNameList = new CourseAreaListInlineEditorComposite(Collections.<CourseAreaDTO> emptyList(),
+                new GenericStringListInlineEditorComposite.ExpandedUi<CourseAreaDTO>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
-        courseAreaNameList.addValueChangeHandler(valueChangeHandler);
+        courseAreaNameList.addValueChangeHandler(courseAreaValueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
@@ -180,12 +185,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         result.endDate = endDateBox.getValue();
         result.isPublic = isPublicCheckBox.getValue();
         result.id = id;
-        List<CourseAreaDTO> courseAreas = new ArrayList<CourseAreaDTO>();
-        for (String courseAreaName : courseAreaNameList.getValue()) {
-            CourseAreaDTO courseAreaDTO = new CourseAreaDTO();
-            courseAreaDTO.setName(courseAreaName);
-            courseAreas.add(courseAreaDTO);
-        }
+        List<CourseAreaDTO> courseAreas = courseAreaNameList.getValue();
         for (ImageDTO image : imagesListComposite.getAllImages()) {
             result.addImage(image);
         }
