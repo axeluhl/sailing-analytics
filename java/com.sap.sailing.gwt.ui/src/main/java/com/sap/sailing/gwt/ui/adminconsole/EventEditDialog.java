@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 
@@ -29,17 +28,10 @@ public class EventEditDialog extends EventDialog {
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(event.isPublic);
         id = event.id;
-
-        List<String> courseAreaNames = new ArrayList<>();
-        if (event.venue.getCourseAreas() != null && event.venue.getCourseAreas().size() > 0) {
-            for (CourseAreaDTO courseArea : event.venue.getCourseAreas()) {
-                courseAreaNames.add(courseArea.getName());
-            }
-        }
         officialWebsiteURLEntryField = createTextBox(event.getOfficialWebsiteURL());
         officialWebsiteURLEntryField.setVisibleLength(50);
         sailorsInfoWebsiteURLEntryFields = createTextBoxesForLocalesAndDefault(event.getSailorsInfoWebsiteURLs());
-        courseAreaNameList.setValue(courseAreaNames);
+        courseAreaNameList.setValue(new ArrayList<>(event.venue.getCourseAreas()));
         List<String> leaderboardGroupNames = new ArrayList<>();
         for(LeaderboardGroupDTO leaderboardGroupDTO: event.getLeaderboardGroups()) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
