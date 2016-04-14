@@ -2,7 +2,7 @@
 <resources>
 
     <string name="course_type">Kurstyp</string>
-    <string name="marks">Kursmarkierungen</string>
+    <string name="marks">Bahnmarken</string>
     <string name="set_position">Position setzen</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen&#8230;</string>
