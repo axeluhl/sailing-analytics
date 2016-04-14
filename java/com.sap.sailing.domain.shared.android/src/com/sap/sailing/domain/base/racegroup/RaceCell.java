@@ -12,4 +12,8 @@ import com.sap.sse.common.Named;
  */
 public interface RaceCell extends Named {
     RaceLog getRaceLog();
+
+    double getFactor();
+
+    Double getExplicitFactor();
 }
