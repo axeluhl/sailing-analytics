@@ -199,7 +199,7 @@ public class LoginActivity extends BaseActivity
     private void selectCourseArea(CourseArea courseArea) {
         courseAreaName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getAreaContainer().setHeaderText(courseAreaName);
+        loginListViews.getCourseAreaContainer().setHeaderText(courseAreaName);
     }
 
     private boolean isCourseAreaSelected() {
@@ -209,7 +209,7 @@ public class LoginActivity extends BaseActivity
     private void resetCourseArea() {
         courseAreaName = null;
         mSelectedCourseAreaUUID = null;
-        loginListViews.getAreaContainer().setHeaderText("");
+        loginListViews.getCourseAreaContainer().setHeaderText("");
         resetPosition();
     }
 
