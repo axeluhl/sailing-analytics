@@ -1,6 +1,8 @@
 <resources>
 
     <string name="app_name" translatable="false">SAP Buoy Pinger</string>
+    <string name="log_file_template" translatable="false">sap_buoy_log_%s.txt</string>
+    <string name="crash_file_name" translatable="false">sap_buoy_crash_%s.txt</string>
     <string name="title_activity_start" translatable="false">SAP Buoy Pinger</string>
     <string name="course_type">Course Type</string>
     <string name="marks">Marks</string>
