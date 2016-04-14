@@ -46,7 +46,6 @@ import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
 public class CheckinManager {
-
     private final static String TAG = CheckinManager.class.getName();
     private AbstractCheckinData checkinData;
     private CheckinDataActivity activity;
@@ -55,16 +54,15 @@ public class CheckinManager {
     private String url;
     private DataChangedListner dataChangedListner;
 
-    public CheckinManager(String url, Context context){
+    public CheckinManager(String url, Context context) {
         this.url = url;
         mContext = context;
         prefs = new AppPreferences(context);
     }
 
     public CheckinManager(String url, CheckinDataActivity activity) {
+        this(url, (Context) activity);
         this.activity = activity;
-        this.url = url;
-        mContext = activity;
         prefs = new AppPreferences(mContext);
     }
 
