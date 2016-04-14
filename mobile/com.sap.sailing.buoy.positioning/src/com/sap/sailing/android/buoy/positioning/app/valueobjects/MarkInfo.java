@@ -6,7 +6,8 @@ import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.MarkType;
 
 public class MarkInfo extends MarkImpl{
-
+    private static final long serialVersionUID = 6139266956501048794L;
+    
     private String className;
     private String checkinDigest;
 
