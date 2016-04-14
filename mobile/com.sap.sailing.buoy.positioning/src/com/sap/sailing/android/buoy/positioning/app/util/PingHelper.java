@@ -42,10 +42,8 @@ public class PingHelper {
     }
 
     public Boolean storePingInDatabase(Context context, Location location, MarkInfo mark) {
-        MarkPingInfo pingInfo = new MarkPingInfo();
-        pingInfo.setMarkId(mark.getId());
-        pingInfo.setGpsFix(GPSFixImpl.create(location.getLongitude(), location.getLatitude(), location.getTime()));
-        pingInfo.setAccuracy(location.getAccuracy());
+        MarkPingInfo pingInfo = new MarkPingInfo(mark.getId(),
+                GPSFixImpl.create(location.getLongitude(), location.getLatitude(), location.getTime()), location.getAccuracy());
         try {
             DatabaseHelper.getInstance().storeMarkPing(context, pingInfo);
         } catch (GeneralDatabaseHelperException e) {

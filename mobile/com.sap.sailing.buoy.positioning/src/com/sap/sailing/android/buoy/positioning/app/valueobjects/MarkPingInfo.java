@@ -5,20 +5,19 @@ import java.io.Serializable;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 
 public class MarkPingInfo {
-    private Serializable markId;
-    private GPSFix gpsFix;
-    private double accuracy;
+    private final Serializable markId;
+    private final GPSFix gpsFix;
+    private final double accuracy;
+
+    public MarkPingInfo(Serializable markId, GPSFix gpsFix, double accuracy) {
+        super();
+        this.markId = markId;
+        this.gpsFix = gpsFix;
+        this.accuracy = accuracy;
+    }
 
     public Serializable getMarkId() {
         return markId;
-    }
-
-    public void setGpsFix(GPSFix fix) {
-        gpsFix = fix;
-    }
-
-    public void setMarkId(Serializable markId) {
-        this.markId = markId;
     }
 
     public String getLongitude() {
@@ -31,10 +30,6 @@ public class MarkPingInfo {
 
     public double getAccuracy() {
         return accuracy;
-    }
-
-    public void setAccuracy(double accuracy) {
-        this.accuracy = accuracy;
     }
 
     public long getTimestamp() {

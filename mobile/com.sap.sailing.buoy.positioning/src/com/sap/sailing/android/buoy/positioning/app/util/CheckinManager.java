@@ -187,14 +187,11 @@ public class CheckinManager {
                                 if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
                                     if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
-                                        MarkPingInfo ping = new MarkPingInfo();
                                         FlatGPSFixJsonDeserializer deserializer = new FlatGPSFixJsonDeserializer();
                                         org.json.simple.JSONObject simplePosition;
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
-                                        ping.setGpsFix(gpsFix);
-                                        ping.setAccuracy(positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
-                                        ping.setMarkId(mark.getId());
+                                        MarkPingInfo ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         pings.add(ping);
                                     }
                                 }

@@ -107,13 +107,11 @@ public class DatabaseHelper {
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
-                MarkPingInfo markPingInfo = new MarkPingInfo();
-                markPingInfo.setMarkId(markID);
                 long timeStamp = Long.parseLong(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_TIMESTAMP))));
                 double longitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LONGITUDE))));
                 double latitude = Double.parseDouble(mpc.getString((mpc.getColumnIndex(MarkPing.MARK_PING_LATITUDE))));
-                markPingInfo.setGpsFix(GPSFixImpl.create(longitude, latitude, timeStamp));
-                markPingInfo.setAccuracy(mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
+                MarkPingInfo markPingInfo = new MarkPingInfo(markID, GPSFixImpl.create(longitude, latitude, timeStamp),
+                        mpc.getDouble((mpc.getColumnIndex(MarkPing.MARK_PING_ACCURACY))));
                 marks.add(markPingInfo);
                 mpc.moveToNext();
             }
