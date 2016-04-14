@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -45,6 +46,6 @@ public class EventCreateDialog extends EventDialog {
         imagesListComposite.fillImages(Collections.<ImageDTO>emptyList());
         videosListComposite.fillVideos(Collections.<VideoDTO>emptyList());
         // add default course area
-        courseAreaNameList.setValue(Collections.singletonList("Default"));
+        courseAreaNameList.setValue(Collections.singletonList(new CourseAreaDTO("Default")));
     }
 }
