@@ -72,6 +72,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Travem&uuml;nder Woche 2014 event page|wiki/tw2014]]
   * [[505 worlds Kiel 2014 event page|wiki/505-worlds-kiel-2014]]
   * [[Kieler Woche event page|wiki/kieler-woche-2015]]
+  * [[Charleston Race Week 2016|wiki/Charleston-Race-Week-2016]]
 * Lean DI Support
   * [[Setting up internal Jenkins on SAP Monsoon|wiki/setting-up-jenkins-on-sap-monsoon]]
 

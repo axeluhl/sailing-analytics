@@ -179,6 +179,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
@@ -4927,10 +4928,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Util.Pair<TimePoint, TimePoint> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimes(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        final Pair<TimePoint, TimePoint> times = new TrackingTimesFinder(raceLog).analyze();
-        return times == null ? null : new Pair<TimePoint, TimePoint>(times.getA(), times.getB());
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> times = new TrackingTimesFinder(raceLog).analyze();
+        return times;
     }
 
     @Override
@@ -5219,18 +5220,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        String name = String.format("Course for %s - %s - %s", leaderboardName, raceColumnName, fleetName);
-        
+        String courseName = "Course of " + raceColumnName;
+        if(!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
+            courseName += "- " + fleetName; 
+        }
         CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
         if (lastPublishedCourse == null) {
-            lastPublishedCourse = new CourseDataImpl(name);
+            lastPublishedCourse = new CourseDataImpl(courseName);
         }
         
         List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
         for (Pair<ControlPointDTO, PassingInstruction> waypointDTO : courseDTO) {
             controlPoints.add(new Pair<>(getOrCreateControlPoint(waypointDTO.getA()), waypointDTO.getB()));
         }
-        Course course = new CourseImpl(name, lastPublishedCourse.getWaypoints());
+        Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
         
         try {
             course.update(controlPoints, baseDomainFactory);
@@ -5360,9 +5363,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private DeviceMappingDTO convertToDeviceMappingDTO(DeviceMapping<?> mapping) throws TransformationException {
         String deviceId = serializeDeviceIdentifier(mapping.getDevice());
-        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().asMillis() == Long.MIN_VALUE ? 
+        Date from = mapping.getTimeRange().from() == null || mapping.getTimeRange().from().equals(TimePoint.BeginningOfTime) ? 
                 null : mapping.getTimeRange().from().asDate();
-        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().asMillis() == Long.MAX_VALUE ?
+        Date to = mapping.getTimeRange().to() == null || mapping.getTimeRange().to().equals(TimePoint.EndOfTime) ?
                 null : mapping.getTimeRange().to().asDate();
         MappableToDevice item = null;
         final WithID mappedTo = mapping.getMappedTo();
@@ -6097,9 +6100,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             final RaceLog raceLog = raceColumn.getRaceLog(fleet);
                             final RegattaLog regattaLog = raceColumn.getRegattaLog();
                             final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
-                            final Pair<TimePoint, TimePoint> trackingTimes = trackingTimesFinder.analyze();
+                            final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
                             try {
-                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark, trackingTimes.getA(), trackingTimes.getB());
+                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark,
+                                        trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());
                             }
@@ -6230,9 +6234,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    public Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>> getTrackingTimes(
+    @Override
+    public Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> getTrackingTimes(
             Collection<Triple<String, String, String>> raceColumnsAndFleets) {
-        Map<Triple<String, String, String>,Pair<TimePoint, TimePoint>>  trackingTimes = new HashMap<Triple<String, String, String>,Pair<TimePoint, TimePoint>>(); 
+        Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> trackingTimes = new HashMap<>(); 
         for (Triple<String, String, String> leaderboardRaceColumnFleetName : raceColumnsAndFleets) {
             try {
                 trackingTimes.put(leaderboardRaceColumnFleetName, getTrackingTimes(leaderboardRaceColumnFleetName.getA(), 

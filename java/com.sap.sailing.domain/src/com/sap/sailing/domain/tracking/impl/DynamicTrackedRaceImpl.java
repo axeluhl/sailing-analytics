@@ -156,8 +156,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix) {
-        if (isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
+    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        if (!onlyWhenInTrackingTimesInterval || isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
@@ -176,9 +176,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Mark mark, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval) {
         final TimePoint fixTimePoint = fix.getTimePoint();
-        if (isFixWithinStartAndEndOfTracking(fixTimePoint)) {
+        if (!onlyWhenInTrackingTimeInterval || isFixWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         }
     }

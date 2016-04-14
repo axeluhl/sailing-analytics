@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCell {
@@ -53,11 +53,11 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
         
-        Pair<TimePoint, TimePoint> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
-        if (startEndTrackingTime == null){
+        Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
+        if (startEndTrackingTime == null) {
             result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
         } else {
-            if (startEndTrackingTime.getB() == null){
+            if (startEndTrackingTime.getB() == null || startEndTrackingTime.getB().getTimePoint() == null) {
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
         }
