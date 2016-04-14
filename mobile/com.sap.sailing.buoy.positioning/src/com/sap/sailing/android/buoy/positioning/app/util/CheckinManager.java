@@ -15,13 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -34,36 +27,54 @@ import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.util.Log;
+import android.widget.Toast;
+
 public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
     private AbstractCheckinData checkinData;
-    private CheckinDataActivity activity;
-    private Context mContext;
-    private AppPreferences prefs;
+    private final CheckinDataActivity activity;
+    private final Context mContext;
+    private final AppPreferences prefs;
     private String url;
     private DataChangedListner dataChangedListner;
+    private final SharedDomainFactory sharedDomainFactory;
 
     public CheckinManager(String url, Context context) {
+        this(url, context, /* context is not necessarily a CheckinDataActivity */ null);
+    }
+
+    private CheckinManager(String url, Context context, CheckinDataActivity activity) {
+        sharedDomainFactory = new SharedDomainFactoryImpl(/* race log resolver not needed in this app */ null);
         this.url = url;
         mContext = context;
         prefs = new AppPreferences(context);
+        this.activity = activity;
     }
 
     public CheckinManager(String url, CheckinDataActivity activity) {
-        this(url, (Context) activity);
-        this.activity = activity;
-        prefs = new AppPreferences(mContext);
+        this(url, activity, activity);
+    }
+    
+    public SharedDomainFactory getSharedDomainFactory() {
+        return sharedDomainFactory;
     }
 
     public void callServerAndGenerateCheckinData() {
@@ -162,14 +173,14 @@ public class CheckinManager {
                     public void performAction(JSONObject response) {
                         try {
                             JSONArray markArray = response.getJSONArray("marks");
-                            String checkinDigest = generateCheckindigest(urlData.uriStr);
+                            String checkinDigest = generateCheckinDigest(urlData.uriStr);
                             List<MarkInfo> marks = new ArrayList<>();
                             List<MarkPingInfo> pings = new ArrayList<>();
                             for (int i = 0; i < markArray.length(); i++) {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
                                 org.json.simple.JSONObject simpleMark;
                                 simpleMark = JsonHelper.convertToSimple(jsonMark);
-                                MarkJsonDeserializer markDeserializer = new MarkJsonDeserializer();
+                                MarkDeserializer markDeserializer = new MarkDeserializer(getSharedDomainFactory());
                                 MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark));
                                 mark.setCheckinDigest(checkinDigest);
                                 mark.setClassName(jsonMark.getString(MarkJsonSerializer.FIELD_CLASS));
@@ -290,7 +301,7 @@ public class CheckinManager {
         setCheckinData(null);
     }
 
-    private String generateCheckindigest(String url) {
+    private String generateCheckinDigest(String url) {
         String checkinDigest = "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

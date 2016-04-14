@@ -2,6 +2,7 @@ package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.MarkType;
 
@@ -11,7 +12,7 @@ public class MarkInfo extends MarkImpl {
     private String className;
     private String checkinDigest;
 
-    public static MarkInfo create(MarkImpl mark) {
+    public static MarkInfo create(Mark mark) {
         return new MarkInfo(mark.getId(), mark.getName(), mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern());
     }
 
