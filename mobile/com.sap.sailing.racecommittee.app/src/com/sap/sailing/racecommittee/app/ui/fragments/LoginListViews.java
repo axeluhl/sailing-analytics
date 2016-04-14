@@ -41,7 +41,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         return mEventContainer;
     }
 
-    public ToggleContainer getAreaContainer() {
+    public ToggleContainer getCourseAreaContainer() {
         return mCourseAreaContainer;
     }
 
