@@ -11,7 +11,9 @@ public interface CompetitorChangeListener extends BoatChangeListener, Nationalit
     void nameChanged(String oldName, String newName);
     
     void emailChanged(String oldEmail, String newEmail);
-    
+
+    void searchTagChanged(String oldSearchTag, String newSearchTag);
+
     void flagImageChanged(URI oldFlagImageURI, URI newFlagImageURI);
     
     void timeOnTimeFactorChanged(Double oldTimeOnTimeFactor, Double newTimeOnTimeFactor);

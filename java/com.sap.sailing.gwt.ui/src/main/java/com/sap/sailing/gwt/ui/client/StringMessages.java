@@ -1006,6 +1006,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String eMailMustNotBeEmpty();
     String emailAddress();
     String password();
+    String searchTag();
     String doYouReallyWantToRemoveLeaderboard(String name);
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
