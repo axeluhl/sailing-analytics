@@ -203,6 +203,7 @@ public class RaceListColumnFactory {
         InvertibleComparator<T> comparator = new InvertibleComparatorAdapter<T>() {
             @Override
             public int compare(T o1, T o2) {
+                if (o1.getDuration() == null && o2.getDuration() == null) return 0;
                 if (o1.getDuration() == null) return isAscending() ? 1 : -1;
                 if (o2.getDuration() == null) return isAscending() ? -1 : 1;
                 return o1.getDuration().compareTo(o2.getDuration());
