@@ -1,19 +1,7 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.Intent;
-import android.content.OperationApplicationException;
-import android.database.Cursor;
-import android.os.RemoteException;
-import android.provider.BaseColumns;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.sap.sailing.android.buoy.positioning.app.BuildConfig;
 import com.sap.sailing.android.buoy.positioning.app.R;
@@ -28,6 +16,17 @@ import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
+import android.content.OperationApplicationException;
+import android.database.Cursor;
+import android.os.RemoteException;
+import android.provider.BaseColumns;
+import android.support.v4.content.LocalBroadcastManager;
 
 public class DatabaseHelper {
 
@@ -88,8 +87,8 @@ public class DatabaseHelper {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
                 String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
-                Serializable id = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
-                MarkInfo markInfo = new MarkInfo(id, markName);
+                String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
+                MarkInfo markInfo = new MarkInfo(markIdAsString, markName);
                 markInfo.setCheckinDigest(mc.getString((mc.getColumnIndex(Mark.MARK_CHECKIN_DIGEST))));
                 markInfo.setClassName(mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))));
                 marks.add(markInfo);

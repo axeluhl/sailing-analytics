@@ -111,9 +111,7 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
             Cursor cursor = (Cursor) adapter.getItem(position);
-
             String markerID = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
             String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_CHECKIN_DIGEST));
             Intent intent = new Intent(getActivity(), PositioningActivity.class);
