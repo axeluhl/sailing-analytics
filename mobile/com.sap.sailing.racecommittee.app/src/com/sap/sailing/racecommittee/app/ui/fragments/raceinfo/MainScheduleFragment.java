@@ -106,7 +106,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
 
         initStartTime();
         initStartMode();
-        initFactor();
         initCourse();
         initWind();
         lastTick = MillisecondsTimePoint.now().minus(2000);

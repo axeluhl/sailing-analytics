@@ -141,6 +141,7 @@ public class SetupPanelFragment extends BasePanelFragment {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
         filter.addAction(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+        filter.addAction(AppConstants.INTENT_ACTION_UPDATE_SCREEN);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
@@ -203,7 +204,11 @@ public class SetupPanelFragment extends BasePanelFragment {
 
         if (mButtonFactor != null) {
             mButtonFactor.setVisibility(preferences.isRaceFactorChangeAllow() ? View.VISIBLE : View.GONE);
-            mButtonFactor.setPanelText(mFactorFormat.format(getRace().getExplicitFactor()));
+            if (getRace().getExplicitFactor() != null) {
+                mButtonFactor.setPanelText(mFactorFormat.format(getRace().getExplicitFactor()));
+            } else {
+                mButtonFactor.setPanelText(null);
+            }
         }
 
         if (mButtonCourse != null) {
@@ -557,7 +562,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-//                    replaceFragment(RaceFactorFragment.newInstance(BaseFragment.START_MODE_PLANNED));
+                    replaceFragment(RaceFactorFragment.newInstance(BaseFragment.START_MODE_PLANNED));
                     break;
 
                 default:
@@ -656,6 +661,10 @@ public class SetupPanelFragment extends BasePanelFragment {
                         uncheckMarker(null);
                     }
                 }
+            }
+
+            if (AppConstants.INTENT_ACTION_UPDATE_SCREEN.equals(action)) {
+                refreshPanel();
             }
         }
     }

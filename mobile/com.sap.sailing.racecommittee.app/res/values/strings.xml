@@ -535,5 +535,7 @@
     <string name="abort_hint">Which running races do you want to abort?</string>
     <string name="abort_dismiss">Dismiss</string>
     <string name="race_factor_format" translatable="false">x #.####</string>
+    <string name="set_column_factor">Set Factor</string>
+    <string name="set_factor_error">There was an error while setting the factor: %s</string>
 
 </resources>

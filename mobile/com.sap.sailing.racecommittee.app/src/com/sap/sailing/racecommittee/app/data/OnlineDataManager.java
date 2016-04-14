@@ -29,7 +29,6 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
-import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -333,7 +332,7 @@ public class OnlineDataManager extends DataManager {
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 if (args.getString(RACE_COLUMN) != null) {
-                    params.add(new Util.Pair<String, Object>(RaceColumnConstants.RACE_COLUMNS, args.getString(RACE_COLUMN)));
+                    params.add(new Util.Pair<String, Object>(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, args.getString(RACE_COLUMN)));
                 }
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/api/v1/leaderboards/" + args.getString(LEADERBOARD) + "/racecolumnfactors", params);
                 return new OnlineDataLoader<>(context, url, parser, handler);
