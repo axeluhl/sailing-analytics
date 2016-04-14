@@ -57,7 +57,7 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
                     if(lastFixDiffInMs / 1000 < 60) {
                         out.println(lastFixDiffInMs / 1000 +"s ago");
                     } else {
-                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 +"min ago</span>");
+                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 +"s ago</span>");
                     }
                 }
                 out.println("<br/>");
