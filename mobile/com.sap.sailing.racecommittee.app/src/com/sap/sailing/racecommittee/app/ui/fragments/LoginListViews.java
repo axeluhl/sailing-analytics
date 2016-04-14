@@ -99,9 +99,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_TOGGLE);
+        filter.addAction(AppConstants.INTENT_ACTION_RESET);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mListener, filter);
-        // Disable button to avoid app crashes
-        mSignUp.setEnabled(false);
     }
 
     @Override
@@ -249,6 +248,10 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                     if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
                         onClick(mPositionContainer.getHeader());
                     }
+                    break;
+
+                case AppConstants.INTENT_ACTION_RESET:
+                    mSignUp.setEnabled(false);
                     break;
 
                 default:

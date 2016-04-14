@@ -72,6 +72,8 @@ public class LoginActivity extends BaseActivity
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
+    private boolean wakeUp;
+
     private final static String TAG = LoginActivity.class.getName();
 
     private final PositionListFragment positionFragment;
@@ -385,6 +387,7 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
+        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -537,11 +540,12 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
                 resetData();
             }
+            wakeUp = false;
         }
     }
 
@@ -567,7 +571,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override
