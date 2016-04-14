@@ -32,7 +32,6 @@ public class UserStoreTest {
         userStore.clear();
         assertNull(userStore.getPreference(username, prefKey));
         assertNull(userStore.getUserByAccessToken(accessToken));
-        assertNull(userStore.getAccessToken(username));
     }
 
     @Test

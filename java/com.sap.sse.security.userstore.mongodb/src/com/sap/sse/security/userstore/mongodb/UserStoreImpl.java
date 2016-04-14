@@ -110,6 +110,7 @@ public class UserStoreImpl implements UserStore {
         settingTypes.clear();
         users.clear();
         usersByEmail.clear();
+        usersByAccessToken.clear();
     }
 
     @Override
@@ -120,6 +121,9 @@ public class UserStoreImpl implements UserStore {
             addToUsersByEmail(user);
             for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
                 setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+                if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                    usersByAccessToken.put(userPref.getValue(), user);
+                }
             }
         }
         for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
