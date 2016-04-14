@@ -54,10 +54,10 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
                     TimePoint latestTimePoint = copyOfLastIgtimiMessages.peek().getWind().getTimePoint(); 
                     long lastFixDiffInMs = System.currentTimeMillis() - latestTimePoint.asMillis();
                     out.println("&nbsp;&nbsp;&nbsp;&nbsp;Last fix:");
-                    if(lastFixDiffInMs / 1000 < 60) {
+                    if (lastFixDiffInMs / 1000 < 60) {
                         out.println(lastFixDiffInMs / 1000 +"s ago");
                     } else {
-                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 +"s ago</span>");
+                        out.println("<span style=\"color:red;\">" + lastFixDiffInMs / 1000 / 60 +"min ago</span>");
                     }
                 }
                 out.println("<br/>");
