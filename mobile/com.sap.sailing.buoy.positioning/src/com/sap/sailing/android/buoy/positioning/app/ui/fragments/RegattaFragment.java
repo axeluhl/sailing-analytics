@@ -114,8 +114,8 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
 
             Cursor cursor = (Cursor) adapter.getItem(position);
 
-            String markerID = cursor.getString(cursor.getColumnIndex("mark_id"));
-            String checkinDigest = cursor.getString(cursor.getColumnIndex("mark_checkin_digest"));
+            String markerID = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_ID));
+            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Mark.MARK_CHECKIN_DIGEST));
             Intent intent = new Intent(getActivity(), PositioningActivity.class);
             intent.putExtra(getString(R.string.mark_id), markerID);
             intent.putExtra(getString(R.string.checkin_digest), checkinDigest);
