@@ -23,6 +23,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
@@ -517,8 +518,8 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
                 Bitmap bitmap = BitmapHelper
-                    .decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp, overflow.getMinimumWidth(), overflow
-                        .getMinimumHeight());
+                    .decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp,
+                            ViewCompat.getMinimumWidth(overflow), ViewCompat.getMinimumHeight(overflow));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     overflow.setScaleType(ImageView.ScaleType.FIT_END);
                 }
