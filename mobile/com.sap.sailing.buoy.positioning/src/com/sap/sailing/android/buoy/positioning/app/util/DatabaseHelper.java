@@ -1,5 +1,6 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
+import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -86,9 +88,10 @@ public class DatabaseHelper {
         if (mc != null) {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
-                String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
-                String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
-                MarkInfo markInfo = new MarkInfo(markIdAsString, markName,
+                final String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
+                final String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
+                final Serializable markId = Helpers.tryUuidConversion(markIdAsString);
+                MarkInfo markInfo = new MarkInfo(markId, markName,
                         mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))),
                         checkinDigest);
                 marks.add(markInfo);
