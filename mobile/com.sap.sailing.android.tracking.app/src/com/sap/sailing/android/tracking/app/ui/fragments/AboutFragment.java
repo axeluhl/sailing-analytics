@@ -74,7 +74,7 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + url));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(browserIntent);
             }
         };
