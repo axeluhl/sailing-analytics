@@ -128,12 +128,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         ois.defaultReadObject();
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
-        if (markPassingCalculator != null) {
-            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
-        }
         courseDesignChangedListeners = new HashSet<>();
         startTimeChangedListeners = new HashSet<>();
         raceAbortedListeners = new HashSet<>();
+    }
+    
+    protected Object readResolve() {
+        super.readResolve();
+        if (markPassingCalculator != null) {
+            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        }
+        return this;
     }
 
     /**
