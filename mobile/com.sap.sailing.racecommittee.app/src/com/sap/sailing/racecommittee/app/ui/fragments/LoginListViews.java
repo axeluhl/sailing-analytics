@@ -90,6 +90,9 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         if (mSignUp != null) {
             mSignUp.setOnClickListener(this);
         }
+
+//        onClick(event_header);
+
         return view;
     }
 
