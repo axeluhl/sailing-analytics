@@ -49,6 +49,7 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
+    private static final long serialVersionUID = -9010874944932370189L;
 
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
     private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
@@ -960,7 +961,11 @@ public class CandidateFinderImpl implements CandidateFinder {
             result = 1;
         } else {
             //TODO There should be a constant (either the 1.5 or the -0.2) which controls how strict the the curve  is.
-            result = (1-PENALTY_FOR_WRONG_SIDE) * Math.pow(1.5, -0.2 * onWrongSide.getMeters()) + PENALTY_FOR_WRONG_SIDE;
+            result = Math.min(1.0, (1-PENALTY_FOR_WRONG_SIDE) *
+                    // consider the possibility that both, mark and boat could have been GPSFix.TYPICAL_HDOP off and
+                    // only start penalizing beyond this distance
+                    Math.pow(1.5, -0.2 * onWrongSide.add(GPSFix.TYPICAL_HDOP.scale(-2.0)).getMeters())
+                    + PENALTY_FOR_WRONG_SIDE);
         }
         return result;
     }

@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
@@ -7,7 +9,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
 
-public interface CandidateChooser {
+public interface CandidateChooser extends Serializable {
     /**
      * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace}.
      * 
