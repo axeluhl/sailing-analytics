@@ -1,17 +1,13 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
-import org.json.JSONObject;
+import java.util.UUID;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,11 +15,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
-import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.services.sending.MessageSendingService;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
@@ -99,8 +93,6 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
 
     @Override
     public void onClick(final View v) {
-        v.setEnabled(false);
-
         final String factor = mFactor.getText().toString();
         Uri.Builder uri = Uri.parse(preferences.getServerBaseURL()).buildUpon();
         uri.appendPath("sailingserver");
@@ -112,41 +104,14 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
         uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, getRace().getName());
         uri.appendQueryParameter(RaceColumnConstants.EXPLICIT_FACTOR, factor);
 
-        if (preferences.isSendingActive()) {
-            try {
-                final HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(uri.toString()));
-                NetworkHelper.getInstance(getActivity()).executeHttpJsonRequestAsync(request, new NetworkHelper.NetworkHelperSuccessListener() {
+        getActivity().startService(MessageSendingService.createMessageIntent(getActivity(), uri.toString(), null, UUID.randomUUID(), "{}", null));
 
-                    @Override
-                    public void performAction(JSONObject response) {
-                        updateData(v, factor);
-                    }
-
-                }, new NetworkHelper.NetworkHelperFailureListener() {
-
-                    @Override
-                    public void performAction(NetworkHelper.NetworkHelperError e) {
-                        v.setEnabled(true);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                        builder.setTitle(R.string.race_factor);
-                        builder.setMessage(getActivity().getString(R.string.set_factor_error, e.getMessage()));
-                        builder.setPositiveButton(android.R.string.ok, null);
-                        ExLog.e(getActivity(), TAG, e.getMessage());
-                    }
-                });
-            } catch (MalformedURLException e) {
-                ExLog.e(getActivity(), TAG, e.getMessage());
-            }
-        } else {
-            updateData(v, factor);
-        }
-    }
-
-    private void updateData(View v, String factor) {
-        v.setEnabled(true);
         if (!TextUtils.isEmpty(factor)) {
             getRace().setExplicitFactor(Double.parseDouble(factor));
+        } else {
+            getRace().setExplicitFactor(null);
         }
+
         if (isAdded()) {
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
