@@ -5,7 +5,6 @@ import com.sap.sailing.domain.common.Distance;
 import com.sap.sse.common.TimePoint;
 
 public class DistanceCandidateImpl extends CandidateWithSide {
-    private static final long serialVersionUID = -9125694086262205898L;
     private final Distance distance;
     
     public DistanceCandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Double startProbabilityBasedOnOtherCompetitors,

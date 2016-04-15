@@ -281,7 +281,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    protected final MarkPassingCalculator markPassingCalculator;
+    protected transient MarkPassingCalculator markPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
@@ -596,6 +596,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     /**
      * Object serialization obtains a read lock for the course so that in cannot change while serializing this object.
+     * Furthermore, as the {@link #markPassingCalculator} is not serializable and needs to be restored explicitly on the
+     * deserializing side, a boolean flag is written to the stream, telling whether a mark passing calculator must be
+     * set.
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
         // obtain the course's read lock because a course change during serialization could lead to
@@ -605,6 +608,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             LockUtil.lockForWrite(getSerializationLock());
             try {
                 s.defaultWriteObject();
+                s.writeBoolean(markPassingCalculator != null);
             } finally {
                 LockUtil.unlockAfterWrite(getSerializationLock());
             }
@@ -620,6 +624,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException, PatchFailedException {
         ois.defaultReadObject();
+        final boolean hasMarkPassingCalculator = ois.readBoolean();
         getRace().getCourse().addCourseListener(this);
         raceStates = new WeakHashMap<>();
         attachedRaceLogs = new ConcurrentHashMap<>();
@@ -641,6 +646,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // may be inconsistent, e.g., due to non-atomic serialization of course and tracked race; see bug 2223
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
+        if (hasMarkPassingCalculator) {
+            markPassingCalculator = createMarkPassingCalculator();
+        }
         logger.info("Deserialized race " + getRace().getName());
     }
 

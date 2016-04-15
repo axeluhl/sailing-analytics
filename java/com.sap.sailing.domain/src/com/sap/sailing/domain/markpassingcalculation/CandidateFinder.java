@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ import com.sap.sse.common.Util;
  * 
  * @author Nicolas Klose
  */
-public interface CandidateFinder extends Serializable {
+public interface CandidateFinder {
     /**
      * @param fixes
      *            Either new fixes or fixes that may have changed their status, e.g. as a result of new mark

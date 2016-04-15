@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,8 +44,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * @author Nicolas Klose
  * 
  */
-public class MarkPassingCalculator implements Serializable {
-    private static final long serialVersionUID = 3591923238312601323L;
+public class MarkPassingCalculator {
     private final DynamicTrackedRace race;
     private CandidateFinder finder;
     private CandidateChooser chooser;

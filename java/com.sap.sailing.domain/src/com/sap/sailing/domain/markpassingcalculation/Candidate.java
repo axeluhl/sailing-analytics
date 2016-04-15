@@ -1,7 +1,5 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
-import java.io.Serializable;
-
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
@@ -18,7 +16,7 @@ import com.sap.sse.common.TimePoint;
  * @author Nicolas Klose
  * 
  */
-public interface Candidate extends Comparable<CandidateImpl>, Serializable {
+public interface Candidate extends Comparable<CandidateImpl> {
 
     Waypoint getWaypoint();
 

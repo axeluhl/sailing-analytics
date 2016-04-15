@@ -49,8 +49,6 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-    private static final long serialVersionUID = -9010874944932370189L;
-
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
     private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
 

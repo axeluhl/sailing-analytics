@@ -34,7 +34,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.impl.SerializableComparator;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -49,8 +48,6 @@ import com.sap.sse.common.impl.SerializableComparator;
  * 
  */
 public class CandidateChooserImpl implements CandidateChooser {
-    private static final long serialVersionUID = -7320365019575417771L;
-
     /**
      * Earlier finish mark passings are to be preferred over later ones if they otherwise seem equally likely. While the
      * {@link #getProbabilityOfActualDistanceGivenGreatCircleDistance(Distance, Distance, double)} method should usually
@@ -134,9 +131,7 @@ public class CandidateChooserImpl implements CandidateChooser {
                     currentMarkPassesForCompetitor.put(w, mp);
                 }
             }
-            TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new SerializableComparator<Candidate>() {
-                private static final long serialVersionUID = -1452151532729153137L;
-
+            TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new Comparator<Candidate>() {
                 @Override
                 public int compare(Candidate o1, Candidate o2) {
                     final int result;
@@ -567,7 +562,6 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private class CandidateWithSettableTime extends CandidateImpl {
-        private static final long serialVersionUID = -1792983349299883266L;
         private TimePoint variableTimePoint;
         
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
@@ -586,7 +580,6 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private class CandidateWithSettableWaypointIndex extends CandidateImpl {
-        private static final long serialVersionUID = 5868551535609781722L;
         private int variableOneBasedWaypointIndex;
         
         public CandidateWithSettableWaypointIndex(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
