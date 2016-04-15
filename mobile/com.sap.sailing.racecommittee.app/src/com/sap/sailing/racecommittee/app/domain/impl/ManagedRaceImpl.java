@@ -31,19 +31,24 @@ public class ManagedRaceImpl implements ManagedRace {
     private List<MapMarker> mapMarkers;
     private CourseBase courseOnServer;
     private ManagedRaceCalculator calculator;
-    private Double factor;
+    private double factor;
+    private Double explicitFactor;
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
-        this.state = state;
+    private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor) {
         this.identifier = identifier;
         this.competitors = new ArrayList<>();
         this.courseOnServer = null;
+        this.factor = factor;
+        this.explicitFactor = explicitFactor;
     }
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator) {
-        this.identifier = identifier;
-        this.competitors = new ArrayList<>();
-        this.courseOnServer = null;
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
+        this(identifier, 0, null);
+        this.state = state;
+    }
+
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor, Double explicitFactor) {
+        this(identifier, factor, explicitFactor);
         this.calculator = calculator;
     }
 
@@ -178,14 +183,18 @@ public class ManagedRaceImpl implements ManagedRace {
         return result;
     }
 
-    @Override
-    public Double getExplicitFactor() {
+    public double getFactor() {
         return factor;
     }
 
     @Override
+    public Double getExplicitFactor() {
+        return explicitFactor;
+    }
+
+    @Override
     public void setExplicitFactor(Double factor) {
-        this.factor = factor;
+        this.explicitFactor = factor;
     }
 
     @Override
