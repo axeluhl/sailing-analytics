@@ -1,13 +1,9 @@
 package com.sap.sailing.android.buoy.positioning.app.util;
 
-import java.util.Date;
 import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.content.Context;
-import android.location.Location;
 
 import com.sap.sailing.android.buoy.positioning.app.util.DatabaseHelper.GeneralDatabaseHelperException;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.MarkInfo;
@@ -19,6 +15,9 @@ import com.sap.sailing.android.shared.services.sending.ServerReplyCallback;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 
+import android.content.Context;
+import android.location.Location;
+
 public class PingHelper {
     private static String TAG = PingHelper.class.getName();
 
@@ -26,13 +25,10 @@ public class PingHelper {
         AppPreferences prefs = new AppPreferences(context);
         try {
             JSONObject fixJson = new JSONObject();
-
-            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, new Date().getTime());
+            fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.TIME_MILLIS, location.getTime());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LON_DEG, location.getLongitude());
             fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
-
             String postUrlStr = leaderBoard.serverUrl + prefs.getServerMarkPingPath(leaderBoard.name, mark.getId().toString());
-
             context.startService(MessageSendingService.createMessageIntent(context, postUrlStr, null,
                     UUID.randomUUID(), fixJson.toString(), callback));
 
