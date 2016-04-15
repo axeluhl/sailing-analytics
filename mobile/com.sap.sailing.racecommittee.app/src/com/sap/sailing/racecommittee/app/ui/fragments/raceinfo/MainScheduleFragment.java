@@ -120,6 +120,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
+    // TODO bug 1267: @Peter, what about this method?
     private void initFactor() {
         if (preferences.isRaceFactorChangeAllow()) {
             Runnable runnable = new Runnable() {
