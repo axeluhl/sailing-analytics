@@ -82,7 +82,7 @@ public class LoginActivity extends BaseActivity
 
     // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
-    private String courseAreaName = null;
+    private String courseName = null;
     private String positionName = null;
 
     private Serializable mSelectedEventId;
@@ -147,7 +147,7 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
                     login();
                 }
             });
@@ -197,17 +197,17 @@ public class LoginActivity extends BaseActivity
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        courseAreaName = courseArea.getName();
+        courseName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getAreaContainer().setHeaderText(courseAreaName);
+        loginListViews.getAreaContainer().setHeaderText(courseName);
     }
 
     private boolean isCourseAreaSelected() {
-        return (courseAreaName != null && mSelectedCourseAreaUUID != null);
+        return (courseName != null && mSelectedCourseAreaUUID != null);
     }
 
     private void resetCourseArea() {
-        courseAreaName = null;
+        courseName = null;
         mSelectedCourseAreaUUID = null;
         loginListViews.getAreaContainer().setHeaderText("");
         resetPosition();
