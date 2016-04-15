@@ -122,12 +122,12 @@ public class DatabaseHelper {
         return marks;
     }
 
-    public void deletePingsFromDataBase(Context context, String markID) {
+    public void deletePingsFromDataBase(Context context, String markIdAsString) {
         ContentResolver cr = context.getContentResolver();
-        int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = ?", new String[] { markID });
+        int d1 = cr.delete(MarkPing.CONTENT_URI, MarkPing.MARK_ID + " = ?", new String[] { markIdAsString });
 
         if (BuildConfig.DEBUG) {
-            ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markID + " deleted: " + d1);
+            ExLog.i(context, TAG, "Checkout, number of markpings for mark: " + markIdAsString + " deleted: " + d1);
         }
     }
 
@@ -248,7 +248,7 @@ public class DatabaseHelper {
         for (MarkInfo mark : markList) {
             ContentValues cmv = new ContentValues();
             cmv.put(Mark.MARK_CHECKIN_DIGEST, mark.getCheckinDigest());
-            cmv.put(Mark.MARK_ID, mark.getId().toString().toString());
+            cmv.put(Mark.MARK_ID, mark.getId().toString());
             cmv.put(Mark.MARK_NAME, mark.getName());
             cmv.put(Mark.MARK_TYPE, mark.getType().toString());
             cmv.put(Mark.MARK_CLASS_NAME, mark.getClassName());

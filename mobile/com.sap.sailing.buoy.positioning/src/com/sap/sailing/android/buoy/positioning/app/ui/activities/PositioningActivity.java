@@ -23,7 +23,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     private MarkInfo markInfo;
     private MarkPingInfo markPing;
     private LeaderboardInfo leaderBoard;
-    private String markerID;
+    private String markIdAsString;
     private String checkinDigest;
 
     @Override
@@ -31,7 +31,7 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_container);
         Intent intent = getIntent();
-        markerID = intent.getExtras().getString(getString(R.string.mark_id));
+        markIdAsString = intent.getExtras().getString(getString(R.string.mark_id));
         checkinDigest = intent.getExtras().getString(getString(R.string.checkin_digest));
 
         loadDataFromDatabase();
@@ -60,13 +60,13 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         List<MarkInfo> marks = DatabaseHelper.getInstance().getMarks(this, checkinDigest);
         setLeaderBoard(DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest));
         for (MarkInfo mark : marks) {
-            if (mark.getId().toString().equals(markerID)) {
+            if (mark.getId().toString().equals(markIdAsString)) {
                 setMarkInfo(mark);
                 break;
             }
         }
         if (markInfo != null) {
-            setPingFromDatabase(markerID);
+            setPingFromDatabase(markIdAsString);
         }
     }
 
