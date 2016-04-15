@@ -125,6 +125,11 @@ public class LeaderboardCacheManager {
         }
 
         @Override
+        public void searchTagChanged(String oldSearchTag, String newSearchTag) {
+            //ignore (email not shown in leaderboard)
+        }
+
+        @Override
         public void flagImageChanged(URI oldFlagImageURL, URI newFlagImageURL) {
             removeFromCache(leaderboard);
         }

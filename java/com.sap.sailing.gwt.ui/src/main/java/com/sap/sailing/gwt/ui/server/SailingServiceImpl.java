@@ -4718,7 +4718,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             competitor.getColor(), competitor.getEmail(), 
                             competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team, boat,
                                     competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile()));
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag()));
         } else {
             result = getBaseDomainFactory().convertToCompetitorDTO(
                     getService().apply(
@@ -4727,7 +4727,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                                     competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
                                     competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile())));
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), 
+                                    competitor.getSearchTag())));
         }
         return result;
     }

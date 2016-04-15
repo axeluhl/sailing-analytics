@@ -46,7 +46,7 @@ public class AbstractGPSFixStoreTest {
     protected RaceLog raceLog;
     protected RegattaLog regattaLog;
     protected GPSFixStore store;
-    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null);
+    protected final Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowanceInSecondsPerNauticalMile */ null, null);
     protected final Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
 
     protected final AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);

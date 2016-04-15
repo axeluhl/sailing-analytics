@@ -241,7 +241,7 @@ public class RaceLogEventSerializerTest {
         RaceLogEvent event = new RaceLogRegisterCompetitorEventImpl(null, author, 0,
             DomainFactory.INSTANCE
                 .getOrCreateCompetitor("comp", "comp", null, null, null, null, null, /* timeOnTimeFactor */null, /* timeOnDistanceAllowancePerNauticalMile */
-                        null));
+                        null, null));
         serializer.serialize(event);
         verify(registerCompetitorEventSerializer).serialize(event);
     }
