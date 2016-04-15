@@ -1040,6 +1040,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String removeLeaderboardFilter();
     String competitorRegistrations();
     String trackerStatus();
+    String courseStatus();
     String canOnlyBeEditedBeforeStartingTracking();
     String defineCourse();
     String mapDevices();
