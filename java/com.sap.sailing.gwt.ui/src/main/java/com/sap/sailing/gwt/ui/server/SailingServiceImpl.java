@@ -5161,14 +5161,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private Mark convertToMark(MarkDTO dto, boolean resolve) {
+        Mark result = null;
         if (resolve) {
             Mark existing = baseDomainFactory.getExistingMarkByIdAsString(dto.getIdAsString());
             if (existing != null) {
-                return existing;
+                result = existing;
             }
         }
-        Serializable id = UUID.randomUUID();
-        return baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
+        if (result == null) {
+            Serializable id = UUID.randomUUID();
+            result = baseDomainFactory.getOrCreateMark(id, dto.getName(), dto.type, dto.color, dto.shape, dto.pattern);
+        }
+        return result;
     }
     
     /**
