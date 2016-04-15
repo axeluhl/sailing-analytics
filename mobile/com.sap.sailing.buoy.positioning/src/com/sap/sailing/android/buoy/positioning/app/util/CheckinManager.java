@@ -181,9 +181,7 @@ public class CheckinManager {
                                 org.json.simple.JSONObject simpleMark;
                                 simpleMark = JsonHelper.convertToSimple(jsonMark);
                                 MarkDeserializer markDeserializer = new MarkDeserializer(getSharedDomainFactory());
-                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark));
-                                mark.setCheckinDigest(checkinDigest);
-                                mark.setClassName(jsonMark.getString(MarkJsonSerializer.FIELD_CLASS));
+                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark), jsonMark.getString(MarkJsonSerializer.FIELD_CLASS), checkinDigest);
                                 if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
                                     if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);

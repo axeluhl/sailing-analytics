@@ -88,9 +88,9 @@ public class DatabaseHelper {
             while (!mc.isAfterLast()) {
                 String markName = mc.getString((mc.getColumnIndex(Mark.MARK_NAME)));
                 String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
-                MarkInfo markInfo = new MarkInfo(markIdAsString, markName);
-                markInfo.setCheckinDigest(mc.getString((mc.getColumnIndex(Mark.MARK_CHECKIN_DIGEST))));
-                markInfo.setClassName(mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))));
+                MarkInfo markInfo = new MarkInfo(markIdAsString, markName,
+                        mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))),
+                        checkinDigest);
                 marks.add(markInfo);
                 mc.moveToNext();
             }

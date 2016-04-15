@@ -12,36 +12,34 @@ public class MarkInfo extends MarkImpl {
     private String className;
     private String checkinDigest;
 
-    public static MarkInfo create(Mark mark) {
-        return new MarkInfo(mark.getId(), mark.getName(), mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern());
+    public static MarkInfo create(Mark mark, String classname, String checkinDigest) {
+        return new MarkInfo(mark.getId(), mark.getName(), mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern(), classname, checkinDigest);
     }
 
     public MarkInfo(String name) {
         super(name);
+        className = null;
+        checkinDigest = null;
     }
 
-    public MarkInfo(Serializable id, String name) {
+    public MarkInfo(Serializable id, String name, String classname, String checkinDigest) {
         super(id, name);
+        this.className = classname;
+        this.checkinDigest = checkinDigest;
     }
 
-    public MarkInfo(Serializable id, String name, MarkType type, String color, String shape, String pattern) {
+    public MarkInfo(Serializable id, String name, MarkType type, String color, String shape, String pattern, String classname, String checkinDigest) {
         super(id, name, type, color, shape, pattern);
+        this.className = classname;
+        this.checkinDigest = checkinDigest;
     }
 
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
     public String getCheckinDigest() {
         return checkinDigest;
-    }
-
-    public void setCheckinDigest(String checkinDigest) {
-        this.checkinDigest = checkinDigest;
     }
 
     @Override
