@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +51,9 @@ import com.sap.sse.concurrent.ConcurrentWeakHashMap;
  * @author Axel Uhl (D043530)
  *
  */
-public class WaypointPositionAndDistanceCache {
+public class WaypointPositionAndDistanceCache implements Serializable {
+    private static final long serialVersionUID = 4031352843124688976L;
+
     /**
      * Weak keys are the waypoints; values are time-ordered maps mapping the center of a time range
      * to the approximate waypoint position at that time.

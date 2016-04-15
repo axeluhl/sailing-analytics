@@ -34,6 +34,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.common.impl.SerializableComparator;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -109,7 +110,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final CandidateWithSettableTime start;
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
-
+    
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
@@ -133,7 +134,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     currentMarkPassesForCompetitor.put(w, mp);
                 }
             }
-            TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new Comparator<Candidate>() {
+            TreeSet<Candidate> fixedPasses = new TreeSet<Candidate>(new SerializableComparator<Candidate>() {
+                private static final long serialVersionUID = -1452151532729153137L;
+
                 @Override
                 public int compare(Candidate o1, Candidate o2) {
                     final int result;
