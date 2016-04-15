@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 
@@ -13,7 +15,8 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
  * @author Nicolas Klose
  * 
  */
-public class Edge implements Comparable<Edge> {
+public class Edge implements Comparable<Edge>, Serializable {
+    private static final long serialVersionUID = 8791643098865724166L;
     private final Candidate start;
     private final Candidate end;
     
