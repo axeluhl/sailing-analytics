@@ -532,7 +532,15 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
                 Mark mark = mapping.getMappedTo();
                 if (mapping.getTimeRange().includes(timePoint)) {
-                    trackedRace.recordFix(mark, fix);
+                    final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                    final GPSFix firstFixAtOrAfter;
+                    if (Util.isEmpty(markTrack.getRawFixes()) ||
+                            (firstFixAtOrAfter=markTrack.getFirstFixAtOrAfter(timePoint)) != null &&
+                                firstFixAtOrAfter.getTimePoint().equals(timePoint)) {
+                        trackedRace.recordFix(mark, fix, /* only when in tracking interval */ false); // force fix into track
+                    } else {
+                        trackedRace.recordFix(mark, fix);
+                    }
                 }
             }
         }
