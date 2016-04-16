@@ -49,7 +49,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // Now try everything to allow the app to use the GPS sensor
 	// while in background
 	coreLocationManager.pausesLocationUpdatesAutomatically = false; 
-        if (coreLocationManager.respondsToSelector("allowsBackgroundLocationUpdates")) {
+        if #available(iOS 9, *) {
 	    coreLocationManager.allowsBackgroundLocationUpdates = true;
         }
 
