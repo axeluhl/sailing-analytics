@@ -966,11 +966,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String setRacingProcedureConfiguration();
     String racingProcedureConfiguration();
     String activateIndividualRecall();
+    String activateResultEntry();
     String rrs26Start();
     String setConfiguration();
     String classFlag();
     String classFlagHelpText(String procedure);
     String individualRecallHelpText();
+    String resultEntryHelpText();
     String startmodeFlags(); 
     String startmodeFlagsHelpText();
     String gateStart();
@@ -1004,6 +1006,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String eMailMustNotBeEmpty();
     String emailAddress();
     String password();
+    String searchTag();
     String doYouReallyWantToRemoveLeaderboard(String name);
     String metaLeaderboardCannotBeChanged();
     String failedToSetNewStartTime();
@@ -1037,6 +1040,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String removeLeaderboardFilter();
     String competitorRegistrations();
     String trackerStatus();
+    String courseStatus();
     String canOnlyBeEditedBeforeStartingTracking();
     String defineCourse();
     String mapDevices();
@@ -1509,6 +1513,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String confirmNewFix();
     String selectAFixPositionBy();
     String pleaseSelectAMark();
+
+    String playstoreRacecommitteeApp();
+    String playstoreTrackingApp();
+    String playStoreBuoypositioningApp();
+
+    String playstoreBadge();
+    String appstoreSapSailingInsight();
+    String appstoreStgTrainingstagebuch();
+    String appstoreBadgeSuffix();
+    
     String markFixes();
     String distanceFromAveragePosition();
     String useATouchOptimizedUI();

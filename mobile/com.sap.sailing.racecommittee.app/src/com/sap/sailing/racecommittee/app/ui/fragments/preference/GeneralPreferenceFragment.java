@@ -1,10 +1,15 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-import java.net.URL;
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -13,20 +18,9 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
-
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
-import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils.DeviceConfigurationDetails;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.BuildConfig;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.UrlHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -187,34 +181,9 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         }
 
         if (resultCode == Activity.RESULT_OK) {
-            String content = data.getStringExtra("SCAN_RESULT");
-            try {
-                DeviceConfigurationDetails connectionConfiguration = DeviceConfigurationQRCodeUtils.splitQRContent(content);
+            QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
 
-                String identifier = connectionConfiguration.getDeviceIdentifier();
-                URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
-                String accessToken = connectionConfiguration.getAccessToken();
 
-                if (apkUrl != null) {
-                    String serverUrl = UrlHelper.getServerUrl(apkUrl);
-
-                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getActivity()).edit();
-                    editor.putString(getString(R.string.preference_identifier_key), identifier);
-                    editor.putString(getString(R.string.preference_server_url_key), serverUrl);
-                    editor.putString(getString(R.string.preference_access_token_key), accessToken);
-                    editor.commit();
-
-                    identifierPreference.getOnPreferenceChangeListener().onPreferenceChange(identifierPreference, identifier);
-                    serverUrlPreference.setText(serverUrl);
-                    serverUrlPreference.getOnPreferenceChangeListener().onPreferenceChange(serverUrlPreference, serverUrl);
-
-                    new AutoUpdater(getActivity()).checkForUpdate(false);
-                } else {
-                    Toast.makeText(getActivity(), getString(R.string.error_scanning_qr_malformed), Toast.LENGTH_LONG).show();
-                }
-            } catch (IllegalArgumentException e) {
-                Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, e.getMessage()), Toast.LENGTH_LONG).show();
-            }
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

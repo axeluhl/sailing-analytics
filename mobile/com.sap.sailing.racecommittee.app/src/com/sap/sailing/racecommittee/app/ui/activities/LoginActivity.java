@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -61,6 +62,7 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
@@ -69,6 +71,8 @@ public class LoginActivity extends BaseActivity
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
+
+    private boolean wakeUp;
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -286,6 +290,17 @@ public class LoginActivity extends BaseActivity
             }
         }
 
+        String action = getIntent().getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.app_name);
+            if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
+                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
+            }
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        }
+
         // This is required to reactivate the loader manager after configuration change (screen rotation)
         getLoaderManager();
 
@@ -372,6 +387,7 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
+        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -524,11 +540,12 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
                 resetData();
             }
+            wakeUp = false;
         }
     }
 
@@ -554,7 +571,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override

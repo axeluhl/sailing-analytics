@@ -1,16 +1,15 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class MarkInfoTest {
 
     @Test
     public void testMarkInfoName() {
-        MarkInfo markInfo = new MarkInfo();
         String name = "test";
-        markInfo.setName(name);
+        MarkInfo markInfo = new MarkInfo(name);
         assertEquals(markInfo.getName(), name);
     }
 }

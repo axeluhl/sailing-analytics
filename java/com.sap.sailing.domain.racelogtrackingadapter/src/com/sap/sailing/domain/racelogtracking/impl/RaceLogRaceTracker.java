@@ -19,7 +19,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
@@ -57,6 +59,8 @@ import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
@@ -146,6 +150,18 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     public void visit(RaceLogEndOfTrackingEvent event) {
                         RaceLogRaceTracker.this.onEndOfTrackingEvent(event);
                     }
+                    
+                    @Override
+                    public void visit(RaceLogStartTimeEvent event) {
+                        trackedRace.updateStartAndEndOfTracking();
+                    }
+                    
+                    @Override
+                    public void visit(RaceLogRaceStatusEvent event) {
+                        if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
+                            trackedRace.updateStartAndEndOfTracking();
+                        }
+                    }
                 };
                 visitors.put(log, visitor);
                 ((RaceLog) log).addListener(visitor);
@@ -183,9 +199,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     @Override
     public void stop(boolean preemptive) {
         RaceLog raceLog = params.getRaceLog();
-        final Pair<TimePoint, TimePoint> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null || trackingTimes.getB() == null) {
-            // seems the first time tracking for this race is started; enter "now" as start of tracking
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (trackingTimes == null || trackingTimes.getB() == null || trackingTimes.getB().getTimePoint() == null) {
+            // seems the first time tracking for this race is stopped; enter "now" as end of tracking
             // into the race log
             raceLog.add(new RaceLogEndOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
         }
@@ -408,13 +424,13 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setStartOfTrackingReceived(event.getLogicalTimePoint());
+            trackedRace.updateStartAndEndOfTracking();
         }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.setEndOfTrackingReceived(event.getLogicalTimePoint());
+            trackedRace.updateStartAndEndOfTracking();
         }
     }
 
@@ -438,9 +454,9 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         RaceColumn raceColumn = params.getRaceColumn();
         Fleet fleet = params.getFleet();
         RaceLogDenoteForTrackingEvent denoteEvent = new RaceInformationFinder(raceLog).analyze();
-        final Pair<TimePoint, TimePoint> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
-        if (trackingTimes == null) {
-            // seems the first time tracking for this race is started; enter "now" as start of tracking
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = new TrackingTimesFinder(raceLog).analyze();
+        if (trackingTimes == null || trackingTimes.getA() == null || trackingTimes.getA().getTimePoint() == null) {
+            // the start of tracking interval is unset or set to null; enter "now" as start of tracking
             // into the race log
             raceLog.add(new RaceLogStartOfTrackingEventImpl(MillisecondsTimePoint.now(), raceLogEventAuthor, /* passId */ 0));
         }
@@ -516,7 +532,22 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
                 Mark mark = mapping.getMappedTo();
                 if (mapping.getTimeRange().includes(timePoint)) {
-                    trackedRace.recordFix(mark, fix);
+                    final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                    final GPSFix firstFixAtOrAfter;
+                    boolean forceFix;
+                    markTrack.lockForRead();
+                    try {
+                        forceFix = Util.isEmpty(markTrack.getRawFixes()) ||
+                                (firstFixAtOrAfter=markTrack.getFirstFixAtOrAfter(timePoint)) != null &&
+                                    firstFixAtOrAfter.getTimePoint().equals(timePoint);
+                    } finally {
+                        markTrack.unlockAfterRead();
+                    }
+                    if (forceFix) {
+                        trackedRace.recordFix(mark, fix, /* only when in tracking interval */ false); // force fix into track
+                    } else {
+                        trackedRace.recordFix(mark, fix);
+                    }
                 }
             }
         }

@@ -33,6 +33,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         coreLocationManager.delegate = self
+
+        // Now try everything to allow the app to use the GPS sensor
+	// while in background
+	coreLocationManager.PausesLocationUpdatesAutomatically = false; 
+	// iOS 8 has additional permissions requirements
+	if (UIDevice.CurrentDevice.CheckSystemVersion (8, 0)) {
+	  coreLocationManager.RequestAlwaysAuthorization (); // works in background
+	  //locMgr.RequestWhenInUseAuthorization (); // only in foreground
+	}
+	if (UIDevice.CurrentDevice.CheckSystemVersion (9, 0)) {
+	   coreLocationManager.AllowsBackgroundLocationUpdates = true;
+	}
     }
     
     func startTracking() -> String? {

@@ -77,6 +77,11 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return false;
+    }
+
+    @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {
         if (startTime.before(now)) {

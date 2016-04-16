@@ -36,6 +36,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -870,7 +871,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return null;
     }
 
-    default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    default Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
+        return null;
+    }
+    
+    default Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
         return null;
     }
 
@@ -883,4 +888,15 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
     }
+    
+    /**
+     * Updates the start and end of tracking in the following precedence order:
+     * 
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol>
+     */
+    public void updateStartAndEndOfTracking();
 }

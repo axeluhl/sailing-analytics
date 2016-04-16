@@ -960,7 +960,11 @@ public class CandidateFinderImpl implements CandidateFinder {
             result = 1;
         } else {
             //TODO There should be a constant (either the 1.5 or the -0.2) which controls how strict the the curve  is.
-            result = (1-PENALTY_FOR_WRONG_SIDE) * Math.pow(1.5, -0.2 * onWrongSide.getMeters()) + PENALTY_FOR_WRONG_SIDE;
+            result = Math.min(1.0, (1-PENALTY_FOR_WRONG_SIDE) *
+                            // consider the possibility that both, mark and boat could have been GPSFix.TYPICAL_HDOP off and
+                            // only start penalizing beyond this distance
+                            Math.pow(1.5, -0.2 * onWrongSide.add(GPSFix.TYPICAL_HDOP.scale(-2.0)).getMeters())
+                            + PENALTY_FOR_WRONG_SIDE);
         }
         return result;
     }
@@ -1003,7 +1007,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         Distance legLength = getAverageLengthOfAdjacentLegs(t, w);
         if (legLength != null) {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
-                    * Math.abs(distance.getMeters() / legLength.getMeters()) + 1);
+                    // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
+                    // may have been caused by inaccurate GPS tracking
+                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).getMeters()) / legLength.getMeters()) + 1);
         } else {
             result = null;
         }
