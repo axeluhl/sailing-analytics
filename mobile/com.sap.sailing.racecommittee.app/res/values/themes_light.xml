@@ -37,7 +37,7 @@
         <item name="sap_light_gray">@color/light_sap_light_gray</item>
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
-        <item name="white">@color/light_white</item>
+        <item name="white">@color/white_light</item>
         <item name="white_invert">@color/constant_white</item>
 
         <!-- styles -->
@@ -115,11 +115,13 @@
         <item name="chevron_left">@drawable/ic_chevron_left_black_24dp</item>
         <item name="chevron_right">@drawable/ic_chevron_right_black_24dp</item>
 
-        <item name="flag_first_blue">@drawable/flag_first_blue_32dp_light</item>
+        <item name="flag_blue_first">@drawable/flag_blue_first_32dp_light</item>
+        <item name="flag_blue_last">@drawable/flag_blue_last_32dp_light</item>
 
         <item name="flags_abandon">@drawable/flags_abandon_64dp_light</item>
+        <item name="flags_blue_first">@drawable/flag_blue_first_64dp_light</item>
+        <item name="flags_blue_last">@drawable/flag_blue_last_64dp_light</item>
         <item name="flags_course">@drawable/flags_course_64dp_light</item>
-        <item name="flags_more">@drawable/flags_more_64dp_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_light</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_light</item>
     </style>
@@ -229,11 +231,12 @@
         <item name="android:textSize">@dimen/panel_button_caption_size</item>
     </style>
 
-    <style name="AppTheme.Light.SettingsAlertDialog" parent="AppTheme.AlertDialog">
+    <style name="AppTheme.Light.SettingsAlertDialog" parent="Base.Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorPrimaryDark">@color/dialog_color_text</item>
         <item name="android:textColorSecondary">@color/dialog_color_text</item>
+        <item name="colorAccent">@color/dialog_color_button</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="AppTheme.Light.TabWidget" parent="@android:style/Widget.TabWidget">

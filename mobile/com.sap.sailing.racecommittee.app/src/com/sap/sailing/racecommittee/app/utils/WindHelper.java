@@ -87,13 +87,12 @@ public class WindHelper {
                 boolean matchingFleetName = fleetName != null && fleetName.equals(triple.getC());
                 boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceName());
                 if (matchingLeaderboardName && matchingFleetName && matchingRaceName){
-                    if (!raceState.isNull("trackedRaceId")){
+                    if (raceState.getBoolean("trackedRaceLinked")){
                         isTracked = true;
                         break;
                     }
                 }
             }
-
         } catch (JSONException e) {
             Log.e(TAG, "Failed to parse contents of the server response: " + e.getMessage());
         }

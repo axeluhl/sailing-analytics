@@ -23,6 +23,8 @@ public interface Competitor extends Named, WithID, IsManagedByCache<SharedDomain
     
     boolean hasEmail();
 
+    String getSearchTag();
+    
     /**
      * an alternative flag image (per default the nation flag
      * @return the URI of the flag image

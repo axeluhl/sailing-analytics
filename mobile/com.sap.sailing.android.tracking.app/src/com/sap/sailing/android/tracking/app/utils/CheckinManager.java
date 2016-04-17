@@ -122,7 +122,6 @@ public class CheckinManager {
                     final String leaderboardName;
 
                     try {
-                        //TODO use constants
                         leaderboardName = response.getString("name");
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.leaderboardUrl + ", Error: " + e.getMessage());
