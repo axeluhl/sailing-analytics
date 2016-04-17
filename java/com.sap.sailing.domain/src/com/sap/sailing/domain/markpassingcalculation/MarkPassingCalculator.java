@@ -34,7 +34,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
  * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s . The
  * chooser than finds the most likely sequence of {@link Candidate}s and updates the race with new {@link MarkPassing}s
- * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} this
+ * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} this
  * happens for the current state of the race. In addition, for live races, the <code>listen</code> parameter of the
  * constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new fixes into a queue
  * as {@link StorePositionUpdateStrategy}. A new thread will also be started to evaluate the new fixes (See
@@ -58,7 +58,7 @@ public class MarkPassingCalculator {
 
     private boolean suspended = false;
 
-    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
+    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen, boolean waitForInitialMarkPassingCalculation) {
         if (listen) {
             listener = new MarkPassingUpdateListener(race);
         } else {
@@ -67,7 +67,7 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
-        new Thread(() -> {
+        Thread t = new Thread(() -> {
             for (Competitor c : race.getRace().getCompetitors()) {
                 Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
                 chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
@@ -77,7 +77,12 @@ public class MarkPassingCalculator {
                 listenerThread.setDaemon(true);
                 listenerThread.start();
             }
-        }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization").start();
+        }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization");
+        if (waitForInitialMarkPassingCalculation) {
+            t.run();
+        } else {
+            t.start();
+        }
     }
 
     /**
