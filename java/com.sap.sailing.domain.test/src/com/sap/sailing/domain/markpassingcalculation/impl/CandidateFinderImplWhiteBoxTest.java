@@ -21,8 +21,6 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 
 public class CandidateFinderImplWhiteBoxTest {
     private static class CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances extends CandidateFinderImpl {
-        private static final long serialVersionUID = 5472855431045667537L;
-
         public CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(
                 DynamicTrackedRace race) {
             super(race);
