@@ -536,7 +536,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 public void raceAdded(TrackedRace trackedRace) {}
                 @Override
                 public void raceRemoved(TrackedRace trackedRace) {
-                    if (trackedRace == this) {
+                    if (trackedRace == TrackedRaceImpl.this) {
                         // stop mark passing calculator when tracked race is removed:
                         markPassingCalculator.stop();
                     }
