@@ -67,15 +67,17 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
-        for (Competitor c : race.getRace().getCompetitors()) {
-            Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
-            chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
-        }
-        if (listen) {
-            final Thread listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
-            listenerThread.setDaemon(true);
-            listenerThread.start();
-        }
+        new Thread(() -> {
+            for (Competitor c : race.getRace().getCompetitors()) {
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+                chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+            }
+            if (listen) {
+                final Thread listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
+                listenerThread.setDaemon(true);
+                listenerThread.start();
+            }
+        }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization").start();
     }
 
     /**

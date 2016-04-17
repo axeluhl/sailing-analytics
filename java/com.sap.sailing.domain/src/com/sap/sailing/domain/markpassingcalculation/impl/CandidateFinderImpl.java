@@ -49,7 +49,6 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
     private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
 
