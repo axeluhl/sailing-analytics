@@ -774,18 +774,21 @@ public class CandidateFinderImpl implements CandidateFinder {
                         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
                         if (track != null) {
                             final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
-                            final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
-                            if (otherCompetitorsDistanceToStartAtT != null) {
-                                final Distance crossTrackError;
-                                if (startIsLine) {
-                                    Pair<Position, Bearing> crossingInformationForStartLine = crossingInformationForStart.iterator().next();
-                                    crossTrackError = estimatedPositionAtT.crossTrackError(crossingInformationForStartLine.getA(),
-                                            crossingInformationForStartLine.getB());
-                                } else {
-                                    crossTrackError = null;
+                            // consider that a position may not be available for that other competitor, although a track exists
+                            if (estimatedPositionAtT != null) {
+                                final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
+                                if (otherCompetitorsDistanceToStartAtT != null) {
+                                    final Distance crossTrackError;
+                                    if (startIsLine) {
+                                        Pair<Position, Bearing> crossingInformationForStartLine = crossingInformationForStart.iterator().next();
+                                        crossTrackError = estimatedPositionAtT.crossTrackError(crossingInformationForStartLine.getA(),
+                                                crossingInformationForStartLine.getB());
+                                    } else {
+                                        crossTrackError = null;
+                                    }
+                                    distancesToStartLineOfOtherCompetitors.add(new
+                                            AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(otherCompetitorsDistanceToStartAtT, crossTrackError));
                                 }
-                                distancesToStartLineOfOtherCompetitors.add(new
-                                        AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(otherCompetitorsDistanceToStartAtT, crossTrackError));
                             }
                         }
                     }
