@@ -120,20 +120,6 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         }
     }
 
-    // TODO bug 1267: @Peter, what about this method?
-    private void initFactor() {
-        if (preferences.isRaceFactorChangeAllow()) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    openFragment(RaceFactorFragment.newInstance(START_MODE_PRESETUP));
-                }
-            };
-            SelectionItem factorItem = new SelectionItem(getString(R.string.race_factor), null, null, false, false, runnable);
-            mItems.add(factorItem);
-        }
-    }
-
     private void initCourse() {
         Runnable runnable = new Runnable() {
             @Override
