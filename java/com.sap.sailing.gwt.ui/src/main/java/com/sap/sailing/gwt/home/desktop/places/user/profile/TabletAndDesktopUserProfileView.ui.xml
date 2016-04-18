@@ -45,6 +45,9 @@
       <c:tabcontent title="{i18n.details}">
         <s:detailstab.UserProfileDetailsTabView ui:field="detailsTabUi" />
       </c:tabcontent>
+      <c:tabcontent title="TODO Prefs">
+        <s:preferencestab.UserProfilePreferencesTabView ui:field="preferencesTabUi" />
+      </c:tabcontent>
     </c:TabPanel>
   </g:HTMLPanel>
 </ui:UiBinder> 
