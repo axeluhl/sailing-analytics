@@ -501,6 +501,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             result.add(uri);
         }
         // sort those to the front that don't do port 443 nor wss://
+        Collections.shuffle(result); // shuffle as a failover strategy
         Collections.sort(result, new Comparator<URI>() {
             @Override
             public int compare(URI o1, URI o2) {
