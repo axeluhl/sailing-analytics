@@ -36,6 +36,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Dark.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Dark.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Dark.Button.Normal</item>
+        <item name="checkedItemBackground">@drawable/checked_item_background_dark</item>
         <item name="round">@style/AppTheme.Dark.Round</item>
         <item name="round_transparent">@style/AppTheme.Dark.RoundTransparent</item>
         <item name="text">@style/AppTheme.Dark.Text</item>

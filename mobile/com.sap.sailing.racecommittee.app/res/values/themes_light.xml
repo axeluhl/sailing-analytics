@@ -28,16 +28,16 @@
         <!-- colors -->
         <item name="black">@color/light_black</item>
         <item name="sap_blue_1">@color/constant_sap_blue_1</item>
-        <item name="sap_gray">@color/light_sap_gray</item>
+        <item name="sap_gray">@color/light_sap_gray</item>                   <!-- ripple -->
         <item name="sap_gray_black_20">@color/light_sap_gray_black_20</item>
-        <item name="sap_gray_black_30">@color/light_sap_gray_black_30</item>
+        <item name="sap_gray_black_30">@color/light_sap_gray_black_30</item> <!-- bg -->
         <item name="sap_gray_black_40">@color/light_sap_gray_black_40</item>
         <item name="sap_gray_white_10">@color/light_sap_gray_white_10</item>
         <item name="sap_gray_white_20">@color/light_sap_gray_white_20</item>
-        <item name="sap_light_gray">@color/light_sap_light_gray</item>
+        <item name="sap_light_gray">@color/light_sap_light_gray</item>      <!-- unselected -->
         <item name="sap_red_1">@color/constant_sap_red_1</item>
         <item name="sap_yellow_1">@color/constant_sap_yellow_1</item>
-        <item name="white">@color/white_light</item>
+        <item name="white">@color/white_light</item>                        <!-- selected / init -->
         <item name="white_invert">@color/constant_white</item>
 
         <!-- styles -->
@@ -45,6 +45,7 @@
         <item name="buttonSolidXSmall">@style/AppTheme.Light.Button.XSmall</item>
         <item name="buttonSolidSmall">@style/AppTheme.Light.Button.Small</item>
         <item name="buttonSolidNormal">@style/AppTheme.Light.Button.Normal</item>
+        <item name="checkedItemBackground">@drawable/checked_item_background_light</item>
         <item name="round">@style/AppTheme.Light.Round</item>
         <item name="round_transparent">@style/AppTheme.Light.RoundTransparent</item>
         <item name="text">@style/AppTheme.Light.Text</item>
