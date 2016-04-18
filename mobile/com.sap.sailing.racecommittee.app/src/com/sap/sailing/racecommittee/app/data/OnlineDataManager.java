@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -97,7 +98,8 @@ public class OnlineDataManager extends DataManager {
 
     public void addRaces(Collection<ManagedRace> data) {
         int index = 0;
-        for (ManagedRace race : data) {
+        Collection<ManagedRace> copy = new HashSet<>(data);
+        for (ManagedRace race : copy) {
             dataStore.addRace(index++, race);
         }
     }
