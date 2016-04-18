@@ -70,7 +70,8 @@
             android:id="@+id/competitor_score"
             android:layout_width="@dimen/competitor_edit_width"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"/>
+            android:inputType="numberDecimal"
+            android:textColor="?attr/white"/>
     </LinearLayout>
 
     <LinearLayout
@@ -158,6 +159,7 @@
             android:id="@+id/competitor_comment"
             android:layout_width="@dimen/competitor_edit_width"
             android:layout_height="wrap_content"
-            android:inputType="text"/>
+            android:inputType="text"
+            android:textColor="?attr/white"/>
     </LinearLayout>
 </LinearLayout>
