@@ -528,6 +528,7 @@
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
+    <string name="reload_config">Reload Configuration from Server</string>
 
     <string name="abort_title">Abort Races</string>
     <string name="abort_hint">Which running races do you want to abort?</string>

@@ -25,7 +25,6 @@ import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRe
 import com.sap.sailing.racecommittee.app.ui.fragments.MainPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
 import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PreferenceActivity extends AppCompatActivity {
 
@@ -80,7 +79,6 @@ public class PreferenceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         AppUtils.lockOrientation(this);
-        ThemeHelper.setTheme(this);
         setContentView(R.layout.preference_view);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

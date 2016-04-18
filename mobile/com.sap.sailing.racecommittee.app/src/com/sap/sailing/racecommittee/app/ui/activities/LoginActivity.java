@@ -368,11 +368,6 @@ public class LoginActivity extends BaseActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
         BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-//        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-//            resetData();
-//        } else {
-//            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
-//        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -381,7 +376,6 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
-
     }
 
     @Override
@@ -432,8 +426,8 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!AppPreferences.on(this).isOfflineMode()) {
-            // always reload the configuration...
+        if (!preferences.isOfflineMode() && preferences.needConfigRefresh()) {
+            // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();

@@ -121,4 +121,8 @@
 
     <string name="preference_non_public_events_key" translatable="false">show_non_public_events</string>
     <bool name="preference_non_public_events_default">false</bool>
+
+    <string name="preference_config_needs_refresh_key" translatable="false">config_refresh</string>
+    <bool name="preference_config_needs_refresh_default" translatable="false">true</bool>
+
 </resources>
