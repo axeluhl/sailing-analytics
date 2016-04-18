@@ -507,7 +507,6 @@
     <string name="abort_title">Rennen abbrechen</string>
     <string name="abort_hint">Welche laufenden Rennen möchten Sie abbrechen?</string>
     <string name="abort_dismiss">Verwerfen</string>
-    <string name="explicit_factor">x %1$s</string>
     <string name="set_column_factor">Setze Faktor</string>
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
 
