@@ -30,6 +30,8 @@ import com.sap.sse.common.Util.Triple;
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     private static final Logger logger = Logger.getLogger(MarkPassingUpdateListener.class.getName());
     private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
+    private final String raceName;
+
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
         public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
@@ -44,6 +46,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
      * Adds itself automatically as a Listener on the <code>race</code> and its course.
      */
     public MarkPassingUpdateListener(DynamicTrackedRace race) {
+        raceName = race.getRace().getName();
         queue = new LinkedBlockingQueue<>();
         race.addListener(this);
         race.getRace().getCourse().addCourseListener(this);
@@ -98,7 +101,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     public void stop() {
-        logger.info("Stopping " + this);
+        logger.info("Stopping " + this + " for race " + raceName);
         queue.add(endMarker);
     }
 

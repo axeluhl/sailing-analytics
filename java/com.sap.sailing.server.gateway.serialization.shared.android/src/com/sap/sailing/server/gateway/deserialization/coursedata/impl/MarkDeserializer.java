@@ -31,7 +31,6 @@ public class MarkDeserializer implements JsonDeserializer<Mark> {
         String shape = (String) object.get(MarkJsonSerializer.FIELD_SHAPE);
         MarkType type = MarkType.valueOf((String) object.get(MarkJsonSerializer.FIELD_TYPE));
         String name = (String) object.get(MarkJsonSerializer.FIELD_NAME);
-        
         Mark mark = factory.getOrCreateMark(id, name, type, color, shape, pattern);
         return mark;
     }

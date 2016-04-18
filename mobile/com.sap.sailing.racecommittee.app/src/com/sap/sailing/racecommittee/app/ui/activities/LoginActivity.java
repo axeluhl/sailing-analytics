@@ -72,6 +72,8 @@ public class LoginActivity extends BaseActivity
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
+    private boolean wakeUp;
+
     private final static String TAG = LoginActivity.class.getName();
 
     private final PositionListFragment positionFragment;
@@ -82,7 +84,7 @@ public class LoginActivity extends BaseActivity
 
     // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
-    private String courseAreaName = null;
+    private String courseName = null;
     private String positionName = null;
 
     private Serializable mSelectedEventId;
@@ -147,7 +149,7 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
                     login();
                 }
             });
@@ -197,19 +199,19 @@ public class LoginActivity extends BaseActivity
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        courseAreaName = courseArea.getName();
+        courseName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getCourseAreaContainer().setHeaderText(courseAreaName);
+        loginListViews.getAreaContainer().setHeaderText(courseName);
     }
 
     private boolean isCourseAreaSelected() {
-        return (courseAreaName != null && mSelectedCourseAreaUUID != null);
+        return (courseName != null && mSelectedCourseAreaUUID != null);
     }
 
     private void resetCourseArea() {
-        courseAreaName = null;
+        courseName = null;
         mSelectedCourseAreaUUID = null;
-        loginListViews.getCourseAreaContainer().setHeaderText("");
+        loginListViews.getAreaContainer().setHeaderText("");
         resetPosition();
     }
 
@@ -385,6 +387,7 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
+        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -537,11 +540,12 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
                 resetData();
             }
+            wakeUp = false;
         }
     }
 
@@ -567,7 +571,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override
