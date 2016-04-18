@@ -54,7 +54,6 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
             
             @Override
             public void competitorPositionChanged(GPSFixMoving fix, Competitor competitor) {
-                System.out.println("Received fix "+fix);
                 synchronized (semaphor) {
                     if (first) {
                         firstTracked[0] = competitor;
