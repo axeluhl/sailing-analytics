@@ -52,6 +52,8 @@
         <item name="textPanelHeader">@style/AppTheme.Dark.Text.PanelHeader</item>
         <item name="floatLabel">@style/AppTheme.Dark.Text.FloatLabel</item>
 
+        <item name="factor_background">@drawable/factor_background_dark</item>
+
         <!-- drawable -->
         <item name="add">@drawable/ic_add_dark</item>
         <item name="access_time_18dp">@drawable/ic_access_time_white_18dp</item>

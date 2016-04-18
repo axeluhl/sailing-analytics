@@ -480,6 +480,11 @@ public class AppPreferences {
             .getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
     }
 
+    public boolean isRaceFactorChangeAllow() {
+        return preferences.getBoolean(context.getString(R.string.preference_allow_edit_race_factor_key), context.getResources()
+            .getBoolean(R.bool.preference_allow_edit_race_factor_default));
+    }
+
     public String showNonPublic() {
         return preferences.getBoolean(context.getString(R.string.preference_non_public_events_key), context.getResources()
             .getBoolean(R.bool.preference_non_public_events_default)) ? "true" : "false";

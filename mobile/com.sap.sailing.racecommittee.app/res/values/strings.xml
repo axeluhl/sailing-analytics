@@ -459,6 +459,8 @@
     <string name="preference_allow_dependent_races_header">Relative Start Time (Minutes)</string>
     <string name="preference_allow_dependent_races_description">Enable Relative Start Time between Races</string>
     <string name="preference_dependent_races_offset_header">Default Relative Start Time Offset</string>
+    <string name="preference_allow_edit_race_factor_header">Race factor change</string>
+    <string name="preference_allow_edit_race_factor_description">Race managers can change the race factor per race</string>
     <string name="error_finished_time">The given finish time is earlier than the first finisher time. Please recheck the time.</string>
     <string name="error_finishing_time">The selected time is before the race start.</string>
     <string name="error_time_in_future">The given time is in future. Please recheck the time.</string>
@@ -528,10 +530,14 @@
 
     <string name="preference_non_public_events_header">Show Non Public Events</string>
     <string name="preference_non_public_events_summary">Load all events including the no public one.</string>
+    <string name="race_factor">Factor</string>
     <string name="options_menu_role">Change Regatta</string>
     <string name="reload_config">Reload Configuration from Server</string>
-
     <string name="abort_title">Abort Races</string>
     <string name="abort_hint">Which running races do you want to abort?</string>
     <string name="abort_dismiss">Dismiss</string>
+    <string name="race_factor_format" translatable="false">x #.####</string>
+    <string name="set_column_factor">Set Factor</string>
+    <string name="set_factor_error">There was an error while setting the factor: %s</string>
+
 </resources>

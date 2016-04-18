@@ -45,6 +45,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_TIMING = "more_timing";
+    public final static String INTENT_ACTION_TOGGLE_FACTOR = "factor";
     public final static String INTENT_ACTION_TOGGLE_COURSE = "course";
     public final static String INTENT_ACTION_TOGGLE_WIND = "wind";
     public final static String INTENT_ACTION_TOGGLE_TIME = "time";
@@ -75,6 +76,7 @@ public class AppConstants {
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";
 
+    public final static String INTENT_ACTION_UPDATE_SCREEN = PACKAGE_NAME + ".action.update.screen";
     public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";
     public final static String INTENT_ACTION_SHOW_SUMMARY_CONTENT = PACKAGE_NAME + ".action.show.summary";
 

@@ -97,6 +97,8 @@
     <bool name="preference_allow_dependent_races_default">true</bool>
     <string name="preference_dependent_races_offset_key" translatable="false">dependentRacesOffset</string>
     <integer name="preference_dependent_races_offset_default">5</integer>
+    <string name="preference_allow_edit_race_factor_key" translatable="false">raceFactor</string>
+    <bool name="preference_allow_edit_race_factor_default">true</bool>
 
     <string name="preference_allow_demo_key" translatable="false">allow_demo</string>
     <bool name="preference_allow_demo_default">false</bool>

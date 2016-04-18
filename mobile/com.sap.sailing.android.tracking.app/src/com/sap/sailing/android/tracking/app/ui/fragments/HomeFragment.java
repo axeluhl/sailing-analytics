@@ -128,8 +128,8 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         try {
             JSONObject requestObject = CheckinHelper.getCheckinJson(checkinData.competitorId, checkinData.deviceUid,
                     "TODO push device ID!!", date.getTime());
-            HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkinData.checkinURL),
-                    requestObject.toString(), getActivity());
+            HttpJsonPostRequest request = new HttpJsonPostRequest(getActivity(), new URL(checkinData.checkinURL),
+                    requestObject.toString());
             NetworkHelper.getInstance(getActivity())
                     .executeHttpJsonRequestAsync(request, new CheckinListener(checkinData.checkinDigest),
                             new CheckinErrorListener(checkinData.checkinDigest));
