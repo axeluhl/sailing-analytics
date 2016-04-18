@@ -26,9 +26,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 
 public class RaceFactorFragment extends BaseFragment implements View.OnClickListener {
-
-    private static final String TAG = RaceFactorFragment.class.getName();
-
     private HeaderLayout mHeader;
     private EditText mFactor;
 
