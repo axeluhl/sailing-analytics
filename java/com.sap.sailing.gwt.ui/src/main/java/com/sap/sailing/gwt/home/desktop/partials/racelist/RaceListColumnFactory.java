@@ -163,7 +163,8 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getFleetNameColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(
+                new NullSafeComparatorWrapper<String>(new NaturalComparator(false))) {
             @Override
             protected String getComparisonValue(T object) {
                 return object.getFleet() != null ? object.getFleet().getFleetName() : null;
@@ -332,7 +333,8 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseAreaColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(
+                new NullSafeComparatorWrapper<String>(new NaturalComparator(false))) {
             @Override
             protected String getComparisonValue(T object) {
                 return object.getCourseArea();
@@ -358,7 +360,8 @@ public class RaceListColumnFactory {
     
     public static <T extends RaceMetadataDTO<?>> SortableRaceListColumn<T, String> getCourseColumn() {
         Cell<String> cell = new TextCell();
-        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(new NaturalComparator(false)) {
+        InvertibleComparator<T> comparator = new InvertibleComparatorWrapper<T, String>(
+                new NullSafeComparatorWrapper<String>(new NaturalComparator(false))) {
             @Override
             protected String getComparisonValue(T object) {
                 return object.getCourse();
