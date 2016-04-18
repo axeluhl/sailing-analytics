@@ -130,9 +130,9 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
     }
     
     private void fillCourseAreaListBox(EventDTO selectedEvent) {
-        courseAreaListBox.addItem("Please select a course area...");
+        courseAreaListBox.addItem(stringMessages.pleaseSelectACourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName());
+            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
         }
         courseAreaListBox.setEnabled(true);
     }
@@ -156,10 +156,10 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
         CourseAreaDTO result = null;
         EventDTO event = getSelectedEvent();
         int selIndex = courseAreaListBox.getSelectedIndex();
-        if(selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String itemText = courseAreaListBox.getItemText(selIndex);
-            for(CourseAreaDTO courseAreaDTO: event.venue.getCourseAreas()) {
-                if(courseAreaDTO.getName().equals(itemText)) {
+        if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
+            String selectedCourseAreaId = courseAreaListBox.getValue(selIndex);
+            for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
+                if (courseAreaDTO.id.toString().equals(selectedCourseAreaId)) {
                     result = courseAreaDTO;
                     break;
                 }

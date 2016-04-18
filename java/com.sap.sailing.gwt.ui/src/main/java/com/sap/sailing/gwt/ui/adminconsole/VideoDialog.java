@@ -22,6 +22,7 @@ import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -89,7 +90,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         });
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaConstants.videoTagSuggestions, "Enter tags for the video", 50));
     }
 
