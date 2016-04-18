@@ -45,6 +45,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
             coreLocationManager.requestAlwaysAuthorization()
         }
+
+        // Now try everything to allow the app to use the GPS sensor
+	// while in background
+	coreLocationManager.pausesLocationUpdatesAutomatically = false; 
+        if #available(iOS 9, *) {
+	    coreLocationManager.allowsBackgroundLocationUpdates = true;
+        }
+
         coreLocationManager.startUpdatingLocation()
         coreLocationManager.startUpdatingHeading()
         coreLocationManager.delegate = self

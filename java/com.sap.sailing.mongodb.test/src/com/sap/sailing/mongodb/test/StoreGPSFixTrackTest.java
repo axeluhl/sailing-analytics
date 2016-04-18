@@ -60,7 +60,7 @@ public class StoreGPSFixTrackTest extends AbstractMongoDBTest {
     	TypeBasedServiceFinderFactory factory = new MockSmartphoneImeiServiceFinderFactory();
     	AbstractLogEventAuthor author = new LogEventAuthorImpl("author", 0);
     	Competitor comp = DomainFactory.INSTANCE.getOrCreateCompetitor("comp", "comp", null, null, null, null, null,
-    	    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    	    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     	Mark mark = DomainFactory.INSTANCE.getOrCreateMark("mark");
         MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService(), factory);
         DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE, factory);

@@ -31,6 +31,7 @@ import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -106,7 +107,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final CandidateWithSettableTime start;
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
-
+    
     public CandidateChooserImpl(DynamicTrackedRace race) {
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
@@ -395,8 +396,9 @@ public class CandidateChooserImpl implements CandidateChooser {
                     }
                 }
             }
-            Candidate marker = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval).getA();
-            while (marker.getOneBasedIndexOfWaypoint() > 0) {
+            final Pair<Candidate, Double> bestCandidateAndProbabilityForEndOfFixedInterval = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval);
+            Candidate marker = bestCandidateAndProbabilityForEndOfFixedInterval == null ? null : bestCandidateAndProbabilityForEndOfFixedInterval.getA();
+            while (marker != null && marker.getOneBasedIndexOfWaypoint() > 0) {
                 mostLikelyCandidates.add(marker);
                 marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
             }
