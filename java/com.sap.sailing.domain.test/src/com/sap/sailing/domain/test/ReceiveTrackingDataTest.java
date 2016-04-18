@@ -89,6 +89,7 @@ public class ReceiveTrackingDataTest extends AbstractTracTracLiveTest {
                         null, /* tracTracUsername */null, /* tracTracPassword */null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false)) {
             receiver.subscribe();
             getRaceSubscriber().start();
+            addReceiverToStopDuringTearDown(receiver);
         }
         addListenersForStoredDataAndStartController(domainFactory
                 .getUpdateReceivers(trackedRegatta, /* delayToLiveInMillis */0l, null, /* simulator */
