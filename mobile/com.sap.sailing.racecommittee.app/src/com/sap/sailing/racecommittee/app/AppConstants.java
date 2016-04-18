@@ -22,11 +22,15 @@ public class AppConstants {
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
 
-    public final static String INTENT_ACTION_RESET = PACKAGE_NAME + ".action.reset";
-    public final static String INTENT_ACTION_REGISTER_RACE = PACKAGE_NAME + ".action.registerRace";
-    public final static String INTENT_ACTION_CLEAR_RACES = PACKAGE_NAME + ".action.clearRaces";
-    public final static String INTENT_ACTION_ALARM_ACTION = PACKAGE_NAME + ".action.alarmAction";
-    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = PACKAGE_NAME + ".action.startProcedureSpecificAction";
+    private final static String INTENT_ACTION = PACKAGE_NAME + ".action";
+    public final static String INTENT_ACTION_RESET = INTENT_ACTION + ".reset";
+    public final static String INTENT_ACTION_REGISTER_RACE = INTENT_ACTION + ".registerRace";
+    public final static String INTENT_ACTION_UNREGISTER_RACE = INTENT_ACTION + ".unregisterRace";
+    public final static String INTENT_ACTION_CLEAR_RACES = INTENT_ACTION + ".clearRaces";
+    public final static String INTENT_ACTION_CLEANUP_RACES = INTENT_ACTION + ".cleanupRaces";
+    public final static String INTENT_ACTION_ALARM_ACTION = INTENT_ACTION + ".alarmAction";
+    public final static String INTENT_ACTION_RELOAD_RACES = INTENT_ACTION + ".reloadRaces";
+    public final static String INTENT_ACTION_START_PROCEDURE_SPECIFIC_ACTION = INTENT_ACTION + ".startProcedureSpecificAction";
 
     // Login activity
     public final static String EventIdTag = "EventId";
@@ -66,6 +70,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_SHOW_ONBOARDING = "show_onboarding";
     public final static String INTENT_ACTION_SHOW_LOGIN = "show_login";
     public final static String INTENT_ACTION_VALID_DATA = "valid_data";
+    public final static String INTENT_ACTION_SHOW_WELCOME = "show_welcome";
 
     // clears all toggle buttons
     public final static String INTENT_ACTION_CLEAR_TOGGLE = PACKAGE_NAME + ".action.toggle.clear";

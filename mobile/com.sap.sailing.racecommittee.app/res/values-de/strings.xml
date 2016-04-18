@@ -500,6 +500,7 @@
 
     <string name="preference_non_public_events_header">Zeige nicht öffentliche Events</string>
     <string name="preference_non_public_events_summary">Lade alle Events, auch die nicht öffentlichen.</string>
+    <string name="options_menu_role">Rolle wechseln</string>
     <string name="reload_config">Konfiguration vom Server laden</string>
 
     <string name="abort_title">Rennen abbrechen</string>

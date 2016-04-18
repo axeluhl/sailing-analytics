@@ -96,8 +96,9 @@ public class OnlineDataManager extends DataManager {
     }
 
     public void addRaces(Collection<ManagedRace> data) {
+        int index = 0;
         for (ManagedRace race : data) {
-            dataStore.addRace(race);
+            dataStore.addRace(index++, race);
         }
     }
 
@@ -110,12 +111,11 @@ public class OnlineDataManager extends DataManager {
     @Override
     public LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createEventsLoader(
             LoadClient<Collection<EventBase>> callback) {
-        return new DataLoaderCallbacks<Collection<EventBase>>(callback, new LoaderCreator<Collection<EventBase>>() {
+        return new DataLoaderCallbacks<>(callback, new LoaderCreator<Collection<EventBase>>() {
             @Override
             public Loader<DataLoaderResult<Collection<EventBase>>> create(int id, Bundle args) throws Exception {
                 ExLog.i(context, TAG, String.format("Creating Events-OnlineDataLoader %d", id));
-                EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(
-                        new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
+                EventBaseJsonDeserializer serializer = new EventBaseJsonDeserializer(new VenueJsonDeserializer(new CourseAreaJsonDeserializer(domainFactory)), new LeaderboardGroupBaseJsonDeserializer());
                 DataParser<Collection<EventBase>> parser = new EventsDataParser(serializer);
                 DataHandler<Collection<EventBase>> handler = new EventsDataHandler(OnlineDataManager.this);
 
@@ -123,8 +123,7 @@ public class OnlineDataManager extends DataManager {
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
                 params.add(new Util.Pair<String, Object>("showNonPublic", AppPreferences.on(context).showNonPublic()));
                 URL url = UrlHelper.generateUrl(preferences.getServerBaseURL(), "/sailingserver/api/v1/events", params);
-                return new OnlineDataLoader<Collection<EventBase>>(context,
-                    url, parser, handler);
+                return new OnlineDataLoader<Collection<EventBase>>(context, url, parser, handler);
             }
         }, getContext());
     }

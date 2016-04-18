@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -23,7 +24,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.widget.TintImageView;
@@ -38,9 +38,11 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.android.shared.util.CollectionUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
@@ -55,6 +57,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
@@ -93,6 +96,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     private RaceListFragment mRaceList;
     private ManagedRace mSelectedRace;
     private TimePoint startTime;
+    private Loader<DataLoaderResult<Collection<ManagedRace>>> raceLoader;
     private Collection<ManagedRace> lastSeenRaces = null;
 
     private Serializable getCourseAreaIdFromIntent() {
@@ -126,7 +130,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         setProgressSpinnerVisibility(true);
 
         ExLog.i(this, TAG, "Issuing loading of managed races from data manager");
-        getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+        if (raceLoader == null) {
+            raceLoader = getLoaderManager().initLoader(RacesLoaderId, null, dataManager.createRacesLoader(courseArea.getId(), new RaceLoadClient(courseArea)));
+        } else {
+            raceLoader.forceLoad();
+        }
     }
 
     private boolean resetEditFragments(@IdRes int id, String action) {
@@ -253,7 +261,9 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+        filter.addAction(AppConstants.INTENT_ACTION_SHOW_WELCOME);
         filter.addAction(AppConstants.INTENT_ACTION_REMOVE_PROTEST);
+        filter.addAction(AppConstants.INTENT_ACTION_RELOAD_RACES);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
     }
 
@@ -350,6 +360,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 resetRace();
                 return true;
 
+            case R.id.options_menu_role:
+                logoutSession();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -383,18 +397,29 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     private void registerOnService(final Collection<ManagedRace> races) {
+        // close current race, if no longer on server
+        if (!races.contains(mSelectedRace)) {
+            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_WELCOME));
+            mSelectedRace = null;
+        }
+
         // since the service is the long-living component
         // he should decide whether these races are already
         // registered or not.
         new Thread(new Runnable() {
             @Override
             public void run() {
+                // add all received races to the service
                 for (ManagedRace race : races) {
                     Intent registerIntent = new Intent(RacingActivity.this, RaceStateService.class);
                     registerIntent.setAction(AppConstants.INTENT_ACTION_REGISTER_RACE);
                     registerIntent.putExtra(AppConstants.RACE_ID_KEY, race.getId());
                     RacingActivity.this.startService(registerIntent);
                 }
+
+                Intent cleanupIntent = new Intent(RacingActivity.this, RaceStateService.class);
+                cleanupIntent.setAction(AppConstants.INTENT_ACTION_CLEANUP_RACES);
+                RacingActivity.this.startService(cleanupIntent);
             }
         }).start();
     }
@@ -610,6 +635,14 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                     transaction.remove(extra);
                                 }
                             }
+        }
+
+        if (AppConstants.INTENT_ACTION_SHOW_WELCOME.equals(action)) {
+            loadWelcomeFragment();
+        }
+
+        if (AppConstants.INTENT_ACTION_RELOAD_RACES.equals(action)) {
+            loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
                         }
 
                         transaction.commit();
