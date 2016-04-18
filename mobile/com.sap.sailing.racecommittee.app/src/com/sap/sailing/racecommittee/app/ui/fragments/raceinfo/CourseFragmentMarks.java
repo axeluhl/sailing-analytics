@@ -243,7 +243,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                             if (ex.getMessage().equals("Missing second mark")) {
                                 String toastText = getString(R.string.error_missing_second_mark);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                            } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                            } else if (ex.getMessage().equals("Each waypoint needs passing instructions")) {
                                 String toastText = getString(R.string.error_missing_passing_instructions);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                             }
@@ -258,7 +258,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
             if (unpublish != null) {
                 unpublish.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View arg0) {
                         CourseBase emptyCourse = new CourseDataImpl(getString(R.string.unpublished_course));
