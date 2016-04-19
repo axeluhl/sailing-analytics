@@ -75,14 +75,22 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class TestSettings extends AbstractSettings implements Serializable {
         private static final long serialVersionUID = -611806711715538293L;
-        private transient final StringSetting humba = new StringSetting("humba", this);
-        private transient final BooleanSetting bumpa = new BooleanSetting("bumpa", this);
-        private transient final EnumSetting<TextOperator.Operators> trala = new EnumSetting<>("trala", this,
-                TextOperator.Operators::valueOf);
-        private transient final DecimalSetting num = new DecimalSetting("num", this);
-        private transient final DecimalListSetting l = new DecimalListSetting("l", this);
+        private transient StringSetting humba;
+        private transient BooleanSetting bumpa;
+        private transient EnumSetting<TextOperator.Operators> trala;
+        private transient DecimalSetting num;
+        private transient DecimalListSetting l;
 
         public TestSettings() {
+        }
+        
+        @Override
+        protected void addChildSettings() {
+            humba = new StringSetting("humba", this);
+            bumpa = new BooleanSetting("bumpa", this);
+            trala = new EnumSetting<>("trala", this, TextOperator.Operators::valueOf);
+            num = new DecimalSetting("num", this);
+            l = new DecimalListSetting("l", this);
         }
     }
 
