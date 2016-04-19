@@ -3,10 +3,15 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.places.user.profile.selection.SuggestedMultiSelectionResources" />
-	<g:HTMLPanel addStyleNames="{local_res.css.suggestionsSelectedItem}">
-	   <g:SimplePanel addStyleNames="{local_res.css.suggestionsItemDescription}" ui:field="itemDescriptionContainerUi"/>
-	   <g:Button addStyleNames="{local_res.css.suggestionsRemoveButton} {res.mainCss.button} {res.mainCss.buttonred}" ui:field="removeItemButtonUi">
-	       <ui:text from="{i18n.remove}" />
-	   </g:Button>
-	</g:HTMLPanel>
+    <ui:style>
+        .imageSize {
+            width: 1.666666666666667em !important;
+            height: 2em !important;
+        }
+    </ui:style>
+    <div>
+        <div class="{local_res.css.suggestionsItemDescriptionImage} {style.imageSize}" ui:field="flagImageUi"></div>
+        <span class="{local_res.css.suggestionsItemDescriptionId}" ui:field="sailIdUi"></span>
+        <span ui:field="nameUi"></span>
+    </div>
 </ui:UiBinder> 

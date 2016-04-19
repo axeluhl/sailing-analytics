@@ -11,8 +11,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ProvidesKey;
+import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -31,10 +34,12 @@ public class SuggestedMultiSelection<T> extends Composite {
     @UiField FlowPanel itemContainerUi;
     private final Map<Object, T> selectedItems = new HashMap<>();
     private final ProvidesKey<T> keyProvider;
+    private final WidgetProvider<T> widgetProvider;
 
-    public SuggestedMultiSelection(ProvidesKey<T> keyProvider, String title) {
+    private SuggestedMultiSelection(ProvidesKey<T> keyProvider, WidgetProvider<T> widgetProvider, String title) {
         SuggestedMultiSelectionResources.INSTANCE.css().ensureInjected();
         this.keyProvider = keyProvider;
+        this.widgetProvider = widgetProvider;
         suggestionWidgetUi = new AbstractSuggestBoxFilter<T, T>(StringMessages.INSTANCE.add()) {
             @Override
             protected String createSuggestionKeyString(T value) {
@@ -63,11 +68,41 @@ public class SuggestedMultiSelection<T> extends Composite {
     public void setSelectedItems(List<T> selectedItemsToSet) {
         itemContainerUi.clear();
         selectedItems.clear();
-        for (T item : selectedItemsToSet) {
+        for (final T item : selectedItemsToSet) {
             Object key = keyProvider.getKey(item);
             selectedItems.put(key, item);
-            itemContainerUi.add(new SuggestedMultiSelectionItem<T>(item));
+            itemContainerUi.add(new SuggestedMultiSelectionItem() {
+                @Override
+                protected IsWidget getItemDescriptionWidget() {
+                    return widgetProvider.getItemDescriptionWidget(item);
+                }
+            });
         }
     }
+    
+    private interface WidgetProvider<T> {
+        IsWidget getItemDescriptionWidget(T item);
+    }
+    
+    public static SuggestedMultiSelection<SimpleCompetitorDTO> forCompetitors(
+            ProvidesKey<SimpleCompetitorDTO> keyProvider, String headerTitle) {
+        return new SuggestedMultiSelection<>(keyProvider, new WidgetProvider<SimpleCompetitorDTO>() {
+            @Override
+            public IsWidget getItemDescriptionWidget(SimpleCompetitorDTO item) {
+                return new SuggestedMultiSelectionCompetitorItemDescription(item);
+            }
+        }, headerTitle);
+    }
+    
+    public static SuggestedMultiSelection<BoatClassMasterdata> forBoatClasses(
+            ProvidesKey<BoatClassMasterdata> keyProvider, String headerTitle) {
+        return new SuggestedMultiSelection<>(keyProvider, new WidgetProvider<BoatClassMasterdata>() {
+            @Override
+            public IsWidget getItemDescriptionWidget(BoatClassMasterdata item) {
+                return new SuggestedMultiSelectionBoatClassItemDescription(item);
+            }
+        }, headerTitle);
+    }
+    
 
 }

@@ -21,7 +21,8 @@ public interface SuggestedMultiSelectionResources extends ClientBundle {
         String suggestionsRemoveButton();
         String suggestionsContentTable();
         String suggestionsSelectedItem();
-        String suggestionsSelectedItemDescription();
-        String suggestionsSelectedItemRemoveButton();
+        String suggestionsItemDescription();
+        String suggestionsItemDescriptionImage();
+        String suggestionsItemDescriptionId();
     }
 }

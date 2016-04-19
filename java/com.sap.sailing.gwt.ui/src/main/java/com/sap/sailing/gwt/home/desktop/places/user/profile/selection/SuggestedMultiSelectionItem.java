@@ -6,27 +6,24 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SuggestedMultiSelectionItem<T> extends Composite {
+abstract class SuggestedMultiSelectionItem extends Composite {
 
-    private static SuggestedMultiSelectionItemUiBinder uiBinder = GWT.create(SuggestedMultiSelectionItemUiBinder.class);
+    private static LocalUiBinder uiBinder = GWT.create(LocalUiBinder.class);
 
-    interface SuggestedMultiSelectionItemUiBinder extends UiBinder<Widget, SuggestedMultiSelectionItem<?>> {
+    interface LocalUiBinder extends UiBinder<Widget, SuggestedMultiSelectionItem> {
     }
     
     @UiField SimplePanel itemDescriptionContainerUi;
     @UiField Button removeItemButtonUi;
     
-    public SuggestedMultiSelectionItem(T item) {
+    SuggestedMultiSelectionItem() {
         initWidget(uiBinder.createAndBindUi(this));
-        itemDescriptionContainerUi.setWidget(getItemDescriptionWidget(item));
+        itemDescriptionContainerUi.setWidget(getItemDescriptionWidget());
     }
     
-    protected IsWidget getItemDescriptionWidget(T item) {
-        return new Label(item.toString());
-    }
+    protected abstract IsWidget getItemDescriptionWidget();
 
 }
