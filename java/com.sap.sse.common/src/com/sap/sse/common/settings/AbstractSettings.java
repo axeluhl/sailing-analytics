@@ -17,17 +17,22 @@ import com.sap.sse.common.settings.value.Value;
  * <pre>
  * <code>
  * public final class ExampleSettings extends AbstractSettings {
- *     private final StringSetting myString = new UUIDSetting("myString", this);
- *     private final BooleanSetting myBoolean = new BooleanSetting("myBoolean", this);
+ *     private transient StringSetting myString;
+ *     private transient BooleanSetting myBoolean;
  *     
  *     // Used to create instances for a component
- *     public RegattaOverviewBaseSettings() {
+ *     public ExampleSettings() {
  *     }
  *     
  *     // Used to create nested settings
- *     public RegattaOverviewBaseSettings(String name, AbstractSettings settings) {
- *         this.event.setValue(event);
- *         this.ignoreLocalSettings.setValue(ignoreLocalSettings);
+ *     public ExampleSettings(String name, AbstractSettings parentSettings) {
+ *         super(name, parentSettings);
+ *     }
+ *     
+ *     @Override
+ *     protected void addChildSettings() {
+ *         myString = new UUIDSetting("myString", this)
+ *         myBoolean = new BooleanSetting("myBoolean", this);
  *     }
  *     
  *     public String getMyString() {
@@ -49,6 +54,13 @@ import com.sap.sse.common.settings.value.Value;
  * </code>
  * </pre>
  * 
+ * To correctly support several kinds of Serialization (Java, GWT and Custom), you need to ensure the following:
+ * <ul>
+ *   <li>the Settings class must have a default constructor</li>
+ *   <li>child settings fields need to be transient</li>
+ *   <li>child settings instances must be initialized in {@link #addChildSettings()} method</li>
+ * </ul>
+ * 
  * If a custom Settings class only has {@link Setting} oder {@link Settings} children that are correctly attached by
  * calling their constructor with a name and the parent {@link Settings} you do not need to implement
  * {@link #hashCode()}, {@link #equals(Object)} and {@link #toString()}. There are generic implementations of those methods that are
@@ -60,11 +72,20 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
     private SettingsValue value;
     private transient Map<String, Setting> childSettings = new HashMap<>();
 
+    /**
+     * Default constructor for direct instantiation of root settings objects.
+     */
     public AbstractSettings() {
         value = new SettingsValue();
         addChildSettings();
     }
 
+    /**
+     * Constructor for automatic attachment of a child settings object to its parent settings object.
+     * 
+     * @param name the name of the child setting
+     * @param settings the parent settings to attach this settings object to
+     */
     public AbstractSettings(String name, AbstractSettings settings) {
         super(name, settings);
         value = (SettingsValue) settings.getValue(name);
@@ -76,6 +97,9 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
         addChildSettings();
     }
     
+    /**
+     * Internal use only for correct lifecycle of {@link SettingsList}.
+     */
     protected void adoptValue(SettingsValue value) {
         this.value = value;
     }
@@ -90,7 +114,13 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
         addChildSettings();
     }
     
-    // TODO make abstract when all Settings are ported to the new system
+    /**
+     * Overwrite this method to initialize child settings.
+     * {@link AbstractSettings} for an example.
+     * 
+     * TODO make abstract when all Settings are ported to the new system
+     * 
+     */
     protected void addChildSettings() {
     }
     
