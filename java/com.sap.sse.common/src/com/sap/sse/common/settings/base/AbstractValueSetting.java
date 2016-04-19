@@ -12,7 +12,9 @@ public abstract class AbstractValueSetting<T> extends AbstractHasValueSetting<T>
     protected AbstractValueSetting(String name, AbstractSettings settings, T defaultValue, ValueConverter<T> valueConverter) {
         super(name, settings, valueConverter);
         this.defaultValue = defaultValue;
-        resetToDefault();
+        if(settings.getValue(settingName) == null) {
+            resetToDefault();
+        }
     }
     
     @Override
