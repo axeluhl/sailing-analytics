@@ -23,7 +23,7 @@ import com.sap.sse.common.settings.StringToEnumConverter;
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class TestOuterSettings extends AbstractSettings {
-        private SimpleTestSettings nested;
+        private transient SimpleTestSettings nested;
 
         public TestOuterSettings() {
         }
@@ -35,7 +35,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
 
     private static class TestListSettings extends AbstractSettings {
-        private SettingsList<SimpleTestSettings> l;
+        private transient SettingsList<SimpleTestSettings> l;
 
         public TestListSettings() {
         }
@@ -47,8 +47,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
 
     private static class SimpleTestSettings extends AbstractSettings {
-        private StringSetting string;
-        private DecimalSetting num;
+        private transient StringSetting string;
+        private transient DecimalSetting num;
 
         public SimpleTestSettings() {
         }
@@ -70,12 +70,12 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     }
 
     private static class TestSettings extends AbstractSettings {
-        private final StringSetting humba = new StringSetting("humba", this);
-        private final BooleanSetting bumpa = new BooleanSetting("bumpa", this);
-        private final EnumSetting<TextOperator.Operators> trala = new EnumSetting<>("trala", this,
+        private transient final StringSetting humba = new StringSetting("humba", this);
+        private transient final BooleanSetting bumpa = new BooleanSetting("bumpa", this);
+        private transient final EnumSetting<TextOperator.Operators> trala = new EnumSetting<>("trala", this,
                 TextOperator.Operators::valueOf);
-        private final DecimalSetting num = new DecimalSetting("num", this);
-        private final DecimalListSetting l = new DecimalListSetting("l", this);
+        private transient final DecimalSetting num = new DecimalSetting("num", this);
+        private transient final DecimalListSetting l = new DecimalListSetting("l", this);
 
         public TestSettings() {
         }
@@ -98,9 +98,9 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class DuplicateFieldSettings extends AbstractSettings {
         @SuppressWarnings("unused")
-        private StringSetting humba;
+        private transient StringSetting humba;
         @SuppressWarnings("unused")
-        private DecimalSetting bumba;
+        private transient DecimalSetting bumba;
         
         @Override
         protected void addChildSettings() {
@@ -111,7 +111,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
     
     private static class DisallowedKeySettings extends AbstractSettings {
         @SuppressWarnings("unused")
-        private StringSetting disallowedKey;
+        private transient StringSetting disallowedKey;
         
         @Override
         protected void addChildSettings() {
