@@ -19,11 +19,10 @@
         android:layout_weight="1"
         android:background="@color/white">
 
-        <fragment
+        <FrameLayout
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            class="com.google.android.gms.maps.MapFragment"/>
+            android:layout_height="match_parent"/>
 
         <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
             android:id="@+id/mark_header"

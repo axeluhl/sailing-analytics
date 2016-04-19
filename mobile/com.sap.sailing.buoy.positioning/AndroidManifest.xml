@@ -68,8 +68,7 @@
             android:name=".ui.activities.RegattaActivity"
             android:configChanges="layoutDirection|screenSize|orientation"/>
         <activity
-            android:name=".ui.activities.PositioningActivity"
-            android:configChanges="layoutDirection|screenSize|orientation"/>
+            android:name=".ui.activities.PositioningActivity"/>
         <activity
             android:name=".ui.activities.SettingActivity"
             android:configChanges="layoutDirection|screenSize|orientation"/>

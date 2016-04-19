@@ -1,6 +1,10 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
+import java.text.DecimalFormat;
+
 import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,8 +41,6 @@ import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.android.ui.fragments.BaseFragment;
-
-import java.text.DecimalFormat;
 
 public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final String TAG = BuoyFragment.class.getName();
@@ -84,6 +86,8 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
         mReceiver = new IntentReceiver();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
+        initMapFragment();
+
         return layout;
     }
 
@@ -91,7 +95,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     public void onResume() {
         super.onResume();
         positioningActivity = (PositioningActivity) getActivity();
-        mapFragment = (MapFragment) positioningActivity.getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         initLocationProvider();
@@ -109,6 +112,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
         initMarkerReceiver();
         checkGPS();
+    }
+
+    private void initMapFragment() {
+        mapFragment = new MapFragment();
+        FragmentManager manager = getActivity().getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.map, mapFragment);
+        transaction.commit();
     }
 
     private void checkGPS() {
