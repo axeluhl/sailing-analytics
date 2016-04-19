@@ -1,13 +1,24 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
     xmlns:ud="urn:import:com.sap.sse.security.ui.userprofile.desktop.userdetails"
-    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator">
+    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+    xmlns:s="urn:import:com.sap.sailing.gwt.home.desktop.places.user.profile.selection">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style>
     </ui:style>
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
-            <g:Label addStyleNames="{res.mainCss.spacermargintopmediumbig} {res.mainCss.spacermarginbottommediumbig}">TODO</g:Label>
+            <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+                    <s:SuggestedMultiSelection ui:field="competitorsIBelongToSelctionUi"/>
+                </div>
+                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
+                    <s:SuggestedMultiSelection ui:field="favouriteCompetitorsSelctionUi"/>
+                </div>
+                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
+                    <s:SuggestedMultiSelection ui:field="favouriteBoatClassesSelctionUi"/>
+                </div>
+            </g:HTMLPanel>
        </um:content>
     </um:AuthorizedContentDecoratorDesktop>
 </ui:UiBinder>
