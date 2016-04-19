@@ -63,4 +63,9 @@ public abstract class DataManager implements ReadonlyDataManager {
         context.startService(intent);
     }
 
+
+    public void stopService() {
+        Intent intent = new Intent(context, RaceStateService.class);
+        context.stopService(intent);
+    }
 }
