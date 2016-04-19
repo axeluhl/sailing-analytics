@@ -116,6 +116,9 @@ public class PreferenceActivity extends AppCompatActivity {
                         String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
                         String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
                         getSupportActionBar().setTitle(title);
+                        if (fragment != null) {
+                            fragment.setArguments(info);
+                        }
                     }
                 }
             }
