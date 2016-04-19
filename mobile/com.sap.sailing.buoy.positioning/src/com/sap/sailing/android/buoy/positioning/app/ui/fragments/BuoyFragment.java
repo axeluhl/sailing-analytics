@@ -51,7 +51,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView accuracyTextView;
     private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
-    private OpenSansButton resetPositionButton;
     private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
@@ -76,10 +75,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
         setPositionButton.setVisibility(View.GONE);
         setPositionButton.setOnClickListener(clickListener);
-
-        resetPositionButton = ViewHelper.get(layout, R.id.marker_reset_position_button);
-        resetPositionButton.setOnClickListener(clickListener);
-        resetPositionButton.setVisibility(View.GONE);
 
         signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
@@ -315,8 +310,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 } else {
                     Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                 }
-            } else if (id == R.id.marker_reset_position_button) {
-                // Reset position
             }
         }
     }

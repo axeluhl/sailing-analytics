@@ -146,17 +146,4 @@
         android:textSize="18sp"
         android:textStyle="bold"/>
 
-    <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
-        android:id="@+id/marker_reset_position_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/rounded_btn_transparent"
-        android:text="@string/reset_position"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
-
 </LinearLayout>
