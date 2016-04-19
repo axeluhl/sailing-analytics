@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="50dp"
-    android:background="@color/colorPrimary"
+    android:background="@color/list_item_background_color"
     tools:ignore="Overdraw" >
 
     <ImageView
@@ -19,8 +19,7 @@
         android:layout_marginTop="13dp"
         android:layout_marginBottom="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
-        android:textColor="@color/white" />
+        android:layout_marginEnd="10dp" />
 
     <com.sap.sailing.android.tracking.app.customviews.OpenSansTextView
         android:id="@+id/regattaName"
@@ -34,6 +33,6 @@
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:singleLine="true"
-        android:textColor="@color/white" />
+        android:textColor="@color/black" />
 
 </RelativeLayout>
