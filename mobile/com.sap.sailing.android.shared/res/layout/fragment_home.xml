@@ -3,10 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <View
+        android:id="@+id/toolbar_separator"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_separator_height"
+        android:layout_alignParentTop="true"
+        android:background="@color/sap_yellow"/>
+
     <ImageView
         android:id="@+id/homeBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_separator"
         android:layout_alignParentBottom="true"
         android:contentDescription="@string/empty"
         android:scaleType="centerCrop"
@@ -64,9 +72,9 @@
     <ListView
         android:id="@+id/listRegatta"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/scanQr"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/toolbar_separator"
         android:divider="@android:color/white"
         android:dividerHeight="1dp" />
 
