@@ -2,7 +2,6 @@ package com.sap.sse.shared.android.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
@@ -16,6 +15,7 @@ import com.sap.sse.common.settings.DecimalListSetting;
 import com.sap.sse.common.settings.DecimalSetting;
 import com.sap.sse.common.settings.EnumListSetting;
 import com.sap.sse.common.settings.EnumSetting;
+import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.SettingsList;
 import com.sap.sse.common.settings.StringSetting;
@@ -23,7 +23,7 @@ import com.sap.sse.common.settings.StringToEnumConverter;
 
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
-    private static class TestOuterSettings extends AbstractSettings implements Serializable {
+    private static class TestOuterSettings extends SerializableSettings {
         private static final long serialVersionUID = -7379232503773525915L;
         private transient SimpleTestSettings nested;
 
@@ -36,7 +36,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestListSettings extends AbstractSettings implements Serializable {
+    private static class TestListSettings extends SerializableSettings {
         private static final long serialVersionUID = 6919127895749914961L;
         private transient SettingsList<SimpleTestSettings> l;
 
@@ -49,7 +49,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class SimpleTestSettings extends AbstractSettings implements Serializable {
+    private static class SimpleTestSettings extends SerializableSettings {
         private static final long serialVersionUID = -4134836978411240572L;
         private transient StringSetting string;
         private transient DecimalSetting num;
@@ -73,7 +73,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestSettings extends AbstractSettings implements Serializable {
+    private static class TestSettings extends SerializableSettings {
         private static final long serialVersionUID = -611806711715538293L;
         private transient StringSetting humba;
         private transient BooleanSetting bumpa;
@@ -94,7 +94,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestEnumListSettings extends AbstractSettings implements Serializable {
+    private static class TestEnumListSettings extends SerializableSettings {
         private static final long serialVersionUID = 93688955681544920L;
         private transient EnumListSetting<TextOperator.Operators> l;
         
@@ -113,7 +113,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class DuplicateFieldSettings extends AbstractSettings implements Serializable {
+    private static class DuplicateFieldSettings extends SerializableSettings {
         private static final long serialVersionUID = 4058775568295038177L;
         @SuppressWarnings("unused")
         private transient StringSetting humba;
@@ -127,7 +127,7 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
     
-    private static class DisallowedKeySettings extends AbstractSettings implements Serializable {
+    private static class DisallowedKeySettings extends SerializableSettings {
         private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient StringSetting disallowedKey;
@@ -140,17 +140,21 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
 
     protected abstract <T extends Settings> SOT serialize(T settings) throws Exception;
 
-    protected abstract <T extends Settings> T deserialize(SOT serializedObject, T settings) throws Exception;
+    protected <T extends Settings> T deserialize(SOT serializedObject, Class<T> settingsClass) throws Exception {
+        T deserializedInstance = settingsClass.newInstance();
 
+        return deserialize(serializedObject, deserializedInstance);
+    }
+    
+    protected <T extends Settings> T deserialize(SOT serializedObject, T settings) throws Exception {
+        return null;
+    };
+
+    @SuppressWarnings("unchecked")
     private <T extends Settings> T serializeAndDeserialize(T objectToSerialize) {
         try {
             SOT serialized = serialize(objectToSerialize);
-
-            @SuppressWarnings("unchecked")
-            Class<T> settingsType = (Class<T>) objectToSerialize.getClass();
-            T deserializedInstance = settingsType.newInstance();
-
-            return deserialize(serialized, deserializedInstance);
+            return deserialize(serialized, (Class<T>) objectToSerialize.getClass());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -18,6 +18,11 @@ public class SettingsList<T extends AbstractSettings> extends AbstractSetting im
     public SettingsList(String name, AbstractSettings settings, SettingsFactory<T> settingsFactory) {
         super(name, settings);
         this.settingsFactory = settingsFactory;
+        adoptValue();
+    }
+    
+    protected void adoptValue() {
+        values.clear();
         ValueListValue value = getValue();
         if(value != null) {
             for(Value val : value.getValueObjects()) {

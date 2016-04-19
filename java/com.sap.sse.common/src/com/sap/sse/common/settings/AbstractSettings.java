@@ -1,12 +1,9 @@
 package com.sap.sse.common.settings;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.common.settings.value.SettingsValue;
 import com.sap.sse.common.settings.value.Value;
 
@@ -68,16 +65,15 @@ import com.sap.sse.common.settings.value.Value;
  *
  */
 public abstract class AbstractSettings extends AbstractSetting implements Settings {
-
-    private SettingsValue value;
-    private transient Map<String, Setting> childSettings = new HashMap<>();
+    private transient SettingsValue value;
+    private transient Map<String, Setting> childSettings;
 
     /**
      * Default constructor for direct instantiation of root settings objects.
      */
     public AbstractSettings() {
         value = new SettingsValue();
-        addChildSettings();
+        addChildSettingsInternal();
     }
 
     /**
@@ -94,7 +90,7 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
             settings.setValue(name, value);
         }
         settings.setValue(name, value);
-        addChildSettings();
+        addChildSettingsInternal();
     }
     
     /**
@@ -102,16 +98,34 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
      */
     protected void adoptValue(SettingsValue value) {
         this.value = value;
+        if(childSettings != null) {
+            for(Map.Entry<String, Setting> entry : childSettings.entrySet()) {
+                Setting childSetting = entry.getValue();
+                if(childSetting instanceof AbstractSettings) {
+                    Value childValue = value.getValue(entry.getKey());
+                    if(childValue != null) {
+                        ((AbstractSettings) childSetting).adoptValue((SettingsValue) childValue);
+                    }
+                }
+                if(childSetting instanceof SettingsList<?>) {
+                    Value childValue = value.getValue(entry.getKey());
+                    if(childValue != null) {
+                        ((SettingsList<?>) childSetting).adoptValue();
+                    }
+                }
+            }
+        }
     }
     
     protected SettingsValue getInnerValueObject() {
         return value;
     }
     
-    @GwtIncompatible
-    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
-        ois.defaultReadObject();
-        addChildSettings();
+    protected final void addChildSettingsInternal() {
+        if(childSettings == null) {
+            childSettings = new HashMap<>();
+            addChildSettings();
+        }
     }
     
     /**
