@@ -28,6 +28,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Amazon EC2|wiki/amazon-ec2]]
   * [[SSL / HTTPS Support|wiki/ssl-support]]
   * [[EC2 Backup Strategy|wiki/amazon-ec2-backup-strategy]]
+  * [[EC2 mail relaying|wiki/mail-relaying]]
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
   * [[Operating Igtimi WindBots/windbot-operations]]

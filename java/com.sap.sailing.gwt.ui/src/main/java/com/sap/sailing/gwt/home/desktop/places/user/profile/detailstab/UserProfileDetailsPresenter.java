@@ -7,14 +7,14 @@ import com.sap.sse.security.ui.userprofile.shared.userdetails.UserDetailsPresent
 public class UserProfileDetailsPresenter implements UserProfileDetailsView.Presenter {
 
     private final UserProfileDetailsView view;
+    private final UserProfileView.Presenter userProfilePresenter;
     private final UserDetailsPresenter userDetailsPresenter;
 
     public UserProfileDetailsPresenter(UserProfileDetailsView view, UserProfileView.Presenter userProfilePresenter) {
         this.view = view;
-        
+        this.userProfilePresenter = userProfilePresenter;
         view.setPresenter(this);
-
-        userDetailsPresenter = new UserDetailsPresenter(view.getUserDetailsView(),
+        this.userDetailsPresenter = new UserDetailsPresenter(view.getUserDetailsView(),
                 userProfilePresenter.getAuthenticationManager(), userProfilePresenter.getUserManagementService(),
                 userProfilePresenter.getMailVerifiedUrl());
     }
@@ -23,5 +23,10 @@ public class UserProfileDetailsPresenter implements UserProfileDetailsView.Prese
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         view.getDecorator().setAuthenticationContext(authenticationContext);
         userDetailsPresenter.setAuthenticationContext(authenticationContext);
+    }
+    
+    @Override
+    public void doTriggerLoginForm() {
+        userProfilePresenter.doTriggerLoginForm();
     }
 }

@@ -54,7 +54,7 @@ public class StarIDM2013MarkPassingTest extends AbstractMarkPassingTest {
     }
 
     private void testWholeRace5() throws InvalidDateException {
-        new MarkPassingCalculator(getTrackedRace(), false); // do our calculation, injecting into TrackedRace
+        new MarkPassingCalculator(getTrackedRace(), false, /* waitForInitialMarkPassingCalculation */ true); // do our calculation, injecting into TrackedRace
         final Competitor GER7897 = getCompetitorByName("Tusch, Frank,Winkelmann, Sven");
         assertMarkPassing(GER7897, Util.get(getWaypoints(), 0), DateParser.parse("2013-05-04T14:50:10+0200"));
         assertMarkPassing(GER7897, Util.get(getWaypoints(), 1), DateParser.parse("2013-05-04T14:57:12+0200"));
