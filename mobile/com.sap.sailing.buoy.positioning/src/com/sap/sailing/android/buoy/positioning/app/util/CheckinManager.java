@@ -13,13 +13,7 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.net.Uri;
-import android.util.Log;
-import android.widget.Toast;
+import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
@@ -29,35 +23,58 @@ import com.sap.sailing.android.shared.data.AbstractCheckinData;
 import com.sap.sailing.android.shared.data.http.HttpGetRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.CheckinDataActivity;
+import com.sap.sailing.android.shared.util.JsonHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.NetworkHelper.NetworkHelperSuccessListener;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.impl.SharedDomainFactoryImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
+import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.coursedata.impl.MarkDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
+import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 
-public class CheckinManager {
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
+import android.util.Log;
+import android.widget.Toast;
 
+public class CheckinManager {
     private final static String TAG = CheckinManager.class.getName();
     private AbstractCheckinData checkinData;
-    private CheckinDataActivity activity;
-    private Context mContext;
-    private AppPreferences prefs;
+    private final CheckinDataActivity activity;
+    private final Context mContext;
+    private final AppPreferences prefs;
     private String url;
     private DataChangedListner dataChangedListner;
+    private final SharedDomainFactory sharedDomainFactory;
 
-    public CheckinManager(String url, Context context){
+    public CheckinManager(String url, Context context) {
+        this(url, context, /* context is not necessarily a CheckinDataActivity */ null);
+    }
+
+    private CheckinManager(String url, Context context, CheckinDataActivity activity) {
+        sharedDomainFactory = new SharedDomainFactoryImpl(/* race log resolver not needed in this app */ null);
         this.url = url;
         mContext = context;
         prefs = new AppPreferences(context);
+        this.activity = activity;
     }
 
     public CheckinManager(String url, CheckinDataActivity activity) {
-        this.activity = activity;
-        this.url = url;
-        mContext = activity;
-        prefs = new AppPreferences(mContext);
+        this(url, activity, activity);
+    }
+    
+    public SharedDomainFactory getSharedDomainFactory() {
+        return sharedDomainFactory;
     }
 
     public void callServerAndGenerateCheckinData() {
@@ -156,36 +173,33 @@ public class CheckinManager {
                     public void performAction(JSONObject response) {
                         try {
                             JSONArray markArray = response.getJSONArray("marks");
-                            String checkinDigest = generateCheckindigest(urlData.uriStr);
-                            List<MarkInfo> marks = new ArrayList<MarkInfo>();
-                            List<MarkPingInfo> pings = new ArrayList<MarkPingInfo>();
+                            String checkinDigest = generateCheckinDigest(urlData.uriStr);
+                            List<MarkInfo> marks = new ArrayList<>();
+                            List<MarkPingInfo> pings = new ArrayList<>();
                             for (int i = 0; i < markArray.length(); i++) {
                                 JSONObject jsonMark = (JSONObject) markArray.get(i);
-                                MarkInfo mark = new MarkInfo();
-                                mark.setCheckinDigest(checkinDigest);
-                                mark.setClassName(jsonMark.getString("@class"));
-                                mark.setName(jsonMark.getString("name"));
-                                mark.setId(jsonMark.getString("id"));
-                                if (jsonMark.has("position")) {
-                                    if (!jsonMark.get("position").equals(null)) {
+                                org.json.simple.JSONObject simpleMark;
+                                simpleMark = JsonHelper.convertToSimple(jsonMark);
+                                MarkDeserializer markDeserializer = new MarkDeserializer(getSharedDomainFactory());
+                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark), jsonMark.getString(MarkJsonSerializer.FIELD_CLASS), checkinDigest);
+                                if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
+                                    if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
                                         JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
-                                        MarkPingInfo ping = new MarkPingInfo();
-                                        ping.setLatitude(positionJson.getString("latitude"));
-                                        ping.setLongitude(positionJson.getString("longitude"));
-                                        ping.setTimestamp(positionJson.getInt("timestamp"));
-                                        ping.setAccuracy(positionJson.getDouble("accuracy"));
-                                        ping.setMarkId(mark.getId());
+                                        FlatGPSFixJsonDeserializer deserializer = new FlatGPSFixJsonDeserializer();
+                                        org.json.simple.JSONObject simplePosition;
+                                        simplePosition = JsonHelper.convertToSimple(positionJson);
+                                        GPSFix gpsFix = deserializer.deserialize(simplePosition);
+                                        MarkPingInfo ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         pings.add(ping);
                                     }
                                 }
-                                mark.setType(jsonMark.getString("type"));
                                 marks.add(mark);
                             }
                             urlData.marks = marks;
                             urlData.pings = pings;
                             saveCheckinDataAndNotifyListeners(urlData, leaderboardName);
 
-                        } catch (JSONException e) {
+                        } catch (JSONException | ParseException | JsonDeserializationException e) {
                             ExLog.e(mContext, TAG, "Error getting data from call on URL: " + urlData.getMarkUrl
                                     + ", Error: " + e.getMessage());
                             if (activity != null) {
@@ -282,7 +296,7 @@ public class CheckinManager {
         setCheckinData(null);
     }
 
-    private String generateCheckindigest(String url) {
+    private String generateCheckinDigest(String url) {
         String checkinDigest = "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
