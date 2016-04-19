@@ -83,6 +83,9 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
 
     private static class TestEnumListSettings extends AbstractSettings {
         private EnumListSetting<TextOperator.Operators> l;
+        
+        public TestEnumListSettings() {
+        }
 
         @Override
         protected void addChildSettings() {
