@@ -2,6 +2,7 @@ package com.sap.sse.shared.android.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
@@ -22,7 +23,8 @@ import com.sap.sse.common.settings.StringToEnumConverter;
 
 public abstract class AbstractSettingsSerializationTest<SOT> {
 
-    private static class TestOuterSettings extends AbstractSettings {
+    private static class TestOuterSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = -7379232503773525915L;
         private transient SimpleTestSettings nested;
 
         public TestOuterSettings() {
@@ -34,7 +36,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestListSettings extends AbstractSettings {
+    private static class TestListSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = 6919127895749914961L;
         private transient SettingsList<SimpleTestSettings> l;
 
         public TestListSettings() {
@@ -46,7 +49,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class SimpleTestSettings extends AbstractSettings {
+    private static class SimpleTestSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = -4134836978411240572L;
         private transient StringSetting string;
         private transient DecimalSetting num;
 
@@ -69,7 +73,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestSettings extends AbstractSettings {
+    private static class TestSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = -611806711715538293L;
         private transient final StringSetting humba = new StringSetting("humba", this);
         private transient final BooleanSetting bumpa = new BooleanSetting("bumpa", this);
         private transient final EnumSetting<TextOperator.Operators> trala = new EnumSetting<>("trala", this,
@@ -81,8 +86,9 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class TestEnumListSettings extends AbstractSettings {
-        private EnumListSetting<TextOperator.Operators> l;
+    private static class TestEnumListSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = 93688955681544920L;
+        private transient EnumListSetting<TextOperator.Operators> l;
         
         public TestEnumListSettings() {
         }
@@ -99,7 +105,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
 
-    private static class DuplicateFieldSettings extends AbstractSettings {
+    private static class DuplicateFieldSettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = 4058775568295038177L;
         @SuppressWarnings("unused")
         private transient StringSetting humba;
         @SuppressWarnings("unused")
@@ -112,7 +119,8 @@ public abstract class AbstractSettingsSerializationTest<SOT> {
         }
     }
     
-    private static class DisallowedKeySettings extends AbstractSettings {
+    private static class DisallowedKeySettings extends AbstractSettings implements Serializable {
+        private static final long serialVersionUID = -2265305217290147424L;
         @SuppressWarnings("unused")
         private transient StringSetting disallowedKey;
         
