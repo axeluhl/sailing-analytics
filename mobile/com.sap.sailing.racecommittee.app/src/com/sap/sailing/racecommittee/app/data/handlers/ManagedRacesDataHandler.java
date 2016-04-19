@@ -26,18 +26,20 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
     }
 
     @Override
-    public void onResult(Collection<ManagedRace> data) {
-        Set<DeleteFromDataStore> deleteList = new HashSet<>();
-        for (ManagedRace race : manager.getDataStore().getRaces()) {
-            if (!data.contains(race)) {
-                deleteList.add(new DeleteFromDataStore(manager, race));
+    public void onResult(Collection<ManagedRace> data, boolean isCached) {
+        if (!isCached) {
+            Set<DeleteFromDataStore> deleteList = new HashSet<>();
+            for (ManagedRace race : manager.getDataStore().getRaces()) {
+                if (!data.contains(race)) {
+                    deleteList.add(new DeleteFromDataStore(manager, race));
+                }
             }
+            for (DeleteFromDataStore action : deleteList) {
+                action.run();
+            }
+            manager.addRaces(data);
+            calcRaceState(data);
         }
-        for (DeleteFromDataStore action : deleteList) {
-            action.run();
-        }
-        manager.addRaces(data);
-        calcRaceState(data);
     }
 
     private void calcRaceState(Collection<ManagedRace> data) {
