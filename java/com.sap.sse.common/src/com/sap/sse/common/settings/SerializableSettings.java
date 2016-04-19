@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sse.common.settings.value.SettingsValue;
 
 public abstract class SerializableSettings extends AbstractSettings implements Serializable {
