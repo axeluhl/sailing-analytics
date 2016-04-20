@@ -103,7 +103,7 @@ public class RaceGroupFactory {
                     skippedFirst = true;
                 } else {
                     Fleet fleet = raceColumn.getFleetByName(fleetName);
-                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet)));
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet), raceColumn.getFactor(), raceColumn.getExplicitFactor()));
                 }
             }
         }

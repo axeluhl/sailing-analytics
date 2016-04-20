@@ -56,7 +56,6 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.activities.SessionActivity;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAdapter;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -269,7 +268,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
                 @Override
                 public void onClick(View v) {
-                    ((RacingActivity) getActivity()).logoutSession();
+                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES));
                 }
             });
         }

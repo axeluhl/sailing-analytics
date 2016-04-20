@@ -27,8 +27,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DeviceMappingFinderTest extends AbstractRegattaLogTrackingTest {
-    private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
-    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    private final Competitor competitor = new CompetitorImpl("comp", "Comp", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    private final Competitor competitor2 = new CompetitorImpl("comp2", "Comp2", null, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     private final DeviceIdentifier device = new SmartphoneImeiIdentifier("imei");
     
     private int time = 0;

@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -71,7 +72,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private RaceListDataType mSelectedRace;
     private ViewGroup panel_left;
     private ViewGroup panel_right;
+    private TextView explicit_factor;
     private int flag_size;
+    private DecimalFormat factor_format;
 
     public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
         super(context, 0);
@@ -82,6 +85,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
         flag_size = getContext().getResources().getInteger(R.integer.flag_size);
+        factor_format = new DecimalFormat(context.getString(R.string.race_factor_format));
     }
 
     @Override
@@ -220,6 +224,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 }
             }
 
+            Double factor = race.getRace().getExplicitFactor();
+            if (factor != null) {
+                explicit_factor.setText(factor_format.format(factor));
+                explicit_factor.setVisibility(View.VISIBLE);
+            }
+
             updateFlag(race.getRace(), now);
         }
         return convertView;
@@ -279,6 +289,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         fleet_series = ViewHelper.get(layout, R.id.fleet_series);
         has_dependent_races = ViewHelper.get(layout, R.id.has_dependent_races);
         depends_on = ViewHelper.get(layout, R.id.depends_on);
+        explicit_factor = ViewHelper.get(layout, R.id.explicit_factor);
     }
 
     private void resetValues(View layout) {
@@ -319,6 +330,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (depends_on != null) {
                 depends_on.setTextColor(ThemeHelper.getColor(getContext(), R.attr.sap_light_gray));
                 depends_on.setVisibility(View.GONE);
+            }
+            if (explicit_factor != null) {
+                explicit_factor.setVisibility(View.GONE);
             }
             setMarker(0);
         }

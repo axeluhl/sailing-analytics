@@ -104,4 +104,19 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      * @return result object
      */
     Result setFinishingTime(TimePoint finishingTime);
+
+    /**
+     * @return
+     */
+    double getFactor();
+
+    /**
+     * @return factor
+     */
+    Double getExplicitFactor();
+
+    /**
+     * @param factor
+     */
+    void setExplicitFactor(Double factor);
 }
