@@ -4642,7 +4642,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } finally {
                     // close the connection, set all objects to null
                     getService().setDataImportDeleteProgressFromMapTimerWithReplication(importOperationId);
-                    connection.disconnect();
+                    if (connection != null) {
+                        connection.disconnect();
+                    }
                     connection = null;
                     long timeToImport = System.currentTimeMillis() - startTime;
                     logger.info(String.format("Took %s ms overall to import master data.", timeToImport));
