@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.selection;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -24,6 +26,13 @@ abstract class SuggestedMultiSelectionItem extends Composite {
         itemDescriptionContainerUi.setWidget(getItemDescriptionWidget());
     }
     
+    @UiHandler("removeItemButtonUi")
+    void onRemoveItemButtonClicked(ClickEvent event) {
+        this.onRemoveItemRequsted();
+    }
+    
     protected abstract IsWidget getItemDescriptionWidget();
+    
+    protected abstract void onRemoveItemRequsted();
 
 }
