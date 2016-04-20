@@ -64,11 +64,11 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public String getName() {
-        return identifier.getRaceName();
+        return identifier.getRaceColumnName();
     }
 
     @Override
-    public String getRaceName() {
+    public String getRaceColumnName() {
         return getName();
     }
 

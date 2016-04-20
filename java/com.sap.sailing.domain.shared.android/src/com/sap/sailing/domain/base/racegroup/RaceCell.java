@@ -4,7 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sse.common.Named;
 
 /**
- * A "race".
+ * A "race". Its {@link #getName() name} represents the Race Column name coming from the leaderboard / {@link RaceGroup}.
  * <p>
  * 
  * Because this and all other {@link RaceGroup} interfaces are used for communication with the Android applications a

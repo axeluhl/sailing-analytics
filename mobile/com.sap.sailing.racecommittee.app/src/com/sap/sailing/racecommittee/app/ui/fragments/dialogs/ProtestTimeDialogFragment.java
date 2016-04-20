@@ -381,7 +381,7 @@ public class ProtestTimeDialogFragment extends AttachedDialogFragment implements
 
         @Override
         public String toString() {
-            return String.format("%s - %s", group.getDisplayName(true), race.getRaceName());
+            return String.format("%s - %s", group.getDisplayName(true), race.getRaceColumnName());
         }
     }
 }

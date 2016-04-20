@@ -18,7 +18,7 @@ public class CurrentRaceFilterImpl implements CurrentRaceFilter {
     @Override
     public <T extends RaceGroupFragment> List<T> filterCurrentRaces(Collection<T> allItems) {
         Map<IsFleetFragment, List<IsRaceFragment>> filteredRace = filterRaces(allItems);
-        filteredRace = removeAllListsBevorLastStarted(filteredRace);
+        filteredRace = removeAllListsBeforeLastStarted(filteredRace);
         return convertBackToList(filteredRace);
     }
 
@@ -48,7 +48,7 @@ public class CurrentRaceFilterImpl implements CurrentRaceFilter {
         return result;
     }
 
-    private Map<IsFleetFragment, List<IsRaceFragment>> removeAllListsBevorLastStarted(Map<IsFleetFragment, List<IsRaceFragment>> filteredRaces) {
+    private Map<IsFleetFragment, List<IsRaceFragment>> removeAllListsBeforeLastStarted(Map<IsFleetFragment, List<IsRaceFragment>> filteredRaces) {
         Map<IsFleetFragment, List<IsRaceFragment>> result;
         IsFleetFragment keyOfLastStartedRace = null;
         for (IsFleetFragment currentKey : filteredRaces.keySet()) {

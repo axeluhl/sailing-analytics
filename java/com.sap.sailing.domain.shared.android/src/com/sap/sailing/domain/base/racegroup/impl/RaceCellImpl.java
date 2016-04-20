@@ -19,8 +19,8 @@ public class RaceCellImpl extends NamedImpl implements RaceCell {
      */
     private final Double explicitFactor;
 
-    public RaceCellImpl(String name, RaceLog raceLog, double factor, Double explicitFactor) {
-        super(name);
+    public RaceCellImpl(String raceColumnName, RaceLog raceLog, double factor, Double explicitFactor) {
+        super(raceColumnName);
         this.raceLog = raceLog;
         this.factor = factor;
         this.explicitFactor = explicitFactor;

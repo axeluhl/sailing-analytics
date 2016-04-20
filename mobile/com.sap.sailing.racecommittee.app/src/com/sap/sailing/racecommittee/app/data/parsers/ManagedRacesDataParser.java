@@ -71,7 +71,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
     }
 
-    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String name,
+    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String raceColumnName,
             RaceLog raceLog, double factor, Double explicitFactor) {
         ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
         RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();
@@ -79,7 +79,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
             configurationLoader = new MergingRegattaConfigurationLoader(localConfiguration, globalConfigurationLoader);
         }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
-        ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(name, fleetIdentifier);
+        ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(raceColumnName, fleetIdentifier);
         return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader), factor, explicitFactor);
     }
 

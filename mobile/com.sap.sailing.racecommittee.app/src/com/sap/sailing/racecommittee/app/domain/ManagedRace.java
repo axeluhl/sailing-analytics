@@ -13,6 +13,12 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
+/**
+ * A managed race's {@link #getName()} is the race column's name.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
 
     /**
