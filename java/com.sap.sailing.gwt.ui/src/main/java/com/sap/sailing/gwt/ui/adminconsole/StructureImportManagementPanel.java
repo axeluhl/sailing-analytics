@@ -166,7 +166,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         });
 
         Grid eventURLGrid = new Grid(3, 2);
-        eventURLGrid.setWidget(0, 0, new Label(stringMessages.manage2Sail() + " " + stringMessages.event() + " " + stringMessages.id() + ":"));
+        eventURLGrid.setWidget(0, 0, new Label(stringMessages.manage2SailEvent() + stringMessages.id() + ":"));
         eventURLGrid.setWidget(0, 1, eventIDTextBox);
         eventURLGrid.setWidget(1, 0, new Label(stringMessages.jsonUrl() + ":"));
         eventURLGrid.setWidget(1, 1, jsonURLTextBox);
@@ -175,7 +175,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         mainPanel.add(progressPanel);
         mainPanel.add(eventURLGrid);
         
-        regattaImportPanel = new CaptionPanel(stringMessages.manage2Sail() + " " + stringMessages.event());
+        regattaImportPanel = new CaptionPanel(stringMessages.manage2SailEvent());
         mainPanel.add(regattaImportPanel);
         VerticalPanel regattaImportContentPanel = new VerticalPanel();
         regattaImportPanel.setContentWidget(regattaImportContentPanel);
