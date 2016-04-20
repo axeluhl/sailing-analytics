@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
 
@@ -184,6 +185,19 @@ public class RaceStateService extends Service {
         ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
     }
 
+    private void unregisterRace(@Nullable String raceId) {
+        ManagedRace raceToUnregister = null;
+        for (ManagedRace race: registeredStateEventSchedulers.keySet()) {
+            if (race.getId().equals(raceId)) {
+                raceToUnregister = race;
+            }
+        }
+
+        if (raceToUnregister != null) {
+            unregisterRace(raceToUnregister);
+        }
+    }
+
     private void handleStartCommand(Intent intent) {
         String action = intent.getAction();
         ExLog.i(this, TAG, String.format("Command action '%s' received.", action));
@@ -337,12 +351,14 @@ public class RaceStateService extends Service {
             // ... and register for polling!
             poller.register(race);
 
-            this.registeredLogListeners.put(race, logListener);
-            this.registeredStateEventSchedulers.put(race, stateEventScheduler);
+            registeredLogListeners.put(race, logListener);
+            registeredStateEventSchedulers.put(race, stateEventScheduler);
 
             ExLog.i(this, TAG, "Race " + race.getId() + " registered.");
         } else {
-            ExLog.w(this, TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+            ExLog.w(this, TAG, "Race " + race.getId() + " was already registered. Cleaning up.");
+            unregisterRace(race.getId());
+            registerRace(race);
         }
     }
 
