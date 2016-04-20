@@ -10,7 +10,7 @@
   - install package `sendmail-cf` via `yum install`
   - edit the config `/etc/mail/sendmail.mc` and insert the line 
 ```
-define(`SMART_HOST', `ip-172-31-18-15.eu-west-1.compute.internal')dnl
+define(`SMART_HOST', `smtp.internalsapsailing.com')dnl
 ``` and save
   - regenerate the sendmail config with `. /etc/mail/make` 
   - restart sendmail with `service sendmail restart`
