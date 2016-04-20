@@ -8,7 +8,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -501,14 +500,7 @@ public class IgtimiConnectionFactoryImpl implements IgtimiConnectionFactory {
             result.add(uri);
         }
         // sort those to the front that don't do port 443 nor wss://
-        Collections.sort(result, new Comparator<URI>() {
-            @Override
-            public int compare(URI o1, URI o2) {
-                int o1Score = (o1.toString().contains("443") ? 1 : 0) + (o1.toString().contains("wss") ? 1 : 0);
-                int o2Score = (o2.toString().contains("443") ? 1 : 0) + (o2.toString().contains("wss") ? 1 : 0);
-                return o1Score - o2Score;
-            }
-        });
+        Collections.shuffle(result); // shuffle as a failover strategy
         logger.info("Trying Igtimi WebSocket servers in the following order: "+result);
         return result;
     }

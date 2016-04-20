@@ -145,18 +145,22 @@ public class RegattaActivity extends AbstractRegattaActivity {
 
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData checkinData) {
-        CheckinData data = (CheckinData) checkinData;
-        try {
-            DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
-            getRegattaFragment().getAdapter().notifyDataSetChanged();
-        } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
-            ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
-            displayDatabaseError();
-            return;
-        }
-
-        if (BuildConfig.DEBUG) {
-            ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
+        if (checkinData != null) {
+            CheckinData data = (CheckinData) checkinData;
+            try {
+                DatabaseHelper.getInstance().updateMarks(this, data.marks, data.getLeaderboard());
+                getRegattaFragment().getAdapter().notifyDataSetChanged();
+            } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+                displayDatabaseError();
+                return;
+            }
+    
+            if (BuildConfig.DEBUG) {
+                ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
+            }
+        } else {
+            ExLog.i(this, TAG, "checkinData is null");
         }
     }
 
