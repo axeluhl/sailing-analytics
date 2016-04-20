@@ -166,12 +166,16 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         }
 
         let aSettings = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier("Settings", sender: actionSheet)
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("SettingsFromHome", sender: actionSheet)
+			}
         }
         actionSheet.addAction(aSettings)
 
         let aAbout = UIAlertAction(title: NSLocalizedString("About", comment: ""), style: .Default) { (action) -> Void in
-            self.performSegueWithIdentifier("About", sender: actionSheet)
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("AboutFromHome", sender: actionSheet)
+			}
         }
         actionSheet.addAction(aAbout)
 
