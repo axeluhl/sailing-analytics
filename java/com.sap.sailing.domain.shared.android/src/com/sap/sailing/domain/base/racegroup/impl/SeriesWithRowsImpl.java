@@ -38,7 +38,7 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
     @Override
     public RaceRow getRaceRow(Fleet fleet) {
         for (final RaceRow row : getRaceRows()) {
-            if (row.getFleet().equals(fleet)) {
+            if (row.getFleet() == fleet) {
                 return row;
             }
         }

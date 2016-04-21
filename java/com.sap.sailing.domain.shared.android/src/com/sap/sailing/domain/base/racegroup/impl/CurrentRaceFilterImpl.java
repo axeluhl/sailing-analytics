@@ -37,10 +37,10 @@ import com.sap.sse.common.Util;
  * @param <T>
  */
 public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentRaceFilter<T> {
-    private final Set<T> allRaces;
+    private final Iterable<T> allRaces;
     private final Map<RaceGroupSeriesFleet, T> racesByRaceGroupSeriesFleet;
 
-    public CurrentRaceFilterImpl(Set<T> allRaces) {
+    public CurrentRaceFilterImpl(Iterable<T> allRaces) {
         this.allRaces = allRaces;
         this.racesByRaceGroupSeriesFleet = new HashMap<>();
         for (final T race : allRaces) {
