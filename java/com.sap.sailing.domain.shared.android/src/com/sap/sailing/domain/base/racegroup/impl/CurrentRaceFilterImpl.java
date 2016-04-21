@@ -59,15 +59,16 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
     public Set<T> getCurrentRaces() {
         final Set<T> filteredRaces = new HashSet<>();
         for (final T race : allRaces) {
-            if (race.getStatus().getOrderNumber() >= RaceLogRaceStatus.SCHEDULED.getOrderNumber() &&
-                    race.getStatus().getOrderNumber() <= RaceLogRaceStatus.FINISHING.getOrderNumber()) {
-                filteredRaces.add(race);
-            } else {
-                final boolean hasNoPredecessor=hasNoPredecessor(race);
-                if ((hasNoPredecessor && race.getStatus() == RaceLogRaceStatus.UNSCHEDULED) ||
-                    (!hasNoPredecessor && hasImmediatePredecessorThatIsAtLeastScheduled(race))) {
-                    // show the race
+            if (race.getStatus().getOrderNumber() <= RaceLogRaceStatus.FINISHING.getOrderNumber()) { // don't show finished races
+                if (race.getStatus().getOrderNumber() >= RaceLogRaceStatus.SCHEDULED.getOrderNumber()) {
                     filteredRaces.add(race);
+                } else {
+                    final boolean hasNoPredecessor=hasNoPredecessor(race);
+                    if ((hasNoPredecessor && race.getStatus() == RaceLogRaceStatus.UNSCHEDULED) ||
+                        (!hasNoPredecessor && hasImmediatePredecessorThatIsAtLeastScheduled(race))) {
+                        // show the race
+                        filteredRaces.add(race);
+                    }
                 }
             }
         }

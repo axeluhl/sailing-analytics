@@ -164,7 +164,18 @@ public class CurrentRaceFilterImplTest {
         assertEquals("F1", firstRace.getRaceColumnName());
         }
     }
-    
+
+    @Test
+    public void testSchedulingFirst505Race() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        get(_505, "R1", "Default").setStatus(RaceLogRaceStatus.SCHEDULED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> current505Races = currentRaces.stream().filter(r->r.getRaceGroup() == _505).collect(Collectors.toSet());
+        assertEquals(2, current505Races.size());
+        assertTrue(current505Races.contains(get(_505, "R1", "Default"))); // it's scheduled, so it shows
+        assertTrue(current505Races.contains(get(_505, "R2", "Default"))); // it's unscheduled and has a scheduled immediate predecessor
+    }
+
     @Test
     public void testSchedulingFirstIsafRace() {
         // with all races unscheduled we can expect the first race of each regatta's first series to show
@@ -175,6 +186,23 @@ public class CurrentRaceFilterImplTest {
         assertTrue(currentIsafRaces.contains(get(isaf, "Q1", "Yellow"))); // it's scheduled, so it shows
         assertTrue(currentIsafRaces.contains(get(isaf, "Q1", "Blue")));   // it's unscheduled, first in fleet
         assertTrue(currentIsafRaces.contains(get(isaf, "Q2", "Yellow"))); // predecessor Q1/Yellow is scheduled, so show this as next in fleet
+    }
+
+    @Test
+    public void testSchedulingAllIsafQualificationRacesButOne() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        for (int i=1; i<=4; i++) {
+            get(isaf, "Q"+i, "Yellow").setStatus(RaceLogRaceStatus.FINISHED);
+            get(isaf, "Q"+i, "Blue").setStatus(RaceLogRaceStatus.FINISHED);
+        }
+        get(isaf, "Q5", "Blue").setStatus(RaceLogRaceStatus.SCHEDULED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentIsafRaces = currentRaces.stream().filter(r->r.getRaceGroup() == isaf).collect(Collectors.toSet());
+        assertEquals(4, currentIsafRaces.size());
+        assertTrue(currentIsafRaces.contains(get(isaf, "Q5", "Yellow"))); // it's unscheduled; its predecessor Q4/Yellow is FINISHED; show it
+        assertTrue(currentIsafRaces.contains(get(isaf, "Q5", "Blue")));   // it's scheduled
+        assertTrue(currentIsafRaces.contains(get(isaf, "F6", "Gold")));   // Q5/Blue is a scheduled immediate predecessor
+        assertTrue(currentIsafRaces.contains(get(isaf, "F6", "Silver")));   // Q5/Blue is a scheduled immediate predecessor
     }
 
     @Test
