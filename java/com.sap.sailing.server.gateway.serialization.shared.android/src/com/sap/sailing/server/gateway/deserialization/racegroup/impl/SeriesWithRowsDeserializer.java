@@ -12,6 +12,7 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.serialization.racegroup.impl.RaceRowsOfSeriesWithRowsSerializer;
+import com.sap.sailing.server.gateway.serialization.racegroup.impl.SeriesWithRowsJsonSerializer;
 
 public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRows> {
 
@@ -22,9 +23,9 @@ public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRo
     }
 
     public SeriesWithRows deserialize(JSONObject object) throws JsonDeserializationException {
-        String name = object.get("name").toString();
-        boolean isMedal = (Boolean) object.get("isMedal");
-        boolean isFleetsCanRunInParallel = (Boolean) object.get("isFleetsCanRunInParallel");
+        String name = object.get(SeriesWithRowsJsonSerializer.FIELD_NAME).toString();
+        boolean isMedal = (Boolean) object.get(SeriesWithRowsJsonSerializer.FIELD_IS_MEDAL);
+        boolean isFleetsCanRunInParallel = (Boolean) object.get(SeriesWithRowsJsonSerializer.FIELD_FLEETS_CAN_RUN_IN_PARALLEL);
 
         Collection<RaceRow> rows = new ArrayList<RaceRow>();
         for (Object fleetObject : Helpers.getNestedArraySafe(object, RaceRowsOfSeriesWithRowsSerializer.FIELD_FLEETS)) {
