@@ -115,7 +115,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
      * Understands [hh:[mm:]]ss and parses into a {@link Duration}. If {@code durationAsString} is {@code null} then
      * so is the result.
      */
-    private Duration parseDuration(String durationAsString) {
+    public static Duration parseDuration(String durationAsString) {
         final Duration result;
         if (durationAsString == null) {
             result = null;
