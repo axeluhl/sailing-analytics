@@ -1541,4 +1541,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String serverInformation();
     String serverConfiguration();
     String standaloneServer();
+    String passId();
+    String createdAt();
+    String logicalTimepoint();
+    String info();
 }
