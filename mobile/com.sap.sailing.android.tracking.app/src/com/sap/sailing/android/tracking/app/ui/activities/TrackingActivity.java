@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -99,10 +100,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setTitle(eventInfo.leaderboardName);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             if (toolbar != null) {
                 toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
                 toolbar.setPadding(20, 0, 0, 0);
-                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             }
         }
 

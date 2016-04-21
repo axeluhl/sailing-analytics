@@ -3,6 +3,7 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 import java.util.List;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,6 +35,8 @@ public class StartActivity extends AbstractStartActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             getSupportActionBar().setHomeButtonEnabled(false);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
         refreshDatabase();

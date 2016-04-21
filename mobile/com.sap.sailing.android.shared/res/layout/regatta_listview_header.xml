@@ -7,7 +7,7 @@
                 tools:ignore="Overdraw">
 
     <View
-        android:id="@+id/top_bar"
+        android:id="@+id/toolbar_separator"
         android:layout_width="fill_parent"
         android:layout_height="4dp"
         android:layout_alignParentTop="true"
@@ -16,7 +16,7 @@
     <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar"
+        android:layout_below="@id/toolbar_separator"
         android:padding="16dp"
         android:textSize="16sp"
         android:background="@color/colorPrimary"

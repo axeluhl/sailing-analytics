@@ -9,5 +9,6 @@
     <dimen name="regatta_button_side_margin">4dp</dimen>
     <dimen name="regatta_button_margin">10dp</dimen>
     <dimen name="regatta_button_padding">10dp</dimen>
+    <dimen name="toolbar_separator_height">1dp</dimen>
 
 </resources>

@@ -57,6 +57,6 @@ public class OpenSansToolbar extends Toolbar {
     public void setTitleSize(float size) {
         TextView titleTextView = (TextView) findViewById(R.id.toolbar_title);
         titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
-        titleTextView.setTextColor(getResources().getColor(R.color.white));
+        titleTextView.setTextColor(getResources().getColor(R.color.toolbar_text_color));
     }
 }

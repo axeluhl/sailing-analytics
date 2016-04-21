@@ -4,7 +4,7 @@
                 android:layout_height="match_parent">
 
     <View
-        android:id="@+id/top_bar"
+        android:id="@+id/toolbar_separator"
         android:layout_width="match_parent"
         android:layout_height="4dp"
         android:layout_alignParentTop="true"
@@ -66,7 +66,7 @@
         android:layout_above="@+id/linearLayout"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/top_bar"
+        android:layout_below="@+id/toolbar_separator"
         android:layout_marginTop="@dimen/about_header_margin_top"
         android:fillViewport="false">
 

@@ -17,6 +17,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -102,7 +103,6 @@ public class RegattaActivity extends AbstractRegattaActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -111,6 +111,8 @@ public class RegattaActivity extends AbstractRegattaActivity
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(leaderboard.name);
             getSupportActionBar().setSubtitle(event.name);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
         RegattaFragment regattaFragment = new RegattaFragment();
         regattaFragment.setFragmentWatcher(this);

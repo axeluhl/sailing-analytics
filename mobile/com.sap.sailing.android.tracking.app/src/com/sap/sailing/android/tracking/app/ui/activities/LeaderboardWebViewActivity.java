@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.ui.activities;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
@@ -30,7 +31,6 @@ public class LeaderboardWebViewActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -38,6 +38,8 @@ public class LeaderboardWebViewActivity extends BaseActivity {
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(getString(R.string.title_activity_leaderboard));
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
         }
 
         replaceFragment(R.id.content_frame, new LeaderboardFragment());
