@@ -1547,4 +1547,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String info();
     String windFixes();
     String twoXMark();
+    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
 }
