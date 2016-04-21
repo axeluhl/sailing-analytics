@@ -85,6 +85,8 @@ public class PanelButton extends FrameLayout implements View.OnClickListener, Di
         setLinePosition(a.getInt(R.styleable.PanelButton_linePosition, -1));
 
         a.recycle();
+
+        setMarkerLevel(LEVEL_NORMAL);
     }
 
     public void setListener(PanelButtonClick listener) {

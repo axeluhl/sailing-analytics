@@ -26,9 +26,20 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
     }
 
     @Override
-    public void onResult(Collection<ManagedRace> data) {
-        manager.addRaces(data);
-        calcRaceState(data);
+    public void onResult(Collection<ManagedRace> data, boolean isCached) {
+        if (!isCached) {
+            Set<DeleteFromDataStore> deleteList = new HashSet<>();
+            for (ManagedRace race : manager.getDataStore().getRaces()) {
+                if (!data.contains(race)) {
+                    deleteList.add(new DeleteFromDataStore(manager, race));
+                }
+            }
+            for (DeleteFromDataStore action : deleteList) {
+                action.run();
+            }
+            manager.addRaces(data);
+            calcRaceState(data);
+        }
     }
 
     private void calcRaceState(Collection<ManagedRace> data) {
@@ -53,5 +64,21 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
             }
             raceStatesWithUnresolvedStartTimes.removeAll(resolved);
         } while (oldNumberOfRaceStatesWithUnresolvedStartTimes != raceStatesWithUnresolvedStartTimes.size());
+    }
+
+    private static class DeleteFromDataStore implements Runnable {
+
+        private final OnlineDataManager mManager;
+        private final ManagedRace mRace;
+
+        public DeleteFromDataStore(OnlineDataManager manager, ManagedRace race) {
+            mManager = manager;
+            mRace = race;
+        }
+
+        @Override
+        public void run() {
+            mManager.getDataStore().removeRace(mRace);
+        }
     }
 }

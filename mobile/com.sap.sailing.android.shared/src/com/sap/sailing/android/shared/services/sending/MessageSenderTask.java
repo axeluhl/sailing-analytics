@@ -40,7 +40,7 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResu
         InputStream responseStream = null;
         try {
             ExLog.i(context, TAG, "Posting message: " + payload);
-            HttpRequest post = new HttpJsonPostRequest(new URL(url), payload, context);
+            HttpRequest post = new HttpJsonPostRequest(context, new URL(url), payload);
             responseStream = post.execute();
             ExLog.i(context, TAG, "Post successful for the following message: " + payload);
             result = new MessageSenderResult(intent, responseStream);
