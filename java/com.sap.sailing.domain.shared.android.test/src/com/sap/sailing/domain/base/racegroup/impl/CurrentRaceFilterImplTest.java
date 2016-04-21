@@ -116,7 +116,7 @@ public class CurrentRaceFilterImplTest {
     }
 
     @Test
-    public void testRaceAccess() {
+    public void testRaceAccessAndStatusUpdate() {
         SimpleFilterableRace isafQ4Yellow = get(isaf, "F7", "Gold");
         assertNotNull(isafQ4Yellow);
         assertEquals("F7", isafQ4Yellow.getRaceColumnName());
@@ -126,6 +126,11 @@ public class CurrentRaceFilterImplTest {
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, isafQ4Yellow.getStatus());
         isafQ4Yellow.setStatus(RaceLogRaceStatus.SCHEDULED);
         assertEquals(RaceLogRaceStatus.SCHEDULED, isafQ4Yellow.getStatus());
+    }
+    
+    @Test
+    public void testBasicFiltering() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
     }
     
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {
