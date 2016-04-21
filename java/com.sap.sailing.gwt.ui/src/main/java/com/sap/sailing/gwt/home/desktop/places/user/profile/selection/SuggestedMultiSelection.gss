@@ -30,16 +30,24 @@
   overflow: hidden;
 }
 
-.suggestionsContentToolbar, .suggestionsSelectedItem {
+.suggestionsSettingsMenuItem, .suggestionsContentToolbar, .suggestionsSelectedItem {
   padding: 0.333333333333333em;
   position: relative;
   text-align: right;
 }
 
-.suggestionsAddFilter, .suggestionsItemDescription {
+.suggestionsSettingsMenuItemLabel, .suggestionsAddFilter, .suggestionsItemDescription {
   position: absolute !important;
   left: 0.333333333333333em;
   right: 8.666666666666667em; 
+}
+
+.suggestionsSettingsMenuItemLabel, .suggestionsItemDescription {
+  right: 8.666666666666667em; 
+}
+
+.suggestionsAddFilter {
+  right: 9.666666666666667em; 
 }
 
 .suggestionsRemoveButton {
@@ -53,11 +61,19 @@
   border-collapse: separate;
 }
 
+.suggestionsSettingsMenuItem {
+  border-bottom: 1px solid #ddd;
+} 
+
 .suggestionsSelectedItem {
   border-top: 1px solid #ddd;
 }
 
-.suggestionsItemDescription {
+.suggestionsSettingsMenuItemLabel {
+  font-weight: 600;
+}
+
+.suggestionsSettingsMenuItemLabel, .suggestionsItemDescription {
   text-align: left;
   line-height: 2em;
 }

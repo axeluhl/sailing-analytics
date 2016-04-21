@@ -30,6 +30,7 @@ public final class SuggestedMultiSelection<T> extends Composite {
     }
     
     @UiField SpanElement headerTitleUi;
+    @UiField SuggestedMultiSelectionNotificationToggle noticationToggleUi;
     @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
     @UiField Button removeAllButtonUi;
     @UiField FlowPanel itemContainerUi;
