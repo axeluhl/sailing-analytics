@@ -287,6 +287,7 @@ public class RegattaDetailsComposite extends Composite {
         final SeriesDTO series = seriesDescriptor.getSeries();
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean isFleetsCanRunInParallelChanged = series.isFleetsCanRunInParallel() != seriesDescriptor.isFleetsCanRunInParallel();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
@@ -350,11 +351,11 @@ public class RegattaDetailsComposite extends Composite {
                                     });
                         }
                     });
-            if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
+            if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
                     || seriesNameChanged) {
                 sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
-                        seriesDescriptor.isMedal(), seriesDescriptor.getResultDiscardingThresholds(),
+                        seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                         seriesDescriptor.hasSplitFleetContiguousScoring(), series.getFleets(),

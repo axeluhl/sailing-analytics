@@ -87,8 +87,8 @@ public class OfflineDataManager extends DataManager {
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
 
-        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
-        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
+        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, /* isFleetsCanRunInParallel */ true, null);
+        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, /* isFleetsCanRunInParallel */ true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
                         medal), new EmptyRegattaConfiguration());
 

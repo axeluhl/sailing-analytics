@@ -66,7 +66,7 @@ public class RaceGroupFactory {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
-            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), getRows(series,
+            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(), getRows(series,
                     seriesToRaceColumns.get(series))));
         }
         return seriesWithRows;
@@ -135,7 +135,7 @@ public class RaceGroupFactory {
 
     private Series createDefaultSeries(Iterable<? extends Fleet> fleets) {
         Series defaultSeries;
-        defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false,
+        defaultSeries = new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME, false, true,
                 fleets, Collections.<String> emptyList(), null);
         return defaultSeries;
     }

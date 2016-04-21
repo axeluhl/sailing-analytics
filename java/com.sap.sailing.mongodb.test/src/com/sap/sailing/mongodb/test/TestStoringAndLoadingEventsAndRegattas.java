@@ -638,6 +638,28 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
     }
 
     @Test
+    public void testLoadStoreRegattaWithSeriesWhereFleetsCanRunInParallel() {
+        final int numberOfQualifyingRaces = 5;
+        final int numberOfFinalRaces = 7;
+        final String regattaBaseName = "Kieler Woche";
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("29erXX", /* typicallyStartsUpwind */ true);
+        Regatta regatta = createRegattaAndAddRaceColumns(numberOfQualifyingRaces, numberOfFinalRaces, RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()),
+                boatClass, regattaStartDate, regattaEndDate, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), OneDesignRankingMetric::new);
+        regatta.getSeriesByName("Qualifying").setIsFleetsCanRunInParallel(true);
+        regatta.getSeriesByName("Final").setIsFleetsCanRunInParallel(false);
+        regatta.getSeriesByName("Medal").setIsFleetsCanRunInParallel(false);
+
+        MongoObjectFactory mof = PersistenceFactory.INSTANCE.getMongoObjectFactory(getMongoService());
+        mof.storeRegatta(regatta);
+        
+        DomainObjectFactory dof = PersistenceFactory.INSTANCE.getDomainObjectFactory(getMongoService(), DomainFactory.INSTANCE);
+        Regatta loadedRegatta = dof.loadRegatta(regatta.getName(), /* trackedRegattaRegistry */ null);
+        assertTrue(loadedRegatta.getSeriesByName("Qualifying").isFleetsCanRunInParallel());
+        assertFalse(loadedRegatta.getSeriesByName("Final").isFleetsCanRunInParallel());
+        assertFalse(loadedRegatta.getSeriesByName("Medal").isFleetsCanRunInParallel());
+    }
+
+    @Test
     public void testLoadStoreSimpleRegattaWithHighPointScoringScheme() {
         final int numberOfQualifyingRaces = 5;
         final int numberOfFinalRaces = 7;
@@ -787,7 +809,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         List<Fleet> qualifyingFleets = new ArrayList<Fleet>();
         qualifyingFleets.add(new FleetImpl("Yellow"));
         qualifyingFleets.add(new FleetImpl("Blue"));
-        Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
+        Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                 emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(qualifyingSeries);
         
@@ -795,13 +817,13 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         List<Fleet> finalFleets = new ArrayList<Fleet>();
         finalFleets.add(new FleetImpl("Gold", 1));
         finalFleets.add(new FleetImpl("Silver", 2));
-        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series finalSeries = new SeriesImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, finalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(finalSeries);
 
         // ------------ medal --------------
         List<Fleet> medalFleets = new ArrayList<Fleet>();
         medalFleets.add(new FleetImpl("Medal"));
-        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
+        Series medalSeries = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, medalFleets, emptyRaceColumnNames, /* trackedRegattaRegistry */ null);
         series.add(medalSeries);
         Regatta regatta = new RegattaImpl(regattaName, boatClass, startDate, endDate, series, persistent, scoringScheme, "123", courseArea, rankingMetricConstructor);
         return regatta;
