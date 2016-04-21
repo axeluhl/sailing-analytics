@@ -79,7 +79,7 @@ public class PlayerActivity extends AbstractActivity {
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default */);
         
         return new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia, initialDurationAfterRaceStartInReplay);
     }
 
     private void createErrorView(String errorMessage, Throwable errorReason, AcceptsOneWidget panel) {

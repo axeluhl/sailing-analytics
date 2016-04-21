@@ -25,6 +25,8 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -88,8 +90,10 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, true);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
+        final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default*/));
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia,
+                initialDurationAfterRaceStartInReplay);
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
@@ -107,6 +111,24 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         });
     }
     
+    /**
+     * Understands [hh:[mm:]]ss and parses into a {@link Duration}. If {@code durationAsString} is {@code null} then
+     * so is the result.
+     */
+    private Duration parseDuration(String durationAsString) {
+        final Duration result;
+        if (durationAsString == null) {
+            result = null;
+        } else {
+            long seconds = 0;
+            for (final String hhmmss : durationAsString.split(":")) {
+                seconds = 60*seconds + Long.valueOf(hhmmss);
+            }
+            result = new MillisecondsDurationImpl(1000l * seconds);
+        }
+        return result;
+    }
+
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
