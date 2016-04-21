@@ -4,6 +4,7 @@
     <style name="AppTheme" parent="AppTheme.Base">
         <!-- Customize your theme using Material Design here. -->
         <item name="android:buttonStyle">@style/shadowLessButtonStyle</item>
+        <item name="android:colorPrimaryDark">@color/fiori_primary_color</item>
     </style>
     
     <style name="shadowLessButtonStyle" parent="@android:style/Widget.Material.Button.Borderless">
