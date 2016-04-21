@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.racegroup.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,6 +163,28 @@ public class CurrentRaceFilterImplTest {
         assertEquals("Red", firstRace.getFleet().getName());
         assertEquals("F1", firstRace.getRaceColumnName());
         }
+    }
+    
+    @Test
+    public void testSchedulingFirstIsafRace() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        get(isaf, "Q1", "Yellow").setStatus(RaceLogRaceStatus.SCHEDULED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentIsafRaces = currentRaces.stream().filter(r->r.getRaceGroup() == isaf).collect(Collectors.toSet());
+        assertEquals(3, currentIsafRaces.size());
+        assertTrue(currentIsafRaces.contains(get(isaf, "Q1", "Yellow"))); // it's scheduled, so it shows
+        assertTrue(currentIsafRaces.contains(get(isaf, "Q1", "Blue")));   // it's unscheduled, first in fleet
+        assertTrue(currentIsafRaces.contains(get(isaf, "Q2", "Yellow"))); // predecessor Q1/Yellow is scheduled, so show this as next in fleet
+    }
+
+    @Test
+    public void testFinishingFirstLeagueRace() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        get(league, "F1", "Red").setStatus(RaceLogRaceStatus.FINISHED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentLeagueRaces = currentRaces.stream().filter(r->r.getRaceGroup() == league).collect(Collectors.toSet());
+        assertEquals(1, currentLeagueRaces.size());
+        assertTrue(currentLeagueRaces.contains(get(league, "F1", "Green"))); // Red is finished, don't show it anymore
     }
     
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {
