@@ -6,17 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.widget.Filter;
-
+import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.FilterMode;
 
+import android.widget.Filter;
+
 /**
- * Filters races by status.
- * <p/>
- * For each "run" of unscheduled races only the first will be taken.
- * For each "run" of finished races only the last will be taken.
+ * Filters {@link ManagedRace} objects by status and place in the regatta structure. See {@link CurrentRaceFilter}. If
+ * the {@link #filterMode} is {@link FilterMode#ALL}, no filtering takes place at all, and all races will be displayed.
+ * If the {@link #filterMode} is {@link FilterMode#ACTIVE}, the set of races to be displayed is computed using a
+ * {@link CurrentRaceFilter}. For each race to be displayed, a {@link RaceListDataTypeRace} view item is produced. The
+ * races are grouped into sections, one for each series, and the items within each such series section are ordered using
+ * a {@link CurrentRaceComparator} while the series sections are ordered by the order in which the series appear in the
+ * Race Group / regatta.
  */
 public class RaceFilter extends Filter {
 

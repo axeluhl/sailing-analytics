@@ -15,7 +15,7 @@ public interface FilterableRace {
     RaceGroup getRaceGroup();
 
     SeriesBase getSeries();
-
+    
     Fleet getFleet();
 
     /**
@@ -38,4 +38,6 @@ public interface FilterableRace {
      * index 0.
      */
     int getZeroBasedIndexInFleet();
+    
+    int getZeroBasedSeriesIndex();
 }

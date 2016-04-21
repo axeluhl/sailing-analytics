@@ -345,7 +345,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
-
         unregisterOnAllRaces();
         registerOnAllRaces();
         for (ManagedRace race : mManagedRacesById.values()) {
@@ -377,34 +376,29 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-
                 mUpdateList = false;
             }
 
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-
                 mUpdateList = true;
             }
         };
 
         mDrawerLayout.post(new Runnable() {
-
             @Override
             public void run() {
                 mDrawerToggle.syncState();
             }
         });
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
         if (mCourse != null) {
             SpannableString text = new SpannableString(course);
             StyleSpan spanBold = new StyleSpan(Typeface.BOLD);
             text.setSpan(spanBold, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             mCourse.setText(text);
         }
-
         if (mData != null) {
             mData.setText(StringHelper.on(getActivity()).getAuthor(author));
         }
@@ -414,7 +408,6 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mRacesByGroup.clear();
         for (ManagedRace race : mManagedRacesById.values()) {
             RaceGroupSeriesFleet container = new RaceGroupSeriesFleet(race);
-
             if (!mRacesByGroup.containsKey(container)) {
                 mRacesByGroup.put(container, new LinkedList<ManagedRace>());
             }
@@ -428,6 +421,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
         // 2. Remove previous view items
         mViewItems.clear();
+        
 
         // 3. Group active fleets from tree by series
         Map<SeriesBase, List<RaceGroupSeriesFleet>> seriesWithFleets = getFleetsGroupedBySeries(mRacesByGroup.keySet());

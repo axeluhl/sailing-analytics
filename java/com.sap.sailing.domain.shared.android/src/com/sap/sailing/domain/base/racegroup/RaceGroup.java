@@ -42,7 +42,8 @@ public interface RaceGroup extends Named {
     public BoatClass getBoatClass();
 
     /**
-     * Gets the collection of series.
+     * Gets the collection of series, for a {@link RaceGroup} representing a regatta in the same order as
+     * the {@code Regatta.getSeries()} call returns them.
      */
     public Iterable<SeriesWithRows> getSeries();
     

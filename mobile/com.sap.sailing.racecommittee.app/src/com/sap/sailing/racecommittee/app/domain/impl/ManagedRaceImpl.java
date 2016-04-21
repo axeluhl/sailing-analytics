@@ -226,4 +226,8 @@ public class ManagedRaceImpl implements ManagedRace {
         return zeroBasedIndexInFleet;
     }
 
+    @Override
+    public int getZeroBasedSeriesIndex() {
+        return Util.indexOf(getRaceGroup().getSeries(), getSeries());
+    }
 }

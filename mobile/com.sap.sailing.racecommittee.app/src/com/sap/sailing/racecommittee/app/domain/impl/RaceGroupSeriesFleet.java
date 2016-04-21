@@ -9,6 +9,15 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 
+/**
+ * Represents a triple of {@link RaceGroup} (representing a regatta or a flexible leaderboard), a {@link SeriesBase series}
+ * and a {@link Fleet}. An instance can be constructed for a {@link ManagedRace} which then extracts these three properties
+ * from the race. Note that equal objects of this type can result for different races as long as they are in the equal
+ * {@link RaceGroup}, {@link SeriesBase series} and {@link Fleet}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
 public class RaceGroupSeriesFleet {
 
     private RaceGroup raceGroup;
@@ -21,13 +30,16 @@ public class RaceGroupSeriesFleet {
         raceGroup = race.getRaceGroup();
         series = race.getSeries();
         fleet = race.getFleet();
-
         seriesOrder = getSeriesIndex(race, series);
         fleetOrder = getFleetIndex(series.getFleets(), race.getFleet());
     }
 
     private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
         return Util.indexOf(race.getRaceGroup().getSeries(), series);
+    }
+
+    private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
+        return Util.indexOf(fleets, fleet);
     }
 
     public RaceGroup getRaceGroup() {
@@ -131,7 +143,4 @@ public class RaceGroupSeriesFleet {
         return true;
     }
 
-    private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
-        return Util.indexOf(fleets, fleet);
-    }
 }
