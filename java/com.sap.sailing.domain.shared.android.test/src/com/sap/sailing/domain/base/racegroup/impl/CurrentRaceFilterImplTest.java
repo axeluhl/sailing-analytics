@@ -187,6 +187,19 @@ public class CurrentRaceFilterImplTest {
         assertTrue(currentLeagueRaces.contains(get(league, "F1", "Green"))); // Red is finished, don't show it anymore
     }
     
+    @Test
+    public void testSkippingSecondLeagueRace() {
+        // with all races unscheduled we can expect the first race of each regatta's first series to show
+        get(league, "F1", "Red").setStatus(RaceLogRaceStatus.FINISHED);
+        get(league, "F1", "Blue").setStatus(RaceLogRaceStatus.SCHEDULED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentLeagueRaces = currentRaces.stream().filter(r->r.getRaceGroup() == league).collect(Collectors.toSet());
+        assertEquals(3, currentLeagueRaces.size());
+        assertTrue(currentLeagueRaces.contains(get(league, "F1", "Green"))); // Red is finished, don't show it anymore; show the next one instead which is Green
+        assertTrue(currentLeagueRaces.contains(get(league, "F1", "Blue")));  // show a scheduled race
+        assertTrue(currentLeagueRaces.contains(get(league, "F2", "Red")));   // This is the next one after the scheduled F1/Blue
+    }
+    
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {
         for (final SeriesWithRows series : raceGroup.getSeries()) {
             final Fleet fleet = getFleet(series, fleetName);
