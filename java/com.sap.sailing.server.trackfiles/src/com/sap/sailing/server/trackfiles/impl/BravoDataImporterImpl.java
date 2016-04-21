@@ -93,15 +93,23 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private DoubleVectorFixImpl parseLine(String line, Map<String, Integer> colIndices) {
         LOG.fine("Process data line: " + line);
         String[] contentTokens = split(line);
-        String jjLDATE = contentTokens[0].substring(0, 9);
-        StringBuilder dtb = new StringBuilder(jjLDATE);
-        String jjlTIME = contentTokens[1];
-        int offset = 6 - jjlTIME.indexOf(".");
-        IntStream.range(0, offset).forEach(n -> dtb.append("0"));
-        dtb.append(jjlTIME);
-        LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
-        Instant instant = day.toInstant(ZoneOffset.UTC);
-        TimePoint fixTp = new MillisecondsTimePoint(Date.from(instant));
+        TimePoint fixTp;
+        String epochColValue = contentTokens[2];
+        if (epochColValue != null && epochColValue.length() > 0) {
+            epochColValue = epochColValue.substring(0, epochColValue.indexOf("."));
+            long epoch = Long.valueOf(epochColValue);
+            fixTp = new MillisecondsTimePoint(epoch);
+        } else {
+            String jjLDATE = contentTokens[0].substring(0, 9);
+            StringBuilder dtb = new StringBuilder(jjLDATE);
+            String jjlTIME = contentTokens[1];
+            int offset = 6 - jjlTIME.indexOf(".");
+            IntStream.range(0, offset).forEach(n -> dtb.append("0"));
+            dtb.append(jjlTIME);
+            LocalDateTime day = DATE_FMT.parse(dtb.toString(), LocalDateTime::from);
+            Instant instant = day.toInstant(ZoneOffset.UTC);
+            fixTp = new MillisecondsTimePoint(Date.from(instant));
+        }
         double[] fixData = new double[metadata.getColumns().size()];
         for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
             String columnName = metadata.getColumns().get(columnIndexInFix);
@@ -114,7 +122,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private Map<String, Integer> validateAndParseHeader(String headerLine) {
         final String[] headerTokens = split(headerLine);
         Map<String, Integer> colIndicesInFile = new HashMap<>();
-        for (int j = 2; j < headerTokens.length; j++) {
+        for (int j = metadata.getHeaderColumnOffset(); j < headerTokens.length; j++) {
             String header = headerTokens[j];
             colIndicesInFile.put(header, j);
         }
