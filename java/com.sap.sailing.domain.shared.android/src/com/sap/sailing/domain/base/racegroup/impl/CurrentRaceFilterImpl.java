@@ -21,6 +21,7 @@ public class CurrentRaceFilterImpl implements CurrentRaceFilter {
     @Override
     public <T extends FilterableRace> Set<T> filterCurrentRaces(Set<T> allRaces) {
         final Set<T> filteredRaces = new HashSet<>();
+        
         // TODO implement the CurrentRaceFilter algorithm here...
         filteredRaces.addAll(allRaces);
         return filteredRaces;
