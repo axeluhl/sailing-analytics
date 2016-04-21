@@ -1536,4 +1536,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String moveFix();
     String manage2SailEvent();
     String noEventsYet();
+    String selectResultImportProvider();
 }
