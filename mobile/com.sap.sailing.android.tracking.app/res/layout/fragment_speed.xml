@@ -29,7 +29,6 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:textColor="@color/white"
             android:singleLine="true"
             android:textSize="124sp"
             android:textStyle="bold"
