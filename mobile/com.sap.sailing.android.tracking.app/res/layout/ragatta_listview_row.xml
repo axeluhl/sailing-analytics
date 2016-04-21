@@ -9,13 +9,13 @@
 
     <ImageView
         android:id="@+id/nextPage"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/empty"
-        android:src="@drawable/yellow_arrow_right"
+        android:src="@drawable/white_arrow_right"
         android:layout_marginTop="13dp"
         android:layout_marginBottom="10dp"
         android:layout_marginRight="10dp"
