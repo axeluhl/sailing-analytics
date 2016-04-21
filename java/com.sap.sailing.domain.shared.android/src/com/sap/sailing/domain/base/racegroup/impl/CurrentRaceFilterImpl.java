@@ -79,7 +79,7 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
      */
     private boolean hasNoPredecessor(FilterableRace race) {
         return race.getZeroBasedSeriesIndex() == 0 && race.getZeroBasedIndexInFleet() == 0 &&
-                (race.getSeries().isFleetsRunInParallel() || Util.indexOf(race.getSeries().getFleets(), race.getFleet()) == 0);
+                (race.getSeries().isFleetsCanRunInParallel() || Util.indexOf(race.getSeries().getFleets(), race.getFleet()) == 0);
     }
 
     /**
@@ -104,7 +104,7 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
     private boolean hasImmediatePredecessorThatIsAtLeastScheduled(FilterableRace race) {
         final Set<FilterableRace> immediatePredecessors = new HashSet<>();
         final RaceGroup raceGroup = race.getRaceGroup();
-        if (race.getSeries().isFleetsRunInParallel()) {
+        if (race.getSeries().isFleetsCanRunInParallel()) {
             if (race.getZeroBasedIndexInFleet() == 0) {
                 // it's in the first column; for fleets that may run in parallel, the immediate predecessors are
                 // in the last column of the immediately preceding series:
@@ -154,7 +154,7 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
     private Iterable<T> getLastRacesFromImmediatelyPrecedingSeries(FilterableRace race, final RaceGroup raceGroup) {
         final Set<T> lastRacesInImmediatelyPrecedingSeries = new HashSet<>();
         final SeriesWithRows immediatelyPrecedingSeries = Util.get(raceGroup.getSeries(), race.getZeroBasedSeriesIndex()-1);
-        if (immediatelyPrecedingSeries.isFleetsRunInParallel()) {
+        if (immediatelyPrecedingSeries.isFleetsCanRunInParallel()) {
             // add all last races of all fleets in immediately preceding series because they may be run in parallel
             for (final RaceRow rowInImmediatelyPrecedingSeries : immediatelyPrecedingSeries.getRaceRows()) {
                 final T lastRaceInRow = getLastRaceInRow(raceGroup, immediatelyPrecedingSeries, rowInImmediatelyPrecedingSeries);

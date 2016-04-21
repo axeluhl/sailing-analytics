@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class CurrentRaceFilterImplTest {
         final List<RaceRow> _505RaceRows = new ArrayList<>();
         final RaceRow _505RaceRow = createRaceRow(/* firstRaceColumnNumber */ 1, /* numberOfRaces */ 9, /* raceColumnNamePrefix */ "R", /* fleetName */ "Default");
         _505RaceRows.add(_505RaceRow);
-        _505Series.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, _505RaceRows));
+        _505Series.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, _505RaceRows));
         final RaceGroup _505 = new RaceGroupImpl("505", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._5O5.getDisplayName(), BoatClassMasterdata._5O5),
                 /* courseArea */ null, _505Series, /* regattaConfiguration */ null);
@@ -67,7 +68,7 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup createYesRegatta() {
         final List<SeriesWithRows> yesSeries = new ArrayList<>();
         final List<RaceRow> yesRaceRows = Arrays.asList(createRaceRow(1, 9, "R", "Yellow"), createRaceRow(1, 9, "R", "Blue"));
-        yesSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, yesRaceRows));
+        yesSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, yesRaceRows));
         final RaceGroup yes = new RaceGroupImpl("YES", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470),
                 /* courseArea */ null, yesSeries, /* regattaConfiguration */ null);
@@ -77,11 +78,11 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup createIsafRegatta() {
         final List<SeriesWithRows> isafSeries = new ArrayList<>();
         final List<RaceRow> isafQualificationRaceRows = Arrays.asList(createRaceRow(1, 5, "Q", "Yellow"), createRaceRow(1, 5, "Q", "Blue"));
-        isafSeries.add(new SeriesWithRowsImpl("Qualification", /* isMedal */ false, isafQualificationRaceRows));
+        isafSeries.add(new SeriesWithRowsImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, isafQualificationRaceRows));
         final List<RaceRow> isafFinalRaceRows = Arrays.asList(createRaceRow(6, 5, "F", "Gold"), createRaceRow(6, 5, "F", "Silver"));
-        isafSeries.add(new SeriesWithRowsImpl("Final", /* isMedal */ false, isafFinalRaceRows));
+        isafSeries.add(new SeriesWithRowsImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, isafFinalRaceRows));
         final List<RaceRow> isafMedalRaceRows = Arrays.asList(createRaceRow(1, 1, "M", "Medal"));
-        isafSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, isafMedalRaceRows));
+        isafSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, isafMedalRaceRows));
         final RaceGroup isaf = new RaceGroupImpl("ISAF", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470),
                 /* courseArea */ null, isafSeries, /* regattaConfiguration */ null);
@@ -91,7 +92,7 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup createLeagueRegatta() {
         final List<SeriesWithRows> leagueSeries = new ArrayList<>();
         final List<RaceRow> leagueRaceRows = Arrays.asList(createRaceRow(1, 15, "F", "Red"), createRaceRow(1, 15, "F", "Green"), createRaceRow(1, 15, "F", "Blue"));
-        leagueSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, leagueRaceRows));
+        leagueSeries.add(new SeriesWithRowsImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ false, leagueRaceRows));
         final RaceGroup league = new RaceGroupImpl("League", /* displayName */ null,
                 new BoatClassImpl(BoatClassMasterdata.J70.getDisplayName(), BoatClassMasterdata.J70),
                 /* courseArea */ null, leagueSeries, /* regattaConfiguration */ null);
@@ -131,6 +132,7 @@ public class CurrentRaceFilterImplTest {
     @Test
     public void testBasicFiltering() {
         // with all races unscheduled we can expect the first race of each regatta's first series to show
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
     }
     
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {
