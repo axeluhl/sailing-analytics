@@ -220,6 +220,7 @@ import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -2936,7 +2937,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 break;
             case RACE_CURRENT_RIDE_HEIGHT_IN_METERS:
-                final BravoFixTrack bravoFixTrack = trackedRace.getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+                final BravoFixTrack<Competitor> bravoFixTrack = trackedRace
+                        .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
                 if (bravoFixTrack != null) {
                     result = bravoFixTrack.getRideHeight(timePoint);
                 }

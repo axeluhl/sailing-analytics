@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuseCache;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -187,7 +188,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Double getAverageRideHeight(TimePoint timePoint) {
         MarkPassing legStart = getMarkPassingForLegStart();
         if (legStart != null) {
-            BravoFixTrack track = getTrackedRace().getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
             if (track != null) {
                 TimePoint endTimePoint = hasFinishedLeg(timePoint) ? getMarkPassingForLegEnd().getTimePoint() : timePoint;
                 return track.getAverageRideHeight(legStart.getTimePoint(), endTimePoint);
@@ -678,7 +680,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     public Double getRideHeight(TimePoint at) {
         if (hasStartedLeg(at)) {
             TimePoint timePoint =hasFinishedLeg(at) ? getMarkPassingForLegEnd().getTimePoint() : at;
-            BravoFixTrack track = getTrackedRace().getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
+            BravoFixTrack<Competitor> track = getTrackedRace()
+                    .<BravoFix, BravoFixTrack<Competitor>> getSensorTrack(competitor, BravoFixTrack.TRACK_NAME);
             return track == null ? null : track.getRideHeight(timePoint);
         } else {
             return null;
