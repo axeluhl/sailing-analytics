@@ -12,6 +12,6 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
  * @author Charlotte Proeller (D062347)
  * @author Axel Uhl (d043530)
  */
-public interface CurrentRaceFilter {
-    <T extends FilterableRace> Set<T> filterCurrentRaces(Set<T> allRaces);
+public interface CurrentRaceFilter<T extends FilterableRace> {
+    Set<T> getCurrentRaces();
 }

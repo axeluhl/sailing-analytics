@@ -44,9 +44,10 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
 
     @Override
     protected RaceLogRaceStatus performAnalysis() {
-        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(RaceLogRaceStatusEventComparator.INSTANCE);
-        for(RaceLogEvent event: getPassEvents()) {
-            if(event instanceof RaceLogRaceStatusEvent) {
+        ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(
+                RaceLogRaceStatusEventComparator.INSTANCE);
+        for (RaceLogEvent event : getPassEvents()) {
+            if (event instanceof RaceLogRaceStatusEvent) {
                 statusEvents.add((RaceLogRaceStatusEvent) event);
             }
         }
@@ -54,7 +55,6 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<RaceLogRaceStatus> {
             event.accept(eventDispatcher);
             return eventDispatcher.nextStatus;
         }
-        
         return RaceLogRaceStatus.UNSCHEDULED;
     }
     

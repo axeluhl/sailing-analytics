@@ -18,7 +18,10 @@ import android.widget.Filter;
  * {@link CurrentRaceFilter}.
  */
 public class RaceFilter extends Filter {
-    private final CurrentRaceFilter currentRaceFilter = new CurrentRaceFilterImpl();
+    /**
+     * A filter that is updated each time an update for {@link #allRaces} is announced by {@link #refreshRegattaStructures()}.
+     */
+    private CurrentRaceFilter<ManagedRace> currentRaceFilter;
 
     public interface FilterSubscriber {
         void onResult(List<ManagedRace> filtered);
@@ -28,9 +31,16 @@ public class RaceFilter extends Filter {
     private final Set<ManagedRace> allRaces;
     private FilterMode filterMode;
 
+    /**
+     * @param allRaces
+     *            callers must call {@link #refreshRegattaStructures()} whenever the contents of this set have changed
+     * @param resultSubscriber
+     *            triggered when the filter results have changed
+     */
     public RaceFilter(Set<ManagedRace> allRaces, FilterSubscriber resultSubscriber) {
         this.allRaces = allRaces;
         this.subscriber = resultSubscriber;
+        refreshRegattaStructures();
     }
 
     public void filterByMode(FilterMode filterMode) {
@@ -52,7 +62,7 @@ public class RaceFilter extends Filter {
             result = createResults(allRaces);
         } else {
             // filter using the CurrentRaceFilter
-            result = createResults(currentRaceFilter.filterCurrentRaces(allRaces));
+            result = createResults(currentRaceFilter.getCurrentRaces());
         }
         return result;
     }
@@ -62,6 +72,11 @@ public class RaceFilter extends Filter {
         @SuppressWarnings("unchecked")
         final List<ManagedRace> filterResults = (List<ManagedRace>) results.values;
         subscriber.onResult(filterResults);
+    }
+
+    public void refreshRegattaStructures() {
+        this.currentRaceFilter = new CurrentRaceFilterImpl<ManagedRace>(allRaces);
+        filter("");
     }
 
 }

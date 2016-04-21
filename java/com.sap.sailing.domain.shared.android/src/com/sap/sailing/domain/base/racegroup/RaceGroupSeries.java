@@ -20,13 +20,17 @@ public class RaceGroupSeries {
     private int seriesOrder;
 
     public RaceGroupSeries(FilterableRace race) {
-        raceGroup = race.getRaceGroup();
-        series = race.getSeries();
-        seriesOrder = getSeriesIndex(race, series);
+        this(race.getRaceGroup(), race.getSeries());
     }
 
-    private static int getSeriesIndex(FilterableRace race, SeriesBase series) {
-        return Util.indexOf(race.getRaceGroup().getSeries(), series);
+    public RaceGroupSeries(RaceGroup raceGroup, SeriesBase series) {
+        this.raceGroup = raceGroup;
+        this.series = series;
+        seriesOrder = getSeriesIndex(raceGroup, series);
+    }
+
+    private static int getSeriesIndex(RaceGroup raceGroup, SeriesBase series) {
+        return Util.indexOf(raceGroup.getSeries(), series);
     }
 
     public RaceGroup getRaceGroup() {

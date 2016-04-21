@@ -107,7 +107,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
         createViewItemsForRacesAndSeries();
-        getFilter().filter("");
+        getFilter().refreshRegattaStructures();
     }
 
     private void createViewItemsForRacesAndSeries() {

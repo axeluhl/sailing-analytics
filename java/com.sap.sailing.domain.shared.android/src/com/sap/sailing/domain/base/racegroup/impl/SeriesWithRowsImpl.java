@@ -20,18 +20,32 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
         this.isMedal = isMedal;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public boolean isMedal() {
         return isMedal;
     }
 
+    @Override
     public Iterable<RaceRow> getRaceRows() {
         return raceRows;
     }
 
+    @Override
+    public RaceRow getRaceRow(Fleet fleet) {
+        for (final RaceRow row : getRaceRows()) {
+            if (row.getFleet().equals(fleet)) {
+                return row;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public Iterable<? extends Fleet> getFleets() {
         Collection<Fleet> fleets = new ArrayList<Fleet>();
         for (RaceRow row : raceRows) {

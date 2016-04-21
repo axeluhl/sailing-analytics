@@ -35,7 +35,7 @@ public class CurrentRaceFilterImplTest {
         RaceFragment firstRace = new RaceFragment(RaceLogRaceStatus.UNSCHEDULED);
         values.add(firstRace);
 
-        List<RaceGroupFragment> result = fixture.filterCurrentRaces(values);
+        List<RaceGroupFragment> result = fixture.getCurrentRaces();
         Assert.assertThat(result.size(), Matchers.equalTo(2));
         Assert.assertThat(result.get(0), Matchers.equalTo(fristSeries));
         Assert.assertThat(result.get(1), Matchers.equalTo(firstRace));
@@ -49,14 +49,14 @@ public class CurrentRaceFilterImplTest {
         values.addAll(createRacesForSeries(3, seriesBase1));
         values.addAll(createRacesForSeries(3, seriesBase2));
 
-        List<RaceGroupFragment> result = fixture.filterCurrentRaces(values);
+        List<RaceGroupFragment> result = fixture.getCurrentRaces();
         Assert.assertThat(result.size(), Matchers.equalTo(2));
         Assert.assertThat(result.get(0), Matchers.equalTo(values.get(0)));
         Assert.assertThat(result.get(1), Matchers.equalTo(values.get(1)));
 
         ((RaceFragment) values.get(5)).setCurrentStatus(RaceLogRaceStatus.PRESCHEDULED);
 
-        result = fixture.filterCurrentRaces(values);
+        result = fixture.getCurrentRaces();
         Assert.assertThat(result.size(), Matchers.equalTo(5));
         Assert.assertThat(result.get(0), Matchers.equalTo(values.get(0)));
         Assert.assertThat(result.get(1), Matchers.equalTo(values.get(1)));
@@ -66,7 +66,7 @@ public class CurrentRaceFilterImplTest {
 
         ((RaceFragment) values.get(5)).setCurrentStatus(RaceLogRaceStatus.RUNNING);
 
-        result = fixture.filterCurrentRaces(values);
+        result = fixture.getCurrentRaces();
         Assert.assertThat(result.size(), Matchers.equalTo(3));
         Assert.assertThat(result.get(0), Matchers.equalTo(values.get(4)));
         Assert.assertThat(result.get(1), Matchers.equalTo(values.get(5)));

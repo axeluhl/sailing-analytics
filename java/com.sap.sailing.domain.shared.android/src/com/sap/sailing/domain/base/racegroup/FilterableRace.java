@@ -40,4 +40,6 @@ public interface FilterableRace {
     int getZeroBasedIndexInFleet();
     
     int getZeroBasedSeriesIndex();
+
+    String getRaceColumnName();
 }

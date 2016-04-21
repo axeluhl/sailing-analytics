@@ -1,11 +1,8 @@
-package com.sap.sailing.racecommittee.app.domain.impl;
+package com.sap.sailing.domain.base.racegroup;
 
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 
 /**
@@ -22,10 +19,16 @@ public class RaceGroupSeriesFleet extends RaceGroupSeries {
     private Fleet fleet;
     private int fleetOrder;
 
-    public RaceGroupSeriesFleet(ManagedRace race) {
+    public RaceGroupSeriesFleet(FilterableRace race) {
         super(race);
         fleet = race.getFleet();
         fleetOrder = getFleetIndex(race.getSeries().getFleets(), race.getFleet());
+    }
+    
+    public RaceGroupSeriesFleet(RaceGroup raceGroup, SeriesBase series, Fleet fleet) {
+        super(raceGroup, series);
+        this.fleet = fleet;
+        getFleetIndex(series.getFleets(), fleet);
     }
 
     private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
