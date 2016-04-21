@@ -64,7 +64,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
             for (RaceRow raceRow : series.getRaceRows()) {
                 Fleet fleet = raceRow.getFleet();
                 for (RaceCell cell : raceRow.getCells()) {
-                    ManagedRace race = createManagedRace(raceGroup, series, fleet, cell.getName(), cell.getRaceLog(), cell.getFactor(), cell.getExplicitFactor());
+                    ManagedRace race = createManagedRace(raceGroup, series, fleet, cell.getName(), cell.getRaceLog(),
+                            cell.getFactor(), cell.getExplicitFactor(), cell.getZeroBasedIndexInFleet());
                     target.add(race);
                 }
             }
@@ -72,7 +73,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
     }
 
     private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String raceColumnName,
-            RaceLog raceLog, double factor, Double explicitFactor) {
+            RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
         RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();
         if (localConfiguration != null) {
@@ -80,7 +81,8 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
         FleetIdentifier fleetIdentifier = new FleetIdentifierImpl(fleet, series, raceGroup);
         ManagedRaceIdentifier identifier = new ManagedRaceIdentifierImpl(raceColumnName, fleetIdentifier);
-        return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader), factor, explicitFactor);
+        return new ManagedRaceImpl(identifier, new ManagedRaceCalculator(raceLog, author, configurationLoader),
+                factor, explicitFactor, zeroBasedIndexInFleet);
     }
 
 }

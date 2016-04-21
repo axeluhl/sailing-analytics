@@ -529,10 +529,10 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
-    private void showProtestTimeDialog(String raceGroupName) {
+    private void showProtestTimeDialog(String raceGroupDisplayName) {
         // Find the race group for which the
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
-            Boolean matchingRaceGroup = raceGroupName.equals(raceGroupSeriesFleet.getDisplayName());
+            Boolean matchingRaceGroup = raceGroupDisplayName.equals(raceGroupSeriesFleet.getDisplayName());
             if (matchingRaceGroup) {
                 List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                 if (!isRaceListDirty(races)) {

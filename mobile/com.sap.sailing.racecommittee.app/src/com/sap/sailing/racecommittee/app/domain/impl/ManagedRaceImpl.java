@@ -12,6 +12,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
@@ -21,6 +22,7 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManagedRaceImpl implements ManagedRace {
@@ -33,22 +35,39 @@ public class ManagedRaceImpl implements ManagedRace {
     private ManagedRaceCalculator calculator;
     private double factor;
     private Double explicitFactor;
+    private final int zeroBasedIndexInFleet;
 
-    private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor) {
+    /**
+     * @param zeroBasedIndexInFleet
+     *            A Series offers a sequence of RaceColumns, each of them split according to the Fleets modeled for the
+     *            Series. A {@link RaceCell} describes a "slot" in this grid, defined by the series, the fleet and the
+     *            race column. While this object's {@link #getName() name} represents the race column's name, this
+     *            doesn't tell anything about the "horizontal" position in the "grid" or in other words what the index
+     *            is of the race column in which this cell lies.
+     *            <p>
+     * 
+     *            Indices returned by this method start with zero, meaning the first race column in the series. This
+     *            corresponds to what one would get by asking {@link Util#indexOf(Iterable, Object)
+     *            Util.indexOf(series.getRaceColumns(), thisCellsRaceColumn)}, except in case the first race column is a
+     *            "virtual" one that holds a non-discardable carry-forward result. In this case, the second Race Column,
+     *            which is the first "non-virtual" one, receives index 0.
+     */
+    private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         this.identifier = identifier;
         this.competitors = new ArrayList<>();
         this.courseOnServer = null;
         this.factor = factor;
         this.explicitFactor = explicitFactor;
+        this.zeroBasedIndexInFleet = zeroBasedIndexInFleet;
     }
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state) {
-        this(identifier, 0, null);
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, RaceState state, int zeroBasedIndexInFleet) {
+        this(identifier, 0, null, zeroBasedIndexInFleet);
         this.state = state;
     }
 
-    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor, Double explicitFactor) {
-        this(identifier, factor, explicitFactor);
+    public ManagedRaceImpl(ManagedRaceIdentifier identifier, ManagedRaceCalculator calculator, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
+        this(identifier, factor, explicitFactor, zeroBasedIndexInFleet);
         this.calculator = calculator;
     }
 
@@ -201,4 +220,10 @@ public class ManagedRaceImpl implements ManagedRace {
     public String toString() {
         return "ManagedRaceImpl [identifier=" + identifier + "]";
     }
+
+    @Override
+    public int getZeroBasedIndexInFleet() {
+        return zeroBasedIndexInFleet;
+    }
+
 }
