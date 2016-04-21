@@ -98,12 +98,13 @@ public class RaceGroupFactory {
         boolean skippedFirst = false;
         Collection<RaceCell> cells = new ArrayList<>();
         if (raceColumns != null) {
-            for (RaceColumn raceColumn : raceColumns) {
+            int zeroBasedIndexOfRaceInFleet = 0;
+            for (final RaceColumn raceColumn : raceColumns) {
                 if (isFirstRaceColumnVirtual && !skippedFirst) {
                     skippedFirst = true;
                 } else {
                     Fleet fleet = raceColumn.getFleetByName(fleetName);
-                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet), raceColumn.getFactor(), raceColumn.getExplicitFactor()));
+                    cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet), raceColumn.getFactor(), raceColumn.getExplicitFactor(), zeroBasedIndexOfRaceInFleet++));
                 }
             }
         }
