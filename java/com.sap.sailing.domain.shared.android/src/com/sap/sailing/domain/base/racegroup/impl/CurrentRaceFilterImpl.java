@@ -1,13 +1,16 @@
 package com.sap.sailing.domain.base.racegroup.impl;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
+import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.base.racegroup.IsFleetFragment;
 import com.sap.sailing.domain.base.racegroup.IsRaceFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroupFragment;
@@ -16,36 +19,11 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 public class CurrentRaceFilterImpl implements CurrentRaceFilter {
 
     @Override
-    public <T extends RaceGroupFragment> List<T> filterCurrentRaces(Collection<T> allItems) {
-        Map<IsFleetFragment, List<IsRaceFragment>> filteredRace = filterRaces(allItems);
-        filteredRace = removeAllListsBeforeLastStarted(filteredRace);
-        return convertBackToList(filteredRace);
-    }
-
-    private <T extends RaceGroupFragment> List<T> convertBackToList(Map<IsFleetFragment, List<IsRaceFragment>> filteredRaces) {
-        Map<IsFleetFragment, List<IsRaceFragment>> filteredRacesWithoutEmtyList = removeEmtyLists(filteredRaces);
-        List<T> result = new LinkedList<>();
-        for (IsFleetFragment currentKey : filteredRacesWithoutEmtyList.keySet()) {
-            @SuppressWarnings("unchecked")
-            T t = (T) currentKey; // assumes that the IsFleetFragment specialization used here also specializes T which is the special RaceGroupFragment used here
-            result.add(t);
-            for (IsRaceFragment r : filteredRacesWithoutEmtyList.get(currentKey)) {
-                @SuppressWarnings("unchecked")
-                T tRace = (T) r;// assumes that the IsRaceFragment specialization used here also specializes T which is the special RaceGroupFragment used here
-                result.add(tRace);
-            }
-        }
-        return result;
-    }
-
-    private Map<IsFleetFragment, List<IsRaceFragment>> removeEmtyLists(Map<IsFleetFragment, List<IsRaceFragment>> filteredRaces) {
-        Map<IsFleetFragment, List<IsRaceFragment>> result = new LinkedHashMap<>();
-        for (IsFleetFragment currentKey : filteredRaces.keySet()) {
-            if (!filteredRaces.get(currentKey).isEmpty()) {
-                result.put(currentKey, filteredRaces.get(currentKey));
-            }
-        }
-        return result;
+    public <T extends FilterableRace> Set<T> filterCurrentRaces(Set<T> allRaces) {
+        final Set<T> filteredRaces = new HashSet<>();
+        // TODO implement the CurrentRaceFilter algorithm here...
+        filteredRaces.addAll(allRaces);
+        return filteredRaces;
     }
 
     private Map<IsFleetFragment, List<IsRaceFragment>> removeAllListsBeforeLastStarted(Map<IsFleetFragment, List<IsRaceFragment>> filteredRaces) {

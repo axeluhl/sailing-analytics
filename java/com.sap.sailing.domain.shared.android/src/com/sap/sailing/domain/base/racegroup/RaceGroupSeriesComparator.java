@@ -2,8 +2,6 @@ package com.sap.sailing.domain.base.racegroup;
 
 import java.util.Comparator;
 
-import com.sap.sse.common.Util;
-
 /**
  * When current races of a regatta are to be displayed to a user, a reasonable ordering is key to usability. This
  * comparator sorts by their series index (day 1 before day 2; qualification before final, etc.), then by their index
@@ -16,28 +14,12 @@ import com.sap.sse.common.Util;
  * @author Axel Uhl (d043530)
  *
  */
-public class CurrentRaceComparator implements Comparator<FilterableRace> {
+public class RaceGroupSeriesComparator implements Comparator<RaceGroupSeries> {
     @Override
-    public int compare(FilterableRace o1, FilterableRace o2) {
-        int result = getRaceGroupDisplayName(o1).compareTo(getRaceGroupDisplayName(o2));
+    public int compare(RaceGroupSeries o1, RaceGroupSeries o2) {
+        int result = o1.getDisplayName().compareTo(o2.getDisplayName());
         if (result == 0) {
-            result = o1.getZeroBasedSeriesIndex() - o2.getZeroBasedSeriesIndex();
-            if (result == 0) {
-                result = o1.getZeroBasedIndexInFleet() - o2.getZeroBasedIndexInFleet();
-                if (result == 0) {
-                    result = Util.indexOf(o1.getSeries().getFleets(), o1.getFleet()) - Util.indexOf(o2.getSeries().getFleets(), o2.getFleet());
-                }
-            }
-        }
-        return result;
-    }
-    
-    private String getRaceGroupDisplayName(FilterableRace r) {
-        final String result;
-        if (r.getRaceGroup().getDisplayName() != null) {
-            result = r.getRaceGroup().getDisplayName();
-        } else {
-            result = r.getRaceGroup().getName();
+            result = o1.getSeriesOrder() - o2.getSeriesOrder();
         }
         return result;
     }

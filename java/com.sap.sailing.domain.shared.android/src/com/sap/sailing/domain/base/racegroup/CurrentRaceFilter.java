@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.base.racegroup;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 
@@ -14,5 +13,5 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
  * @author Axel Uhl (d043530)
  */
 public interface CurrentRaceFilter {
-    <T extends RaceGroupFragment> List<T> filterCurrentRaces(Collection<T> allItems);
+    <T extends FilterableRace> Set<T> filterCurrentRaces(Set<T> allRaces);
 }

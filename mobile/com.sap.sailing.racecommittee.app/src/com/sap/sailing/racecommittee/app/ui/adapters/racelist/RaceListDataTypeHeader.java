@@ -1,26 +1,29 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.IsFleetFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.racecommittee.app.R;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment {
+    private RaceGroupSeries data;
+    private final LayoutInflater mInflater;
 
-    private RaceGroupSeriesFleet data;
-    private boolean isFleetVisible;
-
-    public RaceListDataTypeHeader(RaceGroupSeriesFleet data) {
-        this(data, true);
+    public RaceListDataTypeHeader(RaceGroupSeries data, LayoutInflater layoutInflater) {
+        this(data, true, layoutInflater);
     }
 
-    public RaceListDataTypeHeader(RaceGroupSeriesFleet data, boolean isFleetVisible) {
+    public RaceListDataTypeHeader(RaceGroupSeries data, boolean isFleetVisible, LayoutInflater layoutInflater) {
         this.data = data;
-        this.isFleetVisible = isFleetVisible;
+        this.mInflater = layoutInflater;
     }
 
-    public RaceGroupSeriesFleet getRegattaSeriesFleet() {
+    public RaceGroupSeries getRegattaSeries() {
         return data;
     }
 
@@ -32,14 +35,14 @@ public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment
         return data.getSeries();
     }
 
-    public Fleet getFleet() {
-        return data.getFleet();
-    }
-
-    public boolean isFleetVisible() { return isFleetVisible; }
-
     @Override
     public String toString() {
         return data.getDisplayName();
     }
+
+    @Override
+    public View getView(ViewGroup parent) {
+        return mInflater.inflate(R.layout.race_list_area_header, parent, false);
+    }
+
 }
