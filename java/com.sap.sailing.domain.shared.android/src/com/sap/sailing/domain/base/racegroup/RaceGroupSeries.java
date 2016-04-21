@@ -15,9 +15,9 @@ import com.sap.sse.common.Util;
  */
 public class RaceGroupSeries {
 
-    private RaceGroup raceGroup;
-    private SeriesBase series;
-    private int seriesOrder;
+    private final RaceGroup raceGroup;
+    private final SeriesBase series;
+    private final int seriesOrder;
 
     public RaceGroupSeries(FilterableRace race) {
         this(race.getRaceGroup(), race.getSeries());

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -130,9 +131,37 @@ public class CurrentRaceFilterImplTest {
     }
     
     @Test
-    public void testBasicFiltering() {
+    public void testBasicFilteringForFirstUnscheduledRaces() {
         // with all races unscheduled we can expect the first race of each regatta's first series to show
         final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+
+        {
+        final Set<SimpleFilterableRace> current505Races = currentRaces.stream().filter(r->r.getRaceGroup() == _505).collect(Collectors.toSet());
+        assertEquals(1, current505Races.size());
+        final SimpleFilterableRace firstRace = current505Races.iterator().next();
+        assertEquals("R1", firstRace.getRaceColumnName());
+        }
+        {
+        final Set<SimpleFilterableRace> currentYesRaces = currentRaces.stream().filter(r->r.getRaceGroup() == yes).collect(Collectors.toSet());
+        assertEquals(2, currentYesRaces.size());
+        for (final SimpleFilterableRace currentYesRace : currentYesRaces) {
+            assertEquals("R1", currentYesRace.getRaceColumnName());
+        }
+        }
+        {
+        final Set<SimpleFilterableRace> currentIsafRaces = currentRaces.stream().filter(r->r.getRaceGroup() == isaf).collect(Collectors.toSet());
+        assertEquals(2, currentIsafRaces.size());
+        for (final SimpleFilterableRace currentYesRace : currentIsafRaces) {
+            assertEquals("Q1", currentYesRace.getRaceColumnName());
+        }
+        }
+        {
+        final Set<SimpleFilterableRace> currentLeagueRaces = currentRaces.stream().filter(r->r.getRaceGroup() == league).collect(Collectors.toSet());
+        assertEquals(1, currentLeagueRaces.size());
+        final SimpleFilterableRace firstRace = currentLeagueRaces.iterator().next();
+        assertEquals("Red", firstRace.getFleet().getName());
+        assertEquals("F1", firstRace.getRaceColumnName());
+        }
     }
     
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {

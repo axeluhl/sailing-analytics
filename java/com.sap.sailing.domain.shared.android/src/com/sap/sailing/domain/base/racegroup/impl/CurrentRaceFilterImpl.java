@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
 import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleetRaceColumn;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -38,13 +37,13 @@ import com.sap.sse.common.Util;
  */
 public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentRaceFilter<T> {
     private final Iterable<T> allRaces;
-    private final Map<RaceGroupSeriesFleet, T> racesByRaceGroupSeriesFleet;
+    private final Map<RaceGroupSeriesFleetRaceColumn, T> racesByRaceGroupSeriesFleet;
 
     public CurrentRaceFilterImpl(Iterable<T> allRaces) {
         this.allRaces = allRaces;
         this.racesByRaceGroupSeriesFleet = new HashMap<>();
         for (final T race : allRaces) {
-            racesByRaceGroupSeriesFleet.put(new RaceGroupSeriesFleet(race), race);
+            racesByRaceGroupSeriesFleet.put(new RaceGroupSeriesFleetRaceColumn(race), race);
         }
     }
 

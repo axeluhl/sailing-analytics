@@ -66,4 +66,10 @@ public class SimpleFilterableRace implements FilterableRace {
         return raceColumnName;
     }
 
+    @Override
+    public String toString() {
+        return "SimpleFilterableRace ["+getRaceGroup().getName() + " - " + getSeries().getName() + " - " +
+                getFleet().getName() + " - " + getRaceColumnName() + "]";
+    }
+
 }

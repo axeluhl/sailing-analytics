@@ -65,4 +65,10 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
     public boolean isFleetsCanRunInParallel() {
         return isFleetsCanRunInParallel;
     }
+
+    @Override
+    public String toString() {
+        return "SeriesWithRowsImpl [name=" + name + ", raceRows=" + raceRows + ", isMedal=" + isMedal
+                + ", isFleetsCanRunInParallel=" + isFleetsCanRunInParallel + "]";
+    }
 }

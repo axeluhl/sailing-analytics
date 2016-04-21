@@ -53,4 +53,9 @@ public class RaceGroupSeriesFleetRaceColumn extends RaceGroupSeriesFleet {
             return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return getRaceGroupName() + " - " + getSeriesName() + " - " + getFleetName() + " - " + getRaceColumnName();
+    }
 }

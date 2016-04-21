@@ -69,4 +69,10 @@ public class RaceCellImpl extends NamedImpl implements RaceCell {
     public int getZeroBasedIndexInFleet() {
         return zeroBasedIndexInFleet;
     }
+
+    @Override
+    public String toString() {
+        return "RaceCellImpl [factor=" + factor + ", explicitFactor=" + explicitFactor + ", zeroBasedIndexInFleet="
+                + zeroBasedIndexInFleet + ", getName()=" + getName() + "]";
+    }
 }

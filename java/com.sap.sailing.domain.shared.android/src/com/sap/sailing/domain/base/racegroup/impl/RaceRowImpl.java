@@ -28,4 +28,9 @@ public class RaceRowImpl implements RaceRow {
         return races;
     }
 
+    @Override
+    public String toString() {
+        return "RaceRowImpl [fleet=" + fleet + ", races=" + races + "]";
+    }
+
 }

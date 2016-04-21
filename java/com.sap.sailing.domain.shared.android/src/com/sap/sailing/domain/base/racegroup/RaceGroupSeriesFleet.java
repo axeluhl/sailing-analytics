@@ -16,19 +16,17 @@ import com.sap.sse.common.Util;
  */
 public class RaceGroupSeriesFleet extends RaceGroupSeries {
 
-    private Fleet fleet;
-    private int fleetOrder;
+    private final Fleet fleet;
+    private final int fleetOrder;
 
     public RaceGroupSeriesFleet(FilterableRace race) {
-        super(race);
-        fleet = race.getFleet();
-        fleetOrder = getFleetIndex(race.getSeries().getFleets(), race.getFleet());
+        this(race.getRaceGroup(), race.getSeries(), race.getFleet());
     }
     
     public RaceGroupSeriesFleet(RaceGroup raceGroup, SeriesBase series, Fleet fleet) {
         super(raceGroup, series);
         this.fleet = fleet;
-        getFleetIndex(series.getFleets(), fleet);
+        fleetOrder = getFleetIndex(series.getFleets(), fleet);
     }
 
     private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
