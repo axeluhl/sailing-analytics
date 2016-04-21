@@ -3,6 +3,12 @@
 
     <style name="AppTheme" parent="AppTheme.Base">
         <!-- Customize your theme using Material Design here. -->
+        <item name="android:buttonStyle">@style/shadowLessButtonStyle</item>
+    </style>
+    
+    <style name="shadowLessButtonStyle" parent="@android:style/Widget.Material.Button.Borderless">
+        <item name="android:elevation">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 
 </resources>
