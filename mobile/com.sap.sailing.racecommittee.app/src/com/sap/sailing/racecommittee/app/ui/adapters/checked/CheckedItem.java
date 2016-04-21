@@ -6,6 +6,7 @@ public class CheckedItem {
     protected Drawable mImage;
     protected String mText;
     protected String mSubText;
+    protected boolean mDisabled = false;
 
     public Drawable getImage() {
         return mImage;
@@ -29,5 +30,13 @@ public class CheckedItem {
 
     public void setSubtext(String subText) {
         mSubText = subText;
+    }
+
+    public boolean isEnabled() {
+        return !mDisabled;
+    }
+
+    public void setDisabled(boolean isDisabled) {
+        mDisabled = isDisabled;
     }
 }

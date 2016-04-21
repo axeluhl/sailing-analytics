@@ -49,7 +49,7 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         // We want to use the main (UI) loop
         this.pollingHandler = new Handler(Looper.getMainLooper());
         this.pollingWorker = new PollingWorker(this, context);
-        this.races = new HashMap<ManagedRace, URL>();
+        this.races = new HashMap<>();
         this.appPreferences = AppPreferences.on(context);
         this.appPreferences.registerPollingActiveChangedListener(this);
         this.hasRacesToPoll = false;
@@ -68,6 +68,10 @@ public class RaceLogPoller implements PollingActiveChangedListener {
         } catch (MalformedURLException | UnsupportedEncodingException e) {
             ExLog.e(context, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
         }
+    }
+
+    public void unregister(ManagedRace race) {
+        races.remove(race);
     }
 
     private URL createURL(ManagedRace race) throws MalformedURLException, UnsupportedEncodingException {

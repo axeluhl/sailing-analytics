@@ -30,7 +30,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
     private IntentListener mListener;
 
     private ToggleContainer mEventContainer;
-    private ToggleContainer mAreaContainer;
+    private ToggleContainer mCourseAreaContainer;
     private ToggleContainer mPositionContainer;
 
     public LoginListViews() {
@@ -41,8 +41,8 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         return mEventContainer;
     }
 
-    public ToggleContainer getAreaContainer() {
-        return mAreaContainer;
+    public ToggleContainer getCourseAreaContainer() {
+        return mCourseAreaContainer;
     }
 
     public ToggleContainer getPositionContainer() {
@@ -65,7 +65,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         TextView area_text = ViewHelper.get(view, R.id.selected_area);
         ArrayList<View> above_area = new ArrayList<>();
         above_area.add(event_layout);
-        mAreaContainer = new ToggleContainer(view, area_fragment, area_header, area_text, above_area);
+        mCourseAreaContainer = new ToggleContainer(view, area_fragment, area_header, area_text, above_area);
 
         FrameLayout position_fragment = ViewHelper.get(view, R.id.position_fragment);
         RelativeLayout position_header = ViewHelper.get(view, R.id.position_header);
@@ -90,9 +90,6 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
         if (mSignUp != null) {
             mSignUp.setOnClickListener(this);
         }
-
-//        onClick(event_header);
-
         return view;
     }
 
@@ -118,7 +115,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
         switch (view.getId()) {
             case R.id.event_header:
-                mAreaContainer.close();
+                mCourseAreaContainer.close();
                 mPositionContainer.close();
                 mEventContainer.toggle();
                 break;
@@ -126,12 +123,12 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
             case R.id.area_header:
                 mEventContainer.close();
                 mPositionContainer.close();
-                mAreaContainer.toggle();
+                mCourseAreaContainer.toggle();
                 break;
 
             case R.id.position_header:
                 mEventContainer.close();
-                mAreaContainer.close();
+                mCourseAreaContainer.close();
                 mPositionContainer.toggle();
                 break;
 
@@ -144,14 +141,14 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
 
     public void closeAll() {
         mEventContainer.close();
-        mAreaContainer.close();
+        mCourseAreaContainer.close();
         mPositionContainer.close();
         showButton();
     }
 
     private void showButton() {
         mSignUp.setVisibility(View.GONE);
-        if (mEventContainer.isClosed() && mAreaContainer.isClosed() && mPositionContainer.isClosed()) {
+        if (mEventContainer.isClosed() && mCourseAreaContainer.isClosed() && mPositionContainer.isClosed()) {
             mSignUp.setVisibility(View.VISIBLE);
         }
     }
@@ -246,7 +243,7 @@ public class LoginListViews extends LoggableDialogFragment implements View.OnCli
                         onClick(mEventContainer.getHeader());
                     }
                     if (AppConstants.INTENT_ACTION_TOGGLE_AREA.equals(data)) {
-                        onClick(mAreaContainer.getHeader());
+                        onClick(mCourseAreaContainer.getHeader());
                     }
                     if (AppConstants.INTENT_ACTION_TOGGLE_POSITION.equals(data)) {
                         onClick(mPositionContainer.getHeader());
