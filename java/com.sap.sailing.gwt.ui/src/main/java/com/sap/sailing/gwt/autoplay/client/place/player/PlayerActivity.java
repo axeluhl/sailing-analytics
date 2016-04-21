@@ -8,8 +8,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.ui.raceboard.RaceBoardEntryPoint;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardViewConfiguration;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
@@ -77,6 +79,8 @@ public class PlayerActivity extends AbstractActivity {
                 RaceBoardViewConfiguration.PARAM_VIEW_SHOW_COMPETITORSCHART, false /* default */);
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_VIEW_COMPETITOR_FILTER, null /* default*/);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default */);
+        final Duration initialDurationAfterRaceStartInReplay = RaceBoardEntryPoint.parseDuration(GwtHttpRequestUtils.getStringParameter(
+                RaceBoardViewConfiguration.PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
         
         return new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
                 showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia, initialDurationAfterRaceStartInReplay);
