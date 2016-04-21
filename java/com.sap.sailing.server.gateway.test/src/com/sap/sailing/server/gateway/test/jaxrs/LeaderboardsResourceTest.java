@@ -53,7 +53,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
         List<String> raceColumnNames = new ArrayList<String>();
         fleets.add(new FleetImpl("Fleet1"));
         fleets.add(new FleetImpl("Fleet2"));
-        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, fleets,
+        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets,
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClassName), boatClassName, 

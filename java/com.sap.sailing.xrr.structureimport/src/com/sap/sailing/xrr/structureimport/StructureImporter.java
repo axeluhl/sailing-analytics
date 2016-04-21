@@ -143,7 +143,7 @@ public class StructureImporter {
             for (Series raceType : regattaStructure.getSeries()) {
                 List<com.sap.sailing.domain.base.Fleet> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
-                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
+                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), true, fleets, raceType.getRaceNames(), null));
             }
         }
         return series;

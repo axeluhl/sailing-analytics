@@ -346,6 +346,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String splitFleet();
     String color();
     String medalSeries();
+    String canFleetsRunInParallel();
     String noColor();
     String pleaseSelectARegatta();
     String addFleet();

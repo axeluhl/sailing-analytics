@@ -175,7 +175,7 @@ public class LeaderboardCourseChangeTest {
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
 
-        Series series = new SeriesImpl("TestSeries", false, fleets, new HashSet<String>(), trackedRegattaRegistry);
+        Series series = new SeriesImpl("TestSeries", false, true, fleets, new HashSet<String>(), trackedRegattaRegistry);
         return series;
     }
 

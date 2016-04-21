@@ -13,11 +13,13 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
     private String name;
     private Iterable<RaceRow> raceRows;
     private boolean isMedal;
-
-    public SeriesWithRowsImpl(String name, boolean isMedal, Iterable<RaceRow> raceRows) {
+    private boolean isFleetsCanRunInParallel;
+    
+    public SeriesWithRowsImpl(String name, boolean isMedal, boolean isFleetsCanRunInParallel, Iterable<RaceRow> raceRows) {
         this.name = name;
         this.raceRows = raceRows;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
     }
 
     @Override
@@ -60,8 +62,7 @@ public class SeriesWithRowsImpl implements SeriesWithRows {
     }
 
     @Override
-    public boolean isFleetsRunInParallel() {
-        // TODO This is a default implementation so far, allowing for parallel fleet races to not restrict generality. This shall become a configurable series property. See bug 3532
-        return true;
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
     }
 }
