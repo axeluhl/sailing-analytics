@@ -1545,4 +1545,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String createdAt();
     String logicalTimepoint();
     String info();
+    String windFixes();
 }
