@@ -3,9 +3,11 @@ package com.sap.sailing.racecommittee.app.services;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import android.annotation.TargetApi;
@@ -19,6 +21,8 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Pair;
 
@@ -74,7 +78,7 @@ public class RaceStateService extends Service {
     private Map<ManagedRace, RaceLogEventVisitor> registeredLogListeners;
     private Map<ManagedRace, RaceStateEventScheduler> registeredStateEventSchedulers;
 
-    private Map<Serializable, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
+    private Map<String, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
 
     private NotificationManager notificationManager;
     private NotificationCompat.Builder notificationBuilder;
@@ -104,7 +108,7 @@ public class RaceStateService extends Service {
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
         notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.ic_directions_boat)
+            .setSmallIcon(R.drawable.ic_boat_white_24dp)
             .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
             .setContentTitle(getText(R.string.service_info))
             .setContentText(getString(R.string.service_text_no_races))
@@ -146,10 +150,12 @@ public class RaceStateService extends Service {
         for (Entry<ManagedRace, RaceLogEventVisitor> entry : registeredLogListeners.entrySet()) {
             entry.getKey().getState().getRaceLog().removeListener(entry.getValue());
         }
+        registeredLogListeners.clear();
 
         for (Entry<ManagedRace, RaceStateEventScheduler> entry : registeredStateEventSchedulers.entrySet()) {
             entry.getKey().getState().setStateEventScheduler(null);
         }
+        registeredStateEventSchedulers.clear();
 
         for (List<Pair<PendingIntent, RaceStateEvents>> intents : managedIntents.values()) {
             for (Pair<PendingIntent,RaceStateEvents> intentPair : intents) {
@@ -161,17 +167,58 @@ public class RaceStateService extends Service {
         ExLog.i(this, TAG, "All races unregistered.");
     }
 
+    private void unregisterRace(ManagedRace race) {
+        poller.unregister(race);
+
+        race.getState().getRaceLog().removeAllListeners();
+        registeredLogListeners.remove(race);
+
+        race.getState().setStateEventScheduler(null);
+        registeredStateEventSchedulers.remove(race);
+
+        List<Pair<PendingIntent, RaceStateEvents>> intents = managedIntents.get(race.getId());
+        for (Pair<PendingIntent, RaceStateEvents> intentPair : intents) {
+            alarmManager.cancel(intentPair.first);
+        }
+        managedIntents.remove(race.getId());
+
+        ExLog.i(this, TAG, "Race " + race.getId() + " unregistered");
+    }
+
+    private void unregisterRace(@Nullable String raceId) {
+        ManagedRace raceToUnregister = null;
+        for (ManagedRace race: registeredStateEventSchedulers.keySet()) {
+            if (race.getId().equals(raceId)) {
+                raceToUnregister = race;
+            }
+        }
+
+        if (raceToUnregister != null) {
+            unregisterRace(raceToUnregister);
+        }
+    }
+
     private void handleStartCommand(Intent intent) {
         String action = intent.getAction();
         ExLog.i(this, TAG, String.format("Command action '%s' received.", action));
 
         if (AppConstants.INTENT_ACTION_CLEAR_RACES.equals(action)) {
-            handleClearRaces(intent);
+            handleClearRaces();
+            return;
+        }
+
+        if (AppConstants.INTENT_ACTION_CLEANUP_RACES.equals(action)) {
+            handleCleanupRaces();
             return;
         }
 
         if (AppConstants.INTENT_ACTION_REGISTER_RACE.equals(action)) {
             handleRegisterRace(intent);
+            return;
+        }
+
+        if (AppConstants.INTENT_ACTION_UNREGISTER_RACE.equals(action)) {
+            handleUnregisterRace(intent);
             return;
         }
 
@@ -196,7 +243,7 @@ public class RaceStateService extends Service {
         }
     }
 
-    private void handleClearRaces(Intent intent) {
+    private void handleClearRaces() {
         unregisterAllRaces();
         DataStore dataStore = dataManager.getDataStore();
         dataStore.getRaces().clear();
@@ -204,6 +251,46 @@ public class RaceStateService extends Service {
         dataStore.setCourseUUID(null);
         ExLog.i(this, TAG, "handleClearRaces: Cleared all races.");
         stopForeground(true);
+    }
+
+    private class RemoveRaceAction implements Runnable {
+
+        private final ManagedRace managedRace;
+
+        public RemoveRaceAction(@NonNull ManagedRace race) {
+            managedRace = race;
+        }
+
+        @Override
+        public void run() {
+            unregisterRace(managedRace);
+        }
+    }
+
+    private void handleCleanupRaces() {
+        Set<RemoveRaceAction> actions = new HashSet<>();
+        for (String raceId : managedIntents.keySet()) {
+            if (!inDataStore(raceId)) {
+                for (ManagedRace race : registeredLogListeners.keySet()) {
+                    if (race.getId().equals(raceId)) {
+                        actions.add(new RemoveRaceAction(race));
+                    }
+                }
+            }
+        }
+        for (RemoveRaceAction action : actions) {
+            action.run();
+        }
+        updateNotification();
+    }
+
+    private boolean inDataStore(String raceId) {
+        for (ManagedRace race : dataManager.getDataStore().getRaces()) {
+            if (race.getId().equals(raceId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void handleRegisterRace(Intent intent) {
@@ -214,6 +301,21 @@ public class RaceStateService extends Service {
         }
         registerRace(race);
 
+        updateNotification();
+    }
+
+    private void handleUnregisterRace(Intent intent) {
+        ManagedRace race = getRaceFromIntent(intent);
+        if (race == null) {
+            ExLog.w(this, TAG, "Intent did not carry valid race information");
+            return;
+        }
+        unregisterRace(race);
+
+        updateNotification();
+    }
+
+    private void updateNotification() {
         int numRaces = managedIntents.keySet().size();
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder
                 .setContentText(getString(R.string.service_text_num_races, numRaces))
@@ -249,12 +351,14 @@ public class RaceStateService extends Service {
             // ... and register for polling!
             poller.register(race);
 
-            this.registeredLogListeners.put(race, logListener);
-            this.registeredStateEventSchedulers.put(race, stateEventScheduler);
+            registeredLogListeners.put(race, logListener);
+            registeredStateEventSchedulers.put(race, stateEventScheduler);
 
             ExLog.i(this, TAG, "Race " + race.getId() + " registered.");
         } else {
-            ExLog.w(this, TAG, "Race " + race.getId() + " was already registered. Ignoring.");
+            ExLog.w(this, TAG, "Race " + race.getId() + " was already registered. Cleaning up.");
+            unregisterRace(race.getId());
+            registerRace(race);
         }
     }
 

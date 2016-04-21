@@ -288,7 +288,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    protected final MarkPassingCalculator markPassingCalculator;
+    protected transient MarkPassingCalculator markPassingCalculator;
+    private final boolean hasMarkPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
@@ -548,13 +549,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 public void raceAdded(TrackedRace trackedRace) {}
                 @Override
                 public void raceRemoved(TrackedRace trackedRace) {
+                    if (trackedRace == TrackedRaceImpl.this) {
                     // stop mark passing calculator when tracked race is removed:
                     markPassingCalculator.stop();
+                }
                 }
             });
         } else {
             markPassingCalculator = null;
         }
+        hasMarkPassingCalculator = useInternalMarkPassingAlgorithm;
         sensorTracks = new HashMap<>();
         sensorTracksLock = new NamedReentrantReadWriteLock("sensorTracksLock", true);
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
@@ -660,6 +664,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
         regattaLogAttachmentListeners = new HashSet<>();
+    }
+
+    /**
+     * After the object graph has entirely been re-constructed, create the mark passing calculator if
+     * the original object had one.
+     */
+    protected Object readResolve() {
+        if (hasMarkPassingCalculator) {
+            markPassingCalculator = createMarkPassingCalculator();
+        }
+        return this;
     }
 
     /**

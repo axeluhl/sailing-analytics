@@ -15,9 +15,6 @@ import com.sap.sse.common.Util;
  * @author Nicolas Klose
  */
 public interface CandidateFinder {
-
-    
-
     /**
      * @param fixes
      *            Either new fixes or fixes that may have changed their status, e.g. as a result of new mark
@@ -25,8 +22,6 @@ public interface CandidateFinder {
      * @return new {@link Candidate}s and those that should be removed.
      */
     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes);
-
-
 
     /**
      * When initializing or refreshing the calculator, the whole race until now is evaluated. For that purpose all of the
@@ -41,5 +36,4 @@ public interface CandidateFinder {
      *         mark fixes..
      */
     Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> newMarkFixes);
-
 }
