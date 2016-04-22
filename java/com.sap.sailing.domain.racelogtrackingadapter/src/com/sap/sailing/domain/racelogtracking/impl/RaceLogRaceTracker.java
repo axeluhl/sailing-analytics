@@ -102,6 +102,9 @@ import difflib.PatchFailedException;
  * 
  */
 public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSFix> {
+    
+    private static final Logger logger = Logger.getLogger(RaceLogRaceTracker.class.getName());
+    
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
     private final GPSFixStore gpsFixStore;
@@ -109,17 +112,29 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
     private final RaceLogResolver raceLogResolver;
     private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
 
-    private final ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
+    private final RaceLogMappingWrapper<Competitor> competitorMappings = new CompetitorRaceLogMappings();
+    
     private final ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
-
     private final Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
-    private final Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
 
     private DynamicTrackedRace trackedRace;
     private final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl(
             RaceLogRaceTracker.class.getName(), 0);
-
-    private static final Logger logger = Logger.getLogger(RaceLogRaceTracker.class.getName());
+    
+    private final FixReceivedListener<GPSFix> listener = new FixReceivedListener<GPSFix>() {
+        @Override
+        public void fixReceived(DeviceIdentifier device, GPSFix fix) {
+            competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
+                Competitor comp = mapping.getMappedTo();
+                if (fix instanceof GPSFixMoving) {
+                    trackedRace.recordFix(comp, (GPSFixMoving) fix);
+                } else {
+                    logger.log(Level.WARNING, String.format("Could not add fix for competitor (%s) in race (%s), as it"
+                            + " is no GPSFixMoving, meaning it is missing COG/SOG values", comp, params.getRaceLog()));
+                }
+            });
+        }
+    };
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
             GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
@@ -262,10 +277,6 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
         return params.getRaceLog().getId();
     }
 
-    private Map<Competitor, List<DeviceMapping<Competitor>>> getNewCompetitorMappings() throws DoesNotHaveRegattaLogException {
-        return new RegattaLogDeviceCompetitorMappingFinder(params.getRegattaLog()).analyze();
-    }
-
     private Map<Mark, List<DeviceMapping<Mark>>> getNewMarkMappings() throws DoesNotHaveRegattaLogException {
         return new RegattaLogDeviceMarkMappingFinder(params.getRegattaLog()).analyze();
     }
@@ -369,51 +380,12 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
     private void onDeviceCompetitorMappingEvent(RegattaLogDeviceCompetitorMappingEvent event) {
         if (trackedRace != null) {
             try {
-                updateCompetitorMappings(true);
+                competitorMappings.updateMappings(true);
             } catch (DoesNotHaveRegattaLogException e) {
                 logger.warning("Could not load update competitor mappings as RegattaLog couldn't be found");
             }
             gpsFixStore.addListener(this, event.getDevice());
         }
-    }
-
-    /**
-     * Adjusts the {@link #competitorMappings} map according to the competitor registrations for the race managed by
-     * this tracked, either from the regatta log or the race log. Then, the {@link TrackedRace}'s start and end of
-     * tracking time frame is {@link #updateStartAndEndOfTracking() updated} from the mapping intervals.
-     * 
-     * @param loadIfNotCovered
-     *            if <code>true</code>, the GPS fixes for the mappings will be loaded based on a comparison of the
-     *            previous mappings from {@link #competitorMappings} and the new mappings.
-     * 
-     * @throws DoesNotHaveRegattaLogException
-     */
-    private void updateCompetitorMappings(boolean loadIfNotCovered) throws DoesNotHaveRegattaLogException {
-        // TODO remove fixes, if mappings have been removed
-
-        // check if there are new time ranges not covered so far
-        Map<Competitor, List<DeviceMapping<Competitor>>> newMappings = getNewCompetitorMappings();
-
-        if (loadIfNotCovered) {
-            for (Competitor competitor : newMappings.keySet()) {
-                DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(competitor);
-                List<DeviceMapping<Competitor>> oldMappings = competitorMappings.get(competitor);
-
-                for (DeviceMapping<Competitor> newMapping : newMappings.get(competitor)) {
-                    if (!hasMappingAlreadyBeenLoaded(newMapping, oldMappings)) {
-                        try {
-                            gpsFixStore.loadCompetitorTrack(track, newMapping);
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load competitor track " + newMapping.getMappedTo());
-                        }
-                    }
-                }
-            }
-        }
-        competitorMappings.clear();
-        competitorMappings.putAll(newMappings);
-        competitorMappingsByDevices.clear();
-        competitorMappingsByDevices.putAll(transformToMappingsByDevice(competitorMappings));
     }
 
     private void onStartTrackingEvent(RaceLogStartTrackingEvent event) {
@@ -492,13 +464,13 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         try {
-            updateCompetitorMappings(false);
+            competitorMappings.updateMappings(false);
             updateMarkMappings(false);
         } catch (DoesNotHaveRegattaLogException e) {
             logger.warning("Could not load update mark and competitor mappings as RegattaLog couldn't be found");
         }
         // add listeners for devices in mappings already present
-        addListeners(competitorMappings);
+        competitorMappings.forEachDevice((device) -> gpsFixStore.addListener(listener, device));
         addListeners(markMappings);
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
@@ -545,22 +517,33 @@ public class RaceLogRaceTracker implements RaceTracker, FixReceivedListener<GPSF
                 }
             }
         }
-
-        if (competitorMappingsByDevices.get(device) != null) {
-            for (DeviceMapping<Competitor> mapping : competitorMappingsByDevices.get(device)) {
-                Competitor comp = mapping.getMappedTo();
-                if (mapping.getTimeRange().includes(timePoint)) {
-                    if (fix instanceof GPSFixMoving) {
-                        trackedRace.recordFix(comp, (GPSFixMoving) fix);
-                    } else {
-                        logger.log(
-                                Level.WARNING,
-                                String.format(
-                                        "Could not add fix for competitor (%s) in race (%s), as it is no GPSFixMoving, meaning it is missing COG/SOG values",
-                                        comp, params.getRaceLog()));
-                    }
-                }
+    }
+    
+    private class CompetitorRaceLogMappings extends RaceLogMappingWrapper<Competitor> {
+        @Override
+        protected Map<Competitor, List<DeviceMapping<Competitor>>> calculateMappings() throws DoesNotHaveRegattaLogException {
+            return new RegattaLogDeviceCompetitorMappingFinder(params.getRegattaLog()).analyze();
+        }
+        
+        @Override
+        protected void mappingAdded(DeviceMapping<Competitor> mapping) {
+            DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(mapping.getMappedTo());
+            try {
+                gpsFixStore.loadCompetitorTrack(track, mapping);
+            } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
             }
+        }
+
+        @Override
+        protected void mappingChanged(DeviceMapping<Competitor> oldMapping, DeviceMapping<Competitor> newMapping) {
+            // TODO can the new time range be bigger than the old one? In this case we would need to load the additional time range.
+        }
+        
+        @Override
+        protected void mappingRemoved(DeviceMapping<Competitor> mapping) {
+            // TODO if tracks are always associated to only one device mapping, we could remove tracks here
+            // TODO remove listener from store if there is no mapping left for the DeviceIdentifier
         }
     }
 }
