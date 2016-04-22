@@ -25,7 +25,10 @@ public class SeriesWithRowsDeserializer implements JsonDeserializer<SeriesWithRo
     public SeriesWithRows deserialize(JSONObject object) throws JsonDeserializationException {
         String name = object.get(SeriesWithRowsJsonSerializer.FIELD_NAME).toString();
         boolean isMedal = (Boolean) object.get(SeriesWithRowsJsonSerializer.FIELD_IS_MEDAL);
-        boolean isFleetsCanRunInParallel = (Boolean) object.get(SeriesWithRowsJsonSerializer.FIELD_FLEETS_CAN_RUN_IN_PARALLEL);
+        Boolean isFleetsCanRunInParallel = (Boolean) object.get(SeriesWithRowsJsonSerializer.FIELD_FLEETS_CAN_RUN_IN_PARALLEL);
+        if (isFleetsCanRunInParallel == null) {
+            isFleetsCanRunInParallel = true; // that's the default
+        }
 
         Collection<RaceRow> rows = new ArrayList<RaceRow>();
         for (Object fleetObject : Helpers.getNestedArraySafe(object, RaceRowsOfSeriesWithRowsSerializer.FIELD_FLEETS)) {
