@@ -65,39 +65,37 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
     
     protected abstract Map<ItemT, List<DeviceMapping<ItemT>>> calculateMappings();
 
-    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings() {
+    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = calculateMappings();
-        updateMappings(newMappings);
+        updateMappings(newMappings, loadIfNotCovered);
     }
     
-    private void updateMappings(Map<ItemT, List<DeviceMapping<ItemT>>> newMappings) {
+    private void updateMappings(Map<ItemT, List<DeviceMapping<ItemT>>> newMappings, boolean loadIfNotCovered) {
         // TODO lock
-        Set<ItemT> itemsToProcess = new HashSet<ItemT>(mappings.keySet());
-        itemsToProcess.addAll(newMappings.keySet());
-        for(ItemT item : itemsToProcess) {
-            if(!newMappings.containsKey(item)) {
-                for(DeviceMapping<ItemT> removedMapping : mappings.get(item)) {
-                    mappingRemoved(removedMapping);
-                }
-            } else {
-                final List<DeviceMapping<ItemT>> oldMappings = mappings.containsKey(item) ? mappings.get(item) : Collections.emptyList();
-                
-                for(DeviceMapping<ItemT> newMapping : newMappings.get(item)) {
-                    DeviceMapping<ItemT> oldMapping = findAndRemoveMapping(newMapping, oldMappings);
-                    if(oldMapping == null) {
-                        mappingAdded(newMapping);
-                    } else if(newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
-                        mappingChanged(oldMapping, newMapping);
+        if (loadIfNotCovered) {
+            Set<ItemT> itemsToProcess = new HashSet<ItemT>(mappings.keySet());
+            itemsToProcess.addAll(newMappings.keySet());
+            for(ItemT item : itemsToProcess) {
+                if(!newMappings.containsKey(item)) {
+                    mappings.get(item).forEach(this::mappingRemoved);
+                } else {
+                    final List<DeviceMapping<ItemT>> oldMappings = mappings.containsKey(item) ? mappings.get(item) : Collections.emptyList();
+                    
+                    for(DeviceMapping<ItemT> newMapping : newMappings.get(item)) {
+                        DeviceMapping<ItemT> oldMapping = findAndRemoveMapping(newMapping, oldMappings);
+                        if (oldMapping == null) {
+                            mappingAdded(newMapping);
+                        } else if (newMapping.getTimeRange().equals(oldMapping.getTimeRange())) {
+                            mappingChanged(oldMapping, newMapping);
+                        }
                     }
-                }
-                for(DeviceMapping<ItemT> removedMapping : oldMappings) {
-                    mappingRemoved(removedMapping);
+                    oldMappings.forEach(this::mappingRemoved);
                 }
             }
         }
-
+        
         mappings.clear();
         mappings.putAll(newMappings);
         mappingsByDevice.clear();

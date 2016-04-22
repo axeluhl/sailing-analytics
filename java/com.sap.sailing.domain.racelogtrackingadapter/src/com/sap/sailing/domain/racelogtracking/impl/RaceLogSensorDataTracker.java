@@ -222,9 +222,9 @@ public class RaceLogSensorDataTracker {
 
     private void updateMappingsAndAddListeners() {
         fixLoadingTask.loadFixesForLog(() -> {
-        competitorMappings.updateMappings();
-        // add listeners for devices in mappings already present
-        competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
+            competitorMappings.updateMappings(true);
+            // add listeners for devices in mappings already present
+            competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
         }, "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
     }
 
