@@ -243,10 +243,10 @@ public class DataMiningResource extends AbstractSailingServerResource {
     
     private Response sumManeuversPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
             HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
 
