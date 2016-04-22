@@ -75,7 +75,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private LastPublishedCourseDesignFinder createCourseDesignFinder(RaceLog raceLog) {
-        return new LastPublishedCourseDesignFinder(raceLog);
+        return new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false); // we also want by-name courses to forward, e.g., to TracTrac
     }
 
     private AbortingFlagFinder createAbortingFlagFinder(RaceLog raceLog) {

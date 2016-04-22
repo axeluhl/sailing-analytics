@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -133,11 +134,11 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         Regatta masterRegatta = setupRegatta(RegattaImpl.getDefaultName(regattaName, BOAT_CLASS_NAME_49er), seriesName, fleetName, BOAT_CLASS_NAME_49er);
         RaceLog masterLog = setupRaceColumn(masterRegatta, seriesName, raceColumnName, fleetName);
-        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         masterLog.add(raceLogEvent);
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(seriesName, fleetName, raceColumnName, masterRegatta);
-        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
@@ -162,11 +163,11 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
         final String raceColumnName = "R1";
         FlexibleLeaderboard masterLeaderboard = setupFlexibleLeaderboard(leaderboardName);
         RaceLog masterLog = setupRaceColumn(leaderboardName, fleetName, raceColumnName);
-        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        raceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         masterLog.add(raceLogEvent);
         replicaReplicator.startToReplicateFrom(masterDescriptor);
         RaceLog replicaLog = getReplicaLog(fleetName, raceColumnName, masterLeaderboard);
-        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData());
+        anotherRaceLogEvent = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(), author, 43, createCourseData(), CourseDesignerMode.ADMIN_CONSOLE);
         addAndValidateEventIds(masterLog, replicaLog, anotherRaceLogEvent);
         compareReplicatedCourseDesignEvent(replicaLog, (RaceLogCourseDesignChangedEvent) anotherRaceLogEvent);
     }
