@@ -284,7 +284,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     public void onResult(List<ManagedRace> filteredRaces) {
         synchronized (mLockObject) {
             mShownViewItems.clear();
-            mShownViewItems.addAll(getShownViewItems(filteredRaces));
+            if (filteredRaces != null) {
+                mShownViewItems.addAll(getShownViewItems(filteredRaces));
+            }
             notifyDataSetChanged();
         }
     }
