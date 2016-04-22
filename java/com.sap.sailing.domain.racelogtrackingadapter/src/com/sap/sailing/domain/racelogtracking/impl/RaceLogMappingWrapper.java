@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.tracking.DynamicTrack;
@@ -63,9 +64,21 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
         }
     }
     
-    protected abstract Map<ItemT, List<DeviceMapping<ItemT>>> calculateMappings();
+    protected abstract Map<ItemT, List<DeviceMapping<ItemT>>> calculateMappings() throws DoesNotHaveRegattaLogException;
 
-    <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
+    /**
+     * Adjusts the {@link #mappings} map according to the device mappings provided from the {@link #calculateMappings()}
+     * method. Afterwards, the start end end of tracking is {@link #updateStartAndEndOfTracking() updated} from the
+     * mapping intervals.
+     * 
+     * @param loadIfNotCovered
+     *            if <code>true</code>, the fixes for the mappings will be loaded based on a comparison of the previous
+     *            mappings and the new mappings.
+     * 
+     * @throws DoesNotHaveRegattaLogException
+     */
+    final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered)
+            throws DoesNotHaveRegattaLogException {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMapping<ItemT>>> newMappings = calculateMappings();
