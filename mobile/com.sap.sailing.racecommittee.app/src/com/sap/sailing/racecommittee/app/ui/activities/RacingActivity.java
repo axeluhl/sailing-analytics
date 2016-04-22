@@ -596,7 +596,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                     transaction.remove(extra);
                                 }
                             }
-                            if (findViewById(R.id.race_content) != null) {
+                            if (findViewById(R.id.race_content) != null && mSelectedRace != null) {
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {

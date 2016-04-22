@@ -144,6 +144,7 @@ import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -5229,10 +5230,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
-        if(!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
-            courseName += "- " + fleetName; 
+        if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
+            courseName += " - " + fleetName; 
         }
-        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false).analyze();
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl(courseName);
         }
@@ -5250,7 +5251,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), raceLog.getCurrentPassId(), course);
+                getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
     }
     
@@ -5299,7 +5300,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RaceCourseDTO getLastCourseDefinitionInRaceLog(final String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        // only look for course definitions that really define waypoints; ignore by-name course updates
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl("");
         }
@@ -6056,7 +6058,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 if (raceLog != raceLogToIgnore) {
-                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
+                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true);
                     CourseBase course = finder.analyze();
                     if (course != null) {
                         for (Waypoint waypoint : course.getWaypoints()) {
