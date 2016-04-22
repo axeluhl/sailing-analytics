@@ -81,10 +81,10 @@ public class RaceLogSensorDataTracker {
             competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
                 SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper =
                         sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
-                        DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
-                        if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
-                            mapper.addFix(track, fix);
-                        }
+                DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
+                if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
+                    mapper.addFix(track, fix);
+                }
             });
         }
     };
@@ -204,13 +204,11 @@ public class RaceLogSensorDataTracker {
                 getEndOfTracking() == null ? TimePoint.EndOfTime : getEndOfTracking());
     }
 
-
     private void startTracking() {
         trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
             trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
         }
-        
         trackedRace.addListener(trackingTimesRaceChangeListener);
         updateMappingsAndAddListeners();
     }
@@ -222,7 +220,11 @@ public class RaceLogSensorDataTracker {
 
     private void updateMappingsAndAddListeners() {
         fixLoadingTask.loadFixesForLog(() -> {
-            competitorMappings.updateMappings(true);
+            try {
+                competitorMappings.updateMappings(true);
+            } catch (Exception e) {
+                logger.warning("Could not load update competitor mappings as RegattaLog couldn't be found");;
+            }
             // add listeners for devices in mappings already present
             competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
         }, "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
