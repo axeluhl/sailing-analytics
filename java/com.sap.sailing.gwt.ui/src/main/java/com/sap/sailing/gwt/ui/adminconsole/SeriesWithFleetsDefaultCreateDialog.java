@@ -32,6 +32,7 @@ public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateD
         super(Collections.<SeriesDTO> emptyList(), stringMessages, defaultSeries.getDiscardThresholds(), callback);
         nameEntryField.setText(defaultSeries.getName()); // Otherwise an errorMessage will pop up
         isMedalSeriesCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
+        fleetsCanRunInParallelCheckbox.setValue(defaultSeries.isFleetsCanRunInParallel());
         startsWithZeroScoreCheckbox.setValue(defaultSeries.isStartsWithZeroScore());
         hasSplitFleetContiguousScoringCheckbox.setValue(defaultSeries.hasSplitFleetContiguousScoring());
         firstColumnIsNonDiscardableCarryForwardCheckbox.setValue(defaultSeries.isFirstColumnIsNonDiscardableCarryForward());
