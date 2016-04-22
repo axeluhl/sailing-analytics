@@ -44,6 +44,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -314,7 +315,14 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
                 @Override
                 public int compare(RaceListDataTypeRace lhs, RaceListDataTypeRace rhs) {
-                    return c.compare(lhs.getRace(), rhs.getRace());
+                    final int result;
+                    if (lhs != null && rhs != null) {
+                        result = c.compare(lhs.getRace(), rhs.getRace());
+                    } else {
+                        Log.e(TAG, "Internal error; found null for NavDrawer item while sorting");
+                        result = 0;
+                    }
+                    return result;
                 }
             });
             for (final RaceListDataTypeRace raceItem : raceItems) {
@@ -334,7 +342,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 raceItemsInSeries = new ArrayList<>();
                 raceItemsByHeader.put(seriesHeader, raceItemsInSeries);
             }
-            raceItemsInSeries.add(viewItemsRaces.get(race));
+            final RaceListDataTypeRace viewItemForRace = viewItemsRaces.get(race);
+            if (viewItemForRace != null) {
+                raceItemsInSeries.add(viewItemForRace);
+            } else {
+                Log.w(TAG, "A view item for race "+race+" provided by the filter could not be found");
+            }
         }
         return raceItemsByHeader;
     }
@@ -525,7 +538,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     public void onRacesChanged() {
-        createViewItemsForRacesAndSeries();
-        getFilter().refreshRegattaStructures();
+        synchronized (mLockObject) {
+            createViewItemsForRacesAndSeries();
+            getFilter().refreshRegattaStructures();
+        }
     }
 }
