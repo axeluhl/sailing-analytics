@@ -103,12 +103,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         factor_format = new DecimalFormat(context.getString(R.string.race_factor_format));
     }
 
-    @Override
-    public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
-        getFilter().refreshRegattaStructures();
-    }
-
     private void createViewItemsForRacesAndSeries() {
         viewItemsRaces.clear();
         viewItemsSeriesHeaders.clear();
@@ -532,5 +526,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     public void onRacesChanged() {
         createViewItemsForRacesAndSeries();
+        getFilter().refreshRegattaStructures();
     }
 }

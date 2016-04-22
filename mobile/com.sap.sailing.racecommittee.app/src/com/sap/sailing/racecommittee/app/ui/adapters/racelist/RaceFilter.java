@@ -1,6 +1,7 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -75,7 +76,7 @@ public class RaceFilter extends Filter {
     }
 
     public void refreshRegattaStructures() {
-        this.currentRaceFilter = new CurrentRaceFilterImpl<ManagedRace>(allRaces);
+        this.currentRaceFilter = new CurrentRaceFilterImpl<ManagedRace>(new HashSet<>(allRaces));
         filter("");
     }
 
