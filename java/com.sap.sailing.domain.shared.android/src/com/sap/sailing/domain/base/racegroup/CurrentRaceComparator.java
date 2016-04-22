@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.racegroup;
 import java.util.Comparator;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.common.util.NaturalComparator;
 
 /**
  * When current races of a regatta are to be displayed to a user, a reasonable ordering is key to usability. This
@@ -17,15 +18,20 @@ import com.sap.sse.common.Util;
  *
  */
 public class CurrentRaceComparator implements Comparator<FilterableRace> {
+    private final NaturalComparator naturalComparator = new NaturalComparator();
+    
     @Override
     public int compare(FilterableRace o1, FilterableRace o2) {
         int result = getRaceGroupDisplayName(o1).compareTo(getRaceGroupDisplayName(o2));
         if (result == 0) {
             result = o1.getZeroBasedSeriesIndex() - o2.getZeroBasedSeriesIndex();
             if (result == 0) {
-                result = o1.getZeroBasedIndexInFleet() - o2.getZeroBasedIndexInFleet();
+                result = Util.indexOf(o1.getSeries().getFleets(), o1.getFleet()) - Util.indexOf(o2.getSeries().getFleets(), o2.getFleet());
                 if (result == 0) {
-                    result = Util.indexOf(o1.getSeries().getFleets(), o1.getFleet()) - Util.indexOf(o2.getSeries().getFleets(), o2.getFleet());
+                    result = o1.getZeroBasedIndexInFleet() - o2.getZeroBasedIndexInFleet();
+                    if (result == 0) {
+                        result = naturalComparator.compare(o1.getRaceColumnName(), o2.getRaceColumnName());
+                    }
                 }
             }
         }
