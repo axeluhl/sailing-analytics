@@ -72,6 +72,8 @@ public class LoginActivity extends BaseActivity
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
+    private boolean wakeUp;
+
     private final static String TAG = LoginActivity.class.getName();
 
     private final PositionListFragment positionFragment;
@@ -82,7 +84,7 @@ public class LoginActivity extends BaseActivity
 
     // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
-    private String courseName = null;
+    private String courseAreaName = null;
     private String positionName = null;
 
     private Serializable mSelectedEventId;
@@ -147,7 +149,7 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
                     login();
                 }
             });
@@ -197,19 +199,19 @@ public class LoginActivity extends BaseActivity
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        courseName = courseArea.getName();
+        courseAreaName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getAreaContainer().setHeaderText(courseName);
+        loginListViews.getCourseAreaContainer().setHeaderText(courseAreaName);
     }
 
     private boolean isCourseAreaSelected() {
-        return (courseName != null && mSelectedCourseAreaUUID != null);
+        return (courseAreaName != null && mSelectedCourseAreaUUID != null);
     }
 
     private void resetCourseArea() {
-        courseName = null;
+        courseAreaName = null;
         mSelectedCourseAreaUUID = null;
-        loginListViews.getAreaContainer().setHeaderText("");
+        loginListViews.getCourseAreaContainer().setHeaderText("");
         resetPosition();
     }
 
@@ -366,11 +368,6 @@ public class LoginActivity extends BaseActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
         BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-//        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-//            resetData();
-//        } else {
-//            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
-//        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -379,12 +376,12 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -429,8 +426,8 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!AppPreferences.on(this).isOfflineMode()) {
-            // always reload the configuration...
+        if (!preferences.isOfflineMode() && preferences.needConfigRefresh()) {
+            // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
@@ -537,11 +534,12 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
                 resetData();
             }
+            wakeUp = false;
         }
     }
 
@@ -567,7 +565,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override

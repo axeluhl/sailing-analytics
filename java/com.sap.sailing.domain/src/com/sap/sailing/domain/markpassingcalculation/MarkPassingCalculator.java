@@ -34,7 +34,7 @@ import com.sap.sse.util.impl.ThreadFactoryWithPriority;
  * Calculates the {@link MarkPassing}s for a {@link DynamicTrackedRace} using an {@link CandidateFinder} and an
  * {@link CandidateChooser}. The finder evaluates the fixes and finds possible MarkPassings as {@link Candidate}s . The
  * chooser than finds the most likely sequence of {@link Candidate}s and updates the race with new {@link MarkPassing}s
- * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean)} this
+ * for this sequence. Upon calling the constructor {@link #MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} this
  * happens for the current state of the race. In addition, for live races, the <code>listen</code> parameter of the
  * constructor should be true. Then a {@link MarkPassingUpdateListener} is initialized which puts new fixes into a queue
  * as {@link StorePositionUpdateStrategy}. A new thread will also be started to evaluate the new fixes (See
@@ -58,7 +58,7 @@ public class MarkPassingCalculator {
 
     private boolean suspended = false;
 
-    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen) {
+    public MarkPassingCalculator(DynamicTrackedRace race, boolean listen, boolean waitForInitialMarkPassingCalculation) {
         if (listen) {
             listener = new MarkPassingUpdateListener(race);
         } else {
@@ -67,14 +67,21 @@ public class MarkPassingCalculator {
         this.race = race;
         finder = new CandidateFinderImpl(race);
         chooser = new CandidateChooserImpl(race);
-        for (Competitor c : race.getRace().getCompetitors()) {
-            Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
-            chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
-        }
-        if (listen) {
-            final Thread listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
-            listenerThread.setDaemon(true);
-            listenerThread.start();
+        Thread t = new Thread(() -> {
+            for (Competitor c : race.getRace().getCompetitors()) {
+                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+                chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+            }
+            if (listen) {
+                final Thread listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
+                listenerThread.setDaemon(true);
+                listenerThread.start();
+            }
+        }, "MarkPassingCalculator for race "+race.getRace().getName()+" initialization");
+        if (waitForInitialMarkPassingCalculation) {
+            t.run();
+        } else {
+            t.start();
         }
     }
 
@@ -124,13 +131,14 @@ public class MarkPassingCalculator {
                             if (listener.isEndMarker(fixInsertion)) {
                                 logger.info("Stopping "+MarkPassingCalculator.this+"'s listener for race "+raceName);
                                 finished = true;
+                                break;
                             } else {
                                 fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
                                         smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
                                         suppressedMarkPassings, unsuppressedMarkPassings);
                             }
                         }
-                        if (!suspended) {
+                        if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex != null) {
                                 Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
                                         .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex);
@@ -156,7 +164,7 @@ public class MarkPassingCalculator {
                             unsuppressedMarkPassings.clear();
                         }
                     } catch (Exception e) {
-                        logger.severe("Error while calculating markpassings for race "+raceName+": " + e.getMessage());
+                        logger.log(Level.SEVERE, "Error while calculating markpassings for race "+raceName+": " + e.getMessage(), e);
                     }
                 }
             } finally {

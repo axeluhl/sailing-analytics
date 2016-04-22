@@ -179,4 +179,8 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
     public static String getTracTracPassword() {
         return "tracTest";
     }
+    
+    protected void addReceiverToStopDuringTearDown(Receiver receiver) {
+        receivers.add(receiver);
+    }
 }

@@ -71,8 +71,14 @@ public abstract class AbstractSuggestBoxFilter<T, C> extends AbstractTextInputFi
         
         @Override
         public void requestSuggestions(Request request, Callback callback) {
-            Iterable<String> queryTokens = Collections.singleton(request.getQuery().trim());
-            setSuggestions(request, callback, suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList), queryTokens);
+            String normalizedQuery = request.getQuery().trim();
+            if (normalizedQuery == null || normalizedQuery.isEmpty()) {
+                requestDefaultSuggestions(request, callback);
+            } else {
+                Iterable<String> queryTokens = Collections.singleton(normalizedQuery);
+                Iterable<C> filteredList = suggestionMatchingFilter.applyFilter(queryTokens, suggestionObjectList);
+                setSuggestions(request, callback, filteredList, queryTokens);
+            }
         }
         
         private void setSuggestions(Request request, Callback callback, Iterable<C> suggestionObjects, Iterable<String> queryTokens) {

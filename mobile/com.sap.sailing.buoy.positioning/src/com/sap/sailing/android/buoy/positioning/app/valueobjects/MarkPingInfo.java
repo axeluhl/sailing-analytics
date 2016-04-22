@@ -1,49 +1,38 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-public class MarkPingInfo {
-    private String markId;
-    private String longitude;
-    private String latitude;
-    private double accuracy;
-    private int timestamp;
+import java.io.Serializable;
 
-    public String getMarkId() {
+import com.sap.sailing.domain.common.tracking.GPSFix;
+
+public class MarkPingInfo {
+    private final Serializable markId;
+    private final GPSFix gpsFix;
+    private final double accuracy;
+
+    public MarkPingInfo(Serializable markId, GPSFix gpsFix, double accuracy) {
+        super();
+        this.markId = markId;
+        this.gpsFix = gpsFix;
+        this.accuracy = accuracy;
+    }
+
+    public Serializable getMarkId() {
         return markId;
     }
 
-    public void setMarkId(String markId) {
-        this.markId = markId;
-    }
-
     public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+        return "" + gpsFix.getPosition().getLngDeg();
     }
 
     public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
+        return "" + gpsFix.getPosition().getLatDeg();
     }
 
     public double getAccuracy() {
         return accuracy;
     }
 
-    public void setAccuracy(double accuracy) {
-        this.accuracy = accuracy;
-    }
-
-    public int getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(int timestamp) {
-        this.timestamp = timestamp;
+    public long getTimestamp() {
+        return gpsFix.getTimePoint().asMillis();
     }
 }

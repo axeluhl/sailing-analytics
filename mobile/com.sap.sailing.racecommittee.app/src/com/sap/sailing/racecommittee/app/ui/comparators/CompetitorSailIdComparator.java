@@ -15,6 +15,16 @@ public class CompetitorSailIdComparator implements Comparator<Competitor> {
 
     @Override
     public int compare(Competitor left, Competitor right) {
+        // if left is null, right will be greater
+        if (left == null || left.getBoat() == null || left.getBoat().getSailID() == null) {
+            return -1;
+        }
+
+        // if right is null, left will be greater
+        if (right == null || right.getBoat() == null || right.getBoat().getSailID() == null) {
+            return 1;
+        }
+
         return comparator.compare(left.getBoat().getSailID(), right.getBoat().getSailID());
     }
 }
