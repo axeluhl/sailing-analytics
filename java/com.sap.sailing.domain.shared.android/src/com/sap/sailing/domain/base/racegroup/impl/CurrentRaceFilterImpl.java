@@ -41,11 +41,10 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
     private final Map<RaceGroupSeriesFleetRaceColumn, T> racesByRaceGroupSeriesFleet;
 
     /**
-     * Constructs a filter that can determine "current races" from a set of races representing all races of
-     * a set of regattas / race groups. A copy of {@code allRaces} is constructed here, so later outside modifications
-     * to {@code allRaces} will not have any effect on this filter. Clients need to construct a new instance
-     * if the set of all races has changed.
-     * @param allRaces
+     * Constructs a filter that can determine "current races" from a set of races representing all races of a set of
+     * regattas / race groups. A copy of {@code allRaces} is constructed here, so later outside modifications to
+     * {@code allRaces} will not have any effect on this filter. Clients need to construct a new instance if the set of
+     * all races has changed.
      */
     public CurrentRaceFilterImpl(Iterable<T> allRaces) {
         final Collection<T> copyOfAllRaces = new HashSet<>();

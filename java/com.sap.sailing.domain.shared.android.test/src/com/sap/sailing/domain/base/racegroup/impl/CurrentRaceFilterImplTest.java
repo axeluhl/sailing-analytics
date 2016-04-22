@@ -190,7 +190,6 @@ public class CurrentRaceFilterImplTest {
 
     @Test
     public void testSchedulingAllIsafQualificationRacesButOne() {
-        // with all races unscheduled we can expect the first race of each regatta's first series to show
         for (int i=1; i<=4; i++) {
             get(isaf, "Q"+i, "Yellow").setStatus(RaceLogRaceStatus.FINISHED);
             get(isaf, "Q"+i, "Blue").setStatus(RaceLogRaceStatus.FINISHED);
@@ -203,6 +202,21 @@ public class CurrentRaceFilterImplTest {
         assertTrue(currentIsafRaces.contains(get(isaf, "Q5", "Blue")));   // it's scheduled
         assertTrue(currentIsafRaces.contains(get(isaf, "F6", "Gold")));   // Q5/Blue is a scheduled immediate predecessor
         assertTrue(currentIsafRaces.contains(get(isaf, "F6", "Silver")));   // Q5/Blue is a scheduled immediate predecessor
+    }
+
+    @Test
+    public void testFinishingAllIsafQualificationAndFinalRaces() {
+        // the medal race shall be the only one remaining
+        for (int i=1; i<=5; i++) {
+            get(isaf, "Q"+i, "Yellow").setStatus(RaceLogRaceStatus.FINISHED);
+            get(isaf, "Q"+i, "Blue").setStatus(RaceLogRaceStatus.FINISHED);
+            get(isaf, "F"+(i+5), "Gold").setStatus(RaceLogRaceStatus.FINISHED);
+            get(isaf, "F"+(i+5), "Silver").setStatus(RaceLogRaceStatus.FINISHED);
+        }
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> currentIsafRaces = currentRaces.stream().filter(r->r.getRaceGroup() == isaf).collect(Collectors.toSet());
+        assertEquals(1, currentIsafRaces.size());
+        assertTrue(currentIsafRaces.contains(get(isaf, "M1", "Medal")));
     }
 
     @Test
