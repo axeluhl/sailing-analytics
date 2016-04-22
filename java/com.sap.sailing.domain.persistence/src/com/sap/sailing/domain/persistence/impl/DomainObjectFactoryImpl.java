@@ -1191,7 +1191,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         // isFleetCanRunInParallel is a new field -> set to true when it does not exist in older db versions
         boolean isFleetsCanRunInParallel = true;
         Object isFleetCanRunInParallelObject = dbSeries.get(FieldNames.SERIES_IS_FLEETS_CAN_RUN_IN_PARALLEL.name());
-        if(isFleetCanRunInParallelObject != null) {
+        if (isFleetCanRunInParallelObject != null) {
             isFleetsCanRunInParallel = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_CAN_RUN_IN_PARALLEL.name());
         }
         Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
