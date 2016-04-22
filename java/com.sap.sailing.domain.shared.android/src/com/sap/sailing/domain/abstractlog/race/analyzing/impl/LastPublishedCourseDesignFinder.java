@@ -38,7 +38,7 @@ public class LastPublishedCourseDesignFinder extends RaceLogAnalyzer<CourseBase>
         for (RaceLogEvent event : getAllEventsDescending()) {
             if (event instanceof RaceLogCourseDesignChangedEvent) {
                 RaceLogCourseDesignChangedEvent courseDesignEvent = (RaceLogCourseDesignChangedEvent) event;
-                if (!onlyCoursesWithValidWaypointList || (courseDesignEvent.getCourseDesignerMode() != null &&
+                if (!onlyCoursesWithValidWaypointList || (courseDesignEvent.getCourseDesignerMode() == null ||
                         courseDesignEvent.getCourseDesignerMode().isWaypointSequenceValid())) {
                     return courseDesignEvent.getCourseDesign();
                 }
