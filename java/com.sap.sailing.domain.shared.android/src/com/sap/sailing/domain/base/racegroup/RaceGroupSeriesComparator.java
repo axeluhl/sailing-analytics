@@ -17,9 +17,12 @@ import java.util.Comparator;
 public class RaceGroupSeriesComparator implements Comparator<RaceGroupSeries> {
     @Override
     public int compare(RaceGroupSeries o1, RaceGroupSeries o2) {
-        int result = o1.getSeriesOrder() - o2.getSeriesOrder();
+        int result = o1.getRaceGroup().getDisplayName().compareTo(o2.getRaceGroup().getDisplayName());
         if (result == 0) {
-            result = o1.getDisplayName().compareTo(o2.getDisplayName());
+            result = o1.getSeriesOrder() - o2.getSeriesOrder();
+            if (result == 0) {
+                result = o1.getDisplayName().compareTo(o2.getDisplayName());
+            }
         }
         return result;
     }
