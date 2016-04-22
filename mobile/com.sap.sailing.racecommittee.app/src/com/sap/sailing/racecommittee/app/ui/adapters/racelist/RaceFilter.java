@@ -76,7 +76,7 @@ public class RaceFilter extends Filter {
     }
 
     public void refreshRegattaStructures() {
-        this.currentRaceFilter = new CurrentRaceFilterImpl<ManagedRace>(new HashSet<>(allRaces));
+        this.currentRaceFilter = new CurrentRaceFilterImpl<ManagedRace>(allRaces);
         filter("");
     }
 

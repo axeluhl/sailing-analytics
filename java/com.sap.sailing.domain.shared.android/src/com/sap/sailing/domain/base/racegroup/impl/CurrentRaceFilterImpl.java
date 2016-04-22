@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.racegroup.impl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,8 +40,17 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
     private final Iterable<T> allRaces;
     private final Map<RaceGroupSeriesFleetRaceColumn, T> racesByRaceGroupSeriesFleet;
 
+    /**
+     * Constructs a filter that can determine "current races" from a set of races representing all races of
+     * a set of regattas / race groups. A copy of {@code allRaces} is constructed here, so later outside modifications
+     * to {@code allRaces} will not have any effect on this filter. Clients need to construct a new instance
+     * if the set of all races has changed.
+     * @param allRaces
+     */
     public CurrentRaceFilterImpl(Iterable<T> allRaces) {
-        this.allRaces = allRaces;
+        final Collection<T> copyOfAllRaces = new HashSet<>();
+        Util.addAll(allRaces, copyOfAllRaces);
+        this.allRaces = copyOfAllRaces;
         this.racesByRaceGroupSeriesFleet = new HashMap<>();
         for (final T race : allRaces) {
             racesByRaceGroupSeriesFleet.put(new RaceGroupSeriesFleetRaceColumn(race), race);
