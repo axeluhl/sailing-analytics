@@ -409,10 +409,11 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         mAllRaces.clear();
         Util.addAll(races, mAllRaces);
         registerOnAllRaces();
-        // prepare views and do initial filtering
-        filterChanged();
+        // prepare views and do initial filtering; update the adapter first, so it can create the new
+        // view items for the new races; then trigger the filter
         mAdapter.onRacesChanged();
         mAdapter.notifyDataSetChanged();
+        filterChanged();
     }
 
     public void openDrawer() {

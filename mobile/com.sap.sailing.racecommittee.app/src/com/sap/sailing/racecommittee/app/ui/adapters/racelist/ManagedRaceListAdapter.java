@@ -346,7 +346,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (viewItemForRace != null) {
                 raceItemsInSeries.add(viewItemForRace);
             } else {
-                Log.w(TAG, "A view item for race "+race+" provided by the filter could not be found");
+                Log.w(TAG, "A view item for race "+race+" provided by the filter could not be found", new RuntimeException("Here is where it happened"));
             }
         }
         return raceItemsByHeader;
