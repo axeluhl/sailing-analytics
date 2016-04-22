@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -1059,7 +1060,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor-LegType")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE)
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1074,7 +1075,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor-LegType")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE)
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1094,7 +1095,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/SumDistance_Per_Competitor-LegType")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1109,7 +1110,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/SumDistance_Per_Competitor-LegType")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1129,7 +1130,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/SumManeuvers_Per_Competitor")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1144,7 +1145,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/SumManeuvers_Per_Competitor")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1164,7 +1165,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1179,7 +1180,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
     public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1199,7 +1200,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/SumDistance_Per_Competitor")
+    @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1214,7 +1215,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/SumDistance_Per_Competitor")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
     public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         

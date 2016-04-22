@@ -135,13 +135,14 @@ public class SailingPredefinedQueries {
         retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), "Leaderboard Group"), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), "Leaderboard"), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), "Race"), null));
-        retrieverLevels.add(new DataRetrieverLevelDTO(3, RaceOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasRaceOfCompetitorContext.class.getName(), "Competitor"), null));
-        retrieverLevels.add(new DataRetrieverLevelDTO(4, GPSFixRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasGPSFixContext.class.getName(), "GPS-Fix"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), "Leg"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(4, TrackedLegOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegOfCompetitorContext.class.getName(), "Leg of competitor"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(5, GPSFixRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasGPSFixContext.class.getName(), "GPS-Fix"), null));
         DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("", RacingEventService.class.getName(), retrieverLevels);
 
         ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("default", statistic, aggregator, retrieverChain);
 
-        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getTeam().getName()", HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getTrackedLegOfCompetitorContext().getCompetitor().getTeam().getName()", HasGPSFixContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
         
         return queryDefinition;
@@ -155,12 +156,13 @@ public class SailingPredefinedQueries {
         retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), "Leaderboard Group"), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), "Leaderboard"), null));
         retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), "Race"), null));
-        retrieverLevels.add(new DataRetrieverLevelDTO(3, RaceOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasRaceOfCompetitorContext.class.getName(), "Competitor"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), "Leg"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(4, TrackedLegOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegOfCompetitorContext.class.getName(), "Leg of competitor"), null));
         DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("", RacingEventService.class.getName(), retrieverLevels);
 
         ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("default", statistic, aggregator, retrieverChain);
 
-        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getTeam().getName()", HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getTeam().getName()", HasTrackedLegOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
         
         return queryDefinition;

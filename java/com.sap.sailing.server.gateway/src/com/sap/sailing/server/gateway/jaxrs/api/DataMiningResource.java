@@ -132,152 +132,137 @@ public class DataMiningResource extends AbstractSailingServerResource {
         String json = predefinedQueryNames.toJSONString();
         return Response.ok(json, MediaType.APPLICATION_JSON).build();
     }
-    
+
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO, regattaName, null, null, "kn", 2);
-        }
-        return response;
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE, regattaName);
     }
 
     public Response avgSpeedPerCompetitor(String regattaName) {
-        String json = "{}";
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR, regattaName);
     }
-    
+
     public Response avgSpeedPerCompetitorAndLegType(String regattaName, String raceName) {
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE, regattaName, raceName);
+    }
+
+    public Response avgSpeedPerCompetitor(String regattaName, String raceName) {
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR, regattaName, raceName);
+    }
+
+    private Response avgSpeedPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return avgSpeedPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+
+    private Response avgSpeedPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+
+            if(raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
+            
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
             response = runQuery(queryDefinitionDTO, regattaName, raceName, null, "kn", 2);
         }
         return response;
     }
 
-    public Response avgSpeedPerCompetitor(String regattaName, String raceName) {
-        String json = "{}";
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-    }
-    
-    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO, regattaName, null, distanceMetersExtractor, "m", 2);
-        }
-        return response;
+    public Response sumDistanceTraveledPerCompetitor(String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, regattaName);
     }
 
-    public Response sumDistanceTraveledPerCompetitor(String regattaName) {
-        String json = "{}";
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, regattaName);
+    }
+    
+    public Response sumDistanceTraveledPerCompetitor(String regattaName, String raceName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, regattaName, raceName);
     }
 
     public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName, String raceName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, regattaName, raceName);
+    }
+
+    private Response sumDistanceTraveledPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+    
+    private Response sumDistanceTraveledPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+
+            if(raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
+            
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
             response = runQuery(queryDefinitionDTO, regattaName, raceName, distanceMetersExtractor, "m", 2);
         }
         return response;
     }
 
-    public Response sumDistanceTraveledPerCompetitor(String regattaName, String raceName) {
-        String json = "{}";
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
-    }
-
     public Response sumManeuversPerCompetitor(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO, regattaName, null, null, null, 0);
-        }
-        return response;
+        return sumManeuversPerCompetitorQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR, regattaName);
     }
 
     public Response sumManeuversPerCompetitor(String regattaName, String raceName) {
+        return sumManeuversPerCompetitorQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR, regattaName, raceName);
+    }
+
+    private Response sumManeuversPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return sumManeuversPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+    
+    private Response sumManeuversPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
         ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         
         if (queryDefinitionDTO == null) {
             response = getBadIdentifierErrorResponse(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
+
+            if (raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
             
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);            
             response = runQuery(queryDefinitionDTO, regattaName, raceName, null, null, 0);
         }
         return response;
@@ -350,7 +335,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
     }
 
     private JSONArray groupKeyToJSON(GroupKey groupKey) throws NotJsonSerializableException {
-        // TODO Convert the concrete key values and not just the string represantation
+        // TODO Convert the concrete key values and not just the string representation
         JSONArray jsonResultEntryGroupKeys = new JSONArray();
         if (groupKey instanceof GenericGroupKey<?>) {
             jsonResultEntryGroupKeys.add(simpleGroupKeyToJSON(groupKey));
