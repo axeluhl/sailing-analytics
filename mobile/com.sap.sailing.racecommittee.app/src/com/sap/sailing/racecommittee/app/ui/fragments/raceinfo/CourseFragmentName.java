@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.checked.CheckedItem;
@@ -93,7 +94,7 @@ public class CourseFragmentName extends CourseFragment {
 
     public void handleSelection(String course) {
         CourseBase courseLayout = new CourseDataImpl(course);
-        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseLayout, CourseDesignerMode.BY_NAME);
 
         if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
             openMainScheduleFragment();

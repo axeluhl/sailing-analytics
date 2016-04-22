@@ -53,6 +53,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -387,7 +388,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogCourseDesignChangedEvent() {
         CourseBase course = createCourseBase();
-        RaceLogCourseDesignChangedEvent event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, course);
+        RaceLogCourseDesignChangedEvent event = new RaceLogCourseDesignChangedEventImpl(now, author, 0, course, CourseDesignerMode.ADMIN_CONSOLE);
 
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
 
