@@ -26,11 +26,11 @@ public class CurrentRaceComparator implements Comparator<FilterableRace> {
         if (result == 0) {
             result = o1.getZeroBasedSeriesIndex() - o2.getZeroBasedSeriesIndex();
             if (result == 0) {
-                result = Util.indexOf(o1.getSeries().getFleets(), o1.getFleet()) - Util.indexOf(o2.getSeries().getFleets(), o2.getFleet());
+                result = o1.getZeroBasedIndexInFleet() - o2.getZeroBasedIndexInFleet();
                 if (result == 0) {
-                    result = o1.getZeroBasedIndexInFleet() - o2.getZeroBasedIndexInFleet();
+                    result = naturalComparator.compare(o1.getRaceColumnName(), o2.getRaceColumnName());
                     if (result == 0) {
-                        result = naturalComparator.compare(o1.getRaceColumnName(), o2.getRaceColumnName());
+                        result = Util.indexOf(o1.getSeries().getFleets(), o1.getFleet()) - Util.indexOf(o2.getSeries().getFleets(), o2.getFleet());
                     }
                 }
             }
