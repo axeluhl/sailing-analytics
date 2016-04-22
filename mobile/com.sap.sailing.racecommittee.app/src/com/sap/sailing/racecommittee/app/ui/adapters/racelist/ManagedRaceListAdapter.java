@@ -106,7 +106,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
-        createViewItemsForRacesAndSeries();
         getFilter().refreshRegattaStructures();
     }
 
@@ -182,6 +181,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                    // TODO don't use toString() to convey semantics and perform check; bug 3617
                     intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
                     BroadcastManager.getInstance(getContext()).addIntent(intent);
                 }
@@ -528,5 +528,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         ViewType(int index) {
             this.index = index;
         }
+    }
+
+    public void onRacesChanged() {
+        createViewItemsForRacesAndSeries();
     }
 }

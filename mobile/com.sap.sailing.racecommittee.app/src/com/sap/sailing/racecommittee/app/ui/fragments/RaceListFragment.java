@@ -411,6 +411,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         registerOnAllRaces();
         // prepare views and do initial filtering
         filterChanged();
+        mAdapter.onRacesChanged();
         mAdapter.notifyDataSetChanged();
     }
 
