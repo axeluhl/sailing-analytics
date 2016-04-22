@@ -11,7 +11,6 @@ import org.json.simple.JSONValue;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
@@ -72,7 +71,7 @@ public class ManagedRacesDataParser implements DataParser<Collection<ManagedRace
         }
     }
 
-    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesBase series, Fleet fleet, String raceColumnName,
+    private ManagedRace createManagedRace(RaceGroup raceGroup, SeriesWithRows series, Fleet fleet, String raceColumnName,
             RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         ConfigurationLoader<RegattaConfiguration> configurationLoader = globalConfigurationLoader;
         RegattaConfiguration localConfiguration = raceGroup.getRegattaConfiguration();

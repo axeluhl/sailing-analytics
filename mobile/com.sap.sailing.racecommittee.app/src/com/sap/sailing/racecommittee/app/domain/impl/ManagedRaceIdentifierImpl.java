@@ -1,8 +1,8 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
 
@@ -10,7 +10,7 @@ public class ManagedRaceIdentifierImpl extends FleetIdentifierImpl implements Ma
 
     private String raceColumnName;
 
-    public ManagedRaceIdentifierImpl(String raceColumnName, Fleet fleetWithRaceNames, SeriesBase series, RaceGroup raceGroup) {
+    public ManagedRaceIdentifierImpl(String raceColumnName, Fleet fleetWithRaceNames, SeriesWithRows series, RaceGroup raceGroup) {
         super(fleetWithRaceNames, series, raceGroup);
         this.raceColumnName = raceColumnName;
     }

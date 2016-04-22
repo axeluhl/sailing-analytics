@@ -11,9 +11,9 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
@@ -97,7 +97,7 @@ public class ManagedRaceImpl implements ManagedRace {
     }
 
     @Override
-    public SeriesBase getSeries() {
+    public SeriesWithRows getSeries() {
         return identifier.getSeries();
     }
 
@@ -223,7 +223,24 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public int getZeroBasedIndexInFleet() {
-        return zeroBasedIndexInFleet;
+        int result = -1;
+        if (zeroBasedIndexInFleet != -1) {
+            // it was properly delivered by a compatible server; that's our result
+            result = zeroBasedIndexInFleet;
+        } else {
+            // we deal with an incompatible server that doesn't know about this field yet;
+            // try to compute from the surrounding race group:
+            int i=0;
+            for (final RaceCell cell : getSeries().getRaceRow(getFleet()).getCells()) {
+                if (cell.getName().equals(getRaceColumnName())) {
+                    result = i;
+                    break;
+                }
+                i++;
+            }
+            // if a cell with this race's race column name is not found, leave the index at -1
+        }
+        return result;
     }
 
     @Override
