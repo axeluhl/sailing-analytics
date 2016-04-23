@@ -130,7 +130,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
         }
         
         String json = predefinedQueryNames.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
@@ -306,7 +306,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
                     }
                     jsonResult.put("resultUnit", resultUnit != null && !resultUnit.isEmpty() ? resultUnit : "None");
                     jsonResult.put("results", resultValuesToJSON(result, numberExtractor, resultPlaces));
-                    response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
+                    response = Response.ok(jsonResult.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                 } catch (NotJsonSerializableException e) {
                     response = getNotSerializableErrorResponse(e.getNotSerializableClass());
                 }

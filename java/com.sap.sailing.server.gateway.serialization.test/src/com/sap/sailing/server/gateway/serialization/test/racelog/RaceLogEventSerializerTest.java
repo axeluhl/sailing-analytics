@@ -29,6 +29,7 @@ import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogDenoteForTra
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogStartTrackingEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
@@ -149,7 +150,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testChoosesCourseDesignChangedSerializer() {
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(null, author, 0, null);
+        RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(null, author, 0, null, CourseDesignerMode.ADMIN_CONSOLE);
         serializer.serialize(event);
         verify(courseDesignChangedEventSerializer).serialize(event);
     }
