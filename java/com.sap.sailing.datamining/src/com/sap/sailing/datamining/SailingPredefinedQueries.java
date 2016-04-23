@@ -31,18 +31,28 @@ import com.sap.sse.datamining.shared.impl.dto.LocalizedTypeDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 
 public class SailingPredefinedQueries {
-
     private final Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> predefinedQueries;
+
+    public final static String QUERY_AVERAGE_SPEED_PER_REGATTA_RACE = "AvgSpeed_Per_Regatta-Race";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE = "AvgSpeed_Per_Competitor-LegType";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR = "AvgSpeed_Per_Competitor";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE = "DistanceTraveled_Per_Competitor-LegType";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR = "DistanceTraveled_Per_Competitor";
+    public final static String QUERY_MANEUVERS_PER_COMPETITOR = "Maneuvers_Per_Competitor";
     
     public SailingPredefinedQueries() {
         predefinedQueries = new HashMap<>();
-        predefinedQueries.put(new PredefinedQueryIdentifier("AvgSpeed_Per_Regatta-Race", "Average Speed grouped by Regatta Name and Race Name"),
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_AVERAGE_SPEED_PER_REGATTA_RACE, "Average Speed grouped by regatta name and race name"),
                               create_AvgSpeed_Per_Regatta_Race());
-        predefinedQueries.put(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"),
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE, "Average speed grouped by competitor/team name and leg type"),
                               create_AvgSpeed_Per_Competitor_LegType());
-        predefinedQueries.put(new PredefinedQueryIdentifier("SumDistance_Per_Competitor-LegType", "Sum of the traveled Distance grouped by Competitor Team Name and Leg Type"),
-                              create_SumDistance_Per_Competitor_LegType());
-        predefinedQueries.put(new PredefinedQueryIdentifier("SumManeuvers_Per_Competitor", "Sum of the performed Maneuvers grouped by Competitor Team Name"),
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_AVERAGE_SPEED_PER_COMPETITOR, "Average speed grouped by competitor/team name"),
+                create_AvgSpeed_Per_Competitor());
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, "Distance traveled grouped by competitor/team name and leg type"),
+                              create_SumTraveledDistance_Per_Competitor_LegType());
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, "Distance traveled grouped by competitor/team name and leg type"),
+                create_SumTraveledDistance_Per_Competitor());
+        predefinedQueries.put(new PredefinedQueryIdentifier(QUERY_MANEUVERS_PER_COMPETITOR, "Maneuvers grouped by competitor/team name"),
                               create_SumManeuvers_Per_Competitor());
     }
     
@@ -94,7 +104,7 @@ public class SailingPredefinedQueries {
         return queryDefinition;
     }
     
-    private StatisticQueryDefinitionDTO create_SumDistance_Per_Competitor_LegType() {
+    private StatisticQueryDefinitionDTO create_SumTraveledDistance_Per_Competitor_LegType() {
         FunctionDTO statistic = new FunctionDTO(false, "getDistanceTraveled()", HasTrackedLegOfCompetitorContext.class.getName(), Distance.class.getName(), new ArrayList<String>(), "", 0);
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Distance.class.getName(), Distance.class.getName(), "");
 
@@ -116,7 +126,48 @@ public class SailingPredefinedQueries {
         
         return queryDefinition;
     }
-    
+
+    private StatisticQueryDefinitionDTO create_AvgSpeed_Per_Competitor() {
+        FunctionDTO statistic = new FunctionDTO(false, "getGPSFix().getSpeed().getKnots()", HasGPSFixContext.class.getName(), double.class.getName(), new ArrayList<String>(), "", 0);
+        AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Average", Number.class.getName(), Number.class.getName(), "");
+
+        ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), "Leaderboard Group"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), "Leaderboard"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), "Race"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), "Leg"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(4, TrackedLegOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegOfCompetitorContext.class.getName(), "Leg of competitor"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(5, GPSFixRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasGPSFixContext.class.getName(), "GPS-Fix"), null));
+        DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("", RacingEventService.class.getName(), retrieverLevels);
+
+        ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("default", statistic, aggregator, retrieverChain);
+
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getTrackedLegOfCompetitorContext().getCompetitor().getTeam().getName()", HasGPSFixContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
+        
+        return queryDefinition;
+    }
+
+    private StatisticQueryDefinitionDTO create_SumTraveledDistance_Per_Competitor() {
+        FunctionDTO statistic = new FunctionDTO(false, "getDistanceTraveled()", HasTrackedLegOfCompetitorContext.class.getName(), Distance.class.getName(), new ArrayList<String>(), "", 0);
+        AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Distance.class.getName(), Distance.class.getName(), "");
+
+        ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
+        retrieverLevels.add(new DataRetrieverLevelDTO(0, LeaderboardGroupRetrievalProcessor.class.getName(), new LocalizedTypeDTO(LeaderboardGroupWithContext.class.getName(), "Leaderboard Group"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(1, LeaderboardRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasLeaderboardContext.class.getName(), "Leaderboard"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(2, TrackedRaceRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedRaceContext.class.getName(), "Race"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(3, TrackedLegRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegContext.class.getName(), "Leg"), null));
+        retrieverLevels.add(new DataRetrieverLevelDTO(4, TrackedLegOfCompetitorRetrievalProcessor.class.getName(), new LocalizedTypeDTO(HasTrackedLegOfCompetitorContext.class.getName(), "Leg of competitor"), null));
+        DataRetrieverChainDefinitionDTO retrieverChain = new DataRetrieverChainDefinitionDTO("", RacingEventService.class.getName(), retrieverLevels);
+
+        ModifiableStatisticQueryDefinitionDTO queryDefinition = new ModifiableStatisticQueryDefinitionDTO("default", statistic, aggregator, retrieverChain);
+
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getTeam().getName()", HasTrackedLegOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
+        
+        return queryDefinition;
+    }
+
     private StatisticQueryDefinitionDTO create_SumManeuvers_Per_Competitor() {
         FunctionDTO statistic = new FunctionDTO(false, "getNumberOfManeuvers()", HasRaceOfCompetitorContext.class.getName(), int.class.getName(), new ArrayList<String>(), "", 0);
         AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Sum", Number.class.getName(), Number.class.getName(), "");
@@ -136,7 +187,7 @@ public class SailingPredefinedQueries {
         return queryDefinition;
     }
 
-    public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> get() {
+    public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> getQueries() {
         return predefinedQueries;
     }
 
