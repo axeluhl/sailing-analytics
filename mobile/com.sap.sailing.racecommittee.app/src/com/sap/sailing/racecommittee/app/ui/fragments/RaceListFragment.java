@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -12,6 +13,7 @@ import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.BroadcastManager;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -25,7 +27,6 @@ import com.sap.sailing.racecommittee.app.ui.adapters.racelist.ManagedRaceListAda
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.ProtestTimeDialogFragment;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
@@ -121,9 +122,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
     public static void showProtest(Context context, ManagedRace race) {
         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-        String extra = race.getRaceGroup().getName();
-        extra += RaceHelper.getSeriesName(race.getSeries());
-        extra += RaceHelper.getFleetName(race.getFleet());
+        String extra = new RaceGroupSeries(race.getRaceGroup(), race.getSeries()).getDisplayName();
         intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, extra);
         BroadcastManager.getInstance(context).addIntent(intent);
     }
@@ -310,9 +309,7 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
-
         TickSingleton.INSTANCE.registerListener(this);
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_SHOW_PROTEST);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
@@ -403,8 +400,16 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         ExLog.i(getActivity(), TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), Util.size(races)));
         unregisterOnAllRaces();
         mManagedRacesById.clear();
+        mRacesByGroup.clear();
         for (ManagedRace managedRace : races) {
             mManagedRacesById.put(managedRace.getId(), managedRace);
+            final RaceGroupSeriesFleet key = new RaceGroupSeriesFleet(managedRace);
+            List<ManagedRace> raceList = mRacesByGroup.get(key);
+            if (raceList == null) {
+                raceList = new ArrayList<>();
+                mRacesByGroup.put(key, raceList);
+            }
+            raceList.add(managedRace);
         }
         mAllRaces.clear();
         Util.addAll(races, mAllRaces);
@@ -438,10 +443,11 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         }
     }
 
-    private void showProtestTimeDialog(String raceGroupDisplayName) {
+    private void showProtestTimeDialog(String raceGroupSeriesDisplayName) {
         // Find the race group for which the
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
-            Boolean matchingRaceGroup = raceGroupDisplayName.equals(raceGroupSeriesFleet.getDisplayName());
+            Boolean matchingRaceGroup = raceGroupSeriesDisplayName.equals(
+                    new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries()).getDisplayName());
             if (matchingRaceGroup) {
                 List<ManagedRace> races = mRacesByGroup.get(raceGroupSeriesFleet);
                 if (!isRaceListDirty(races)) {
@@ -508,9 +514,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         @Override
         public void onReceive(Context context, Intent intent) {
             if (AppConstants.INTENT_ACTION_SHOW_PROTEST.equals(intent.getAction())) {
-                String raceGroupName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
-                if (raceGroupName != null) {
-                    showProtestTimeDialog(raceGroupName);
+                String raceGroupSeriesDisplayName = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
+                if (raceGroupSeriesDisplayName != null) {
+                    showProtestTimeDialog(raceGroupSeriesDisplayName);
                     mDrawerLayout.closeDrawers();
                 } else {
                     ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");

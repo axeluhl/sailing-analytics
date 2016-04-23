@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,6 +80,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView boat_class;
     private TextView fleet_series;
     private ImageView protest_image;
+    private final Set<ImageView> protestFlagsWithClickListenerSet;
     private ImageView has_dependent_races;
     private SimpleDateFormat dateFormat;
     private RaceListDataType mSelectedRace;
@@ -91,6 +93,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     public ManagedRaceListAdapter(Context context, Set<ManagedRace> allRaces) {
         super(context, 0);
+        protestFlagsWithClickListenerSet = new HashSet<>();
         mAllRaces = allRaces;
         mShownViewItems = new ArrayList<>();
         this.viewItemsRaces = new HashMap<>();
@@ -172,15 +175,18 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 fleet_series.setVisibility(View.VISIBLE);
             }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
-            protest_image.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    // TODO don't use toString() to convey semantics and perform check; bug 3617
-                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
-                    BroadcastManager.getInstance(getContext()).addIntent(intent);
-                }
-            });
+            if (!protestFlagsWithClickListenerSet.contains(protest_image)) {
+                protestFlagsWithClickListenerSet.add(protest_image);
+                protest_image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                        // TODO don't use toString() to convey semantics and perform check; bug 3617
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, new RaceGroupSeries(header.getRaceGroup(), header.getSeries()).getDisplayName());
+                        BroadcastManager.getInstance(getContext()).addIntent(intent);
+                    }
+                });
+            }
         } else if (type == ViewType.RACE.index) {
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
 

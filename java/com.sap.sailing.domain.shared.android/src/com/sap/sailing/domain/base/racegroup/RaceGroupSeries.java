@@ -106,5 +106,4 @@ public class RaceGroupSeries {
         }
         return true;
     }
-
 }
