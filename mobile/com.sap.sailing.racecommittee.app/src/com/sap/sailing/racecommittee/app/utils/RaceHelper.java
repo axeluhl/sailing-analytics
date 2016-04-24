@@ -15,12 +15,12 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.GateSt
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.GateStartTimingFragment;
 
 public class RaceHelper {
@@ -36,7 +36,7 @@ public class RaceHelper {
             raceName = getRaceGroupName(race);
             raceName += getSeriesName(race.getSeries(), delimiter);
             raceName += getFleetName(race.getFleet(), delimiter);
-            raceName += delimiter + race.getRaceName();
+            raceName += delimiter + race.getRaceColumnName();
         }
 
         return raceName;
@@ -51,7 +51,7 @@ public class RaceHelper {
 
         String raceName = "";
         if (race != null) {
-            raceName += race.getRaceName();
+            raceName += race.getRaceColumnName();
             raceName += getFleetName(race.getFleet(), delimiter);
             raceName += getSeriesName(race.getSeries(), delimiter);
             raceName += delimiter + getRaceGroupName(race);
@@ -69,7 +69,7 @@ public class RaceHelper {
 
         String raceName = "";
         if (race != null) {
-            raceName += race.getRaceName();
+            raceName += race.getRaceColumnName();
             raceName += getFleetName(race.getFleet(), delimiter);
         }
 
@@ -81,7 +81,7 @@ public class RaceHelper {
         String raceName = "";
         if (race != null) {
             int maxElements = 3;
-            raceName += race.getRaceName();
+            raceName += race.getRaceColumnName();
             String groupName = getRaceGroupName(race);
             String seriesName = getSeriesName(race.getSeries(), delimiter);
             String fleetName = getFleetName(race.getFleet(), delimiter);
@@ -246,7 +246,7 @@ public class RaceHelper {
     public static SimpleRaceLogIdentifier getSimpleRaceLogIdentifier(@Nullable ManagedRace race) {
         SimpleRaceLogIdentifier identifier = null;
         if (race != null) {
-            identifier = new SimpleRaceLogIdentifierImpl(race.getRaceGroup().getName(), race.getRaceName(), race.getFleet().getName());
+            identifier = new SimpleRaceLogIdentifierImpl(race.getRaceGroup().getName(), race.getRaceColumnName(), race.getFleet().getName());
         }
         return identifier;
     }

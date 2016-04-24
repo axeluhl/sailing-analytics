@@ -182,7 +182,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
             RankingMetricConstructor rankingMetricConstructor) {
         this(raceLogStore, regattaLogStore, name, boatClass, startDate, endDate, Collections
                 .singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
-                /* isMedal */false, Collections
+                /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                 /* race column names */new ArrayList<String>(), trackedRegattaRegistry)), /* persistent */false,
                 scoringScheme, id, courseArea, /* useStartTimeInference */true, rankingMetricConstructor);
@@ -427,6 +427,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     @Override
     public void isMedalRaceChanged(RaceColumn raceColumn, boolean newIsMedalRace) {
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
+    }
+
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
     }
 
     @Override

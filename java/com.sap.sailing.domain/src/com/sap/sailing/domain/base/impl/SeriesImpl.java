@@ -36,6 +36,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     private final List<Fleet> fleetsInAscendingOrder;
     private final List<RaceColumnInSeries> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private Regatta regatta;
     private final RaceColumnListeners raceColumnListeners;
     private ThresholdBasedResultDiscardingRule resultDiscardingRule;
@@ -71,7 +72,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
      *            this column's series {@link Regatta}, respectively. If <code>null</code>, the re-association won't be
      *            carried out.
      */
-    public SeriesImpl(String name, boolean isMedal, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
+    public SeriesImpl(String name, boolean isMedal, boolean isFleetsCanRunInParallel, Iterable<? extends Fleet> fleets, Iterable<String> raceColumnNames,
             TrackedRegattaRegistry trackedRegattaRegistry) {
         super(name);
         if (fleets == null || Util.isEmpty(fleets)) {
@@ -86,6 +87,7 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         Collections.sort(fleetsInAscendingOrder);
         this.raceColumns = new ArrayList<RaceColumnInSeries>();
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel; 
         this.raceColumnListeners = new RaceColumnListeners();
         for (String raceColumnName : raceColumnNames) {
             addRaceColumn(raceColumnName, trackedRegattaRegistry);
@@ -285,6 +287,22 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     }
 
     @Override
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    @Override
+    public void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        boolean oldIsFleetsCanRunInParallel = this.isFleetsCanRunInParallel;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
+        if (oldIsFleetsCanRunInParallel != isFleetsCanRunInParallel) {
+            for (RaceColumn raceColumn : getRaceColumns()) {
+                raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, isFleetsCanRunInParallel);
+            }
+        }
+    }
+
+    @Override
     public void trackedRaceLinked(RaceColumn raceColumn, Fleet fleet, TrackedRace trackedRace) {
         raceColumnListeners.notifyListenersAboutTrackedRaceLinked(raceColumn, fleet, trackedRace);
     }
@@ -299,6 +317,10 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
         raceColumnListeners.notifyListenersAboutIsMedalRaceChanged(raceColumn, newIsMedalRace);
     }
 
+    @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+        raceColumnListeners.notifyListenersAboutIsFleetsCanRunInParallelChanged(raceColumn, newIsFleetsCanRunInParallel);
+    }
     @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
         raceColumnListeners.notifyListenersAboutIsStartsWithZeroScoreChanged(raceColumn, newIsStartsWithZeroScore);
@@ -433,11 +455,5 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     @Override
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
-    }
-
-    @Override
-    public boolean isFleetsRunInParallel() {
-        // TODO This is a default implementation so far, allowing for parallel fleet races to not restrict generality. This shall become a configurable series property. See bug 3532
-        return true;
     }
 }
