@@ -91,9 +91,6 @@ public class RaceHelper {
             if (maxElements == 2 && seriesName.equals(getSeriesName(race2.getSeries(), delimiter))) {
                 maxElements -= 1;
             }
-            if (maxElements == 1 && fleetName.equals(getFleetName(race2.getFleet(), delimiter))) {
-                maxElements -= 1;
-            }
             if (maxElements >= 1) {
                 raceName += fleetName;
             }
@@ -160,12 +157,10 @@ public class RaceHelper {
 
     public static String getSeriesName(@Nullable SeriesBase series, @Nullable String delimiter) {
         delimiter = getDefaultDelimiter(delimiter);
-
         String seriesName = "";
         if (series != null && !LeaderboardNameConstants.DEFAULT_SERIES_NAME.equals(series.getName())) {
             seriesName = delimiter + series.getName();
         }
-
         return seriesName;
     }
 
@@ -175,12 +170,10 @@ public class RaceHelper {
 
     public static String getFleetName(@Nullable Fleet fleet, @Nullable String delimiter) {
         delimiter = getDefaultDelimiter(delimiter);
-
         String fleetName = "";
         if (fleet != null && !LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleet.getName())) {
             fleetName = delimiter + fleet.getName();
         }
-
         return fleetName;
     }
 
