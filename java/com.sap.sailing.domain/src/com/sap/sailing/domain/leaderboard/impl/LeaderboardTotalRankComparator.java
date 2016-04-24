@@ -17,6 +17,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -51,6 +52,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
     private final ScoringScheme scoringScheme;
     private final Map<Util.Pair<Competitor, RaceColumn>, Double> totalPointsCache;
+    private final Map<Util.Pair<Competitor, RaceColumn>, Double> netPointsCache;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
     
@@ -81,12 +83,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
         totalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
+        netPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
                     competitor, leaderboard, raceColumnsToConsider, timePoint);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
-                totalPointsCache.put(new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
+                Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
+                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
+                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
             }
         }
     }
@@ -97,8 +101,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     
     @Override
     public int compare(Competitor o1, Competitor o2) {
-        List<Util.Pair<RaceColumn, Double>> o1Scores = new ArrayList<Util.Pair<RaceColumn, Double>>();
-        List<Util.Pair<RaceColumn, Double>> o2Scores = new ArrayList<Util.Pair<RaceColumn, Double>>();
+        List<Util.Pair<RaceColumn, Double>> o1Scores = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o2Scores = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o1NetPoints = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o2NetPoints = new ArrayList<>();
         double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
@@ -114,21 +120,27 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
             final boolean o2ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint);
             final Double o1Score;
             if (o1ValidInTotalScore) {
-                o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
+                Pair<Competitor, RaceColumn> key = new Util.Pair<>(o1, raceColumn);
+                o1Score = totalPointsCache.get(key);
                 if (o1Score != null) {
-                    o1Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o1Score));
+                    o1Scores.add(new Util.Pair<>(raceColumn, o1Score));
                     if (needToResetO1ScoreUponNextValidResult) {
                         o1ScoreSum = 0;
                         needToResetO1ScoreUponNextValidResult = false;
                     }
                     o1ScoreSum += o1Score;
                 }
+                final Double o1Net = netPointsCache.get(key);
+                if (o1Net != null) {
+                    o1NetPoints.add(new Util.Pair<>(raceColumn, o1Net));
+                }
             } else {
                 o1Score = null;
             }
             final Double o2Score;
             if (o2ValidInTotalScore) {
-                o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
+                Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(o2, raceColumn);
+                o2Score = totalPointsCache.get(key);
                 if (o2Score != null) {
                     o2Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o2Score));
                     if (needToResetO2ScoreUponNextValidResult) {
@@ -136,6 +148,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                         needToResetO2ScoreUponNextValidResult = false;
                     }
                     o2ScoreSum += o2Score;
+                }
+                final Double o2Net = netPointsCache.get(key);
+                if (o2Net != null) {
+                    o2NetPoints.add(new Util.Pair<>(raceColumn, o2Net));
                 }
             } else {
                 o2Score = null;
@@ -176,7 +192,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
-                        result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
+                        result = scoringScheme.compareByLastRace(o1NetPoints, o2NetPoints, nullScoresAreBetter);
                         if (result == 0) {
                             try {
                                 result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);

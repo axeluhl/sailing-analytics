@@ -675,6 +675,40 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
     }
 
+    /**
+     * Reported by Clemens Fackeldey:<p>
+     * 
+     * <pre>
+     *   GER2105: 8/6/(18,DNF)/10/9 => 33
+     *   GER2254: 6/10/9/8/(11) => 33
+     * </pre>
+     * GER2105 must rank better than GER2254 because while the scores are equal when including the discards and
+     * considering the discards and ordering the results from best to worst both have 6/8/9/10, the count-back
+     * shows that for the last race GER2254 scored worse in the last race (although that was discarded).
+     * But RRS A8.2 does not mention discards, so the last race score needs to be considered regardless of
+     * whether it was discarded.
+     */
+    @Test
+    public void testTieBreakByCountbackIncludesDiscards() throws NoWindException {
+        Competitor[] c = createCompetitors(18).toArray(new Competitor[0]);
+        Competitor GER2105 = c[0];
+        Competitor GER2254 = c[1];
+        Competitor[] f1 = new Competitor[] { c[ 7], c[ 5], c[2], c[3], c[4], c[1], c[6], c[0], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f2 = new Competitor[] { c[ 5], c[ 9], c[2], c[3], c[4], c[0], c[6], c[7], c[8], c[1], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f3 = new Competitor[] { c[17], c[ 8], c[2], c[3], c[4], c[5], c[6], c[7], c[1], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[0] };
+        Competitor[] f4 = new Competitor[] { c[ 9], c[ 7], c[2], c[3], c[4], c[5], c[6], c[1], c[8], c[0], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f5 = new Competitor[] { c[ 8], c[10], c[2], c[3], c[4], c[5], c[6], c[7], c[0], c[9], c[ 1], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+                /* medal */ false, "testTieBreakByCountbackIncludesDiscards",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(33.0, leaderboard.getTotalPoints(GER2105, later), 0.0000001);
+        assertEquals(33.0, leaderboard.getTotalPoints(GER2254, later), 0.0000001);
+        assertTrue(rankedCompetitors.indexOf(GER2105) == rankedCompetitors.indexOf(GER2254)-1);
+    }
+
     @Test
     public void testBasicElminationScoringScheme() throws NoWindException {
         Regatta regatta = createRegattaWithEliminations(1, new int[] { 8, 4, 2, 2 }, "testBasicElminationScoringScheme",
