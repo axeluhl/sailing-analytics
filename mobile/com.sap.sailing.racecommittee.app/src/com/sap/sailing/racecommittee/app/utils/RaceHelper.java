@@ -200,9 +200,12 @@ public class RaceHelper {
         return delimiter == null ? " - " : delimiter;
     }
 
-    public static List<ManagedRace> getManagedRacesAsList(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace){
+    /**
+     * Obtains the set of races in the same race group / regatta and the same series and the same fleet as {@code currentRace}.
+     */
+    public static List<ManagedRace> getManagedRacesAsList(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace) {
         List<ManagedRace> races = new ArrayList<>();
-        // Find the race group for which the
+        // Find the race group / series / fleet for the currentRace and add all races in that group/series/fleet
         String raceGroupName = "";
         if (currentRace != null) {
             raceGroupName = getRaceGroupName(currentRace);
@@ -221,7 +224,7 @@ public class RaceHelper {
         return races;
     }
 
-    public static List<ManagedRace> getPreSelectedRaces(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace){
+    public static List<ManagedRace> getPreSelectedRaces(@NonNull LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> racesByGroup, @Nullable ManagedRace currentRace) {
         List<ManagedRace> managedRaces = getManagedRacesAsList(racesByGroup, currentRace);
         List<ManagedRace> preselectedRaces = new ArrayList<>();
         for(ManagedRace race : managedRaces){
