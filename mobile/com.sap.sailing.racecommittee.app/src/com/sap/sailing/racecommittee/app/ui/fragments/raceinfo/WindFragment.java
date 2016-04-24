@@ -187,14 +187,12 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
             mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
                     .getKnots()));
         }
-
         setupButtons();
         setupWindSpeedPicker();
         setupLayouts(false);
@@ -236,12 +234,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                     mAccuracy.setAccuracy(-1);
                 }
             }
-
             if (!timeOnly) {
                 mSetData.setEnabled(mCurrentLocation != null);
                 mSetDataMulti.setEnabled(mCurrentLocation != null);
             }
-
             if (mCurrentLocation != null) {
                 if (!timeOnly) {
                     double latitude = mCurrentLocation.getLatitude();
@@ -430,25 +426,17 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onResume() {
         super.onResume();
-
         mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
-
         mManagedRaces = RaceHelper.getManagedRacesAsList(mRacesByGroup, getRace());
-
         mSelectedRaces = new ArrayList<>();
-
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-
         // connect googleApiClient and register position poller
         resumeApiClient();
-
         //register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
-
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
-
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
@@ -462,9 +450,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
-
             default:
                 openMainScheduleFragment();
                 break;

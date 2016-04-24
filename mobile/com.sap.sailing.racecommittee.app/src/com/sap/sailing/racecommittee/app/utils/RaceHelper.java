@@ -78,29 +78,22 @@ public class RaceHelper {
 
     public static String getShortReverseRaceName(@Nullable ManagedRace race, @Nullable String delimiter, @NonNull ManagedRace race2) {
         delimiter = getDefaultDelimiter(delimiter);
-
         String raceName = "";
         if (race != null) {
             int maxElements = 3;
-
             raceName += race.getRaceName();
-
             String groupName = getRaceGroupName(race);
             String seriesName = getSeriesName(race.getSeries(), delimiter);
             String fleetName = getFleetName(race.getFleet(), delimiter);
-
             if (groupName.equals(getRaceGroupName(race2))) {
                 maxElements -= 1;
             }
-
             if (maxElements == 2 && seriesName.equals(getSeriesName(race2.getSeries(), delimiter))) {
                 maxElements -= 1;
             }
-
             if (maxElements == 1 && fleetName.equals(getFleetName(race2.getFleet(), delimiter))) {
                 maxElements -= 1;
             }
-
             if (maxElements >= 1) {
                 raceName += fleetName;
             }
@@ -111,7 +104,6 @@ public class RaceHelper {
                 raceName += delimiter + groupName;
             }
         }
-
         return raceName;
     }
 
