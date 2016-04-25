@@ -46,7 +46,7 @@ public class EventsResource extends AbstractSailingServerResource {
             }
         }
         String json = result.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -71,7 +71,7 @@ public class EventsResource extends AbstractSailingServerResource {
             JSONObject eventJson = eventSerializer.serialize(event);
 
             String json = eventJson.toJSONString();
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -98,7 +98,7 @@ public class EventsResource extends AbstractSailingServerResource {
                     filterByLeaderboard, filterByDayOffset, getService());
             JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
             String json = raceStatesJson.toJSONString();
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }

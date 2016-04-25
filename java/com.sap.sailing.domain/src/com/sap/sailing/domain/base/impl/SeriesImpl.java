@@ -434,4 +434,10 @@ public class SeriesImpl extends RenamableImpl implements Series, RaceColumnListe
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }
+
+    @Override
+    public boolean isFleetsRunInParallel() {
+        // TODO This is a default implementation so far, allowing for parallel fleet races to not restrict generality. This shall become a configurable series property. See bug 3532
+        return true;
+    }
 }
