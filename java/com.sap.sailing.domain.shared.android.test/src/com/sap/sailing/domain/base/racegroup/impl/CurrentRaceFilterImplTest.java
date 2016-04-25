@@ -35,7 +35,6 @@ public class CurrentRaceFilterImplTest {
     private RaceGroup isaf;
     private RaceGroup league;
     private RaceGroup ess;
-    private RaceGroup _49er;
     private Map<RaceGroupSeriesFleetRaceColumn, SimpleFilterableRace> races;
 
     @Before
@@ -56,8 +55,6 @@ public class CurrentRaceFilterImplTest {
         races.putAll(getAllRaces(league));
         ess = createEssRegatta();
         races.putAll(getAllRaces(ess));
-        _49er = create49erRegatta();
-        races.putAll(getAllRaces(_49er));
         fixture = new CurrentRaceFilterImpl<>(races.values());
     }
 
@@ -95,20 +92,6 @@ public class CurrentRaceFilterImplTest {
                 new BoatClassImpl(BoatClassMasterdata._470.getDisplayName(), BoatClassMasterdata._470),
                 /* courseArea */ null, isafSeries, /* regattaConfiguration */ null);
         return isaf;
-    }
-
-    private RaceGroup create49erRegatta() {
-        final List<SeriesWithRows> _49erSeries = new ArrayList<>();
-        final List<RaceRow> _49erQualificationRaceRows = Arrays.asList(createRaceRow(1, 5, "Q", "Yellow"), createRaceRow(1, 5, "Q", "Blue"));
-        _49erSeries.add(new SeriesWithRowsImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, _49erQualificationRaceRows));
-        final List<RaceRow> _49erFinalRaceRows = Arrays.asList(createRaceRow(6, 5, "F", "Gold"), createRaceRow(6, 5, "F", "Silver"));
-        _49erSeries.add(new SeriesWithRowsImpl("Final", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, _49erFinalRaceRows));
-        final List<RaceRow> _49erMedalRaceRows = Arrays.asList(createRaceRow(1, 1, "M", "Medal"));
-        _49erSeries.add(new SeriesWithRowsImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, _49erMedalRaceRows));
-        final RaceGroup _49er = new RaceGroupImpl("49er Worldcup", /* displayName */ null,
-                new BoatClassImpl(BoatClassMasterdata._49ER.getDisplayName(), BoatClassMasterdata._49ER),
-                /* courseArea */ null, _49erSeries, /* regattaConfiguration */ null);
-        return _49er;
     }
 
     private RaceGroup createEssRegatta() {
@@ -376,13 +359,26 @@ public class CurrentRaceFilterImplTest {
     public void testStartInSecondSeriesOf49erRaces() {
         // with all races unscheduled we start with the first race of the second series
         // we can expect the first race of each regatta's series to show except the first series 
-        get(_49er, "F6", "Gold").setStatus(RaceLogRaceStatus.SCHEDULED);
+        get(isaf, "F6", "Gold").setStatus(RaceLogRaceStatus.SCHEDULED);
         final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
-        final Set<SimpleFilterableRace> current49erRaces = currentRaces.stream().filter(r->r.getRaceGroup() == _49er).collect(Collectors.toSet());
+        final Set<SimpleFilterableRace> current49erRaces = currentRaces.stream().filter(r->r.getRaceGroup() == isaf).collect(Collectors.toSet());
         assertEquals(3, current49erRaces.size());
-        assertTrue(current49erRaces.contains(get(_49er, "F6", "Gold"))); // it's scheduled, so it shows
-        assertTrue(current49erRaces.contains(get(_49er, "F6", "Silver")));   // it's unscheduled, first in fleet
-        assertTrue(current49erRaces.contains(get(_49er, "F7", "Gold"))); // predecessor F7/Gold is scheduled, so show this as next in fleet
+        assertTrue(current49erRaces.contains(get(isaf, "F6", "Gold"))); // it's scheduled, so it shows
+        assertTrue(current49erRaces.contains(get(isaf, "F6", "Silver")));   // it's unscheduled, first in fleet
+        assertTrue(current49erRaces.contains(get(isaf, "F7", "Gold"))); // predecessor F7/Gold is scheduled, so show this as next in fleet
+    }
+
+    @Test
+    public void testSchedulingSilverFleetKnockoutFinalRaceAlsoShowsGoldRace() {
+        // with nothing scheduled in earlier fleets, F1 Gold shall be scheduled when (erroneously or on purpose)
+        // the later race F1 Silver is already scheduled.
+        get(ess, "F1", "Silver").setStatus(RaceLogRaceStatus.SCHEDULED);
+        final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
+        final Set<SimpleFilterableRace> current49erRaces = currentRaces.stream().filter(r->r.getRaceGroup() == ess).collect(Collectors.toSet());
+        assertEquals(3, current49erRaces.size());
+        assertTrue(current49erRaces.contains(get(ess, "F1", "Gold"))); // it's unscheduled but the first in an already started series
+        assertTrue(current49erRaces.contains(get(ess, "F1", "Silver")));   // it's scheduled
+        assertTrue(current49erRaces.contains(get(ess, "R11", "Default"))); // preceding series' last column has a scheduled race
     }
 
     private SimpleFilterableRace get(RaceGroup raceGroup, String raceColumnName, String fleetName) {

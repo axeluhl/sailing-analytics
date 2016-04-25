@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sailing.domain.base.Fleet;
@@ -13,6 +14,7 @@ import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
 import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleetRaceColumn;
 import com.sap.sailing.domain.base.racegroup.RaceRow;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -39,6 +41,11 @@ import com.sap.sse.common.Util;
 public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentRaceFilter<T> {
     private final Iterable<T> allRaces;
     private final Map<RaceGroupSeriesFleetRaceColumn, T> racesByRaceGroupSeriesFleet;
+    
+    /**
+     * Helpful in order to quickly find races that are in specific series
+     */
+    private final Map<RaceGroupSeries, Set<T>> racesByRaceGroupSeries;
 
     /**
      * Constructs a filter that can determine "current races" from a set of races representing all races of a set of
@@ -51,18 +58,35 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
         Util.addAll(allRaces, copyOfAllRaces);
         this.allRaces = copyOfAllRaces;
         this.racesByRaceGroupSeriesFleet = new HashMap<>();
+        this.racesByRaceGroupSeries = new HashMap<>();
         for (final T race : allRaces) {
             racesByRaceGroupSeriesFleet.put(new RaceGroupSeriesFleetRaceColumn(race), race);
+            final RaceGroupSeries key = new RaceGroupSeries(race);
+            Set<T> racesForRaceGroupSeries = racesByRaceGroupSeries.get(key);
+            if (racesForRaceGroupSeries == null) {
+                racesForRaceGroupSeries = new HashSet<>();
+                racesByRaceGroupSeries.put(key, racesForRaceGroupSeries);
+            }
+            racesForRaceGroupSeries.add(race);
         }
     }
 
     /**
      * A race is considered "current" and shall be shown if its status is between (inclusive)
-     * {@link RaceLogRaceStatus#SCHEDULED} and {@link RaceLogRaceStatus#FINISHING}, or if the race
-     * has no predecessor in the regatta / leaderboard and therefore could start the regatta,
-     * or if the race has an immediate predecessor (a race A that must precede the race in question, say X,
-     * such that there is no other race B that also must precede X with A having to precede B) which
-     * is at least in state {@link RaceLogRaceStatus#SCHEDULED}.
+     * {@link RaceLogRaceStatus#SCHEDULED} and {@link RaceLogRaceStatus#FINISHING}, or if the race has no predecessor in
+     * the regatta / leaderboard and therefore could start the regatta, or if the race has an immediate predecessor (a
+     * race A that must precede the race in question, say X, such that there is no other race B that also must precede X
+     * with A having to precede B) which is at least in state {@link RaceLogRaceStatus#SCHEDULED}, or if the race is the
+     * first in a series where for other fleets in the series a race is at least in state
+     * {@link RaceLogRaceStatus#SCHEDULED} (the latter case is relevant if one or more race columns in the preceding
+     * series were "skipped" and the next series has begun to be scheduled). However, a race with a status that is
+     * before {@link RaceLogRaceStatus#SCHEDULED} is <em>not</em> considered current if a race exists in a subsequent
+     * series that is at least {@link RaceLogRaceStatus#SCHEDULED}. Two typical cases for the latter exist: the regatta
+     * structure may not have been adjusted properly regarding the number of races to be run in a qualification phase;
+     * when the final series is scheduled, further unscheduled races of the qualification races are not to be shown
+     * anymore. Similarly, when a qualification phase was not at all handled by the solution and only races from the
+     * final and medal series are handled at all, unscheduled races from the qualification series shall not be
+     * considered "current" when one or more races from the final or medal series have already been scheduled.
      */
     @Override
     public Set<T> getCurrentRaces() {
@@ -70,11 +94,13 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
         for (final T race : allRaces) {
             if (race.getStatus().getOrderNumber() <= RaceLogRaceStatus.FINISHING.getOrderNumber()) { // don't show finished races
                 if (race.getStatus().getOrderNumber() >= RaceLogRaceStatus.SCHEDULED.getOrderNumber()) {
-                    filteredRaces.add(race);
+                    filteredRaces.add(race); // always show races at least scheduled and not yet finished
                 } else {
+                    assert race.getStatus().getOrderNumber() < RaceLogRaceStatus.SCHEDULED.getOrderNumber();
                     final boolean hasNoPredecessor=hasNoPredecessor(race);
-                    if ((hasNoPredecessor && race.getStatus() == RaceLogRaceStatus.UNSCHEDULED) ||
-                        (!hasNoPredecessor && hasImmediatePredecessorThatIsAtLeastScheduled(race))) {
+                    if (!raceScheduledInLaterSeries(race) && // if a race is already at least scheduled in a later series,
+                                                             // don't show unscheduled races in earlier series anymore
+                        (hasNoPredecessor || hasImmediatePredecessorThatIsAtLeastScheduled(race) || isFirstInAlreadyScheduledSeries(race))) {
                         // show the race
                         filteredRaces.add(race);
                     }
@@ -82,6 +108,45 @@ public class CurrentRaceFilterImpl<T extends FilterableRace> implements CurrentR
             }
         }
         return filteredRaces;
+    }
+
+    /**
+     * Checks if {@code race} can be scheduled next in its series because it is in the first race column (for fleets
+     * that may run in parallel in their series) or is additionally in the first fleet in the series (for fleets that
+     * run their fleets sequentially; although this case is pretty bizarre because this race then should have been the
+     * first to be scheduled; but a series would even count as started if someone scheduled a later race in that series)
+     * and another race in the series is at least in state {@link RaceLogRaceStatus#SCHEDULED}. In this case, the
+     * previous series is considered "terminated" by the scheduling of one or more races in the next series, and
+     * therefore at least all "first" race in the series become eligible for being scheduled.
+     */
+    private boolean isFirstInAlreadyScheduledSeries(T race) {
+        final boolean result;
+        if (race.getZeroBasedIndexInFleet() == 0 && (race.getSeries().isFleetsCanRunInParallel() || Util.indexOf(race.getSeries().getFleets(), race.getFleet()) == 0)) {
+            boolean foundRaceAtLeastScheduledInSameSeries = false;
+            for (final T raceInSameSeries : racesByRaceGroupSeries.get(new RaceGroupSeries(race))) {
+                if (raceInSameSeries.getStatus().getOrderNumber() >= RaceLogRaceStatus.SCHEDULED.getOrderNumber()) {
+                    foundRaceAtLeastScheduledInSameSeries = true;
+                    break;
+                }
+            }
+            result = foundRaceAtLeastScheduledInSameSeries;
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    private boolean raceScheduledInLaterSeries(T race) {
+        for (final Entry<RaceGroupSeries, Set<T>> rgs : racesByRaceGroupSeries.entrySet()) {
+            if (rgs.getKey().getRaceGroup() == race.getRaceGroup() && rgs.getKey().getSeriesOrder() > race.getZeroBasedSeriesIndex()) {
+                for (final T r : rgs.getValue()) {
+                    if (r.getStatus().getOrderNumber() >= RaceLogRaceStatus.SCHEDULED.getOrderNumber()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
