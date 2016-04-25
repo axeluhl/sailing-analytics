@@ -375,7 +375,7 @@ public class CurrentRaceFilterImplTest {
     @Test
     public void testStartInSecondSeriesOf49erRaces() {
         // with all races unscheduled we start with the first race of the second series
-        // we can expect the first race of each regatta's first series to show expect for the 
+        // we can expect the first race of each regatta's series to show except the first series 
         get(_49er, "F6", "Gold").setStatus(RaceLogRaceStatus.SCHEDULED);
         final Set<SimpleFilterableRace> currentRaces = fixture.getCurrentRaces();
         final Set<SimpleFilterableRace> current49erRaces = currentRaces.stream().filter(r->r.getRaceGroup() == _49er).collect(Collectors.toSet());
