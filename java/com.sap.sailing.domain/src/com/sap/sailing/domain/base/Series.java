@@ -41,6 +41,8 @@ public interface Series extends SeriesBase {
     
     void setIsMedal(boolean isMedal);
 
+    void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel);
+
     Fleet getFleetByName(String fleetName);
 
     /**

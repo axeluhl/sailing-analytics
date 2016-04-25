@@ -204,7 +204,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl(testFleet1Name);
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -467,7 +467,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -626,7 +626,7 @@ public class MasterDataImportTest {
         List<Fleet> fleets = new ArrayList<Fleet>();
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(RegattaImpl.getDefaultName("testRegatta", "29er"), "29er",
         /* startDate */null, /* endDate */null, regattaUUID, series, true, new LowPoint(), courseAreaUUID, /* useStartTimeInference */
@@ -789,7 +789,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -949,7 +949,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -1063,7 +1063,7 @@ public class MasterDataImportTest {
             List<Fleet> fleetsNotToOverride = new ArrayList<Fleet>();
             FleetImpl testFleet1NotToOverride = new FleetImpl("testFleet1");
             fleetsNotToOverride.add(testFleet1NotToOverride);
-            seriesNotToOverride.add(new SeriesImpl("testSeries", false, fleetsNotToOverride, emptyRaceColumnNamesList,
+            seriesNotToOverride.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleetsNotToOverride, emptyRaceColumnNamesList,
                     destService));
             Regatta regattaNotToOverride = destService.createRegatta(
                     RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, /* startDate */
@@ -1151,7 +1151,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -1261,7 +1261,7 @@ public class MasterDataImportTest {
             List<Fleet> fleetsToOverride = new ArrayList<Fleet>();
             FleetImpl testFleet1ToOverride = new FleetImpl("testFleet1");
             fleetsToOverride.add(testFleet1ToOverride);
-            seriesToOverride.add(new SeriesImpl("testSeries", false, fleetsToOverride, emptyRaceColumnNamesList,
+            seriesToOverride.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleetsToOverride, emptyRaceColumnNamesList,
                     destService));
             Regatta regattaToOverride = destService.createRegatta(
                     RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, /* startDate */
@@ -1452,7 +1452,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
 
         Regatta regatta = sourceService.createRegatta(
@@ -1587,7 +1587,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -1833,7 +1833,7 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl("testFleet1");
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        series.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        series.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME,
@@ -2063,8 +2063,8 @@ public class MasterDataImportTest {
         FleetImpl testFleet1 = new FleetImpl(testFleet1Name);
         fleets.add(testFleet1);
         fleets.add(new FleetImpl("testFleet2"));
-        seriesOnSource.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
-        seriesOnTarget.add(new SeriesImpl("testSeries", false, fleets, emptyRaceColumnNamesList, sourceService));
+        seriesOnSource.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
+        seriesOnTarget.add(new SeriesImpl("testSeries", false, /* isFleetsCanRunInParallel */ true, fleets, emptyRaceColumnNamesList, sourceService));
         UUID regattaUUID = UUID.randomUUID();
         Regatta regatta = sourceService.createRegatta(
                 RegattaImpl.getDefaultName(TEST_REGATTA_NAME, TEST_BOAT_CLASS_NAME), TEST_BOAT_CLASS_NAME, /* startDate */

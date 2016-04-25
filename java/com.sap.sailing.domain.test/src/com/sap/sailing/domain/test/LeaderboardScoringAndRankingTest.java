@@ -1769,7 +1769,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfQualifyingRaces; i++) {
                 qualifyingRaceColumnNames.add("Q" + i);
             }
-            Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
+            Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                     qualifyingRaceColumnNames, /* trackedRegattaRegistry */null);
             series.add(qualifyingSeries);
         }
@@ -1785,7 +1785,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfFinalRaces; i++) {
                 finalRaceColumnNames.add("F" + i);
             }
-            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(finalSeries);
         }
 
@@ -1840,7 +1840,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 } else {
                     roundName = "Round "+roundNumber;
                 }
-                Series seriesForRound = new SeriesImpl("E"+elimination+" "+roundName, /* isMedal */ false, fleetsInRound,
+                Series seriesForRound = new SeriesImpl("E"+elimination+" "+roundName, /* isMedal */ false, /* isFleetsCanRunInParallel */ true, fleetsInRound,
                         raceColumnNameForRound, /* trackedRegattaRegistry */null);
                 if (isFinalRound) {
                     // last "Final" round; here, the fleets are contiguously scored
@@ -1874,7 +1874,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfBeforeRaces; i++) {
                 beforeRaceColumnNames.add("R" + i);
             }
-            Series qualifyingSeries = new SeriesImpl("Before", /* isMedal */false, beforeFleets,
+            Series qualifyingSeries = new SeriesImpl("Before", /* isMedal */false, /* isFleetsCanRunInParallel */ true, beforeFleets,
                     beforeRaceColumnNames, /* trackedRegattaRegistry */null);
             series.add(qualifyingSeries);
         }
@@ -1886,7 +1886,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             }
             List<String> qualificationRaceColumnNames = new ArrayList<String>();
             qualificationRaceColumnNames.add("Q");
-            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
             // discard the one and only qualification race; it doesn't score
             qualificationSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { 1 }));
             series.add(qualificationSeries);
@@ -1901,7 +1901,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             }
             List<String> finalRaceColumnNames = new ArrayList<String>();
             finalRaceColumnNames.add("F");
-            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             finalSeries.setSplitFleetContiguousScoring(true);
             series.add(finalSeries);
         }
@@ -1913,7 +1913,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = numberOfBeforeRaces+1; i <= numberOfBeforeRaces+numberOfFinalRaces; i++) {
                 finalRaceColumnNames.add("R" + i);
             }
-            Series finalSeries = new SeriesImpl("After", /* isMedal */false, afterFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("After", /* isMedal */false, /* isFleetsCanRunInParallel */ true, afterFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);

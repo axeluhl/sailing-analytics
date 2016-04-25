@@ -1,33 +1,36 @@
-package com.sap.sailing.racecommittee.app.domain.impl;
+package com.sap.sailing.domain.base.racegroup;
 
-import android.text.TextUtils;
-
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 
-public class RaceGroupSeriesFleet {
+/**
+ * Represents a pair of {@link RaceGroup} (representing a regatta or a flexible leaderboard) and {@link SeriesBase
+ * series}. An instance can be constructed for a {@link ManagedRace} which then extracts these two properties from the
+ * race. Note that equal objects of this type can result for different races as long as they are in the equal
+ * {@link RaceGroup} and {@link SeriesBase series}.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public class RaceGroupSeries {
 
-    private RaceGroup raceGroup;
-    private Fleet fleet;
-    private SeriesBase series;
-    private int seriesOrder;
-    private int fleetOrder;
+    private final RaceGroup raceGroup;
+    private final SeriesBase series;
+    private final int seriesOrder;
 
-    public RaceGroupSeriesFleet(ManagedRace race) {
-        raceGroup = race.getRaceGroup();
-        series = race.getSeries();
-        fleet = race.getFleet();
-
-        seriesOrder = getSeriesIndex(race, series);
-        fleetOrder = getFleetIndex(series.getFleets(), race.getFleet());
+    public RaceGroupSeries(FilterableRace race) {
+        this(race.getRaceGroup(), race.getSeries());
     }
 
-    private static int getSeriesIndex(ManagedRace race, SeriesBase series) {
-        return Util.indexOf(race.getRaceGroup().getSeries(), series);
+    public RaceGroupSeries(RaceGroup raceGroup, SeriesBase series) {
+        this.raceGroup = raceGroup;
+        this.series = series;
+        seriesOrder = getSeriesIndex(raceGroup, series);
+    }
+
+    private static int getSeriesIndex(RaceGroup raceGroup, SeriesBase series) {
+        return Util.indexOf(raceGroup.getSeries(), series);
     }
 
     public RaceGroup getRaceGroup() {
@@ -38,10 +41,6 @@ public class RaceGroupSeriesFleet {
         return series;
     }
 
-    public Fleet getFleet() {
-        return fleet;
-    }
-
     public String getRaceGroupName() {
         return raceGroup.getName();
     }
@@ -50,24 +49,17 @@ public class RaceGroupSeriesFleet {
         return series.getName();
     }
 
-    public String getFleetName() {
-        return fleet.getName();
-    }
-
     public String getDisplayName() {
         return getDisplayName(false);
     }
 
     public String getDisplayName(boolean useDisplayName) {
         String name = raceGroup.getDisplayName();
-        if (!useDisplayName || TextUtils.isEmpty(name)) {
+        if (!useDisplayName || name == null || name.length() == 0) {
             name = raceGroup.getName();
         }
         if (series != null && !series.getName().equals(LeaderboardNameConstants.DEFAULT_SERIES_NAME)) {
             name += " - " + series.getName();
-        }
-        if (fleet != null && !fleet.getName().equals(LeaderboardNameConstants.DEFAULT_FLEET_NAME)) {
-            name += " - " + fleet.getName();
         }
         return name;
     }
@@ -76,19 +68,13 @@ public class RaceGroupSeriesFleet {
         return seriesOrder;
     }
 
-    public int getFleetOrder() {
-        return fleetOrder;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((raceGroup == null) ? 0 : raceGroup.hashCode());
         result = prime * result + ((series == null) ? 0 : series.hashCode());
-        result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + seriesOrder;
-        result = prime * result + fleetOrder;
         return result;
     }
 
@@ -100,19 +86,12 @@ public class RaceGroupSeriesFleet {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RaceGroupSeriesFleet other = (RaceGroupSeriesFleet) obj;
+        RaceGroupSeries other = (RaceGroupSeries) obj;
         if (raceGroup == null) {
             if (other.raceGroup != null) {
                 return false;
             }
         } else if (!raceGroup.equals(other.raceGroup)) {
-            return false;
-        }
-        if (fleet == null) {
-            if (other.fleet != null) {
-                return false;
-            }
-        } else if (!fleet.equals(other.fleet)) {
             return false;
         }
         if (series == null) {
@@ -125,13 +104,6 @@ public class RaceGroupSeriesFleet {
         if (seriesOrder != other.seriesOrder) {
             return false;
         }
-        if (fleetOrder != other.fleetOrder) {
-            return false;
-        }
         return true;
-    }
-
-    private int getFleetIndex(Iterable<? extends Fleet> fleets, Fleet fleet) {
-        return Util.indexOf(fleets, fleet);
     }
 }

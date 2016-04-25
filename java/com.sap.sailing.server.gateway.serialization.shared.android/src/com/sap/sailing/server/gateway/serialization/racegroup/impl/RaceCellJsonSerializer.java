@@ -10,8 +10,9 @@ public class RaceCellJsonSerializer implements JsonSerializer<RaceCell> {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_RACE_LOG = "raceLog";
     public static final String FIELD_COMPETITORS = "competitors";
-    public static final Object FIELD_FACTOR = "factor";
-    public static final Object FIELD_EXPLICIT_FACTOR = "explicitfactor";
+    public static final String FIELD_FACTOR = "factor";
+    public static final String FIELD_EXPLICIT_FACTOR = "explicitfactor";
+    public static final String FIELD_ZERO_BASED_INDEX_IN_FLEET = "zerobasedindexinfleet";
     
     private JsonSerializer<RaceLog> logSerializer;
 
@@ -25,6 +26,7 @@ public class RaceCellJsonSerializer implements JsonSerializer<RaceCell> {
         result.put(FIELD_NAME, object.getName());
         result.put(FIELD_FACTOR, object.getFactor());
         result.put(FIELD_EXPLICIT_FACTOR, object.getExplicitFactor());
+        result.put(FIELD_ZERO_BASED_INDEX_IN_FLEET, object.getZeroBasedIndexInFleet());
         result.put(FIELD_RACE_LOG, logSerializer.serialize(object.getRaceLog()));
         return result;
     }
