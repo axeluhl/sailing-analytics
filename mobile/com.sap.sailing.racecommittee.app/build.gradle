@@ -72,7 +72,7 @@ android {
 }
 
 dependencies {
-    compile "com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.2"
+    compile "com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.7.4"
 
     /* support libraries */
     compile "com.android.support:appcompat-v7:${rootProject.ext.support}"
