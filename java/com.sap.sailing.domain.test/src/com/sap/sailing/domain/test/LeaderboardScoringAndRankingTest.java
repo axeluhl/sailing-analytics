@@ -1801,7 +1801,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                     medalRaceColumnNames.add("M" + i);
                 }
             }
-            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, /* isFleetsCanRunInParallel */ true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(medalSeries);
         }
 
