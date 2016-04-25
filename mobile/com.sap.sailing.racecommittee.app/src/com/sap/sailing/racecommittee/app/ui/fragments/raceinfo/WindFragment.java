@@ -3,33 +3,12 @@ package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-
-import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.location.Location;
-import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.text.InputFilter;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.NumberPicker;
-import android.widget.TextView;
+import java.util.Set;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,7 +18,10 @@ import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.base.racegroup.impl.CurrentRaceFilterImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -64,7 +46,32 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.annotation.ColorInt;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
 public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnRaceUpdatedListener {
 
@@ -187,14 +194,12 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
             mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
                     .getKnots()));
         }
-
         setupButtons();
         setupWindSpeedPicker();
         setupLayouts(false);
@@ -236,12 +241,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
                     mAccuracy.setAccuracy(-1);
                 }
             }
-
             if (!timeOnly) {
                 mSetData.setEnabled(mCurrentLocation != null);
                 mSetDataMulti.setEnabled(mCurrentLocation != null);
             }
-
             if (mCurrentLocation != null) {
                 if (!timeOnly) {
                     double latitude = mCurrentLocation.getLatitude();
@@ -419,10 +422,8 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onPause() {
         super.onPause();
-
         // disconnect googleApiClient and unregister position poller
         pauseApiClient();
-
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
@@ -430,25 +431,23 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
     @Override
     public void onResume() {
         super.onResume();
-
         mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
-
-        mManagedRaces = RaceHelper.getManagedRacesAsList(mRacesByGroup, getRace());
-
+        final Set<ManagedRace> allRaces = new HashSet<>();
+        for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
+            Util.addAll(racesInGroup, allRaces);
+        }
+        final CurrentRaceFilter<ManagedRace> raceFilter = new CurrentRaceFilterImpl<>(allRaces);
+        mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
+        Collections.sort(mManagedRaces, new CurrentRaceComparator());
         mSelectedRaces = new ArrayList<>();
-
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-
         // connect googleApiClient and register position poller
         resumeApiClient();
-
         //register receiver to be notified if race is tracked
         IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
-
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
-
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
     }
 
@@ -462,9 +461,7 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
             case 1:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
                 break;
-
             default:
                 openMainScheduleFragment();
                 break;
@@ -537,10 +534,10 @@ public class WindFragment extends BaseFragment implements CompassDirectionListen
         mSelectedRaces.clear();
         mSelectedRaces.addAll(RaceHelper.getPreSelectedRaces(mRacesByGroup, getRace()));
         boolean[] selected = new boolean[mManagedRaces.size()];
-        for (int i = 0; i < mManagedRaces.size(); i++) {
-            selected[i] = mSelectedRaces.contains(mManagedRaces.get(i));
+        int i=0;
+        for (final ManagedRace r : mManagedRaces) {
+            selected[i++] = mSelectedRaces.contains(r);
         }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.wind_select_race));
         builder.setMultiChoiceItems(races.toArray(new String[races.size()]), selected, new DialogInterface.OnMultiChoiceClickListener() {
