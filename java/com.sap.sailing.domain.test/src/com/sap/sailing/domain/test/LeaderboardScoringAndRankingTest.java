@@ -699,7 +699,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f4 = new Competitor[] { c[ 9], c[ 7], c[2], c[3], c[4], c[5], c[6], c[1], c[8], c[0], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
         Competitor[] f5 = new Competitor[] { c[ 8], c[10], c[2], c[3], c[4], c[5], c[6], c[7], c[0], c[9], c[ 1], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
-                /* medal */ false, "testTieBreakByCountbackIncludesDiscards",
+                /* medal */ false, /* medal */ 0, "testTieBreakByCountbackIncludesDiscards",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5);
