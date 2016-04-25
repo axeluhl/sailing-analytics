@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -55,6 +56,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CourseFragmentMarks extends CourseFragment implements CourseMarkAdapter.MarkClick, CourseElementAdapter.EventListener, CourseElementAdapter.ItemClick {
 
+    private static final String EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS = "Each waypoint needs passing instructions";
+    private static final String MISSING_SECOND_MARK = "Missing second mark";
     private ReadonlyDataManager mDataManager;
     private RecyclerViewDragDropManager mDragDropManager;
     private RecyclerViewSwipeManager mSwipeManager;
@@ -240,10 +243,10 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
                             }
                             sendCourseDataAndDismiss(courseData);
                         } catch (IllegalStateException ex) {
-                            if (ex.getMessage().equals("Missing second mark")) {
+                            if (ex.getMessage().equals(MISSING_SECOND_MARK)) {
                                 String toastText = getString(R.string.error_missing_second_mark);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
-                            } else if (ex.getMessage().equals("Each waypoints needs passing instructions")) {
+                            } else if (ex.getMessage().equals(EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS)) {
                                 String toastText = getString(R.string.error_missing_passing_instructions);
                                 Toast.makeText(getActivity(), toastText, Toast.LENGTH_LONG).show();
                             }
@@ -258,7 +261,6 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
             Button unpublish = (Button) getView().findViewById(R.id.unpublishCourse);
             if (unpublish != null) {
                 unpublish.setOnClickListener(new View.OnClickListener() {
-
                     @Override
                     public void onClick(View arg0) {
                         CourseBase emptyCourse = new CourseDataImpl(getString(R.string.unpublished_course));
@@ -532,10 +534,10 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
                     waypoints.add(waypoint);
                 } else {
-                    throw new IllegalStateException("Missing second mark");
+                    throw new IllegalStateException(MISSING_SECOND_MARK);
                 }
             } else if (courseElement.getPassingInstructions().equals(PassingInstruction.None)) {
-                throw new IllegalStateException("Each waypoints needs passing instructions");
+                throw new IllegalStateException(EACH_WAYPOINT_NEEDS_PASSING_INSTRUCTIONS);
             } else {
                 Waypoint waypoint = new WaypointImpl(courseElement.getLeftMark(), courseElement.getPassingInstructions());
 
@@ -562,7 +564,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_MARKS);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
             case START_MODE_PRESETUP:

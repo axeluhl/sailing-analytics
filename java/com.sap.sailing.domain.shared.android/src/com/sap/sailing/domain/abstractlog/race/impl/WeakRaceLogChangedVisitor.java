@@ -27,7 +27,7 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
     private static ReferenceQueue<? super RaceLogChangedListener> queue = new ReferenceQueue<RaceLogChangedListener>();
     private static Map<Reference<?>, WeakRaceLogChangedVisitor> referenceToVisitor = new ConcurrentHashMap<Reference<?>, WeakRaceLogChangedVisitor>();
     static {
-        new Thread(WeakRaceLogChangedVisitor.class.getSimpleName() + " weak reference cleaner") {
+        Thread t = new Thread(WeakRaceLogChangedVisitor.class.getSimpleName() + " weak reference cleaner") {
             @Override
             public void run() {
                 while (true) {
@@ -42,7 +42,9 @@ public class WeakRaceLogChangedVisitor extends AbstractRaceLogChangedVisitor {
                     }
                 }
             }
-        }.start();
+        };
+        t.setDaemon(true);
+        t.start();
     }
     
     private final WeakReference<RaceLogChangedListener> listenerRef;

@@ -20,13 +20,13 @@ public class RaceCellDeserializer implements JsonDeserializer<RaceCell> {
 
     public RaceCell deserialize(JSONObject object)
             throws JsonDeserializationException {
-        String name = object.get(RaceCellJsonSerializer.FIELD_NAME).toString();
-
+        final String name = object.get(RaceCellJsonSerializer.FIELD_NAME).toString();
+        final Object factorJson = object.get(RaceCellJsonSerializer.FIELD_FACTOR);
+        final double factor = factorJson == null ? 1 : ((Number) factorJson).doubleValue();
+        final Double explicitFactor = (Double) object.get(RaceCellJsonSerializer.FIELD_EXPLICIT_FACTOR);
         JSONObject logJson = Helpers.getNestedObjectSafe(object, RaceCellJsonSerializer.FIELD_RACE_LOG);
         RaceLog log = logDeserializer.deserialize(logJson);
-
-
-        return new RaceCellImpl(name, log);
+        return new RaceCellImpl(name, log, factor, explicitFactor);
     }
 
 }
