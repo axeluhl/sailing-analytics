@@ -548,7 +548,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void arg0) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, /* raceColumnNameToSelect */ null);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -572,7 +572,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void result) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -596,7 +596,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 
                             @Override
                             public void onSuccess(Void result) {
-                                loadAndRefreshLeaderboard(selectedLeaderboardName, selectedRaceColumnName);
+                                loadAndRefreshLeaderboard(selectedLeaderboardName);
                             }
                         }));
     }
@@ -671,7 +671,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         
                     @Override
                     public void onSuccess(Void v) {
-                        loadAndRefreshLeaderboard(leaderboardName, /* nameOfRaceColumnToSelect */ null);
+                        loadAndRefreshLeaderboard(leaderboardName);
                     }
                 }));
     }
