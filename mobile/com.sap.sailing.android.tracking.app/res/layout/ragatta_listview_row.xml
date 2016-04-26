@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
+    android:layout_height="80dp"
     android:background="@color/list_item_background_color"
     tools:ignore="Overdraw" >
 
@@ -13,11 +13,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
+        android:baselineAlignBottom="@+id/regattaName"
         android:contentDescription="@string/empty"
         android:src="@drawable/white_arrow_right"
-        android:layout_marginTop="13dp"
-        android:layout_marginBottom="10dp"
+        android:paddingTop="15dp"
         android:layout_marginRight="10dp"
         android:layout_marginEnd="10dp" />
 
@@ -28,8 +27,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:layout_toLeftOf="@+id/nextPage"
-        android:layout_toStartOf="@+id/nextPage"
+        android:textSize="18sp"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:singleLine="true"
