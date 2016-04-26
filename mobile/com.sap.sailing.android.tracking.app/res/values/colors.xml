@@ -29,6 +29,9 @@
     <color name="qr_code_button_normal">@color/fiori_primary_color</color>
     <color name="qr_code_button_pressed">#007aad</color>
 
+    <color name="normal_button">#f3f3f3</color>
+    <color name="normal_button_pressed">#bfbfbf</color>
+
     <color name="competitor_background_color">#B3f3f3f3</color>
 
 </resources>

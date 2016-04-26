@@ -446,7 +446,7 @@
                 android:layout_marginLeft="@dimen/regatta_button_side_margin"
                 android:layout_marginRight="@dimen/regatta_button_side_margin"
                 android:layout_weight="0.50"
-                android:background="@drawable/rounded_btn_green"
+                android:background="@drawable/normal_btn_green"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
                 android:textAllCaps="true"

@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@drawable/main_background">
 
     <RelativeLayout
         android:id="@+id/image"
@@ -114,7 +115,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:background="@color/black_transparent"
+            android:background="@color/competitor_background_color"
             android:baselineAligned="false"
             android:measureWithLargestChild="false"
             android:orientation="horizontal"
@@ -129,7 +130,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/empty"
-                android:textColor="@color/white"/>
+                android:textColor="@color/black"/>
 
             <RelativeLayout
                 android:layout_width="10dp"
@@ -159,7 +160,7 @@
                 android:gravity="end|center_vertical"
                 android:padding="0dp"
                 android:text="@string/empty"
-                android:textColor="@color/white"/>
+                android:textColor="@color/black"/>
         </LinearLayout>
 
         <LinearLayout
@@ -185,12 +186,12 @@
 
         <View
             android:id="@+id/bottom_bar"
-            android:layout_width="fill_parent"
-            android:layout_height="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_separator_height"
             android:layout_alignBottom="@+id/competitor_info_layout"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:background="@color/sap_yellow"/>
+            android:background="@color/separator_color"/>
 
     </RelativeLayout>
 
@@ -365,12 +366,11 @@
         android:id="@+id/start_tracking_box"
         android:layout_width="fill_parent"
         android:layout_height="200dp"
-        android:layout_above="@id/bottomLayout"
-        android:background="@color/black">
+        android:layout_above="@+id/bottom_announcement">
 
         <View
             android:id="@+id/white_bar"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -384,77 +384,69 @@
             android:layout_below="@id/white_bar"
             android:orientation="horizontal">
 
-            <com.sap.sailing.android.tracking.app.customviews.OpenSansButton
+            <Button
                 android:id="@+id/show_event_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginBottom="@dimen/regatta_button_margin"
                 android:layout_marginLeft="@dimen/regatta_button_side_margin"
-                android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_marginTop="@dimen/regatta_button_margin"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_btn_blue"
+                android:background="@drawable/normal_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_event"
-                android:textAllCaps="true"
-                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="@dimen/button_text_size"
                 tools:text="Show Event"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            <Button
                 android:id="@+id/show_leaderboards_button"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
+                android:layout_marginBottom="@dimen/regatta_button_margin"
                 android:layout_marginLeft="@dimen/regatta_button_side_margin"
                 android:layout_marginRight="@dimen/regatta_button_side_margin"
+                android:layout_marginTop="@dimen/regatta_button_margin"
                 android:layout_weight="1"
-                android:background="@drawable/rounded_btn_yellow"
+                android:background="@drawable/normal_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
-                android:textAllCaps="true"
-                android:textStyle="bold"/>
+                android:textColor="@color/black"
+                android:textSize="@dimen/button_text_size"/>
 
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/regatta_button_height"
+            android:layout_height="@dimen/tracking_button_height"
             android:layout_below="@+id/event_buttons">
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            <Button
                 android:id="@+id/start_tracking"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="@dimen/regatta_button_margin"
                 android:layout_marginLeft="@dimen/regatta_button_side_margin"
                 android:layout_marginRight="@dimen/regatta_button_side_margin"
-                android:background="@drawable/rounded_btn_green"
+                android:layout_marginTop="@dimen/regatta_button_margin"
+                android:background="@drawable/start_tracking_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/start_tracking"
-                android:textAllCaps="true"
-                android:textStyle="bold"/>
+                android:textSize="@dimen/tracking_button_text_size"/>
 
         </RelativeLayout>
 
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/bottomLayout"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        android:id="@+id/bottom_announcement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:background="@color/darker_gray">
-
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:id="@+id/bottom_announcement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:text="@string/please_listen_to_announcements"
-            android:textColor="@color/white"/>
-    </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:textSize="@dimen/default_text_size"
+        android:text="@string/please_listen_to_announcements"
+        android:textColor="@color/black"/>
 
 </RelativeLayout>
