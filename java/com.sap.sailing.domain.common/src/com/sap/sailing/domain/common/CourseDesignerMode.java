@@ -40,7 +40,7 @@ public enum CourseDesignerMode {
     public static CourseDesignerMode[] validValues() {
         List<CourseDesignerMode> validValues = new ArrayList<CourseDesignerMode>();
         for (CourseDesignerMode type : values()) {
-            if (type != UNKNOWN || type != ADMIN_CONSOLE) {
+            if (type != UNKNOWN && type != ADMIN_CONSOLE) {
                 validValues.add(type);
             }
         }
