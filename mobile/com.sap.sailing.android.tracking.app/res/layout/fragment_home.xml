@@ -41,7 +41,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/scan_qr_button"
+        android:background="@drawable/blue_button"
         android:text="@string/scan_qr"
         android:textSize="@dimen/highlight_text_size"/>
 
