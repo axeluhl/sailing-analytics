@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@drawable/main_background">
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar
         android:id="@+id/toolbar"
@@ -52,7 +53,7 @@
 
         <RelativeLayout
             android:id="@+id/tracking_linear_layout"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:padding="0dp"/>

@@ -33,5 +33,7 @@
     <color name="normal_button_pressed">#bfbfbf</color>
 
     <color name="competitor_background_color">#B3f3f3f3</color>
+    
+    <color name="tracking_status_row_color">#f6fbfb</color>
 
 </resources>
