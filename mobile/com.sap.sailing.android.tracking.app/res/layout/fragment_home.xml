@@ -28,6 +28,7 @@
             android:layout_centerVertical="true"
             android:gravity="center"
             android:text="@string/scan_hint"
+            android:textSize="@dimen/default_text_size"
             android:textColor="@color/black"/>
     </RelativeLayout>
 
@@ -40,10 +41,9 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="20dp"
-        android:background="@color/qr_code_background_color"
+        android:background="@drawable/scan_qr_button"
         android:text="@string/scan_qr"
-        android:textAllCaps="true"
-        android:textSize="18sp"/>
+        android:textSize="@dimen/highlight_text_size"/>
 
     <Button
         android:id="@+id/noQrCode"
@@ -56,9 +56,8 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:text="@string/no_qr_code"
-        android:textAllCaps="true"
         android:textColor="@color/black"
-        android:textSize="18sp"/>
+        android:textSize="@dimen/default_text_size"/>
 
     <ListView
         android:id="@+id/listRegatta"

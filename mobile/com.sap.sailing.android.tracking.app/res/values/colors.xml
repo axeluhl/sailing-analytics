@@ -9,6 +9,7 @@
     <color name="green">#00FF00</color>
     <color name="gray">#333333</color>
     <color name="darker_gray">#242424</color>
+    <color name="black_transparent">#55000000</color>
 
     <color name="colorPrimary">@color/gray</color>
     <color name="colorPrimaryDark">@color/colorPrimary</color>
@@ -19,6 +20,15 @@
 
     <color name="fiori_primary_color">#009de0</color>
 
-    <color name="qr_code_background_color">@color/fiori_primary_color</color>
+    <color name="start_tracking_button_normal">#0e7733</color>
+    <color name="start_tracking_button_pressed">#08451e</color>
+
+    <color name="stop_tracking_button_normal">#cd201b</color>
+    <color name="stop_tracking_button_pressed">#991814</color>
+
+    <color name="qr_code_button_normal">@color/fiori_primary_color</color>
+    <color name="qr_code_button_pressed">#007aad</color>
+
+    <color name="competitor_background_color">#B3f3f3f3</color>
 
 </resources>
