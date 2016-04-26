@@ -201,7 +201,7 @@
                     android:id="@+id/change_photo_button"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/stift"/>
+                    android:background="@drawable/edit_pencil"/>
             </LinearLayout>
         </RelativeLayout>
 
