@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -98,9 +98,8 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
                 // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
-                // This decision is made once based on the initial screen height. Resizing the window afterwards will have
-                // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
-                boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
+                // This decision is made once during initial page load based on the device type (mobile or not).
+                boolean isScreenLargeEnoughToOfferChartSupport = !DeviceDetector.isMobile();
                 checkUrlParameters(result, showMapControls, isScreenLargeEnoughToOfferChartSupport);
             }
             
