@@ -28,7 +28,7 @@ import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
 
 public class PreferenceActivity extends AppCompatActivity {
 
-    public static final String SPECIFIC_REGATTA_PREFERENCES_NAME = "TEMP_PREFERENCE_KEY";
+    public static final String SPECIFIC_REGATTA_PREFERENCES_NAME = "TEMP_PREFERENCES";
     public static final String EXTRA_SPECIFIC_REGATTA_NAME = "EXTRA_SPECIFIC_REGATTA_NAME";
     public static final String EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME = "EXTRA_SPECIFIC_REGATTA_PREFERENCE_KEY";
     public static final String EXTRA_SHOW_FRAGMENT = "SHOW_FRAGMENT";
@@ -39,13 +39,13 @@ public class PreferenceActivity extends AppCompatActivity {
 
     public static void openSpecificRegattaConfiguration(Context context, RaceGroup raceGroup) {
         // reset temp preferences
-        PreferenceHelper helper = new PreferenceHelper(context, "TEMP_PREFERENCE_KEY");
+        PreferenceHelper helper = new PreferenceHelper(context, SPECIFIC_REGATTA_PREFERENCES_NAME);
         helper.clearPreferences();
         helper.resetPreferences(true);
 
         // store local configuration in temp preferences
         RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
-        AppPreferences preferences = AppPreferences.on(context, "TEMP_PREFERENCE_KEY");
+        AppPreferences preferences = AppPreferences.on(context, SPECIFIC_REGATTA_PREFERENCES_NAME);
         PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
         preferencesLoader.store();
 
@@ -112,7 +112,6 @@ public class PreferenceActivity extends AppCompatActivity {
                     Bundle info = bundle.getBundle(PreferenceActivity.EXTRA_SHOW_FRAGMENT_ARGUMENTS);
                     if (info != null) {
                         mIsRedirected = true;
-                        // sharedPreferencesName = info.getString(EXTRA_SPECIFIC_REGATTA_PREFERENCES_NAME);
                         String raceGroupName = info.getString(EXTRA_SPECIFIC_REGATTA_NAME);
                         String title = getString(R.string.preference_regatta_specific_title, raceGroupName);
                         getSupportActionBar().setTitle(title);
