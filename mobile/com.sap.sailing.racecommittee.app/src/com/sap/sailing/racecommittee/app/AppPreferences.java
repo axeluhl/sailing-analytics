@@ -132,7 +132,7 @@ public class AppPreferences {
     }
 
     public CourseDesignerMode getDefaultCourseDesignerMode() {
-        String mode = preferences.getString(key(R.string.preference_course_designer_override_key), "");
+        String mode = preferences.getString(key(R.string.preference_course_designer_override_key), "BY_NAME");
         return CourseDesignerMode.valueOf(mode);
     }
 
