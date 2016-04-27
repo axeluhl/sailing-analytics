@@ -41,7 +41,7 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
     private final Logger LOG = Logger.getLogger(DoubleVectorFixImporter.class.getName());
     private final static DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss.SSSSSS");
     private final BravoSensorDataMetadata metadata = BravoSensorDataMetadata.INSTANCE;
-    private final String BOF = "jjlDATE\tjjlTIME";
+    private final String BOF = "jjlDATE\tjjlTIME\tEpoch";
 
     public void importFixes(InputStream inputStream, Callback callback, String sourceName)
             throws FormatNotSupportedException, IOException {
