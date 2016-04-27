@@ -247,7 +247,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
-            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
