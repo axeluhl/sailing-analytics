@@ -72,7 +72,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogMappingWrapper;
-import com.sap.sailing.domain.racelogtracking.impl.logtracker.Racelog2GPSFixTracker;
+import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogGPSFixTracker;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -117,7 +117,7 @@ public class RaceLogRaceTracker implements RaceTracker {
     private final GPSFixStore gpsFixStore;
     private final RaceLogResolver raceLogResolver;
 
-    private Racelog2GPSFixTracker raceLogGPSFixTracker;
+    private RaceLogGPSFixTracker raceLogGPSFixTracker;
 
     public RaceLogRaceTracker(final DynamicTrackedRegatta regatta, RaceLogConnectivityParams params,
             WindStore windStore,
@@ -372,7 +372,7 @@ public class RaceLogRaceTracker implements RaceTracker {
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
         trackedRace.setStatus(new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
 
-        raceLogGPSFixTracker = new Racelog2GPSFixTracker(regatta, trackedRace);
+        raceLogGPSFixTracker = new RaceLogGPSFixTracker(regatta, trackedRace);
         // update the device mappings (without loading the fixes, as the TrackedRace does this itself on startup)
         try {
             competitorMappings.updateMappings(false);
