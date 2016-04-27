@@ -40,11 +40,10 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
+public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     private static final Logger logger = Logger.getLogger(RaceLogSensorFixTracker.class.getName());
 
     private final SensorFixStore sensorFixStore;
-    private final DynamicTrackedRace trackedRace;
     private final RaceLogMappingWrapper<Competitor> competitorMappings;
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
@@ -81,8 +80,9 @@ public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
             competitorMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), (mapping) -> {
                 SensorFixMapper<DoubleVectorFix, DynamicSensorFixTrack<Competitor, SensorFix>, Competitor> mapper =
                         sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
-                DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
-                if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
+                DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(getTrackedRace(),
+                        mapping.getMappedTo());
+                if (getTrackedRace().isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
                     mapper.addFix(track, fix);
                 }
             });
@@ -130,13 +130,11 @@ public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
         }
     };
 
-    private final DynamicTrackedRegatta trackedRegatta;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
     public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
-        this.trackedRace = trackedRace;
-        this.trackedRegatta = regatta;
+        super(regatta, trackedRace);
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.fixLoadingTask = new FixLoadingTask(trackedRace);
@@ -190,7 +188,7 @@ public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMapping<Competitor> mapping) {
         SensorFixMapper<Timed, Track<?>, Competitor> mapper = sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
-        Track<?> track = mapper.getTrack(trackedRace, mapping.getMappedTo());
+        Track<?> track = mapper.getTrack(getTrackedRace(), mapping.getMappedTo());
         try {
             sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(), 
                     timeRangeToLoad.from(), timeRangeToLoad.to(), true);
@@ -205,11 +203,11 @@ public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
     }
 
     private void startTracking() {
-        trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        getTrackedRace().addRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
-            trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
+            getTrackedRace().getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
         }
-        trackedRace.addListener(trackingTimesRaceChangeListener);
+        getTrackedRace().addListener(trackingTimesRaceChangeListener);
         updateMappingsAndAddListeners();
     }
 
@@ -227,29 +225,23 @@ public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
             }
             // add listeners for devices in mappings already present
             competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
-        }, "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
+        }, "Mongo sensor track loader for tracked race " + getTrackedRace().getRace().getName());
     }
 
     public void stopTracking() {
-        trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        getTrackedRace().removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
             knownRegattaLogs.clear();
         }
         sensorFixStore.removeListener(listener);
-        trackedRace.removeListener(trackingTimesRaceChangeListener);
+        getTrackedRace().removeListener(trackingTimesRaceChangeListener);
     }
     
     public void stop() {
         stopTracking();
-        trackedRace.removeListener(raceChangeListener);
+        getTrackedRace().removeListener(raceChangeListener);
     }
 
-    private TimePoint getStartOfTracking() {
-        return trackedRace.getStartOfTracking();
-    }
 
-    private TimePoint getEndOfTracking() {
-        return trackedRace.getEndOfTracking();
-    }
 }
