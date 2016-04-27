@@ -45,6 +45,8 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
 
     private final SensorFixStore sensorFixStore;
     private final RaceLogMappingWrapper<Competitor> competitorMappings;
+    
+    // TODO: move to AbstractRaceLogFixTracker
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
         public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -64,6 +66,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
             updateMappingsAndAddListeners();
         };
     };
+    // TODO: move to AbstractRaceLogFixTracker    
     private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
@@ -74,6 +77,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
             }
         }
     };
+    // TODO: move to AbstractRaceLogFixTracker
     private final FixReceivedListener<DoubleVectorFix> listener = new FixReceivedListener<DoubleVectorFix>() {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
@@ -89,6 +93,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
         }
     };
 
+    // TODO: move to AbstractRaceLogFixTracker
     private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
         
         @Override
@@ -110,7 +115,8 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     
     private final FixLoadingTask fixLoadingTask;
 
-    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
+    // TODO: move to AbstractRaceLogFixTracker
+   private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
         @Override
         public void regattaLogAttached(RegattaLog regattaLog) {
             try {

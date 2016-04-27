@@ -14,6 +14,7 @@ public class AbstractRaceLogFixTracker {
         this.trackedRace = trackedRace;
     }
 
+    // TEMP: usage in RaceLogRaceTracker überprüfen
     public DynamicTrackedRace getTrackedRace() {
         return trackedRace;
     }
@@ -22,14 +23,17 @@ public class AbstractRaceLogFixTracker {
         return trackedRegatta;
     }
 
+    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getStartOfTracking() {
         return trackedRace.getStartOfTracking();
     }
 
+    // TEMP: kommt von RaceLogSensorFixTracker
     protected TimePoint getEndOfTracking() {
         return trackedRace.getEndOfTracking();
     }
 
+    // TEMP: kommt von RaceLogRaceTracker
     public void updateStartAndEndOfTracking() {
         trackedRace.updateStartAndEndOfTracking();
     }
