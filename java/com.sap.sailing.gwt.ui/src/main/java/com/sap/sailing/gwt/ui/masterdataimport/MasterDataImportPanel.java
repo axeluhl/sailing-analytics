@@ -45,7 +45,6 @@ public class MasterDataImportPanel extends VerticalPanel {
 
     private List<String> allLeaderboardGroupNames;
 
-    private final MasterDataImportSubProgressMessages progressMessages = MasterDataImportSubProgressMessages.INSTANCE;
     private final StringMessages stringMessages;
     private String currentHost;
     private SailingServiceAsync sailingService;
@@ -181,8 +180,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                                                     } else {
                                                         overallProgressBar.setPercent((int) (result
                                                                 .getOverallProgressPct() * 100));
-                                                                subProgressName.setText(progressMessages.getString(
-                                                                        result.getNameOfCurrentSubProgress()));
+                                                        subProgressName.setText(result.getCurrentSubProgress()
+                                                                .getMessage(stringMessages));
                                                         subProgressBar.setPercent((int) (result
                                                                 .getCurrentSubProgressPct() * 100));
                                                     }

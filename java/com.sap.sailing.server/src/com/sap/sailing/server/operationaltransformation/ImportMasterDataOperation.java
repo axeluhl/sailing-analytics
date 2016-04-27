@@ -1,10 +1,5 @@
 package com.sap.sailing.server.operationaltransformation;
 
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_LEADERBOARD_GROUPS;
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_WAIT;
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_WIND_TRACKS;
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.UPDATE_EVENT_LEADERBOARD_GROUP_LINKS;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -31,6 +26,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
@@ -101,10 +97,10 @@ public class ImportMasterDataOperation extends
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
         this.progress = dataImportLock.getProgress(importOperationId);
-        progress.setNameOfCurrentSubProgress(IMPORT_WAIT.getMessageKey());
+        progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WAIT);
         LockUtil.lockForWrite(dataImportLock);
         try {
-            progress.setNameOfCurrentSubProgress(IMPORT_LEADERBOARD_GROUPS.getMessageKey());
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_LEADERBOARD_GROUPS);
             progress.setCurrentSubProgressPct(0);
             int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
             int i = 0;
@@ -113,7 +109,7 @@ public class ImportMasterDataOperation extends
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
-            progress.setNameOfCurrentSubProgress(UPDATE_EVENT_LEADERBOARD_GROUP_LINKS.getMessageKey());
+            progress.setCurrentSubProgress(DataImportSubProgress.UPDATE_EVENT_LEADERBOARD_GROUP_LINKS);
             progress.setOverAllProgressPct(0.4);
             progress.setCurrentSubProgressPct(0);
             final Iterable<Event> allEvents = masterData.getAllEvents();
@@ -124,7 +120,7 @@ public class ImportMasterDataOperation extends
                 eventCounter++;
                 progress.setCurrentSubProgressPct((double) eventCounter / numOfEventsToHandle);
             }
-            progress.setNameOfCurrentSubProgress(IMPORT_WIND_TRACKS.getMessageKey());
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WIND_TRACKS);
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);

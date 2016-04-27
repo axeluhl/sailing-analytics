@@ -34,10 +34,10 @@ public interface DataImportProgress extends Serializable {
     double getOverallProgressPct();
 
     void setOverAllProgressPct(double pct);
-
-    String getNameOfCurrentSubProgress();
-
-    void setNameOfCurrentSubProgress(String name);
+    
+    DataImportSubProgress getCurrentSubProgress();
+    
+    void setCurrentSubProgress(DataImportSubProgress subProgress);
 
     double getCurrentSubProgressPct();
 

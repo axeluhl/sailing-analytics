@@ -1,8 +1,5 @@
 package com.sap.sailing.server.masterdata;
 
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.TRANSFER_COMPLETED;
-import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.TRANSFER_STARTED;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -15,6 +12,7 @@ import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
@@ -39,7 +37,7 @@ public class MasterDataImporter {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
-                TRANSFER_STARTED.getMessageKey(), 0.5);
+                DataImportSubProgress.TRANSFER_STARTED, 0.5);
 
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
@@ -68,7 +66,7 @@ public class MasterDataImporter {
         }
 
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
-                TRANSFER_COMPLETED.getMessageKey(), 0.5);
+                DataImportSubProgress.TRANSFER_COMPLETED, 0.5);
 
         applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
     }
