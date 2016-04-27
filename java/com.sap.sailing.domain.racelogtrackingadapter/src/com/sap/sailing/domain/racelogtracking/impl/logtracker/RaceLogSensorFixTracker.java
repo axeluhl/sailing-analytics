@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl.logtracker;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,8 +40,8 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.impl.TimeRangeImpl;
 
-public class RaceLogSensorDataTracker {
-    private static final Logger logger = Logger.getLogger(RaceLogSensorDataTracker.class.getName());
+public class RaceLogSensorFixTracker extends AbstractRacelogTracker {
+    private static final Logger logger = Logger.getLogger(RaceLogSensorFixTracker.class.getName());
 
     private final SensorFixStore sensorFixStore;
     private final DynamicTrackedRace trackedRace;
@@ -133,7 +133,7 @@ public class RaceLogSensorDataTracker {
     private final DynamicTrackedRegatta trackedRegatta;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RaceLogSensorDataTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
+    public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
         this.trackedRace = trackedRace;
         this.trackedRegatta = regatta;
@@ -152,17 +152,17 @@ public class RaceLogSensorDataTracker {
             }
             @Override
             protected void mappingRemoved(DeviceMapping<Competitor> mapping) {
-                RaceLogSensorDataTracker.this.mappingRemoved(mapping);
+                RaceLogSensorFixTracker.this.mappingRemoved(mapping);
             }
 
             @Override
             protected void mappingAdded(DeviceMapping<Competitor> mapping) {
-                RaceLogSensorDataTracker.this.mappingAdded(mapping);
+                RaceLogSensorFixTracker.this.mappingAdded(mapping);
             }
 
             @Override
             protected void mappingChanged(DeviceMapping<Competitor> oldMapping, DeviceMapping<Competitor> newMapping) {
-                RaceLogSensorDataTracker.this.mappingChanged(oldMapping, newMapping);
+                RaceLogSensorFixTracker.this.mappingChanged(oldMapping, newMapping);
             }
             
         };

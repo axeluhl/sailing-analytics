@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl.logtracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +77,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
      * 
      * @throws DoesNotHaveRegattaLogException
      */
-    final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered)
+    public final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered)
             throws DoesNotHaveRegattaLogException {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far

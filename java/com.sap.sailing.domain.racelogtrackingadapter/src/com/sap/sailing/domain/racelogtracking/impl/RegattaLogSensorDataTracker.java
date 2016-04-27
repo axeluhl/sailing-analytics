@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
+import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTracker;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -13,7 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RegattaLogSensorDataTracker {
     private final Map<RegattaAndRaceIdentifier, DynamicTrackedRace> knownTrackedRaces = new ConcurrentHashMap<>();
-    private final Map<RegattaAndRaceIdentifier, RaceLogSensorDataTracker> dataTrackers = new ConcurrentHashMap<>();
+    private final Map<RegattaAndRaceIdentifier, RaceLogSensorFixTracker> dataTrackers = new ConcurrentHashMap<>();
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
     private final SensorFixStore sensorFixStore;
@@ -50,7 +51,7 @@ public class RegattaLogSensorDataTracker {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            RaceLogSensorDataTracker dataTracker = new RaceLogSensorDataTracker((DynamicTrackedRace) trackedRace,
+            RaceLogSensorFixTracker dataTracker = new RaceLogSensorFixTracker((DynamicTrackedRace) trackedRace,
                     trackedRegatta, sensorFixStore, sensorFixMapperFactory);
             dataTrackers.put(raceIdentifier, dataTracker);
         }
@@ -66,7 +67,7 @@ public class RegattaLogSensorDataTracker {
     }
 
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
-        RaceLogSensorDataTracker currentActiveDataTracker = dataTrackers.get(raceIdentifier);
+        RaceLogSensorFixTracker currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
             currentActiveDataTracker.stop();
             dataTrackers.remove(currentActiveDataTracker);
