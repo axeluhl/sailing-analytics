@@ -309,7 +309,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 if (seriesIter.hasNext()) {
                     final SeriesDTO series = seriesIter.next();
                     sailingService.updateSeries(regattaName, series.getName(), series.getName(), series.isMedal(),
-                        series.getDiscardThresholds(), series.isStartsWithZeroScore(),
+                        series.isFleetsCanRunInParallel(), series.getDiscardThresholds(), series.isStartsWithZeroScore(),
                         series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring(),
                         series.getFleets(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                             @Override

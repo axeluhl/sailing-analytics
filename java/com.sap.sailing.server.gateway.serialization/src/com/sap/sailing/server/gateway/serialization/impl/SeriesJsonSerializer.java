@@ -18,6 +18,7 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
     public static final String FIELD_STARTS_WITH_ZERO_SCORE = "startsWithZeroScore";
     public static final String FIELD_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING = "hasSplitFleetContiguousScoring";
     public static final String FIELD_IS_MEDAL_SERIES = "isMedalSeries";
+    public static final String FIELD_FLEETS_CAN_RUN_IN_PARALLEL = "fleetsCanRunInParallel";
 
     private final JsonSerializer<Fleet> fleetSerializer;
 
@@ -30,6 +31,7 @@ public class SeriesJsonSerializer implements JsonSerializer<Series> {
         
         result.put(FIELD_NAME, series.getName());
         result.put(FIELD_IS_MEDAL_SERIES, series.isMedal());
+        result.put(FIELD_FLEETS_CAN_RUN_IN_PARALLEL, series.isFleetsCanRunInParallel());
         result.put(FIELD_STARTS_WITH_ZERO_SCORE, series.isStartsWithZeroScore());
         result.put(FIELD_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING, series.hasSplitFleetContiguousScoring());
 

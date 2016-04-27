@@ -189,7 +189,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     private SimpleRaceLogIdentifier convertManagedRaceIdentifierToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
-        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceName(), id.getFleet().getName());
+        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(), id.getFleet().getName());
     }
 
     @Override

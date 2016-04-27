@@ -145,6 +145,7 @@ import com.sap.sailing.domain.base.impl.SailingServerConfigurationImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
@@ -851,7 +852,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             fleets.add(baseDomainFactory.convertToFleetDTO(fleet));
         }
         List<RaceColumnDTO> raceColumns = convertToRaceColumnDTOs(series.getRaceColumns());
-        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(),
+        SeriesDTO result = new SeriesDTO(series.getName(), fleets, raceColumns, series.isMedal(), series.isFleetsCanRunInParallel(),
                 series.getResultDiscardingRule() == null ? null : series.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(),
                         series.isStartsWithZeroScore(), series.isFirstColumnIsNonDiscardableCarryForward(), series.hasSplitFleetContiguousScoring());
         return result;
@@ -2808,7 +2809,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             /* startDate*/ null, /*endDate*/ null,
                             RegattaImpl.getDefaultName(replayRaceDTO.rsc, replayRaceDTO.boat_class),
                             Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
-                            /* isMedal */false, Collections.singletonList(new FleetImpl(
+                            /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(new FleetImpl(
                                     LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
                             /* race column names */new ArrayList<String>(), getService())), false,
                             baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true,
@@ -3929,7 +3930,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     @Override
-    public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
+    public void updateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
             List<FleetDTO> fleets) {
@@ -3938,7 +3939,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
         }
         getService().apply(
-                new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, resultDiscardingThresholds,
+                new UpdateSeries(regattaIdentifier, seriesName, newSeriesName, isMedal, isFleetsCanRunInParallel, resultDiscardingThresholds,
                         startsWithZeroScore, firstColumnIsNonDiscardableCarryForward, hasSplitFleetContiguousScoring,
                         fleets));
     }
@@ -4269,7 +4270,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (SeriesDTO series : regattaDTO.series){
                 SeriesParameters seriesParameters = getSeriesParameters(series);
                 seriesCreationParams.put(series.getName(), new SeriesCreationParametersDTO(series.getFleets(),
-                false, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
+                false, true, seriesParameters.isStartswithZeroScore(), seriesParameters.isFirstColumnIsNonDiscardableCarryForward(),
                         seriesParameters.getDiscardingThresholds(), seriesParameters.isHasSplitFleetContiguousScoring()));
             }
         return seriesCreationParams;
@@ -5241,10 +5242,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<com.sap.sse.common.Util.Pair<ControlPointDTO, PassingInstruction>> courseDTO) throws NotFoundException {
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
-        if(!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
-            courseName += "- " + fleetName; 
+        if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
+            courseName += " - " + fleetName; 
         }
-        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false).analyze();
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl(courseName);
         }
@@ -5262,7 +5263,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
-                getService().getServerAuthor(), raceLog.getCurrentPassId(), course);
+                getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
     }
     
@@ -5311,7 +5312,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RaceCourseDTO getLastCourseDefinitionInRaceLog(final String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException {
         final RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
-        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        // only look for course definitions that really define waypoints; ignore by-name course updates
+        CourseBase lastPublishedCourse = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl("");
         }
@@ -6115,7 +6117,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             for (Fleet fleet : raceColumn.getFleets()) {
                 RaceLog raceLog = raceColumn.getRaceLog(fleet);
                 if (raceLog != raceLogToIgnore) {
-                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog);
+                    LastPublishedCourseDesignFinder finder = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true);
                     CourseBase course = finder.analyze();
                     if (course != null) {
                         for (Waypoint waypoint : course.getWaypoints()) {

@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -26,7 +27,6 @@ import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.logging.LogEvent;
 import com.sap.sailing.racecommittee.app.services.RaceStateService;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
@@ -596,7 +596,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                     transaction.remove(extra);
                                 }
                             }
-                            if (findViewById(R.id.race_content) != null) {
+                            if (findViewById(R.id.race_content) != null && mSelectedRace != null) {
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {
@@ -689,13 +689,10 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
                 lastSeenRaces = data;
-
                 registerOnService(data);
                 mRaceList.setupOn(data);
-
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
-
             setProgressSpinnerVisibility(false);
         }
     }

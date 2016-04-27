@@ -185,11 +185,11 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Kiel Week 2012";
         final String boatClassName = "49er";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false,
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1), new FleetImpl("Silver", 2) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
-        Series medal = new SeriesImpl("Medal", /* isMedal */ true,
+        Series medal = new SeriesImpl("Medal", /* isMedal */ true, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Medal") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
                 UUID.randomUUID(), Arrays.asList(new Series[] { qualification, finals, medal }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
@@ -224,7 +224,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Extreme Sailing Series 2020";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
                 UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
@@ -238,10 +238,10 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         assertEquals("Qualification", replicatedQualification.getName());
         assertEquals(2, Util.size(replicatedQualification.getFleets()));
         assertFalse(seriesIter.hasNext());
-        Series finals = new SeriesImpl("Finals", /* isMedal */ false,
+        Series finals = new SeriesImpl("Finals", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Gold", 1) }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         FleetDTO finalsGoldFleet = new FleetDTO("Gold", 1, Color.GRAY);
-        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(),
+        master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), finals.getName(), finals.getName(), finals.isMedal(), finals.isFleetsCanRunInParallel(),
                 new int[] {},
                 finals.isStartsWithZeroScore(), finals.isFirstColumnIsNonDiscardableCarryForward(),
                 finals.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] { finalsGoldFleet })));
@@ -267,7 +267,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         final String baseEventName = "Extreme Sailing Series 2021";
         final String boatClassName = "Extreme40";
         final List<String> emptyRaceColumnNamesList = Collections.emptyList();
-        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false,
+        Series qualification = new SeriesImpl("Qualification", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 Arrays.asList(new Fleet[] { new FleetImpl("Yellow"), new FleetImpl("Blue") }), emptyRaceColumnNamesList, /* trackedRegattaRegistry */ null);
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, /*startDate*/ null, /*endDate*/ null,
                 UUID.randomUUID(), Arrays.asList(new Series[] { qualification }), /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /* useStartTimeInference */ true, OneDesignRankingMetric::new);
@@ -279,7 +279,7 @@ public class RegattaReplicationTest extends AbstractServerReplicationTest {
         Series replicatedQualification = seriesIter.next();
         assertEquals("Qualification", replicatedQualification.getName());
         master.apply(new UpdateSeries(masterRegatta.getRegattaIdentifier(), qualification.getName(), "Simons Quali", 
-                qualification.isMedal(),
+                qualification.isMedal(), qualification.isFleetsCanRunInParallel(),
                 new int[] {},
                 qualification.isStartsWithZeroScore(), qualification.isFirstColumnIsNonDiscardableCarryForward(),
                 qualification.hasSplitFleetContiguousScoring(), Arrays.asList(new FleetDTO[] {  })));

@@ -313,7 +313,7 @@ public class RaceLogRaceTracker implements RaceTracker {
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
         if (trackedRace != null) {
-            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog(), /* onlyCoursesWithValidWaypointList */ true).analyze();
             List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
             for (Waypoint waypoint : base.getWaypoints()) {
                 update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
@@ -338,7 +338,7 @@ public class RaceLogRaceTracker implements RaceTracker {
         }
         BoatClass boatClass = denoteEvent.getBoatClass();
         String raceName = denoteEvent.getRaceName();
-        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (courseBase == null) {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);

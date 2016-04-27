@@ -1462,7 +1462,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             result.put(
                     s.getName(),
-                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
+                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring()));

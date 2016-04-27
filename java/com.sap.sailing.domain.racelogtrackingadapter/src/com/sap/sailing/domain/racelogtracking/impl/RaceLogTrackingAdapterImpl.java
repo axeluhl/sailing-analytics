@@ -47,6 +47,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -194,7 +195,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service) {
-        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
         if (course != null) {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
@@ -212,7 +213,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                            service.getServerAuthor(), passId, newCourse);
+                            service.getServerAuthor(), passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
 

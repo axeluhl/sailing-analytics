@@ -343,7 +343,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         } else {
             // if no tracked race is found, use marks from race course if present in racelog
-            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet));
+            LastPublishedCourseDesignFinder courseDesginFinder = new LastPublishedCourseDesignFinder(getRaceLog(fleet), /* onlyCoursesWithValidWaypointList */ true);
             final CourseBase courseBase = courseDesginFinder.analyze();
             if (courseBase != null) {
                 courseBase.getWaypoints().forEach((waypoint) -> Util.addAll(waypoint.getMarks(), result));

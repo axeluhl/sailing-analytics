@@ -202,7 +202,7 @@ public class OnlineDataManager extends DataManager {
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
                 // no parameter encoding required here; the UrlHelper.generateUrl call uses Url.Builder which handles encoding
                 String raceGroupName = identifier.getRaceGroup().getName();
-                String raceColumnName = identifier.getRaceName();
+                String raceColumnName = identifier.getRaceColumnName();
                 String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
@@ -229,7 +229,7 @@ public class OnlineDataManager extends DataManager {
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
                 String raceGroupName = identifier.getRaceGroup().getName();
-                String raceColumnName = identifier.getRaceName();
+                String raceColumnName = identifier.getRaceColumnName();
                 String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
@@ -257,7 +257,7 @@ public class OnlineDataManager extends DataManager {
                 ManagedRaceIdentifier identifier = managedRace.getIdentifier();
 
                 String raceGroupName = identifier.getRaceGroup().getName();
-                String raceColumnName = identifier.getRaceName();
+                String raceColumnName = identifier.getRaceColumnName();
                 String fleetName = identifier.getFleet().getName();
 
                 List<Util.Pair<String, Object>> params = new ArrayList<>();
