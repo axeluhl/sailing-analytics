@@ -1,5 +1,10 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_LEADERBOARD_GROUPS;
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_WAIT;
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_WIND_TRACKS;
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.UPDATE_EVENT_LEADERBOARD_GROUP_LINKS;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -96,10 +101,10 @@ public class ImportMasterDataOperation extends
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
         this.progress = dataImportLock.getProgress(importOperationId);
-        progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
+        progress.setNameOfCurrentSubProgress(IMPORT_WAIT.getMessageKey());
         LockUtil.lockForWrite(dataImportLock);
         try {
-            progress.setNameOfCurrentSubProgress("Importing leaderboard groups");
+            progress.setNameOfCurrentSubProgress(IMPORT_LEADERBOARD_GROUPS.getMessageKey());
             progress.setCurrentSubProgressPct(0);
             int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
             int i = 0;
@@ -108,7 +113,7 @@ public class ImportMasterDataOperation extends
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
-            progress.setNameOfCurrentSubProgress("Updating Event-LeaderboardGroup links");
+            progress.setNameOfCurrentSubProgress(UPDATE_EVENT_LEADERBOARD_GROUP_LINKS.getMessageKey());
             progress.setOverAllProgressPct(0.4);
             progress.setCurrentSubProgressPct(0);
             final Iterable<Event> allEvents = masterData.getAllEvents();
@@ -119,7 +124,7 @@ public class ImportMasterDataOperation extends
                 eventCounter++;
                 progress.setCurrentSubProgressPct((double) eventCounter / numOfEventsToHandle);
             }
-            progress.setNameOfCurrentSubProgress("Importing wind tracks");
+            progress.setNameOfCurrentSubProgress(IMPORT_WIND_TRACKS.getMessageKey());
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);

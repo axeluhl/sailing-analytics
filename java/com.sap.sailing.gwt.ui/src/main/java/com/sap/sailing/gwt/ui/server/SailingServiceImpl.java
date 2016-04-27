@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.CONNECTION_ESTABLISH;
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.CONNECTION_SETUP;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -4603,7 +4606,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             public void run() {
                 long startTime = System.currentTimeMillis();
                 getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
-                        "Setting up connection", 0.5);
+                        CONNECTION_SETUP.getMessageKey(), 0.5);
                 String query;
                 try {
                     query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations);
@@ -4619,7 +4622,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(base, path, query);
                     connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
-                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting", 0.5);
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, 
+                            CONNECTION_ESTABLISH.getMessageKey(), 0.5);
                     if (compress) {
                         InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(
                                 connection.getInputStream(), connection);

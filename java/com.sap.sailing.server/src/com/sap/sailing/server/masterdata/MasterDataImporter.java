@@ -1,5 +1,8 @@
 package com.sap.sailing.server.masterdata;
 
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.TRANSFER_COMPLETED;
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.TRANSFER_STARTED;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -35,8 +38,8 @@ public class MasterDataImporter {
             ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
-        racingEventService
-                .createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03, "Reading Data", 0.5);
+        racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
+                TRANSFER_STARTED.getMessageKey(), 0.5);
 
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
                 racingEventService.getMongoObjectFactory(), racingEventService.getDomainObjectFactory());
@@ -65,7 +68,7 @@ public class MasterDataImporter {
         }
 
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.3,
-                "Data-Transfer Complete, Initializing Import Operation", 0.5);
+                TRANSFER_COMPLETED.getMessageKey(), 0.5);
 
         applyMasterDataImportOperation(topLevelMasterData, importOperationId, override);
     }
