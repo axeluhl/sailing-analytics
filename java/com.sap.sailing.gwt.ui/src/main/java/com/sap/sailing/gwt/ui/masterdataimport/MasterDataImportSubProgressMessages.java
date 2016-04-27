@@ -11,6 +11,7 @@ public interface MasterDataImportSubProgressMessages extends ConstantsWithLookup
     String connectionEstablish();
     String transferStarted();
     String transferCompleted();
+    String importInit();
     String importWait();
     String importLeaderboardGroups();
     String importWindTracks();

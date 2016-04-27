@@ -14,6 +14,7 @@ public interface DataImportProgress extends Serializable {
         CONNECTION_ESTABLISH("connectionEstablish"),
         TRANSFER_STARTED("transferStarted"),
         TRANSFER_COMPLETED("transferCompleted"),
+        IMPORT_INIT("importInit"),
         IMPORT_WAIT("importWait"),
         IMPORT_LEADERBOARD_GROUPS("importLeaderboardGroups"),
         IMPORT_WIND_TRACKS("importWindTracks"),

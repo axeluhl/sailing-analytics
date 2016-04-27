@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.impl;
 
+import static com.sap.sailing.domain.common.DataImportProgress.SubProgress.IMPORT_INIT;
+
 import java.util.UUID;
 
 import com.sap.sailing.domain.common.DataImportProgress;
@@ -11,7 +13,7 @@ public class DataImportProgressImpl implements DataImportProgress {
     private UUID currentImportOperationId;
     private MasterDataImportObjectCreationCount result = null;
     private double overallProgressPct = 0;
-    private String currentSubProgressName = "Initializing Import";
+    private String currentSubProgressName = IMPORT_INIT.getMessageKey();
     private double currentSubProgressPct = 0;
     private boolean failed = false;
     private String errorMessage;
@@ -21,7 +23,6 @@ public class DataImportProgressImpl implements DataImportProgress {
 
     public DataImportProgressImpl(final UUID currentImportOperationId) {
         this.currentImportOperationId = currentImportOperationId;
-
     }
 
     @Override
