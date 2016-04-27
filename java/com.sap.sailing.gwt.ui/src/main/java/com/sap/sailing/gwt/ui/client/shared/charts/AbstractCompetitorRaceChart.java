@@ -566,9 +566,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             DetailType newSelectedSecondDetailType) {
         boolean hasDetailTypeChanged = !Util.equalsWithNull(newSelectedFirstDetailType, this.selectedFirstDetailType)
                 || !Util.equalsWithNull(newSelectedSecondDetailType, this.selectedSecondDetailType);
-        if (newSelectedSecondDetailType == null && selectedSecondDetailType != null) {
-            chart.getYAxis(1).setAxisTitleText("");
-        }
         if (hasDetailTypeChanged) {
             final boolean oldReversedY0Axis = isY0AxisReversed();
             final boolean oldReversedY1Axis = isY1AxisReversed();
@@ -593,6 +590,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             final String unitY1 = hasSecondYAxis() ? DetailTypeFormatter.getUnit(getSelectedSecondDetailType()) : null;
             final String labelY1 = hasSecondYAxis() ? (unitY1.isEmpty() ? "" : "[" + unitY1 + "]") : null;
 
+            chart.setTitle(new ChartTitle().setText(""), null);
             if (!compactChart) {
                 chart.setTitle(new ChartTitle().setText(chartTitleFromDetailTypes()), null);
                 if (hasSecondYAxis()) {
@@ -606,7 +604,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     chart.getYAxis(1).setAxisTitleText("");
                 }
             } else {
-                chart.setTitle(new ChartTitle().setText(""), null);
                 if (hasSecondYAxis()) {
                     chart.getYAxis(0).setAxisTitleText(
                             DetailTypeFormatter.format(selectedFirstDetailType) + " " + labelY0);
