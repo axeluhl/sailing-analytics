@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
+import com.sap.sailing.domain.common.i18n.CommonStringMessages;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
 import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
-public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
+        com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String manage2Sail();
