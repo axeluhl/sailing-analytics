@@ -10,7 +10,7 @@ public enum BravoSensorDataMetadata {
     private final String RIDE_HEIGHT = "RideHeight";
     private final int HEADER_COLUMN_OFFSET = 3;
 
-    private final List<String> columns = Collections.unmodifiableList(Arrays.asList("RideHeight", "RideHeightPortHull",
+    private final List<String> columns = Collections.unmodifiableList(Arrays.asList(RIDE_HEIGHT, "RideHeightPortHull",
             "RideHeightStbdHull", "Heel", "Trim", "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ",
             "ImuSensor_Pitch", "ImuSensor_Roll", "ImuSensor_Yaw", "ImuSensor_LinearAccX", "ImuSensor_LinearAccY",
             "ImuSensor_LinearAccZ", "Hb_Z", "Dn_Z", "Db_Z", "LKF_ride_hgh", "LKF_ride_hgh_Position",
