@@ -260,27 +260,35 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             components.add(competitorChart);
+            
             windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel, new WindChartSettings(),
                     stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             components.add(windChart);
         }
+            
         editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
                 stringMessages, competitorSelectionProvider, errorReporter, timer);
-        editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
-        editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
-        components.add(editMarkPassingPanel);
-        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName, stringMessages, sailingService, timer, timeRangeWithZoomModel,
-                asyncActionsExecutor, errorReporter);
-        editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
-        components.add(editMarkPositionPanel);
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+            editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
+            components.add(editMarkPassingPanel);
+        }
+        
+        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName,
+                stringMessages, sailingService, timer, timeRangeWithZoomModel, asyncActionsExecutor, errorReporter);
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+            components.add(editMarkPositionPanel);
+        }
+        
         boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
         leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
-                components, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel, isScreenLargeEnoughToOfferChartSupport);
+                components, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
         this.setupUserManagementControlPanel(userService);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {

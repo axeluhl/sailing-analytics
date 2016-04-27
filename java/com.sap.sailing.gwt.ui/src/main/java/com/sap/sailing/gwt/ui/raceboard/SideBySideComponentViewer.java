@@ -82,7 +82,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
             final StringMessages stringMessages, UserService userService, EditMarkPassingsPanel markPassingsPanel,
-            EditMarkPositionPanel markPositionPanel, boolean isScreenLargeEnoughToOfferChartSupport) {
+            EditMarkPositionPanel markPositionPanel) {
         this.mediaPlayerManagerComponent = mediaPlayerManagerComponent;
         this.stringMessages = stringMessages;
         this.leftComponent = leftComponentP;
@@ -149,8 +149,7 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         this.mainPanel.setSize("100%", "100%");
         this.mainPanel.getElement().getStyle().setMarginTop(-12, Unit.PX);
         this.mainPanel.setStyleName("SideBySideComponentViewer-MainPanel");
-        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, 
-                /* vertical splitter height */ isScreenLargeEnoughToOfferChartSupport ? 25 : 0);
+        this.splitLayoutPanel = new TouchSplitLayoutPanel(/* horizontal splitter width */3, /* vertical splitter height */ 25);
         this.mainPanel.add(splitLayoutPanel);
 
         // initialize components - they need to be added before other widgets to get the right width
