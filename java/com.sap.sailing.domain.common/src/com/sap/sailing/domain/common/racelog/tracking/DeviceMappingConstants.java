@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.common.racelog.tracking;
 
-import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sse.common.util.UrlHelper;
 
 /**
@@ -39,44 +38,16 @@ public class DeviceMappingConstants {
     public static final String JSON_TO_MILLIS = "toMillis";
     public static final String JSON_TEAM_IMAGE_URI = "teamImageUri";
 
-    @Deprecated
-    static final String APK_PATH = "/apps/com.sap.sailing.android.tracking.app.apk";
-
     public static String getDeviceMappingForRegattaLogUrl(String serverUrlWithoutTrailingSlash, String eventId,
             String leaderboardName, String mappedItemType, String mappedItemId, UrlHelper helper) {
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + TRACKING_URL_BASE + "?" + URL_EVENT_ID + "=" + eventId + "&"
-                + URL_LEADERBOARD_NAME + "=" + leaderboardName + "&" + mappedItemType + "="
-                + mappedItemId);
+        return serverUrlWithoutTrailingSlash + TRACKING_URL_BASE + "?" + URL_EVENT_ID + "=" + helper.encodeQueryString(eventId) + "&"
+                + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName) + "&" + helper.encodeQueryString(mappedItemType) + "="
+                + helper.encodeQueryString(mappedItemId);
     }
     
     public static String getBuoyTenderInvitationUrl(String serverUrlWithoutTrailingSlash,
             String leaderboardName, String eventId, UrlHelper helper) {
-        return helper.encodeUrl(serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
-                + eventId + "&" + URL_LEADERBOARD_NAME + "=" + leaderboardName);
-    }
-
-    @Deprecated
-    public static String getDeviceMappingForRaceLogUrl(String serverUrlWithoutTrailingSlash, String leaderboardName,
-            String raceColumnName, String fleetName, String mappedItemType, String mappedItemId, Long fromMillis,
-            Long toMillis, UrlHelper helper) throws QRCodeURLCreationException {
-        
-        if (toMillis != null && fromMillis != null){
-            if (fromMillis > toMillis) {
-                throw new QRCodeURLCreationException("from can't lie after to");
-            }
-        }
-        
-        StringBuilder urlToEncode = new StringBuilder();
-        
-        urlToEncode.append(serverUrlWithoutTrailingSlash + DeviceMappingConstants.APK_PATH + "?"
-                + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "=" + leaderboardName + "&"
-                + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "=" + raceColumnName + "&"
-                + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "=" + fleetName + "&" + mappedItemType + "="
-                + mappedItemId);
-    
-        urlToEncode.append((fromMillis != null) ? "&" + DeviceMappingConstants.URL_FROM_MILLIS + "=" + fromMillis : "");
-        urlToEncode.append((toMillis != null) ? "&" + DeviceMappingConstants.URL_TO_MILLIS + "=" + toMillis : "");
-        
-        return helper.encodeUrl(urlToEncode.toString());
+        return serverUrlWithoutTrailingSlash + BUOY_TENDER_URL_BASE + "?" + URL_EVENT_ID + "="
+                + helper.encodeQueryString(eventId) + "&" + URL_LEADERBOARD_NAME + "=" + helper.encodeQueryString(leaderboardName);
     }
 }

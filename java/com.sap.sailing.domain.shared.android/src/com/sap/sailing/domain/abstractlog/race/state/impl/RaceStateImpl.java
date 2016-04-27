@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.Flags;
@@ -201,8 +202,8 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     }
 
     @Override
-    public void setCourseDesign(TimePoint timePoint, CourseBase courseDesign) {
-        raceLog.add(new RaceLogCourseDesignChangedEventImpl(timePoint, author, raceLog.getCurrentPassId(), courseDesign));
+    public void setCourseDesign(TimePoint timePoint, CourseBase courseDesign, CourseDesignerMode courseDesignerMode) {
+        raceLog.add(new RaceLogCourseDesignChangedEventImpl(timePoint, author, raceLog.getCurrentPassId(), courseDesign, courseDesignerMode));
     }
 
     @Override

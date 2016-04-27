@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -563,7 +564,7 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
     }
 
     protected void sendCourseDataAndDismiss(CourseBase courseDesign) {
-        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign);
+        getRaceState().setCourseDesign(MillisecondsTimePoint.now(), courseDesign, CourseDesignerMode.BY_MARKS);
         saveChangedCourseDesignInCache(courseDesign);
         switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
             case START_MODE_PRESETUP:

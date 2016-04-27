@@ -104,7 +104,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             jsonLeaderboards.add(leaderboardName);
         }
         String json = jsonLeaderboards.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -138,7 +138,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonLeaderboard.writeJSONString(sw);
 
                 String json = sw.getBuffer().toString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                         .type(MediaType.TEXT_PLAIN).build();
@@ -509,7 +509,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         } else {
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
-            response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -580,7 +580,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONObject result = new JSONObject();
         result.put("marks", array);
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
@@ -671,7 +671,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 final JSONObject json = getJsonForColumnFactors(leaderboard, raceColumns);
-                response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -725,7 +725,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             } else {
                 raceColumn.setFactor(explicitFactor);
                 final JSONObject json = getJsonForColumnFactors(leaderboard, Collections.singleton(raceColumn));
-                response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;

@@ -12,6 +12,7 @@ public class SeriesDTO extends NamedDTO {
     private List<FleetDTO> fleets;
     private List<RaceColumnDTO> raceColumns;
     private boolean isMedal;
+    private boolean isFleetsCanRunInParallel;
     private int[] discardThresholds;
     private Boolean startsWithZeroScore;
     private boolean firstColumnIsNonDiscardableCarryForward;
@@ -19,13 +20,14 @@ public class SeriesDTO extends NamedDTO {
     
     public SeriesDTO() {}
     
-    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal,
+    public SeriesDTO(String name, List<FleetDTO> fleets, List<RaceColumnDTO> raceColumns, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] discardThresholds, boolean startsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
             boolean hasSplitFleetContiguousScoring) {
         super(name);
         this.fleets = fleets;
         this.raceColumns = raceColumns;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.discardThresholds = discardThresholds;
@@ -40,16 +42,12 @@ public class SeriesDTO extends NamedDTO {
     public SeriesDTO(SeriesDTO otherSeries) {
         this(otherSeries.getName(), otherSeries.getFleets(),
                 otherSeries.getRaceColumns() == null ? null : new ArrayList<RaceColumnDTO>(otherSeries.getRaceColumns()),
-                otherSeries.isMedal(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
+                otherSeries.isMedal(), otherSeries.isFleetsCanRunInParallel(), otherSeries.getDiscardThresholds(), otherSeries.isStartsWithZeroScore(),
                 otherSeries.isFirstColumnIsNonDiscardableCarryForward(), otherSeries.hasSplitFleetContiguousScoring());
     }
 
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
-    }
-
-    public boolean isMedal() {
-        return isMedal;
     }
 
     public List<FleetDTO> getFleets() {
@@ -60,8 +58,20 @@ public class SeriesDTO extends NamedDTO {
         this.fleets = fleets;
     }
 
+    public boolean isMedal() {
+        return isMedal;
+    }
+
     public void setMedal(boolean isMedal) {
         this.isMedal = isMedal;
+    }
+
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+
+    public void setFleetsCanRunInParallel(boolean isFleetsCanRunInParallel) {
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
     }
 
     public List<RaceColumnDTO> getRaceColumns() {
