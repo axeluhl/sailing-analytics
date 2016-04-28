@@ -21,7 +21,7 @@
             android:layout_height="50dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/gps_quality"
+            android:layout_below="@+id/tracking_status_label"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
@@ -73,8 +73,8 @@
             android:id="@+id/tracking_status_label"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_below="@+id/tracking_unsent_fixes_label"
             android:gravity="center_vertical"
+            android:layout_alignParentTop="true"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/tracking_status"
@@ -99,6 +99,7 @@
             android:id="@+id/gps_quality_info_layout"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
+            android:layout_alignBottom="@+id/gps_quality"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:gravity="center_vertical"
@@ -128,7 +129,7 @@
             android:id="@+id/gps_quality"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/tracking_unsent_fixes_label"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
@@ -139,33 +140,28 @@
         <!-- Separators -->
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/mode_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/tracking_status_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/tracking_unsent_fixes_label"
             android:background="@android:color/darker_gray"/>
 
         <View
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/gps_quality"
             android:background="@android:color/darker_gray"/>
 
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/tracking_status_label"
-            android:background="@android:color/darker_gray"/>
     </RelativeLayout>
 </ScrollView>
