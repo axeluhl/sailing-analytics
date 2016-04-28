@@ -3,10 +3,16 @@
     <item
         android:drawable="@drawable/main_background"/>
 
-    <item>
+    <item android:bottom="60dp">
         <bitmap
             android:gravity="center"
             android:src="@drawable/launch_screen_icon"/>
+    </item>
+
+    <item android:top="80dp">
+        <bitmap
+            android:src="@drawable/launch_screen_text"
+            android:gravity="center|clip_horizontal|clip_vertical"/>
     </item>
 
 </layer-list>
