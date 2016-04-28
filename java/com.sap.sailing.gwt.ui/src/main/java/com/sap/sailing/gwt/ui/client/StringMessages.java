@@ -1555,4 +1555,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String currentRideHeightInMetersTooltip();
     String currentOrAverageRideHeightInMeters();
     String currentOrAverageRideHeightInMetersTooltip();
+    String pleaseCreateAtLeastOneMappingForCompetitor();
+    String importAdditionalSensorData();
 }
