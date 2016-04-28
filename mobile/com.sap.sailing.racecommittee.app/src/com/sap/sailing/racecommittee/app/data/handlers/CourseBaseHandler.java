@@ -24,7 +24,7 @@ public class CourseBaseHandler extends DataHandler<CourseBase> {
     }
 
     @Override
-    public void onResult(CourseBase data) {
+    public void onResult(CourseBase data, boolean isCached) {
         race.setCourseOnServer(data);
     }
 

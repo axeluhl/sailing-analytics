@@ -293,7 +293,7 @@ public class RaceContext {
         case FINISHING:
         case RUNNING:
         case SCHEDULED:
-            case PRESCHEDULED:
+        case PRESCHEDULED:
         case STARTPHASE:
         case UNKNOWN:
             break;
@@ -436,8 +436,8 @@ public class RaceContext {
         }
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
-            TimePoint finishTime = getFinishTime();
-            if(finishTime == null) {
+            TimePoint finishTime = trackedRace.getEndOfRace();
+            if (finishTime == null) {
                 finishTime = HomeServiceUtil.getLiveTimePoint();
             }
             List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);

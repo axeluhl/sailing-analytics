@@ -221,6 +221,7 @@ public class LiveLeaderboardUpdater implements Runnable {
     private synchronized void start() {
         running = true;
         thread = new Thread(this, "LiveLeaderboardUpdater for leaderboard "+getLeaderboard().getName());
+        thread.setDaemon(true);
         thread.start();
     }
 

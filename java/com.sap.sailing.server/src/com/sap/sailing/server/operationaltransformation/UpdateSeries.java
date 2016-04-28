@@ -21,6 +21,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     
     private final List<FleetDTO> fleets;
     private final boolean isMedal;
+    private final boolean isFleetsCanRunInParallel;
     private final int[] resultDiscardingThresholds;
     private final boolean startsWithZeroScore;
     private final boolean firstColumnIsNonDiscardableCarryForward;
@@ -28,7 +29,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
     private final boolean seriesNameChanged;
     private final String newSeriesName;
 
-    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal,
+    public UpdateSeries(RegattaIdentifier regattaIdentifier, String seriesName, String newSeriesName, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring,
             List<FleetDTO> fleets) {
@@ -36,6 +37,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
         this.seriesNameChanged = !seriesName.equals(newSeriesName);
         this.newSeriesName = newSeriesName;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
         this.startsWithZeroScore = startsWithZeroScore;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
@@ -53,6 +55,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
             series.setName(newSeriesName);
         }
         series.setIsMedal(isMedal);
+        series.setIsFleetsCanRunInParallel(isFleetsCanRunInParallel);
         series.setResultDiscardingRule(resultDiscardingThresholds == null ?
                 null : new ThresholdBasedResultDiscardingRuleImpl(resultDiscardingThresholds));
         series.setStartsWithZeroScore(startsWithZeroScore);
@@ -72,7 +75,7 @@ public class UpdateSeries extends AbstractSeriesOperation<Void> {
             Fleet fleet = new FleetImpl(fleetNameAndOrderingAndColor.getName(), fleetNameAndOrderingAndColor.getOrderNo(), fleetNameAndOrderingAndColor.getColor());
             result.add(fleet);
         }
-        regatta.addSeries(new SeriesImpl(getSeriesName(), isMedal, result, emptyRaceColumnNames, (TrackedRegattaRegistry)toState));
+        regatta.addSeries(new SeriesImpl(getSeriesName(), isMedal, isFleetsCanRunInParallel, result, emptyRaceColumnNames, (TrackedRegattaRegistry)toState));
         return regatta.getSeriesByName(getSeriesName());
     }
 

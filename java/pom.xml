@@ -197,7 +197,7 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
           <configuration>
-            <dependency-resolution>
+    <p2-target>race-analysis-p2-sap-nexus</p2-target><!--can be overidden through p2-target.local profile -->
               <extraRequirements>
                 <requirement>
                   <type>eclipse-plugin</type>

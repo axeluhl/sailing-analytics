@@ -49,7 +49,6 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-
     // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
     private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
 
@@ -248,7 +247,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
-            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
@@ -462,7 +461,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                         } else if (wasCan && !isCan) {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
@@ -471,7 +470,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                             result.getB().add(oldCan);
                         }
                     }
@@ -574,14 +573,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
                     } else {
-                        if (fixAfter != null && xtesAfter != null) {
+                        if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
                             Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                             if (xte < 0 != xteAfter <= 0) {
                                 newCandidates.put(Arrays.asList(fix, fixAfter),
                                         createCandidate(c, xte, xteAfter, t, tAfter, w, false));
                             }
                         }
-                        if (fixBefore != null) {
+                        if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
                             Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
                                 newCandidates.put(Arrays.asList(fixBefore, fix),
@@ -775,18 +774,21 @@ public class CandidateFinderImpl implements CandidateFinder {
                         final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(otherCompetitor);
                         if (track != null) {
                             final Position estimatedPositionAtT = track.getEstimatedPosition(t, /* extrapolate */ true);
-                            final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
-                            if (otherCompetitorsDistanceToStartAtT != null) {
-                                final Distance crossTrackError;
-                                if (startIsLine) {
-                                    Pair<Position, Bearing> crossingInformationForStartLine = crossingInformationForStart.iterator().next();
-                                    crossTrackError = estimatedPositionAtT.crossTrackError(crossingInformationForStartLine.getA(),
-                                            crossingInformationForStartLine.getB());
-                                } else {
-                                    crossTrackError = null;
+                            // consider that a position may not be available for that other competitor, although a track exists
+                            if (estimatedPositionAtT != null) {
+                                final Distance otherCompetitorsDistanceToStartAtT = getMinDistanceOrNull(calculateDistance(estimatedPositionAtT, start, t));
+                                if (otherCompetitorsDistanceToStartAtT != null) {
+                                    final Distance crossTrackError;
+                                    if (startIsLine) {
+                                        Pair<Position, Bearing> crossingInformationForStartLine = crossingInformationForStart.iterator().next();
+                                        crossTrackError = estimatedPositionAtT.crossTrackError(crossingInformationForStartLine.getA(),
+                                                crossingInformationForStartLine.getB());
+                                    } else {
+                                        crossTrackError = null;
+                                    }
+                                    distancesToStartLineOfOtherCompetitors.add(new
+                                            AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(otherCompetitorsDistanceToStartAtT, crossTrackError));
                                 }
-                                distancesToStartLineOfOtherCompetitors.add(new
-                                        AbsoluteGeometricDistanceAndSignedProjectedDistanceToStartLine(otherCompetitorsDistanceToStartAtT, crossTrackError));
                             }
                         }
                     }

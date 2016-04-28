@@ -15,7 +15,7 @@ public class LoginGetRequest extends HttpRequest {
     private final LoginData loginData;
 
     public LoginGetRequest(URL url, Context context, LoginData login) {
-        super(url, context);
+        super(context, url);
         loginData = login;
     }
 
