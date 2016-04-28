@@ -1,22 +1,84 @@
 package com.sap.sailing.domain.racelogtracking.impl.logtracker;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.racelogsensortracking.impl.FixLoadingTask;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
+import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 
-public class AbstractRaceLogFixTracker {
+public abstract class AbstractRaceLogFixTracker {
+    private static final Logger logger = Logger.getLogger(AbstractRaceLogFixTracker.class.getName());
 
-    private final DynamicTrackedRegatta trackedRegatta;
-    private final DynamicTrackedRace trackedRace;
+    protected final DynamicTrackedRegatta trackedRegatta;
+    protected final DynamicTrackedRace trackedRace;
+    
+    private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
+        @Override
+        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
+            if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
+                startTracking();
+            } else {
+                stopTracking();
+            }
+        }
+    };
+    private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
+    
+    private final FixLoadingTask fixLoadingTask;
+
+    // TODO: move to AbstractRaceLogFixTracker
+   private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
+        @Override
+        public void regattaLogAttached(RegattaLog regattaLog) {
+            try {
+                fixLoadingTask.waitForLoadingFromGPSFixStoreToFinishRunning();
+            } catch (InterruptedException e) {
+                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
+            }
+        }
+
+        @Override
+        public void regattaLogAboutToBeAttached(RegattaLog regattaLog) {
+            synchronized (knownRegattaLogs) {
+                addRegattaLogUnlocked(regattaLog);
+            }
+            updateMappingsAndAddListeners();
+        }
+    };
+    private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
+        
+        @Override
+        public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
+            if ((newStartOfTracking == null || (oldStartOfTracking != null && newStartOfTracking
+                    .before(oldStartOfTracking)))) {
+                loadFixesForExtendedTimeRange(newStartOfTracking, oldStartOfTracking);
+            }
+        }
+        
+        @Override
+        public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+            if (newEndOfTracking == null || (oldEndOfTracking != null && newEndOfTracking.after(oldEndOfTracking))) {
+                loadFixesForExtendedTimeRange(oldEndOfTracking, newEndOfTracking);
+            }
+        }
+    };
 
     public AbstractRaceLogFixTracker(DynamicTrackedRegatta trackedRegatta, DynamicTrackedRace trackedRace) {
         this.trackedRegatta = trackedRegatta;
         this.trackedRace = trackedRace;
-    }
 
-    // TEMP: usage in RaceLogRaceTracker überprüfen
-    public DynamicTrackedRace getTrackedRace() {
-        return trackedRace;
+        this.fixLoadingTask = new FixLoadingTask(trackedRace);
     }
 
     public final DynamicTrackedRegatta getTrackedRegatta() {
@@ -33,8 +95,53 @@ public class AbstractRaceLogFixTracker {
         return trackedRace.getEndOfTracking();
     }
 
-    // TEMP: kommt von RaceLogRaceTracker
-    public void updateStartAndEndOfTracking() {
-        trackedRace.updateStartAndEndOfTracking();
+    private void addRegattaLogUnlocked(RegattaLog log) {
+        log.addListener(getRegattaLogEventVisitor());
+        knownRegattaLogs.add(log);
+    }
+    
+    protected void forEachRegattaLog(Consumer<RegattaLog> regattaLogConsumer) {
+        synchronized (knownRegattaLogs) {
+            knownRegattaLogs.forEach(regattaLogConsumer);
+        }
+    }
+    
+    protected abstract void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo);
+    
+    protected abstract RegattaLogEventVisitor getRegattaLogEventVisitor();
+    
+    public void start() {
+        
+        trackedRace.addListener(raceChangeListener);
+    }
+    
+    protected void startTracking() {
+        trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        synchronized (knownRegattaLogs) {
+            trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
+        }
+        trackedRace.addListener(trackingTimesRaceChangeListener);
+        updateMappingsAndAddListeners();
+    }
+
+    protected void updateMappingsAndAddListeners() {
+        fixLoadingTask.loadFixesForLog(this::updateMappingsAndAddListenersImpl,
+                "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
+    }
+    
+    protected abstract void updateMappingsAndAddListenersImpl();
+    
+    public void stop() {
+        stopTracking();
+        trackedRace.removeListener(raceChangeListener);
+        trackedRace.removeListener(trackingTimesRaceChangeListener);
+    }
+
+    protected void stopTracking() {
+        trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        synchronized (knownRegattaLogs) {
+            knownRegattaLogs.forEach((log) -> log.removeListener(getRegattaLogEventVisitor()));
+            knownRegattaLogs.clear();
+        }
     }
 }
