@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.sap.sailing.android.shared.ui.customviews.OpenSansTextView;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
@@ -48,7 +47,7 @@ public class AboutFragment extends com.sap.sailing.android.ui.fragments.BaseFrag
                 EulaHelper.with(getActivity()).openEulaPage();
             }
         });
-        OpenSansTextView versionTextView = (OpenSansTextView) view.findViewById(R.id.system_information_application_version);
+        TextView versionTextView = (TextView) view.findViewById(R.id.system_information_application_version);
         versionTextView.setText(AppUtils.with(getActivity()).getBuildInfo());
         return view;
     }
