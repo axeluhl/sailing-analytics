@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.racelog.tracking;
 
+import java.util.function.Consumer;
+
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
@@ -75,5 +77,11 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
             TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
+    }
+    
+    @Override
+    public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
+            TimePoint start, TimePoint end, boolean inclusive)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
     }
 }

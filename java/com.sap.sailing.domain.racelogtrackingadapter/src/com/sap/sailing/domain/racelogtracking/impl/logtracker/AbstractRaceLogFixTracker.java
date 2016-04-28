@@ -29,11 +29,7 @@ public abstract class AbstractRaceLogFixTracker {
    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
         @Override
         public void regattaLogAttached(RegattaLog regattaLog) {
-            try {
-                fixLoadingTask.waitForLoadingFromGPSFixStoreToFinishRunning();
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
-            }
+            waitForLoadingFromFixStoreToFinishRunning();
         }
 
         @Override
@@ -67,6 +63,14 @@ public abstract class AbstractRaceLogFixTracker {
         this.trackedRace = trackedRace;
 
         this.fixLoadingTask = new FixLoadingTask(trackedRace);
+    }
+
+    protected void waitForLoadingFromFixStoreToFinishRunning() {
+        try {
+            fixLoadingTask.waitForLoadingFromGPSFixStoreToFinishRunning();
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
+        }
     }
 
     public final DynamicTrackedRegatta getTrackedRegatta() {
@@ -105,6 +109,7 @@ public abstract class AbstractRaceLogFixTracker {
         }
         trackedRace.addListener(trackingTimesRaceChangeListener);
         updateMappingsAndAddListeners();
+        waitForLoadingFromFixStoreToFinishRunning();
     }
 
     protected void updateMappingsAndAddListeners() {

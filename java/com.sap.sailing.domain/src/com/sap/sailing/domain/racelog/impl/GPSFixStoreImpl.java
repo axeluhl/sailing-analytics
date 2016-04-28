@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelog.impl;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
@@ -131,5 +132,12 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public long getNumberOfFixes(DeviceIdentifier device) throws TransformationException, NoCorrespondingServiceRegisteredException {
         return sensorFixStore.getNumberOfFixes(device);
+    }
+    
+    @Override
+    public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
+            TimePoint start, TimePoint end, boolean inclusive)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+        sensorFixStore.loadFixes(consumer, deviceIdentifier, start, end, inclusive);
     }
 }
