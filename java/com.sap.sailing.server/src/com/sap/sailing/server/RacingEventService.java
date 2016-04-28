@@ -41,6 +41,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -552,12 +553,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DataImportLockWithProgress getDataImportLock();
 
     DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
 

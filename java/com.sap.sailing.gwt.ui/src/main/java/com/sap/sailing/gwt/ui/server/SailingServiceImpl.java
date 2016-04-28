@@ -147,6 +147,7 @@ import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
@@ -4608,7 +4609,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations) {
         final UUID importOperationId = UUID.randomUUID();
-        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, "Initializing", 0.0);
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -4616,7 +4617,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             public void run() {
                 long startTime = System.currentTimeMillis();
                 getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.01,
-                        "Setting up connection", 0.5);
+                        DataImportSubProgress.CONNECTION_SETUP, 0.5);
                 String query;
                 try {
                     query = createLeaderboardQuery(groupNames, compress, exportWind, exportDeviceConfigurations);
@@ -4632,7 +4633,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     serverAddress = createUrl(base, path, query);
                     connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
-                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, "Connecting", 0.5);
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, 
+                            DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
                     if (compress) {
                         InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(
                                 connection.getInputStream(), connection);

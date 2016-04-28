@@ -247,7 +247,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
-            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
@@ -573,14 +573,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
                     } else {
-                        if (fixAfter != null && xtesAfter != null) {
+                        if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
                             Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                             if (xte < 0 != xteAfter <= 0) {
                                 newCandidates.put(Arrays.asList(fix, fixAfter),
                                         createCandidate(c, xte, xteAfter, t, tAfter, w, false));
                             }
                         }
-                        if (fixBefore != null) {
+                        if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
                             Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
                                 newCandidates.put(Arrays.asList(fixBefore, fix),

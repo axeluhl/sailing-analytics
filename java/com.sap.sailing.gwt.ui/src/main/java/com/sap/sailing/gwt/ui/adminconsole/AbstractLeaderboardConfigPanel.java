@@ -332,11 +332,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
 
     /**
-     * @param nameOfRaceColumnToSelect
-     *            if not <code>null</code>, selects the first race column name with this name found in the leaderboard
-     *            after the refresh has successfully completed. See {@link #selectRaceColumn(String)}.
      */
-    public void loadAndRefreshLeaderboard(final String leaderboardName, final String nameOfRaceColumnToSelect) {
+    public void loadAndRefreshLeaderboard(final String leaderboardName) {
         sailingService.getLeaderboard(leaderboardName, new MarkedAsyncCallback<StrippedLeaderboardDTO>(
                 new AsyncCallback<StrippedLeaderboardDTO>() {
                         @Override
@@ -350,9 +347,6 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                             replaceLeaderboardInList(availableLeaderboardList, leaderboardName, leaderboard);
                             filterLeaderboardPanel.updateAll(availableLeaderboardList); // also updates leaderboardList provider
                             leaderboardSelectionModel.setSelected(leaderboard, true);
-                            if (nameOfRaceColumnToSelect != null) {
-                                selectRaceColumn(nameOfRaceColumnToSelect);
-                            }
                             leaderboardSelectionChanged();
                             getLeaderboardsRefresher().updateLeaderboards(leaderboardList.getList(), AbstractLeaderboardConfigPanel.this);
                         }
@@ -593,7 +587,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 new ParallelExecutionHolder(callbacks.toArray(new ParallelExecutionCallback<?>[0])) {
                     @Override
                     public void handleSuccess() {
-                        loadAndRefreshLeaderboard(selectedLeaderboardName, result.getName());
+                        loadAndRefreshLeaderboard(selectedLeaderboardName);
                     }
                     @Override
                     public void handleFailure(Throwable t) {

@@ -391,14 +391,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
-
         StringBuilder occuredExceptions = new StringBuilder();
-
         String[] emailArray = emails.split(",");
         String leaderboardName = leaderboard.getName();
-
         String eventId = event.getId().toString();
-
         String logoUrl = null;
         List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
@@ -417,7 +413,6 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 occuredExceptions.append(e.getMessage() + "\r\n");
             }
         }
-
         if (!(occuredExceptions.length() == 0)) {
             throw new MailException(occuredExceptions.toString());
         }
