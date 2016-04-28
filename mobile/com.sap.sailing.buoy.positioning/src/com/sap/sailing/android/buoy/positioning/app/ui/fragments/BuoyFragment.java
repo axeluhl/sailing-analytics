@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -63,6 +64,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private IntentReceiver mReceiver;
     private PositioningActivity positioningActivity;
     private LocalBroadcastManager mBroadcastManager;
+    private GPSListener mGpsListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -84,6 +86,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
 
         mReceiver = new IntentReceiver();
+        mGpsListener = new GPSListener();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
         return layout;
     }
@@ -114,6 +117,11 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
         setPositionButton = ViewHelper.get(layout, R.id.marker_set_position_button);
+        disablePositionButton();
+        setPositionButton.setOnClickListener(clickListener);
+    }
+
+    private void disablePositionButton() {
         setPositionButton.setEnabled(false);
         boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
         int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
@@ -122,7 +130,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(10, true);
         disabledButtonText.setSpan(absoluteSizeSpan, text.indexOf("\n"), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         setPositionButton.setText(disabledButtonText);
-        setPositionButton.setOnClickListener(clickListener);
     }
 
     private void checkGPS() {
@@ -154,6 +161,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onPause();
         // Unsubscribe from location updates for power saving
         locationManager.removeUpdates(this);
+        locationManager.removeGpsStatusListener(mGpsListener);
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
@@ -190,6 +198,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         if (getActivity() instanceof PositioningActivity) {
+            mapFragment.getMap().setMyLocationEnabled(true);
             lastKnownLocation = location;
             reportGPSQuality(lastKnownLocation.getAccuracy());
             setPositionButton.setEnabled(true);
@@ -210,7 +219,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private void configureMap(GoogleMap map) {
-        map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(true);
         map.setPadding(0, 50, 0, 0);
     }
@@ -240,6 +248,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
+        locationManager.addGpsStatusListener(mGpsListener);
         
         Location initialLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         
@@ -298,7 +307,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     public interface pingListener {
-        public void updatePing();
+        void updatePing();
     }
 
     private class ClickListener implements OnClickListener {
@@ -340,6 +349,23 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             if (action.equals(getString(R.string.ping_reached_server))){
                 Log.d(TAG, "Response reached Buoy Fragment");
                 handleSuccessfulResponse();
+            }
+        }
+    }
+
+    private class GPSListener implements GpsStatus.Listener {
+
+        @Override
+        public void onGpsStatusChanged(int event) {
+            switch (event) {
+                case GpsStatus.GPS_EVENT_STOPPED: {
+                    disablePositionButton();
+                    distanceTextView.setText(N_A);
+                    accuracyTextView.setText(N_A);
+                    mapFragment.getMap().setMyLocationEnabled(false);
+                    reportGPSQuality(0);
+                    break;
+                }
             }
         }
     }
