@@ -461,7 +461,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                         } else if (wasCan && !isCan) {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
@@ -470,7 +470,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                             result.getB().add(oldCan);
                         }
                     }
