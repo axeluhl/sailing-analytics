@@ -79,7 +79,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
             self.yourTeamPhotoButton.hidden = true
         } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
-            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl! + "sa")
+            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest,
                 placeholderImage: nil,
@@ -224,7 +224,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             case 0:
                 showCheckOutAlertView()
             case 1:
-                performSegueWithIdentifier("Settings", sender: actionSheet)
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+					self.performSegueWithIdentifier("Settings", sender: actionSheet)
+				}
                 break
             case 2:
                 showImageAlertView(actionSheet)
