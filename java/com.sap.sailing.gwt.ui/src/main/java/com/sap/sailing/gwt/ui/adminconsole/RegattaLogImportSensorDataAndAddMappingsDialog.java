@@ -45,7 +45,7 @@ public class RegattaLogImportSensorDataAndAddMappingsDialog extends DataEntryDia
                 new DataEntryDialog.Validator<Collection<TypedDeviceMappingDTO>>() {
                     @Override
                     public String getErrorMessage(Collection<TypedDeviceMappingDTO> valueToValidate) {
-                        return valueToValidate.isEmpty() ? "!! Please create at least one mapping by [...] !!" : null;
+                        return valueToValidate.isEmpty() ? stringMessages.pleaseCreateAtLeastOneMappingForCompetitor() : null;
                     }
                 }, true, callback);
         this.stringMessages = stringMessages;

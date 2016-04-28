@@ -92,7 +92,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
             }
         });
         buttonPanel.add(importBtn);
-        buttonPanel.add(new Button("!! Import IMU data !!", new ClickHandler() {
+        buttonPanel.add(new Button(stringMessages.importAdditionalSensorData(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 importFoiling();
