@@ -217,6 +217,7 @@ public class RaceLogRaceTracker implements RaceTracker {
 
         // remove listener for fixes
         gpsFixStore.removeListener(fixReceivedListener);
+        raceLogGPSFixTracker.stop();
 
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));

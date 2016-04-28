@@ -8,12 +8,10 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.racelogsensortracking.impl.FixLoadingTask;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 
@@ -23,16 +21,6 @@ public abstract class AbstractRaceLogFixTracker {
     protected final DynamicTrackedRegatta trackedRegatta;
     protected final DynamicTrackedRace trackedRace;
     
-    private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-            if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
-                startTracking();
-            } else {
-                stopTracking();
-            }
-        }
-    };
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     
     private final FixLoadingTask fixLoadingTask;
@@ -110,11 +98,6 @@ public abstract class AbstractRaceLogFixTracker {
     
     protected abstract RegattaLogEventVisitor getRegattaLogEventVisitor();
     
-    public void start() {
-        
-        trackedRace.addListener(raceChangeListener);
-    }
-    
     protected void startTracking() {
         trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
@@ -133,11 +116,10 @@ public abstract class AbstractRaceLogFixTracker {
     
     public void stop() {
         stopTracking();
-        trackedRace.removeListener(raceChangeListener);
-        trackedRace.removeListener(trackingTimesRaceChangeListener);
     }
 
     protected void stopTracking() {
+        trackedRace.removeListener(trackingTimesRaceChangeListener);
         trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
             knownRegattaLogs.forEach((log) -> log.removeListener(getRegattaLogEventVisitor()));
