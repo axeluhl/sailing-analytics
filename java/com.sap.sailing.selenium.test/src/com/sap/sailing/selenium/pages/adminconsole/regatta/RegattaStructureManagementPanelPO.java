@@ -9,7 +9,7 @@ import com.sap.sailing.selenium.pages.PageArea;
 import com.sap.sailing.selenium.pages.adminconsole.regatta.RegattaListCompositePO.RegattaDescriptor;
 
 public class RegattaStructureManagementPanelPO extends PageArea {
-    public static final String DEFAULT_SERIES_NAME = "Default"; //$NON-NLS-1$
+    public static final String DEFAULT_SERIES_NAME = "DefaultSelenium"; //$NON-NLS-1$
     
     @FindBy(how = BySeleniumId.class, using = "AddRegattaButton")
     WebElement addRegattaButton;
@@ -52,8 +52,8 @@ public class RegattaStructureManagementPanelPO extends PageArea {
     }
     
     private DefaultRegattaLeaderboardCreateDialogPO createDefaultRegattaLeaderboard() {
-            WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaDialog"); //$NON-NLS-1$
-            return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
+        WebElement dialog = findElementBySeleniumId(this.driver, "CreateDefaultRegattaLeaderboardDialog"); //$NON-NLS-1$
+        return new DefaultRegattaLeaderboardCreateDialogPO(this.driver, dialog);
     }
 
     public RegattaListCompositePO getRegattaList() {

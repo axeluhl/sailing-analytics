@@ -81,11 +81,13 @@ import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.AbstractSortableColumnWithMinMax;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableSortedCellTableWithStylableHeaders;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sailing.gwt.ui.client.shared.filter.CompetitorRaceRankFilter;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
@@ -101,7 +103,10 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateChangeListener;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyStateProvider;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.player.PlayStateListener;
 import com.sap.sse.gwt.client.player.TimeListener;
@@ -122,7 +127,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * 
  */
 public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher {
+        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher,
+        BusyStateProvider, LeaderboardUpdateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -161,7 +167,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     private final StringMessages stringMessages;
 
-    private final SortedCellTable<LeaderboardRowDTO> leaderboardTable;
+    private final FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO> leaderboardTable;
 
     private final MultiSelectionModel<LeaderboardRowDTO> leaderboardSelectionModel;
 
@@ -277,7 +283,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
      * {@link RaceColumnDTO#getRaceIdentifier(String) race identifier} matches the value of this attribute will be
      * added.
      */
-    private final RaceIdentifier preSelectedRace;
+    private final RegattaAndRaceIdentifier preSelectedRace;
 
     private final VerticalPanel contentPanel;
     
@@ -296,6 +302,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private ImageResource playIcon;
 
     private final BusyIndicator busyIndicator;
+    private final Set<BusyStateChangeListener> busyStateChangeListeners;
 
     /**
      * Tells whether the leaderboard settings were explicitly changed by an external call to
@@ -344,7 +351,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private Element elementToBlur;
     private boolean showSelectionCheckbox;
     
-    private List<LeaderboardUpdateListener> leaderboardUpdateListener;
+    private final List<LeaderboardUpdateListener> leaderboardUpdateListener;
 
     private boolean initialCompetitorFilterHasBeenApplied = false;
     private final boolean showCompetitorFilterStatus;
@@ -477,8 +484,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         
-        final boolean oldBusyState = getBusyIndicator().isBusy(); 
-        getBusyIndicator().setBusy(true);
+        final boolean oldBusyState = isBusy(); 
+        setBusyState(true);
         Runnable doWhenNecessaryDetailHasBeenLoaded = new Runnable() {
             @Override
             public void run() {
@@ -501,7 +508,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         getLeaderboardTable().sortColumn(raceColumnByRaceName, /* ascending */true);
                     }
                 }
-                getBusyIndicator().setBusy(oldBusyState);
+                setBusyState(oldBusyState);
             }
         };
         if (oldShallAddOverallDetails == shallAddOverallDetails() || oldShallAddOverallDetails || getLeaderboard().hasOverallDetails()) {
@@ -619,7 +626,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         
         @Override
         public void render(Context context, LeaderboardRowDTO object, SafeHtmlBuilder sb) {
-            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor).getAsHtml();
+            String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(object.competitor,
+                    LeaderboardPanel.this.preSelectedRace).getAsHtml();
             String competitorColorBarStyle;
             if (LeaderboardPanel.this.isEmbedded && preSelectedRace != null) {
                 competitorColorBarStyle = "style=\"border-bottom: 2px solid " + competitorColor + ";\"";
@@ -642,6 +650,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         protected SailIDColumn(CompetitorFetcher<T> competitorFetcher) {
             super(new TextCell(), SortingOrder.ASCENDING, LeaderboardPanel.this);
             this.competitorFetcher = competitorFetcher;
+            // This style is adding to avoid contained images CSS property "max-width: 100%", which could cause
+            // an overflow to the next column (see https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3537)
+            setCellStyleNames(tableResources.cellTableStyle().cellTableSailIdColumn());
         }
 
         @Override
@@ -668,6 +679,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             final String twoLetterIsoCountryCode = competitor.getTwoLetterIsoCountryCode();
             final String flagImageURL = competitor.getFlagImageURL();
 
+            boolean showBoatColor = !isShowCompetitorFullName() && LeaderboardPanel.this.isEmbedded && preSelectedRace != null;
+            if (showBoatColor) {
+                String competitorColor = LeaderboardPanel.this.competitorSelectionProvider.getColor(
+                        competitorFetcher.getCompetitor(object), LeaderboardPanel.this.preSelectedRace).getAsHtml();
+                sb.appendHtmlConstant("<div style=\"border-bottom: 2px solid " + competitorColor + ";\">");
+            }
+            
             if (flagImageURL != null && !flagImageURL.isEmpty()) {
                 sb.appendHtmlConstant("<img src=\"" + flagImageURL + "\" width=\"18px\" height=\"12px\" title=\"" + competitor.getName() + "\"/>");
                 sb.appendHtmlConstant("&nbsp;");
@@ -684,6 +702,9 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 }
             }
             sb.appendEscaped(competitor.getSailID());
+            if (showBoatColor) {
+                sb.appendHtmlConstant("</div>");
+            }
         }
 
         @Override
@@ -1592,7 +1613,17 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     private class LeaderboardSelectionCheckboxColumn extends com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn<LeaderboardRowDTO>
     implements CompetitorSelectionChangeListener {
         protected LeaderboardSelectionCheckboxColumn(final CompetitorSelectionProvider competitorSelectionProvider) {
-            super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(), tableResources.cellTableStyle().cellTableCheckboxColumnCell());
+            super(tableResources.cellTableStyle().cellTableCheckboxSelected(), tableResources.cellTableStyle().cellTableCheckboxDeselected(),
+                    tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<LeaderboardRowDTO>() {
+                        @Override
+                        public boolean representSameEntity(LeaderboardRowDTO dto1, LeaderboardRowDTO dto2) {
+                            return dto1.competitor.getIdAsString().equals(dto2.competitor.getIdAsString());
+                        }
+                        @Override
+                        public int hashCode(LeaderboardRowDTO t) {
+                            return t.competitor.getIdAsString().hashCode();
+                        }
+                    }, getData(), leaderboardTable);
             competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
         }
         
@@ -1610,17 +1641,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
          */
         @Override
         public void addedToSelection(CompetitorDTO competitor) {
-            final LeaderboardRowDTO row = getRow(competitor);
-            if (row != null) {
-                redrawRow(row);
-            }
-        }
-
-        private void redrawRow(final LeaderboardRowDTO row) {
-            final List<LeaderboardRowDTO> leaderboardDataList = getData().getList();
-            synchronized (leaderboardDataList) {
-                redrawRow(row, leaderboardDataList);
-            }
+            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), true);
         }
 
         /**
@@ -1628,19 +1649,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
          */
         @Override
         public void removedFromSelection(CompetitorDTO competitor) {
-            final LeaderboardRowDTO row = getRow(competitor);
-            if (row != null) {
-                redrawRow(row);
-            }
+            getSelectionModel().setSelected(getRow(competitor.getIdAsString()), false);
         }
 
         @Override
         public void updateMinMax() {}
-
-        @Override
-        protected ListDataProvider<LeaderboardRowDTO> getListDataProvider() {
-            return getData();
-        }
     }
     
     private class TotalRankColumn extends LeaderboardSortableColumnWithMinMax<LeaderboardRowDTO, String> {
@@ -1769,7 +1782,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             break;
         }
         totalRankColumn = new TotalRankColumn();
-        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         RACE_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableRaceColumnHeader();
         LEG_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegColumnHeader();
         LEG_DETAIL_COLUMN_HEADER_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumnHeader();
@@ -1777,7 +1789,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         LEG_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegColumn();
         LEG_DETAIL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableLegDetailColumn();
         TOTAL_COLUMN_STYLE = tableResources.cellTableStyle().cellTableTotalColumn();
-        leaderboardTable = new SortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
+        leaderboardTable = new FlushableSortedCellTableWithStylableHeaders<LeaderboardRowDTO>(
         /* pageSize */10000, tableResources);
         leaderboardTable.addCellPreviewHandler(new CellPreviewEvent.Handler<LeaderboardRowDTO>() {
             @Override
@@ -1791,6 +1803,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             }
         });
         leaderboardTable.ensureDebugId("LeaderboardCellTable");
+        selectionCheckboxColumn = new LeaderboardSelectionCheckboxColumn(competitorSelectionProvider);
         getLeaderboardTable().setWidth("100%");
         leaderboardSelectionModel = new MultiSelectionModel<LeaderboardRowDTO>();
         // remember handler registration so we can temporarily remove it and re-add it to suspend selection events while we're actively changing it
@@ -1823,7 +1836,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         busyIndicator.ensureDebugId("BusyIndicator");
-        
+        busyStateChangeListeners = new HashSet<>();
 
         // the information panel
         if (!isEmbedded) {
@@ -1919,7 +1932,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         filterClearButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                getBusyIndicator().setBusy(true);
+                setBusyState(true);
                 competitorFilterPanel.clearAllActiveFilters();
                 timeChanged(new Date(), null);
             }
@@ -2236,19 +2249,19 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         @Override
                         public void onSuccess(LeaderboardDTO result) {
                             updateLeaderboard(result);
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                         }
         
                         @Override
                         public void onFailure(Throwable caught) {
-                            getBusyIndicator().setBusy(false);
+                            setBusyState(false);
                             getErrorReporter()
                                     .reportError("Error trying to obtain leaderboard contents: " + caught.getMessage(),
                                             true /* silentMode */);
                         }
                     });
         } else {
-            getBusyIndicator().setBusy(false);
+            setBusyState(false);
         }
     }
 
@@ -2398,32 +2411,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                     scoreCorrectionLastUpdateTimeLabel.setText("");
                 }
                 
-                List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
-                boolean hasLiveRace = !liveRaces.isEmpty();
+                boolean hasLiveRace = !leaderboard.getLiveRaces(timer.getLiveTimePointInMillis()).isEmpty();
                 liveRaceLabel.setText(hasLiveRace ? getLiveRacesText() : "");
-                if (hasLiveRace) {
-                    String liveRaceText = "";
-                    if(liveRaces.size() == 1) {
-                        com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                        liveRaceText = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
-                    } else {
-                        String raceNames = "";
-                        for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                            raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
-                        }
-                        // remove last ", "
-                        raceNames = raceNames.substring(0, raceNames.length() - 2);
-                        liveRaceText = stringMessages.racesAreLive(raceNames);
-                    }
-                    liveRaceLabel.setText(liveRaceText);
-                } else {
-                    liveRaceLabel.setText("");
-                }
                 scoreCorrectionLastUpdateTimeLabel.setVisible(!hasLiveRace);
                 liveRaceLabel.setVisible(hasLiveRace);
             }
             informLeaderboardUpdateListenersAboutLeaderboardUpdated(leaderboard);
-            getBusyIndicator().setBusy(false);
+            setBusyState(false);
         }
     }
 
@@ -3119,10 +3113,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         return stringMessages.leaderboard();
     }
 
-    private LeaderboardRowDTO getRow(CompetitorDTO competitor) {
+    private LeaderboardRowDTO getRow(String competitorIdAsString) {
         synchronized (getData().getList()) {
             for (LeaderboardRowDTO row : getData().getList()) {
-                if (row.competitor.equals(competitor)) {
+                if (row.competitor.getIdAsString().equals(competitorIdAsString)) {
                     return row;
                 }
             }
@@ -3132,7 +3126,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void addedToSelection(CompetitorDTO competitor) {
-        LeaderboardRowDTO row = getRow(competitor);
+        LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, true);
         }
@@ -3140,20 +3134,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public void removedFromSelection(CompetitorDTO competitor) {
-        LeaderboardRowDTO row = getRow(competitor);
+        LeaderboardRowDTO row = getRow(competitor.getIdAsString());
         if (row != null) {
             leaderboardSelectionModel.setSelected(row, false);
         }
-    }
-
-    @Override
-    public BusyIndicator getBusyIndicator() {
-        return busyIndicator;
-    }
-
-    @Override
-    public boolean hasBusyIndicator() {
-        return true;
     }
     
     private Iterable<LeaderboardRowDTO> getSelectedRows() {
@@ -3196,7 +3180,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (timer != null) {
             timer.removeTimeListener(this);
         }
-        if(leaderboardUpdateListener != null) {
+        if (leaderboardUpdateListener != null) {
             leaderboardUpdateListener.clear();
         }
     }
@@ -3231,9 +3215,15 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             timeChanged(getLeaderboardDisplayDate(), null);
         }
     }
-    
+
+    @Override
     public void addLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
         this.leaderboardUpdateListener.add(listener);
+    }
+
+    @Override
+    public void removeLeaderboardUpdateListener(LeaderboardUpdateListener listener) {
+        this.leaderboardUpdateListener.remove(listener);
     }
 
     protected void informLeaderboardUpdateListenersAboutLeaderboardUpdated(LeaderboardDTO leaderboard) {
@@ -3255,18 +3245,20 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     public String getLiveRacesText() {
         String result = "";
         List<com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO>> liveRaces = leaderboard.getLiveRaces(timer.getLiveTimePointInMillis());
+        boolean isMeta = leaderboard.type.isMetaLeaderboard();
         if (!liveRaces.isEmpty()) {
-            if(liveRaces.size() == 1) {
+            if (liveRaces.size() == 1) {
                 com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace = liveRaces.get(0);
-                result = stringMessages.raceIsLive("'" + liveRace.getA().getRaceColumnName() + "'");
+                String text = "'" + liveRace.getA().getRaceColumnName() + "'";
+                result = isMeta ? stringMessages.regattaIsLive(text) : stringMessages.raceIsLive(text);
             } else {
-                String raceNames = "";
+                String names = "";
                 for (com.sap.sse.common.Util.Pair<RaceColumnDTO, FleetDTO> liveRace : liveRaces) {
-                    raceNames += "'" + liveRace.getA().getRaceColumnName() + "', ";
+                    names += "'" + liveRace.getA().getRaceColumnName() + "', ";
                 }
                 // remove last ", "
-                raceNames = raceNames.substring(0, raceNames.length() - 2);
-                result = stringMessages.racesAreLive(raceNames);
+                names = names.substring(0, names.length() - 2);
+                result = isMeta ? stringMessages.regattasAreLive(names) : stringMessages.racesAreLive(names);
             }
         }
         return result;
@@ -3275,5 +3267,30 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
     @Override
     public String getDependentCssClassName() {
         return "leaderboard";
+    }
+
+    @Override
+    public void addBusyStateChangeListener(BusyStateChangeListener listener) {
+        busyStateChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeBusyStateChangeListener(BusyStateChangeListener listener) {
+        busyStateChangeListeners.remove(listener);
+    }
+
+    @Override
+    public boolean isBusy() {
+        return busyIndicator.isBusy();
+    }
+
+    @Override
+    public void setBusyState(boolean isBusy) {
+        if (busyIndicator.isBusy() != isBusy) {
+            busyIndicator.setBusy(isBusy);
+            for (BusyStateChangeListener listener : busyStateChangeListeners) {
+                listener.onBusyStateChange(isBusy);
+            }
+        }
     }
 }

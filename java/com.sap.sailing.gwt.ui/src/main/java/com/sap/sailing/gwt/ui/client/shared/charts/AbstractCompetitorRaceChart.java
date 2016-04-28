@@ -45,7 +45,6 @@ import com.sap.sailing.gwt.ui.actions.GetCompetitorsRaceDataAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.DetailTypeFormatter;
-import com.sap.sailing.gwt.ui.client.RaceSelectionProvider;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CompetitorRaceDataDTO;
@@ -94,20 +93,20 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private Long timeOfLatestRequestInMillis;
     
     protected AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, Button settingsButton,
             final StringMessages stringMessages, ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust) {
-        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, raceSelectionProvider, timer,
+        this(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, timer,
                 timeRangeWithZoomProvider, stringMessages, errorReporter, detailType, compactChart, allowTimeAdjust,
                 null, null);
     }
 
     AbstractCompetitorRaceChart(SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor,
-            CompetitorSelectionProvider competitorSelectionProvider, RaceSelectionProvider raceSelectionProvider,
+            CompetitorSelectionProvider competitorSelectionProvider, RegattaAndRaceIdentifier selectedRaceIdentifier,
             Timer timer, TimeRangeWithZoomProvider timeRangeWithZoomProvider, final StringMessages stringMessages,
             ErrorReporter errorReporter, DetailType detailType, boolean compactChart, boolean allowTimeAdjust,
             String leaderboardGroupName, String leaderboardName) {
-        super(sailingService, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
+        super(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomProvider, stringMessages, asyncActionsExecutor, errorReporter);
         this.competitorSelectionProvider = competitorSelectionProvider;
         this.compactChart = compactChart;
         this.allowTimeAdjust = allowTimeAdjust;
@@ -124,9 +123,11 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         noDataFoundLabel.setStyleName("abstractChartPanel-importantMessageOfChart");
         createChart();
         setSelectedDetailType(detailType);
-        
         competitorSelectionProvider.addCompetitorSelectionChangeListener(this);
-        raceSelectionProvider.addRaceSelectionChangeListener(this);
+        clearChart();
+        if (selectedRaceIdentifier != null) {
+            timeChanged(timer.getTime(), null);
+        }
     }
 
     /**
@@ -391,7 +392,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
                     .setLineWidth(LINE_WIDTH)
                     .setMarker(new Marker().setEnabled(false).setHoverState(new Marker().setEnabled(true).setRadius(4)))
                     .setShadow(false).setHoverStateLineWidth(LINE_WIDTH)
-                    .setColor(competitorSelectionProvider.getColor(competitor).getAsHtml()).setSelected(true));
+                    .setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml()).setSelected(true));
             result.setOption("turboThreshold", MAX_SERIES_POINTS);
             dataSeriesByCompetitor.put(competitor, result);
         }
@@ -408,7 +409,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         if (result == null) {
             result = chart.createSeries().setType(Series.Type.SCATTER)
                     .setName(stringMessages.markPassing() + " " + competitor.getName());
-            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor).getAsHtml())
+            result.setPlotOptions(new ScatterPlotOptions().setColor(competitorSelectionProvider.getColor(competitor, selectedRaceIdentifier).getAsHtml())
                     .setSelected(true));
             markPassingSeriesByCompetitor.put(competitor, result);
         }
@@ -501,7 +502,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             if (oldReversedYAxis != hasReversedYAxis(selectedDetailType)) {
                 chart = createChart();
                 if (isZoomed) {
-                	com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
+                    com.sap.sse.common.Util.Pair<Date, Date> zoomRange = timeRangeWithZoomProvider.getTimeZoom();
                     onTimeZoomChanged(zoomRange.getA(), zoomRange.getB());
                 } else {
                     resetMinMaxAndExtremesInterval(/* redraw */ true);
@@ -548,20 +549,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     
     private boolean isYAxisReversed() {
         return hasReversedYAxis(selectedDetailType);
-    }
-
-    @Override
-    public void onRaceSelectionChange(List<RegattaAndRaceIdentifier> selectedRaces) {
-        if (selectedRaces != null && !selectedRaces.isEmpty()) {
-            selectedRaceIdentifier = selectedRaces.iterator().next();
-        } else {
-            selectedRaceIdentifier = null;
-        }
-
-        clearChart();
-        if (selectedRaceIdentifier != null) {
-            timeChanged(timer.getTime(), null);
-        }
     }
 
     /**
@@ -640,12 +627,6 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
             break;
         }
         }
-    }
-
-    private void updateTimePlotLine(Date date) {
-        chart.getXAxis().removePlotLine(timePlotLine);
-        timePlotLine.setValue(date.getTime());
-        chart.getXAxis().addPlotLines(timePlotLine);
     }
 
     @Override

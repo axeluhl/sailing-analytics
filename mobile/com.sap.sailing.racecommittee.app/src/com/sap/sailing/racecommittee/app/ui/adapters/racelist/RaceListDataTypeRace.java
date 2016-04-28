@@ -5,7 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 import android.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
@@ -22,9 +26,11 @@ public class RaceListDataTypeRace implements RaceListDataType {
     private static String finishedTemplate;
     private static String unknownTemplate;
 
+    private final ManagedRace race;
+    private final RaceGroupSeriesFleet fleet;
+    private final LayoutInflater mInflater;
     private boolean updateIndicatorVisible = false;
     private RaceLogRaceStatus currentStatus = RaceLogRaceStatus.UNKNOWN;
-    private ManagedRace race;
 
     private Format scheduleFormatter = new SimpleDateFormat("HH:mm", Locale.US);
 
@@ -39,9 +45,15 @@ public class RaceListDataTypeRace implements RaceListDataType {
         unknownTemplate = fragment.getString(R.string.racelist_unknown);
     }
 
-    public RaceListDataTypeRace(ManagedRace race) {
+    public RaceListDataTypeRace(ManagedRace race, LayoutInflater layoutInflater) {
+        this(race, null, layoutInflater);
+    }
+
+    public RaceListDataTypeRace(ManagedRace race, RaceGroupSeriesFleet fleet, LayoutInflater layoutInflater) {
         this.race = race;
+        this.fleet = fleet;
         this.currentStatus = race.getStatus();
+        this.mInflater = layoutInflater;
     }
 
     public void onStatusChanged(RaceLogRaceStatus status, boolean allowUpdateIndicator) {
@@ -66,7 +78,9 @@ public class RaceListDataTypeRace implements RaceListDataType {
     public ManagedRace getRace() {
         return race;
     }
-    
+
+    public RaceGroupSeriesFleet getFleet() { return fleet; }
+
     public RaceLogRaceStatus getCurrentStatus() {
         return currentStatus;
     }
@@ -103,6 +117,11 @@ public class RaceListDataTypeRace implements RaceListDataType {
             return unknownTemplate;
         }
         return scheduleFormatter.format(startTime.asDate());
+    }
+
+    @Override
+    public View getView(ViewGroup parent) {
+        return mInflater.inflate(R.layout.race_list_area_item, parent, false);
     }
 
 }

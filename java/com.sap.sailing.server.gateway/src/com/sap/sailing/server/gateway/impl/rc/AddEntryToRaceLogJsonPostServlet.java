@@ -12,6 +12,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
@@ -21,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.AbstractJsonHttpServlet;
@@ -68,6 +71,7 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
                     String.format("Missing parameter '%s'.", RaceLogServletConstants.PARAMS_LEADERBOARD_NAME));
             return;
         }
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Permission.Mode.UPDATE, leaderboardName));
 
         String raceColumnName = request.getParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME);
         if (raceColumnName == null) {
@@ -88,19 +92,19 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
         Leaderboard leaderboard = service.getLeaderboardByName(leaderboardName);
         if (leaderboard == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+leaderboardName+" not found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Leaderboard "+StringEscapeUtils.escapeHtml(leaderboardName)+" not found.");
             return;
         }
 
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Race column "+raceColumnName+" not found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Race column "+StringEscapeUtils.escapeHtml(raceColumnName)+" not found.");
             return;
         }
 
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         if (fleet == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Fleet "+fleetName+" not found.");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Fleet "+StringEscapeUtils.escapeHtml(fleetName)+" not found.");
             return;
         }
 
@@ -112,8 +116,8 @@ public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
 
         BufferedReader reader = request.getReader();
         StringBuilder requestBody = new StringBuilder();
-        String line = "";
-        // TODO: we are remove line feeds here, intented?
+        String line;
+        // TODO: we are removing line feeds here, intended?
         while ((line = reader.readLine()) != null) {
             requestBody.append(line);
         }

@@ -15,9 +15,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.LinkUtil;
 import com.sap.sailing.gwt.common.client.i18n.TextMessages;
+import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingButtons;
 import com.sap.sailing.gwt.home.desktop.partials.sharing.SharingMetadataProvider;
 import com.sap.sailing.gwt.home.desktop.places.event.EventView;
@@ -29,8 +31,7 @@ import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.home.shared.utils.LogoUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.eventview.EventViewDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventHeader extends Composite {
     private static EventHeaderUiBinder uiBinder = GWT.create(EventHeaderUiBinder.class);
@@ -64,7 +65,7 @@ public class EventHeader extends Composite {
     private Presenter presenter;
     
     public EventHeader(EventView.Presenter presenter) {
-        this.event = presenter.getCtx().getEventDTO();
+        this.event = presenter.getEventDTO();
         this.presenter = presenter;
         EventHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -157,10 +158,12 @@ public class EventHeader extends Composite {
         if(!presenter.needsSelectionInHeader()) {
             eventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(eventState, event.getState().getStateMarker());
+            UIObject.ensureDebugId(eventState, "EventStateLabelDiv");
             hide(dropdownTitle);
         } else {
             dropdownEventName.setInnerText(nameToShow);
             LabelTypeUtil.renderLabelType(dropdownEventState, presenter.showRegattaMetadata() ? presenter.getRegattaMetadata().getState().getStateMarker() : event.getState().getStateMarker());
+            UIObject.ensureDebugId(dropdownEventState, "EventStateLabelDiv");
             hide(staticTitle);
             initDropdown();
         }

@@ -8,11 +8,8 @@
 
 import Foundation
 
-class TimerViewController: UIViewController, UIAlertViewDelegate {
-    enum AlertView: Int {
-        case StopTracking
-    }
-    
+class TimerViewController: UIViewController {
+
     @IBOutlet weak var trackingTimeLabel: UILabel!
     
     let startDate = NSDate()
@@ -28,6 +25,7 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
         dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
         
     }
+    
     // MARK:- Timer
     
     func timer(timer: NSTimer) {
@@ -36,33 +34,4 @@ class TimerViewController: UIViewController, UIAlertViewDelegate {
         let timerDate = NSDate(timeIntervalSince1970: timeInterval)
         trackingTimeLabel.text = dateFormatter.stringFromDate(timerDate)
     }
-
-    // MARK:- Buttons
-    
-    /* Stop tracking, go back to regattas view */
-    @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-        let alertView = UIAlertView(title: NSLocalizedString("Stop tracking?", comment: ""), message: "", delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""), otherButtonTitles: NSLocalizedString("Stop", comment: ""))
-        alertView.tag = AlertView.StopTracking.rawValue;
-        alertView.show()
-    }
-    
-    /* Alert view delegate */
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch alertView.tag {
-            // Stop tracking?
-        case AlertView.StopTracking.rawValue:
-            switch buttonIndex {
-            case alertView.cancelButtonIndex:
-                break
-            default:
-                LocationManager.sharedManager.stopTracking()
-                SendGPSFixController.sharedManager.checkIn = nil
-                self.dismissViewControllerAnimated(true, completion: nil)
-            }
-            break
-        default:
-            break
-        }
-    }
-
 }

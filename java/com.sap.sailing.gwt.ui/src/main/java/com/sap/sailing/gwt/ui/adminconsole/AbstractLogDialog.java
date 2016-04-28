@@ -18,9 +18,12 @@ import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.AbstractLogDTO;
 import com.sap.sailing.gwt.ui.shared.AbstractLogEventDTO;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends AbstractLogEventDTO> extends DataEntryDialog<R> {
+    
+    protected final StringMessages stringMessages;
     private final R logDTO;
 
     private final SelectionModel<E> selectionModel;
@@ -29,13 +32,14 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
 
     public AbstractLogDialog(final R logDTO, final StringMessages stringMessages, String logName, DialogCallback<R> callback) {
         super(logName, null, stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
+        this.stringMessages = stringMessages;
         this.logDTO = logDTO;
 
         raceLogEventsList = new ListDataProvider<E>();
         selectionModel = new SingleSelectionModel<E>();
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        raceLogEventsTable = new CellTable<E>(/* pageSize */10000, tableRes);
+        raceLogEventsTable = new BaseCelltable<E>(/* pageSize */10000, tableRes);
         raceLogEventsTable.ensureDebugId("TrackedRacesTable");
         raceLogEventsTable.setSelectionModel(selectionModel);
 
@@ -145,11 +149,11 @@ public abstract class AbstractLogDialog<R extends AbstractLogDTO<E>, E extends A
         
         addFirstColumns(raceLogEventsTable, columnSortHandler);
         raceLogEventsTable.addColumn(logEventTypeColumn, stringMessages.type());
-        raceLogEventsTable.addColumn(logEventCreatedColumn, "Created at");
-        raceLogEventsTable.addColumn(logEventLogicalTimeColumn, "Logical timepoint");
-        raceLogEventsTable.addColumn(logEventAuthorColumn, "Author");
-        raceLogEventsTable.addColumn(logEventAuthorPriorityColumn, "Priority");
-        raceLogEventsTable.addColumn(logEventInfoColumn, "Info");
+        raceLogEventsTable.addColumn(logEventCreatedColumn, stringMessages.createdAt());
+        raceLogEventsTable.addColumn(logEventLogicalTimeColumn, stringMessages.logicalTimepoint());
+        raceLogEventsTable.addColumn(logEventAuthorColumn, stringMessages.authorName());
+        raceLogEventsTable.addColumn(logEventAuthorPriorityColumn, stringMessages.authorPriority());
+        raceLogEventsTable.addColumn(logEventInfoColumn, stringMessages.info());
         addLastColumns(raceLogEventsTable, columnSortHandler);
 
         raceLogEventsList.addDataDisplay(raceLogEventsTable);

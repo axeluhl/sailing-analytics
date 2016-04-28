@@ -12,16 +12,10 @@ import android.os.Bundle;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sse.common.Util;
 
-public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Intent, Boolean, InputStream>> {
-    
+public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResult> {
+
     private static String TAG = MessageSenderTask.class.getName();
-
-    public interface MessageSendingListener {
-        public void onMessageSent(Intent intent, boolean success, InputStream inputStream);
-    }
-
     private MessageSendingListener listener;
     private Context context;
 
@@ -30,42 +24,47 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, Util.Triple<Inten
         this.context = context;
     }
 
-    @SuppressWarnings("unused")
     @Override
-    protected Util.Triple<Intent, Boolean, InputStream> doInBackground(Intent... params) {
-        Util.Triple<Intent, Boolean, InputStream> result;
+    protected MessageSenderResult doInBackground(Intent... params) {
+        MessageSenderResult result;
         Intent intent = params[0];
         if (intent == null) {
-            return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            return new MessageSenderResult();
         }
         Bundle extras = intent.getExtras();
         String payload = extras.getString(MessageSendingService.PAYLOAD);
         String url = extras.getString(MessageSendingService.URL);
         if (payload == null || url == null) {
-            return new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            return new MessageSenderResult(intent);
         }
         InputStream responseStream = null;
         try {
             ExLog.i(context, TAG, "Posting message: " + payload);
-            HttpRequest post = new HttpJsonPostRequest(new URL(url), payload, context);
+            HttpRequest post = new HttpJsonPostRequest(context, new URL(url), payload);
             responseStream = post.execute();
             ExLog.i(context, TAG, "Post successful for the following message: " + payload);
-            result = new Util.Triple<Intent, Boolean, InputStream>(intent, true, responseStream);
+            result = new MessageSenderResult(intent, responseStream);
         } catch (IOException e) {
-            if (responseStream != null) {
-                try {
-                    responseStream.close();
-                } catch (IOException ie) { }
-            }
             ExLog.e(context, TAG, String.format("Post not successful, exception occured: %s", e.toString()));
-            result = new Util.Triple<Intent, Boolean, InputStream>(intent, false, null);
+            result = new MessageSenderResult(intent, e);
+        } finally {
+            try {
+                if (responseStream != null) {
+                    responseStream.close();
+                }
+            } catch (IOException e) {
+            }
         }
         return result;
     }
 
     @Override
-    protected void onPostExecute(Util.Triple<Intent, Boolean, InputStream> resultTriple) {
-        super.onPostExecute(resultTriple);
-        listener.onMessageSent(resultTriple.getA(), resultTriple.getB(), resultTriple.getC());
+    protected void onPostExecute(MessageSenderResult result) {
+        super.onPostExecute(result);
+        listener.onMessageSent(result);
+    }
+
+    public interface MessageSendingListener {
+        void onMessageSent(MessageSenderResult result);
     }
 }

@@ -1,5 +1,8 @@
 package com.sap.sailing.android.shared.ui.activities;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -55,5 +58,15 @@ public abstract class LoggableActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         ExLog.i(this, TAG, String.format("Back pressed on activity %s", this.getClass().getSimpleName()));
+    }
+
+    public void safeClose(Closeable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (IOException e) {
+                ExLog.ex(this, TAG, e);
+            }
+        }
     }
 }

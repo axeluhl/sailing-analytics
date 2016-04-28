@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
@@ -34,8 +33,8 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     private final static Flags startmodeFlag = Flags.PAPA;
     
     public LeagueRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author, 
-            RaceLogEventFactory factory, LeagueConfiguration configuration, RaceLogResolver raceLogResolver) {
-        super(raceLog, author, factory, configuration, raceLogResolver);
+             LeagueConfiguration configuration, RaceLogResolver raceLogResolver) {
+        super(raceLog, author, configuration, raceLogResolver);
         update();
     }
 
@@ -45,20 +44,15 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     }
     
     @Override
-    public boolean hasIndividualRecall() {
-        boolean hasRecall = super.hasIndividualRecall();
-        if (!hasRecall) {
-            return false;
-        } else {
-            return hasRecall;
-        }
-    }
-    
-    @Override
     protected boolean hasIndividualRecallByDefault() {
         return true;
     }
     
+    @Override
+    protected Boolean isResultEntryEnabledByDefault() {
+        return true;
+    }
+
     @Override
     public RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             FulfillmentFunction function) {

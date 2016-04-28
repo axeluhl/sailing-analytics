@@ -1,17 +1,26 @@
 package com.sap.sailing.android.tracking.app.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 
 public class AppPreferences extends BaseAppPreferences {
 
+    private final SharedPreferences pref;
+
     public AppPreferences(Context context) {
         super(context);
+
+        pref = context.getSharedPreferences("failed_uploads", Context.MODE_PRIVATE);
     }
 
     public static final AbstractLogEventAuthor raceLogEventAuthor = new LogEventAuthorImpl("Tracking App", 0);
@@ -37,21 +46,25 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerEventPath(String eventId) {
-        return context.getString(R.string.preference_server_event_path, "/events").replace("{event_id}", eventId);
+        return context.getString(R.string.preference_server_event_path).replace("{event_id}", eventId);
+    }
+
+    public String getServerEventUrl(String eventId) {
+        return context.getString(R.string.preference_server_event_url, eventId);
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path, "/leaderboards").replace(
+        return context.getString(R.string.preference_server_leaderboard_path).replace(
                 "{leaderboard_name}", leaderboardName);
     }
 
-    public String getServerCompetitorPath(String competitorId) {
-        return context.getString(R.string.preference_server_competitor_path, "/competitors").replace("{competitor_id}",
-                competitorId);
+    public String getServerCompetitorPath(String competitorId) throws UnsupportedEncodingException {
+        return context.getString(R.string.preference_server_competitor_path).replace("{competitor_id}",
+                URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
     public String getServerCompetiorTeamPath(String competitorId){
-        return context.getString(R.string.preference_server_team_info_path, "/competitors").replace("{competitor_id}",
+        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
             competitorId);
     }
 
@@ -148,5 +161,17 @@ public class AppPreferences extends BaseAppPreferences {
     public void setMessageResendInterval(int interval) {
         preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), interval)
                 .commit();
+    }
+
+    public boolean hasFailedUpload(String key) {
+        return pref.getBoolean(key, false);
+    }
+
+    public void setFailedUpload(String key) {
+        pref.edit().putBoolean(key, true).commit();
+    }
+
+    public void removeFailedUpload(String key) {
+        pref.edit().remove(key).commit();
     }
 }

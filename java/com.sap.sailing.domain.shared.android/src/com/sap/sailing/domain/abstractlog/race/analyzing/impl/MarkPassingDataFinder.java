@@ -3,9 +3,9 @@ package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogFixedMarkPassingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sse.common.TimePoint;

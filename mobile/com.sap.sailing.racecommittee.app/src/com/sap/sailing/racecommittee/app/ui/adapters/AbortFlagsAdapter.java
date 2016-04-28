@@ -1,7 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
+import java.util.ArrayList;
+import java.util.Locale;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +14,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
-
-import java.util.ArrayList;
-import java.util.Locale;
+import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
 
 public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
@@ -30,8 +33,9 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
     private Context mContext;
     private ArrayList<AbortFlag> mFlags;
     private AbortFlagItemClick mListener;
+    private boolean showButton;
 
-    public AbortFlagsAdapter(Context context, AbortFlagItemClick listener, Flags flags) {
+    public AbortFlagsAdapter(@NonNull Context context, @NonNull AbortFlagItemClick listener, @NonNull Flags flags) {
         mContext = context;
         mListener = listener;
 
@@ -39,6 +43,8 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         addFlag(flags.name().toLowerCase(Locale.US), Flags.NONE);
         addFlag(flags.name().toLowerCase(Locale.US), Flags.HOTEL);
         addFlag(flags.name().toLowerCase(Locale.US), Flags.ALPHA);
+
+        showButton = !Flags.NOVEMBER.equals(flags);
     }
 
     private void addFlag(String primaryFlag, Flags otherFlag) {
@@ -91,11 +97,14 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
 
         final ImageView flagImage = ViewHelper.get(convertView, R.id.flag);
         if (flagImage != null) {
-            Drawable flagDrawable = null;
+            Drawable flagDrawable;
             flagImage.setVisibility(View.INVISIBLE);
             int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
             if (flagResId != 0) {
-                flagDrawable = BitmapHelper.getDrawable(mContext, flagResId);
+                String[] flag = item.file_name.split("_");
+                String flagName = flag[1];
+                int flagSize = Integer.parseInt(flag[flag.length - 1].replace("dp", ""));
+                flagDrawable = FlagsResources.getFlagDrawable(mContext, flagName, flagSize);
             } else {
                 flagDrawable = BitmapHelper.getAttrDrawable(mContext, item.file_name);
             }
@@ -126,7 +135,7 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         final Button confirm = ViewHelper.get(convertView, R.id.confirm);
         if (confirm != null && mListener != null) {
             confirm.setVisibility(View.GONE);
-            if (item.touched) {
+            if (item.touched && showButton) {
                 confirm.setVisibility(View.VISIBLE);
             }
 
@@ -145,6 +154,9 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
                 public void onClick(View v) {
                     for (AbortFlag flag : mFlags) {
                         flag.touched = flag.file_name.equals(item.file_name);
+                        if (flag.touched && !showButton) {
+                            mListener.onClick(item.flag);
+                        }
                     }
                     notifyDataSetChanged();
                 }

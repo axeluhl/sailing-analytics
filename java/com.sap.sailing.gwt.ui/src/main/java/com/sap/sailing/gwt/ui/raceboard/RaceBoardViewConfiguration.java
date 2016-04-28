@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.sap.sse.common.Duration;
+
 /** 
  * Represents the parameters for configuring the raceboard view
  * @author Frank
@@ -10,12 +12,12 @@ public class RaceBoardViewConfiguration {
     private final boolean showWindChart; 
     private final boolean showCompetitorsChart;
     private final String activeCompetitorsFilterSetName;
-    private final boolean canReplayDuringLiveRaces;
     private final boolean autoSelectMedia;
     private final String defaultMedia;
     private final boolean showViewStreamlets;
     private final boolean showViewStreamletColors;
     private final boolean showViewSimulation;
+    private final Duration initialDurationAfterRaceStartInReplay;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -30,16 +32,17 @@ public class RaceBoardViewConfiguration {
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_AUTOSELECT_MEDIA = "autoSelectMedia";
     public static final String PARAM_DEFAULT_MEDIA = "defaultMedia";
+    public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
 
     public RaceBoardViewConfiguration() {
         this(/* activeCompetitorsFilterSetName */ null, /* showLeaderboard */ true,
                 /* showWindChart */ false, /* showCompetitorsChart */ false, /* showViewStreamlets */ false, /* showViewStreamletColors */ false, /* showViewSimulation */ false,
-        /* canReplayDuringLiveRaces */false, /* autoSelectMedia */false, null);
+         /* autoSelectMedia */false, null, /* initialDurationAfterRaceStartInReplay */ null);
     }	
     
     public RaceBoardViewConfiguration(String activeCompetitorsFilterSetName, boolean showLeaderboard,
-            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation, boolean canReplayDuringLiveRaces,
-            boolean autoSelectMedia, String defaultMedia) {
+            boolean showWindChart, boolean showCompetitorsChart, boolean showViewStreamlets, boolean showViewStreamletColors, boolean showViewSimulation,
+            boolean autoSelectMedia, String defaultMedia, Duration initialDurationAfterRaceStartInReplay) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
@@ -47,9 +50,9 @@ public class RaceBoardViewConfiguration {
         this.showViewStreamlets = showViewStreamlets;
         this.showViewStreamletColors = showViewStreamletColors;
         this.showViewSimulation = showViewSimulation;
-        this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
         this.autoSelectMedia = autoSelectMedia;
         this.defaultMedia = defaultMedia;
+        this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
     }
 
     public boolean isShowLeaderboard() {
@@ -80,16 +83,15 @@ public class RaceBoardViewConfiguration {
         return activeCompetitorsFilterSetName;
     }
 
-    public boolean isCanReplayDuringLiveRaces() {
-        return canReplayDuringLiveRaces;
-    }
-
     public boolean isAutoSelectMedia() {
-		return autoSelectMedia;
-	}
+        return autoSelectMedia;
+    }
 
     public String getDefaultMedia() {
         return defaultMedia;
     }
 
+    public Duration getInitialDurationAfterRaceStartInReplay() {
+        return initialDurationAfterRaceStartInReplay;
+    }
 }

@@ -33,7 +33,7 @@ public class RecordCompetitorGPSFix extends AbstractRaceOperation<Void> {
     public Void internalApplyTo(RacingEventService toState) throws Exception {
         DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
         Competitor competitor = trackedRace.getRace().getCompetitorById(competitorID);
-        trackedRace.recordFix(competitor, gpsFix);
+        trackedRace.recordFix(competitor, gpsFix, /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
         return null;
     }
 

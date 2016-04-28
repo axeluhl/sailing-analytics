@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegatt
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.analyticstab.RegattaCompetitorAnalyticsPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
@@ -21,9 +20,15 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 
 public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
@@ -65,6 +70,22 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
     
+    public PlaceNavigation<ImprintPlace> getImprintNavigation() {
+        return createGlobalPlaceNavigation(new ImprintPlace());
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
+    }
+    
+    public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
+        return createGlobalPlaceNavigation(new PasswordResetPlace());
+    }
+
     public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
         MultiregattaRegattasPlace eventPlace = new MultiregattaRegattasPlace(eventUuidAsString);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, eventPlace);
@@ -101,7 +122,7 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, regattaPlace);
     }
 
-    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
+        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
     }
 }

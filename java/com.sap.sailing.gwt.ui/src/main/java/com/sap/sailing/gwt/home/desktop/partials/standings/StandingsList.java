@@ -10,14 +10,14 @@ import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderboardDTO;
+import com.sap.sailing.gwt.home.communication.event.minileaderboard.MiniLeaderboardItemDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.GetMiniLeaderboardDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.MiniLeaderboardItemDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class StandingsList extends Widget implements RefreshableWidget<GetMiniLeaderboardDTO> {
     interface MyUiBinder extends UiBinder<Element, StandingsList> {
@@ -31,13 +31,16 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
     @UiField SpanElement headerLabelUi;
     @UiField DivElement headerArrowUi;
     @UiField DivElement itemContainerUi;
+    @UiField DivElement noResultsUi;
     @UiField DivElement scoreInformationUi;
+    
+    private final boolean finished;
 
     public StandingsList(boolean finished, PlaceNavigation<?> headerNavigation) {
+        this.finished = finished;
         StandingsResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         setVisible(false);
-        headerTitleUi.setInnerText(finished ? i18n.results() : i18n.latestRegattaStandings());
         if(headerNavigation == null) {
             headerArrowUi.removeFromParent();
         } else {
@@ -47,13 +50,23 @@ public class StandingsList extends Widget implements RefreshableWidget<GetMiniLe
 
     @Override
     public void setData(GetMiniLeaderboardDTO data) {
+        String headerText = finished ? i18n.results() : i18n.latestRegattaStandings();
+        int itemCount = data.getItems().size();
+        if (itemCount > 0 && data.getTotalCompetitorCount() > itemCount) {
+            headerText += " (" + i18n.topN(itemCount) + ")";
+        }
+        headerTitleUi.setInnerText(headerText);
         itemContainerUi.removeAllChildren();
         scoreInformationUi.removeAllChildren();
         getElement().getStyle().clearDisplay();
         updateScoreInformation(data);
         
         LabelTypeUtil.renderLabelTypeOrHide(headerLabelUi, data.isLive() ? LabelType.LIVE : LabelType.NONE);
-        setVisible(!data.getItems().isEmpty());
+        if(data.getItems().isEmpty()) {
+            noResultsUi.getStyle().clearDisplay();
+            return;
+        }
+        noResultsUi.getStyle().setDisplay(Display.NONE);
         
         boolean showRaceCounts = data.hasDifferentRaceCounts();
         for (MiniLeaderboardItemDTO item : data.getItems()) {

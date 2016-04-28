@@ -47,6 +47,7 @@ import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -179,9 +180,9 @@ public class MediaMasterDataExportTest {
     public static RegattaImpl createTestRegatta(String regattaName, Iterable<String> raceColumnNames) {
         Iterable<? extends Fleet> regattaFleets = Collections.singleton(regattaFleet);
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Series series = new SeriesImpl("series name", isMedal, regattaFleets, raceColumnNames, trackedRegattaRegistry);
+        Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
         Iterable<? extends Series> regattaSeries = Collections.singleton(series);
-        return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea);
+        return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
     }
 
 

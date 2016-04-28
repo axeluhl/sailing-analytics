@@ -19,10 +19,10 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressDTO;
+import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.regatta.RegattaProgressSeriesDTO;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
 
 public class MultiRegattaListSteps extends Composite {
 
@@ -98,11 +98,9 @@ public class MultiRegattaListSteps extends Composite {
     }
 
     private String getLeaderboardButtonStyle(RegattaState regattaState) {
-        switch (regattaState) {
-            case UPCOMING: return SharedResources.INSTANCE.mainCss().buttoninactive();
-            case RUNNING: return SharedResources.INSTANCE.mainCss().buttonred();
-            default: return SharedResources.INSTANCE.mainCss().buttonprimary();
-        }
+        String liveStyle = SharedResources.INSTANCE.mainCss().buttonred();
+        String defaultStyle = SharedResources.INSTANCE.mainCss().buttonprimary();
+        return RegattaState.RUNNING == regattaState ? liveStyle : defaultStyle;
     }
 
 }

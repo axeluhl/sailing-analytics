@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import org.json.simple.JSONArray;
 
@@ -134,11 +135,12 @@ public class PolarResource extends AbstractSailingServerResource {
     }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
-        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        return  Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     private Response getBadRaceErrorResponse(String regattaName, String raceName) {
-        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + raceName + "' in regatta '" + regattaName + "'.").type(MediaType.TEXT_PLAIN).build();
+        return Response.status(Status.NOT_FOUND).entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) +
+                "' in regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN).build();
     }
 
     @GET
@@ -168,7 +170,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } finally {
                     maneuverBasedWindEstimationTrackImpl.unlockAfterRead();
                 }
-                response = Response.ok(resultAsJson.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(resultAsJson.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;

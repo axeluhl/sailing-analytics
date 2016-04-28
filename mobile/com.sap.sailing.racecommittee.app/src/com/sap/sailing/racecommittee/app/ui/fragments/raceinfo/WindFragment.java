@@ -1,28 +1,27 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
-import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.content.LocalBroadcastManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.widget.*;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceFilter;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.base.racegroup.impl.CurrentRaceFilterImpl;
 import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -34,34 +33,53 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.services.polling.RacePositionsPoller;
+import com.sap.sailing.racecommittee.app.ui.activities.RacingActivity;
 import com.sap.sailing.racecommittee.app.ui.utils.OnRaceUpdatedListener;
+import com.sap.sailing.racecommittee.app.ui.views.AccuracyView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView;
 import com.sap.sailing.racecommittee.app.ui.views.CompassView.CompassDirectionListener;
+import com.sap.sailing.racecommittee.app.utils.DecimalInputTextWatcher;
+import com.sap.sailing.racecommittee.app.utils.GeoUtils;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sailing.racecommittee.app.utils.RangeInputFilter;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sailing.racecommittee.app.utils.WindHelper;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.annotation.ColorInt;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
-public class WindFragment extends BaseFragment
-    implements CompassDirectionListener,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener,
-        OnRaceUpdatedListener {
+public class WindFragment extends BaseFragment implements CompassDirectionListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnRaceUpdatedListener {
 
     private final static String TAG = WindFragment.class.getName();
-    private final static String START_MODE = "startMode";
-    private final static long ONE_SEC = 1000;
     private final static long FIVE_SEC = 5000;
-    private final static long EVERY_POSITION_CHANGE = 0;
+    private final static long EVERY_POSITION_CHANGE = 2000;
     private final static int MIN_KTS = 3;
     private final static int MAX_KTS = 30;
-    private final static float MAX_LOCATION_DRIFT_IN_METER = 25f; // 25 meter
-    private final static long MAX_LOCATION_DRIFT_IN_MILLIS = 8 * 60 * 60 * 1000; // 8 hours
 
     private View mHeaderLayout;
     private View mContentLayout;
@@ -69,28 +87,33 @@ public class WindFragment extends BaseFragment
 
     private TextView mHeaderText;
     private TextView mHeaderWindSensor;
-//    private View mWindOn;
-//    private View mWindOff;
-    private Button mContentSetData;
-    private CompassView mContentCompassView;
-    private NumberPicker mContentWindSpeed;
-    private TextView mContentLatitude;
-    private TextView mContentLongitude;
-    private TextView mContentAccuracy;
+    private Button mSetData;
+    private Button mSetDataMulti;
+    private CompassView mCompassView;
+    private NumberPicker mWindSpeed;
+    private TextView mLatitude;
+    private TextView mLongitude;
+    private AccuracyView mAccuracy;
+    private TextView mAccuracyTimestamp;
+    private EditText mWindInputDirection;
+    private EditText mWindInputSpeed;
     private Button mContentMapShow;
     private WebView mMapWebView;
     private Button mMapHide;
+    private ImageView mEditCourse;
+    private ImageView mEditSpeed;
 
     private GoogleApiClient apiClient;
     private LocationRequest locationRequest;
     private Location mCurrentLocation;
 
-    private Handler mRefreshUIHandler;
-    private Runnable mRefreshUIRunnable;
+    private IsTrackedReceiver mReceiver;
 
-    private RacePositionsPoller positionPoller;
+    private List<ManagedRace> mSelectedRaces;
+    private List<ManagedRace> mManagedRaces;
+    private LinkedHashMap<RaceGroupSeriesFleet, List<ManagedRace>> mRacesByGroup;
 
-    public static WindFragment newInstance(int startMode) {
+    public static WindFragment newInstance(@START_MODE_VALUES int startMode) {
         WindFragment fragment = new WindFragment();
         Bundle args = new Bundle();
         args.putInt(START_MODE, startMode);
@@ -105,8 +128,9 @@ public class WindFragment extends BaseFragment
      */
     private String[] generateNumbers() {
         ArrayList<String> numbers = new ArrayList<>();
+        String kn = getString(R.string.wind_kn);
         for (float i = MIN_KTS; i <= MAX_KTS; i += .5f) {
-            numbers.add(String.format("%.1f %s", i, getString(R.string.wind_kn)));
+            numbers.add(String.format(Locale.US, "%.1f ", i) + kn);
         }
         return numbers.toArray(new String[numbers.size()]);
     }
@@ -117,81 +141,52 @@ public class WindFragment extends BaseFragment
 
         // initialize the googleApiClient for location requests
         apiClient = new GoogleApiClient.Builder(getActivity()).addApi(LocationServices.API).build();
-
-        // create runnable for ui refreshing
-        mRefreshUIRunnable = createUIRefreshRunnable();
-
-        //register receiver to be notified if race is tracked
-        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new IsTrackedReceiver(), filter);
-    }
-
-    private Runnable createUIRefreshRunnable() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                refreshUI();
-                mRefreshUIHandler.postDelayed(this, ONE_SEC);
-            }
-        };
-    }
-
-    /**
-     * refresh location data labels and highlight missing or inaccuracy gps data
-     * disable mContentSetData button if gps data is missing or inaccurate
-     */
-    private void refreshUI() {
-        if (mCurrentLocation != null) {
-            double latitude = mCurrentLocation.getLatitude();
-            double longitude = mCurrentLocation.getLongitude();
-            float accuracy = mCurrentLocation.getAccuracy();
-            long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
-            mContentLatitude.setText(String.format("%s: %.5f", getString(R.string.wind_latitude), latitude));
-            mContentLatitude.setTextColor(Color.BLACK);
-            mContentLongitude.setText(String.format("%s: %.5f", getString(R.string.wind_longitude), longitude));
-            mContentLongitude.setTextColor(Color.BLACK);
-            String timeFormatted = TimeUtils.formatTimeAgo(timeDifference) + " " + getString(R.string.wind_accuracy_ago);
-            mContentAccuracy.setText(String.format("%s: ~%.0fm\n(%s)", getString(R.string.wind_accuracy), mCurrentLocation.getAccuracy(), timeFormatted));
-            mContentSetData.setEnabled(timeDifference <= MAX_LOCATION_DRIFT_IN_MILLIS && accuracy <= MAX_LOCATION_DRIFT_IN_METER);
-
-            // highlight accuracy problem if location is invalid
-            mContentAccuracy.setTextColor(mContentSetData.isEnabled() ? Color.BLACK : Color.RED);
-        } else {
-            mContentSetData.setEnabled(false);
-
-            // highlight location problem if no location is available
-            mContentLatitude.setTextColor(Color.RED);
-            mContentLongitude.setTextColor(Color.RED);
-            mContentAccuracy.setTextColor(Color.RED);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.wind_view, container, false);
 
-        // the fragment is divided into three layouts
-        // header layout is optional and is used for back navigation
-        // content layout holds wind direction, wind speed and location controls
-        // map layout holds a lazy web view for map presentation
-        mHeaderLayout = layout.findViewById(R.id.header_layout);
-        mContentLayout = layout.findViewById(R.id.content_layout);
-        mMapLayout = layout.findViewById(R.id.map_layout);
+        mHeaderLayout = ViewHelper.get(layout, R.id.header_layout);
+        mContentLayout = ViewHelper.get(layout, R.id.content_layout);
+        mMapLayout = ViewHelper.get(layout, R.id.map_layout);
 
-        mHeaderText = (TextView) layout.findViewById(R.id.header_text);
-        mHeaderWindSensor = (TextView) layout.findViewById(R.id.wind_sensor);
+        mHeaderText = ViewHelper.get(layout, R.id.header_text);
+        mHeaderWindSensor = ViewHelper.get(layout, R.id.wind_sensor);
         // disabled, because of bug #2871
-        // mWindOff = layout.findViewById(R.id.wind_off);
-        // mWindOn = layout.findViewById(R.id.wind_on);
-        mContentSetData = (Button) layout.findViewById(R.id.set_data);
-        mContentCompassView = (CompassView) layout.findViewById(R.id.compass_view);
-        mContentWindSpeed = (NumberPicker) layout.findViewById(R.id.wind_speed);
-        mContentLatitude = (TextView) layout.findViewById(R.id.position_latitude);
-        mContentLongitude = (TextView) layout.findViewById(R.id.position_longitude);
-        mContentAccuracy = (TextView) layout.findViewById(R.id.position_accuracy);
-        mContentMapShow = (Button) layout.findViewById(R.id.position_show);
-        mMapWebView = (WebView) layout.findViewById(R.id.web_view);
-        mMapHide = (Button) layout.findViewById(R.id.position_hide);
+        // mWindOff = ViewHelper.get(layout, R.id.wind_off);
+        // mWindOn = ViewHelper.get(layout, R.id.wind_on);
+        mSetData = ViewHelper.get(layout, R.id.set_data);
+        mSetDataMulti = ViewHelper.get(layout, R.id.set_data_multi);
+        mCompassView = ViewHelper.get(layout, R.id.compass_view);
+        mWindSpeed = ViewHelper.get(layout, R.id.wind_speed);
+        mLatitude = ViewHelper.get(layout, R.id.latitude_value);
+        mLongitude = ViewHelper.get(layout, R.id.longitude_value);
+        mAccuracy = ViewHelper.get(layout, R.id.accuracy_value);
+        mAccuracyTimestamp = ViewHelper.get(layout, R.id.accuracy_timestamp);
+        mWindInputDirection = ViewHelper.get(layout, R.id.wind_input_direction);
+        if (mWindInputDirection != null) {
+            mWindInputDirection.setFilters(new InputFilter[]{new RangeInputFilter(0, 360)});
+        }
+        mWindInputSpeed = ViewHelper.get(layout, R.id.wind_input_speed);
+        if (mWindInputSpeed != null) {
+            mWindInputSpeed.setFilters(new InputFilter[]{new RangeInputFilter(0, MAX_KTS)});
+            mWindInputSpeed.addTextChangedListener(new DecimalInputTextWatcher(mWindInputSpeed, 1));
+        }
+        mContentMapShow = ViewHelper.get(layout, R.id.position_show);
+        mMapWebView = ViewHelper.get(layout, R.id.web_view);
+        mMapHide = ViewHelper.get(layout, R.id.position_hide);
+
+        mReceiver = new IsTrackedReceiver(mContentMapShow);
+
+        mEditCourse = ViewHelper.get(layout, R.id.edit_course);
+        if (mEditCourse != null) {
+            mEditCourse.setOnClickListener(new EditCourseClick());
+        }
+        mEditSpeed = ViewHelper.get(layout, R.id.edit_speed);
+        if (mEditSpeed != null) {
+            mEditSpeed.setOnClickListener(new EditSpeedClick());
+        }
 
         return layout;
     }
@@ -199,33 +194,84 @@ public class WindFragment extends BaseFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         if (mHeaderWindSensor != null && getRace() != null && getRaceState() != null && getRaceState().getWindFix() != null) {
-            String sensorData = getString(R.string.wind_sensor);
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", getResources().getConfiguration().locale);
             Wind wind = getRaceState().getWindFix();
-            sensorData = sensorData.replace("#AT#", dateFormat.format(wind.getTimePoint().asDate()));
-            sensorData = sensorData.replace("#FROM#", String.format("%.0f", wind.getFrom().getDegrees()));
-            sensorData = sensorData.replace("#SPEED#", String.format("%.1f", wind.getKnots()));
-            mHeaderWindSensor.setText(sensorData);
+            mHeaderWindSensor.setText(getString(R.string.wind_sensor, dateFormat.format(wind.getTimePoint().asDate()), wind.getFrom().getDegrees(), wind
+                    .getKnots()));
         }
-
         setupButtons();
         setupWindSpeedPicker();
         setupLayouts(false);
+
+        refreshUI(false);
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void notifyTick(TimePoint now) {
+        super.notifyTick(now);
 
-        mRefreshUIHandler = new Handler();
+        refreshUI(true);
+    }
+
+    @Override
+    public boolean onBackPressed() {
+        if (mMapHide == null && mContentLayout.getVisibility() == View.GONE) {
+            setupLayouts(false);
+            return true;
+        }
+        return super.onBackPressed();
+    }
+
+    /**
+     * refresh location data labels and highlight missing or inaccuracy gps data
+     * disable setData button if gps data is missing or inaccurate
+     *
+     * @param timeOnly updates only the time since last position
+     */
+    private void refreshUI(boolean timeOnly) {
+        if (isAdded()) {
+            int whiteColor = ThemeHelper.getColor(getActivity(), R.attr.white);
+            int redColor = R.color.sap_red;
+            if (!timeOnly) {
+                setTextAndColor(mLatitude, getString(R.string.not_available), redColor);
+                setTextAndColor(mLongitude, getString(R.string.not_available), redColor);
+                setTextAndColor(mAccuracyTimestamp, null, whiteColor);
+                if (mAccuracy != null) {
+                    mAccuracy.setAccuracy(-1);
+                }
+            }
+            if (!timeOnly) {
+                mSetData.setEnabled(mCurrentLocation != null);
+                mSetDataMulti.setEnabled(mCurrentLocation != null);
+            }
+            if (mCurrentLocation != null) {
+                if (!timeOnly) {
+                    double latitude = mCurrentLocation.getLatitude();
+                    double longitude = mCurrentLocation.getLongitude();
+                    if (mAccuracy != null) {
+                        mAccuracy.setAccuracy(mCurrentLocation.getAccuracy());
+                    }
+                    setTextAndColor(mLatitude, GeoUtils.getInDMSFormat(getActivity(), latitude), whiteColor);
+                    setTextAndColor(mLongitude, GeoUtils.getInDMSFormat(getActivity(), longitude), whiteColor);
+                }
+                long timeDifference = System.currentTimeMillis() - mCurrentLocation.getTime();
+                setTextAndColor(mAccuracyTimestamp, getString(R.string.accuracy_timestamp, TimeUtils.formatTimeAgo(getActivity(), timeDifference)), whiteColor);
+            }
+        }
+    }
+
+    private void setTextAndColor(TextView textView, String text, int color) {
+        if (textView != null) {
+            textView.setText(text);
+            textView.setTextColor(color);
+        }
     }
 
     /**
      * starts the googleApiClient to get location updates
      */
-    private void tearUpApiClient() {
+    private void resumeApiClient() {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(FIVE_SEC);
@@ -235,23 +281,10 @@ public class WindFragment extends BaseFragment
         apiClient.connect();
     }
 
-    private void tearDownApiClient() {
+    private void pauseApiClient() {
         apiClient.unregisterConnectionFailedListener(this);
         apiClient.unregisterConnectionCallbacks(this);
         apiClient.disconnect();
-    }
-
-    /**
-     * adds the polling for buoy data to the polled races, also registers a callback
-     */
-    private void tearUpPositionPoller() {
-        positionPoller = new RacePositionsPoller(getActivity());
-        positionPoller.register(getRace(), this);
-        ExLog.i(getActivity(), TAG, "registering race " + getRace().getRaceName());
-    }
-
-    private void tearDownPositionPoller() {
-        positionPoller.unregisterAllAndStop();
     }
 
     /**
@@ -262,15 +295,23 @@ public class WindFragment extends BaseFragment
             mHeaderText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    openMainScheduleFragment();
+                    goHome();
                 }
             });
         }
-        if (mContentSetData != null) {
-            mContentSetData.setOnClickListener(new View.OnClickListener() {
+        if (mSetData != null) {
+            mSetData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onSendClick();
+                }
+            });
+        }
+        if (mSetDataMulti != null) {
+            mSetDataMulti.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showWindDialog();
                 }
             });
         }
@@ -298,17 +339,8 @@ public class WindFragment extends BaseFragment
      * configures the wind speed picker views and attaches all relevant listener functions to them
      */
     public void setupWindSpeedPicker() {
-        String nums[] = generateNumbers();
-        ThemeHelper.setPickerTextColor(getActivity(), mContentWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
-        mContentWindSpeed.setMaxValue(nums.length - 1);
-        mContentWindSpeed.setMinValue(0);
-        mContentWindSpeed.setWrapSelectorWheel(false);
-        mContentWindSpeed.setDisplayedValues(nums);
-        mContentWindSpeed.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-
         double enteredWindSpeed = preferences.getWindSpeed();
         double enteredWindBearingFrom = preferences.getWindBearingFromDirection();
-
         if (getRace() != null && getRaceState() != null) {
             Wind enteredWind = getRaceState().getWindFix();
             if (enteredWind != null) {
@@ -317,16 +349,35 @@ public class WindFragment extends BaseFragment
             }
         }
 
-        mContentCompassView.setDirection((float) enteredWindBearingFrom);
-        mContentWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+        if (mWindSpeed != null && mCompassView != null) {
+            initSpeedPicker(mWindSpeed, ThemeHelper.getColor(getActivity(), R.attr.white));
+            mCompassView.setDirection((float) enteredWindBearingFrom);
+            mWindSpeed.setValue(((int) ((enteredWindSpeed - MIN_KTS) * 2)));
+        } else if (mWindInputDirection != null && mWindInputSpeed != null) {
+            mWindInputDirection.setText(String.valueOf((int) enteredWindBearingFrom));
+            mWindInputSpeed.setText(String.format(Locale.US, "%.1f", enteredWindSpeed));
+        }
+    }
+
+    private void initSpeedPicker(NumberPicker picker, @ColorInt int textColor) {
+        String numbers[] = generateNumbers();
+        ViewHelper.disableSave(picker);
+        ThemeHelper.setPickerColor(getActivity(), picker, textColor, ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
+        picker.setMaxValue(numbers.length - 1);
+        picker.setMinValue(0);
+        picker.setWrapSelectorWheel(false);
+        picker.setDisplayedValues(numbers);
+        picker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
     }
 
     // the map view needs java script
     @SuppressLint("SetJavaScriptEnabled")
     private void setupLayouts(boolean showMap) {
         if (mHeaderLayout != null) {
-            if (getArguments() != null && getArguments().getInt(START_MODE, 0) == 1) {
-                mHeaderLayout.setVisibility(View.GONE);
+            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PLANNED) {
+                if (AppUtils.with(getActivity()).isLand()) {
+                    mHeaderLayout.setVisibility(View.GONE);
+                }
             } else {
                 mHeaderLayout.setVisibility(showMap ? View.GONE : View.VISIBLE);
             }
@@ -341,6 +392,7 @@ public class WindFragment extends BaseFragment
                 loadRaceMap(true, false, false, true);
                 mMapLayout.setVisibility(View.VISIBLE);
             } else {
+                mMapWebView.loadUrl("about:blank");
                 settings.setJavaScriptEnabled(false);
                 mMapLayout.setVisibility(View.GONE);
             }
@@ -362,47 +414,41 @@ public class WindFragment extends BaseFragment
     public void onStart() {
         super.onStart();
 
-        mContentCompassView.setDirectionListener(this);
-
-        // start ui refreshing
-        if (mRefreshUIHandler != null) {
-            mRefreshUIHandler.postDelayed(mRefreshUIRunnable, ONE_SEC);
+        if (mCompassView != null) {
+            mCompassView.setDirectionListener(this);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         // disconnect googleApiClient and unregister position poller
-        tearDownApiClient();
-        tearDownPositionPoller();
-
+        pauseApiClient();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
         sendIntent(AppConstants.INTENT_ACTION_TIME_SHOW);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
+        mRacesByGroup = ((RacingActivity) getActivity()).getRacesByGroup();
+        final Set<ManagedRace> allRaces = new HashSet<>();
+        for (final Iterable<ManagedRace> racesInGroup : mRacesByGroup.values()) {
+            Util.addAll(racesInGroup, allRaces);
+        }
+        final CurrentRaceFilter<ManagedRace> raceFilter = new CurrentRaceFilterImpl<>(allRaces);
+        mManagedRaces = new ArrayList<>(raceFilter.getCurrentRaces());
+        Collections.sort(mManagedRaces, new CurrentRaceComparator());
+        mSelectedRaces = new ArrayList<>();
+        sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
         // connect googleApiClient and register position poller
-        tearUpApiClient();
-        tearUpPositionPoller();
-
+        resumeApiClient();
+        //register receiver to be notified if race is tracked
+        IntentFilter filter = new IntentFilter(AppConstants.INTENT_ACTION_IS_TRACKING);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
         // Contact server and ask if race is tracked and map is allowed to show.
         WindHelper.isTrackedRace(getActivity(), getRace());
-
         sendIntent(AppConstants.INTENT_ACTION_TIME_HIDE);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // stop ui refreshing
-        if (mRefreshUIHandler != null) {
-            mRefreshUIHandler.removeCallbacks(mRefreshUIRunnable);
-        }
     }
 
     /**
@@ -410,31 +456,22 @@ public class WindFragment extends BaseFragment
      */
     private void onSendClick() {
         Wind wind = getResultingWindFix();
-        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, /* isMagnetic */ true);
+        boolean isMagnetic = preferences.isMagnetic();
+        getRaceState().setWindFix(MillisecondsTimePoint.now(), wind, isMagnetic);
         saveEntriesInPreferences(wind);
         switch (getArguments().getInt(START_MODE, 0)) {
-        case 1:
-//            sendIntent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT);
-            break;
-
-        default:
-            openMainScheduleFragment();
-            break;
+            case 1:
+                break;
+            default:
+                openMainScheduleFragment();
+                break;
         }
     }
-
-//    private void setWind(boolean on) {
-//        if (mWindOn != null) {
-//            mWindOn.setVisibility(on ? View.VISIBLE : View.GONE);
-//        }
-//        if (mWindOff != null) {
-//            mWindOff.setVisibility(!on ? View.VISIBLE : View.GONE);
-//        }
-//    }
 
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
+        refreshUI(false);
     }
 
     @Override
@@ -445,6 +482,8 @@ public class WindFragment extends BaseFragment
     @Override
     public void onConnected(Bundle arg0) {
         LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, locationRequest, this);
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(apiClient);
+        refreshUI(false);
     }
 
     @Override
@@ -461,9 +500,16 @@ public class WindFragment extends BaseFragment
     }
 
     private Wind getResultingWindFix() throws NumberFormatException {
+        double windSpeed = 0;
+        double windBearing = 0;
         Position currentPosition = new DegreePosition(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        double windSpeed = mContentWindSpeed.getValue() / 2 + MIN_KTS;
-        double windBearing = mContentCompassView.getDirection();
+        if (mCompassView != null && mWindSpeed != null) {
+            windBearing = mCompassView.getDirection();
+            windSpeed = mWindSpeed.getValue() / 2 + MIN_KTS;
+        } else if (mWindInputDirection != null && mWindInputSpeed != null) {
+            windBearing = Double.parseDouble(mWindInputDirection.getText().toString());
+            windSpeed = Double.parseDouble(mWindInputSpeed.getText().toString());
+        }
         Bearing bearing_from = new DegreeBearingImpl(windBearing);
         SpeedWithBearing speedBearing = new KnotSpeedWithBearingImpl(windSpeed, bearing_from.reverse());
         return new WindImpl(currentPosition, MillisecondsTimePoint.now(), speedBearing);
@@ -480,13 +526,116 @@ public class WindFragment extends BaseFragment
         preferences.setWindSpeed(wind.getKnots());
     }
 
-    private class IsTrackedReceiver extends BroadcastReceiver {
+    private void showWindDialog() {
+        ArrayList<String> races = new ArrayList<>();
+        for (ManagedRace race : mManagedRaces) {
+            races.add(RaceHelper.getShortReverseRaceName(race, " / ", getRace()));
+        }
+        mSelectedRaces.clear();
+        mSelectedRaces.addAll(RaceHelper.getPreSelectedRaces(mRacesByGroup, getRace()));
+        boolean[] selected = new boolean[mManagedRaces.size()];
+        int i=0;
+        for (final ManagedRace r : mManagedRaces) {
+            selected[i++] = mSelectedRaces.contains(r);
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+        builder.setTitle(getString(R.string.wind_select_race));
+        builder.setMultiChoiceItems(races.toArray(new String[races.size()]), selected, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                ManagedRace race = mManagedRaces.get(which);
+                if (mSelectedRaces.contains(race)) {
+                    mSelectedRaces.remove(race);
+                }
+                if (isChecked) {
+                    mSelectedRaces.add(race);
+                }
+            }
+        });
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                for (ManagedRace race : mSelectedRaces) {
+                    race.getState().setWindFix(MillisecondsTimePoint.now(), getResultingWindFix(), preferences.isMagnetic());
+                }
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.show();
+    }
+
+    private static class IsTrackedReceiver extends BroadcastReceiver {
+
+        private WeakReference<Button> reference;
+
+        public IsTrackedReceiver(Button button) {
+            reference = new WeakReference<>(button);
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            mContentMapShow.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            Button button = reference.get();
+            if (button != null) {
+                button.setEnabled(intent.getBooleanExtra(AppConstants.INTENT_ACTION_IS_TRACKING_EXTRA, false));
+            }
         }
-
     }
 
+    private class EditCourseClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.wind_from);
+            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_course, null);
+            final CompassView compassView = (CompassView) layout.findViewById(R.id.compass_view);
+            if (compassView != null) {
+                if (mWindInputDirection != null && !TextUtils.isEmpty(mWindInputDirection.getText())) {
+                    compassView.setDirection(Float.valueOf(mWindInputDirection.getText().toString()));
+                } else {
+                    compassView.setDirection(0);
+                }
+                compassView.setReadOnly(true);
+            }
+            builder.setView(layout);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (compassView != null) {
+                        float degrees = (compassView.getDirection() >= 0) ? compassView.getDirection() : compassView.getDirection() + 360;
+                        mWindInputDirection.setText(String.format("%.0f", degrees));
+                    }
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.show();
+        }
+    }
+
+    private class EditSpeedClick implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.wind_speed);
+            View layout = getActivity().getLayoutInflater().inflate(R.layout.wind_input_speed, null);
+            final NumberPicker speed = (NumberPicker) layout.findViewById(R.id.wind_speed);
+            initSpeedPicker(speed, getResources().getColor(R.color.black));
+            double value = 0;
+            if (!TextUtils.isEmpty(mWindInputSpeed.getText())) {
+                value = Double.valueOf(mWindInputSpeed.getText().toString());
+            }
+            speed.setValue(((int) ((value - MIN_KTS) * 2)));
+            builder.setView(layout);
+            builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    float value = (float) speed.getValue() / 2 + MIN_KTS;
+                    mWindInputSpeed.setText(String.valueOf(value));
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+            builder.show();
+        }
+    }
 }

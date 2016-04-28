@@ -26,7 +26,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-    <inherits name="com.sap.sse.Security" />
+        <inherits name="com.sap.sse.Security" />
     
 	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
 	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
@@ -44,10 +44,8 @@
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
-	<extend-property name="locale" values="en,de" />
-	<set-property name="locale" value="en,de"/>
-	<set-property-fallback name="locale" value="en"/>
-	
+	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
 	<!-- Turning CSS obfuscation on, which is the default -->
@@ -63,6 +61,11 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceComponents'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceLeaderboard'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceRaceboard'/>
+	
+    <inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+    
+    <set-configuration-property name="CssResource.enableGss" value="true" />
+    <set-configuration-property name="CssResource.legacy" value="true" />
 	
 	<source path='masterdataimport'/>
 	<source path='test'/>

@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.home.mobile.app;
 import java.util.List;
 
 import com.google.gwt.place.shared.PlaceController;
+import com.sap.sailing.gwt.home.communication.event.news.NewsEntryDTO;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
-import com.sap.sailing.gwt.home.desktop.places.searchresult.SearchResultPlace;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
+import com.sap.sailing.gwt.home.mobile.places.user.authentication.AuthenticationPlace;
 import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -17,10 +19,15 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
-import com.sap.sailing.gwt.ui.shared.dispatch.news.NewsEntryDTO;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
+import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace.Action;
+import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 
 public class MobilePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -78,11 +85,36 @@ public class MobilePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new AboutUsPlace());
     }
 
+    public PlaceNavigation<ImprintPlace> getImprintNavigation() {
+        return createGlobalPlaceNavigation(new ImprintPlace());
+    }
+
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
 
-    public PlaceNavigation<SearchResultPlace> getSearchResultNavigation(String searchQuery) {
-        return createGlobalPlaceNavigation(new SearchResultPlace(searchQuery));
+    public PlaceNavigation<?> getRegattaOverviewNavigation(String eventId, String leaderboardName, String baseUrl,
+            boolean isOnRemoteServer) {
+        return createPlaceNavigation(baseUrl, isOnRemoteServer, new RegattaOverviewPlace(eventId, leaderboardName));
+    }
+    
+    public PlaceNavigation<AuthenticationPlace> getSignInNavigation() {
+        return createGlobalPlaceNavigation(new AuthenticationPlace());
+    }
+    
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
+        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+    }
+
+    public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
+        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
+    }
+    
+    public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
+        return createGlobalPlaceNavigation(new PasswordResetPlace());
     }
 }

@@ -21,3 +21,5 @@ Now push your changes to the remote Git repository. It will take some time befor
 * [Application Level Caching with Automatic Invalidation](/doc/theses/20140703_Bertone_Application_Level_Caching_With_Automatic_Invalidation.pdf) (Bachelor Thesis, Aug 2014, Raul Bertone)
 
 * [Authentication and Authorization for SAP Sailing Analytics](/doc/theses/20140915_Ebling_Authentication_and_Authorization_for_SAP_Sailing_Analytics.pdf) (Bachelor Thesis, Sep 2014, Benjamin Ebling)
+
+* [Buoy Position Modeling and Correction in the SAP Sailing Analytics Suite](/doc/theses/20150305_Dann_Buoy_Position_Modeling_and_Correction_in_the_SAP_Sailing_Analytics_Suite.pdf) (T3000 Project Thesis, Feb 2015, Jonas Dann)

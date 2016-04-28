@@ -19,19 +19,18 @@ import com.sap.sailing.racecommittee.app.data.parsers.DataParser;
  * <p>
  * A {@link Loader} that loads data by accessing a remote resource.
  * </p>
- * 
+ * <p/>
  * <p>
  * An {@link OnlineDataLoader} may return cached results as announced by its {@link DataHandler}. Call
  * {@link OnlineDataLoader#forceLoad()} to ensure that the remote resource is checked for new data.
  * </p>
- * 
+ * <p/>
  * <p>
  * The data returned by the remote resource is parsed by the given {@link DataParser} and may be cached through your
- * implementation of {@link DataHandler#onResult(Object)}.
+ * implementation of {@link DataHandler#onResult(Object, boolean)}.
  * </p>
- * 
- * @param <T>
- *            result type.
+ *
+ * @param <T> result type.
  */
 public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     private static final String TAG = OnlineDataLoader.class.getName();
@@ -79,7 +78,7 @@ public class OnlineDataLoader<T> extends AsyncTaskLoader<DataLoaderResult<T>> {
     @Override
     public void deliverResult(DataLoaderResult<T> result) {
         if (result.isSuccessful()) {
-            dataHandler.onResult(result.getResult());
+            dataHandler.onResult(result.getResult(), result.isResultCached());
         }
         super.deliverResult(result);
     }

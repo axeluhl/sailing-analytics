@@ -6,22 +6,21 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
-import com.sap.sailing.gwt.ui.client.SelectionProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationMatcherDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 
 public class DeviceConfigurationUserListComposite extends DeviceConfigurationListComposite {
 
-    public DeviceConfigurationUserListComposite(SailingServiceAsync sailingService,
-            SelectionProvider<DeviceConfigurationMatcherDTO> selectionProvider, ErrorReporter errorReporter,
+    public DeviceConfigurationUserListComposite(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
-        super(sailingService, selectionProvider, errorReporter, stringMessages);
+        super(sailingService, errorReporter, stringMessages);
     }
     
     @Override
     protected CellTable<DeviceConfigurationMatcherDTO> createConfigurationTable() {
-        CellTable<DeviceConfigurationMatcherDTO> table = new CellTable<DeviceConfigurationMatcherDTO>(
+        CellTable<DeviceConfigurationMatcherDTO> table = new BaseCelltable<DeviceConfigurationMatcherDTO>(
                 /* pageSize */10000, tableResource);
         configurationsDataProvider.addDataDisplay(table);
         table.setWidth("100%");

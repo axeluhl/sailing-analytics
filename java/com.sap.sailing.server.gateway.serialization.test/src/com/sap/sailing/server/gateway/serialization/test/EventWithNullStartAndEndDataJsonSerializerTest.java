@@ -31,8 +31,11 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 
 public class EventWithNullStartAndEndDataJsonSerializerTest {
 
@@ -44,6 +47,7 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
     protected final Venue expectedVenue = new VenueImpl("Expected Venue");
     protected final URL expectedOfficialWebsiteURL;
     protected final URL expectedLogoImageURL;
+    protected final ImageDescriptor expectedLogoImageDescriptor;
     protected final LeaderboardGroupBase expectedLeaderboardGroup = mock(LeaderboardGroupBase.class);
     protected final Iterable<LeaderboardGroupBase> expectedLeaderboardGroups = Collections.singleton(expectedLeaderboardGroup);
 
@@ -55,9 +59,9 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
     public EventWithNullStartAndEndDataJsonSerializerTest() throws MalformedURLException {
         expectedOfficialWebsiteURL = new URL("http://official.website.com");
         expectedLogoImageURL = new URL("http://official.logo.com/logo.png");
+        expectedLogoImageDescriptor = new ImageDescriptorImpl(expectedLogoImageURL, MillisecondsTimePoint.now());
     }
     
-    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -70,14 +74,10 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         when(event.getName()).thenReturn(expectedName);
         when(event.getDescription()).thenReturn(expectedDescription);
         when(event.getOfficialWebsiteURL()).thenReturn(expectedOfficialWebsiteURL);
-        when(event.getLogoImageURL()).thenReturn(expectedLogoImageURL);
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>emptySet());
+        when(event.getImages()).thenReturn(Collections.<ImageDescriptor>singleton(expectedLogoImageDescriptor));
         when(event.getVideos()).thenReturn(Collections.<VideoDescriptor>emptySet());
         doReturn(expectedLeaderboardGroups).when(event).getLeaderboardGroups();
 
@@ -96,7 +96,6 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertNull(result.get(EventBaseJsonSerializer.FIELD_END_DATE));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testBasicAttributesAfterDeserialization() throws JsonDeserializationException {
         final JSONObject result = serializer.serialize(event);
@@ -105,7 +104,8 @@ public class EventWithNullStartAndEndDataJsonSerializerTest {
         assertEquals(expectedName, deserializedEvent.getName());
         assertEquals(expectedDescription, deserializedEvent.getDescription());
         assertEquals(expectedOfficialWebsiteURL, deserializedEvent.getOfficialWebsiteURL());
-        assertEquals(expectedLogoImageURL, deserializedEvent.getLogoImageURL());
+        assertEquals(1, Util.size(deserializedEvent.getImages()));
+        assertEquals(expectedLogoImageURL, deserializedEvent.getImages().iterator().next().getURL());
         LeaderboardGroupBase deserializedLg = deserializedEvent.getLeaderboardGroups().iterator().next();
         assertEquals(expectedLeaderboardGroup.getName(), deserializedLg.getName());
         assertEquals(expectedLeaderboardGroup.getDescription(), deserializedLg.getDescription());

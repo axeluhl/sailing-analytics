@@ -9,6 +9,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -19,6 +20,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -29,13 +31,14 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
-import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -46,6 +49,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
     private final ErrorReporter errorReporter;
     private final CellTable<String> allAccounts;
     private final LabeledAbstractFilterablePanel<String> filterAccountsPanel;
+    private final RefreshableSingleSelectionModel<String> refreshableAccountsSelectionModel;
 
     public static class AccountImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
@@ -74,10 +78,10 @@ public class IgtimiAccountsPanel extends FlowPanel {
         this.stringMessages = stringMessages;
         
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
-        allAccounts = new CellTable<String>(/* pageSize */10000, tableRes);
-        final SingleSelectionModel<String> accountsSelectionModel = new SingleSelectionModel<String>();
-        allAccounts.setSelectionModel(accountsSelectionModel);
+        allAccounts = new BaseCelltable<String>(/* pageSize */10000, tableRes);
         final ListDataProvider<String> filteredAccounts = new ListDataProvider<String>();
+        refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<String>(null, filteredAccounts);
+        allAccounts.setSelectionModel(refreshableAccountsSelectionModel);
         ListHandler<String> accountColumnListHandler = new ListHandler<String>(filteredAccounts.getList());
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
@@ -94,17 +98,17 @@ public class IgtimiAccountsPanel extends FlowPanel {
         removeAccountButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                if (accountsSelectionModel.getSelectedObject() != null) {
+                if (refreshableAccountsSelectionModel.getSelectedObject() != null) {
                     if (Window.confirm("Do you really want to remove the leaderboards?")) {
-                        removeAccount(accountsSelectionModel.getSelectedObject(), filteredAccounts);
+                        removeAccount(refreshableAccountsSelectionModel.getSelectedObject(), filteredAccounts);
                     }
                 }
             }
         });
-        accountsSelectionModel.addSelectionChangeHandler(new Handler() {
+        refreshableAccountsSelectionModel.addSelectionChangeHandler(new Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                removeAccountButton.setEnabled(accountsSelectionModel.getSelectedObject() != null);
+                removeAccountButton.setEnabled(refreshableAccountsSelectionModel.getSelectedObject() != null);
             }
         });
         controlsPanel.add(filterAccountsPanel);
@@ -159,7 +163,7 @@ public class IgtimiAccountsPanel extends FlowPanel {
 
             @Override
             public void onSuccess(String result) {
-                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), result); 
+                Anchor addIgtimiUserLink = new Anchor(stringMessages.addIgtimiUser(), UriUtils.fromString(result).asString()); 
                 controlsPanel.add(addIgtimiUserLink);
             }
         });
@@ -240,17 +244,16 @@ public class IgtimiAccountsPanel extends FlowPanel {
         }
         
         @Override
-        public void show() {
-            super.show();
-            eMail.setFocus(true);
+        protected FocusWidget getInitialFocusWidget() {
+            return eMail;
         }
-
+        
         @Override
         protected UserData getResult() {
             return new UserData(eMail.getText(), password.getText());
         }
     }
-    
+
     private static void updateAllAccounts(SailingServiceAsync sailingService, final LabeledAbstractFilterablePanel<String> filterAccountsPanel,
             final StringMessages stringMessages, final ErrorReporter errorReporter) {
         sailingService.getAllIgtimiAccountEmailAddresses(new AsyncCallback<Iterable<String>>() {

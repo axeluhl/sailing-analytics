@@ -57,9 +57,9 @@ public class Main {
 		raceSubscriber.subscribeRaceMessages(eventListener);
 		raceSubscriber.subscribeRaceMessages(eventListener);
 		raceSubscriber.subscribeRaceTimesChanges(eventListener);
-		raceSubscriber.subscribeRouteChanges(eventListener);
+		raceSubscriber.subscribeRouteChanges(eventListener);		
 		raceSubscriber.start();		
-		eventSubscriber.start();			
+		//eventSubscriber.start();			
 		
 		// Go ahead with GUI or other stuff in main thread
 		System.out.println("Press key to cancel live data stream");
@@ -67,7 +67,7 @@ public class Main {
 		System.out.println("Cancelling data stream");
 	
 		// Stop data streams
-		eventSubscriber.stop();		
+		//eventSubscriber.stop();		
 		raceSubscriber.stop();	
 	}
 

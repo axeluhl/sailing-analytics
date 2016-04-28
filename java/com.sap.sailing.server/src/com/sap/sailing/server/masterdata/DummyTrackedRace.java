@@ -102,6 +102,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public TimePoint getStartOfRace(boolean inferred) {
+        return null;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -530,10 +535,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog forRaceLog) throws InterruptedException {
-    }
-
-    @Override
     public void addRaceAbortedListener(RaceAbortedListener listener) {
     }
 
@@ -627,5 +628,9 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateStartAndEndOfTracking() {
     }
 }

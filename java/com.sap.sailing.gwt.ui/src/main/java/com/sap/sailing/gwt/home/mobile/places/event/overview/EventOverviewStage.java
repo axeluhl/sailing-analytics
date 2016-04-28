@@ -6,18 +6,17 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageContentDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewTickerStageDTO;
+import com.sap.sailing.gwt.home.communication.event.eventoverview.EventOverviewVideoStageDTO;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown;
 import com.sap.sailing.gwt.home.shared.partials.countdown.Countdown.CountdownNavigationProvider;
 import com.sap.sailing.gwt.home.shared.partials.message.Message;
 import com.sap.sailing.gwt.home.shared.partials.video.Video;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageContentDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewTickerStageDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.EventOverviewVideoStageDTO;
 
 public class EventOverviewStage extends Composite implements RefreshableWidget<EventOverviewStageDTO> {
     
@@ -33,7 +32,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     private final StageCountdownNavigationProvider countdownNavigationProvider = new StageCountdownNavigationProvider();
     private Widget lastContent;
     
-    public EventOverviewStage(EventView.Presenter presenter) {
+    public EventOverviewStage(EventViewBase.Presenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
     }
@@ -64,8 +63,7 @@ public class EventOverviewStage extends Composite implements RefreshableWidget<E
     private class StageCountdownNavigationProvider implements CountdownNavigationProvider {
         @Override
         public PlaceNavigation<?> getRegattaNavigation(String regattaName) {
-            return ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE 
-                    ? presenter.getRegattaOverviewNavigation(regattaName) : null;
+            return presenter.getRegattaOverviewNavigation(regattaName);
         }
     }
 }

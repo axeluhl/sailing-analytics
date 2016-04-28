@@ -11,10 +11,12 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
@@ -46,14 +48,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
-        final HorizontalPanel imageUrlPanel = new HorizontalPanel(); 
+        final HorizontalPanel imageUrlPanel = new HorizontalPanel();
+        mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
         mainPanel.add(imageUrlPanel);
         
         final FormPanel removePanel = new FormPanel();
         removePanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
-                final JSONObject resultJson = JSONParser.parseLenient(event.getResults().replaceFirst("<pre[^>]*>(.*)</pre>", "$1")).isObject();
+                final JSONObject resultJson = parseAfterReplacingSurroundingPreElement(event.getResults()).isObject();
                 Window.alert(stringMessages.removeResult(resultJson.get("status").isString().stringValue(),
                         resultJson.get("message") == null ? "" : resultJson.get("message").isString().stringValue()));
                 setURL("");
@@ -94,7 +97,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
-        final SubmitButton submitButton = new SubmitButton("Send...");
+        final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setEnabled(false);
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
@@ -109,7 +112,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 String result = event.getResults();
-                JSONArray resultJson = (JSONArray) JSONParser.parseLenient(result.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
+                JSONArray resultJson = parseAfterReplacingSurroundingPreElement(result).isArray();
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get("file_uri") != null) {
                         uri = resultJson.get(0).isObject().get("file_uri").isString().stringValue();
@@ -146,8 +149,8 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         }
     }
     
-    public void setFocus(boolean focused) {
-        urlTextBox.setFocus(focused);
+    public FocusWidget getInitialFocusWidget() {
+        return urlTextBox;
     }
 
     private HandlerRegistration addChangeHandler(ChangeHandler handler) {
@@ -183,5 +186,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         if (fireEvents) {
             ValueChangeEvent.fire(this, value);
         }
+    }
+
+    /**
+     * See https://github.com/twilson63/ngUpload/issues/43 and
+     * https://www.sencha.com/forum/showthread.php?132949-Fileupload-Invalid-JSON-string. The JSON response of the file
+     * upload is wrapped by a &lt;pre&gt; element which needs to be stripped off if present to allow the JSON parser to
+     * succeed.
+     */
+    private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
+        return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
 }

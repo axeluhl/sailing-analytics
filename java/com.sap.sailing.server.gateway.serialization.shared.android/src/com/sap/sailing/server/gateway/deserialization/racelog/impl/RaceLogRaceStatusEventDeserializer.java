@@ -7,6 +7,7 @@ import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
@@ -25,6 +26,6 @@ public class RaceLogRaceStatusEventDeserializer extends BaseRaceLogEventDeserial
             throws JsonDeserializationException {
         String statusValue = object.get(RaceLogRaceStatusEventSerializer.FIELD_NEXT_STATUS).toString();
         RaceLogRaceStatus nextStatus = RaceLogRaceStatus.valueOf(statusValue);
-        return factory.createRaceStatusEvent(createdAt, author, timePoint, id, competitors, passId, nextStatus);
+        return new RaceLogRaceStatusEventImpl(createdAt, timePoint, author, id, passId, nextStatus);
     }
 }

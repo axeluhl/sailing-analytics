@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
@@ -26,6 +27,7 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
+import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -59,22 +61,31 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
             
-            if(imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
+            if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrl();
-            } else if(imageWidth == null || imageHeight == null) {
-                errorMessage = "The width and height of the image could not retrieved yet.";
-            } else if(imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                    MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
+            } else if (imageWidth == null || imageHeight == null) {
+                errorMessage = stringMessages.couldNotRetrieveImageSizeYet();
+            } else if (imageToValidate.hasTag(MediaTagConstants.LOGO)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+                            MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
+                            MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Logo", MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                        MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
-            } else if(imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                    MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
+                        MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
+                        MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages);
+            } else if (imageToValidate.hasTag(MediaTagConstants.TEASER)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+                            MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
+                            MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Event-Teaser", MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                        MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
-            } else if(imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                    MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
+                        MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
+                        MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages);
+            } else if (imageToValidate.hasTag(MediaTagConstants.STAGE)
+                    && !isValidSize(imageWidth, imageHeight, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+                            MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
+                            MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
                 errorMessage = getSizeErrorMessage("Stage", MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                        MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
+                        MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
+                        MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages);
             }
             return errorMessage;
         }
@@ -83,52 +94,53 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             return width >= minWidth && width <= maxWidth && height >= minHeight && height <= maxHeight;
         }
         
-        private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight) {
-            String errorMessage = "The size of the " + imageType + " image does not fit. ";
-            errorMessage += "The width should be between " + minWidth + " and " + maxWidth + " px ";
-            errorMessage += " and the height between " + minHeight + " and " + maxHeight + " px.";
+        private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageSizeError(imageType, minWidth, maxWidth, minHeight, maxHeight);
             return errorMessage;
         }
     }
 
     public ImageDialog(Date creationDate, ImageParameterValidator validator, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator,
-                callback);
+        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.creationDate = creationDate;
         getDialogBox().getWidget().setWidth("730px");
-
         busyIndicator = new SimpleBusyIndicator();
-
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
-                busyIndicator.setBusy(true);
                 String imageUrlAsString = event.getValue();
-                ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString, new AsyncCallback<Util.Pair<Integer,Integer>>() {
-                    @Override
-                    public void onSuccess(Pair<Integer, Integer> imageSize) {
-                        busyIndicator.setBusy(false);
-                        if(imageSize != null) {
-                            widthInPxBox.setValue(imageSize.getA());
-                            heightInPxBox.setValue(imageSize.getB());
-                        }
-                        validate();
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        busyIndicator.setBusy(false);
-                    }
-                });
+                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
+                    widthInPxBox.setText("");
+                    heightInPxBox.setText("");
+                } else {
+                    busyIndicator.setBusy(true);
+                    ImageDialog.this.sailingService.resolveImageDimensions(imageUrlAsString,
+                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
+                                @Override
+                                public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                    busyIndicator.setBusy(false);
+                                    if (imageSize != null) {
+                                        widthInPxBox.setValue(imageSize.getA());
+                                        heightInPxBox.setValue(imageSize.getB());
+                                    }
+                                    validate();
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    busyIndicator.setBusy(false);
+                                }
+                            });
+                }
                 validate();
             }
         });
         
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
-                new StringListInlineEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
+                new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaConstants.imageTagSuggestions, "Enter tags for the image", 30));
     }
 
@@ -138,7 +150,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         result.setTitle(titleTextBox.getValue());
         result.setSubtitle(subtitleTextBox.getValue());
         result.setCopyright(copyrightTextBox.getValue());
-        if(widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
+        if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
             result.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
         }
         List<String> tags = new ArrayList<String>();
@@ -189,8 +201,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     }
 
     @Override
-    public void show() {
-        super.show();
-        imageURLAndUploadComposite.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return imageURLAndUploadComposite.getInitialFocusWidget();
     }
 }

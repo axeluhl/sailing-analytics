@@ -8,7 +8,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
-import com.sap.sailing.gwt.common.client.LinkUtil;
+import com.sap.sse.gwt.client.LinkUtil;
 
 public class PlaceNavigation<T extends Place> {
     private final PlaceNavigator placeNavigator;
@@ -59,11 +59,12 @@ public class PlaceNavigation<T extends Place> {
             if (!GWT.isProdMode()) {
                 url += "?gwt.codesvr=127.0.0.1:9997";
             }
-            url += getPlaceToken();
-        } else {
-            url = getPlaceToken();
+            String localeValue = Window.Location.getParameter("locale");
+            if (localeValue != null) {
+                url += "?locale=" + localeValue;
+            }
         }
-        return url;
+        return url + getPlaceToken();
     }
 
     public boolean isRemotePlace() {
@@ -104,6 +105,10 @@ public class PlaceNavigation<T extends Place> {
                 }
             }
         });
+    }
+    
+    public String getFullQualifiedUrl() {
+        return Window.Location.createUrlBuilder().setHash(getTargetUrl()).buildString();
     }
     
 }

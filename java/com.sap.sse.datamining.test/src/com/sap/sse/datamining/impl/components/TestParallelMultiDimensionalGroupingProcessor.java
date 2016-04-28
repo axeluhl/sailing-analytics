@@ -83,10 +83,10 @@ public class TestParallelMultiDimensionalGroupingProcessor {
     }
 
     private void verifyGroupedElement(Number originElement) {
-        GroupKey mainKey = new GenericGroupKey<Object>(originElement.getLength());
-        List<GroupKey> subKeys = new ArrayList<>();
-        subKeys.add(new GenericGroupKey<Object>(originElement.getCrossSum()));
-        GroupKey expectedKey = new CompoundGroupKey(mainKey, subKeys);
+        List<GroupKey> keys = new ArrayList<>();
+        keys.add(new GenericGroupKey<Object>(originElement.getLength()));
+        keys.add(new GenericGroupKey<Object>(originElement.getCrossSum()));
+        GroupKey expectedKey = new CompoundGroupKey(keys);
         assertThat(groupedElement.getKey(), is(expectedKey));
     }
 

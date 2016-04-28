@@ -14,9 +14,13 @@ public interface CompetitorDTO extends Serializable, MappableToDevice {
 
     String getCountryName();
 
+    String getIdAsString();
+
     String getSailID();
 
-    String getIdAsString();
+    String getSearchTag();
+
+    BoatDTO getBoat();
 
     BoatClassDTO getBoatClass();
     

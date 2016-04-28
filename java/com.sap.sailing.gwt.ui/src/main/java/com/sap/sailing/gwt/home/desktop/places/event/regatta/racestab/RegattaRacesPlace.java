@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.event.regatta.racestab;
 
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
-import com.sap.sailing.gwt.home.shared.ExperimentalFeatures;
 import com.sap.sailing.gwt.home.shared.app.MobileSupport;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -32,6 +31,6 @@ public class RegattaRacesPlace extends AbstractEventRegattaPlace implements Mobi
     
     @Override
     public boolean hasMobileVersion() {
-        return ExperimentalFeatures.SHOW_REGATTA_OVERVIEW_AND_RACES_ON_MOBILE;
+        return true;
     }
 }

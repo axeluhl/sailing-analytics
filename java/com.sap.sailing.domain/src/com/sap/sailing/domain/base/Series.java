@@ -27,6 +27,8 @@ import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
  */
 public interface Series extends SeriesBase {
     
+    static public final String DEFAULT_NAME = "Default";
+    
     /**
      * A series consists of one or more "race columns." Some people would just say "race," but we use the term "race" for
      * something that has a single start time and start line; so if each fleet in a series gets their own start for
@@ -38,6 +40,8 @@ public interface Series extends SeriesBase {
     RaceColumnInSeries getRaceColumnByName(String columnName);
     
     void setIsMedal(boolean isMedal);
+
+    void setIsFleetsCanRunInParallel(boolean isFleetsCanRunInParallel);
 
     Fleet getFleetByName(String fleetName);
 

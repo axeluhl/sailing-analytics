@@ -32,4 +32,25 @@
     <string name="your_regattas">Ihre Regattas:</string>
     <string name="options_refresh">Aktualisieren</string>
 
+    <!-- Eula -->
+    <string name="eula_title">Endbenutzer Lizenzvereinbarung</string>
+    <string name="eula_message">Mit der Verwendung dieser App stimmen Sie den Datenschutzbestimmungen der SAP SE zu. Die Datenschutzbestimmungen finden Sie hier.</string>
+    <string name="eula_confirm">Zustimmen</string>
+    <string name="linked_eula_message_part">hier</string>
+
+    <!-- About this app -->
+    <string name="about_this_app">Über diese App</string>
+    <string name="eula">Datenschutz</string>
+    <string name="license_information">Lizenzhinweise</string>
+
+    <!-- Dialog -->
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="warning">Warnung</string>
+    <string name="enable_gps">GPS ist nicht aktiviert. Diese App erfordert GPS Positionen. Möchten Sie GPS in den Einstellungen aktivieren?</string>
+
+    <!-- Message Sending -->
+    <string name="sending_waiting">%1$d Events konnten noch nicht gesendet werden.\nLetzter erfolgreicher Versand fand statt %2$s</string>
+    <string name="sending_no_waiting">Derzeit keine unversendeten Events.</string>
+    
 </resources>

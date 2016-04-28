@@ -9,10 +9,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import org.apache.shiro.SecurityUtils;
+
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.DefaultRoles;
 import com.sap.sse.security.shared.UserManagementException;
 
 /**
@@ -51,6 +54,10 @@ public class UserStoreImpl implements UserStore {
     private final transient MongoObjectFactory mongoObjectFactory;
 
     public UserStoreImpl() {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+    }
+    
+    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -58,26 +65,40 @@ public class UserStoreImpl implements UserStore {
         settingTypes = new ConcurrentHashMap<>();
         usersByAccessToken = new ConcurrentHashMap<>();
         preferences = new ConcurrentHashMap<>();
-        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
-            settingTypes.put(e.getKey(), e.getValue());
-        }
-        for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
-            settings.put(e.getKey(), e.getValue());
-        }
-        for (Entry<String, Map<String, String>> e : domainObjectFactory.loadPreferences().entrySet()) {
-            preferences.put(e.getKey(), e.getValue());
-        }
-        boolean changed = false;
-        changed = changed || initSocialSettingsIfEmpty();
-        if (changed) {
-            mongoObjectFactory.storeSettingTypes(settingTypes);
-            mongoObjectFactory.storeSettings(settings);
-        }
-        for (User u : domainObjectFactory.loadAllUsers()) {
-            users.put(u.getName(), u);
-            addToUsersByEmail(u);
+        this.mongoObjectFactory = mongoObjectFactory;
+        if (domainObjectFactory != null) {
+            for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
+                settingTypes.put(e.getKey(), e.getValue());
+            }
+            for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
+                settings.put(e.getKey(), e.getValue());
+            }
+            for (Entry<String, Map<String, String>> e : domainObjectFactory.loadPreferences().entrySet()) {
+                preferences.put(e.getKey(), e.getValue());
+            }
+            boolean changed = false;
+            changed = changed || initSocialSettingsIfEmpty();
+            if (changed) {
+                mongoObjectFactory.storeSettingTypes(settingTypes);
+                mongoObjectFactory.storeSettings(settings);
+            }
+            for (User u : domainObjectFactory.loadAllUsers()) {
+                users.put(u.getName(), u);
+                addToUsersByEmail(u);
+            }
+            for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+                if (e.getValue() != null) {
+                    final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                    if (accessToken != null) {
+                        final User user = users.get(e.getKey());
+                        if (user != null) {
+                            usersByAccessToken.put(accessToken, user);
+                        } else {
+                            logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -89,6 +110,7 @@ public class UserStoreImpl implements UserStore {
         settingTypes.clear();
         users.clear();
         usersByEmail.clear();
+        usersByAccessToken.clear();
     }
 
     @Override
@@ -99,6 +121,9 @@ public class UserStoreImpl implements UserStore {
             addToUsersByEmail(user);
             for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
                 setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+                if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                    usersByAccessToken.put(userPref.getValue(), user);
+                }
             }
         }
         for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {
@@ -128,11 +153,33 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public void removeAccessToken(String username, String accessToken) {
-        User user = usersByAccessToken.remove(accessToken);
-        if (user != null) {
-            // the access token actually existed; now we need to update the preferences
-            unsetPreference(username, ACCESS_TOKEN_KEY);
+    public String getAccessToken(String username) {
+        // only the user or an administrator may request a user's access token
+        final Object principal = SecurityUtils.getSubject().getPrincipal();
+        if (SecurityUtils.getSubject().hasRole(DefaultRoles.ADMIN.getRolename()) ||
+            (principal != null && principal.toString().equals(username))) {
+            return getPreference(username, ACCESS_TOKEN_KEY);
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("Only admin role or owner can retrieve access token");
+        }
+    }
+
+    @Override
+    public void removeAccessToken(String username) {
+        // only the user or an administrator may request a user's access token
+        if (SecurityUtils.getSubject().hasRole(DefaultRoles.ADMIN.getRolename()) ||
+            SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
+            User user = users.get(username);
+            if (user != null) {
+                final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
+                if (accessToken != null) {
+                    usersByAccessToken.remove(accessToken);
+                }
+                // the access token actually existed; now we need to update the preferences
+                unsetPreference(username, ACCESS_TOKEN_KEY);
+            }
+        } else {
+            throw new org.apache.shiro.authz.AuthorizationException("Only admin role or owner can retrieve access token");
         }
     }
 
@@ -183,7 +230,7 @@ public class UserStoreImpl implements UserStore {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         User user = new User(name, email, accounts);
-        logger.info("Creating user: " + user);
+        logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
         }

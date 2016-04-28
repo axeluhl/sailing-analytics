@@ -79,6 +79,10 @@ public class RaceLogReplicator implements RaceColumnListener {
     }
 
     @Override
+    public void isFleetsCanRunInParallelChanged(RaceColumn raceColumn, boolean newIsFleetsCanRunInParallel) {
+    }
+
+    @Override
     public void isStartsWithZeroScoreChanged(RaceColumn raceColumn, boolean newIsStartsWithZeroScore) {
     }
 

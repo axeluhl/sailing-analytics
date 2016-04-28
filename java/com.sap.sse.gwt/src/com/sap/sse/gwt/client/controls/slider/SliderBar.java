@@ -730,9 +730,10 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
      * @param minValue
      *            the current value for min
      * @param maxValue
-     *            the current valuefor max
+     *            the current value for max
+     * @return whether min or max have changed
      */
-    public void setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
+    public boolean setMinAndMaxValue(Double minValue, Double maxValue, boolean fireEvent) {
         boolean changed = false;
         if (!Util.equalsWithNull(minValue, this.minValue)) {
             this.minValue = minValue;
@@ -745,6 +746,7 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
         if (changed) {
             onMinMaxValueChanged(fireEvent);
         }
+        return changed;
     }
     
     /**
@@ -1083,13 +1085,13 @@ public class SliderBar extends FocusPanel implements RequiresResize, HasValue<Do
                         label = DOM.createDiv();
                         label.getStyle().setPosition(Position.ABSOLUTE);
                         label.getStyle().setDisplay(Display.NONE);
-                        if (enabled) {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel");
-                        } else {
-                            label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
-                        }
                         DOM.appendChild(getElement(), label);
                         markerLabelElements.add(label);
+                    }
+                    if (enabled) {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel");
+                    } else {
+                        label.setPropertyString("className", "gwt-SliderBar-markerlabel-disabled");
                     }
 
                     // Set the marker label text

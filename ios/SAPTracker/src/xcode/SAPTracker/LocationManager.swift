@@ -45,6 +45,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
             coreLocationManager.requestAlwaysAuthorization()
         }
+
+        // Now try everything to allow the app to use the GPS sensor
+	// while in background
+	coreLocationManager.pausesLocationUpdatesAutomatically = false; 
+        if #available(iOS 9, *) {
+	    coreLocationManager.allowsBackgroundLocationUpdates = true;
+        }
+
         coreLocationManager.startUpdatingLocation()
         coreLocationManager.startUpdatingHeading()
         coreLocationManager.delegate = self
@@ -62,9 +70,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
-        let location = locations.last as! CLLocation
-        let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location))
+    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [CLLocation]!) {
+        let location = locations.last
+        let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location!))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 

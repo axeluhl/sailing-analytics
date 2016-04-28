@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.base;
 
 import java.net.URL;
+import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.Renamable;
@@ -8,7 +9,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 import com.sap.sse.common.media.ImageSize;
-import com.sap.sse.common.media.WithMedia;
+import com.sap.sse.shared.media.WithMedia;
 
 /**
  * Base interface for an Event consisting of all static information, which might be shared
@@ -42,38 +43,6 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     void setPublic(boolean isPublic);
 
     /**
-     * @deprecated
-     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to image resources that can be
-     * used to represent the event, e.g., on a web page.
-     * 
-     * @return a non-<code>null</code> value which may be empty
-     */
-    Iterable<URL> getImageURLs();
-    
-    /**
-     * @deprecated
-     * An event may have zero or more sponsors, each of which usually want to see their logo on the web page.
-     * 
-     * @return the sponsors' logos; always non-<code>null</code> but possibly empty
-     */
-    Iterable<URL> getSponsorImageURLs();
-
-    /**
-     * @deprecated
-     * An optional logo image; may return <code>null</code>.
-     */
-    URL getLogoImageURL();
-
-    /**
-     * @deprecated
-     * Returns a non-<code>null</code> live but unmodifiable collection of URLs pointing to video resources that can be
-     * used to represent the event, e.g., on a web page.
-     * 
-     * @return a non-<code>null</code> value which may be empty
-     */
-    Iterable<URL> getVideoURLs();
-
-    /**
      * @return the URL of the event's official web site, or <code>null</code> if such a site does not exist or its URL
      *         is not known
      */
@@ -82,12 +51,43 @@ public interface EventBase extends Named, WithDescription, Renamable, WithID, Wi
     void setOfficialWebsiteURL(URL officialWebsiteURL);
 
     /**
-     * @return the URL of an external web site containing sailor related information like protests, official results, etc.
-     *  or <code>null</code> if such a site does not exist or its URL is not known.
+     * Returns a mapping of Locales to URLs where the URLs are meant as an external web site containing sailor related
+     * information like protests, official results, etc.
+     * The default, language independent URL has {@code null} as key.
+     * 
+     * @return the URLs of an external web site containing sailor related information like protests, official results,
+     *         etc.
      */
-    URL getSailorsInfoWebsiteURL();
+    Map<Locale, URL> getSailorsInfoWebsiteURLs();
     
-    void setSailorsInfoWebsiteURL(URL sailorsInfoWebsiteURL);
+    void setSailorsInfoWebsiteURLs(Map<Locale, URL> sailorsInfoWebsiteURLs);
+    
+    /**
+     * Sets a sailorsInfoWebsiteURL for the given locale
+     */
+    void setSailorsInfoWebsiteURL(Locale locale, URL sailorsInfoWebsiteURL);
+    
+    /**
+     * Checks if there is a sailorsInfoWebsiteURL available for the given locale.
+     * 
+     * @param locale a locale or null
+     * @return true if there is a sailorsInfoWebsiteURL available for the given locale
+     */
+    boolean hasSailorsInfoWebsiteURL(Locale locale);
+    
+    /**
+     * @param locale a locale to get the associated sailors info website URL for
+     * @return the URL of an external web site containing sailor related information like protests, official results, etc.
+     *  or <code>null</code> if such a site does not exist for the given locale or its URL is not known.
+     */
+    URL getSailorsInfoWebsiteURL(Locale locale);
+    
+    /**
+     * Gets the sailorsInfoWebsiteURL for the given locale. If there is no sailorsInfoWebsiteURL for the specific locale
+     * but there is a default sailorsInfoWebsiteURL available, this one is returned.
+     * So this method returns the best available sailorsInfoWebsiteURL for a user who uses the given locale.
+     */
+    URL getSailorsInfoWebsiteURLOrFallback(Locale locale);
 
     Iterable<? extends LeaderboardGroupBase> getLeaderboardGroups();
 

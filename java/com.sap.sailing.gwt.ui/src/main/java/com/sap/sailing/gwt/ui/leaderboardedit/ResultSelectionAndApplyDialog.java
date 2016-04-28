@@ -13,6 +13,7 @@ import java.util.Set;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -77,7 +78,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             sortedProviderNames.add(providerName);
         }
         Collections.sort(sortedProviderNames);
-        scoreCorrectionProviderListBox.addItem("Please select a result import provider...");
+        scoreCorrectionProviderListBox.addItem(stringMessages.selectResultImportProvider());
         for(String providerName: sortedProviderNames) {
             scoreCorrectionProviderListBox.addItem(providerName);
         }
@@ -214,19 +215,19 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             final String eventName = providerNameAndEventNameBoatClassNameCapturedWhen.getB();
             final String boatClassName = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getA();
             final Date timePointWhenResultPublished = providerNameAndEventNameBoatClassNameCapturedWhen.getC().getB();
-            leaderboardPanel.getBusyIndicator().setBusy(true);
+            leaderboardPanel.setBusyState(true);
             sailingService.getScoreCorrections(scoreCorrectionProviderName, eventName, boatClassName, timePointWhenResultPublished,
                     new AsyncCallback<RegattaScoreCorrectionDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            leaderboardPanel.getBusyIndicator().setBusy(false);
+                            leaderboardPanel.setBusyState(false);
                             errorReporter.reportError(stringMessages.errorObtainingScoreCorrections(scoreCorrectionProviderName,
                                     eventName, boatClassName, timePointWhenResultPublished.toString(), caught.getMessage()));
                         }
 
                         @Override
                         public void onSuccess(RegattaScoreCorrectionDTO result) {
-                            leaderboardPanel.getBusyIndicator().setBusy(false);
+                            leaderboardPanel.setBusyState(false);
                             new MatchAndApplyScoreCorrectionsDialog(leaderboardPanel, stringMessages, sailingService,
                                     errorReporter, result).show();
                         }
@@ -244,12 +245,11 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     @Override
-    public void show() {
-        super.show();
-        scoreCorrectionProviderListBox.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return scoreCorrectionProviderListBox;
     }
 
-     @Override
+    @Override
     protected Util.Triple<String, String, Util.Pair<String, Date>> getResult() {
          Util.Triple<String, String, Util.Pair<String, Date>> result = null; 
 

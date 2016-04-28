@@ -1,12 +1,13 @@
 package com.sap.sailing.server.gateway.deserialization.impl;
 
+import org.json.simple.JSONObject;
+
 import com.sap.sailing.domain.base.configuration.RacingProcedureConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.LeagueConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.LeagueConfiguration;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import org.json.simple.JSONObject;
 
 public class LeagueConfigurationJsonDeserializer extends RacingProcedureConfigurationJsonDeserializer implements
         JsonDeserializer<RacingProcedureConfiguration> {
@@ -25,11 +26,12 @@ public class LeagueConfigurationJsonDeserializer extends RacingProcedureConfigur
     }
 
     @Override
-    protected LeagueConfiguration createResult(JSONObject object, Boolean individualRecall, Flags classFlag)
+    protected LeagueConfiguration createResult(JSONObject object, Boolean individualRecall, Boolean resultEntryEnabled, Flags classFlag)
             throws JsonDeserializationException {
         LeagueConfigurationImpl result = new LeagueConfigurationImpl();
         result.setClassFlag(classFlag);
-        result.setHasInidividualRecall(individualRecall);
+        result.setHasIndividualRecall(individualRecall);
+        result.setResultEntryEnabled(resultEntryEnabled);
         return result;
     }
 

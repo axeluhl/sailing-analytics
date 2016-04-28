@@ -81,7 +81,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private final FlowPanel timePanelInnerWrapper;
 
     /** 
-     * the minimum time the slider extends it's time when the end of the slider is reached
+     * the minimum time the slider extends its time when the end of the slider is reached
      */
     private long MINIMUM_AUTO_ADVANCE_TIME_IN_MS = 5 * 60 * 1000; // 5 minutes
     private boolean advancedModeShown;
@@ -89,7 +89,13 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
     private static ClientResources resources = GWT.create(ClientResources.class);
     protected static TimePanelCss timePanelCss = TimePanelCssResources.INSTANCE.css();
 
-    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages, boolean canReplayWhileLiveIsPossible) {
+    /**
+     * @param isScreenLargeEnoughToOfferChartSupport
+     *            if <code>true</code>, the right padding will be set such that the time panel lines up with charts such
+     *            as the competitor chart or the wind chart shown above it
+     */
+    public TimePanel(Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport) {
         this.timer = timer;
         this.timeRangeProvider = timeRangeProvider;
         this.stringMessages = stringMessages;
@@ -105,7 +111,9 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         timePanelSliderFlowWrapper = new FlowPanel();
         timePanelSlider.setStyleName("timePanelSlider");
         timePanelSlider.getElement().getStyle().setPaddingLeft(66, Unit.PX);
-        timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        if (isScreenLargeEnoughToOfferChartSupport) {
+            timePanelSlider.getElement().getStyle().setPaddingRight(66, Unit.PX);
+        }
         timePanelSliderFlowWrapper.add(timePanelSlider);
 
         playSpeedImg = resources.timesliderPlaySpeedIcon();
@@ -221,8 +229,6 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         
         playSpeedBox = new IntegerBox();
         playSpeedBox.setVisibleLength(3);
-        playSpeedBox.setWidth("25px");
-        playSpeedBox.setHeight("14px");
         playSpeedBox.setValue((int)timer.getPlaySpeedFactor()); // Christopher: initialize play speed box according to play speed factor
         playSpeedBox.setTitle(stringMessages.playSpeedHelp());
         playSpeedBox.addValueChangeHandler(new ValueChangeHandler<Integer>() {
@@ -263,6 +269,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
         playSpeedImage.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedImage.getElement().getStyle().setPadding(3, Style.Unit.PX);
+        playSpeedImage.getElement().getStyle().setMarginRight(3, Style.Unit.PX);
        
         playSpeedBox.getElement().getStyle().setFloat(Style.Float.LEFT);
         playSpeedBox.getElement().getStyle().setPadding(2, Style.Unit.PX);
@@ -420,10 +427,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
         assert min != null && max != null;
                 
         boolean changed = false;
-        if (!max.equals(timeRangeProvider.getToTime()) || !min.equals(timeRangeProvider.getFromTime())) {
-            changed = true;
-            timeSlider.setMinAndMaxValue(new Double(min.getTime()),new Double(max.getTime()), fireEvent);
-        }
+        changed = timeSlider.setMinAndMaxValue(new Double(min.getTime()), new Double(max.getTime()), fireEvent);
         if (changed) {
             if (!timeRangeProvider.isZoomed()) {
                 timeRangeProvider.setTimeRange(min, max, this);
@@ -521,6 +525,7 @@ public class TimePanel<T extends TimePanelSettings> extends SimplePanel implemen
 
     @Override
     public void onTimeRangeChanged(Date fromTime, Date toTime) {
+        setMinMax(fromTime, toTime, true);
     }
 
     protected boolean isLiveModeToBeMadePossible() {

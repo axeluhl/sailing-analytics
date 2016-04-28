@@ -9,15 +9,31 @@
         <item name="android:windowTitleStyle">@style/AlertDialogHeader</item>
     </style>
 
+    <style name="AppTheme.AlertDialog.FloatLabel">
+        <item name="android:textColor">@color/dialog_color_text</item>
+    </style>
+
+    <style name="AppTheme.Dialog" parent="AppTheme.AlertDialog">
+        <item name="android:windowNoTitle">false</item>
+    </style>
+
     <style name="AlertDialogHeader">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>﻿
         <item name="android:textColor">@color/dialog_color_header</item>
     </style>
 
+    <style name="PreferenceTheme" parent="PreferenceBase"/>
+
+    <style name="PreferenceBase" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/light_colorPrimary</item>
+        <item name="colorPrimaryDark">@color/light_colorPrimaryDark</item>
+        <item name="colorAccent">@color/light_colorAccent</item>
+    </style>
+
     <style name="ToolBarStyle" parent="@style/ThemeOverlay.AppCompat.Dark">
         <item name="android:textColorSecondary">@color/constant_white</item>
     </style>
-    
+
     <style name="ToolBarRacingStyle" parent="ToolBarStyle">
         <item name="drawerArrowStyle">@style/DrawerButton</item>
         <item name="titleTextStyle">@style/RacingToolBarTitle</item>
@@ -26,16 +42,18 @@
 
     <style name="DrawerButton" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="thickness">4dp</item>
+        <!--
         <item name="barSize">30dp</item>
+        -->
         <item name="gapBetweenBars">6dp</item>
         <item name="drawableSize">32dp</item>
         <item name="spinBars">false</item>
     </style>
 
     <style name="OverFlow" parent="Widget.AppCompat.ActionButton.Overflow">
-        <item name="android:minWidth">32dp</item>
-        <item name="android:minHeight">32dp</item>
-        <item name="android:contentDescription">@android:string/unknownName</item>
+        <item name="android:minWidth">@dimen/bigger_over_flow_width</item>
+        <item name="android:minHeight">@dimen/bigger_over_flow_height</item>
+        <item name="android:contentDescription">@string/abc_action_menu_overflow_description</item>
     </style>
 
     <style name="RacingToolBarTitle" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">

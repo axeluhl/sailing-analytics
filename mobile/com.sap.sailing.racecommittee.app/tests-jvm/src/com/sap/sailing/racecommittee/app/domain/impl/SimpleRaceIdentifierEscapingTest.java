@@ -1,16 +1,17 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
-import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sse.common.Util.Triple;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import org.junit.Test;
+
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
+import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
+import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * This test verifies the algorithm used to escape and unescape SimpleRaceIdentifier components as used in
@@ -42,7 +43,7 @@ public class SimpleRaceIdentifierEscapingTest {
     
     private String build(final String leaderboardName, final String seriesName, final String fleetName, final String raceColumnName) {
         Fleet fleet = mock(Fleet.class);
-        SeriesBase series = mock(SeriesBase.class);
+        SeriesWithRows series = mock(SeriesWithRows.class);
         RaceGroup raceGroup = mock(RaceGroupImpl.class);
 
         when(fleet.getName()).thenReturn(fleetName);

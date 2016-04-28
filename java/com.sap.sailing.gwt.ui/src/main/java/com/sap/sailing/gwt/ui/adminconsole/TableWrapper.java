@@ -7,27 +7,32 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.SelectionModel;
-import com.google.gwt.view.client.SingleSelectionModel;
+import com.google.gwt.view.client.Range;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
 import com.sap.sailing.gwt.ui.client.shared.controls.SelectionCheckboxColumn;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
+import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
+import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
  * Implementing classes still have to add the table to the main panel. The table created and wrapped by this object
  * offers already a {@link ListHandler} for sorting. Subclasses can obtain the table's default column sort handler
  * created by this class's constructor by calling {@link #getColumnSortHandler}.
  */
-public abstract class TableWrapper<T, S extends SelectionModel<T>> implements IsWidget {
-    protected final CellTable<T> table;
+public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> implements IsWidget {
+    protected final FlushableCellTable<T> table;
     private final S selectionModel;
     protected final ListDataProvider<T> dataProvider;
     protected VerticalPanel mainPanel;
     protected final SailingServiceAsync sailingService;
     protected final ErrorReporter errorReporter;
+    protected final StringMessages stringMessages;
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListHandler<T> columnSortHandler;
@@ -36,12 +41,19 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
     public Widget asWidget() {
         return mainPanel;
     }
+    
+    /**
+     * @param entityIdentityComparator
+     *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
+     */
 
-    public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
-            boolean multiSelection, boolean enablePager) {
+    public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
+            boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-        table = new CellTable<T>(10000, tableRes);
+        this.stringMessages = stringMessages;
+        table = new FlushableCellTable<T>(10000, tableRes);
+        table.ensureDebugId("WrappedTable");
         this.dataProvider = new ListDataProvider<T>();
         this.columnSortHandler = new ListHandler<T>(dataProvider.getList());
         table.addColumnSortHandler(this.columnSortHandler);
@@ -49,12 +61,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
             SelectionCheckboxColumn<T> selectionCheckboxColumn = new SelectionCheckboxColumn<T>(
                     tableRes.cellTableStyle().cellTableCheckboxSelected(),
                     tableRes.cellTableStyle().cellTableCheckboxDeselected(),
-                    tableRes.cellTableStyle().cellTableCheckboxColumnCell()) {
-                        @Override
-                        protected ListDataProvider<T> getListDataProvider() {
-                            return dataProvider;
-                        }
-            };
+                    tableRes.cellTableStyle().cellTableCheckboxColumnCell(), entityIdentityComparator, dataProvider, table);
             columnSortHandler.setComparator(selectionCheckboxColumn, selectionCheckboxColumn.getComparator());
             @SuppressWarnings("unchecked")
             S typedSelectionModel = (S) selectionCheckboxColumn.getSelectionModel();
@@ -63,7 +70,7 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
             table.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         } else {
             @SuppressWarnings("unchecked")
-            S typedSelectionModel = (S) new SingleSelectionModel<T>();
+            S typedSelectionModel = (S) new RefreshableSingleSelectionModel<T>(entityIdentityComparator, dataProvider);
             selectionModel = typedSelectionModel;
             table.setSelectionModel(selectionModel);
         }
@@ -72,7 +79,19 @@ public abstract class TableWrapper<T, S extends SelectionModel<T>> implements Is
         mainPanel.add(table);
         if (enablePager) {
             table.setPageSize(8);
-            SimplePager pager = new SimplePager();
+            SimplePager pager = new SimplePager() {
+                protected String createText() {
+                    HasRows display = getDisplay();
+                    Range range = display.getVisibleRange();
+                    int pageStart = range.getStart() + 1;
+                    int pageSize = range.getLength();
+                    int dataSize = display.getRowCount();
+                    int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
+                    endIndex = Math.max(pageStart, endIndex);
+                    boolean exact = display.isRowCountExact();
+                    return stringMessages.pagerStateInfo(pageStart, endIndex, dataSize, exact);
+                }
+            };
             pager.setDisplay(table);
             mainPanel.add(pager);
         }

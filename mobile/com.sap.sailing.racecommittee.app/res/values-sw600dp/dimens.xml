@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="side_button">168dp</dimen>
+    <dimen name="side_button_height">100dp</dimen>
+    <dimen name="side_button_large">200dp</dimen>
+
+    <dimen name="checked_item_text">@dimen/textSize_26</dimen>
+    <dimen name="checked_item_small_text">@dimen/textSize_18</dimen>
+
+    <dimen name="panel_button_header_size">20sp</dimen>
+    <dimen name="panel_button_caption_size">18sp</dimen>
+    <dimen name="panel_lock_padding">5dp</dimen>
+
+    <dimen name="wind_input">75dp</dimen>
+
+    <dimen name="switch_height">40dp</dimen>
+    <dimen name="switch_padding">16dp</dimen>
+
+    <dimen name="preference_margin">16dp</dimen>
+    <dimen name="preference_line_margin">0dp</dimen>
+    <item name="preference_columns" format="integer" type="integer">1</item>
+
+    <!-- race state dependent -->
+    <!-- login -->
+    <dimen name="login_text_size_small">@dimen/textSize_22</dimen>
+    <dimen name="login_text_size">@dimen/textSize_26</dimen>
+
+</resources>

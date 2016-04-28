@@ -1,6 +1,5 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
-import java.io.NotSerializableException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,26 +7,32 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.RestServletContainer;
+import com.sap.sailing.server.gateway.serialization.NotJsonSerializableException;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
 import com.sap.sse.datamining.StatisticQueryDefinition;
 import com.sap.sse.datamining.data.QueryResult;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
+import com.sap.sse.datamining.shared.impl.CompoundGroupKey;
+import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
@@ -39,10 +44,49 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
  */
 @Path("/v1/datamining")
 public class DataMiningResource extends AbstractSailingServerResource {
+    
+    private SailingPredefinedQueries predefinedDataMiningQueries;
 
-    private static final String AVG_SPEED_PER_COMPETITOR_LEG_TYPE = "AvgSpeed_Per_Competitor-LegType";
-    private static final String SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE = "SumDistance_Per_Competitor-LegType";
-    private static final String SUM_MANEUVERS_PER_COMPETITOR = "SumManeuvers_Per_Competitor";
+    private static final Function<Distance, Number> distanceMetersExtractor = (distance) -> distance.getMeters();
+    
+    public final static String QUERY_AVERAGE_SPEED_PER_REGATTA_RACE = "AvgSpeed_Per_Regatta-Race";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE = "AvgSpeed_Per_Competitor-LegType";
+    public final static String QUERY_AVERAGE_SPEED_PER_COMPETITOR = "AvgSpeed_Per_Competitor";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE = "DistanceTraveled_Per_Competitor-LegType";
+    public final static String QUERY_DISTANCE_TRAVELED_PER_COMPETITOR = "DistanceTraveled_Per_Competitor";
+    public final static String QUERY_MANEUVERS_PER_COMPETITOR = "Maneuvers_Per_Competitor";
+
+    public List<PredefinedQueryIdentifier> getPredefinedRegattaDataMiningQueries() {
+        return getPredefinedQueriesByNames(
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE,
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR,
+                QUERY_MANEUVERS_PER_COMPETITOR);
+    }
+
+    public List<PredefinedQueryIdentifier> getPredefinedRaceDataMiningQueries() {
+        return getPredefinedQueriesByNames(
+                QUERY_AVERAGE_SPEED_PER_REGATTA_RACE, 
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE,
+                QUERY_AVERAGE_SPEED_PER_COMPETITOR,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE,
+                QUERY_DISTANCE_TRAVELED_PER_COMPETITOR,
+                QUERY_MANEUVERS_PER_COMPETITOR);
+    }
+
+    public List<PredefinedQueryIdentifier> getPredefinedQueriesByNames(String... names) {
+        List<PredefinedQueryIdentifier> result = new ArrayList<>();
+        SailingPredefinedQueries predefinedMiningQueries = getPredefinedMiningQueries();
+        for(PredefinedQueryIdentifier id: predefinedMiningQueries.getQueries().keySet()) {
+            for(String name: names) {
+                if(id.getIdentifier().equals(name)) {
+                    result.add(id);
+                }
+            }
+        }
+        return result;
+    }
 
     public DataMiningServer getDataMiningServer() {
         @SuppressWarnings("unchecked")
@@ -56,7 +100,7 @@ public class DataMiningResource extends AbstractSailingServerResource {
     }
 
     private Response getBadQueryDefinitionErrorResponse(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
-        return Response.status(Status.BAD_REQUEST).entity("Couldn't create a query for definition '" + queryDefinitionDTO + "'.")
+        return Response.status(Status.BAD_REQUEST).entity("Couldn't create a query for definition '" + StringEscapeUtils.escapeHtml(queryDefinitionDTO.toString()) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -69,12 +113,13 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 type(MediaType.TEXT_PLAIN).build();
     }
 
-//    @GET
-//    @Produces("application/json;charset=UTF-8")
-//    public Response getPredefinedQueries() {
-//        return predefinedQueryIdentifiersToJSON(getDataMiningServer().getPredefinedQueryIdentifiers());
-//    }
-    
+    private SailingPredefinedQueries getPredefinedMiningQueries() {
+        if (predefinedDataMiningQueries == null) {
+            predefinedDataMiningQueries = new SailingPredefinedQueries();
+        }
+        return predefinedDataMiningQueries;
+    }
+
     public Response predefinedQueryIdentifiersToJSON(Iterable<PredefinedQueryIdentifier> identifiers) {
         JSONArray predefinedQueryNames = new JSONArray();
         for (PredefinedQueryIdentifier identifier : identifiers) {
@@ -85,148 +130,140 @@ public class DataMiningResource extends AbstractSailingServerResource {
         }
         
         String json = predefinedQueryNames.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
-    
-//    @GET
-//    @Produces("application/json;charset=UTF-8")
-//    @Path("{identifier}")
-//    public Response runPredefinedQuery(@PathParam("identifier") String identifier) {
-//        Response response;
-//        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(identifier);
-//        if (queryDefinitionDTO == null) {
-//            response = getBadIdentifierErrorResponse(identifier);
-//        } else {
-//            response = runQuery(queryDefinitionDTO);
-//        }
-//        return response;
-//    }
-    
+
     public Response avgSpeedPerCompetitorAndLegType(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
-        }
-        return response;
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE, regattaName);
+    }
+
+    public Response avgSpeedPerCompetitor(String regattaName) {
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR, regattaName);
     }
 
     public Response avgSpeedPerCompetitorAndLegType(String regattaName, String raceName) {
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE, regattaName, raceName);
+    }
+
+    public Response avgSpeedPerCompetitor(String regattaName, String raceName) {
+        return avgSpeedPerCompetitorQuery(SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR, regattaName, raceName);
+    }
+
+    private Response avgSpeedPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return avgSpeedPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+
+    private Response avgSpeedPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(AVG_SPEED_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+
+            if(raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
+            
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, null, "kn", 2);
         }
         return response;
     }
 
-    public Response sumDistancePerCompetitorAndLegType(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
-        }
-        return response;
+    public Response sumDistanceTraveledPerCompetitor(String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, regattaName);
     }
 
-    public Response sumDistancePerCompetitorAndLegType(String regattaName, String raceName) {
+    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, regattaName);
+    }
+    
+    public Response sumDistanceTraveledPerCompetitor(String regattaName, String raceName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR, regattaName, raceName);
+    }
+
+    public Response sumDistanceTraveledPerCompetitorAndLegType(String regattaName, String raceName) {
+        return sumDistanceTraveledPerCompetitorQuery(SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE, regattaName, raceName);
+    }
+
+    private Response sumDistanceTraveledPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return sumDistanceTraveledPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+    
+    private Response sumDistanceTraveledPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_DISTANCE_PER_COMPETITOR_LEG_TYPE);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+
+            if(raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
+            
             queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, distanceMetersExtractor, "m", 2);
         }
         return response;
     }
 
     public Response sumManeuversPerCompetitor(String regattaName) {
-        Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
-        
-        if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
-        } else {
-            FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
-            getRegattaName_FilterSelection.add(regattaName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
-            race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
-        }
-        return response;
+        return sumManeuversPerCompetitorQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR, regattaName);
     }
 
     public Response sumManeuversPerCompetitor(String regattaName, String raceName) {
+        return sumManeuversPerCompetitorQuery(SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR, regattaName, raceName);
+    }
+
+    private Response sumManeuversPerCompetitorQuery(String predefinedQueriesName, String regattaName) {
+        return sumManeuversPerCompetitorQuery(predefinedQueriesName, regattaName, null);
+    }
+    
+    private Response sumManeuversPerCompetitorQuery(String predefinedQueriesName, String regattaName, String raceName) {
         Response response;
-        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(SUM_MANEUVERS_PER_COMPETITOR);
+        ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO = getPredefinedQuery(predefinedQueriesName);
         
         if (queryDefinitionDTO == null) {
-            response = getBadIdentifierErrorResponse(SUM_MANEUVERS_PER_COMPETITOR);
+            response = getBadIdentifierErrorResponse(predefinedQueriesName);
         } else {
+            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
+
             FunctionDTO getRegattaName = new FunctionDTO(true, "getRegatta().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
             HashSet<Serializable> getRegattaName_FilterSelection = new HashSet<>();
             getRegattaName_FilterSelection.add(regattaName);
-
-            FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
-            HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
-            getRaceName_FilterSelection.add(raceName);
-            
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> race_FilterSelection = new HashMap<>();
             race_FilterSelection.put(getRegattaName, getRegattaName_FilterSelection);
-            race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
-            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);
-            response = runQuery(queryDefinitionDTO);
+
+            if (raceName != null) {
+                FunctionDTO getRaceName = new FunctionDTO(true, "getRace().getName()", HasTrackedRaceContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+                HashSet<Serializable> getRaceName_FilterSelection = new HashSet<>();
+                getRaceName_FilterSelection.add(raceName);
+                race_FilterSelection.put(getRaceName, getRaceName_FilterSelection);
+            }
+            
+            queryDefinitionDTO.setFilterSelectionFor(queryDefinitionDTO.getDataRetrieverChainDefinition().getRetrieverLevel(2), race_FilterSelection);            
+            response = runQuery(queryDefinitionDTO, regattaName, raceName, null, null, 0);
         }
         return response;
     }
@@ -237,7 +274,8 @@ public class DataMiningResource extends AbstractSailingServerResource {
         return dataMiningServer.getPredefinedQueryDefinitionDTO(queryIdentifier);
     }
     
-    private Response runQuery(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO) {
+    private <ResultType> Response runQuery(ModifiableStatisticQueryDefinitionDTO queryDefinitionDTO, String regattaName, String raceName,
+                              Function<ResultType, Number> numberExtractor, String resultUnit, int resultPlaces) {
         Response response;
         DataMiningServer dataMiningServer = getDataMiningServer();
         
@@ -247,7 +285,9 @@ public class DataMiningResource extends AbstractSailingServerResource {
             response = getBadQueryDefinitionErrorResponse(queryDefinitionDTO);
         } else {
             DataMiningSession session = new UUIDDataMiningSession(UUID.randomUUID());
-            QueryResult<?> result = dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
+            long requestTimepoint = System.currentTimeMillis();
+            @SuppressWarnings("unchecked")
+            QueryResult<ResultType> result = (QueryResult<ResultType>) dataMiningServer.runNewQueryAndAbortPreviousQueries(session, query);
             
             if (result == null || result.isEmpty()) {
                 response = getNoDataFoundErrorResponse();
@@ -255,66 +295,62 @@ public class DataMiningResource extends AbstractSailingServerResource {
                 try {
                     JSONObject jsonResult = new JSONObject();
                     jsonResult.put("state", result.getState());
-                    jsonResult.put("signifier", result.getResultSignifier());
-                    jsonResult.put("resultType", result.getResultType().getSimpleName());
-                    jsonResult.put("results", resultValuesToJSON(result.getResultType(), result.getResults()));
-                    response = Response.ok(jsonResult.toJSONString(), MediaType.APPLICATION_JSON).build();
-                } catch (NotSerializableException e) {
-                    response = getNotSerializableErrorResponse(result.getResultType());
+                    jsonResult.put("requestTimepoint", requestTimepoint);
+                    jsonResult.put("calculationDuration-s", roundDouble(result.getCalculationTimeInSeconds(), 2));
+                    jsonResult.put("description", result.getResultSignifier());
+                    if (regattaName != null && !regattaName.isEmpty()) {
+                        jsonResult.put("regatta", regattaName);
+                    }
+                    if (raceName != null && !raceName.isEmpty()) {
+                        jsonResult.put("race", raceName);
+                    }
+                    jsonResult.put("resultUnit", resultUnit != null && !resultUnit.isEmpty() ? resultUnit : "None");
+                    jsonResult.put("results", resultValuesToJSON(result, numberExtractor, resultPlaces));
+                    response = Response.ok(jsonResult.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                } catch (NotJsonSerializableException e) {
+                    response = getNotSerializableErrorResponse(e.getNotSerializableClass());
                 }
             }
         }
         return response;
     }
 
-    @SuppressWarnings("unchecked")
-    private JSONArray resultValuesToJSON(Class<?> resultType, Map<GroupKey, ?> resultValues) throws NotSerializableException {
-        // TODO see Bug 3334
-        if (Number.class.isAssignableFrom(resultType)) {
-            return numericalResultValuesToJSON((Map<GroupKey, Number>) resultValues);
+    private <ResultType> JSONArray resultValuesToJSON(QueryResult<ResultType> result, Function<ResultType, Number> numberExtractor,
+                                                      int places) throws NotJsonSerializableException {
+        if (!Number.class.isAssignableFrom(result.getResultType()) && numberExtractor == null) {
+            throw new NotJsonSerializableException(result.getResultType());
         }
-        if (Distance.class.isAssignableFrom(resultType)) {
-            return distanceResultValuesToJSON((Map<GroupKey, Distance>) resultValues);
-        }
-        throw new NotSerializableException(resultType.getName());
-    }
-
-    private JSONArray numericalResultValuesToJSON(Map<GroupKey, Number> resultValues) {
-        JSONArray jsonResultValues = new JSONArray();
-        for (GroupKey groupKey : resultValues.keySet()) {
-            JSONObject jsonResultEntry = new JSONObject();
-            jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
-            jsonResultEntry.put("value", resultValues.get(groupKey));
-            jsonResultValues.add(jsonResultEntry);
-        }
-        return jsonResultValues;
-    }
-    
-    private JSONArray distanceResultValuesToJSON(Map<GroupKey, Distance> resultValues) {
-        DistanceJsonSerializer distanceSerializer = new DistanceJsonSerializer();
         
+        // TODO see Bug 3334
+        Map<GroupKey, ResultType> values = result.getResults();
         JSONArray jsonResultValues = new JSONArray();
-        for (GroupKey groupKey : resultValues.keySet()) {
+        for (GroupKey groupKey : values.keySet()) {
             JSONObject jsonResultEntry = new JSONObject();
             jsonResultEntry.put("groupKey", groupKeyToJSON(groupKey));
-            jsonResultEntry.put("value", distanceSerializer.serialize(resultValues.get(groupKey)));
+            Number value = numberExtractor != null ? numberExtractor.apply(values.get(groupKey)) : (Number) values.get(groupKey);
+            jsonResultEntry.put("value", roundDouble(value.doubleValue(), places));
             jsonResultValues.add(jsonResultEntry);
         }
         return jsonResultValues;
     }
 
-    private JSONArray groupKeyToJSON(GroupKey groupKey) {
-        // TODO Convert the concrete key values and not just the string represantation
+    private JSONArray groupKeyToJSON(GroupKey groupKey) throws NotJsonSerializableException {
+        // TODO Convert the concrete key values and not just the string representation
         JSONArray jsonResultEntryGroupKeys = new JSONArray();
-        List<GroupKey> resultEntryGroupKeys = new ArrayList<>();
-        resultEntryGroupKeys.add(groupKey.getMainKey());
-        if (groupKey.hasSubKeys()) {
-            resultEntryGroupKeys.addAll(groupKey.getSubKeys());
-        }
-        for (GroupKey resultEntryGroupKey : resultEntryGroupKeys) {
-            jsonResultEntryGroupKeys.add(resultEntryGroupKey.asString());
+        if (groupKey instanceof GenericGroupKey<?>) {
+            jsonResultEntryGroupKeys.add(simpleGroupKeyToJSON(groupKey));
+        } else if (groupKey instanceof CompoundGroupKey) {
+            for (GroupKey key : groupKey.getKeys()) {
+                jsonResultEntryGroupKeys.add(groupKeyToJSON(key));
+            }
+        } else {
+            throw new NotJsonSerializableException(groupKey.getClass());
         }
         return jsonResultEntryGroupKeys;
+    }
+
+    private Object simpleGroupKeyToJSON(GroupKey groupKey) {
+        return groupKey.asString();
     }
     
 }

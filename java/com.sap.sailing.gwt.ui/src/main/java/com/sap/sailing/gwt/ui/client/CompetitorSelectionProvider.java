@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.filter.Filter;
@@ -61,6 +62,8 @@ public interface CompetitorSelectionProvider {
     boolean hasMultiSelection();
 
     Color getColor(CompetitorDTO competitor);
+
+    Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier);
     
     void addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener listener);
 

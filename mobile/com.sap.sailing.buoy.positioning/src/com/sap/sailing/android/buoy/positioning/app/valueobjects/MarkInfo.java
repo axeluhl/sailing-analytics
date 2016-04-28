@@ -1,51 +1,71 @@
 package com.sap.sailing.android.buoy.positioning.app.valueobjects;
 
-public class MarkInfo {
+import java.io.Serializable;
 
-    private String markId;
-    private String name;
-    private String type;
-    private String className;
-    private String checkinDigest;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.common.MarkType;
 
-    public String getId() {
-        return markId;
+public class MarkInfo extends MarkImpl {
+    private static final long serialVersionUID = 6139266956501048794L;
+    
+    private final String className;
+    private final String checkinDigest;
+
+    public static MarkInfo create(Mark mark, String classname, String checkinDigest) {
+        return new MarkInfo(mark.getId(), mark.getName(), mark.getType(), mark.getColor(), mark.getShape(), mark.getPattern(), classname, checkinDigest);
     }
 
-    public void setId(String id) {
-        this.markId = id;
+    public MarkInfo(String name) {
+        super(name);
+        className = null;
+        checkinDigest = null;
     }
 
-    public String getName() {
-        return name;
+    public MarkInfo(Serializable id, String name, String classname, String checkinDigest) {
+        super(id, name);
+        this.className = classname;
+        this.checkinDigest = checkinDigest;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public MarkInfo(Serializable id, String name, MarkType type, String color, String shape, String pattern, String classname, String checkinDigest) {
+        super(id, name, type, color, shape, pattern);
+        this.className = classname;
+        this.checkinDigest = checkinDigest;
     }
 
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
     public String getCheckinDigest() {
         return checkinDigest;
     }
 
-    public void setCheckinDigest(String checkinDigest) {
-        this.checkinDigest = checkinDigest;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        MarkInfo markInfo = (MarkInfo) o;
+
+        if(!super.equals(markInfo)) {
+            return false;
+        }
+
+        if (!className.equals(markInfo.className))
+            return false;
+        return checkinDigest.equals(markInfo.checkinDigest);
+
     }
 
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + className.hashCode();
+        result = 31 * result + checkinDigest.hashCode();
+        return result;
+    }
 }

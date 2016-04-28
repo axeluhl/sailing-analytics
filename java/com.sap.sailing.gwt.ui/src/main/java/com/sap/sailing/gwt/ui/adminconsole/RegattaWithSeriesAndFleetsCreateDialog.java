@@ -8,9 +8,15 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.dto.FleetDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -100,9 +106,17 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, stringMessages.addRegatta(), stringMessages.ok(),
+            List<EventDTO> existingEvents, EventDTO correspondingEvent, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, correspondingEvent, stringMessages.addRegatta(), stringMessages.ok(),
                 stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+        SeriesDTO series = new SeriesDTO();
+        series.setName(Series.DEFAULT_NAME);
+        series.setMedal(false);
+        series.setStartsWithZeroScore(false);
+        series.setSplitFleetContiguousScoring(false);
+        series.setFirstColumnIsNonDiscardableCarryForward(false);
+        series.setFleets(Collections.singletonList(new FleetDTO(LeaderboardNameConstants.DEFAULT_FLEET_NAME, 0, null)));
+        seriesEditor.setValue(Collections.singleton(series));
     }
 
     @Override
@@ -122,14 +136,27 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     @Override
-    public void show() {
-        super.show();
-        nameEntryField.setFocus(true);
+    protected FocusWidget getInitialFocusWidget() {
+        return nameEntryField;
     }
 
     @Override
-    protected RegattaDTO getResult() {
+    protected RegattaDTO getResult() {        
         RegattaDTO dto = super.getResult();
+        List<SeriesDTO> seriesList = getSeriesEditor().getValue();
+        for (SeriesDTO series : seriesList) {
+            // generate 3 Default Races if default series is still present
+            if (series.getName().equals(Series.DEFAULT_NAME)) {
+                List<RaceColumnDTO> races = new ArrayList<RaceColumnDTO>();
+                for (int i = 1; i <= 3; i++) {
+                    RaceColumnDTO raceColumnDTO = new RaceColumnInSeriesDTO(series.getName(), dto.getName());
+                    raceColumnDTO.setName("R"+i);
+                    races.add(raceColumnDTO);
+                }
+                series.setRaceColumns(races);
+            }
+        }
+        dto.series = seriesList;
         setRankingMetrics(dto);
         return dto;
     }

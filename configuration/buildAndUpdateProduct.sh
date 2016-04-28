@@ -5,7 +5,7 @@ set -o functrace
 # and is used to correctly resolve bundle names
 PROJECT_TYPE="sailing"
 
-find_project_home () 
+find_project_home ()
 {
     if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then
         echo ""
@@ -173,7 +173,7 @@ do
         u) suppress_confirmation=1;;
         v) p2local=1;;
         x) GWT_WORKERS=$OPTARG;;
-        j) TESTCASE_TO_EXECUTE=$OPTARG;; 
+        j) TESTCASE_TO_EXECUTE=$OPTARG;;
         \?) echo "Invalid option"
             exit 4;;
     esac
@@ -181,7 +181,11 @@ done
 
 ACDIR=$SERVERS_HOME/$TARGET_SERVER_NAME
 echo INSTALL goes to $ACDIR
-extra="${extra} -Dgwt.workers=${GWT_WORKERS}"
+echo TMP will be used for java.io.tmpdir and is $TMP
+if [ "$TMP" = "" ]; then
+  export TMP=/tmp
+fi
+extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
 
 shift $((OPTIND-1))
 
@@ -306,11 +310,11 @@ MEMORY=4096m
 REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl
 INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     " >> $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/amazon-launch-config_replica.txt
-     
+
     `which tar` cvzf $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO/$SIMPLE_VERSION_INFO.tar.gz *
     cp $ACDIR/env.sh $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
     cp $PROJECT_HOME/build/release-notes.txt $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO
-    
+
     cd $PROJECT_HOME
     rm -rf build/*
 
@@ -322,7 +326,7 @@ INSTALL_FROM_RELEASE=$SIMPLE_VERSION_INFO
     echo "Checking the remote connection..."
     REMOTE_HOME=`ssh $REMOTE_SERVER_LOGIN 'echo $HOME/releases'`
     echo "Now uploading release to $REMOTE_SERVER_LOGIN:$REMOTE_HOME. Can take quite a while!"
-    
+
     `which scp` -r $PROJECT_HOME/dist/$SIMPLE_VERSION_INFO $REMOTE_SERVER_LOGIN:$REMOTE_HOME/
     echo "Uploaded release to $REMOTE_HOME! Make sure to also put an updated env.sh if needed to the right place ($REMOTE_HOME/environment in most cases)"
 fi
@@ -607,7 +611,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     if [ $android -eq 0 ] && [ $gwtcompile -eq 0 ] && [ $testing -eq 0 ]; then
         parallelexecution=1
         echo "INFO: Running build in parallel with 2.5*CPU threads"
-	    extra="$extra -T 2.5C"
+        extra="$extra -T 2.5C"
     fi
 
     if [ $android -eq 1 ]; then
@@ -620,22 +624,32 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
         ANDROID="$ANDROID_HOME/tools/android"
-	    if [ \! -x "$ANDROID" ]; then
-	        ANDROID="$ANDROID_HOME/tools/android.bat"
-	    fi
+        if [ \! -x "$ANDROID" ]; then
+            ANDROID="$ANDROID_HOME/tools/android.bat"
+        fi
+        
+        mobile_extra="-P -with-not-android-relevant -P with-mobile"
+        
+        if [ $testing -eq 0 ]; then
+            echo "INFO: Skipping tests"
+            mobile_extra="$mobile_extra -Dmaven.test.skip=true -DskipTests=true"
+        else
+            mobile_extra="$mobile_extra -DskipTests=false"
+        fi
 
-        RC_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/build.gradle | cut -d "=" -f 2`
+        RC_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.racecommittee.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "RC_APP_VERSION=$RC_APP_VERSION"
-        extra="$extra -Drc-app-version=$RC_APP_VERSION"
 
-        TRACKING_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/build.gradle | cut -d "=" -f 2`
+        TRACKING_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.android.tracking.app/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "TRACKING_APP_VERSION=$TRACKING_APP_VERSION"
-        extra="$extra -Dtracking-app-version=$TRACKING_APP_VERSION"
 
-        BUOY_APP_VERSION=`grep "def verCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/build.gradle | cut -d "=" -f 2`
+        BUOY_APP_VERSION=`grep "android:versionCode=" mobile/com.sap.$PROJECT_TYPE.buoy.positioning/AndroidManifest.xml | cut -d "\"" -f 2`
         echo "BUOY_APP_VERSION=$BUOY_APP_VERSION"
-        extra="$extra -Dbuoy-app-version=$BUOY_APP_VERSION"
-
+        
+        APP_VERSION_PARAMS="-Drc-app-version=$RC_APP_VERSION -Dtracking-app-version=$TRACKING_APP_VERSION -Dbuoy.positioning-app-version=$BUOY_APP_VERSION"
+        extra="$extra $APP_VERSION_PARAMS"
+        mobile_extra="$mobile_extra $APP_VERSION_PARAMS"
+        
         NOW=$(date +"%s")
         BUILD_TOOLS=22.0.1
         TARGET_API=22
@@ -654,16 +668,19 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
-        ./gradlew clean build -xtest | tee -a $START_DIR/build.log
+
+        echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
+        echo "Maven version used: `mvn --version`"
+        mvn $mobile_extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
         fi
         if [ $testing -eq 1 ]; then
             echo "Starting JUnit tests..."
-            ./gradlew test | tee -a $START_DIR/build.log
-            if [[ ${PIPESTATUS[0]} != 0 ]]; then
-                exit 103
-            fi
+            # ./gradlew test | tee -a $START_DIR/build.log
+            # if [[ ${PIPESTATUS[0]} != 0 ]]; then
+            #    exit 103
+            # fi
             # TODO find a way that the emulator test is stable in hudson
             # adb emu kill
             # echo "Downloading image (sys-img-${ANDROID_ABI}-android-${TEST_API})..." | tee -a $START_DIR/build.log
@@ -690,9 +707,6 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             # adb emu kill
             # "$ANDROID" delete avd --name ${AVD_NAME}
         fi
-    else
-        echo "INFO: Deactivating mobile modules"
-        extra="$extra -P !with-mobile"
     fi
 
     if [ $reporting -eq 1 ]; then
@@ -703,6 +717,8 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     # make sure to honour the service configuration
     # needed to make sure that tests use the right servers
     APP_PARAMETERS="-Dmongo.host=$MONGODB_HOST -Dmongo.port=$MONGODB_PORT -Dexpedition.udp.port=$EXPEDITION_PORT -Dreplication.exchangeHost=$REPLICATION_HOST -Dreplication.exchangeName=$REPLICATION_CHANNEL"
+
+    extra="$extra -P with-not-android-relevant,!with-mobile"
 
     echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
     echo "Maven version used: `mvn --version`"
@@ -888,13 +904,13 @@ if [[ "$@" == "remote-deploy" ]]; then
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/mail.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/env.sh $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/start $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/stop $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/status $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
- 
+
         $SCP_CMD $PROJECT_HOME/java/target/http2udpmirror $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/logging.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
     fi

@@ -36,11 +36,11 @@ import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.ImageDescriptorImpl;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.media.VideoDescriptor;
-import com.sap.sse.common.media.VideoDescriptorImpl;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
+import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
+import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 
 public class EventDataJsonSerializerWithImagesAndVideosTest {
     private final UUID expectedId = UUID.randomUUID();
@@ -105,7 +105,6 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         videos.add(video1);
     }
     
-    @SuppressWarnings("deprecation")
     @Before
     public void setUp() {
         // Event and its basic attributes ...
@@ -115,9 +114,6 @@ public class EventDataJsonSerializerWithImagesAndVideosTest {
         when(event.getStartDate()).thenReturn(expectedStartDate);
         when(event.getEndDate()).thenReturn(expectedEndDate);
         when(event.getVenue()).thenReturn(expectedVenue);
-        when(event.getImageURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getVideoURLs()).thenReturn(Collections.<URL>emptySet());
-        when(event.getSponsorImageURLs()).thenReturn(Collections.<URL>emptySet());
         when(event.getImages()).thenReturn(images);
         when(event.getVideos()).thenReturn(videos);
         // ... and the serializer itself.		

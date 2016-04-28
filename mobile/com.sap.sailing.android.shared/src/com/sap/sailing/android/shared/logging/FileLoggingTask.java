@@ -90,6 +90,7 @@ public class FileLoggingTask implements Runnable {
             logWriter.newLine();
             logWriter.flush();
         } catch (Exception e) {
+            // if logging don't work, how can we log that it didn't work...?
         }
     }
 

@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/selector_header_height"
-        android:background="?sap_gray">
+        android:background="?attr/sap_gray">
 
         <LinearLayout
             android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginLeft="@dimen/side_padding"
             android:orientation="horizontal">
 
             <ImageView
@@ -24,25 +25,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="?chevron_left_24dp"
+                android:src="?attr/chevron_left_24dp"
                 android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/header_flag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:src="@drawable/flag_first_blue_48dp"/>
+                android:layout_gravity="center"
+                android:layout_marginLeft="@dimen/side_padding"
+                android:layout_marginRight="@dimen/side_padding"
+                android:src="?attr/flag_blue_first" />
 
             <TextView
                 android:id="@+id/header_headline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center"
                 android:text="@string/race_begin_finish_header"
-                android:textAppearance="?textNormal"/>
+                android:textAppearance="?attr/textHeader" />
         </LinearLayout>
 
         <View
@@ -50,26 +52,36 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/thin_line"
             android:layout_alignParentBottom="true"
-            android:background="?black"/>
+            android:background="?attr/black" />
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
+        android:background="?attr/sap_gray_black_30"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
+            <include
+                android:id="@+id/finish_current"
+                layout="@layout/finish_current_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true" />
+
             <RelativeLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="11">
+                android:layout_above="@id/finish_current"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true">
 
                 <TextView
                     android:id="@+id/current_time"
@@ -77,42 +89,38 @@
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
                     android:layout_centerVertical="true"
-                    android:drawableLeft="?access_time_36dp"
+                    android:drawableLeft="?attr/access_time_36dp"
                     android:drawablePadding="@dimen/default_padding_half"
-                    android:drawableStart="?access_time_36dp"
+                    android:drawableStart="?attr/access_time_36dp"
                     android:gravity="center"
-                    android:textColor="?white"
+                    android:textColor="?attr/white"
                     android:textSize="@dimen/textSize_40"
                     android:visibility="invisible"
-                    tools:text="@string/time"/>
+                    tools:text="@string/time" />
             </RelativeLayout>
+        </RelativeLayout>
 
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="9">
-
-                <Button
-                    android:id="@+id/finish_current"
-                    style="?attr/buttonSolidSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_current"/>
-            </RelativeLayout>
-        </LinearLayout>
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="2"
             android:baselineAligned="false"
             android:orientation="horizontal">
 
+            <include
+                android:id="@+id/finish_custom"
+                layout="@layout/finish_custom_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="@dimen/default_margin_twice" />
+
             <RelativeLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="11"
+                android:layout_above="@id/finish_custom"
+                android:layout_centerInParent="true"
                 android:scaleX="@integer/picker_scale"
                 android:scaleY="@integer/picker_scale">
 
@@ -121,22 +129,9 @@
                     layout="@layout/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerInParent="true" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="9">
-
-                <Button
-                    android:id="@+id/finish_custom"
-                    style="?attr/buttonSolidSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:text="@string/race_begin_finish_custom"/>
-            </RelativeLayout>
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

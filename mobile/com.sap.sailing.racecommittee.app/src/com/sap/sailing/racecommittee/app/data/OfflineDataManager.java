@@ -16,9 +16,9 @@ import android.content.Context;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventFactoryImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
@@ -37,6 +37,7 @@ import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.CourseAreaImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
+import com.sap.sailing.domain.base.impl.RaceColumnFactorImpl;
 import com.sap.sailing.domain.base.impl.StrippedEventImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
@@ -86,32 +87,32 @@ public class OfflineDataManager extends DataManager {
         newEvent.getVenue().addCourseArea(new CourseAreaImpl("Stadium", UUID.randomUUID()));
         dataStore.addEvent(newEvent);
 
-        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, null);
-        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, null);
+        SeriesWithRows qualifying = new SeriesWithRowsImpl("Qualifying", false, /* isFleetsCanRunInParallel */ true, null);
+        SeriesWithRows medal = new SeriesWithRowsImpl("Medal", true, /* isFleetsCanRunInParallel */ true, null);
         RaceGroup raceGroup = new RaceGroupImpl("ESS", /* displayName */ null, new BoatClassImpl("X40", false), null, Arrays.asList(qualifying,
                         medal), new EmptyRegattaConfiguration());
 
         List<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
-        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.BLUE, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "The Wave Muscat", Color.LIGHT_GRAY, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Red Bull Extreme Sailing Team", Color.RED, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Team Korea", Color.GREEN, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
+        competitors.add(new CompetitorImpl(UUID.randomUUID(), "Realteam", Color.BLACK, null, null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
 
-        RaceLogEventFactory factory = new RaceLogEventFactoryImpl();
         RaceLog log = new RaceLogImpl(UUID.randomUUID());
         final AbstractLogEventAuthor author = AppPreferences.on(context).getAuthor();
         ConfigurationLoader<RegattaConfiguration> configuration = PreferencesRegattaConfigurationLoader
                 .loadFromPreferences(preferences);
 
-        log.add(factory.createStartTimeEvent(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
+        log.add(new RaceLogStartTimeEventImpl(new MillisecondsTimePoint(new Date().getTime() - 2000), author, 1,
                 new MillisecondsTimePoint(new Date().getTime() - 1000)));
 
-        log.add(factory.createRaceStatusEvent(new MillisecondsTimePoint(new Date().getTime()),
+        log.add(new RaceLogRaceStatusEventImpl(new MillisecondsTimePoint(new Date().getTime()),
                 AppPreferences.on(context).getAuthor(), 1, RaceLogRaceStatus.FINISHING));
 
         ManagedRace q1 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("A.B", new FleetImpl("A"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 0);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -120,7 +121,8 @@ public class OfflineDataManager extends DataManager {
          */
 
         ManagedRace q2 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("B", new FleetImpl("A.A"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 1);
 
         log = new RaceLogImpl(UUID.randomUUID());
         /*
@@ -128,7 +130,8 @@ public class OfflineDataManager extends DataManager {
          * RaceLogRaceStatus.FINISHED));
          */
         ManagedRace q3 = new ManagedRaceImpl(new ManagedRaceIdentifierImpl("Q3", new FleetImpl("Default"), qualifying, raceGroup),
-            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration));
+            RaceStateImpl.create(new AndroidRaceLogResolver(), log, AppPreferences.on(context).getAuthor(), configuration),
+            /* zeroBasedIndexInFleet */ 2);
         /*
          * ManagedRace m1 = new ManagedRaceImpl( new ManagedRaceIdentifierImpl( "M1", new FleetImpl("Default"), medal,
          * raceGroup), null);
@@ -255,4 +258,8 @@ public class OfflineDataManager extends DataManager {
         return null;
     }
 
+    @Override
+    public LoaderCallbacks<DataLoaderResult<RaceColumnFactorImpl>> createRaceColumnFactorLoader(LoadClient<RaceColumnFactorImpl> callback) {
+        return null;
+    }
 }

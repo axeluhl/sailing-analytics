@@ -1,49 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:headerText="@string/finished_list" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/photo_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"/>
+        android:layout_weight="4"
+        android:paddingTop="@dimen/side_padding" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <ImageView
                 android:id="@+id/photo_button"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_centerInParent="true"
+                android:layout_width="@dimen/photo_shutter_size"
+                android:layout_height="@dimen/photo_shutter_size"
+                android:layout_gravity="center"
                 android:background="@drawable/round_button_outline"
-                android:padding="@dimen/default_padding"
-                android:src="?photo_camera_48dp"/>
-        </RelativeLayout>
+                android:padding="@dimen/default_padding_half"
+                android:src="?attr/photo_camera" />
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <Button
-                android:id="@+id/submit_button"
-                style="?buttonSolidSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/send_photos" />
-        </RelativeLayout>
+            <include layout="@layout/photo_list_button" />
+        </FrameLayout>
     </LinearLayout>
 </LinearLayout>

@@ -15,6 +15,8 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(PredefinedFormat.DATE_SHORT));
     public static DateTimeFormatRenderer defaultTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
+    public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT));
 
     public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
@@ -57,5 +59,13 @@ public class DateAndTimeFormatterUtil {
         }
         
         return result;
+    }
+    
+    public static String getClientTimeZoneAsGMTString() {
+        Date now = new Date();
+        @SuppressWarnings("deprecation")
+        int localeTimezoneOffset = now.getTimezoneOffset();
+        TimeZone localeTimeZone = TimeZone.createTimeZone(localeTimezoneOffset);
+        return localeTimeZone.getGMTString(now);
     }
 }

@@ -219,7 +219,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         fleet = new FleetImpl(FLEET);
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
-        series = new SeriesImpl(SERIES, false, fleets, new HashSet<String>(), null);
+        series = new SeriesImpl(SERIES, false, /* isFleetsCanRunInParallel */ true, fleets, new HashSet<String>(), null);
         Set<Series> seriesSet = new HashSet<>();
         if (linkSeriesToRegatta) {
             seriesSet.add(series);

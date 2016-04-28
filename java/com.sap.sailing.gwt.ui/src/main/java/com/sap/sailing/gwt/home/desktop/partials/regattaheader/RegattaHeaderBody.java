@@ -10,11 +10,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.UIObject;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.communication.event.LabelType;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.eventview.HasRegattaMetadata.RegattaState;
-import com.sap.sailing.gwt.ui.shared.eventview.RegattaMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.general.LabelType;
 
 public class RegattaHeaderBody extends UIObject {
 
@@ -44,6 +44,8 @@ public class RegattaHeaderBody extends UIObject {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
         }
         addDetailsItem(regattaMetadata.getBoatCategory());
+        UIObject.ensureDebugId(nameUi, "RegattaNameSpan");
+        UIObject.ensureDebugId(labelUi, "RegattaStateLabelDiv");
     }
     
     private void addDetailsItem(int count, String text) {

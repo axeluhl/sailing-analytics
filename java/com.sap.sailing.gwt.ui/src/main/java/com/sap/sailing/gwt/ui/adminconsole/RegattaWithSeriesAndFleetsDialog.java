@@ -20,10 +20,10 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
 
-    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents,
+    public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, StringMessages stringMessages,
             Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
-        super(regatta, series, existingEvents, title, okButton, stringMessages, validator, callback);
+        super(regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");
@@ -46,7 +46,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     @Override
     protected RegattaDTO getResult() {
         RegattaDTO result = getRegattaDTO();
-        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing slashes
+        result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), 0.0);
         return result;
     }

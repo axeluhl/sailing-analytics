@@ -3,11 +3,11 @@ package com.sap.sailing.gwt.home.desktop.partials.racelist;
 import java.util.Collection;
 import java.util.Date;
 
-import com.sap.sailing.gwt.ui.shared.dispatch.event.RaceListRaceDTO;
-import com.sap.sailing.gwt.ui.shared.dispatch.event.SimpleCompetitorDTO;
-import com.sap.sailing.gwt.ui.shared.race.FleetMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.RaceMetadataDTO;
-import com.sap.sailing.gwt.ui.shared.race.wind.AbstractWindDTO;
+import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
+import com.sap.sailing.gwt.home.communication.race.wind.AbstractWindDTO;
 import com.sap.sse.common.Duration;
 
 public class RaceListDataUtil {

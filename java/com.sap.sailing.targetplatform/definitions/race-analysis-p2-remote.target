@@ -14,8 +14,8 @@
 <repository location="http://download.eclipse.org/jetty/updates/jetty-bundles-9.x/9.2.2.v20140723/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.osgi" version="3.10.1.v20140909-1633"/>
-<unit id="org.eclipse.osgi.source" version="3.10.1.v20140909-1633"/>
+<unit id="org.eclipse.osgi" version="3.10.2.v20150203-1939"/>
+<unit id="org.eclipse.osgi.source" version="3.10.2.v20150203-1939"/>
 <unit id="org.eclipse.osgi.services" version="3.4.0.v20140312-2051"/>
 <unit id="org.eclipse.osgi.services.source" version="3.4.0.v20140312-2051"/>
 <unit id="org.eclipse.equinox.common" version="3.6.200.v20130402-1505"/>
@@ -82,9 +82,9 @@
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
 <plugin id="com.sun.mail.javax.mail"/>
-<plugin id="jackson-core-lgpl"/>
+<plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
-<plugin id="jackson-mapper-lgpl"/>
+<plugin id="jackson-mapper-asl"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet" version="3.1.0.v20140303-1611"/>
@@ -95,6 +95,7 @@
 <plugin id="javax.ws.rs.source"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
+<plugin id="lz4-java"/>
 <plugin id="org.apache.commons.beanutils"/>
 <plugin id="org.apache.commons.beanutils.source"/>
 <plugin id="org.apache.commons.codec"/>
@@ -239,7 +240,6 @@
 <plugin id="routeconverter"/>
 <plugin id="slf4j.api"/>
 <plugin id="slf4j.jdk14"/>
-<plugin id="lz4-java"/>
 </includeBundles>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 </target>

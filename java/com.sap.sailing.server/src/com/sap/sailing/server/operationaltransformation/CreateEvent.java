@@ -1,14 +1,16 @@
 package com.sap.sailing.server.operationaltransformation;
 
 import java.net.URL;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.media.ImageDescriptor;
-import com.sap.sse.common.media.VideoDescriptor;
+import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.shared.media.VideoDescriptor;
 
 /**
  * Creates an {@link Event} in the server, with a new venue and an empty course area list.
@@ -28,10 +30,10 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     private final Iterable<ImageDescriptor> images;
     private final Iterable<VideoDescriptor> videos;
     private final URL officialWebsiteURL;
-    private final URL sailorsInfoWebsiteURL;
+    private final Map<Locale, URL> sailorsInfoWebsiteURLs;
     
     public CreateEvent(String eventName, String eventDescription, TimePoint startDate, TimePoint endDate, String venue,
-            boolean isPublic, UUID id, URL officialWebsiteURL, URL sailorsInfoWebsiteURL, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
+            boolean isPublic, UUID id, URL officialWebsiteURL, Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
         super(id);
         this.eventName = eventName;
         this.eventDescription = eventDescription;
@@ -40,7 +42,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
         this.venue = venue;
         this.isPublic = isPublic;
         this.officialWebsiteURL = officialWebsiteURL;
-        this.sailorsInfoWebsiteURL = sailorsInfoWebsiteURL;
+        this.sailorsInfoWebsiteURLs = sailorsInfoWebsiteURLs;
         this.images = images;
         this.videos = videos;
     }
@@ -64,7 +66,7 @@ public class CreateEvent extends AbstractEventOperation<Event> {
     @Override
     public Event internalApplyTo(RacingEventService toState) {
         return toState.createEventWithoutReplication(getEventName(), eventDescription, startDate, endDate, venue, isPublic,
-                getId(), officialWebsiteURL, sailorsInfoWebsiteURL, images, videos);
+                getId(), officialWebsiteURL, sailorsInfoWebsiteURLs, images, videos);
     }
 
 }

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/windFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
+
+    <RelativeLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/selector_header_height"
+        android:background="?attr/sap_gray"
+        android:clickable="true">
+
+        <TextView
+            android:id="@+id/wind_sensor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/side_padding"
+            android:text="@string/wind_off"
+            android:textAppearance="?attr/textNormal"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/wind_off"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:layout_toLeftOf="@id/wind_sensor"
+            android:src="?attr/wind_off"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/wind_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/default_margin_half"
+            android:layout_toLeftOf="@id/wind_sensor"
+            android:layout_toStartOf="@id/wind_sensor"
+            android:src="?attr/wind_on"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/side_padding"
+            android:layout_toLeftOf="@id/wind_off"
+            android:drawableLeft="?attr/chevron_left_24dp"
+            android:orientation="horizontal"
+            android:text="@string/wind"
+            android:textAppearance="?attr/textHeader" />
+
+        <View
+            android:id="@+id/line_top"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/header_line"
+            android:layout_alignParentBottom="true"
+            android:background="?attr/black" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header_layout"
+        android:background="?attr/sap_gray_black_30"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/button_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/position_show"
+                style="?attr/button"
+                android:layout_width="@dimen/default_button_width"
+                android:layout_height="@dimen/default_button_height"
+                android:layout_gravity="center"
+                android:layout_marginBottom="@dimen/default_margin_half"
+                android:enabled="false"
+                android:text="@string/wind_map_button_show"
+                android:textSize="@dimen/textSize_18" />
+
+            <Button
+                android:id="@+id/set_data_multi"
+                style="?attr/button"
+                android:layout_width="@dimen/default_button_width"
+                android:layout_height="@dimen/default_button_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/default_margin_half"
+                android:enabled="false"
+                android:text="@string/wind_set_data_multi"
+                android:textSize="@dimen/textSize_18" />
+
+            <Button
+                android:id="@+id/set_data"
+                style="?attr/button"
+                android:layout_width="@dimen/default_button_width"
+                android:layout_height="@dimen/default_button_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/default_margin_half"
+                android:enabled="false"
+                android:text="@string/wind_set_data"
+                android:textSize="@dimen/textSize_18" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/button_bar">
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="0"
+                    android:text="@string/wind_from"
+                    android:textAppearance="?attr/textSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center_vertical|right"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="1"
+                    android:text="@string/wind_speed"
+                    android:textAppearance="?attr/textSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="2"
+                    android:text="@string/wind_latitude"
+                    android:textAppearance="?attr/textSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="3"
+                    android:text="@string/wind_longitude"
+                    android:textAppearance="?attr/textSmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="right"
+                    android:layout_marginRight="@dimen/side_padding"
+                    android:layout_row="4"
+                    android:text="@string/wind_accuracy"
+                    android:textAppearance="?attr/textSmall" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_row="0"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/wind_input_direction"
+                        android:layout_width="@dimen/wind_input_width"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textAppearance="?attr/textSmall"
+                        android:textColor="?attr/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/side_padding"
+                        android:text="@string/wind_degree"
+                        android:textAppearance="?attr/textSmall"
+                        android:textColor="?attr/white" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_row="1"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/wind_input_speed"
+                        android:layout_width="@dimen/wind_input_width"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal"
+                        android:textAppearance="?attr/textSmall"
+                        android:textColor="?attr/white" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/side_padding"
+                        android:text="@string/wind_kn"
+                        android:textAppearance="?attr/textSmall" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/latitude_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_row="2"
+                    android:text="@string/not_available"
+                    android:textAppearance="?attr/textSmall" />
+
+                <TextView
+                    android:id="@+id/longitude_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_marginBottom="@dimen/side_padding"
+                    android:layout_row="3"
+                    android:text="@string/not_available"
+                    android:textAppearance="?attr/textSmall" />
+
+                <com.sap.sailing.racecommittee.app.ui.views.AccuracyView
+                    android:id="@+id/accuracy_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_columnSpan="2"
+                    android:layout_row="4" />
+
+                <TextView
+                    android:id="@+id/accuracy_timestamp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_columnSpan="2"
+                    android:layout_row="5"
+                    android:textAppearance="?attr/textSmall"
+                    tools:text="(since 0h 23' 12'')" />
+
+                <ImageView
+                    android:id="@+id/edit_course"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:layout_gravity="center"
+                    android:layout_row="0"
+                    android:src="?attr/create" />
+
+                <ImageView
+                    android:id="@+id/edit_speed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="2"
+                    android:layout_gravity="center"
+                    android:layout_row="1"
+                    android:src="?attr/create" />
+            </GridLayout>
+        </FrameLayout>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/map_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <WebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+</RelativeLayout>

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.gwt.ui.shared.start.StageEventType;
+import com.sap.sailing.gwt.home.communication.start.StageEventType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util.Pair;

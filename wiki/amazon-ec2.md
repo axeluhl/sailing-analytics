@@ -7,7 +7,8 @@
 #### Servers
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database and Queue Server: 172.31.25.253
+- Database Server: dbserver.internal.sapsailing.com
+- Database and Queue Server: rabbit.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -21,7 +22,6 @@ You may need to select "All generations" instead of "Current generation" to see 
 <pre>
 INSTALL_FROM_RELEASE=`name-of-release`
 USE_ENVIRONMENT=live-server
-MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 REPLICATION_CHANNEL=myspecificevent
 SERVER_NAME=MYSPECIFICEVENT
@@ -41,9 +41,9 @@ BUILD_COMPLETE_NOTIFY=you@email.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
@@ -207,11 +207,11 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=LIVE1
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=sapsailinganalytics-live
 TELNET_PORT=14888
 SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 EXPEDITION_PORT=2010
 REPLICATE_ON_START=False
@@ -272,8 +272,8 @@ Here are the steps to create a load balanced setup:
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
 - When using the Race Committee App (RCApp), try to make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which is as of this writing (2014-12-18) an EXPERIMENTAL feature). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
 - Create `n` instances that are configured to connect to the master server, automatically launching replication by using one of the `*...-replica-...*` environment from http://releases.sapsailing.com/environments.
-- Create a load balancer that redirects everything from HTTP port 8888 to HTTP port 8888 and leave the other switches and checkboxes on their default value
-- As "Ping Port" enter HTTP port 8888 and use /index.html as the "Ping Path." Leave the other values on their defaults again.
+- Create a load balancer that redirects everything from HTTP port 80 to HTTP port 80 as well as HTTPS port 443 to HTTPS port 443 and leave the other switches and checkboxes on their default value. For the HTTPS listener, use the `sapsailing.com` certificate that should be offered as an existing certificate from IAM.
+- As "Ping Port" enter HTTPS port 443 and use /index.html as the "Ping Path." Leave the other values on their defaults again.
 - Put the ELB into the "Sailing Analytics App" security group as it will appear in the landscape as a regular sailing analytics application server.
 - Associate all your instances
 - Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup. Again, remember not to let the RCApp devices point to the ELB domain as their updates could hit a replica which wouldn't know how to handle!

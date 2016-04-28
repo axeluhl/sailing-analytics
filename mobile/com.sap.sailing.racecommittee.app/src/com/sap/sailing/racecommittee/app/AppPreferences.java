@@ -1,11 +1,18 @@
 package com.sap.sailing.racecommittee.app;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -13,13 +20,12 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.racecommittee.app.domain.coursedesign.*;
-import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.LoginDialog.LoginType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.sap.sailing.racecommittee.app.domain.LoginType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.BoatClassType;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
+import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -55,6 +61,7 @@ public class AppPreferences {
     public static AppPreferences on(Context context, String preferenceName) {
         return new AppPreferences(context, preferenceName);
     }
+
     protected final Context context;
 
     private OnSharedPreferenceChangeListener pollingActiveChangedListener = new OnSharedPreferenceChangeListener() {
@@ -70,18 +77,20 @@ public class AppPreferences {
     private Set<PollingActiveChangedListener> pollingActiveChangedListeners = new HashSet<>();
 
     protected final SharedPreferences preferences;
+
     protected AppPreferences(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
+
     public AppPreferences(Context context, String preferenceName) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.preferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
     }
 
     public void setAuthor(AbstractLogEventAuthor author) {
-        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).commit();
-        preferences.edit().putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority()).commit();
+        preferences.edit().putString(HIDDEN_PREFERENCE_AUTHOR_NAME, author.getName()).putInt(HIDDEN_PREFERENCE_AUTHOR_PRIORITY, author.getPriority())
+            .commit();
     }
 
     public AbstractLogEventAuthor getAuthor() {
@@ -100,7 +109,7 @@ public class AppPreferences {
 
     public List<String> getByNameCourseDesignerCourseNames() {
         Set<String> values = preferences.getStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>());
-        return new ArrayList<String>(values);
+        return new ArrayList<>(values);
     }
 
     public Context getContext() {
@@ -128,43 +137,45 @@ public class AppPreferences {
     }
 
     public RacingProcedureType getDefaultRacingProcedureType() {
-        String defaultStartProcedureType = preferences.getString(
-                key(R.string.preference_racing_procedure_override_key), "");
+        String defaultStartProcedureType = preferences.getString(key(R.string.preference_racing_procedure_override_key), "");
         return RacingProcedureType.valueOf(defaultStartProcedureType);
     }
 
     public String getDeviceIdentifier() {
+        return getDeviceIdentifier(Secure.getString(context.getContentResolver(), Secure.ANDROID_ID));
+    }
+
+    public String getDeviceIdentifier(String defaultValue) {
         String identifier = preferences.getString(key(R.string.preference_identifier_key), "");
-        return identifier.isEmpty() ? Secure.getString(context.getContentResolver(), Secure.ANDROID_ID) : identifier;
+        return TextUtils.isEmpty(identifier) ? defaultValue : identifier;
     }
 
     public boolean getGateStartHasAdditionalGolfDownTime() {
-        return preferences.getBoolean(
-                key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), true);
+        return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), true);
     }
 
     public boolean getGateStartHasPathfinder() {
         return preferences.getBoolean(key(R.string.preference_racing_procedure_gatestart_haspathfinder_key), true);
     }
 
-	public LoginType getLoginType() {
-		int type = preferences.getInt(HIDDEN_PREFERENCE_LOGIN_TYPE, -1);
-		switch( type ){
-			case 0:{
-				return LoginType.NONE;
-			}
-			case 1:{
-				return LoginType.VIEWER;
-			}
-			case 2:{
-				return LoginType.OFFICER;
-			}
+    public LoginType getLoginType() {
+        int type = preferences.getInt(HIDDEN_PREFERENCE_LOGIN_TYPE, -1);
+        switch (type) {
+            case 0: {
+                return LoginType.NONE;
+            }
+            case 1: {
+                return LoginType.VIEWER;
+            }
+            case 2: {
+                return LoginType.OFFICER;
+            }
 
-			default:{
-				return LoginType.NONE;
-			}
-		}
-	}
+            default: {
+                return LoginType.NONE;
+            }
+        }
+    }
 
     public String getMailRecipient() {
         return preferences.getString(key(R.string.preference_mail_key), "");
@@ -172,7 +183,7 @@ public class AppPreferences {
 
     public List<String> getManagedCourseAreaNames() {
         Set<String> values = preferences.getStringSet(key(R.string.preference_course_areas_key), new HashSet<String>());
-        return new ArrayList<String>(values);
+        return new ArrayList<>(values);
     }
 
     public NumberOfRounds getNumberOfRounds() {
@@ -196,18 +207,18 @@ public class AppPreferences {
 
     private String getRacingProcedureClassFlagKey(RacingProcedureType type) {
         switch (type) {
-        case RRS26:
-            return key(R.string.preference_racing_procedure_rrs26_classflag_key);
-        case GateStart:
-            return key(R.string.preference_racing_procedure_gatestart_classflag_key);
-        case ESS:
-            return key(R.string.preference_racing_procedure_ess_classflag_key);
-        case BASIC:
-            return key(R.string.preference_racing_procedure_basic_classflag_key);
-        case LEAGUE:
-            return key(R.string.preference_racing_procedure_league_classflag_key);
-        default:
-            throw new IllegalArgumentException("Unknown racing procedure type.");
+            case RRS26:
+                return key(R.string.preference_racing_procedure_rrs26_classflag_key);
+            case GateStart:
+                return key(R.string.preference_racing_procedure_gatestart_classflag_key);
+            case ESS:
+                return key(R.string.preference_racing_procedure_ess_classflag_key);
+            case BASIC:
+                return key(R.string.preference_racing_procedure_basic_classflag_key);
+            case LEAGUE:
+                return key(R.string.preference_racing_procedure_league_classflag_key);
+            default:
+                throw new IllegalArgumentException("Unknown racing procedure type.");
         }
     }
 
@@ -218,40 +229,54 @@ public class AppPreferences {
 
     private String getRacingProcedureHasIndividualRecallKey(RacingProcedureType type) {
         switch (type) {
+            case RRS26:
+                return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            case GateStart:
+                return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
+            case ESS:
+                return key(R.string.preference_racing_procedure_ess_hasxray_key);
+            case BASIC:
+                return key(R.string.preference_racing_procedure_basic_hasxray_key);
+            case LEAGUE:
+                return key(R.string.preference_racing_procedure_league_hasxray_key);
+            default:
+                throw new IllegalArgumentException("Unknown racing procedure type.");
+        }
+    }
+
+    public boolean getRacingProcedureIsResultEntryEnabled(RacingProcedureType type) {
+        String key = getRacingProcedureIsResultEntryEnabledKey(type);
+        return preferences.getBoolean(key, false);
+    }
+
+    private String getRacingProcedureIsResultEntryEnabledKey(RacingProcedureType type) {
+        switch (type) {
         case RRS26:
-            return key(R.string.preference_racing_procedure_rrs26_hasxray_key);
+            return key(R.string.preference_racing_procedure_rrs26_resultentryenabled_key);
         case GateStart:
-            return key(R.string.preference_racing_procedure_gatestart_hasxray_key);
+            return key(R.string.preference_racing_procedure_gatestart_resultentryenabled_key);
         case ESS:
-            return key(R.string.preference_racing_procedure_ess_hasxray_key);
+            return key(R.string.preference_racing_procedure_ess_resultentryenabled_key);
         case BASIC:
-            return key(R.string.preference_racing_procedure_basic_hasxray_key);
+            return key(R.string.preference_racing_procedure_basic_resultentryenabled_key);
         case LEAGUE:
-            return key(R.string.preference_racing_procedure_league_hasxray_key);
+            return key(R.string.preference_racing_procedure_league_resultentryenabled_key);
         default:
             throw new IllegalArgumentException("Unknown racing procedure type.");
         }
     }
-
+    
     public Set<Flags> getRRS26StartmodeFlags() {
         Set<String> flagNames = preferences.getStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), new HashSet<String>());
-        if (flagNames != null) {
-            Set<Flags> flags = new HashSet<Flags>();
-            for (String flagName : flagNames) {
-                flags.add(Flags.valueOf(flagName));
-            }
-            return flags;
+        Set<Flags> flags = new HashSet<>();
+        for (String flagName : flagNames) {
+            flags.add(Flags.valueOf(flagName));
         }
-        return null;
+        return flags;
     }
 
     public String getServerBaseURL() {
-        String value = preferences.getString(key(R.string.preference_server_url_key), "");
-        if (value.equals("")) {
-            return "http://localhost:8889";
-        }
-
-        return value;
+        return preferences.getString(key(R.string.preference_server_url_key), null);
     }
 
     public double getWindBearingFromDirection() {
@@ -264,10 +289,10 @@ public class AppPreferences {
         return Double.longBitsToDouble(windSpeedAsLong);
     }
 
-    public LatLng getWindPosition(){
-    	double lat = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0));
-    	double lng = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0));
-    	return new LatLng(lat,lng);
+    public LatLng getWindPosition() {
+        double lat = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LAT, 0));
+        double lng = Double.longBitsToDouble(preferences.getLong(HIDDEN_PREFERENCE_WIND_LNG, 0));
+        return new LatLng(lat, lng);
     }
 
     public boolean isPollingActive() {
@@ -275,8 +300,8 @@ public class AppPreferences {
     }
 
     public boolean isSendingActive() {
-        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), context
-            .getResources().getBoolean(R.bool.preference_isSendingActive_default));
+        return preferences.getBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), context.getResources()
+            .getBoolean(R.bool.preference_isSendingActive_default));
     }
 
     protected String key(int keyId) {
@@ -296,9 +321,7 @@ public class AppPreferences {
     }
 
     public void setByNameCourseDesignerCourseNames(List<String> courseNames) {
-        preferences
-                .edit()
-                .putStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<String>(courseNames)).commit();
+        preferences.edit().putStringSet(key(R.string.preference_course_designer_by_name_course_names_key), new HashSet<>(courseNames)).commit();
     }
 
     public void setCourseLayout(CourseLayouts courseLayout) {
@@ -315,82 +338,80 @@ public class AppPreferences {
     }
 
     public void setGateStartHasAdditionalGolfDownTime(boolean hasAdditionalGolfDownTime) {
-        preferences
-                .edit()
-                .putBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), hasAdditionalGolfDownTime).commit();
+        preferences.edit().putBoolean(key(R.string.preference_racing_procedure_gatestart_hasadditionalgolfdowntime_key), hasAdditionalGolfDownTime)
+            .commit();
     }
 
     public void setGateStartHasPathfinder(boolean hasPathfinder) {
-        preferences.edit()
-                .putBoolean(key(R.string.preference_racing_procedure_gatestart_haspathfinder_key), hasPathfinder)
-                .commit();
+        preferences.edit().putBoolean(key(R.string.preference_racing_procedure_gatestart_haspathfinder_key), hasPathfinder).commit();
     }
 
-	public void setLoginType(LoginType type) {
-        ExLog.i(getContext(), this.getClass().toString(), "setLoginType: "+ type);
+    public void setLoginType(LoginType type) {
+        ExLog.i(getContext(), this.getClass().toString(), "setLoginType: " + type);
 
         Editor setEdit = preferences.edit();
 
-		switch( type ){
-			case NONE:{
-				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
-				break;
-			}
-			case VIEWER:{
-				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 1);
-				break;
-			}
-			case OFFICER:{
-				setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
-				break;
-			}
+        switch (type) {
+            case NONE: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 0);
+                break;
+            }
+            case VIEWER: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 1);
+                break;
+            }
+            case OFFICER: {
+                setEdit.putInt(HIDDEN_PREFERENCE_LOGIN_TYPE, 2);
+                break;
+            }
 
-			default:{
-				break;
-			}
-		}
+            default: {
+                break;
+            }
+        }
 
-		setEdit.commit();
-	}
+        setEdit.commit();
+    }
 
     public void setMailRecipient(String mail) {
         preferences.edit().putString(key(R.string.preference_mail_key), mail).commit();
     }
 
     public void setManagedCourseAreaNames(List<String> courseAreaNames) {
-        preferences.edit()
-                .putStringSet(key(R.string.preference_course_areas_key), new HashSet<String>(courseAreaNames)).commit();
+        preferences.edit().putStringSet(key(R.string.preference_course_areas_key), new HashSet<>(courseAreaNames)).commit();
     }
 
     public void setNumberOfRounds(NumberOfRounds numberOfRounds) {
-        String numberOfRoundsString = numberOfRounds.name();
+        final String numberOfRoundsString = numberOfRounds.name();
         preferences.edit().putString(HIDDEN_PREFERENCE_NUMBER_OF_ROUNDS, numberOfRoundsString).commit();
     }
 
     public void setRacingProcedureClassFlag(RacingProcedureType type, Flags flag) {
-        String key = getRacingProcedureClassFlagKey(type);
+        final String key = getRacingProcedureClassFlagKey(type);
         preferences.edit().putString(key, flag.name()).commit();
     }
 
     public void setRacingProcedureHasIndividualRecall(RacingProcedureType type, Boolean hasRecall) {
-        String key = getRacingProcedureHasIndividualRecallKey(type);
+        final String key = getRacingProcedureHasIndividualRecallKey(type);
         preferences.edit().putBoolean(key, hasRecall).commit();
     }
 
+    public void setRacingProcedureIsResultEntryEnabled(RacingProcedureType type, Boolean resultEntryEnabled) {
+        final String key = getRacingProcedureIsResultEntryEnabledKey(type);
+        preferences.edit().putBoolean(key, resultEntryEnabled).commit();
+    }
+
     public void setRRS26StartmodeFlags(Set<Flags> flags) {
-        Set<String> flagNames = new HashSet<String>();
+        Set<String> flagNames = new HashSet<>();
         for (Flags flag : flags) {
             flagNames.add(flag.name());
         }
-        preferences.edit().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames)
-                .commit();
+        preferences.edit().putStringSet(key(R.string.preference_racing_procedure_rrs26_startmode_flags_key), flagNames).commit();
     }
 
     public void setSendingActive(boolean activate) {
-        ExLog.i(getContext(), this.getClass().toString(), "setSendingActive: "+ activate);
-        preferences.edit()
-                .putBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), activate)
-                .commit();
+        ExLog.i(getContext(), this.getClass().toString(), "setSendingActive: " + activate);
+        preferences.edit().putBoolean(context.getResources().getString(R.string.preference_isSendingActive_key), activate).commit();
     }
 
     public void setWindBearingFromDirection(double enteredWindBearing) {
@@ -406,10 +427,7 @@ public class AppPreferences {
     public void setWindPosition(LatLng latLng) {
         long lat = Double.doubleToLongBits(latLng.latitude);
         long lng = Double.doubleToLongBits(latLng.longitude);
-        preferences.edit()
-        	.putLong(HIDDEN_PREFERENCE_WIND_LAT, lat)
-        	.putLong(HIDDEN_PREFERENCE_WIND_LNG, lng)
-        .commit();
+        preferences.edit().putLong(HIDDEN_PREFERENCE_WIND_LAT, lat).putLong(HIDDEN_PREFERENCE_WIND_LNG, lng).commit();
     }
 
     public void unregisterPollingActiveChangedListener(PollingActiveChangedListener listener) {
@@ -420,32 +438,64 @@ public class AppPreferences {
     }
 
     public boolean isDemoAllowed() {
-        return preferences.getBoolean(context.getString(R.string.preference_allow_demo_key),
-            context.getResources().getBoolean(R.bool.preference_allow_demo_default));
+        return preferences.getBoolean(context.getString(R.string.preference_allow_demo_key), context.getResources()
+            .getBoolean(R.bool.preference_allow_demo_default));
     }
 
     public boolean wakelockEnabled() {
-        return preferences.getBoolean(context.getString(R.string.preference_wakelock_key), context.getResources()
-            .getBoolean(R.bool.preference_wakelock_default));
+        return preferences
+            .getBoolean(context.getString(R.string.preference_wakelock_key), context.getResources().getBoolean(R.bool.preference_wakelock_default));
     }
 
     public boolean isOfflineMode() {
-        return preferences.getBoolean(context.getString(R.string.preference_offline_key),
-                context.getResources().getBoolean(R.bool.preference_offline_default));
+        return preferences
+            .getBoolean(context.getString(R.string.preference_offline_key), context.getResources().getBoolean(R.bool.preference_offline_default));
     }
 
     public boolean isDependentRacesAllowed() {
-        return preferences.getBoolean(context.getString(R.string.preference_allow_dependent_races_key),
-            context.getResources().getBoolean(R.bool.preference_allow_dependent_races_default));
+        return preferences.getBoolean(context.getString(R.string.preference_allow_dependent_races_key), context.getResources()
+            .getBoolean(R.bool.preference_allow_dependent_races_default));
     }
 
     public int getDependentRacesOffset() {
-        return preferences.getInt(context.getString(R.string.preference_dependent_races_offset_key),
-            context.getResources().getInteger(R.integer.preference_dependent_races_offset_default));
+        return preferences.getInt(context.getString(R.string.preference_dependent_races_offset_key), context.getResources()
+            .getInteger(R.integer.preference_dependent_races_offset_default));
     }
 
     public String getTheme() {
-        return preferences.getString(context.getString(R.string.preference_theme_key),
-                context.getResources().getString(R.string.preference_theme_default));
+        return preferences
+            .getString(context.getString(R.string.preference_theme_key), context.getResources().getString(R.string.preference_theme_default));
+    }
+
+    public void setAccessToken(String accessToken) {
+        preferences.edit().putString(context.getString(R.string.preference_access_token_key), accessToken).commit();
+    }
+
+    public String getAccessToken() {
+        return preferences.getString(context.getString(R.string.preference_access_token_key), null);
+    }
+
+    public boolean isMagnetic() {
+        return preferences.getBoolean(context.getString(R.string.preference_heading_with_declination_subtracted_key), context.getResources()
+            .getBoolean(R.bool.preference_heading_with_declination_subtracted_default));
+    }
+
+    public boolean isRaceFactorChangeAllow() {
+        return preferences.getBoolean(context.getString(R.string.preference_allow_edit_race_factor_key), context.getResources()
+            .getBoolean(R.bool.preference_allow_edit_race_factor_default));
+    }
+
+    public String showNonPublic() {
+        return preferences.getBoolean(context.getString(R.string.preference_non_public_events_key), context.getResources()
+            .getBoolean(R.bool.preference_non_public_events_default)) ? "true" : "false";
+    }
+
+    public boolean needConfigRefresh() {
+        return preferences.getBoolean(context.getString(R.string.preference_config_needs_refresh_key), context.getResources()
+            .getBoolean(R.bool.preference_config_needs_refresh_default));
+    }
+
+    public void setNeedConfigRefresh(boolean refresh) {
+        preferences.edit().putBoolean(context.getString(R.string.preference_config_needs_refresh_key), refresh).commit();
     }
 }

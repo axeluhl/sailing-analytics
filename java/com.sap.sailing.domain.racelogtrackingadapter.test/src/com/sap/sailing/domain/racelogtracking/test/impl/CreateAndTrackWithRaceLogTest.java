@@ -19,7 +19,9 @@ import org.junit.rules.ExpectedException;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRegisterCompetitorEventImpl;
@@ -68,15 +70,13 @@ public class CreateAndTrackWithRaceLogTest {
 
     private long time = 0;
 
-    private static final RaceLogEventFactory factory = RaceLogEventFactory.INSTANCE;
-
     @Before
     public void setup() {
         service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
         gpsFixStore = service.getGPSFixStore();
         service.getMongoObjectFactory().getDatabase().dropDatabase();
         author = service.getServerAuthor();
-        Series series = new SeriesImpl("series", false, Collections.singletonList(fleet), Collections.emptySet(),
+        Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
         /* startDate */null, /* endDate */null, UUID.randomUUID(), Collections.<Series> singletonList(series), false,
@@ -159,8 +159,8 @@ public class CreateAndTrackWithRaceLogTest {
     @Test
     public void canDenote_Add_Track() throws MalformedURLException, FileNotFoundException, URISyntaxException,
             Exception {
-
         RaceColumn column = leaderboard.getRaceColumnByName(columnName);
+        RegattaLog regattaLog = leaderboard.getRegattaLike().getRegattaLog();
         RaceLog raceLog = column.getRaceLog(fleet);
 
         // can denote racelog for tracking
@@ -170,22 +170,23 @@ public class CreateAndTrackWithRaceLogTest {
 
         // add a mapping and one fix in, one out of mapping
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
-        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(0), t(10)));
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(0), t(10)));
         addFixes0(dev1);
-        raceLog.add(factory.createRegisterCompetitorEvent(t(), author, 0, comp1));
-
+        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(t(), author, t(), UUID.randomUUID(), 0));
+        raceLog.add(new RaceLogRegisterCompetitorEventImpl(t(), author, 0, comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
 
-        // now there is a trackedrace
+        // now there is a tracked race
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(raceLog);
+        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
         addFixes1(race, comp1, dev1);
-        raceLog.add(factory.createDeviceCompetitorMappingEvent(t(), author, dev1, comp1, 0, t(11), t(20)));
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(11), t(20)));
 
         // add another mapping on the fly, other old fixes should be loaded
         addFixes2(race, comp1, dev1);
@@ -205,12 +206,13 @@ public class CreateAndTrackWithRaceLogTest {
 
         // add a mapping and one fix in, one out of mapping
         Competitor comp1 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp1", "comp1", null, null, null, null, null,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         DeviceIdentifier dev1 = new SmartphoneImeiIdentifier("dev1");
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), author, t(), UUID.randomUUID(), comp1, dev1,
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(0), t(10)));
         addFixes0(dev1);
-        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), author, t(), UUID.randomUUID(), comp1));
+        regattaLog.add(new RegattaLogRegisterCompetitorEventImpl(t(), t(), author, UUID.randomUUID(), comp1));
+        raceLog.add(new RaceLogStartOfTrackingEventImpl(t(0), author, /* passId */ 0));
 
         // start tracking
         adapter.startTracking(service, leaderboard, column, fleet);
@@ -223,7 +225,7 @@ public class CreateAndTrackWithRaceLogTest {
         addFixes1(race, comp1, dev1);
 
         // add another mapping on the fly, other old fixes should be loaded
-        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), author, t(), UUID.randomUUID(), comp1, dev1,
+        regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(11), t(20)));
         addFixes2(race, comp1, dev1);
 

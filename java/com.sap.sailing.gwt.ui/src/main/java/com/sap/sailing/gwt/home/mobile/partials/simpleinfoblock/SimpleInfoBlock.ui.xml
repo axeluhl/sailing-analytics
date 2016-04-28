@@ -2,7 +2,7 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="res"
-		type="com.sap.sailing.gwt.home.mobile.resources.SharedResources" />
+		type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
 		.description {
 			display: none;

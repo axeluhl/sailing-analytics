@@ -1,19 +1,29 @@
 package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.IsFleetFragment;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.racecommittee.app.R;
 
-public class RaceListDataTypeHeader implements RaceListDataType {
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-    private RaceGroupSeriesFleet data;
+public class RaceListDataTypeHeader implements RaceListDataType, IsFleetFragment {
+    private RaceGroupSeries data;
+    private final LayoutInflater mInflater;
 
-    public RaceListDataTypeHeader(RaceGroupSeriesFleet data) {
-        this.data = data;
+    public RaceListDataTypeHeader(RaceGroupSeries data, LayoutInflater layoutInflater) {
+        this(data, true, layoutInflater);
     }
 
-    public RaceGroupSeriesFleet getRegattaSeriesFleet() {
+    public RaceListDataTypeHeader(RaceGroupSeries data, boolean isFleetVisible, LayoutInflater layoutInflater) {
+        this.data = data;
+        this.mInflater = layoutInflater;
+    }
+
+    public RaceGroupSeries getRegattaSeries() {
         return data;
     }
 
@@ -25,12 +35,14 @@ public class RaceListDataTypeHeader implements RaceListDataType {
         return data.getSeries();
     }
 
-    public Fleet getFleet() {
-        return data.getFleet();
-    }
-
     @Override
     public String toString() {
         return data.getDisplayName();
     }
+
+    @Override
+    public View getView(ViewGroup parent) {
+        return mInflater.inflate(R.layout.race_list_area_header, parent, false);
+    }
+
 }

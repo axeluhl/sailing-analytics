@@ -19,10 +19,10 @@ import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.CourseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.LineStartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PhotoListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.PositioningFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartModeFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.StartProcedureFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
 
 public class FinishedButtonFragment extends BasePanelFragment {
 
@@ -46,9 +46,19 @@ public class FinishedButtonFragment extends BasePanelFragment {
         return fragment;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static boolean isCameraAvailable(Context context) {
+        PackageManager manager = context.getPackageManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+        } else {
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_finished_left, container, false);
+        View layout = inflater.inflate(R.layout.race_finished_buttons, container, false);
 
         mRecord = ViewHelper.get(layout, R.id.record_button);
         if (mRecord != null) {
@@ -84,6 +94,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+
+        if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
+            mList.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -94,31 +108,21 @@ public class FinishedButtonFragment extends BasePanelFragment {
     }
 
     private void uncheckMarker(View view) {
-        if (view != null) {
+        if (isAdded() && view != null) {
             if (!view.equals(mRecord)) {
-                resetFragment(null, R.id.race_frame, StartProcedureFragment.class);
-                setMarkerLevel(mRecord, R.id.record_marker, 0);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), StartProcedureFragment.class);
+                setMarkerLevel(mRecord, R.id.record_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, R.id.race_frame, StartModeFragment.class);
-                setMarkerLevel(mPhoto, R.id.photo_marker, 0);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), LineStartModeFragment.class);
+                setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, R.id.race_frame, CourseFragment.class);
-                setMarkerLevel(mList, R.id.list_marker, 0);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), CourseFragment.class);
+                setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
             }
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static  boolean isCameraAvailable(Context context) {
-        PackageManager manager = context.getPackageManager();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
-        } else {
-            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
         }
     }
 
@@ -129,11 +133,11 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
                 switch (toggleMarker(v, R.id.record_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
+                    case LEVEL_TOGGLED:
                         // TODO
                         break;
 
@@ -152,12 +156,12 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
                 switch (toggleMarker(v, R.id.photo_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
-                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), R.id.finished_content);
+                    case LEVEL_TOGGLED:
+                        replaceFragment(PhotoListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:
@@ -175,12 +179,12 @@ public class FinishedButtonFragment extends BasePanelFragment {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
                 sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
-                    case 0:
+                    case LEVEL_NORMAL:
                         sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
                         break;
 
-                    case 1:
-                        replaceFragment(PositioningFragment.newInstance(getRecentArguments()), R.id.finished_content);
+                    case LEVEL_TOGGLED:
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:

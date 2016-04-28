@@ -50,7 +50,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         this.regatta = new RegattaDescriptor(REGATTA, BOAT_CLASS);
         this.trackableRace = new TrackableRaceDescriptor(EVENT, RACE, BOAT_CLASS);
         this.trackedRace = new TrackedRaceDescriptor(this.regatta.toString(), BOAT_CLASS, RACE);
-        this.raceColumn = new RaceDescriptor("R1", "Default", false, false, 0.0);
+        this.raceColumn = new RaceDescriptor("D1", "Default", false, false, 0.0);
         clearState(getContextRoot());
         super.setUp();
         configureLeaderboard();
@@ -124,6 +124,7 @@ public class TestColumnsInLeaderboard extends AbstractSeleniumTest {
         SeriesEditDialogPO seriesDialog = regattaDetails.editSeries(RegattaStructureManagementPanelPO.DEFAULT_SERIES_NAME);
         seriesDialog.addRaces(1, 1);
         seriesDialog.pressOk();
+        regattaDetails.deleteSeries("Default");
         // Start the tracking for the races and wait until they are ready to use
         startTrackingRaceAndStopWhenFinished(adminConsole);
         LeaderboardConfigurationPanelPO leaderboardConfiguration = adminConsole.goToLeaderboardConfiguration();

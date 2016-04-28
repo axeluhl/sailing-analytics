@@ -10,7 +10,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
-import com.sap.sailing.domain.abstractlog.shared.events.DeviceMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDefineMarkEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Leg;
@@ -35,6 +36,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -100,6 +102,14 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * If no start time can be determined this way, <code>null</code> is returned.
      */
     TimePoint getStartOfRace();
+    
+    /**
+     * Like {@link #getStartOfRace()}, but ignoring any inference from start mark passings in case {@code inferred} is
+     * {@code false}. In this case, if no official start time was set, e.g., in the {@link RaceLog} or explicitly using
+     * {@link #getStartTimeReceived()}, {@code null} will be returned by this method even if start mark passings are
+     * present.
+     */
+    TimePoint getStartOfRace(boolean inferred);
 
     /**
      * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We
@@ -658,15 +668,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     void waitUntilLoadingFromWindStoreComplete() throws InterruptedException;
 
     /**
-     * Whenever a {@link RaceLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
-     * found in the {@code RaceLog} in a separate thread. This method blocks if there is such a thread loading
+     * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
+     * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading
      * fixes, until that thread is finished.
-     * @param fromRaceLog Make sure that the fixes defined by the mappings in this racelog were loaded.
-     */
-    void waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog fromRaceLog) throws InterruptedException;
-
-    /**
-     * @see #waitForLoadingFromGPSFixStoreToFinishRunning(RaceLog)
+     * @param fromRegattaLog Make sure that the fixes defined by the mappings in this regattalog were loaded.
      */
     void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
     
@@ -690,7 +695,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     /**
      * Attaches the passed race log with this {@link TrackedRace}.
-     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link DeviceMappingEvent}s
+     * This causes fixes from the {@link GPSFixStore} to be loaded for such {@link RegattaLogDeviceMappingEvent}s
      * that are present in the raceLog. This loading is offloaded into a separate thread, that blocks
      * serialization until it is finished. If multiple race logs are attached, the loading process is
      * forced to be serialized.
@@ -866,16 +871,32 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
         return null;
     }
 
-    default Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    default Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
+        return null;
+    }
+    
+    default Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
         return null;
     }
 
     /**
      * Returns all marks found in the {@link #markTracks} map and the mark device mappings and mark
-     * definition events in all attached race and regatta logs.
+     * definition events in all attached race and regatta logs. Note that usually a device mapping should
+     * exist for a mark only if that mark is also defined by a {@link RegattaLogDefineMarkEvent}, so for
+     * this standard case, adding the marks from the device mark mappings would be redundant.
      */
-    default Iterable<Mark> getMarksFromRaceAndLogs() {
+    default Iterable<Mark> getMarksFromRegattaLogs() {
         return getMarks();
     }
-
+    
+    /**
+     * Updates the start and end of tracking in the following precedence order:
+     * 
+     * <ol>
+     * <li>start/end of tracking in Racelog</li>
+     * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
+     * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
+     * </ol>
+     */
+    public void updateStartAndEndOfTracking();
 }

@@ -75,7 +75,7 @@ public abstract class CanvasOverlayV3 {
     /**
      * the z-Index of the canvas
      */
-    protected int zIndex;
+    protected final int zIndex;
 
     protected MapCanvasProjection mapProjection;
     
@@ -94,13 +94,14 @@ public abstract class CanvasOverlayV3 {
     public CanvasOverlayV3(MapWidget map, int zIndex, String canvasId, CoordinateSystem coordinateSystem) {
         this.transitionTimeInMilliseconds = -1; // no animated position transition initially
         this.map = map;
+        this.zIndex = zIndex;
         this.mapProjection = null;
         this.coordinateSystem = coordinateSystem;
         canvas = Canvas.createIfSupported();
         canvas.getElement().getStyle().setZIndex(zIndex);
         canvas.getElement().getStyle().setCursor(Cursor.POINTER);
         canvas.getElement().getStyle().setPosition(com.google.gwt.dom.client.Style.Position.ABSOLUTE);
-        if(canvasId != null) {
+        if (canvasId != null) {
             canvas.getElement().setId(canvasId);
         }
         customOverlayView = OverlayView.newInstance(map, getOnDrawHandler(), getOnAddHandler(), getOnRemoveHandler());
@@ -407,5 +408,17 @@ public abstract class CanvasOverlayV3 {
 
     public MapCanvasProjection getMapProjection() {
         return mapProjection;
+    }
+
+    protected void updateTransition(long timeForPositionTransitionMillis) {
+        if (timeForPositionTransitionMillis == -1) {
+            removeCanvasPositionAndRotationTransition();
+        } else {
+            setCanvasPositionAndRotationTransition(timeForPositionTransitionMillis);
+        }
+    }
+
+    public int getZIndex() {
+        return zIndex;
     }
 }

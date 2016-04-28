@@ -11,8 +11,8 @@ public class CompoundGroupKey extends AbstractGroupKey {
 
     private static final long serialVersionUID = -7902450253393172550L;
     
-    private GroupKey mainKey;
-    private ArrayList<GroupKey> subKeys;
+    private List<? extends GroupKey> keys;
+    private boolean hasSubKeys;
 
     /**
      * Constructor for the GWT-Serialization. Don't use this!
@@ -20,22 +20,29 @@ public class CompoundGroupKey extends AbstractGroupKey {
     @Deprecated
     CompoundGroupKey() { }
 
-    public CompoundGroupKey(GroupKey mainKey, List<GroupKey> subKeys) {
-        if (mainKey == null) {
-            throw new IllegalArgumentException("The mainKey mustn't be null");
+    public CompoundGroupKey(List<? extends GroupKey> keys) {
+        if (keys == null || keys.isEmpty()) {
+            throw new IllegalArgumentException("The keys mustn't be null or empty");
         }
         
-        this.mainKey = mainKey;
-        this.subKeys = new ArrayList<>(subKeys);
+        this.keys = new ArrayList<>(keys);
+        hasSubKeys = this.keys.size() > 1;
     }
 
     @Override
     public String asString() {
-        StringBuilder builder = new StringBuilder(mainKey.asString());
-        for (GroupKey groupKey : subKeys) {
-            builder.append("(" + groupKey.asString());
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        int bracketCount = 0;
+        for (GroupKey groupKey : keys) {
+            if (!first) {
+                builder.append('(');
+                bracketCount++;
+            }
+            builder.append(groupKey.asString());
+            first = false;
         }
-        for (int i = 0; i < subKeys.size(); i++) {
+        for (int i = 0; i < bracketCount; i++) {
             builder.append(")");
         }
         return builder.toString();
@@ -43,17 +50,16 @@ public class CompoundGroupKey extends AbstractGroupKey {
 
     @Override
     public boolean hasSubKeys() {
-        return !subKeys.isEmpty();
+        return hasSubKeys;
     }
     
     @Override
-    public GroupKey getMainKey() {
-        return mainKey;
-    }
-
-    @Override
-    public List<GroupKey> getSubKeys() {
-        return Collections.unmodifiableList(subKeys);
+    public List<? extends GroupKey> getKeys() {
+        if (hasSubKeys) {
+            return Collections.unmodifiableList(keys);
+        } else {
+            return Collections.singletonList(keys.get(0));
+        }
     }
     
     @Override
@@ -61,15 +67,12 @@ public class CompoundGroupKey extends AbstractGroupKey {
         int result;
         if (key instanceof CompoundGroupKey) {
             CompoundGroupKey compoundGroupKey = (CompoundGroupKey) key;
-            result = mainKey.compareTo(compoundGroupKey.mainKey);
+            result = Integer.compare(keys.size(), compoundGroupKey.keys.size());
             if (result == 0) {
-                result = Integer.compare(subKeys.size(), compoundGroupKey.subKeys.size());
-                if (result == 0) {
-                    for (int i = 0; i < subKeys.size(); i++) {
-                        result = subKeys.get(i).compareTo(compoundGroupKey.subKeys.get(i));
-                        if (result != 0) {
-                            break;
-                        }
+                for (int i = 0; i < keys.size(); i++) {
+                    result = keys.get(i).compareTo(compoundGroupKey.keys.get(i));
+                    if (result != 0) {
+                        break;
                     }
                 }
             }
@@ -83,8 +86,8 @@ public class CompoundGroupKey extends AbstractGroupKey {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((mainKey == null) ? 0 : mainKey.hashCode());
-        result = prime * result + ((subKeys == null) ? 0 : subKeys.hashCode());
+        result = prime * result + (hasSubKeys ? 1231 : 1237);
+        result = prime * result + ((keys == null) ? 0 : keys.hashCode());
         return result;
     }
 
@@ -97,15 +100,12 @@ public class CompoundGroupKey extends AbstractGroupKey {
         if (getClass() != obj.getClass())
             return false;
         CompoundGroupKey other = (CompoundGroupKey) obj;
-        if (mainKey == null) {
-            if (other.mainKey != null)
-                return false;
-        } else if (!mainKey.equals(other.mainKey))
+        if (hasSubKeys != other.hasSubKeys)
             return false;
-        if (subKeys == null) {
-            if (other.subKeys != null)
+        if (keys == null) {
+            if (other.keys != null)
                 return false;
-        } else if (!subKeys.equals(other.subKeys))
+        } else if (!keys.equals(other.keys))
             return false;
         return true;
     }

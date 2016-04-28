@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_procedure"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/start_procedure"
+            app:buttonType="typeValue" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_mode"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/start_mode"
+            app:buttonType="typeImage" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_pathfinder"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/gate_start_pathfinder"
+            app:buttonType="typeValue" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_timing"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/gate_start_timing"
+            app:buttonType="typeValue" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_race_group"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/race_group"
+            app:buttonSwitch=""
+            app:buttonType="typeSwitch" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_factor"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/race_factor"
+            app:buttonType="typeValue" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_course"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/course"
+            app:buttonType="typeValue" />
+
+        <com.sap.sailing.racecommittee.app.ui.views.PanelButton
+            android:id="@+id/button_wind"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            app:buttonHeader="@string/wind"
+            app:buttonType="typeValue" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/line_bottom"
+        android:layout_width="@dimen/thin_line"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="?attr/black" />
+</RelativeLayout>

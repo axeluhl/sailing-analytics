@@ -69,6 +69,7 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -113,7 +114,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     private TextColumn<RegattaOverviewEntryDTO> boatClass;
     private TextColumn<RegattaOverviewEntryDTO> startTimeColumn;
     private SimplePanel tableHolder = new SimplePanel();
-    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 60 /* hour */;
+    private final long _1_HOUR = 60 /* seconds */* 60 /* minutes */* 1 /* hour */;
     private final long HIDE_COL_TIME_THRESHOLD = _1_HOUR;
     private TextColumn<RegattaOverviewEntryDTO> lastUpdateColumn;
     private TextColumn<RegattaOverviewEntryDTO> endOfProtestTime;
@@ -260,8 +261,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+        } else {
+            sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
-        table = new CellTable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
+        table = new BaseCelltable<RegattaOverviewEntryDTO>(/* pageSize */10000, tableRes);
         tableHolder.setWidget(table);
         regattaOverviewDataProvider.getList().clear();
         regattaOverviewDataProvider.addDataDisplay(table);
@@ -618,6 +621,9 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
             @Override
             public String getValue(RegattaOverviewEntryDTO entryDTO) {
+                if (entryDTO.raceInfo.lastUpdateTime == null) {
+                    return "-";
+                }
                 final long lastUpdateInSeconds = timePassedInSeconds(entryDTO.raceInfo.lastUpdateTime);
                 if (lastUpdateInSeconds > HIDE_COL_TIME_THRESHOLD) {
                     return timeFormatter.format(entryDTO.raceInfo.lastUpdateTime);
@@ -628,8 +634,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 } else if (lastUpdateInSeconds < _1_HOUR) {
                     sb.append(lastUpdateInSeconds / 60).append("m");
                 } else {
-                    long hours = lastUpdateInSeconds / 3600;
-                    long minutes = (lastUpdateInSeconds - (hours * 3600)) / 60;
+                    long hours = lastUpdateInSeconds / _1_HOUR;
+                    long minutes = (lastUpdateInSeconds - (hours * _1_HOUR)) / 60;
                     if (hours > HIDE_COL_TIME_THRESHOLD) {
                         return "";
                     }
@@ -638,6 +644,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                 return sb.toString();
             }
         };
+        lastUpdateColumn.setDefaultSortAscending(false);
         lastUpdateColumn.setSortable(true);
         regattaOverviewListHandler.setComparator(lastUpdateColumn, new Comparator<RegattaOverviewEntryDTO>() {
             @Override
@@ -910,6 +917,8 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
 
     private String getPassingInstructionsAsText(PassingInstruction passingInstructions) {
         switch (passingInstructions) {
+        case Single_Unknown:
+            return stringMessages.toSide() + " " + stringMessages.unknown();
         case Port:
             return stringMessages.toSide() + " " + stringMessages.portSide();
         case Starboard:

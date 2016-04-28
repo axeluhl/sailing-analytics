@@ -19,7 +19,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventFactory;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
@@ -38,6 +37,7 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.configuration.procedures.ESSConfiguration;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -48,7 +48,6 @@ public class RaceStateTest {
     
     private RaceLog raceLog;
     private AbstractLogEventAuthor author;
-    private RaceLogEventFactory factory;
     private RacingProcedureType defaultRacingProcedureType;
     private ConfigurationLoader<RegattaConfiguration> configuration;
     private RaceStateChangedListener listener;
@@ -60,13 +59,12 @@ public class RaceStateTest {
     public void setUp() {
         raceLog = new RaceLogImpl("test-log");
         author = new LogEventAuthorImpl("Test", 1);
-        factory = RaceLogEventFactory.INSTANCE;
         defaultRacingProcedureType = RacingProcedureType.RRS26;
         configuration = new EmptyRegattaConfiguration();
         listener = mock(RaceStateChangedListener.class);
         nowMock = mock(TimePoint.class);
         
-        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
     }
     
     @Test
@@ -96,7 +94,7 @@ public class RaceStateTest {
         config.setBasicConfiguration(mock(RacingProcedureConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
         
         assertEquals(RacingProcedureType.BASIC, state.getRacingProcedure().getType());
     }
@@ -110,8 +108,8 @@ public class RaceStateTest {
         config.setESSConfiguration(mock(ESSConfiguration.class));
         configuration = mock(ConfigurationLoader.class);
         when(configuration.load()).thenReturn(config);
-        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, author, nowMock, "12", null, 0, RacingProcedureType.ESS));
-        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, factory, new RacingProcedureFactoryImpl(author, factory, configuration));
+        raceLog.add(new RaceLogStartProcedureChangedEventImpl(nowMock, nowMock, author, "12", 0, RacingProcedureType.ESS));
+        state = new RaceStateImpl(mock(RaceLogResolver.class), raceLog, author, new RacingProcedureFactoryImpl(author, configuration));
         
         assertEquals(RacingProcedureType.ESS, state.getRacingProcedure().getType());
     }
@@ -136,8 +134,8 @@ public class RaceStateTest {
     @Test
     public void testSetIndividualRecall() {
         assertFalse(state.getRacingProcedure().isIndividualRecallDisplayed());
-        raceLog.add(new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), author, MillisecondsTimePoint.now(), UUID
-                .randomUUID(), null, /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
+        raceLog.add(new RaceLogFlagEventImpl(MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), author, UUID
+                .randomUUID(), /* pass */0, Flags.XRAY, Flags.NONE, /* pIsDisplayed */true));
         assertTrue(state.getRacingProcedure().isIndividualRecallDisplayed());
     }
 
@@ -180,7 +178,7 @@ public class RaceStateTest {
         state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
         state.setFinishedTime(new MillisecondsTimePoint(10));
-        state.setCourseDesign(nowMock, mock(CourseBase.class));
+        state.setCourseDesign(nowMock, mock(CourseBase.class), CourseDesignerMode.ADMIN_CONSOLE);
         
         state.setAdvancePass(mock(TimePoint.class));
         

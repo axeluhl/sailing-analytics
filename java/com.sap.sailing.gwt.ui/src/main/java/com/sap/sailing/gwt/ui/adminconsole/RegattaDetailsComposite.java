@@ -36,6 +36,7 @@ import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 
@@ -117,43 +118,45 @@ public class RegattaDetailsComposite extends Composite {
     }
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
-        CellTable<SeriesDTO> table = new CellTable<SeriesDTO>(/* pageSize */10000, tableRes);
+        CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
         table.setWidth("100%");
-        
         TextColumn<SeriesDTO> seriesNameColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.getName();
             }
         };
-
         TextColumn<SeriesDTO> isMedalSeriesColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isMedal() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> startsWithZeroScoreColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isStartsWithZeroScore() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> hasSplitFleetContiguousScoringColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.hasSplitFleetContiguousScoring() ? stringMessages.yes() : stringMessages.no();
             }
         };
-
         TextColumn<SeriesDTO> isFirstColumnIsNonDiscardableCarryForwardColumn = new TextColumn<SeriesDTO>() {
             @Override
             public String getValue(SeriesDTO series) {
                 return series.isFirstColumnIsNonDiscardableCarryForward() ? stringMessages.yes() : stringMessages.no();
             }
         };
+        TextColumn<SeriesDTO> isFleetsCanRunInParallelColumn = new TextColumn<SeriesDTO>() {
+            @Override
+            public String getValue(SeriesDTO series) {
+                return series.isFleetsCanRunInParallel() ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+
 
         TextColumn<SeriesDTO> racesColumn = new TextColumn<SeriesDTO>() {
             @Override
@@ -252,6 +255,7 @@ public class RegattaDetailsComposite extends Composite {
         table.addColumn(isFirstColumnIsNonDiscardableCarryForwardColumn, stringMessages.firstRaceIsNonDiscardableCarryForward());
         table.addColumn(startsWithZeroScoreColumn, stringMessages.startsWithZeroScore());
         table.addColumn(hasSplitFleetContiguousScoringColumn, stringMessages.hasSplitFleetContiguousScoring());
+        table.addColumn(isFleetsCanRunInParallelColumn, stringMessages.canFleetsRunInParallel());
         table.addColumn(seriesActionColumn, stringMessages.actions());
         
         return table;
@@ -286,6 +290,7 @@ public class RegattaDetailsComposite extends Composite {
         final SeriesDTO series = seriesDescriptor.getSeries();
         final List<RaceColumnDTO> newRaceColumns = seriesDescriptor.getRaces();
         final boolean isMedalChanged = series.isMedal() != seriesDescriptor.isMedal();
+        final boolean isFleetsCanRunInParallelChanged = series.isFleetsCanRunInParallel() != seriesDescriptor.isFleetsCanRunInParallel();
         final boolean isStartsWithZeroScoreChanged = series.isStartsWithZeroScore() != seriesDescriptor.isStartsWithZeroScore();
         final boolean isFirstColumnIsNonDiscardableCarryForwardChanged = series.isFirstColumnIsNonDiscardableCarryForward() != seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward();
         final boolean hasSplitFleetContiguousScoringChanged = series.hasSplitFleetContiguousScoring() != seriesDescriptor.hasSplitFleetContiguousScoring();
@@ -349,11 +354,11 @@ public class RegattaDetailsComposite extends Composite {
                                     });
                         }
                     });
-            if (isMedalChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
+            if (isMedalChanged || isFleetsCanRunInParallelChanged || seriesResultDiscardingThresholdsChanged || isStartsWithZeroScoreChanged
                     || isFirstColumnIsNonDiscardableCarryForwardChanged || hasSplitFleetContiguousScoringChanged
                     || seriesNameChanged) {
                 sailingService.updateSeries(regattaIdentifier, series.getName(), seriesDescriptor.getSeriesName(),
-                        seriesDescriptor.isMedal(), seriesDescriptor.getResultDiscardingThresholds(),
+                        seriesDescriptor.isMedal(), seriesDescriptor.isFleetsCanRunInParallel(), seriesDescriptor.getResultDiscardingThresholds(),
                         seriesDescriptor.isStartsWithZeroScore(),
                         seriesDescriptor.isFirstColumnIsNonDiscardableCarryForward(),
                         seriesDescriptor.hasSplitFleetContiguousScoring(), series.getFleets(),

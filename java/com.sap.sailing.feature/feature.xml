@@ -88,13 +88,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          unpack="false"/>
 
    <plugin
-         id="com.sap.sailing.server.gateway.ess40"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="com.tractrac.clientmodule"
          download-size="0"
          install-size="0"
@@ -206,12 +199,6 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
          version="0.0.0"/>
 
    <plugin
-         id="com.sap.sailing.www.events"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="com.sap.sailing.resultimport"
          download-size="0"
          install-size="0"
@@ -255,6 +242,13 @@ Computes leaderboard information for sailing races and offers RESTful APIs to al
 
    <plugin
          id="com.sap.sailing.manage2sail.resultimport"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.sap.sailing.yachtscoring.resultimport"
          download-size="0"
          install-size="0"
          version="0.0.0"

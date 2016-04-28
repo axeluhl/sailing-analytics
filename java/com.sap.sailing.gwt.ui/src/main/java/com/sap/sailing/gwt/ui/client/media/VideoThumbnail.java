@@ -12,8 +12,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.common.client.YoutubeApi;
-import com.sap.sailing.gwt.ui.shared.media.SailingVideoDTO;
 import com.sap.sse.common.media.MediaSubType;
+import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoThumbnail extends Widget implements HasClickHandlers {
 
@@ -28,7 +28,7 @@ public class VideoThumbnail extends Widget implements HasClickHandlers {
     @UiField
     ImageElement thumbnailUi;
 
-    public VideoThumbnail(SailingVideoDTO video) {
+    public VideoThumbnail(VideoDTO video) {
         setElement(uiBinder.createAndBindUi(this));
         getElement().addClassName("videoThumbnail");
         captionUi.setInnerText(video.getTitle());

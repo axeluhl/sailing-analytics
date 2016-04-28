@@ -9,10 +9,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Nationality;
@@ -41,9 +44,10 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
 import com.sap.sailing.domain.tractracadapter.impl.Simulator;
-import com.tractrac.model.lib.api.data.IPosition;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.tractrac.model.lib.api.data.IPosition;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.model.lib.api.event.ICompetitor;
 import com.tractrac.model.lib.api.event.IEvent;
@@ -75,7 +79,7 @@ public interface DomainFactory {
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(ICompetitor competitor);
 
     com.sap.sailing.domain.base.Competitor getOrCreateCompetitor(UUID competitorId, String competitorClassName,
-            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile);
+            String nationalityAsString, String name, String shortName, float timeOnTimeFactor, float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag);
 
     /**
      * Looks up or, if not found, creates a {@link Nationality} object and re-uses <code>threeLetterIOCCode</code> also as the
@@ -91,7 +95,6 @@ public interface DomainFactory {
      * Fetch a race definition previously created by a call to {@link #getOrCreateRaceDefinitionAndTrackedRace}. If no such
      * race definition was created so far, the call blocks until such a definition is provided by a call to
      * {@link #getOrCreateRaceDefinitionAndTrackedRace}.
-     * @param raceId TODO
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId);
 
@@ -101,7 +104,6 @@ public interface DomainFactory {
      * A new {@link com.sap.sailing.domain.base.Regatta} is created if no event by
      * an equal name with a boat class with an equal name as the <code>event</code>'s
      * boat class exists yet.
-     * @param trackedRegattaRegistry TODO
      */
     com.sap.sailing.domain.base.Regatta getOrCreateDefaultRegatta(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             IRace race, TrackedRegattaRegistry trackedRegattaRegistry);
@@ -130,27 +132,30 @@ public interface DomainFactory {
      *            if <code>null</code>, all stored data until the "end of time" will be loaded that the event has
      *            to provide, particularly for the mark positions which are stored per event, not per race; otherwise,
      *            particularly the mark position loading will be constrained to this end time.
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
      * @param windStore
      *            Provides the capability to obtain the {@link WindTrack}s for the different wind sources. A trivial
      *            implementation is {@link EmptyWindStore} which simply provides new, empty tracks. This is always
      *            available but loses track of the wind, e.g., during server restarts.
-     * @param raceLogResolver TODO
      */
     TracTracRaceTracker createRaceTracker(URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException, SubscriberInitializationException;
 
     /**
-     * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)}, only that
-     * a predefined {@link Regatta} is used to hold the resulting races.
-     * @param raceLogResolver TODO
+     * Same as {@link #createRaceTracker(URL, URI, URI, URI, TimePoint, TimePoint, WindStore, TrackedRegattaRegistry)},
+     * only that a predefined {@link Regatta} is used to hold the resulting races.
+     * 
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
      */
     RaceTracker createRaceTracker(Regatta regatta, URL paramURL, URI liveURI, URI storedURI, URI courseDesignUpdateURI,
             TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, GPSFixStore gpsFixStore, String tracTracUsername, String tracTracPassword,
             String raceStatus, String raceVisibility, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver)
             throws MalformedURLException, FileNotFoundException, URISyntaxException, CreateModelException,
@@ -169,7 +174,6 @@ public interface DomainFactory {
      *            must have been created before through
      *            {@link #getOrCreateTrackedRegatta(com.sap.sailing.domain.base.Regatta)} because otherwise the link to
      *            the {@link IEvent} can't be established
-     * @param raceLogResolver TODO
      * @param tokenToRetrieveAssociatedRace
      *            used to update the set of{@link RaceDefinition}s received by the {@link RaceCourseReceiver} created by
      *            this call
@@ -181,7 +185,7 @@ public interface DomainFactory {
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm);
 
     /**
-     * Creates a {@link RaceDefinition} from a TracTrac {@link Race} and a domain {@link Course} definition. The
+     * Creates a {@link RaceDefinition} from a TracTrac {@link IRace} and a domain {@link Course} definition. The
      * resulting {@link RaceDefinition} is added to the {@link com.sap.sailing.domain.base.Regatta} to which
      * <code>trackedRegatta</code> belongs (see {@link TrackedRegatta#getRegatta()}). It is added to the internal race
      * cache. The corresponding {@link TrackedRace} object is also created, and the notification of threads waiting on
@@ -199,7 +203,7 @@ public interface DomainFactory {
      * @param raceLogResolver TODO
      */
     DynamicTrackedRace getOrCreateRaceDefinitionAndTrackedRace(DynamicTrackedRegatta trackedRegatta, UUID raceId,
-            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass,
+            String raceName, Iterable<com.sap.sailing.domain.base.Competitor> competitors, BoatClass boatClass, Map<Competitor, Boat> competitorBoats,
             Course course, Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
             URI courseDesignUpdateURI, UUID tracTracEventUuid, String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver);
@@ -254,11 +258,17 @@ public interface DomainFactory {
      */
     RaceDefinition getAndWaitForRaceDefinition(UUID raceId, long timeoutInMilliseconds);
 
+    Map<Competitor, Boat> getBoatsInfoForCompetitors(IRace race, BoatClass defaultBoatClass);
+
     Util.Pair<Iterable<com.sap.sailing.domain.base.Competitor>, BoatClass> getCompetitorsAndDominantBoatClass(IRace race);
     
+    /**
+     * @param offsetToStartTimeOfSimulatedRace
+     *            if non-<code>null</code>, the {@link Simulator} will be used with this duration as start offset
+     */
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, TimePoint startOfTracking, TimePoint endOfTracking, long delayToLiveInMillis,
-            boolean simulateWithStartTimeNow, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+            Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             String tracTracUsername, String tracTracPassword, String raceStatus, String raceVisibility);
     /**
      * Removes all knowledge about <code>tractracRace</code> which includes removing it from the race cache, from the
@@ -280,7 +290,7 @@ public interface DomainFactory {
 
     MetadataParser getMetadataParser();
 
-    BoatClass getDominantBoatClass(List<String> competitorClassNames);
+    BoatClass getDominantBoatClass(Iterable<String> competitorClassNames);
 
     List<Sideline> createSidelines(String raceMetadataString, Iterable<? extends TracTracControlPoint> allEventControlPoints);
 

@@ -1,5 +1,11 @@
 package com.sap.sailing.android.tracking.app.ui.fragments;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -12,24 +18,26 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.LeaderboardWebViewActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.RegattaActivity;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
+import com.sap.sailing.android.tracking.app.utils.AppPreferences;
+import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 
 public class RegattaFragment extends BaseFragment implements OnClickListener {
 
@@ -57,6 +65,9 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         Button showLeaderboardButton = (Button) view.findViewById(R.id.show_leaderboards_button);
         showLeaderboardButton.setOnClickListener(this);
 
+        Button showEventButton = (Button) view.findViewById(R.id.show_event_button);
+        showEventButton.setOnClickListener(this);
+
         Button changePhotoButton = (Button) view.findViewById(R.id.change_photo_button);
         changePhotoButton.setOnClickListener(this);
 
@@ -69,6 +80,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         setLeaderboardImageHeight(view);
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        AppPreferences prefs = new AppPreferences(getActivity());
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        if (prefs.hasFailedUpload(activity.leaderboard.name)) {
+            activity.showRetryUploadLayout();
+        }
     }
 
     private void setLeaderboardImageHeight(View view){
@@ -154,12 +176,17 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         case R.id.show_leaderboards_button:
             startLeaderboardActivity();
             break;
+        case R.id.show_event_button:
+            startEventActivity();
+            break;
         case R.id.start_tracking:
             if (showingThankYouNote) {
                 RegattaActivity regattaActivity = (RegattaActivity) getActivity();
                 regattaActivity.checkout();
-            } else {
+            } else if (LocationHelper.isGPSEnabled(getActivity())) {
                 startTrackingActivity();
+            } else {
+                LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
             }
             break;
         case R.id.add_photo_button:
@@ -225,7 +252,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
             RegattaActivity activity = (RegattaActivity) getActivity();
 
             if (requestCode == CAMERA_REQUEST_CODE) {
-                File photoFile = ((RegattaActivity) getActivity()).getImageFile(CAMERA_TEMP_FILE);
+                File photoFile = activity.getImageFile(CAMERA_TEMP_FILE);
                 Bitmap photo;
                 try {
                     photo = decodeUri(Uri.fromFile(photoFile));
@@ -239,7 +266,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                         ExLog.i(getActivity(), TAG, "update photo, io exception: " + e.getMessage());
                     }
                 } finally {
-                    ((RegattaActivity) getActivity()).deleteFile(CAMERA_TEMP_FILE);
+                    activity.deleteFile(CAMERA_TEMP_FILE);
                 }
             } else if (requestCode == SELECT_PHOTO_REQUEST_CODE) {
                 Uri selectedImage = data.getData();
@@ -281,8 +308,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         if (options.outHeight > IMAGE_MAX_SIZE || options.outWidth > IMAGE_MAX_SIZE) {
             scale = (int) Math.pow(
                     2,
-                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth))
-                            / Math.log(0.5)));
+                    (int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
         }
 
         BitmapFactory.Options options2 = new BitmapFactory.Options();
@@ -302,7 +328,16 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_EVENT_ID, activity.event.id);
         intent.putExtra(LeaderboardWebViewActivity.LEADERBOARD_EXTRA_LEADERBOARD_NAME, activity.leaderboard.name);
 
-        getActivity().startActivity(intent);
+        startActivity(intent);
+    }
+
+    private void startEventActivity() {
+        RegattaActivity activity = (RegattaActivity) getActivity();
+        AppPreferences preferences = new AppPreferences(getActivity());
+        EventInfo eventInfo = activity.event;
+        String url = eventInfo.server + preferences.getServerEventUrl(eventInfo.id);
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
     }
 
     private void startTrackingActivity() {
@@ -395,7 +430,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    ExLog.w(RegattaFragment.this.getActivity(), TAG, "Interrupted sleep");
                 }
             }
         }

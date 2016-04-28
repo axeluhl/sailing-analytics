@@ -15,6 +15,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -30,8 +32,8 @@ import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityL
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.SpeedFragment;
-import com.sap.sailing.android.tracking.app.ui.fragments.StopTrackingButtonFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
+import com.sap.sailing.android.tracking.app.ui.fragments.TrackingTimeFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
@@ -41,7 +43,8 @@ import com.viewpagerindicator.CirclePageIndicator;
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
 
     TrackingService trackingService;
-    boolean trackingServiceBound;
+    private boolean trackingServiceBound;
+    private boolean gpsReceived;
 
     MessageSendingService messageSendingService;
     boolean messageSendingServiceBound;
@@ -75,29 +78,32 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onCreate(savedInstanceState);
 
         prefs = new AppPreferences(this);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            checkinDigest = extras.getString(getString(R.string.tracking_activity_checkin_digest_parameter));
+        } else {
+            checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
+        }
+        lastSpeedIndicatorText = getString(R.string.initial_hyphen);
 
-        checkinDigest = getIntent().getExtras().getString(
-                getString(R.string.tracking_activity_checkin_digest_parameter));
-
-        setContentView(R.layout.fragment_hud_container);
+        setContentView(R.layout.activity_tracking);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
-            toolbar.setPadding(20, 0, 0, 0);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this,
-                    checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64_sq);
-            toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(eventInfo.leaderboardName);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            if (toolbar != null) {
+                toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+                toolbar.setPadding(20, 0, 0, 0);
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            }
         }
 
         // Instantiate a ViewPager and a PagerAdapter.
@@ -142,6 +148,14 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             }
         });
 
+        Button stopTracking = (Button) findViewById(R.id.stop_tracking);
+        stopTracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showStopTrackingConfirmationDialog();
+            }
+        });
+
         replaceFragment(R.id.tracking_linear_layout, trackingFragment);
         ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
     }
@@ -166,6 +180,12 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         bindService(messageSendingServiceIntent, messageSendingServiceConnection, Context.BIND_AUTO_CREATE);
         Intent trackingServiceIntent = new Intent(this, TrackingService.class);
         bindService(trackingServiceIntent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        ServiceHelper.getInstance().stopTrackingService(this);
+        super.onDestroy();
     }
 
     @Override
@@ -207,7 +227,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         super.onResume();
 
         timer = new TimerRunnable();
-        timer.start();
+        Thread thread = new Thread(timer);
+        thread.start();
 
         if (mPagerAdapter == null) {
             mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager());
@@ -218,7 +239,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
         LocationManager service = (LocationManager) getSystemService(LOCATION_SERVICE);
         boolean gpsEnabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (gpsEnabled == false) {
+        if (!gpsEnabled) {
             showErrorPopup(R.string.warning, R.string.gps_turned_off);
         }
     }
@@ -319,7 +340,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         public final static int VIEW_PAGER_FRAGMENT_COMPASS = 1;
         public final static int VIEW_PAGER_FRAGMENT_SPEED = 2;
 
-        private StopTrackingButtonFragment stbFragment;
+        private TrackingTimeFragment trackingTimeFragment;
         private CompassFragment cFragment;
         private SpeedFragment sFragment;
 
@@ -330,8 +351,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         @Override
         public Fragment getItem(int position) {
             if (position == VIEW_PAGER_FRAGMENT_STOP_BUTTON) {
-                stbFragment = new StopTrackingButtonFragment();
-                return stbFragment;
+                trackingTimeFragment = new TrackingTimeFragment();
+                return trackingTimeFragment;
             } else if (position == VIEW_PAGER_FRAGMENT_COMPASS) {
                 cFragment = new CompassFragment();
                 return cFragment;
@@ -364,14 +385,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm)
-                .setMessage(R.string.do_you_really_want_to_stop_tracking).setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
+            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        stopTracking();
-                    }
-                }).setNegativeButton(android.R.string.no, null).create();
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    stopTracking();
+                }
+            }).setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }
@@ -386,10 +406,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * Update UI with a string containing the time since tracking started, e.g. 01:22:45
      */
     public void updateTimer() {
-        long diff = System.currentTimeMillis() - prefs.getTrackingTimerStarted();
-        TextView textView = (TextView) findViewById(R.id.tracking_time_label);
-        if (textView != null) {
-            textView.setText(getTimeFormatString(diff));
+        long trackingTimerStarted = prefs.getTrackingTimerStarted();
+        if (trackingTimerStarted > 0) {
+            hideWaitForGPSText();
+            long diff = System.currentTimeMillis() - trackingTimerStarted;
+            TextView textView = (TextView) findViewById(R.id.tracking_time_label);
+            if (textView != null) {
+                textView.setText(getTimeFormatString(diff));
+            }
+        }
+    }
+
+    private void hideWaitForGPSText() {
+        if (!gpsReceived) {
+            View waitForGPSLabel = findViewById(R.id.wait_for_gps);
+            if (waitForGPSLabel != null) {
+                waitForGPSLabel.setVisibility(View.GONE);
+                gpsReceived = true;
+            }
         }
     }
 
@@ -403,15 +437,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     private class TimerRunnable implements Runnable {
 
-        public Thread t;
-        public volatile boolean running = true;
+        private boolean running;
 
-        public void start() {
+        TimerRunnable() {
             running = true;
-            if (t == null) {
-                t = new Thread(this);
-                t.start();
-            }
         }
 
         @Override
@@ -427,7 +456,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    ExLog.e(TrackingActivity.this, TAG, "Interrupted sleep");
                 }
             }
         }

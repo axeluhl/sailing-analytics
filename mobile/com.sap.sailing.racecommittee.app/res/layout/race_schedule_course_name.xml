@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
+    <com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout
         android:id="@+id/header"
-        layout="@layout/race_schedule_course_header"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:headerText="@string/course" />
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/header"
-        android:background="?sap_gray_black_30"
+        android:background="?attr/sap_gray_black_30"
         android:divider="@null"
-        android:dividerHeight="0dp"/>
+        android:dividerHeight="0dp" />
 </RelativeLayout>

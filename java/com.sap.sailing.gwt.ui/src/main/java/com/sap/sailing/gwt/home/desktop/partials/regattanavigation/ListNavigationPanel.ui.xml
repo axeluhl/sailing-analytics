@@ -5,11 +5,11 @@
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.regattanavigation.RegattaNavigationResources" />
 	<g:FlowPanel addStyleNames="{res.mediaCss.grid} {local_res.css.regattanavigation}" >
-        <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.large7} {res.mediaCss.columns}" ui:field="actionContainerUi">
+        <g:FlowPanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.medium7} {res.mediaCss.columns}" ui:field="actionContainerUi">
         	<g:Label addStyleNames="{local_res.css.regattanavigation_text}">
         		<ui:text from='{i18n.display}' />:
         	</g:Label>
         </g:FlowPanel>
-        <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.large5} {res.mediaCss.columns}" ui:field="additionalWidgetContainerUi"/>
+        <g:SimplePanel addStyleNames="{res.mediaCss.small12} {res.mediaCss.medium5} {res.mediaCss.columns}" ui:field="additionalWidgetContainerUi"/>
 	</g:FlowPanel>
 </ui:UiBinder> 

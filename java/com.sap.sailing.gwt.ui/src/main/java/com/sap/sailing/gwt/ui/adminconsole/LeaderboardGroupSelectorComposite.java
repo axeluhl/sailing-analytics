@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.util.NaturalComparator;
+import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
 public class LeaderboardGroupSelectorComposite extends Composite implements HasValueChangeHandlers<Iterable<LeaderboardGroupDTO>> {
@@ -80,7 +81,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     }
     
     private Widget createLeaderboardGroupOfEventsPanel() {
-        selectedEventLeaderboardGroupsTable = new CellTable<LeaderboardGroupDTO>(10000000, tableRes);
+        selectedEventLeaderboardGroupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000000, tableRes);
         CaptionPanel result = new CaptionPanel(stringMessages.leaderboardGroupsOfSelectedEvent());
         result.add(selectedEventLeaderboardGroupsTable);
         selectedEventLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
@@ -133,7 +134,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
     }
 
     private Widget createAvailableLeaderboardGroupsPanel() {
-        availableLeaderboardGroupsTable = new CellTable<LeaderboardGroupDTO>(10000000, tableRes);
+        availableLeaderboardGroupsTable = new BaseCelltable<LeaderboardGroupDTO>(10000000, tableRes);
         CaptionPanel result = new CaptionPanel(stringMessages.availableLeaderboardGroups());
         availableLeaderboardGroupsSelectionModel = new MultiSelectionModel<>();
         availableLeaderboardGroupsSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {

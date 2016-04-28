@@ -1,14 +1,18 @@
 package com.sap.sailing.racecommittee.app.data;
 
-import com.sap.sailing.domain.base.*;
-import com.sap.sailing.domain.base.racegroup.RaceGroup;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
 public interface DataStore {
     
@@ -28,10 +32,12 @@ public interface DataStore {
 
     Collection<ManagedRace> getRaces();
     void addRace(ManagedRace race);
-    public ManagedRace getRace(String id);
-    public ManagedRace getRace(SimpleRaceLogIdentifier id);
-    public boolean hasRace(String id);
-    public boolean hasRace(SimpleRaceLogIdentifier id);
+    void addRace(int index, ManagedRace race);
+    void removeRace(ManagedRace race);
+    ManagedRace getRace(String id);
+    ManagedRace getRace(SimpleRaceLogIdentifier id);
+    boolean hasRace(String id);
+    boolean hasRace(SimpleRaceLogIdentifier id);
 
     Collection<Mark> getMarks();
     Mark getMark(Serializable id);

@@ -64,6 +64,11 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
     boolean hasIndividualRecall();
 
     /**
+     * Returns {@code true} if this racing procedure allows users to enter scores in the app
+     */
+    boolean isResultEntryEnabled();
+
+    /**
      * Returns <code>true</code> if there is an individual recall signaled in the {@link RaceLog} right now.
      */
     boolean isIndividualRecallDisplayed();

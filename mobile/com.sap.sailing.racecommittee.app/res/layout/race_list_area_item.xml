@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/navigation_drawer_cell_height">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/navigation_drawer_cell_height">
 
     <RelativeLayout
         android:id="@+id/panel_right"
         android:layout_width="@dimen/navigation_drawer_right_box"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="2dp">
+        android:layout_alignParentTop="true">
 
         <LinearLayout
             android:id="@+id/race_scheduled"
@@ -26,7 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textAppearance="?textXLarge"
+                android:textAppearance="?attr/textXLarge"
                 tools:text="13:36"/>
 
             <TextView
@@ -35,15 +32,15 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_started"
-                android:textAppearance="?textXSmall"/>
+                android:textAppearance="?attr/textXSmall"/>
 
             <TextView
-                android:id="@+id/race_finshed"
+                android:id="@+id/race_finished"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="@string/race_finished"
-                android:textAppearance="?textXSmall"/>
+                android:textAppearance="?attr/textXSmall"/>
         </LinearLayout>
 
         <TextView
@@ -52,9 +49,20 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/race_unscheduled"
-            android:textColor="?sap_light_gray"
+            android:textColor="?attr/sap_light_gray"
             android:textSize="@dimen/textSize_18"
             android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/update_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:contentDescription="@string/updateIndicator"
+            android:scaleType="matrix"
+            android:src="@drawable/updated"
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -66,15 +74,14 @@
 
         <ImageView
             android:id="@+id/race_marker"
-            android:layout_width="@dimen/thick_line"
+            android:layout_width="@dimen/obesity_line"
             android:layout_height="match_parent"
-            android:src="?marker_race"/>
+            android:src="?attr/marker_race"/>
 
         <LinearLayout
             android:id="@+id/additional_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true">
 
@@ -84,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="5dp"
-                android:src="?link_24dp"
+                android:src="?attr/link_24dp"
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
@@ -92,7 +99,6 @@
                 android:id="@+id/race_flag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
                 android:orientation="vertical"
                 android:visibility="gone"
@@ -102,17 +108,17 @@
                     android:id="@+id/current_flag"
                     android:layout_width="40dp"
                     android:layout_height="25dp"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="center"
                     android:scaleType="centerInside"
-                    tools:src="@drawable/alpha_flag"/>
+                    tools:src="@drawable/flag_alpha_64dp"/>
 
                 <TextView
                     android:id="@+id/flag_timer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:drawableLeft="?arrow_down"
-                    android:textAppearance="?textXSmall"
+                    android:layout_gravity="center"
+                    android:drawableLeft="?attr/arrow_down"
+                    android:textAppearance="?attr/textXSmall"
                     tools:text="01:12"/>
             </LinearLayout>
         </LinearLayout>
@@ -123,8 +129,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/default_margin"
-            android:layout_marginStart="@dimen/default_margin"
+            android:layout_marginLeft="@dimen/navigation_drawer_text_margin"
             android:layout_toLeftOf="@id/additional_info"
             android:layout_toStartOf="@id/additional_info"
             android:orientation="vertical">
@@ -133,32 +138,37 @@
                 android:id="@+id/race_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textAppearance="?textNormal"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?attr/textNormal"
                 tools:text="Race 3"/>
 
             <TextView
                 android:id="@+id/depends_on"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textAppearance="?textXSmall"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="?attr/textXSmall"
                 android:visibility="gone"
                 tools:text="5 minutes after ABC"
                 tools:visibility="visible"/>
         </LinearLayout>
     </RelativeLayout>
 
+    <TextView
+        android:id="@+id/explicit_factor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="?attr/factor_background"
+        android:textAppearance="?attr/textXSmall"
+        android:textColor="?attr/white_invert"
+        tools:text="x 3.5"/>
+
     <ImageView
-        android:id="@+id/update_badge"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="2dp"
-        android:contentDescription="@string/updateIndicator"
-        android:src="@drawable/updatelabel"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/thin_line"
+        android:layout_alignParentBottom="true"
+        android:background="?attr/black"/>
 </RelativeLayout>

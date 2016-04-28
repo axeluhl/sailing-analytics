@@ -25,6 +25,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.common.util.NaturalComparator;
@@ -35,6 +36,7 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.DefaultRoles;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
@@ -124,10 +126,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -152,12 +154,23 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             new Thread("sending updated password to user "+username+" by e-mail") {
                 @Override public void run() {
                     try {
-                        getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, I'd be worried...");
+                        getSecurityService().sendMail(username, "Password Changed", "Somebody changed your password for your user named "+username+".\nIf that wasn't you, please contact sailing_analytics@sap.com via email.");
                     } catch (MailException e) {
                         logger.log(Level.SEVERE, "Error sending new password to user "+username+" by e-mail", e);
                     }
                 }
             }.start();
+        } else {
+            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+        }
+    }
+    
+    @Override
+    public void updateUserProperties(final String username, String fullName, String company) throws UserManagementException {
+        final Subject subject = SecurityUtils.getSubject();
+        // the signed-in subject has role ADMIN or is changing own user
+        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
+            getSecurityService().updateUserProperties(username, fullName, company);
         } else {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
@@ -238,7 +251,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<String> permissions) {
         Subject currentSubject = SecurityUtils.getSubject();
-        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename())) {
+        if (currentSubject.hasRole(DefaultRoles.ADMIN.getRolename()) || currentSubject.isPermitted(Permission.MANAGE_USERS.getStringPermissionForObjects(DefaultModes.UPDATE, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -288,7 +301,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 break;
             }
         }
-        userDTO = new UserDTO(user.getName(), user.getEmail(), user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
+        userDTO = new UserDTO(user.getName(), user.getEmail(), user.getFullName(), user.getCompany(),
+                user.isEmailValidated(), accountDTOs, user.getRoles(), user.getPermissions());
         return userDTO;
     }
 
@@ -421,4 +435,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return getSecurityService().getPreference(username, key);
     }
 
+    @Override
+    public String getAccessToken(String username) {
+        return getSecurityService().getAccessToken(username);
+    }
+
+    @Override
+    public String getOrCreateAccessToken(String username) {
+        return getSecurityService().getOrCreateAccessToken(username);
+    }
 }

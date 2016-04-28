@@ -1,37 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link href="sailing-fontface-1.0.cache.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
-  <link href="main.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
-  <link href="release_notes.css" rel="stylesheet" type="text/css" />
+	<link href="sailing-fontface-1.0.cache.css" media="screen" rel="stylesheet" title="Default stylesheet" type="text/css" />
+	<link href="start.css" rel="stylesheet" type="text/css" />
+	<link href="release_notes.css" rel="stylesheet" type="text/css" />
 	<link rel="shortcut icon" type="image/x-icon" href="/sap.ico" />
-  <title>SAP Sailing Analytics - Admin Console Release Notes</title>
+	<title>SAP Sailing Analytics - Admin Console Release Notes</title>
 </head>
 <body>
-	<div id="yield_content">
-		<!-- start logo and title panel _header -->
-		<div id="logoAndTitlePanel">
-			<a class="sapLogo" href="http://www.sap.com/">
-				<img alt="SAP Website" src="images/sap-logo.png" />
-			</a>
-			<ul class="headNavigation">
-				<li><a href="http://www.sapsailing.com/">sapsailing.com</a></li>
-			</ul>
-		</div>
-		<div id="contentWrapper">
-			<div id="keyVisual">
-				<img alt="Sailer" src="images/key-visual.jpg" />
-			</div>
-			<div id="mainContent">
+	<div class="logoAndTitlePanel">
+    	<a class="sapLogo" href="http://www.sap.com">
+        	<img class="sapLogoImage" src="/images/logo-small@2x.png" alt="SAP Website"/>
+    	</a>
+		<div class="sailingAnalyticsLabelPanel">
+	    	<div class="sailingAnalyticsLabel">Sailing Analytics</div>
+	      </div>
+    </div>
+
+	<div class="yield_content">
+		<div class="contentWrapper">
+			<div class="mainContent">
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
-                                        <h2 class="articleSubheadline">October 2015</h2>
-                                        <ul class="bulletList">
-                                            <li>The "RaceLog Tracking" panel was renamed to the more intuitive "Smartphone Tracking".
-                                            </li>
-                                            <li>Competitor and course information can now be copied independently from one race to another within a Smartphone-tracked leaderboard.
-                                            </li>
-                                        </ul>
+			
+                    <h2 class="articleSubheadline">April 2016</h2>
+                    <ul class="bulletList">
+			<li>In the "Race Manager App" regatta configuration settings, a new preference
+			    "Activate result entry" has been added. It can enable or diable result entry
+			    during or after the finishing phase in the Race Manager app. With this, it is
+			    possible to configure up-front whether a race officer is offered the possibility to manage
+			    results directly from the Race Manager app. This should <em>not</em> be used if an
+			    external, official regatta management system is being used to capture and manage
+			    the official scores.
+			</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">March 2016</h2>
+                    <ul class="bulletList">
+                        <li>For smartphone tracking, added shortcut to start/stop tracking of
+                            race to each individual race (play/stop button in action column).
+                        </li>
+			<li>When starting/stopping to track a race using smartphone tracking the
+			    tracking start/stop time is set to "now" if no time has previously been set.
+			</li> 
+                        <li>With the <b>MANAGE_MARK_POSITIONS</b> permission, users of the smartphone tracking feature can now
+                            conveniently manipulate course mark positions from the <em>RaceBoard.html</em> entry point. When having
+                            the permission, a new button "Edit Mark Positions" will be shown. Marks can then be selected from a
+                            table, new fixes can be added and existing fixes can be moved. Note that the "Delete" menu item is
+                            currently still disabled. Delete may be supported in future versions, though.
+                        </li>
+                        <li>The sailors info link is now also available for single regatta events in addition to multi regatta events that used to have this feature.
+                            If a sailors info link is configured for events that are part of a series,
+                            this isn't shown on the event page because the link to the series uses the same space in the UI and has higher priority.
+                        </li>
+                        <li>It's possible to configure language specific sailors info website links for events.
+                            There is a default value that can be overwritten on a per locale base.
+                            No sailors info link is shown for UI languages if there is neither a default link nor one for the specific locale,
+                            even if there is one for another locale configured.
+                        </li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">February 2016</h2>
+                    <ul class="bulletList">
+		    	<li>Several improvements regarding the creation of race metadata (events, regatta, etc.) including:
+			automatic creation of default series, dialog for creating a default leaderboard group
+			</li>
+                        <li>The RaceBoard URL Parameter "canReplayDuringLiveRaces" has been removed.
+                            This parameter was used to allow users to trigger autoplay for live races on non-live points in time.
+                            The permission "CAN_REPLAY_DURING_LIVE_RACES" and role "moderator" now grant this functionality to users.
+                        </li>
+                        <li>The "Manage Media" button in RegattaOverview is now bound to the Permission "MANAGE_MEDIA".
+                            The Roles "eventmanager" and "mediaeditor" grant the "MANAGE_MEDIA" permission.
+                        </li>
+                        <li>The "Edit mark passings" button in RegattaOverview is now bound to the Permission "MANAGE_MARK_PASSINGS".
+                            The Role "eventmanager" grants the "MANAGE_MARK_PASSINGS" permission.
+                        </li>
+                        <li>The user management page now provides a "Refresh" button to reload the user list.
+                        </li>
+                        <li>The user management page now also lists sailing roles and permissions in the respective suggest boxes.
+                        </li>
+                        <li>The "Edit Points" module is now bound to the Permission "MANAGE_LEADERBOARD_RESULTS".
+                            The Role "eventmanager" grants the "MANAGE_LEADERBOARD_RESULTS" permission.
+                        </li>
+                        <li>There is now a UI element in the header of "Edit Points", "Admin Console" and "Races Overview" pages
+                            that indicates the authentication and makes it possible to sign in/sign out without leaving the page.
+                            The pages "Edit Points" and "Admin Console" will show a message instead of the page content
+                            if you aren't autenticated or don't have the required permissions.
+                        </li>
+                    </ul>
+                    
+                    <h2 class="articleSubheadline">October 2015</h2>
+                    <ul class="bulletList">
+                        <li>The "RaceLog Tracking" panel was renamed to the more intuitive "Smartphone Tracking".
+                        </li>
+                        <li>Competitor and course information can now be copied independently from one race to another within a Smartphone-tracked leaderboard.
+                        </li>
+                    </ul>
+		    <h2 class="articleSubheadline">November 2015</h2>
+		    <ul class="bulletList">
+                        <li>Adding a competitor to a leaderboard or a regatta pre-sets the competitor's boat class
+                            according to the leaderboard's / regatta's boat class.
+                        </li>
+                        <li>When done with creating a regatta, the user can have the corresponding regatta leaderboard
+                        	created with a simple click instead of having to navigate to the "Leaderboards" tab.
+                        </li>
+                        <li>Trim leaderboard and leaderboard group names during creation, removing leading and trailing
+                            blanks. These names can occur in URLs, and trailing blanks in particular may be trimmed,
+                            causing the objects to not be found.
+                        </li>
+                    </ul>
+                    <h2 class="articleSubheadline">October 2015</h2>
+                    <ul class="bulletList">
+                        <li>The "RaceLog Tracking" panel was renamed to the more intuitive "Smartphone Tracking".
+                        </li>
+                        <li>Competitor and course information can now be copied independently from one race to another within a Smartphone-tracked leaderboard.
+                        </li>
+                    </ul>
 					<h2 class="articleSubheadline">September 2015</h2>
 					<ul class="bulletList">
 					    <li>A new scoring scheme for elimination rounds has been added. It will first be used
@@ -192,24 +276,7 @@
 				</div>
 			</div>
 	  </div>
-		<div id="spaceBar"></div>
-	</div>
-	<div id="footer">
-		<ul class="regularNav">
-			<li> 
-				<a href="http://www12.sap.com/corporate-en/legal/impressum.epx" target="_blank">
-					Legal Disclosure
-				</a>
-				<span>
-					|
-				</span>
-			</li>
-			<li> 
-				<a href="http://www12.sap.com/corporate-en/our-company/legal/privacy.epx" target="_blank">
-					Privacy
-				</a>
-			</li>
-		</ul>
+		<div class="spaceBar"></div>
 	</div>
 </body>
 
