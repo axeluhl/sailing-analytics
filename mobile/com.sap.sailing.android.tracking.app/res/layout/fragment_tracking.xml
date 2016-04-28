@@ -120,8 +120,7 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/signal_accuracy_indicator_view_description"
                 android:focusable="true"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
+                android:layout_marginRight="10dp"
                 app:signalQuality="none"/>
         </LinearLayout>
 
