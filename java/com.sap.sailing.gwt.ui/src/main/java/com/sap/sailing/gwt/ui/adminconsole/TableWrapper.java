@@ -7,7 +7,9 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.Range;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.FlushableCellTable;
@@ -45,7 +47,7 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
      *            {@link EntityIdentityComparator} to create a {@link RefreshableSelectionModel}
      */
 
-    public TableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public TableWrapper(SailingServiceAsync sailingService, final StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, EntityIdentityComparator<T> entityIdentityComparator) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -77,7 +79,19 @@ public abstract class TableWrapper<T, S extends RefreshableSelectionModel<T>> im
         mainPanel.add(table);
         if (enablePager) {
             table.setPageSize(8);
-            SimplePager pager = new SimplePager();
+            SimplePager pager = new SimplePager() {
+                protected String createText() {
+                    HasRows display = getDisplay();
+                    Range range = display.getVisibleRange();
+                    int pageStart = range.getStart() + 1;
+                    int pageSize = range.getLength();
+                    int dataSize = display.getRowCount();
+                    int endIndex = Math.min(dataSize, pageStart + pageSize - 1);
+                    endIndex = Math.max(pageStart, endIndex);
+                    boolean exact = display.isRowCountExact();
+                    return stringMessages.pagerStateInfo(pageStart, endIndex, dataSize, exact);
+                }
+            };
             pager.setDisplay(table);
             mainPanel.add(pager);
         }
