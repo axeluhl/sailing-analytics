@@ -247,7 +247,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
-            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
@@ -461,7 +461,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                         } else if (wasCan && !isCan) {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
@@ -470,7 +470,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                             result.getB().add(oldCan);
                         }
                     }
@@ -573,14 +573,14 @@ public class CandidateFinderImpl implements CandidateFinder {
                     if (xte == 0) {
                         newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
                     } else {
-                        if (fixAfter != null && xtesAfter != null) {
+                        if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
                             Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                             if (xte < 0 != xteAfter <= 0) {
                                 newCandidates.put(Arrays.asList(fix, fixAfter),
                                         createCandidate(c, xte, xteAfter, t, tAfter, w, false));
                             }
                         }
-                        if (fixBefore != null) {
+                        if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
                             Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                             if (xte < 0 != xteBefore <= 0) {
                                 newCandidates.put(Arrays.asList(fixBefore, fix),

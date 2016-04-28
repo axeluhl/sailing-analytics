@@ -132,7 +132,6 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     private void setupCourseDesignerListBox(Grid grid, int gridRow) {
         designerModeEntryListBox = new ListBox();
         designerModeEntryListBox.setMultipleSelect(false);
-
         designerModeEntryListBox.setWidth("100%");
         ListBoxUtils.setupCourseDesignerModeListBox(designerModeEntryListBox,
                 originalConfiguration.defaultCourseDesignerMode, stringMessages.dontoverwrite());

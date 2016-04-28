@@ -1,5 +1,6 @@
 package com.sap.sailing.domain.base.racegroup;
 
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.SeriesBase;
 
 /**
@@ -11,5 +12,7 @@ public interface SeriesWithRows extends SeriesBase {
     /**
      * All {@link RaceRow}s of this series.
      */
-    public Iterable<RaceRow> getRaceRows();
+    Iterable<RaceRow> getRaceRows();
+
+    RaceRow getRaceRow(Fleet fleet);
 }

@@ -80,6 +80,10 @@ public class AppConstants {
     public final static String INTENT_ACTION_SHOW_MAIN_CONTENT = PACKAGE_NAME + ".action.show.main";
     public final static String INTENT_ACTION_SHOW_SUMMARY_CONTENT = PACKAGE_NAME + ".action.show.summary";
 
+    /**
+     * As extra this intent expects the String obtained for a FilterableRace / ManagedRace using
+     * {@code new RaceGroupSeries(race.getRaceGroup(), race.getSeries()).getDisplayName()}.
+     */
     public final static String INTENT_ACTION_SHOW_PROTEST = PACKAGE_NAME + ".action.show.protest";
     public final static String INTENT_ACTION_REMOVE_PROTEST = PACKAGE_NAME + ".action.remove.protest";
 

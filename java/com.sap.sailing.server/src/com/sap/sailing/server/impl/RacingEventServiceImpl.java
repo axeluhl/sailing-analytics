@@ -91,6 +91,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -1444,7 +1445,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             result.put(
                     s.getName(),
-                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
+                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring()));
@@ -3034,19 +3035,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         // Create/Update locally
         DataImportProgress progress = createOrUpdateDataImportProgressWithoutReplication(importOperationId,
-                overallProgressPct, subProgressName, subProgressPct);
+                overallProgressPct, subProgress, subProgressPct);
         // Create/Update on replicas
-        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgressName,
+        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgress,
                 subProgressPct));
         return progress;
     }
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         DataImportProgress progress = dataImportLock.getProgress(importOperationId);
         boolean newObject = false;
         if (progress == null) {
@@ -3054,7 +3055,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             newObject = true;
         }
         progress.setOverAllProgressPct(overallProgressPct);
-        progress.setNameOfCurrentSubProgress(subProgressName);
+        progress.setCurrentSubProgress(subProgress);
         progress.setCurrentSubProgressPct(subProgressPct);
         if (newObject) {
             dataImportLock.addProgress(importOperationId, progress);

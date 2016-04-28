@@ -180,7 +180,8 @@ public class MasterDataImportPanel extends VerticalPanel {
                                                     } else {
                                                         overallProgressBar.setPercent((int) (result
                                                                 .getOverallProgressPct() * 100));
-                                                        subProgressName.setText(result.getNameOfCurrentSubProgress());
+                                                        subProgressName.setText(result.getCurrentSubProgress()
+                                                                .getMessage(stringMessages));
                                                         subProgressBar.setPercent((int) (result
                                                                 .getCurrentSubProgressPct() * 100));
                                                     }

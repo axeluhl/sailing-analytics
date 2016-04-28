@@ -33,5 +33,5 @@ public interface SeriesBase extends Renamable {
      * made except that within a fleet the races are usually run in the order as defined by the {@link #getRaceColumns()
      * race columns}.
      */
-    boolean isFleetsRunInParallel();
+    boolean isFleetsCanRunInParallel();
 }
