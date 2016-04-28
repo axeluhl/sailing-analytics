@@ -19,6 +19,7 @@
     <color name="toolbar_background">@color/white</color>
 
     <color name="fiori_primary_color">#009de0</color>
+    <color name="fiori_text_color">#323232</color>
 
     <color name="start_tracking_button_normal">#0e7733</color>
     <color name="start_tracking_button_pressed">#08451e</color>

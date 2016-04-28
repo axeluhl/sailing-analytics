@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:padding="14dp"
         android:textSize="18sp"
-        android:textColor="@color/black"
+        android:textColor="@color/fiori_text_color"
         android:text="@string/your_regattas" />
 
 </RelativeLayout>

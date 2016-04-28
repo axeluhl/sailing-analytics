@@ -12,6 +12,7 @@
         android:paddingRight="10dp"
         android:paddingTop="15dp"
         android:text="@string/course_over_ground"
+        android:textColor="@color/fiori_text_color"
         android:textSize="@dimen/default_text_size"
         />
 

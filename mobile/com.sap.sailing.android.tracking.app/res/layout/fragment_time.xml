@@ -14,6 +14,7 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:text="@string/tracking_time"
+        android:textColor="@color/fiori_text_color"
         android:textSize="@dimen/default_text_size"/>
 
     <TextView
@@ -26,6 +27,7 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:text="@string/waiting_for_gps"
+        android:textColor="@color/fiori_text_color"
         android:textSize="@dimen/default_text_size"/>
 
     <com.sap.sailing.android.shared.ui.customviews.AutoResizeLightTextView

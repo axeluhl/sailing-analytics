@@ -47,7 +47,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/add_team_photo"
-                android:textColor="@color/black"/>
+                android:textColor="@color/fiori_text_color"/>
         </LinearLayout>
 
         <LinearLayout
@@ -77,7 +77,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/upload_in_progress"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
 
@@ -106,7 +106,7 @@
                 android:paddingRight="8dp"
                 android:paddingTop="8dp"
                 android:text="@string/upload_retry"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
 
@@ -132,7 +132,7 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:text="@string/empty"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/default_text_size"/>
 
             <RelativeLayout
@@ -153,7 +153,7 @@
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/content_description_flag_icon"
                     android:scaleType="fitXY"
-                    android:textColor="@color/black"/>
+                    android:textColor="@color/fiori_text_color"/>
             </RelativeLayout>
 
             <TextView
@@ -163,7 +163,7 @@
                 android:gravity="end|center_vertical"
                 android:padding="0dp"
                 android:text="@string/empty"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
 
@@ -232,7 +232,7 @@
                     android:gravity="start"
                     android:padding="0dp"
                     android:text="@string/thank_you_you_successfully_participated"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fiori_text_color"
                     android:textStyle="bold"/>
             </RelativeLayout>
 
@@ -253,7 +253,7 @@
                     android:paddingRight="10dp"
                     android:paddingTop="10dp"
                     android:text="@string/regatta_starts_in"
-                    android:textColor="@color/black"
+                    android:textColor="@color/fiori_text_color"
                     android:textSize="@dimen/default_text_size"
                     android:textStyle="bold"/>
 
@@ -284,7 +284,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/highlight_text_size"/>
 
                         <TextView
@@ -294,7 +294,7 @@
                             android:padding="0dp"
                             android:singleLine="true"
                             android:text="@string/days"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/default_text_size"/>
 
                     </LinearLayout>
@@ -322,7 +322,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/highlight_text_size"/>
 
                         <TextView
@@ -332,7 +332,7 @@
                             android:padding="0dp"
                             android:singleLine="true"
                             android:text="@string/hours"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/default_text_size"/>
                     </LinearLayout>
 
@@ -359,7 +359,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="0dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/highlight_text_size"/>
 
                         <TextView
@@ -369,7 +369,7 @@
                             android:padding="0dp"
                             android:singleLine="true"
                             android:text="@string/minutes"
-                            android:textColor="@color/black"
+                            android:textColor="@color/fiori_text_color"
                             android:textSize="@dimen/default_text_size"/>
                     </LinearLayout>
                 </LinearLayout>
@@ -400,7 +400,7 @@
                 android:background="@drawable/normal_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_event"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/button_text_size"
                 tools:text="Show Event"/>
 
@@ -415,7 +415,7 @@
                 android:background="@drawable/normal_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
-                android:textColor="@color/black"
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/button_text_size"/>
 
         </LinearLayout>
@@ -450,7 +450,7 @@
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp"
         android:text="@string/please_listen_to_announcements"
-        android:textColor="@color/black"
+        android:textColor="@color/fiori_text_color"
         android:textSize="@dimen/default_text_size"/>
 
 </RelativeLayout>

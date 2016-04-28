@@ -26,6 +26,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/tracking_mode"
+            android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/default_text_size"/>
 
         <TextView
@@ -51,6 +52,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/tracking_unsent_fixes"
+            android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/default_text_size"/>
 
         <TextView
@@ -64,6 +66,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/none"
+            android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/default_text_size"/>
 
         <TextView
@@ -75,6 +78,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/tracking_status"
+            android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/default_text_size"/>
 
         <TextView
@@ -107,6 +111,7 @@
                 android:paddingLeft="9dp"
                 android:paddingRight="9dp"
                 android:text=""
+                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/default_text_size"/>
 
             <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
@@ -129,6 +134,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="@string/tracking_gps_accuracy"
+            android:textColor="@color/fiori_text_color"
             android:textSize="@dimen/default_text_size"/>
 
         <!-- Separators -->
