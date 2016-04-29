@@ -6,7 +6,7 @@
 
     <groupId>com.sap.sailing</groupId>
     <artifactId>workspace</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>pom</packaging>
 	<parent>
       	   <groupId>com.sap.prd.mobile.ios.mios</groupId>
