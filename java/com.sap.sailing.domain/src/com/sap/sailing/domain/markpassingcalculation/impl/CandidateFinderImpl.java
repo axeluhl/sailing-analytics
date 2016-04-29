@@ -34,9 +34,11 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
@@ -128,12 +130,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     
     private final double penaltyForSkipping = Edge.getPenaltyForSkipping();
     private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
-    private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
-        @Override
-        public int compare(GPSFix arg0, GPSFix arg1) {
-            return arg0.getTimePoint().compareTo(arg1.getTimePoint());
-        }
-    };
+    private final Comparator<Timed> comp = TimedComparator.INSTANCE;
 
     public CandidateFinderImpl(DynamicTrackedRace race) {
         this.race = race;
@@ -206,6 +203,8 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private void updateCandiatesAfterRaceTimeRangeChanged(TimePoint startOfRangeToAdd, TimePoint endOfRangeToAdd) {
         // TODO implement candidate addition / removal in updateCandiatesAfterRaceTimeRangeChanged
+        // TODO needs to somehow invoke chooser.calculateMarkPassDeltas(c, candidateDeltas.getA(), candidateDeltas.getB()) which
+        // TODO suggests that it may work better if the time range management worked at the level of MarkPassingCalculator
     }
 
     private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {

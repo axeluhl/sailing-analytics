@@ -14,7 +14,6 @@ public interface CandidateChooser {
      * @param candidateDeltas
      *            new {@link CandidateImpl}s and those that should be removed.
      */
-
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans);
 
     void removeWaypoints(Iterable<Waypoint> ways);
