@@ -15,7 +15,7 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
      * name should match the corresponding field name from @WindControlParameters for which this control is being set
      */
     private String name;
-    private String displayName;
+    private SettingName settingName;
     private double currentValue;
     private double min;
     private double max;
@@ -30,9 +30,10 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
 
     }
 
-    public WindPatternSettingSliderBar(String name, String displayName, double min, double max, double res, double defaultValue, int steps) {
+    public WindPatternSettingSliderBar(String name, SettingName settingName, double min, double max, double res,
+            double defaultValue, int steps) {
         this.name = name;
-        this.displayName = displayName;
+        this.settingName = settingName;
         this.min = min;
         this.max = max;
         this.res = res;
@@ -108,7 +109,7 @@ public class WindPatternSettingSliderBar implements WindPatternSetting<Double>, 
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
+    public SettingName getSettingName() {
+        return settingName;
     }
 }
