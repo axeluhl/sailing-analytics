@@ -68,11 +68,11 @@
     <Button
         android:id="@+id/stop_tracking"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="@dimen/tracking_button_height"
         android:layout_above="@+id/title_page_indicator"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="@dimen/fragment_side_margin"
+        android:layout_marginRight="@dimen/fragment_side_margin"
         android:layout_marginTop="0dp"
         android:background="@drawable/stop_tracking_button"
         android:padding="0dp"
@@ -81,7 +81,7 @@
 
     <com.viewpagerindicator.CirclePageIndicator
         android:id="@+id/title_page_indicator"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="20dp"

@@ -6,7 +6,7 @@
 
     <!-- Values for regatta buttons-->
     <dimen name="regatta_button_height">80dp</dimen>
-    <dimen name="regatta_button_side_margin">20dp</dimen>
+    <dimen name="fragment_side_margin">20dp</dimen>
     <dimen name="regatta_button_margin">10dp</dimen>
     <dimen name="regatta_button_padding">10dp</dimen>
     <dimen name="tracking_button_height">120dp</dimen>
