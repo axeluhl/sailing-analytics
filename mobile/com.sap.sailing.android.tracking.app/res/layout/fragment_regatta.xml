@@ -213,9 +213,8 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/start_tracking_box"
         android:layout_below="@id/image"
-        android:layout_gravity="center"
+        android:layout_above="@+id/start_tracking_box"
         android:isScrollContainer="true"
         android:orientation="vertical"
         android:scrollbars="vertical">
@@ -269,7 +268,7 @@
                 <LinearLayout
                     android:id="@+id/three_boxes_regatta_starts"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_below="@id/regatta_starts_in"
                     android:baselineAligned="false"
                     android:gravity="center"
@@ -390,13 +389,14 @@
     <RelativeLayout
         android:id="@+id/start_tracking_box"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="@dimen/regatta_button_layout_height"
         android:layout_above="@+id/bottom_announcement">
 
         <LinearLayout
             android:id="@+id/event_buttons"
             android:layout_width="match_parent"
             android:layout_height="@dimen/regatta_button_height"
+            android:layout_above="@+id/layout_start_tracking"
             android:orientation="horizontal">
 
             <Button
@@ -430,9 +430,10 @@
         </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/layout_start_tracking"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tracking_button_height"
-            android:layout_below="@+id/event_buttons">
+            android:layout_alignParentBottom="true">
 
             <Button
                 android:id="@+id/start_tracking"

@@ -103,7 +103,7 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
 
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
-            threeBoxesLayout.setVisibility(View.INVISIBLE);
+            threeBoxesLayout.setVisibility(View.GONE);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
