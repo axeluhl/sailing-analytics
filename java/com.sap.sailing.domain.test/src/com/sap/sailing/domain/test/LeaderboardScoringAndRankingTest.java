@@ -1606,6 +1606,65 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
     
     /**
+     * When a DNS score correction is made then both, the MaxPointsReason and the score shall apply at the start of the race.
+     */
+    @Test
+    public void testDNSScoreAppliesBeforeEndOfRace() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        final TimePoint endOfR1 = MillisecondsTimePoint.now();
+        final TimePoint withinR1 = endOfR1.minus(1000);
+        final TimePoint startOfR1 = withinR1.minus(10000);
+        final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
+        final TimePoint afterEndOfR1 = endOfR1.plus(1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new LowPoint(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(c)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return endOfR1;
+            }
+        }, "R1", /* medalRace */false);
+        leaderboard1.getScoreCorrection().correctScore(c[0], leaderboard1.getRaceColumnByName("R1"), 123.);
+        leaderboard1.getScoreCorrection().setMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), MaxPointsReason.DNS);
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
+        assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
+        assertNull(leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001);
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+    }
+    
+    /**
+     * When a DNS score correction is made then both, the MaxPointsReason and the score shall apply at the start of the race.
+     */
+    @Test
+    public void testDNFScoreDoesNotApplyBeforeEndOfRace() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        final TimePoint endOfR1 = MillisecondsTimePoint.now();
+        final TimePoint withinR1 = endOfR1.minus(1000);
+        final TimePoint startOfR1 = withinR1.minus(10000);
+        final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
+        final TimePoint afterEndOfR1 = endOfR1.plus(1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new LowPoint(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(c)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return endOfR1;
+            }
+        }, "R1", /* medalRace */false);
+        leaderboard1.getScoreCorrection().correctScore(c[0], leaderboard1.getRaceColumnByName("R1"), 123.);
+        leaderboard1.getScoreCorrection().setMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), MaxPointsReason.DNF);
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
+        assertEquals(MaxPointsReason.DNF, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
+        assertNull(leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(1.0, leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001); // tracked rank is 1
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+    }
+    
+
+    /**
      * A test case for bug 1802. Competitors that didn't have a fleet (null fleet) were sorted to the end of the column even
      * if they had a score correction assigned.
      */

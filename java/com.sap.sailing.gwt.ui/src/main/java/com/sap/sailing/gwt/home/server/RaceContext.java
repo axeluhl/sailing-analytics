@@ -429,6 +429,15 @@ public class RaceContext {
         return 0;
     }
 
+    private TimePoint getLiveTimePoint() {
+        return new MillisecondsTimePoint(getLiveTimePointInMillis());
+    }
+    
+    private long getLiveTimePointInMillis() {
+        final Long liveDelay = leaderboard.getDelayToLiveInMillis();
+        return System.currentTimeMillis() - (liveDelay == null ? 0l : liveDelay);
+    }
+    
     private SimpleCompetitorDTO getWinnerOrNull() {
         if (getLiveRaceViewState() != RaceViewState.FINISHED) {
             // We can't reliably calculate the winner for non finished races
@@ -436,10 +445,7 @@ public class RaceContext {
         }
         // TODO do not calculate the winner if the blue flag is currently shown.
         try {
-            TimePoint finishTime = trackedRace.getEndOfRace();
-            if (finishTime == null) {
-                finishTime = HomeServiceUtil.getLiveTimePoint();
-            }
+            TimePoint finishTime = getLiveTimePoint();
             List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
             if (competitors == null || competitors.isEmpty()) {
                 return null;
@@ -542,7 +548,7 @@ public class RaceContext {
         if (finishTime != null && now.after(finishTime)) {
             return RaceViewState.FINISHED;
         }
-        if(raceLog != null) {
+        if (raceLog != null) {
             RaceLogFlagEvent abortingFlagEvent = checkForAbortFlagEvent();
             if (abortingFlagEvent != null) {
                 Flags upperFlag = abortingFlagEvent.getUpperFlag();
@@ -558,10 +564,10 @@ public class RaceContext {
             }
         }
         ScoreCorrection scoreCorrection = leaderboard.getScoreCorrection();
-        if(trackedRace == null && scoreCorrection != null && scoreCorrection.hasCorrectionForNonTrackedFleet(raceColumn)) {
+        if (trackedRace == null && scoreCorrection != null && scoreCorrection.hasCorrectionForNonTrackedFleet(raceColumn)) {
             return RaceViewState.FINISHED;
         }
-        if(startTime != null) {
+        if (startTime != null) {
             return RaceViewState.RUNNING;
         }
         return RaceViewState.PLANNED;
