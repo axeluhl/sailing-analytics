@@ -104,7 +104,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             if (toolbar != null) {
                 toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-                toolbar.setPadding(20, 0, 0, 0);
+                int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+                toolbar.setPadding(sidePadding, 0, 0, 0);
             }
         }
 

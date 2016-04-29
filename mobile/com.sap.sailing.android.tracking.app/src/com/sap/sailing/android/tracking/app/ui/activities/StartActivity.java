@@ -37,6 +37,8 @@ public class StartActivity extends AbstractStartActivity {
             getSupportActionBar().setHomeButtonEnabled(false);
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
+            int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
+            toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
         refreshDatabase();
