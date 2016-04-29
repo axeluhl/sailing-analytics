@@ -393,7 +393,7 @@ public class SimulatorMainPanel extends SimplePanel {
         HorizontalPanel optionsPanel = new HorizontalPanel();
         optionsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
-        optionsPanel.setTitle("Optionsbar");
+        optionsPanel.setTitle(stringMessages.optionsBar());
         optionsPanel.getElement().setClassName("optionsPanel");
         Label options = new Label(stringMessages.optionsBar());
         options.getElement().setClassName("sectorHeadline");
@@ -418,7 +418,7 @@ public class SimulatorMainPanel extends SimplePanel {
         FlowPanel controlPanel = new FlowPanel();
         FlowPanel controlPanelInnerWrapper = new FlowPanel();
         controlPanelInnerWrapper.getElement().setClassName("controlPanelInnerWrapper");
-        controlPanel.setTitle("Control Settings");
+        controlPanel.setTitle(stringMessages.controlSettings());
         controlPanel.getElement().setClassName("controlPanel");
         controlPanel.getElement().setId("masterPanelLeft");
         controlPanel.add(controlPanelInnerWrapper);
@@ -560,7 +560,7 @@ public class SimulatorMainPanel extends SimplePanel {
         HorizontalPanel mapOptions = new HorizontalPanel();
         mapOptions.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         mapOptions.setSize("100%", "45px");
-        mapOptions.setTitle("Maps");
+        mapOptions.setTitle(stringMessages.maps());
         mapOptions.getElement().setClassName("mapOptions");
 
         Label mapsLabel = new Label(stringMessages.maps());
@@ -1207,7 +1207,8 @@ public class SimulatorMainPanel extends SimplePanel {
 
                 int index = 0;
                 for (String legName : response) {
-                    legSelector.addItem(legName + ((index % 2 == 0) ? " (upwind)" : " (downwind)"));
+                    legSelector.addItem(legName + ((index % 2 == 0) ? " (" + stringMessages.upWind() + ")"
+                            : " (" + stringMessages.downWind() + ")"));
                     index++;
                 }
 
