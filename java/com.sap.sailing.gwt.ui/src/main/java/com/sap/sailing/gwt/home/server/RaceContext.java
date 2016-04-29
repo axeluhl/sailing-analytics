@@ -429,6 +429,15 @@ public class RaceContext {
         return 0;
     }
 
+    private TimePoint getLiveTimePoint() {
+        return new MillisecondsTimePoint(getLiveTimePointInMillis());
+    }
+    
+    private long getLiveTimePointInMillis() {
+        final Long liveDelay = leaderboard.getDelayToLiveInMillis();
+        return System.currentTimeMillis() - (liveDelay == null ? 0l : liveDelay);
+    }
+    
     private SimpleCompetitorDTO getWinnerOrNull() {
         if (getLiveRaceViewState() != RaceViewState.FINISHED) {
             // We can't reliably calculate the winner for non finished races
@@ -438,7 +447,7 @@ public class RaceContext {
         try {
             TimePoint finishTime = trackedRace.getEndOfRace();
             if (finishTime == null) {
-                finishTime = HomeServiceUtil.getLiveTimePoint();
+                finishTime = getLiveTimePoint();
             }
             List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(raceColumn, finishTime);
             if (competitors == null || competitors.isEmpty()) {
