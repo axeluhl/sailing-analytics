@@ -33,10 +33,13 @@ import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
@@ -91,6 +94,19 @@ public class CandidateFinderImpl implements CandidateFinder {
     
     private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.1;
     private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 10;
+    
+    /**
+     * If a {@link TrackedRace#getStartOfRace(boolean)) non-inferred start time} is known for the {@link #race},
+     * candidates are not accepted if they are more than this duration earlier than the start time.
+     */
+    private static final Duration EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START = Duration.ONE_MINUTE;
+
+    /**
+     * If a {@link TrackedRace#getFinishedTime()) finished time} ("Blue Flag Down") is known for the {@link #race},
+     * candidates are not accepted if they are more than this duration later than the time when the race has officially
+     * finished.
+     */
+    private static final Duration LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED = Duration.ONE_MINUTE.times(5);
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
 
@@ -101,6 +117,15 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> xteCandidates = new HashMap<>();
     private Map<Competitor, Map<Waypoint, Map<GPSFix, Candidate>>> distanceCandidates = new HashMap<>();
     private final DynamicTrackedRace race;
+    
+    /**
+     * Fixes are not considered eligible as candidates if a non-inferred start time is known for the race and the fix is
+     * {@link #EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START reasonably} earlier than this start time point. They
+     * are also ignored if a non-inferred finished time for the race is known and the fix is
+     * {@link #LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED reasonably} after that time point.
+     */
+    private TimeRange timeRangeForValidCandidates;
+    
     private final double penaltyForSkipping = Edge.getPenaltyForSkipping();
     private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
     private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
@@ -112,7 +137,32 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     public CandidateFinderImpl(DynamicTrackedRace race) {
         this.race = race;
-        RaceDefinition raceDefinition = race.getRace();
+        this.timeRangeForValidCandidates = new TimeRangeImpl(
+                getTimePointWhenToStartConsideringCandidates(race.getStartOfRace(/* inferred */ false)),
+                getTimePointWhenToFinishConsideringCandidates(race.getFinishedTime()));
+        race.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+                final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
+                final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
+                if (!Util.equalsWithNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from())) {
+                    timeRangeForValidCandidates = new TimeRangeImpl(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
+                    updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from());
+                }
+            }
+
+            @Override
+            public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+                final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
+                if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
+                    timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
+                    updateCandiatesAfterRaceTimeRangeChanged(
+                            getTimePointWhenToFinishConsideringCandidates(oldFinishedTime),
+                            newTimePointWhenToFinishConsideringCandidates);
+                }
+            }
+        });
+        final RaceDefinition raceDefinition = race.getRace();
         for (Competitor c : raceDefinition.getCompetitors()) {
             xteCache.put(c, new LimitedLinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>(25));
             distanceCache.put(c, new LimitedLinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>(25));
@@ -121,8 +171,44 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
-    private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+    /**
+     * For a given race start time {@code startOfRace} which is not inferred from any mark passings determines
+     * the earliest start mark passing time point. No candidates earlier than this time point need to be considered.
+     */
+    private TimePoint getTimePointWhenToStartConsideringCandidates(TimePoint startOfRace) {
+        return startOfRace == null ? null : startOfRace.minus(EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START);
+    }
+    
+    /**
+     * For a given race finished time {@code finishedTime} which is not inferred from any mark passings determines
+     * the latest finish mark passing time point. No candidates later than this time point need to be considered.
+     */
+    private TimePoint getTimePointWhenToFinishConsideringCandidates(TimePoint finishedTime) {
+        return finishedTime == null ? null : finishedTime.plus(LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED);
+    }
+    
+    /**
+     * Adds or removes candidates for a time range. If the {@code startOfRangeToAdd} is at or before
+     * {@code endOfRangeToAdd}, all fixes from this range for all competitors will be submitted for candidate analysis,
+     * and new candidates may emerge from this. If {@code startOfRangeToAdd} is after {@code endOfRangeToAdd}, all
+     * candidates within that (inverse) range are removed, and so are all edges attached to any of these candidates.
+     * 
+     * @param startOfRangeToAdd
+     *            the start of a range of fixes valid for candidate analysis if {@link TimePoint#before(TimePoint)}
+     *            {@code endOfRangeToAdd}; the end of the now invalid time range of fixes no longer valid for candidate
+     *            analysis otherwise; may be {@code null}, meaning that no start of the valid time range is known and therefore
+     *            all fixes from the beginning of the track up to {@code endOfRangeToAdd} are to be analyzed
+     * @param endOfRangeToAdd
+     *            the end of a range of fixes valid for candidate analysis if {@link TimePoint#after(TimePoint)}
+     *            {@code startOfRangeToAdd}; the start of the now invalid time range of fixes no longer valid for candidate
+     *            analysis otherwise; may be {@code null}, meaning that no end of the valid time range is known and therefore
+     *            all fixes starting at {@code startOfRangeToAdd} until the end of the track are to be analyzed
+     */
+    private void updateCandiatesAfterRaceTimeRangeChanged(TimePoint startOfRangeToAdd, TimePoint endOfRangeToAdd) {
+        // TODO implement candidate addition / removal in updateCandiatesAfterRaceTimeRangeChanged
+    }
 
+    private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
         private static final long serialVersionUID = 1L;
         private int limit;
 
@@ -218,7 +304,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
-    private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int indexOfChange) {
+    private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
         Course course = race.getRace().getCourse();
         for (Competitor c : race.getRace().getCompetitors()) {
@@ -229,7 +315,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         course.lockForRead();
         try {
             for (Waypoint w : course.getWaypoints()) {
-                if (course.getIndexOfWaypoint(w) > indexOfChange - 2) {
+                if (course.getIndexOfWaypoint(w) > zeroBasedIndexOfWaypointChanged - 2) {
                     changedWaypoints.add(w);
                 }
             }
