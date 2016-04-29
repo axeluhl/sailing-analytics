@@ -495,12 +495,8 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         try {
             int trackedRank = trackedRankProvider.call();
             result = scoringScheme.getScoreForRank(leaderboard, raceColumn, competitor,
-                    trackedRank, new Callable<Integer>() {
-                        @Override
-                        public Integer call() {
-                            return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
-                        }
-                    }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+                    trackedRank, ()->getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Exception while computing uncorrected score", e);
             throw new RuntimeException(e);
