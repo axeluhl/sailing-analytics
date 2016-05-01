@@ -15,19 +15,26 @@ public enum PassingInstruction {
     None(1, 2),
     Port(1),
     Starboard(1),
+    Single_Unknown(1),
     Gate(2),
     Line(2),
     Offset(2),
-    FixedBearing(1),
-    Single_Unknown(1);
+    FixedBearing(1);
 
+    /**
+     * Those values relevant for picking by a user when creating a waypoint; for example, this list
+     * does not include the {@link #None} or the {@link #Single_Unknown} literals. No guarantees
+     * made as to the ordering. The enum literals may change, be extended, have elements inserted or
+     * removed at any time!
+     */
     public static PassingInstruction[] relevantValues() {
         PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - 1];
 
         int i = 0;
         for (PassingInstruction p : PassingInstruction.values()) {
-            if (p != PassingInstruction.None)
+            if (p != None && p != Single_Unknown) {
                 uiValues[i++] = p;
+            }
         }
         return uiValues;
     }

@@ -91,13 +91,14 @@
     <string name="pick_a_rounding_direction">Pick a rounding direction</string>
     <string name="select_penalty_reason">Select penalty reason</string>
 
-    <string-array name="rounding_directions">
-        <item>Port</item>
-        <item>Starboard</item>
-        <item>Gate</item>
-        <item>Line</item>
-        <item>Offset</item>
-    </string-array>
+    <string name="passing_instruction_none">None</string>
+    <string name="passing_instruction_port">Port</string>
+    <string name="passing_instruction_starboard">Starboard</string>
+    <string name="passing_instruction_single_unknown">Single, Unknown</string>
+    <string name="passing_instruction_gate">Gate</string>
+    <string name="passing_instruction_line">Line</string>
+    <string name="passing_instruction_offset">Offset</string>
+    <string name="passing_instruction_fixed_bearing">Fixed Bearing</string>
 
     <string name="publish">Publish</string>
     <string name="unpublish">Unpublish</string>
