@@ -28,7 +28,7 @@ public enum PassingInstruction {
      * removed at any time!
      */
     public static PassingInstruction[] relevantValues() {
-        final PassingInstruction[] uselessValues = new PassingInstruction[] { None, Single_Unknown };
+        final PassingInstruction[] uselessValues = new PassingInstruction[] { None, Single_Unknown, Offset, FixedBearing };
         PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - uselessValues.length];
         int i = 0;
         for (PassingInstruction p : PassingInstruction.values()) {
