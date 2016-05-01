@@ -28,11 +28,18 @@ public enum PassingInstruction {
      * removed at any time!
      */
     public static PassingInstruction[] relevantValues() {
-        PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - 1];
-
+        final PassingInstruction[] uselessValues = new PassingInstruction[] { None, Single_Unknown };
+        PassingInstruction[] uiValues = new PassingInstruction[PassingInstruction.values().length - uselessValues.length];
         int i = 0;
         for (PassingInstruction p : PassingInstruction.values()) {
-            if (p != None && p != Single_Unknown) {
+            boolean useless = false;
+            for (PassingInstruction u : uselessValues) {
+                if (u == p) {
+                    useless = true;
+                    break;
+                }
+            }
+            if (!useless) {
                 uiValues[i++] = p;
             }
         }

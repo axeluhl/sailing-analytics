@@ -457,13 +457,17 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
         final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(passingInstructionsRelevantForUserEntry);
         builder.setTitle(R.string.pick_a_rounding_direction).setItems(i18NPassingInstructions, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
+                PassingInstruction pickedDirection = passingInstructionsRelevantForUserEntry[position];
                 onPassingInstructionPicked(courseElement, pickedDirection);
             }
         });
         builder.create().show();
     }
 
+    /**
+     * Cosntructs a message text for each of the {@link PassingIntsruction} values passed. The message strings
+     * returned correspond in their order with the {@link PassingInstruction}s passed in the array.
+     */
     private CharSequence[] getI18NPassingInstructions(PassingInstruction[] passingInstructionsRelevantForUserEntry) {
         final CharSequence[] result = new CharSequence[passingInstructionsRelevantForUserEntry.length];
         int i=0;
