@@ -179,7 +179,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
         ArrayList<String> al = new ArrayList<String>();
         al.add(COLUMN1_NAME);
         service.getLeaderboardByName(LEADERBOARD_NAME, new Date(), al, /* addOverallDetails */ false, /* previousLeaderboardId */ null,
-                /* fillUncorrectedRealTotalPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
+                /* fillUncorrectedTotalPoints */ false, new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 fail("Failed to get leaderboard.");

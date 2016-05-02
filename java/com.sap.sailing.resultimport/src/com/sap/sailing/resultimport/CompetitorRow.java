@@ -4,7 +4,7 @@ package com.sap.sailing.resultimport;
 public interface CompetitorRow {
     Iterable<CompetitorEntry> getRankAndMaxPointsReasonAndPointsAndDiscarded();
 
-    Double getRealTotalPointsBeforeDiscarding();
+    Double getTotalPointsBeforeDiscarding();
 
     Double getScoreAfterDiscarding();
 

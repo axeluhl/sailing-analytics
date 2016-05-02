@@ -493,14 +493,14 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         for (Competitor goldCompetitor : gold) {
             assertEquals(rank, f1Column.getTrackedRace(goldCompetitor).getRank(goldCompetitor, later));
             assertEquals(rank, leaderboard.getTrackedRank(goldCompetitor, f1Column, later));
-            assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getRealTotalPoints(goldCompetitor, f1Column, later), 0.00000001);
+            assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getTotalPoints(goldCompetitor, f1Column, later), 0.00000001);
             rank++;
         }
         rank=1;
         for (Competitor silverCompetitor : silver) {
             assertEquals(rank, f1Column.getTrackedRace(silverCompetitor).getRank(silverCompetitor, later));
             assertEquals(rank, leaderboard.getTrackedRank(silverCompetitor, f1Column, later));
-            assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getRealTotalPoints(silverCompetitor, f1Column, later), 0.00000001);
+            assertEquals(NUMBER_OF_COMPETITORS/2+1-rank, leaderboard.getTotalPoints(silverCompetitor, f1Column, later), 0.00000001);
             rank++;
         }
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
@@ -1629,9 +1629,9 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
         assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
         assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
-        assertNull(leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
-        assertEquals(123., leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001);
-        assertEquals(123., leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+        assertNull(leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(123., leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001);
+        assertEquals(123., leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
     }
     
     /**
@@ -1658,9 +1658,9 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
         assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
         assertEquals(MaxPointsReason.DNF, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
-        assertNull(leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
-        assertEquals(1.0, leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001); // tracked rank is 1
-        assertEquals(123., leaderboard1.getRealTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+        assertNull(leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(1.0, leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001); // tracked rank is 1
+        assertEquals(123., leaderboard1.getTotalPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
     }
     
 

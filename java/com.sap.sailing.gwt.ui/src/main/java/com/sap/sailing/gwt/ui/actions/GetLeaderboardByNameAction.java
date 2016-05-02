@@ -37,11 +37,11 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
     private final StringMessages stringMessages;
     private final ErrorReporter errorReporter;
     private final Timer timerToAdjustOffetIn;
-    private final boolean fillRealTotalPointsUncorrected;
+    private final boolean fillTotalPointsUncorrected;
     
     public GetLeaderboardByNameAction(SailingServiceAsync sailingService, String leaderboardName, Date date,
             final Collection<String> namesOfRacesForWhichToLoadLegDetails, boolean addOverallDetails,
-            LeaderboardDTO previousLeaderboard, boolean fillRealTotalPointsUncorrected, Timer timerToAdjustOffsetIn,
+            LeaderboardDTO previousLeaderboard, boolean fillTotalPointsUncorrected, Timer timerToAdjustOffsetIn,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
@@ -52,14 +52,14 @@ public class GetLeaderboardByNameAction implements AsyncAction<LeaderboardDTO> {
         this.addOverallDetails = addOverallDetails;
         this.previousLeaderboard = previousLeaderboard;
         this.timerToAdjustOffetIn = timerToAdjustOffsetIn;
-        this.fillRealTotalPointsUncorrected = fillRealTotalPointsUncorrected;
+        this.fillTotalPointsUncorrected = fillTotalPointsUncorrected;
     }
     
     @Override
     public void execute(final AsyncCallback<LeaderboardDTO> callback) {
         final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
         sailingService.getLeaderboardByName(leaderboardName, date, namesOfRacesForWhichToLoadLegDetails, addOverallDetails,
-                previousLeaderboard==null?null:previousLeaderboard.getId(), fillRealTotalPointsUncorrected,
+                previousLeaderboard==null?null:previousLeaderboard.getId(), fillTotalPointsUncorrected,
                         new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {

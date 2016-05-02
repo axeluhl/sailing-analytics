@@ -30,13 +30,13 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public MaxPointsReason reasonForMaxPoints;
     
-    public Double realTotalPoints;
-    public Double realTotalPointsUncorrected;
+    public Double totalPoints;
+    public Double totalPointsUncorrected;
     
     /**
      * Tells if the total points have been overridden by a score correction. Can be used to render differently in editing environment.
      */
-    public boolean realTotalPointsCorrected;
+    public boolean totalPointsCorrected;
     
     public Double netPoints;
     
@@ -130,7 +130,7 @@ public class LeaderboardEntryDTO implements Serializable {
     public LeaderboardEntryDTO() { }
     
     public boolean hasScoreCorrection() {
-        return realTotalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
+        return totalPointsCorrected || (reasonForMaxPoints != null && reasonForMaxPoints != MaxPointsReason.NONE);
     }
 
     @Override
@@ -162,9 +162,9 @@ public class LeaderboardEntryDTO implements Serializable {
                         .hashCode());
         result = prime * result + ((fleet == null) ? 0 : fleet.hashCode());
         result = prime * result + ((legDetails == null) ? 0 : legDetails.hashCode());
-        result = prime * result + ((realTotalPoints == null) ? 0 : realTotalPoints.hashCode());
-        result = prime * result + ((realTotalPointsUncorrected == null) ? 0 : realTotalPointsUncorrected.hashCode());
-        result = prime * result + (realTotalPointsCorrected ? 1231 : 1237);
+        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime * result + ((totalPointsUncorrected == null) ? 0 : totalPointsUncorrected.hashCode());
+        result = prime * result + (totalPointsCorrected ? 1231 : 1237);
         result = prime * result + ((race == null) ? 0 : race.hashCode());
         result = prime * result + ((reasonForMaxPoints == null) ? 0 : reasonForMaxPoints.hashCode());
         result = prime
@@ -250,17 +250,17 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!legDetails.equals(other.legDetails))
             return false;
-        if (realTotalPoints == null) {
-            if (other.realTotalPoints != null)
+        if (totalPoints == null) {
+            if (other.totalPoints != null)
                 return false;
-        } else if (!realTotalPoints.equals(other.realTotalPoints))
+        } else if (!totalPoints.equals(other.totalPoints))
             return false;
-        if (realTotalPointsUncorrected == null) {
-            if (other.realTotalPointsUncorrected != null)
+        if (totalPointsUncorrected == null) {
+            if (other.totalPointsUncorrected != null)
                 return false;
-        } else if (!realTotalPointsUncorrected.equals(other.realTotalPointsUncorrected))
+        } else if (!totalPointsUncorrected.equals(other.totalPointsUncorrected))
             return false;
-        if (realTotalPointsCorrected != other.realTotalPointsCorrected)
+        if (totalPointsCorrected != other.totalPointsCorrected)
             return false;
         if (race == null) {
             if (other.race != null)

@@ -526,7 +526,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         getSailingService().getLeaderboardByName(getLeaderboardName(),
                 timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                 /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(),
-                shallAddOverallDetails(), previousLeaderboard.getId(), /* fillRealTotalPointsUncorrected */ false,
+                shallAddOverallDetails(), previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
                 new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
                         new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
                             @Override
@@ -801,8 +801,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 final String addedScores = isShowAddedScores() ? scoreFormat.format(computeAddedScores(object)) : "";
                 String netOrAddedPointsAsText = isShowAddedScores() ? addedScores
                         : entry.netPoints == null ? "" : scoreFormat.format(entry.netPoints);
-                String realTotalOrAddedPointsAsText = isShowAddedScores() ? addedScores
-                        : entry.realTotalPoints == null ? "" : scoreFormat.format(entry.realTotalPoints);
+                String totalOrAddedPointsAsText = isShowAddedScores() ? addedScores
+                        : entry.totalPoints == null ? "" : scoreFormat.format(entry.totalPoints);
                 if (entry.fleet != null && entry.fleet.getColor() != null) {
                     html.append(raceColumnTemplate.cellFrameWithTextColorAndFleetBorder(textColor, entry.fleet.getColor().getAsHtml()));
                 } else {
@@ -816,11 +816,11 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                         html.appendHtmlConstant("</span>");
                     } else {
                         html.appendHtmlConstant(" <span style=\"opacity: 0.5;\"><del>");
-                        html.appendHtmlConstant(realTotalOrAddedPointsAsText);
+                        html.appendHtmlConstant(totalOrAddedPointsAsText);
                         html.appendHtmlConstant("</del></span>");
                     }
                 } else {
-                    html.appendHtmlConstant(" <span title=\"" + realTotalOrAddedPointsAsText + "/" + netOrAddedPointsAsText
+                    html.appendHtmlConstant(" <span title=\"" + totalOrAddedPointsAsText + "/" + netOrAddedPointsAsText
                             + "\" style=\"opacity: 0.5;\">");
                     if (entry.discarded) {
                         html.appendHtmlConstant("<del>");
@@ -2243,7 +2243,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
                     getLeaderboardName(), useNullAsTimePoint() ? null : date,
                     /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaces(), shallAddOverallDetails(), /* previousLeaderboard */
-                    getLeaderboard(), isFillRealTotalPointsUncorrected(), timer, errorReporter, stringMessages);
+                    getLeaderboard(), isFillTotalPointsUncorrected(), timer, errorReporter, stringMessages);
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -2265,7 +2265,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         }
     }
 
-    protected boolean isFillRealTotalPointsUncorrected() {
+    protected boolean isFillTotalPointsUncorrected() {
         return false;
     }
 

@@ -99,7 +99,7 @@ public class TestColumnSwapping {
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[0], true);
             sailingService.updateIsMedalRace(TEST_LEADERBOARD_NAME, races[2], false);
             lb = sailingService.getLeaderboardByName(TEST_LEADERBOARD_NAME, new Date(), /* races to load */ null, /* addOverallDetails */ true, /* previous leaderboard ID */ null,
-                    /* fillRealTotalPointsUncorrected */ false).getLeaderboardDTO(/* previousVersion */ null);
+                    /* fillTotalPointsUncorrected */ false).getLeaderboardDTO(/* previousVersion */ null);
         } catch (Exception e) {
             // e.printStackTrace();
             fail(e.getLocalizedMessage());
@@ -141,7 +141,7 @@ public class TestColumnSwapping {
         service.moveLeaderboardColumnUp(LEADERBOARDNAME, "Race3");
         try {
             leaderboardDTO = service.getLeaderboardByName(LEADERBOARDNAME, leaderboardCreationDate, leglist, /* addOverallDetails */
-                    true, /* previous leaderboard ID */null, /* fillRealTotalPointsUncorrected */false).getLeaderboardDTO(/* previousVersion */null);
+                    true, /* previous leaderboard ID */null, /* fillTotalPointsUncorrected */false).getLeaderboardDTO(/* previousVersion */null);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

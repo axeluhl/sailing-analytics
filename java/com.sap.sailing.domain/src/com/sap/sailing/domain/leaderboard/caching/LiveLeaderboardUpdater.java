@@ -297,7 +297,7 @@ public class LiveLeaderboardUpdater implements Runnable {
                     final boolean addOverallDetails = getOverallDetails(timePoint);
                     LeaderboardDTO newCacheValue = leaderboard.computeDTO(timePoint,
                             namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillRealTotalPointsUncorrected */ false);
+                            /* waitForLatestAnalyses */false, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
                     updateCacheContents(namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, newCacheValue);
                 } catch (NoWindException e) {
                     logger.log(Level.SEVERE, "Exception during re-calculating the live leaderboard "+leaderboard.getName(), e);

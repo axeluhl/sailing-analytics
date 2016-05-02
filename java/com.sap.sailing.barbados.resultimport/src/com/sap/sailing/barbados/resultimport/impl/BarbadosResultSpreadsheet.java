@@ -41,9 +41,9 @@ public class BarbadosResultSpreadsheet {
             throw new IllegalArgumentException("Didn't find "+RACE_SCORE_COLUMN_NAME+" column");
         }
         final int numberOfRaces = i-COLUMN_NUMBER_OF_FIRST_RACE_RANK;
-        final int columnNumberOfRealTotalScore = i;
-        final int columnNumberOfTotalScore = columnNumberOfRealTotalScore+1;
-        final int columnNumberOfFirstRaceScore = columnNumberOfTotalScore+2;
+        final int columnNumberOfTotalScore = i;
+        final int columnNumberOfNetScore = columnNumberOfTotalScore+1;
+        final int columnNumberOfFirstRaceScore = columnNumberOfNetScore+2;
         int rowIndex = 1;
         Row row;
         String iocCountryCode;
@@ -53,8 +53,8 @@ public class BarbadosResultSpreadsheet {
             String helm = row.getCell(3).getStringCellValue();
             String crew = row.getCell(4).getStringCellValue();
             Iterable<String> names = Arrays.asList(new String[] { helm, crew });
-            double scoreAfterDiscarding = row.getCell(columnNumberOfTotalScore).getNumericCellValue();
-            double realTotalPointsBeforeDiscarding = row.getCell(columnNumberOfRealTotalScore).getNumericCellValue();
+            double scoreAfterDiscarding = row.getCell(columnNumberOfNetScore).getNumericCellValue();
+            double totalPointsBeforeDiscarding = row.getCell(columnNumberOfTotalScore).getNumericCellValue();
             List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
             for (int raceNumber=0; raceNumber<numberOfRaces; raceNumber++) {
                 final Cell rankOrMaxPointReasonCell = row.getCell(COLUMN_NUMBER_OF_FIRST_RACE_RANK+raceNumber);
@@ -78,7 +78,7 @@ public class BarbadosResultSpreadsheet {
                 }
             }
             CompetitorRow competitorRow = new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding,
-                    realTotalPointsBeforeDiscarding, rankAndMaxPointsReasonAndPointsAndDiscarded);
+                    totalPointsBeforeDiscarding, rankAndMaxPointsReasonAndPointsAndDiscarded);
             competitorRows.add(competitorRow);
             rowIndex++;
         }

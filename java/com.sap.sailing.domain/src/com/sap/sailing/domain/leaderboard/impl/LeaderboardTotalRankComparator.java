@@ -52,7 +52,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
     private final ScoringScheme scoringScheme;
     private final Map<Util.Pair<Competitor, RaceColumn>, Double> netPointsCache;
-    private final Map<Util.Pair<Competitor, RaceColumn>, Double> realTotalPointsCache;
+    private final Map<Util.Pair<Competitor, RaceColumn>, Double> totalPointsCache;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
     
@@ -83,14 +83,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
         netPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
-        realTotalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
+        totalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
                     competitor, leaderboard, raceColumnsToConsider, timePoint);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
                 netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
-                realTotalPointsCache.put(key, leaderboard.getRealTotalPoints(competitor, raceColumn, timePoint));
+                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
             }
         }
     }
@@ -103,8 +103,8 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     public int compare(Competitor o1, Competitor o2) {
         List<Util.Pair<RaceColumn, Double>> o1Scores = new ArrayList<>();
         List<Util.Pair<RaceColumn, Double>> o2Scores = new ArrayList<>();
-        List<Util.Pair<RaceColumn, Double>> o1RealTotalPoints = new ArrayList<>();
-        List<Util.Pair<RaceColumn, Double>> o2RealTotalPoints = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o1TotalPoints = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o2TotalPoints = new ArrayList<>();
         double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
@@ -130,9 +130,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o1ScoreSum += o1Score;
                 }
-                final Double o1RealTotal = realTotalPointsCache.get(key);
-                if (o1RealTotal != null) {
-                    o1RealTotalPoints.add(new Util.Pair<>(raceColumn, o1RealTotal));
+                final Double o1Total = totalPointsCache.get(key);
+                if (o1Total != null) {
+                    o1TotalPoints.add(new Util.Pair<>(raceColumn, o1Total));
                 }
             } else {
                 o1Score = null;
@@ -149,9 +149,9 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o2ScoreSum += o2Score;
                 }
-                final Double o2RealTotal = realTotalPointsCache.get(key);
-                if (o2RealTotal != null) {
-                    o2RealTotalPoints.add(new Util.Pair<>(raceColumn, o2RealTotal));
+                final Double o2Total = totalPointsCache.get(key);
+                if (o2Total != null) {
+                    o2TotalPoints.add(new Util.Pair<>(raceColumn, o2Total));
                 }
             } else {
                 o2Score = null;
@@ -192,7 +192,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
-                        result = scoringScheme.compareByLastRace(o1RealTotalPoints, o2RealTotalPoints, nullScoresAreBetter);
+                        result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter);
                         if (result == 0) {
                             try {
                                 result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);

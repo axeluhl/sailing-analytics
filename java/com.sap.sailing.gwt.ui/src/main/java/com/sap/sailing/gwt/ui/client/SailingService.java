@@ -182,7 +182,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     IncrementalOrFullLeaderboardDTO getLeaderboardByName(String leaderboardName, Date date,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId, boolean fillRealTotalPointsUncorrected) throws Exception;
+            String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws Exception;
 
     List<StrippedLeaderboardDTO> getLeaderboards();
     

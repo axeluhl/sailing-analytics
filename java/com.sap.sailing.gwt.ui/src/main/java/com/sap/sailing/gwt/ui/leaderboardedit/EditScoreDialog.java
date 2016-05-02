@@ -15,11 +15,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, Double>> {
     private final ListBox maxPointsBox;
-    private final DoubleBox realTotalPointsBox;
+    private final DoubleBox totalPointsBox;
     private final StringMessages stringMessages;
     
     public EditScoreDialog(StringMessages stringMessages, String competitorName, String raceColumnName,
-            MaxPointsReason oldMaxPointsReason, Double oldRealTotalPoints, DialogCallback<Util.Pair<MaxPointsReason, Double>> callback) {
+            MaxPointsReason oldMaxPointsReason, Double oldTotalPoints, DialogCallback<Util.Pair<MaxPointsReason, Double>> callback) {
         super(stringMessages.correctScore(), stringMessages.correctScoreFor(competitorName, raceColumnName),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, /* animationEnabled */ true,
                 callback);
@@ -34,9 +34,9 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
         } else {
             maxPointsBox.setSelectedIndex(1+Arrays.asList(MaxPointsReason.values()).indexOf(oldMaxPointsReason));
         }
-        realTotalPointsBox = createDoubleBox(/* visibleLength */ 5);
-        if (oldRealTotalPoints != null) {
-            realTotalPointsBox.setValue(oldRealTotalPoints);
+        totalPointsBox = createDoubleBox(/* visibleLength */ 5);
+        if (oldTotalPoints != null) {
+            totalPointsBox.setValue(oldTotalPoints);
         }
     }
 
@@ -48,8 +48,8 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
         } else {
             maxPointsReason = MaxPointsReason.valueOf(maxPointsBox.getItemText(maxPointsBox.getSelectedIndex()));
         }
-        final Double realTotalScore = realTotalPointsBox.getValue();
-        return new Util.Pair<MaxPointsReason, Double>(maxPointsReason, realTotalScore);
+        final Double totalScore = totalPointsBox.getValue();
+        return new Util.Pair<MaxPointsReason, Double>(maxPointsReason, totalScore);
     }
 
     @Override
@@ -57,19 +57,19 @@ public class EditScoreDialog extends DataEntryDialog<Util.Pair<MaxPointsReason, 
         Grid grid = new Grid(2, 2);
         grid.setWidget(0, 0, new Label(stringMessages.penaltyOrRedress()));
         grid.setWidget(0, 1, maxPointsBox);
-        grid.setWidget(1, 0, new Label(stringMessages.realTotalScore()));
-        grid.setWidget(1, 1, realTotalPointsBox);
+        grid.setWidget(1, 0, new Label(stringMessages.totalScore()));
+        grid.setWidget(1, 1, totalPointsBox);
         return grid;
     }
 
     @Override
     protected FocusWidget getInitialFocusWidget() {
-        return realTotalPointsBox;
+        return totalPointsBox;
     }
     
     @Override
     public void show() {
         super.show();
-        realTotalPointsBox.selectAll();
+        totalPointsBox.selectAll();
     }
 }

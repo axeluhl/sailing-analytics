@@ -54,15 +54,15 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     public interface Entry {
         int getTrackedRank();
-        Double getRealTotalPoints();
-        Double getRealTotalPointsUncorrected();
+        Double getTotalPoints();
+        Double getTotalPointsUncorrected();
         Double getNetPoints();
         MaxPointsReason getMaxPointsReason();
         boolean isDiscarded();
         /**
-         * Tells if the realTotal points have been corrected by a {@link ScoreCorrection}
+         * Tells if the total points have been corrected by a {@link ScoreCorrection}
          */
-        boolean isRealTotalPointsCorrected();
+        boolean isTotalPointsCorrected();
         
         /**
          * @return <code>null</code>, if the competitor's fleet in the race column cannot be determined, the
@@ -74,7 +74,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry,
-            DomainFactory baseDomainFactory, boolean fillRealTotalPointsUncorrected) throws NoWindException;
+            DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected) throws NoWindException;
 
     /**
      * Obtains the unique set of {@link Competitor} objects from all {@link TrackedRace}s currently linked to this
@@ -225,7 +225,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * @return <code>null</code> if the competitor didn't participate in the race or the race hasn't started yet at
      *         <code>timePoint</code>
      */
-    Double getRealTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
+    Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint);
 
     /**
      * Tells if and why a competitor received "penalty" points for a race (however the scoring rules define the
@@ -235,7 +235,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
 
     /**
      * A possibly corrected number of points for the race specified. Defaults to the result of calling
-     * {@link #getRealTotalPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta rules for
+     * {@link #getTotalPoints(Competitor, TrackedRace, TimePoint)} but may be corrected by the regatta rules for
      * discarding results. If {@link #isDiscarded(Competitor, RaceColumn, TimePoint) discarded}, the points returned
      * will be 0.
      * 
@@ -283,7 +283,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      * {@link Fleet#compareTo(Fleet) ordered fleets} and {@link RaceColumn#isMedalRace() medal races}. The ordering
      * does not consider result discarding because when sorting for a race column it is of interest how the competitor
      * performed in that race and not how the score affected the overall regatta score. Therefore, it is based on
-     * {@link #getRealTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
+     * {@link #getTotalPoints(Competitor, RaceColumn, TimePoint)} and not on
      * {@link #getNetPoints(Competitor, RaceColumn, TimePoint)}.
      */
     List<Competitor> getCompetitorsFromBestToWorst(RaceColumn raceColumn, TimePoint timePoint) throws NoWindException;
@@ -522,7 +522,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
      */
     LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
-            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillRealTotalPointsUncorrected) throws NoWindException,
+            boolean addOverallDetails, TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillTotalPointsUncorrected) throws NoWindException,
             InterruptedException, ExecutionException;
 
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
