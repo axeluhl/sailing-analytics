@@ -40,7 +40,7 @@ public abstract class AbstractHighPointFirstGetsFixedOr8AndLastBreaksTie extends
     public int compareByBetterScore(Competitor o1, List<Util.Pair<RaceColumn, Double>> o1Scores, Competitor o2, List<Util.Pair<RaceColumn, Double>> o2Scores, boolean nullScoresAreBetter, TimePoint timePoint) {
         Double o1Highest = getHighestScore(o1Scores);
         Double o2Highest = getHighestScore(o2Scores);
-        return o1Highest.compareTo(o2Highest);
+        return o2Highest.compareTo(o1Highest);
     }
 
     private double getHighestScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
