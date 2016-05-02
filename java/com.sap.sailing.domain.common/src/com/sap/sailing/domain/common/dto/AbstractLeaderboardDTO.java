@@ -113,16 +113,16 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         return false;
     }
 
-    public Double getNetPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
-        Double netPoints = null;
+    public Double getRealTotalPoints(CompetitorDTO competitor, String nameOfLastRaceSoFar) {
+        Double realTotalPoints = null;
         LeaderboardRowDTO row = rows.get(competitor);
         if (row != null) {
             LeaderboardEntryDTO field = row.fieldsByRaceColumnName.get(nameOfLastRaceSoFar);
-            if (field != null &&  field.netPoints != null) {
-                netPoints = field.netPoints;
+            if (field != null &&  field.realTotalPoints != null) {
+                realTotalPoints = field.realTotalPoints;
             }
         }
-        return netPoints;
+        return realTotalPoints;
     }
 
     public boolean raceIsTracked(String raceColumnName) {

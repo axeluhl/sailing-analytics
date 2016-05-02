@@ -15,8 +15,8 @@ public class CompetitorRaceRankFilterUIFactory extends AbstractCompetitorNumberF
         this(new CompetitorRaceRankFilter());
     }
 
-    public CompetitorRaceRankFilterUIFactory(CompetitorRaceRankFilter competitorRaceNetPointsFilter) {
-        super(competitorRaceNetPointsFilter, BinaryOperator.Operators.LessThanEquals);
+    public CompetitorRaceRankFilterUIFactory(CompetitorRaceRankFilter competitorRaceRealTotalPointsFilter) {
+        super(competitorRaceRealTotalPointsFilter, BinaryOperator.Operators.LessThanEquals);
         
         supportedOperators.add(BinaryOperator.Operators.LessThanEquals);
         supportedOperators.add(BinaryOperator.Operators.GreaterThanEquals);

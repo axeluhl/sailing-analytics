@@ -41,8 +41,8 @@ public class BarbadosResultSpreadsheet {
             throw new IllegalArgumentException("Didn't find "+RACE_SCORE_COLUMN_NAME+" column");
         }
         final int numberOfRaces = i-COLUMN_NUMBER_OF_FIRST_RACE_RANK;
-        final int columnNumberOfNetScore = i;
-        final int columnNumberOfTotalScore = columnNumberOfNetScore+1;
+        final int columnNumberOfRealTotalScore = i;
+        final int columnNumberOfTotalScore = columnNumberOfRealTotalScore+1;
         final int columnNumberOfFirstRaceScore = columnNumberOfTotalScore+2;
         int rowIndex = 1;
         Row row;
@@ -54,7 +54,7 @@ public class BarbadosResultSpreadsheet {
             String crew = row.getCell(4).getStringCellValue();
             Iterable<String> names = Arrays.asList(new String[] { helm, crew });
             double scoreAfterDiscarding = row.getCell(columnNumberOfTotalScore).getNumericCellValue();
-            double netPointsBeforeDiscarding = row.getCell(columnNumberOfNetScore).getNumericCellValue();
+            double realTotalPointsBeforeDiscarding = row.getCell(columnNumberOfRealTotalScore).getNumericCellValue();
             List<CompetitorEntry> rankAndMaxPointsReasonAndPointsAndDiscarded = new ArrayList<>();
             for (int raceNumber=0; raceNumber<numberOfRaces; raceNumber++) {
                 final Cell rankOrMaxPointReasonCell = row.getCell(COLUMN_NUMBER_OF_FIRST_RACE_RANK+raceNumber);
@@ -78,7 +78,7 @@ public class BarbadosResultSpreadsheet {
                 }
             }
             CompetitorRow competitorRow = new CompetitorRowImpl(totalRank, sailID, names, scoreAfterDiscarding,
-                    netPointsBeforeDiscarding, rankAndMaxPointsReasonAndPointsAndDiscarded);
+                    realTotalPointsBeforeDiscarding, rankAndMaxPointsReasonAndPointsAndDiscarded);
             competitorRows.add(competitorRow);
             rowIndex++;
         }

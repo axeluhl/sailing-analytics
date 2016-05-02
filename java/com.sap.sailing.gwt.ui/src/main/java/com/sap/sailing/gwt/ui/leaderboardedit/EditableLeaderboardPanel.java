@@ -88,7 +88,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
     final private CellTable<CompetitorDTO> suppressedCompetitorsTable;
     final private ListDataProvider<CompetitorDTO> suppressedCompetitorsShown;
 
-    private CheckBox showUncorrectedNetPointsCheckbox;
+    private CheckBox showUncorrectedRealTotalPointsCheckbox;
     
     private class SettingsClickHandler implements ClickHandler {
         private final StringMessages stringMessages;
@@ -334,13 +334,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
                             setBusyState(false);
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                     || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newNetAndTotalPointsAndIsCorrected.getA();
-                            row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
-                            row.fieldsByRaceColumnName.get(raceColumnName).netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
+                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPoints = newRealTotalAndTotalPointsAndIsCorrected.getA();
+                            row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
+                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again
                             whiteboard.setObjectWithWhichToUpdateRow(row);
                         }
@@ -360,10 +360,10 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         }
     }
     
-    private class UncorrectedNetPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+    private class UncorrectedRealTotalPointsViewProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final String raceColumnName;
         
-        protected UncorrectedNetPointsViewProvider(String raceColumnName) {
+        protected UncorrectedRealTotalPointsViewProvider(String raceColumnName) {
             this.raceColumnName = raceColumnName;
         }
 
@@ -382,59 +382,59 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             String result = "";
-            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsUncorrected != null) {
-                result="("+scoreFormat.format(leaderboardEntryDTO.netPointsUncorrected)+")";
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.realTotalPointsUncorrected != null) {
+                result="("+scoreFormat.format(leaderboardEntryDTO.realTotalPointsUncorrected)+")";
             }
             return result;
         }
     }
 
-    private class NetPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
-        private final EditTextCell netPointsEditCell;
+    private class RealTotalPointsEditCellProvider extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+        private final EditTextCell realTotalPointsEditCell;
         private final String raceColumnName;
 
-        protected NetPointsEditCellProvider(String raceColumnName) {
+        protected RealTotalPointsEditCellProvider(String raceColumnName) {
             this.raceColumnName = raceColumnName;
-            netPointsEditCell = new EditTextCell(new SafeHtmlRenderer<String>() {
+            realTotalPointsEditCell = new EditTextCell(new SafeHtmlRenderer<String>() {
                 @Override
-                public void render(String netPointsAsString, SafeHtmlBuilder html) {
-                    if (netPointsAsString != null) {
-                        final boolean netPointsCorrected = isNetPointsCorrected();
-                        if (netPointsCorrected) {
+                public void render(String realTotalPointsAsString, SafeHtmlBuilder html) {
+                    if (realTotalPointsAsString != null) {
+                        final boolean realTotalPointsCorrected = isRealTotalPointsCorrected();
+                        if (realTotalPointsCorrected) {
                             html.appendHtmlConstant("<b>");
                         }
-                        html.appendEscaped(netPointsAsString);
-                        if (netPointsCorrected) {
+                        html.appendEscaped(realTotalPointsAsString);
+                        if (realTotalPointsCorrected) {
                             html.appendHtmlConstant("</b>");
                         }
                     }
                 }
 
                 @Override
-                public SafeHtml render(String netPointsAsString) {
-                    final boolean netPointsCorrected = isNetPointsCorrected();
+                public SafeHtml render(String realTotalPointsAsString) {
+                    final boolean realTotalPointsCorrected = isRealTotalPointsCorrected();
                     String prefix;
                     String suffix;
-                    if (netPointsCorrected) {
+                    if (realTotalPointsCorrected) {
                         prefix = "<b class='bold'>";
                         suffix = "</b>";
                     } else {
                         prefix = "";
                         suffix = "";
                     }
-                    return SafeHtmlUtils.fromSafeConstant(prefix+SafeHtmlUtils.fromString(netPointsAsString).asString()+suffix);
+                    return SafeHtmlUtils.fromSafeConstant(prefix+SafeHtmlUtils.fromString(realTotalPointsAsString).asString()+suffix);
                 }
             });
         }
 
-        private boolean isNetPointsCorrected() {
+        private boolean isRealTotalPointsCorrected() {
             LeaderboardEntryDTO leaderboardEntryDTO = getCurrentlyRendering().fieldsByRaceColumnName.get(raceColumnName);
-            return leaderboardEntryDTO != null && leaderboardEntryDTO.netPointsCorrected;
+            return leaderboardEntryDTO != null && leaderboardEntryDTO.realTotalPointsCorrected;
         }
 
         @Override
         public EditTextCell getCell() {
-            return netPointsEditCell;
+            return realTotalPointsEditCell;
         }
 
         @Override
@@ -460,13 +460,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
                             setBusyState(false);
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
-                            leaderboardEntryDTO.netPoints = value == null || value.length() == 0 ? newNetAndTotalPointsAndIsCorrected
+                            leaderboardEntryDTO.realTotalPoints = value == null || value.length() == 0 ? newRealTotalAndTotalPointsAndIsCorrected
                                     .getA() : Double.valueOf(value.trim());
-                            leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
-                            leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
+                            leaderboardEntryDTO.totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
+                            leaderboardEntryDTO.realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again
                             whiteboard.setObjectWithWhichToUpdateRow(row);
                         }
@@ -479,31 +479,31 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         public String getValue(LeaderboardRowDTO object) {
             LeaderboardEntryDTO leaderboardEntryDTO = object.fieldsByRaceColumnName.get(raceColumnName);
             String result = "n/a";
-            if (leaderboardEntryDTO != null && leaderboardEntryDTO.netPoints != null) {
-                result = scoreFormat.format(leaderboardEntryDTO.netPoints);
+            if (leaderboardEntryDTO != null && leaderboardEntryDTO.realTotalPoints != null) {
+                result = scoreFormat.format(leaderboardEntryDTO.realTotalPoints);
             }
             return result;
         }
     }
     
-    private class MaxPointsReasonAndNetPointsEditButtonCell extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
+    private class MaxPointsReasonAndRealTotalPointsEditButtonCell extends AbstractRowUpdateWhiteboardProducerThatHasCell<LeaderboardRowDTO, String> {
         private final ButtonCell cell = new ButtonCell();
         private final String raceColumnName;
         private final StringMessages stringMessages;
         private final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider;
-        private final NetPointsEditCellProvider netPointsEditCellProvider;
+        private final RealTotalPointsEditCellProvider realTotalPointsEditCellProvider;
         
         /**
          * @param maxPointsDropDownCellProvider will have its cell's view data reset after a successful update to force call to getValue
-         * @param netPointsEditCellProvider will have its cell's view data reset after a successful update to force call to getValue
+         * @param realTotalPointsEditCellProvider will have its cell's view data reset after a successful update to force call to getValue
          */
-        public MaxPointsReasonAndNetPointsEditButtonCell(StringMessages stringMessages, String raceColumnName,
+        public MaxPointsReasonAndRealTotalPointsEditButtonCell(StringMessages stringMessages, String raceColumnName,
                 MaxPointsDropDownCellProvider maxPointsDropDownCellProvider,
-                NetPointsEditCellProvider netPointsEditCellProvider) {
+                RealTotalPointsEditCellProvider realTotalPointsEditCellProvider) {
             this.stringMessages = stringMessages;
             this.raceColumnName = raceColumnName;
             this.maxPointsDropDownCellProvider = maxPointsDropDownCellProvider;
-            this.netPointsEditCellProvider = netPointsEditCellProvider;
+            this.realTotalPointsEditCellProvider = realTotalPointsEditCellProvider;
         }
 
         @Override
@@ -521,7 +521,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                     getWhiteboardOwner().whiteboardProduced(whiteboard);
                     new EditScoreDialog(stringMessages, row.competitor.getName(), raceColumnName,
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints,
-                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints, new DialogCallback<Util.Pair<MaxPointsReason, Double>>() {
+                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPoints, new DialogCallback<Util.Pair<MaxPointsReason, Double>>() {
                         @Override
                         public void ok(final Util.Pair<MaxPointsReason, Double> editedObject) {
                             setBusyState(true);
@@ -538,7 +538,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                 }
 
                                 @Override
-                                public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
                                     getSailingService().updateLeaderboardMaxPointsReason(getLeaderboardName(), row.competitor.getIdAsString(), raceColumnName,
                                             editedObject.getA(), getLeaderboardDisplayDate(),
                                                     new AsyncCallback<Util.Triple<Double, Double, Boolean>>() {
@@ -552,15 +552,15 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         }
 
                                         @Override
-                                        public void onSuccess(Util.Triple<Double, Double, Boolean> newNetAndTotalPointsAndIsCorrected) {
+                                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
                                             setBusyState(false);
                                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                                             leaderboardEntryDTO.reasonForMaxPoints = editedObject.getA();
-                                            leaderboardEntryDTO.netPoints = newNetAndTotalPointsAndIsCorrected.getA();
-                                            leaderboardEntryDTO.totalPoints = newNetAndTotalPointsAndIsCorrected.getB();
-                                            leaderboardEntryDTO.netPointsCorrected = newNetAndTotalPointsAndIsCorrected.getC();
+                                            leaderboardEntryDTO.realTotalPoints = newRealTotalAndTotalPointsAndIsCorrected.getA();
+                                            leaderboardEntryDTO.totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
+                                            leaderboardEntryDTO.realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
                                             maxPointsDropDownCellProvider.getCell().setViewData(row, null);
-                                            netPointsEditCellProvider.getCell().setViewData(row, null);
+                                            realTotalPointsEditCellProvider.getCell().setViewData(row, null);
                                             whiteboard.setObjectWithWhichToUpdateRow(row);
                                         }
                                     });
@@ -652,14 +652,14 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
         final Button setScoreCorrectionDefaultTimeBtn = new Button(stringMessages.setTimeToNow());
         setScoreCorrectionDefaultTimeBtn.addStyleName("inlineButton");
         scoreCorrectionInfoGrid.setWidget(0, 2, setScoreCorrectionDefaultTimeBtn);
-        showUncorrectedNetPointsCheckbox = new CheckBox(stringMessages.showUncorrectedNetPoints());
-        showUncorrectedNetPointsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        showUncorrectedRealTotalPointsCheckbox = new CheckBox(stringMessages.showUncorrectedRealTotalPoints());
+        showUncorrectedRealTotalPointsCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
                 timeChanged(getTimer().getTime(), getTimer().getTime());
             }
         });
-        scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedNetPointsCheckbox);
+        scoreCorrectionInfoGrid.setWidget(0, 3, showUncorrectedRealTotalPointsCheckbox);
 
         setScoreCorrectionDefaultTimeBtn.addClickHandler(new ClickHandler() {
             @Override
@@ -994,12 +994,12 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                 new ArrayList<RowUpdateWhiteboardProducerThatAlsoHasCell<LeaderboardRowDTO, ?>>();
         final MaxPointsDropDownCellProvider maxPointsDropDownCellProvider = new MaxPointsDropDownCellProvider(race.getRaceColumnName());
         list.add(maxPointsDropDownCellProvider);
-        final NetPointsEditCellProvider netPointsEditCellProvider = new NetPointsEditCellProvider(race.getRaceColumnName());
-        list.add(netPointsEditCellProvider);
-        final UncorrectedNetPointsViewProvider uncorrectedViewProvider = new UncorrectedNetPointsViewProvider(race.getRaceColumnName());
+        final RealTotalPointsEditCellProvider realTotalPointsEditCellProvider = new RealTotalPointsEditCellProvider(race.getRaceColumnName());
+        list.add(realTotalPointsEditCellProvider);
+        final UncorrectedRealTotalPointsViewProvider uncorrectedViewProvider = new UncorrectedRealTotalPointsViewProvider(race.getRaceColumnName());
         list.add(uncorrectedViewProvider);
-        list.add(new MaxPointsReasonAndNetPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
-                maxPointsDropDownCellProvider, netPointsEditCellProvider));
+        list.add(new MaxPointsReasonAndRealTotalPointsEditButtonCell(getStringMessages(), race.getRaceColumnName(),
+                maxPointsDropDownCellProvider, realTotalPointsEditCellProvider));
         return list;
     }
     
@@ -1007,8 +1007,8 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
      * Computing the uncorrected scores can be expensive for large leaderboards; disable by default but allow user to enable
      */
     @Override
-    protected boolean isFillNetPointsUncorrected() {
-        return showUncorrectedNetPointsCheckbox==null?false:showUncorrectedNetPointsCheckbox.getValue();
+    protected boolean isFillRealTotalPointsUncorrected() {
+        return showUncorrectedRealTotalPointsCheckbox==null?false:showUncorrectedRealTotalPointsCheckbox.getValue();
     }
 
     @Override

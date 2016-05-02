@@ -120,7 +120,7 @@ public class LeaderboardCourseChangeTest {
         
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
-                trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                trackedRegattaRegistry, baseDomainFactory, /* fillRealTotalPointsUncorrected */ false);
 
         assertEquals(6, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
@@ -129,7 +129,7 @@ public class LeaderboardCourseChangeTest {
         course.removeWaypoint(3);
 
         leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false, trackedRegattaRegistry,
-                baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                baseDomainFactory, /* fillRealTotalPointsUncorrected */ false);
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
 

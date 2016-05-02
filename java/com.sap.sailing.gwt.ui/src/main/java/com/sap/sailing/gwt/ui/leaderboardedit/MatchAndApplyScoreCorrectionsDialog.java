@@ -260,8 +260,8 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                                     officialCorrectionEntry.getMaxPointsReason());
                             if (officialCorrectionEntry.getScore() != null) {
                                 double officialTotalPoints = officialCorrectionEntry.getScore().doubleValue();
-                                double officialNetPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
-                                result.addScoreUpdate(competitor, raceColumn, officialNetPoints);
+                                double officialRealTotalPoints = officialTotalPoints / raceColumn.getEffectiveFactor();
+                                result.addScoreUpdate(competitor, raceColumn, officialRealTotalPoints);
                             }
                         }
                     }
@@ -308,7 +308,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.getName());
                 String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                 VerticalPanel cell = new VerticalPanel();
-                cell.add(new Label(entry.netPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
+                cell.add(new Label(entry.realTotalPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
                         (entry.discarded?"/discarded":"")));
                 if (officialSailID != null && raceNameOrNumber != null) {
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
@@ -316,7 +316,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                         .get(raceNameOrNumber).get(officialSailID);
                     final Double officialTotalPoints = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.isDiscarded() ? new Double(0) : officialCorrectionEntry.getScore();
-                    final Double officialNetPoints = officialCorrectionEntry == null ? null :
+                    final Double officialRealTotalPoints = officialCorrectionEntry == null ? null :
                         officialCorrectionEntry.getScore() == null ? null :
                         officialCorrectionEntry.getScore() / raceColumn.getEffectiveFactor();
                     final MaxPointsReason officialMaxPointsReason = officialCorrectionEntry == null ? null :
@@ -325,17 +325,17 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     // entries not considered "different' in case we haven't got an entry for the competitor/race at all;
                     // those non-existing "entries" will be ignored by getResults anyhow
                     boolean entriesDiffer = officialCorrectionEntry != null &&
-                           (((officialNetPoints == null && entry.netPoints != null) || (officialNetPoints != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialNetPoints)))) ||
+                           (((officialRealTotalPoints == null && entry.realTotalPoints != null) || (officialRealTotalPoints != null && (entry.realTotalPoints == null || !new Double(entry.realTotalPoints).equals(officialRealTotalPoints)))) ||
                             ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
                             ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
                                     officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {
                         sb.appendHtmlConstant("<span style=\"color: #0000FF;\"><b>");
                     }
-                    if (officialNetPoints == null) {
+                    if (officialRealTotalPoints == null) {
                         sb.appendEscaped("null");
                     } else {
-                        sb.append(officialNetPoints);
+                        sb.append(officialRealTotalPoints);
                     }
                     sb.appendEscaped("/");
                     if (officialTotalPoints == null) {

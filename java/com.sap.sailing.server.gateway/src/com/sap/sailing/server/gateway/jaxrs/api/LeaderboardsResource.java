@@ -154,7 +154,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 timePointAndResultStateAndMaxCompetitorsCount.getA(), Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
-                /* fillNetPointsUncorrected */false);
+                /* fillRealTotalPointsUncorrected */false);
 
         TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
         ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
@@ -197,8 +197,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("netPoints", leaderboardEntry.netPointsCorrected);
-                jsonEntry.put("uncorrectedNetPoints", leaderboardEntry.netPoints);
+                jsonEntry.put("realTotalPoints", leaderboardEntry.realTotalPointsCorrected);
+                jsonEntry.put("uncorrectedRealTotalPoints", leaderboardEntry.realTotalPoints);
                 jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
@@ -245,7 +245,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
                 final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("netPoints", null);
+                jsonEntry.put("realTotalPoints", null);
                 jsonEntry.put("totalPoints", null);
                 jsonEntry.put("maxPointsReason", "");
                 jsonEntry.put("rank", 0);

@@ -66,7 +66,7 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
         double competitorCount = Util.size(leaderboard.getCompetitors());
-        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        double points = leaderboard.getRealTotalPoints(competitor, raceColumn, now);
         double relativeLowPoints = leaderboard.getScoringScheme().isHigherBetter() ?
                 competitorCount - points : points;
         final double result = relativeLowPoints / competitorCount;
@@ -167,7 +167,7 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     public Boolean isPodiumFinish() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
-        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        double points = leaderboard.getRealTotalPoints(competitor, raceColumn, now);
         if (leaderboard.getScoringScheme().isHigherBetter()) {
             double competitorCount = Util.size(leaderboard.getCompetitors());
             return points >= (competitorCount - 2.05);
@@ -180,7 +180,7 @@ public class RaceResultOfCompetitorWithContext implements HasRaceResultOfCompeti
     public Boolean isWin() {
         Leaderboard leaderboard = getLeaderboard();
         final TimePoint now = MillisecondsTimePoint.now();
-        double points = leaderboard.getNetPoints(competitor, raceColumn, now);
+        double points = leaderboard.getRealTotalPoints(competitor, raceColumn, now);
         if (leaderboard.getScoringScheme().isHigherBetter()) {
             double competitorCount = Util.size(leaderboard.getCompetitors());
             return points >= (competitorCount - 0.05);

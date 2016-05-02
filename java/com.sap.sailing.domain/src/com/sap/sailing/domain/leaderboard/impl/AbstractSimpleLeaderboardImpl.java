@@ -172,22 +172,22 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      */
     class EntryImpl implements Entry {
         private final Callable<Integer> trackedRankProvider;
-        private final Double netPoints;
-        private final Callable<Double> netPointsUncorrectedProvider;
-        private final boolean isNetPointsCorrected;
+        private final Double realTotalPoints;
+        private final Callable<Double> realTotalPointsUncorrectedProvider;
+        private final boolean isRealTotalPointsCorrected;
         private final Double totalPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
         private final Fleet fleet;
 
-        private EntryImpl(Callable<Integer> trackedRankProvider, Double netPoints,
-                Callable<Double> netPointsUncorrectedProvider, boolean isNetPointsCorrected,
+        private EntryImpl(Callable<Integer> trackedRankProvider, Double realTotalPoints,
+                Callable<Double> realTotalPointsUncorrectedProvider, boolean isRealTotalPointsCorrected,
                 Double totalPoints, MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedRankProvider = trackedRankProvider;
-            this.netPoints = netPoints;
-            this.netPointsUncorrectedProvider = netPointsUncorrectedProvider;
-            this.isNetPointsCorrected = isNetPointsCorrected;
+            this.realTotalPoints = realTotalPoints;
+            this.realTotalPointsUncorrectedProvider = realTotalPointsUncorrectedProvider;
+            this.isRealTotalPointsCorrected = isRealTotalPointsCorrected;
             this.totalPoints = totalPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
@@ -202,12 +202,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
         }
         @Override
-        public Double getNetPoints() {
-            return netPoints;
+        public Double getRealTotalPoints() {
+            return realTotalPoints;
         }
         @Override
-        public boolean isNetPointsCorrected() {
-            return isNetPointsCorrected;
+        public boolean isRealTotalPointsCorrected() {
+            return isRealTotalPointsCorrected;
         }
         @Override
         public Double getTotalPoints() {
@@ -226,9 +226,9 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             return fleet;
         }
         @Override
-        public Double getNetPointsUncorrected() {
+        public Double getRealTotalPointsUncorrected() {
             try {
-                return netPointsUncorrectedProvider.call();
+                return realTotalPointsUncorrectedProvider.call();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -437,7 +437,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Double getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
+    public Double getRealTotalPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
         return getScoreCorrection().getCorrectedScore(
                 ()->getTrackedRank(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
@@ -508,11 +508,11 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         if (isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns)) {
             result = 0.0;
         } else {
-            final Double netPoints = getNetPoints(competitor, raceColumn, timePoint);
-            if (netPoints == null) {
+            final Double realTotalPoints = getRealTotalPoints(competitor, raceColumn, timePoint);
+            if (realTotalPoints == null) {
                 result = null;
             } else {
-                result = raceColumn.getFactor() * netPoints;
+                result = raceColumn.getFactor() * realTotalPoints;
             }
         }
         return result;
@@ -550,19 +550,19 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     /**
-     * All competitors with non-<code>null</code> net points are added to the result which is then sorted by net points in ascending
-     * order. The fleet, if ordered, is the primary ordering criterion, followed by the net points.
+     * All competitors with non-<code>null</code> real total points are added to the result which is then sorted by realTotal points in ascending
+     * order. The fleet, if ordered, is the primary ordering criterion, followed by the realTotal points.
      */
     @Override
     public List<Competitor> getCompetitorsFromBestToWorst(final RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> netPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
+        final Map<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>> realTotalPointsAndFleet = new HashMap<Competitor, com.sap.sse.common.Util.Pair<Double, Fleet>>();
         for (Competitor competitor : getCompetitors()) {
-            Double netPoints = getNetPoints(competitor, raceColumn, timePoint);
-            if (netPoints != null) {
-                netPointsAndFleet.put(competitor, new com.sap.sse.common.Util.Pair<Double, Fleet>(netPoints, raceColumn.getFleetOfCompetitor(competitor)));
+            Double realTotalPoints = getRealTotalPoints(competitor, raceColumn, timePoint);
+            if (realTotalPoints != null) {
+                realTotalPointsAndFleet.put(competitor, new com.sap.sse.common.Util.Pair<Double, Fleet>(realTotalPoints, raceColumn.getFleetOfCompetitor(competitor)));
             }
         }
-        List<Competitor> result = new ArrayList<Competitor>(netPointsAndFleet.keySet());
+        List<Competitor> result = new ArrayList<Competitor>(realTotalPointsAndFleet.keySet());
         Collections.sort(result, new Comparator<Competitor>() {
             @Override
             public int compare(Competitor o1, Competitor o2) {
@@ -573,8 +573,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     if (raceColumn.hasSplitFleets() && !raceColumn.hasSplitFleetContiguousScoring()) {
                         // only check fleets if there are more than one and the column is not to be contiguously scored even in case
                         // of split fleets
-                        final Fleet o1Fleet = netPointsAndFleet.get(o1).getB();
-                        final Fleet o2Fleet = netPointsAndFleet.get(o2).getB();
+                        final Fleet o1Fleet = realTotalPointsAndFleet.get(o1).getB();
+                        final Fleet o2Fleet = realTotalPointsAndFleet.get(o2).getB();
                         if (o1Fleet == null) {
                             if (o2Fleet == null) {
                                 comparisonResult = 0;
@@ -596,7 +596,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                     }
                     if (comparisonResult == 0) {
                         comparisonResult = getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
-                                netPointsAndFleet.get(o1).getA(), netPointsAndFleet.get(o2).getA());
+                                realTotalPointsAndFleet.get(o1).getA(), realTotalPointsAndFleet.get(o2).getA());
                     }
                 }
                 return comparisonResult;
@@ -1205,7 +1205,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     public LeaderboardDTO computeDTO(final TimePoint timePoint,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             final boolean waitForLatestAnalyses, TrackedRegattaRegistry trackedRegattaRegistry, final DomainFactory baseDomainFactory,
-            final boolean fillNetPointsUncorrected)
+            final boolean fillRealTotalPointsUncorrected)
             throws NoWindException {
         long startOfRequestHandling = System.currentTimeMillis();
         final LeaderboardDTOCalculationReuseCache cache = new LeaderboardDTOCalculationReuseCache(timePoint);
@@ -1327,7 +1327,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                                 namesOfRaceColumnsForWhichToLoadLegDetails != null
                                         && namesOfRaceColumnsForWhichToLoadLegDetails.contains(raceColumn
                                                 .getName()), waitForLatestAnalyses, legRanksCache, baseDomainFactory,
-                                                fillNetPointsUncorrected, cache);
+                                                fillRealTotalPointsUncorrected, cache);
                     });
                 executor.execute(future);
                 futuresForColumnName.put(raceColumn.getName(), future);
@@ -1403,8 +1403,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            if <code>false</code>, this method is allowed to read the maneuver analysis results from a cache that
      *            may not reflect all data already received; otherwise, the method will always block for the latest
      *            cache updates to have happened before returning.
-     * @param fillNetPointsUncorrected
-     *            tells if {@link LeaderboardEntryDTO#netPointsUncorrected} shall be filled; filling it is rather
+     * @param fillRealTotalPointsUncorrected
+     *            tells if {@link LeaderboardEntryDTO#realTotalPointsUncorrected} shall be filled; filling it is rather
      *            expensive, especially when compared to simply retrieving a score correction, and particularly if in a
      *            larger fleet a number of competitors haven't properly finished the race. This should only be used for
      *            leaderboard editing where a user needs to see what the uncorrected score was that would be used when
@@ -1413,15 +1413,15 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     private LeaderboardEntryDTO getLeaderboardEntryDTO(Entry entry, RaceColumn raceColumn, Competitor competitor,
             TimePoint timePoint, boolean addLegDetails, boolean waitForLatestAnalyses,
             Map<Leg, LinkedHashMap<Competitor, Integer>> legRanksCache, DomainFactory baseDomainFactory,
-            boolean fillNetPointsUncorrected, WindLegTypeAndLegBearingCache cache) {
+            boolean fillRealTotalPointsUncorrected, WindLegTypeAndLegBearingCache cache) {
         LeaderboardEntryDTO entryDTO = new LeaderboardEntryDTO();
         TrackedRace trackedRace = raceColumn.getTrackedRace(competitor);
         entryDTO.race = trackedRace == null ? null : trackedRace.getRaceIdentifier();
-        entryDTO.netPoints = entry.getNetPoints();
-        if (fillNetPointsUncorrected) {
-            entryDTO.netPointsUncorrected = entry.getNetPointsUncorrected();
+        entryDTO.realTotalPoints = entry.getRealTotalPoints();
+        if (fillRealTotalPointsUncorrected) {
+            entryDTO.realTotalPointsUncorrected = entry.getRealTotalPointsUncorrected();
         }
-        entryDTO.netPointsCorrected = entry.isNetPointsCorrected();
+        entryDTO.realTotalPointsCorrected = entry.isRealTotalPointsCorrected();
         entryDTO.totalPoints = entry.getTotalPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
@@ -1880,7 +1880,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public LeaderboardDTO getLeaderboardDTO(TimePoint timePoint,
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillNetPointsUncorrected) throws NoWindException,
+            TrackedRegattaRegistry trackedRegattaRegistry, DomainFactory baseDomainFactory, boolean fillRealTotalPointsUncorrected) throws NoWindException,
             InterruptedException, ExecutionException {
         LeaderboardDTO result = null;
         if (timePoint == null) {
@@ -1890,7 +1890,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             // when the tracked race associations or score corrections or tracked race contents changes:
             final TimePoint nowMinusDelay = this.getNowMinusDelay();
             final TimePoint timePointOfLatestModification = this.getTimePointOfLatestModification();
-            if (fillNetPointsUncorrected || (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification))) {
+            if (fillRealTotalPointsUncorrected || (timePointOfLatestModification != null && !nowMinusDelay.before(timePointOfLatestModification))) {
                 // if there hasn't been any modification to the leaderboard since nowMinusDelay, use non-live mode
                 // and pull the result from the regular leaderboard cache:
                 timePoint = timePointOfLatestModification;
@@ -1901,10 +1901,10 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             }
         }
         if (timePoint != null) {
-            if (fillNetPointsUncorrected) {
-                // explicitly filling the uncorrected net points requires uncached recalculation
+            if (fillRealTotalPointsUncorrected) {
+                // explicitly filling the uncorrected realTotal points requires uncached recalculation
                 result = computeDTO(timePoint, namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, /* waitForLatestAnalyses */ true,
-                        trackedRegattaRegistry, baseDomainFactory, fillNetPointsUncorrected);
+                        trackedRegattaRegistry, baseDomainFactory, fillRealTotalPointsUncorrected);
             } else {
                 // in replay we'd like up-to-date results; they are still cached
                 // which is OK because the cache is invalidated whenever any of the tracked races attached to the

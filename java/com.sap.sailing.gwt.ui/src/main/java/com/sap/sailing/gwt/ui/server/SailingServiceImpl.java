@@ -698,7 +698,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId, boolean fillNetPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
+            String previousLeaderboardId, boolean fillRealTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
         try {
             long startOfRequestHandling = System.currentTimeMillis();
@@ -712,7 +712,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     timePoint = new MillisecondsTimePoint(date);
                 }
                 LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillNetPointsUncorrected);
+                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillRealTotalPointsUncorrected);
                 LeaderboardDTO previousLeaderboardDTO = null;
                 synchronized (leaderboardByNameResultsCacheById) {
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);

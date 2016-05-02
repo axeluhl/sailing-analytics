@@ -229,7 +229,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getRealTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = 0;
         lockTrackedRacesForRead();
         try {

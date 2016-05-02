@@ -146,17 +146,17 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                     InterruptedException {
             }
         };
-        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+        LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false);
         assertNotNull(leaderboardDTO);
-        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // assert it's cached
+        assertSame(leaderboardDTO, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false)); // assert it's cached
         leaderboard.getRaceColumnByName(columnName).releaseTrackedRace(defaultFleet); // this should clear the cache
-        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+        LeaderboardDTO leaderboardDTO2 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false);
         assertNotSame(leaderboardDTO, leaderboardDTO2);
-        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // and cached again
+        assertSame(leaderboardDTO2, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false)); // and cached again
         leaderboard.getRaceColumnByName(columnName).setTrackedRace(defaultFleet, testRaces.iterator().next()); // clear cache again; requires listener(s) to still be attached
-        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false);
+        LeaderboardDTO leaderboardDTO3 = leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false);
         assertNotSame(leaderboardDTO2, leaderboardDTO3);
-        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillNetPointsUncorrected */ false)); // and cached again
+        assertSame(leaderboardDTO3, leaderboard.getLeaderboardDTO(now, emptySet, /* addOverallDetails */ true, trackedRegattaRegistry, DomainFactory.INSTANCE, /* fillRealTotalPointsUncorrected */ false)); // and cached again
     }
 
     @Test
@@ -187,9 +187,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             }
         }
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DSQ);
-        // assert that best scoring but now disqualified race gets max net points because of disqualification:
+        // assert that best scoring but now disqualified race gets max realTotal points because of disqualification:
         assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
-                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
+                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getRealTotalPoints(), 0.000000001);
         // now assert that it gets discarded because due to disqualification it scores worse than all others:
         assertEquals(0, leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
     }
@@ -238,7 +238,7 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
         RaceColumn r2 = leaderboard.addRaceColumn("R2", /* medalRace */false);
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, r2, MaxPointsReason.DND); // non-discardable disqualification
         // assert that max points were given before discarding...
-        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
+        assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getRealTotalPoints(), 0.000000001);
         // ...and after...
         assertEquals(4.0, leaderboard.getEntry(competitor, r2, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
         // ...because it's not discarded
@@ -273,9 +273,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
             }
         }
         leaderboard.getScoreCorrection().setMaxPointsReason(competitor, bestScoringRaceColumn, MaxPointsReason.DND);
-        // assert that best scoring but now disqualified race gets max net points because of disqualification:
+        // assert that best scoring but now disqualified race gets max realTotal points because of disqualification:
         assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
-                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getNetPoints(), 0.000000001);
+                leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getRealTotalPoints(), 0.000000001);
         // now assert that it does not get discarded because it's a DND
         assertEquals(Util.size(bestScoringRaceColumn.getTrackedRace(defaultFleet).getRace().getCompetitors())+1,
                 leaderboard.getEntry(competitor, bestScoringRaceColumn, MillisecondsTimePoint.now()).getTotalPoints(), 0.000000001);
@@ -324,9 +324,9 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 assertEquals(rank, leaderboard.getTrackedRank(competitor, raceColumn, now));
                 assertEquals(rank, leaderboard.getContent(now).get(key).getTrackedRank());
                 assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getTrackedRank());
-                assertEquals(rank, leaderboard.getNetPoints(competitor, raceColumn, now), 0.000000001);
-                assertEquals(rank, leaderboard.getContent(now).get(key).getNetPoints(), 0.000000001);
-                assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getNetPoints(), 0.000000001);
+                assertEquals(rank, leaderboard.getRealTotalPoints(competitor, raceColumn, now), 0.000000001);
+                assertEquals(rank, leaderboard.getContent(now).get(key).getRealTotalPoints(), 0.000000001);
+                assertEquals(rank, leaderboard.getEntry(competitor, raceColumn, now).getRealTotalPoints(), 0.000000001);
                 // One race is discarded because four races were started, and for [3-6) one race can be discarded.
                 // The discarded race is the worst of those started, so the one with rank 4.
                 int expectedNumberOfDiscardedRaces =
@@ -340,11 +340,11 @@ public class LeaderboardOfflineTest extends AbstractLeaderboardTest {
                 totalPoints += leaderboard.getContent(now).get(key).getTotalPoints();
             } else {
                 assertEquals(0, leaderboard.getTrackedRank(competitor, raceColumn, now));
-                assertNull(leaderboard.getNetPoints(competitor, raceColumn, now));
+                assertNull(leaderboard.getRealTotalPoints(competitor, raceColumn, now));
                 assertEquals(0, leaderboard.getContent(now).get(key).getTrackedRank());
-                assertNull(leaderboard.getContent(now).get(key).getNetPoints());
+                assertNull(leaderboard.getContent(now).get(key).getRealTotalPoints());
                 assertEquals(0, leaderboard.getEntry(competitor, raceColumn, now).getTrackedRank());
-                assertNull(leaderboard.getEntry(competitor, raceColumn, now).getNetPoints());
+                assertNull(leaderboard.getEntry(competitor, raceColumn, now).getRealTotalPoints());
                 // no increment on totalPoints
             }
         }

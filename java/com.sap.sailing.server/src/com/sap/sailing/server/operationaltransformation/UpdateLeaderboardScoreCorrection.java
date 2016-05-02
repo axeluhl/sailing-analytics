@@ -41,7 +41,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
     @Override
     public Util.Triple<Double, Double, Boolean> internalApplyTo(RacingEventService toState) throws NoWindException {
         Leaderboard leaderboard = toState.getLeaderboardByName(getLeaderboardName());
-        Double newNetPoints;
+        Double newRealTotalPoints;
         Double newTotalPoints;
         boolean isScoreCorrected;
         if (leaderboard != null) {
@@ -50,10 +50,10 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
                 RaceColumn raceColumn = leaderboard.getRaceColumnByName(getColumnName());
                 if (correctedScore == null) {
                     leaderboard.getScoreCorrection().uncorrectScore(competitor, raceColumn);
-                    newNetPoints = leaderboard.getNetPoints(competitor, raceColumn, timePoint);
+                    newRealTotalPoints = leaderboard.getRealTotalPoints(competitor, raceColumn, timePoint);
                 } else {
                     leaderboard.getScoreCorrection().correctScore(competitor, raceColumn, correctedScore);
-                    newNetPoints = correctedScore;
+                    newRealTotalPoints = correctedScore;
                 }
                 newTotalPoints = leaderboard.getEntry(competitor, raceColumn, timePoint).getTotalPoints();
                 isScoreCorrected = leaderboard.getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint);
@@ -64,7 +64,7 @@ public class UpdateLeaderboardScoreCorrection extends AbstractLeaderboardColumnO
             throw new IllegalArgumentException("Didn't find leaderboard "+getLeaderboardName());
         }
         updateStoredLeaderboard(toState, leaderboard);
-        return new Util.Triple<Double, Double, Boolean>(newNetPoints, newTotalPoints, isScoreCorrected);
+        return new Util.Triple<Double, Double, Boolean>(newRealTotalPoints, newTotalPoints, isScoreCorrected);
     }
 
 }

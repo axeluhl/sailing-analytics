@@ -621,7 +621,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String correctScore();
     String correctScoreFor(String competitorName, String raceColumnName);
     String penaltyOrRedress();
-    String netScore();
+    String realTotalScore();
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
@@ -1139,7 +1139,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
-    String showUncorrectedNetPoints();
+    String showUncorrectedRealTotalPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
     String lastScoreCorrectionsTime();
