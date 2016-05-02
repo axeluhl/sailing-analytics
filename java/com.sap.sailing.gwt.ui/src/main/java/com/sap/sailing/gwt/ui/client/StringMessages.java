@@ -1578,4 +1578,12 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String perHours();
     String pleaseSelectAValidWindPattern();
     String downwindLegsNotSupported();
+    String raceLeader();
+    String opportunistLeft();
+    String opportunistRight();
+    String oneTurnerLeft();
+    String oneTurnerRight();
+    String current();
+    String simulationLegendAlgorithmTimedOutText();
+    String simulationLegendMixedLegText();
 }

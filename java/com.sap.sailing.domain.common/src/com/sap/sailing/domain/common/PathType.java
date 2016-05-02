@@ -1,4 +1,4 @@
-package com.sap.sailing.simulator;
+package com.sap.sailing.domain.common;
 
 public enum PathType {
     OMNISCIENT("1#Omniscient"),
