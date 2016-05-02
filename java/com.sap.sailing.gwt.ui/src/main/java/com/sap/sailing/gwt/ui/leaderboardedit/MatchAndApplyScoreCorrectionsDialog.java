@@ -308,7 +308,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                 LeaderboardEntryDTO entry = leaderboardRow.fieldsByRaceColumnName.get(raceColumn.getName());
                 String raceNameOrNumber = getSelectedString(raceNameOrNumberChoosers, raceColumn);
                 VerticalPanel cell = new VerticalPanel();
-                cell.add(new Label(entry.realTotalPoints+"/"+entry.totalPoints+"/"+entry.reasonForMaxPoints+
+                cell.add(new Label(entry.realTotalPoints+"/"+entry.netPoints+"/"+entry.reasonForMaxPoints+
                         (entry.discarded?"/discarded":"")));
                 if (officialSailID != null && raceNameOrNumber != null) {
                     ScoreCorrectionEntryDTO officialCorrectionEntry =
@@ -326,7 +326,7 @@ public class MatchAndApplyScoreCorrectionsDialog extends DataEntryDialog<BulkSco
                     // those non-existing "entries" will be ignored by getResults anyhow
                     boolean entriesDiffer = officialCorrectionEntry != null &&
                            (((officialRealTotalPoints == null && entry.realTotalPoints != null) || (officialRealTotalPoints != null && (entry.realTotalPoints == null || !new Double(entry.realTotalPoints).equals(officialRealTotalPoints)))) ||
-                            ((officialTotalPoints == null && entry.totalPoints != null) || (officialTotalPoints != null && (entry.totalPoints == null || !new Double(entry.totalPoints).equals(officialTotalPoints)))) ||
+                            ((officialTotalPoints == null && entry.netPoints != null) || (officialTotalPoints != null && (entry.netPoints == null || !new Double(entry.netPoints).equals(officialTotalPoints)))) ||
                             ((officialMaxPointsReason == null && entry.reasonForMaxPoints != MaxPointsReason.NONE) ||
                                     officialMaxPointsReason != null && officialMaxPointsReason != entry.reasonForMaxPoints));
                     if (entriesDiffer) {

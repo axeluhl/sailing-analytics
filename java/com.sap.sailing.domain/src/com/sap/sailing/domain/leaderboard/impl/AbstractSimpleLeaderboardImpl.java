@@ -130,7 +130,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     /**
      * Backs the {@link #getCarriedPoints(Competitor)} API with data. Can be used to prime this leaderboard
      * with aggregated results of races not tracked / displayed by this leaderboard in detail. The points
-     * provided by this map are considered by {@link #getTotalPoints(Competitor, TimePoint)}.
+     * provided by this map are considered by {@link #getNetPoints(Competitor, TimePoint)}.
      */
     private final Map<Competitor, Double> carriedPoints;
 
@@ -175,20 +175,20 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         private final Double realTotalPoints;
         private final Callable<Double> realTotalPointsUncorrectedProvider;
         private final boolean isRealTotalPointsCorrected;
-        private final Double totalPoints;
+        private final Double netPoints;
         private final MaxPointsReason maxPointsReason;
         private final boolean discarded;
         private final Fleet fleet;
 
         private EntryImpl(Callable<Integer> trackedRankProvider, Double realTotalPoints,
                 Callable<Double> realTotalPointsUncorrectedProvider, boolean isRealTotalPointsCorrected,
-                Double totalPoints, MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
+                Double netPoints, MaxPointsReason maxPointsReason, boolean discarded, Fleet fleet) {
             super();
             this.trackedRankProvider = trackedRankProvider;
             this.realTotalPoints = realTotalPoints;
             this.realTotalPointsUncorrectedProvider = realTotalPointsUncorrectedProvider;
             this.isRealTotalPointsCorrected = isRealTotalPointsCorrected;
-            this.totalPoints = totalPoints;
+            this.netPoints = netPoints;
             this.maxPointsReason = maxPointsReason;
             this.discarded = discarded;
             this.fleet = fleet;
@@ -210,8 +210,8 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             return isRealTotalPointsCorrected;
         }
         @Override
-        public Double getTotalPoints() {
-            return totalPoints;
+        public Double getNetPoints() {
+            return netPoints;
         }
         @Override
         public MaxPointsReason getMaxPointsReason() {
@@ -462,7 +462,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
 
     /**
      * Same as {@link #isDiscarded(Competitor, RaceColumn, TimePoint)}, only that the set of discarded race columns can
-     * be specified which is useful when total points are to be computed for more than one column for the same
+     * be specified which is useful when net points are to be computed for more than one column for the same
      * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
      * once and not again for each column (which would lead to quadratic effort).
      * 
@@ -479,21 +479,21 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
-        return getTotalPoints(competitor, raceColumn, getRaceColumns(), timePoint);
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) throws NoWindException {
+        return getNetPoints(competitor, raceColumn, getRaceColumns(), timePoint);
     }
 
     @Override
-    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn,
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn,
             Iterable<RaceColumn> raceColumnsToConsider, TimePoint timePoint) throws NoWindException {
         final Set<RaceColumn> discardedRaceColumns = getResultDiscardingRule()
                 .getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint);
-        return getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
+        return getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
     }
 
     /**
-     * Same as {@link #getTotalPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
-     * be specified which is useful when total points are to be computed for more than one column for the same
+     * Same as {@link #getNetPoints(Competitor, RaceColumn, Iterable, TimePoint)}, only that the set of discarded race columns can
+     * be specified which is useful when net points are to be computed for more than one column for the same
      * competitor because then the calculation of discards (which requires looking at all columns) only needs to be done
      * once and not again for each column (which would lead to quadratic effort).
      * 
@@ -503,7 +503,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
      *            getDiscardedRaceColumns(competitor, this, raceColumnsToConsider, timePoint)}.
      */
     @Override
-    public Double getTotalPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) {
+    public Double getNetPoints(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint, Set<RaceColumn> discardedRaceColumns) {
         Double result;
         if (isDiscarded(competitor, raceColumn, timePoint, discardedRaceColumns)) {
             result = 0.0;
@@ -519,12 +519,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Double getTotalPoints(Competitor competitor, TimePoint timePoint) {
-        return getTotalPoints(competitor, getRaceColumns(), timePoint);
+    public Double getNetPoints(Competitor competitor, TimePoint timePoint) {
+        return getNetPoints(competitor, getRaceColumns(), timePoint);
     }
 
     @Override
-    public Double getTotalPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
+    public Double getNetPoints(Competitor competitor, final Iterable<RaceColumn> raceColumnsToConsider,
             TimePoint timePoint) {
         // when a column with isStartsWithZeroScore() is found, only reset score if the competitor scored in any race from there on
         boolean needToResetScoreUponNextNonEmptyEntry = false;
@@ -535,14 +535,14 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             if (raceColumn.isStartsWithZeroScore()) {
                 needToResetScoreUponNextNonEmptyEntry = true;
             }
-            if (getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint)) {
-                final Double totalPoints = getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
-                if (totalPoints != null) {
+            if (getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint)) {
+                final Double netPoints = getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns);
+                if (netPoints != null) {
                     if (needToResetScoreUponNextNonEmptyEntry) {
                         result = 0;
                         needToResetScoreUponNextNonEmptyEntry = false;
                     }
-                    result += totalPoints;
+                    result += netPoints;
                 }
             }
         }
@@ -550,7 +550,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     /**
-     * All competitors with non-<code>null</code> real total points are added to the result which is then sorted by realTotal points in ascending
+     * All competitors with non-<code>null</code> realTotal points are added to the result which is then sorted by realTotal points in ascending
      * order. The fleet, if ordered, is the primary ordering criterion, followed by the realTotal points.
      */
     @Override
@@ -654,7 +654,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public boolean countRaceForComparisonWithDiscardingThresholds(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
         TrackedRace trackedRaceForCompetitorInColumn;
-        return getScoringScheme().isValidInTotalScore(this, raceColumn, competitor, timePoint) && 
+        return getScoringScheme().isValidInNetScore(this, raceColumn, competitor, timePoint) && 
                (getScoreCorrection().isScoreCorrected(competitor, raceColumn, timePoint) ||
                        ((trackedRaceForCompetitorInColumn=raceColumn.getTrackedRace(competitor)) != null &&
                         trackedRaceForCompetitorInColumn.hasStarted(timePoint) &&
@@ -703,7 +703,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     }
 
     @Override
-    public Map<RaceColumn, Map<Competitor, Double>> getTotalPointsSumAfterRaceColumn(final TimePoint timePoint)
+    public Map<RaceColumn, Map<Competitor, Double>> getNetPointsSumAfterRaceColumn(final TimePoint timePoint)
             throws NoWindException {
         final Map<RaceColumn, Map<Competitor, Double>> result = new LinkedHashMap<>();
         List<RaceColumn> raceColumnsToConsider = new ArrayList<>();
@@ -714,12 +714,12 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             futures.put(raceColumn, executor.submit(new Callable<Map<Competitor, Double>>() {
                 @Override
                 public Map<Competitor, Double> call() {
-                    Map<Competitor, Double> totalPointsSumPerCompetitorInColumn = new HashMap<>();
+                    Map<Competitor, Double> netPointsSumPerCompetitorInColumn = new HashMap<>();
                     for (Competitor competitor : getCompetitors()) {
-                        totalPointsSumPerCompetitorInColumn.put(competitor, getTotalPoints(competitor, finalRaceColumnsToConsider, timePoint));
+                        netPointsSumPerCompetitorInColumn.put(competitor, getNetPoints(competitor, finalRaceColumnsToConsider, timePoint));
                     }
                     synchronized (result) {
-                        return totalPointsSumPerCompetitorInColumn;
+                        return netPointsSumPerCompetitorInColumn;
                     }
                 }
             }));
@@ -1313,7 +1313,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             row.competitor = competitorDTO;
             row.fieldsByRaceColumnName = new HashMap<String, LeaderboardEntryDTO>();
             row.carriedPoints = this.hasCarriedPoints(competitor) ? this.getCarriedPoints(competitor) : null;
-            row.totalPoints = this.getTotalPoints(competitor, timePoint);
+            row.netPoints = this.getNetPoints(competitor, timePoint);
             if (addOverallDetails) {
                 addOverallDetailsToRow(timePoint, competitor, row);
             }
@@ -1422,7 +1422,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
             entryDTO.realTotalPointsUncorrected = entry.getRealTotalPointsUncorrected();
         }
         entryDTO.realTotalPointsCorrected = entry.isRealTotalPointsCorrected();
-        entryDTO.totalPoints = entry.getTotalPoints();
+        entryDTO.netPoints = entry.getNetPoints();
         entryDTO.reasonForMaxPoints = entry.getMaxPointsReason();
         entryDTO.discarded = entry.isDiscarded();
         final GPSFixTrack<Competitor, GPSFixMoving> track = trackedRace == null ? null : trackedRace.getTrack(competitor);

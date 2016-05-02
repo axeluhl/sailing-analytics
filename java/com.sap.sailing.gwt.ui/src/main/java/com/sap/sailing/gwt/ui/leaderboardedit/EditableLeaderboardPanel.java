@@ -334,13 +334,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                         }
 
                         @Override
-                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
+                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndNetPointsAndIsCorrected) {
                             setBusyState(false);
                             row.fieldsByRaceColumnName.get(raceColumnName).reasonForMaxPoints = value == null
                                     || value.length() == 0 ? null : MaxPointsReason.valueOf(value.trim());
-                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPoints = newRealTotalAndTotalPointsAndIsCorrected.getA();
-                            row.fieldsByRaceColumnName.get(raceColumnName).totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
-                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
+                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPoints = newRealTotalAndNetPointsAndIsCorrected.getA();
+                            row.fieldsByRaceColumnName.get(raceColumnName).netPoints = newRealTotalAndNetPointsAndIsCorrected.getB();
+                            row.fieldsByRaceColumnName.get(raceColumnName).realTotalPointsCorrected = newRealTotalAndNetPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again
                             whiteboard.setObjectWithWhichToUpdateRow(row);
                         }
@@ -465,7 +465,7 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                             leaderboardEntryDTO.realTotalPoints = value == null || value.length() == 0 ? newRealTotalAndTotalPointsAndIsCorrected
                                     .getA() : Double.valueOf(value.trim());
-                            leaderboardEntryDTO.totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
+                            leaderboardEntryDTO.netPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
                             leaderboardEntryDTO.realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
                             getCell().setViewData(row, null); // ensure that getValue() is called again
                             whiteboard.setObjectWithWhichToUpdateRow(row);
@@ -552,13 +552,13 @@ public class EditableLeaderboardPanel extends LeaderboardPanel {
                                         }
 
                                         @Override
-                                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndTotalPointsAndIsCorrected) {
+                                        public void onSuccess(Util.Triple<Double, Double, Boolean> newRealTotalAndNetPointsAndIsCorrected) {
                                             setBusyState(false);
                                             final LeaderboardEntryDTO leaderboardEntryDTO = row.fieldsByRaceColumnName.get(raceColumnName);
                                             leaderboardEntryDTO.reasonForMaxPoints = editedObject.getA();
-                                            leaderboardEntryDTO.realTotalPoints = newRealTotalAndTotalPointsAndIsCorrected.getA();
-                                            leaderboardEntryDTO.totalPoints = newRealTotalAndTotalPointsAndIsCorrected.getB();
-                                            leaderboardEntryDTO.realTotalPointsCorrected = newRealTotalAndTotalPointsAndIsCorrected.getC();
+                                            leaderboardEntryDTO.realTotalPoints = newRealTotalAndNetPointsAndIsCorrected.getA();
+                                            leaderboardEntryDTO.netPoints = newRealTotalAndNetPointsAndIsCorrected.getB();
+                                            leaderboardEntryDTO.realTotalPointsCorrected = newRealTotalAndNetPointsAndIsCorrected.getC();
                                             maxPointsDropDownCellProvider.getCell().setViewData(row, null);
                                             realTotalPointsEditCellProvider.getCell().setViewData(row, null);
                                             whiteboard.setObjectWithWhichToUpdateRow(row);

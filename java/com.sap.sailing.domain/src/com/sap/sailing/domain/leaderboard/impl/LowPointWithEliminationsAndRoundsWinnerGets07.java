@@ -187,7 +187,7 @@ public class LowPointWithEliminationsAndRoundsWinnerGets07 extends LowPoint {
     }
 
     @Override
-    public boolean isValidInTotalScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
+    public boolean isValidInNetScore(Leaderboard leaderboard, RaceColumn raceColumn, Competitor competitor, TimePoint at) {
         final RaceColumnInSeries raceColumnInSeries = (RaceColumnInSeries) raceColumn;
         final Iterator<? extends Series> seriesInRegattaIter = raceColumnInSeries.getSeries().getRegatta().getSeries().iterator();
         while (seriesInRegattaIter.hasNext() && seriesInRegattaIter.next() != raceColumnInSeries.getSeries())

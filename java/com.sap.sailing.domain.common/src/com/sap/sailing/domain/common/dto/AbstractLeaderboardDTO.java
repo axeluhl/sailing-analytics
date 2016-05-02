@@ -106,7 +106,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
     public boolean scoredInMedalRace(CompetitorDTO competitor) {
         LeaderboardRowDTO row = rows.get(competitor);
         for (RaceColumnDTO race : races) {
-            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).totalPoints > 0) {
+            if (race.isMedalRace() && row.fieldsByRaceColumnName.get(race.getRaceColumnName()).netPoints > 0) {
                 return true;
             }
         }

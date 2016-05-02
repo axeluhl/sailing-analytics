@@ -26,12 +26,12 @@ public class DetailTypeFormatter {
             return stringMessages.regattaRank();
         case OVERALL_RANK:
             return stringMessages.overallRank();
-        case RACE_TOTAL_POINTS:
-            return stringMessages.totalPoints();
-        case REGATTA_TOTAL_POINTS:
-            return stringMessages.totalPoints();            
-        case REGATTA_TOTAL_POINTS_SUM:
-            return stringMessages.totalPoints();            
+        case RACE_NET_POINTS:
+            return stringMessages.netPoints();
+        case REGATTA_NET_POINTS:
+            return stringMessages.netPoints();            
+        case REGATTA_NET_POINTS_SUM:
+            return stringMessages.netPoints();            
         case NUMBER_OF_MANEUVERS:
             return stringMessages.numberOfManeuvers();
         case CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
@@ -225,9 +225,9 @@ public class DetailTypeFormatter {
         case RACE_RANK:
         case REGATTA_RANK:
         case OVERALL_RANK:
-        case RACE_TOTAL_POINTS:
-        case REGATTA_TOTAL_POINTS:
-        case REGATTA_TOTAL_POINTS_SUM:
+        case RACE_NET_POINTS:
+        case REGATTA_NET_POINTS:
+        case REGATTA_NET_POINTS_SUM:
         case CURRENT_LEG:
         case TACK:
         case START_TACK:
@@ -336,12 +336,12 @@ public class DetailTypeFormatter {
             return stringMessages.regattaRankTooltip();
         case OVERALL_RANK:
             return stringMessages.overallRankTooltip();
-        case RACE_TOTAL_POINTS:
-            return stringMessages.raceTotalPointsTooltip();
-        case REGATTA_TOTAL_POINTS:
-            return stringMessages.regattaTotalPointsTooltip();            
-        case REGATTA_TOTAL_POINTS_SUM:
-            return stringMessages.regattaTotalPointsTooltip();            
+        case RACE_NET_POINTS:
+            return stringMessages.raceNetPointsTooltip();
+        case REGATTA_NET_POINTS:
+            return stringMessages.regattaNetPointsTooltip();            
+        case REGATTA_NET_POINTS_SUM:
+            return stringMessages.regattaNetPointsTooltip();            
         case RANK_GAIN:
             return stringMessages.rankGainTooltip();
         case TACK:

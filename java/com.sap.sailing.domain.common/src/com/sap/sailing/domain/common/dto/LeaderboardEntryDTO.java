@@ -38,7 +38,7 @@ public class LeaderboardEntryDTO implements Serializable {
      */
     public boolean realTotalPointsCorrected;
     
-    public Double totalPoints;
+    public Double netPoints;
     
     public boolean discarded;
     
@@ -176,7 +176,7 @@ public class LeaderboardEntryDTO implements Serializable {
         result = prime * result + ((startTack == null) ? 0 : startTack.hashCode());
         result = prime * result + ((averageSamplingInterval == null) ? 0 : averageSamplingInterval.hashCode());
         result = prime * result + ((timeSinceLastPositionFixInSeconds == null) ? 0 : timeSinceLastPositionFixInSeconds.hashCode());
-        result = prime * result + ((totalPoints == null) ? 0 : totalPoints.hashCode());
+        result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime
                 * result
                 + ((windwardDistanceToCompetitorFarthestAheadInMeters == null) ? 0 : windwardDistanceToCompetitorFarthestAheadInMeters
@@ -292,10 +292,10 @@ public class LeaderboardEntryDTO implements Serializable {
                 return false;
         } else if (!timeSinceLastPositionFixInSeconds.equals(other.timeSinceLastPositionFixInSeconds))
             return false;
-        if (totalPoints == null) {
-            if (other.totalPoints != null)
+        if (netPoints == null) {
+            if (other.netPoints != null)
                 return false;
-        } else if (!totalPoints.equals(other.totalPoints))
+        } else if (!netPoints.equals(other.netPoints))
             return false;
         if (windwardDistanceToCompetitorFarthestAheadInMeters == null) {
             if (other.windwardDistanceToCompetitorFarthestAheadInMeters != null)

@@ -499,9 +499,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorRegattaDataAfterRaceN(String detailType, String raceColumnName);
     String showRankChart();
     String rankChart();
-    String totalPoints();
-    String raceTotalPointsTooltip();
-    String regattaTotalPointsTooltip();
+    String netPoints();
+    String raceNetPointsTooltip();
+    String regattaNetPointsTooltip();
     String overallLeaderboardSelection();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
@@ -587,7 +587,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sailIdColumnTooltip();
     String rankColumnTooltip();
     String carryColumnTooltip();
-    String totalsColumnTooltip();
+    String totalNetPointsColumnTooltip();
     String windData();
     String gpsData();
     String status();
