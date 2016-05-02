@@ -243,7 +243,7 @@ public class LeaderboardData extends ExportAction {
                     addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
                     boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, timepointToBeUsed);
                     addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                    Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, timepointToBeUsed);
+                    Double finalRaceScore = leaderboard.getNetPoints(competitorInLeaderboard, column, timepointToBeUsed);
                     addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
                     competitorElement.addContent(competitorRaceDataElement);
                     raceElement.addContent(competitorElement);
@@ -404,7 +404,7 @@ public class LeaderboardData extends ExportAction {
                         addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
                         boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitorInLeaderboard, column, race.getEndOfRace());
                         addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-                        Double finalRaceScore = leaderboard.getTotalPoints(competitorInLeaderboard, column, race.getEndOfRace());
+                        Double finalRaceScore = leaderboard.getNetPoints(competitorInLeaderboard, column, race.getEndOfRace());
                         addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
                         competitorElement.addContent(competitorRaceDataElement);
                         raceElement.addContent(competitorElement);
@@ -428,7 +428,7 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
             boolean isDiscardedForCompetitor = leaderboard.isDiscarded(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "is_discarded", isDiscardedForCompetitor == true ? "true" : "false");
-            Double finalRaceScore = leaderboard.getTotalPoints(competitor, column, race.getEndOfRace());
+            Double finalRaceScore = leaderboard.getNetPoints(competitor, column, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_score", finalRaceScore);
             if (maxPointsReason.equals(MaxPointsReason.DNS) || race.getMarkPassings(competitor).isEmpty()) {
                 // we do not want to include competitors that did not start the race
@@ -701,7 +701,7 @@ public class LeaderboardData extends ExportAction {
         Speed averageSpeedOverGroundIncludingNonCompletedRaces = getAverageSpeedOverGround(leaderboard, competitor, timePointOfLatestModification, true);
         addNamedElementWithValue(competitorElement, "average_speed_over_ground_including_non_finished_races_in_knots", averageSpeedOverGroundIncludingNonCompletedRaces == null ? 0 : averageSpeedOverGroundIncludingNonCompletedRaces.getKnots());
         addNamedElementWithValue(competitorElement, "overall_rank", leaderboard.getTotalRankOfCompetitor(competitor, timePointOfLatestModification));
-        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getTotalPoints(competitor, timePointOfLatestModification));
+        addNamedElementWithValue(competitorElement, "overall_score", leaderboard.getNetPoints(competitor, timePointOfLatestModification));
         competitorElement.addContent(createDataConfidenceXML(competitorConfidenceAndErrorMessages));
         TimePoint elapsedTime = MillisecondsTimePoint.now().minus(timeSpent.asMillis());
         addNamedElementWithValue(competitorElement, "generation_time_in_milliseconds", elapsedTime.asMillis());

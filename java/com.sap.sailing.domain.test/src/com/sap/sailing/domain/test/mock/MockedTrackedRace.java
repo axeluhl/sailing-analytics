@@ -534,7 +534,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+            public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
                 return 0;
             }
 

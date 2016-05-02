@@ -698,7 +698,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public IncrementalOrFullLeaderboardDTO getLeaderboardByName(final String leaderboardName, final Date date,
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
-            String previousLeaderboardId, boolean fillNetPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
+            String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
         try {
             long startOfRequestHandling = System.currentTimeMillis();
@@ -712,7 +712,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     timePoint = new MillisecondsTimePoint(date);
                 }
                 LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint,
-                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillNetPointsUncorrected);
+                        namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails, getService(), baseDomainFactory, fillTotalPointsUncorrected);
                 LeaderboardDTO previousLeaderboardDTO = null;
                 synchronized (leaderboardByNameResultsCacheById) {
                     leaderboardByNameResultsCacheById.put(leaderboardDTO.getId(), leaderboardDTO);
@@ -3041,8 +3041,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TimePoint effectiveTimePoint = timePoint == null ? leaderboard.getNowMinusDelay() : timePoint;
             if (detailType != null) {
                 switch (detailType) {
-                case REGATTA_TOTAL_POINTS_SUM:
-                    for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getTotalPointsSumAfterRaceColumn(effectiveTimePoint).entrySet()) {
+                case REGATTA_NET_POINTS_SUM:
+                    for (Entry<RaceColumn, Map<Competitor, Double>> e : leaderboard.getNetPointsSumAfterRaceColumn(effectiveTimePoint).entrySet()) {
                         List<CompetitorDTO> competitorDTOs = new ArrayList<>();
                         List<Double> pointSums = new ArrayList<>();
                         for (Entry<Competitor, Double> e2 : e.getValue().entrySet()) {
