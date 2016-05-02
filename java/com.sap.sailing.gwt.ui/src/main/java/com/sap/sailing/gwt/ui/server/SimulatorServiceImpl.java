@@ -949,7 +949,7 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
             // NOTE: pathName convention is: sort-digit + "#" + path-name
             // pathsAndNames is TreeMap which ensures sorting
-            pathDTOs[index] = new PathDTO(entry.getKey().getTxtId());
+            pathDTOs[index] = new PathDTO(entry.getKey());
 
             // fill pathDTO with path points where speed is true wind speed
             List<SimulatorWindDTO> wList = new ArrayList<SimulatorWindDTO>();
