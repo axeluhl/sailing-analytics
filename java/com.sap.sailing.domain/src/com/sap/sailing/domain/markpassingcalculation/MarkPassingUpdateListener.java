@@ -17,6 +17,7 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.util.IntHolder;
 
 /**
  * Listens for changes that might affect the MarkPassingCalculator: new Fixes of a Competitor or a Mark, updated
@@ -30,11 +31,13 @@ import com.sap.sse.common.Util.Triple;
 public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     private static final Logger logger = Logger.getLogger(MarkPassingUpdateListener.class.getName());
     private LinkedBlockingQueue<StorePositionUpdateStrategy> queue;
+    private final String raceName;
+
     private final StorePositionUpdateStrategy endMarker = new StorePositionUpdateStrategy() {
         @Override
         public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                 Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                Integer smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
+                IntHolder smallestChangedWaypointIndex, List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                 List<Pair<Competitor, Integer>> removedMarkPassings,
                 List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
         }
@@ -44,6 +47,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
      * Adds itself automatically as a Listener on the <code>race</code> and its course.
      */
     public MarkPassingUpdateListener(DynamicTrackedRace race) {
+        raceName = race.getRace().getName();
         queue = new LinkedBlockingQueue<>();
         race.addListener(this);
         race.getRace().getCourse().addCourseListener(this);
@@ -59,7 +63,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
@@ -79,7 +83,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
@@ -98,7 +102,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
     }
 
     public void stop() {
-        logger.info("Stopping " + this);
+        logger.info("Stopping " + this + " for race " + raceName);
         queue.add(endMarker);
     }
 
@@ -108,13 +112,13 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
                 addedWaypoints.add(waypointThatGotAdded);
-                if (smallestChangedWaypointIndex == null || smallestChangedWaypointIndex > zeroBasedIndex) {
-                    smallestChangedWaypointIndex = zeroBasedIndex;
+                if (smallestChangedWaypointIndex.value == -1|| smallestChangedWaypointIndex.value > zeroBasedIndex) {
+                    smallestChangedWaypointIndex.value = zeroBasedIndex;
                 }
             }
         });
@@ -126,13 +130,13 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
                 removedWaypoints.add(waypointThatGotRemoved);
-                if (smallestChangedWaypointIndex == null || smallestChangedWaypointIndex > zeroBasedIndex) {
-                    smallestChangedWaypointIndex = zeroBasedIndex;
+                if (smallestChangedWaypointIndex.value == -1 || smallestChangedWaypointIndex.value > zeroBasedIndex) {
+                    smallestChangedWaypointIndex.value = zeroBasedIndex;
                 }
             }
         });
@@ -144,7 +148,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
@@ -159,7 +163,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
@@ -174,7 +178,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
@@ -189,7 +193,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
             @Override
             public void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes,
                     Map<Mark, List<GPSFix>> markFixes, List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints,
-                    Integer smallestChangedWaypointIndex,
+                    IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {

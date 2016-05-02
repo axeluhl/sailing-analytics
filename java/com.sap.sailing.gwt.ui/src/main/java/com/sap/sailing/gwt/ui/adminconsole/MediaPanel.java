@@ -123,7 +123,11 @@ public class MediaPanel extends FlowPanel {
             public List<String> getSearchableStrings(MediaTrack t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.title);
-                strings.add(t.startTime.toString());
+                if (t.startTime == null) {
+                    GWT.log("startTime of media track "+t.title+" undefined");
+                } else {
+                    strings.add(t.startTime.toString());
+                }
                 return strings;
             }
         };

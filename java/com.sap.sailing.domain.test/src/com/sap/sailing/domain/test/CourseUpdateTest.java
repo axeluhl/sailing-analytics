@@ -105,6 +105,9 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
             }
         });
         addListenersForStoredDataAndStartController(receivers);
+        for (final Receiver receiver : receivers) {
+            addReceiverToStopDuringTearDown(receiver);
+        }
         // now we expect that there is no 
         assertNull(domainFactory.getExistingRaceDefinitionForRace(tractracRace.getId()));
         race = domainFactory.getAndWaitForRaceDefinition(tractracRace.getId());

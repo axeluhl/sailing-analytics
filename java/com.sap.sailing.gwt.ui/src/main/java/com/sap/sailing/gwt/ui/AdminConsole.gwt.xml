@@ -26,7 +26,7 @@
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
-    <inherits name="com.sap.sse.Security" />
+        <inherits name="com.sap.sse.Security" />
     
 	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
 	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
@@ -45,11 +45,7 @@
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
 	<inherits name='com.sap.sailing.gwt.common.SailingLocales' />
-	<!-- AdminConsole inherits the default sailing locale configuration but only activates de and en permutations.
-	     With this, all default sailing locales are included in GWT'2 LocaleInfo.
-	     So we can populate UI elements in the AdminConsole with all locales without the need to really support all those locales for users of the AdminConsole. -->
-	<set-property name="locale" value="en,de"/>
-	
+
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->
 	<!-- Turning CSS obfuscation on, which is the default -->

@@ -2,11 +2,14 @@ package com.sap.sailing.domain.base;
 
 import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 
 public interface BoatClass extends Named, IsManagedByCache<SharedDomainFactory> {
+    final Duration APPROXIMATE_AVERAGE_MANEUVER_DURATION = Duration.ONE_SECOND.times(8); // as discussed with Dennis Gehrlein
+
     /**
      * The distance returned by this method should be appropriate for use in
      * {@link TrackedRace#approximate(Competitor, Distance, TimePoint, TimePoint)} so that penalty circles and other

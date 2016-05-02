@@ -9,17 +9,18 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public final class ListBoxUtils {
 
-
     public static void setupCourseDesignerModeListBox(ListBox box, CourseDesignerMode selectedCourseDesignerMode, 
             String noItemText) {
         for (CourseDesignerMode mode : CourseDesignerMode.values()) {
-            if (mode == CourseDesignerMode.UNKNOWN) {
-                box.addItem(noItemText, mode.name());
-            } else {
-                box.addItem(mode.toString(), mode.name());
-            }
-            if (mode == selectedCourseDesignerMode) {
-                box.setSelectedIndex(box.getItemCount() - 1);
+            if (mode != CourseDesignerMode.ADMIN_CONSOLE) {
+                if (mode == CourseDesignerMode.UNKNOWN) {
+                    box.addItem(noItemText, mode.name());
+                } else {
+                    box.addItem(mode.toString(), mode.name());
+                }
+                if (mode == selectedCourseDesignerMode) {
+                    box.setSelectedIndex(box.getItemCount() - 1);
+                }
             }
         }
     }
@@ -52,14 +53,22 @@ public final class ListBoxUtils {
             }
         }
     }
-    
-    public static void setupFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+
+    private static void setupFlagsListBox(ListBox box, List<Flags> selectedFlags, Flags... availableFlags) {
         box.clear();
-        for (Flags flag : Flags.validValues()) {            
+        for (Flags flag : availableFlags) {            
             box.addItem(flag.toString(), flag.name());
             if (selectedFlags.contains(flag)) {
                 box.setItemSelected(box.getItemCount() - 1, true);
             }
         }
+    }
+
+    public static void setupFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+        setupFlagsListBox(box, selectedFlags, Flags.validValues());
+    }
+
+    public static void setupStartmodeFlagsListBox(ListBox box, List<Flags> selectedFlags) {
+        setupFlagsListBox(box, selectedFlags, Flags.PAPA, Flags.BLACK, Flags.INDIA, Flags.INDIA_ZULU, Flags.UNIFORM);            
     }
 }

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/sap_yellow"/>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            android:id="@+id/license_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/about_button_height"
+            android:layout_marginBottom="@dimen/about_button_top_bottom_margin"
+            android:layout_marginLeft="@dimen/about_button_side_margin"
+            android:layout_marginRight="@dimen/about_button_side_margin"
+            android:layout_marginTop="@dimen/about_button_top_bottom_margin"
+            android:background="@drawable/rounded_btn_yellow"
+            android:text="@string/license_information"
+            android:textAllCaps="false"
+            android:textSize="@dimen/about_button_text_size"
+            android:textStyle="bold"/>
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansButton
+            android:id="@+id/eula_button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/about_button_height"
+            android:layout_marginBottom="@dimen/about_button_top_bottom_margin"
+            android:layout_marginLeft="@dimen/about_button_side_margin"
+            android:layout_marginRight="@dimen/about_button_side_margin"
+            android:layout_marginTop="@dimen/about_button_top_bottom_margin"
+            android:background="@drawable/rounded_btn_yellow"
+            android:text="@string/eula"
+            android:textAllCaps="false"
+            android:textSize="@dimen/about_button_text_size"
+            android:textStyle="bold"/>
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            android:id="@+id/system_information_application_version_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/about_button_side_margin"
+            android:text="@string/application_version"/>
+
+        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            android:id="@+id/system_information_application_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/about_button_top_bottom_margin"
+            android:layout_marginLeft="@dimen/about_button_side_margin"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/linearLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/top_bar"
+        android:layout_marginTop="@dimen/about_header_margin_top"
+        android:fillViewport="false">
+
+        <TextView
+            android:id="@+id/about_partnership"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/about_text_side_padding"
+            android:paddingRight="@dimen/about_text_side_padding"
+            android:text="@string/about_partnership_text"/>
+
+    </ScrollView>
+
+</RelativeLayout>

@@ -1,5 +1,11 @@
 package com.sap.sailing.racecommittee.app.ui.activities;
 
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -15,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -55,20 +62,17 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.CourseArea
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.EventSelectedListenerHost;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelectedListener;
 import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.PositionSelectedListenerHost;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
 import com.sap.sailing.racecommittee.app.utils.StringHelper;
 import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.UUID;
 
 public class LoginActivity extends BaseActivity
         implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
+
+    private boolean wakeUp;
 
     private final static String TAG = LoginActivity.class.getName();
 
@@ -80,7 +84,7 @@ public class LoginActivity extends BaseActivity
 
     // FIXME weird data redundancy by using different field for setting values makes everything so complex and buggy
     private String eventName = null;
-    private String courseName = null;
+    private String courseAreaName = null;
     private String positionName = null;
 
     private Serializable mSelectedEventId;
@@ -145,7 +149,7 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
                     login();
                 }
             });
@@ -195,19 +199,19 @@ public class LoginActivity extends BaseActivity
     }
 
     private void selectCourseArea(CourseArea courseArea) {
-        courseName = courseArea.getName();
+        courseAreaName = courseArea.getName();
         mSelectedCourseAreaUUID = courseArea.getId();
-        loginListViews.getAreaContainer().setHeaderText(courseName);
+        loginListViews.getCourseAreaContainer().setHeaderText(courseAreaName);
     }
 
     private boolean isCourseAreaSelected() {
-        return (courseName != null && mSelectedCourseAreaUUID != null);
+        return (courseAreaName != null && mSelectedCourseAreaUUID != null);
     }
 
     private void resetCourseArea() {
-        courseName = null;
+        courseAreaName = null;
         mSelectedCourseAreaUUID = null;
-        loginListViews.getAreaContainer().setHeaderText("");
+        loginListViews.getCourseAreaContainer().setHeaderText("");
         resetPosition();
     }
 
@@ -286,6 +290,17 @@ public class LoginActivity extends BaseActivity
             }
         }
 
+        String action = getIntent().getAction();
+        if (Intent.ACTION_VIEW.equals(action)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
+            builder.setTitle(R.string.app_name);
+            if (QRHelper.with(this).saveData(getIntent().getData().toString())) {
+                builder.setMessage(getString(R.string.server_deeplink_message, preferences.getServerBaseURL()));
+            }
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.show();
+        }
+
         // This is required to reactivate the loader manager after configuration change (screen rotation)
         getLoaderManager();
 
@@ -353,11 +368,6 @@ public class LoginActivity extends BaseActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter);
 
         BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_CHECK_LOGIN));
-//        if (!TextUtils.isEmpty(AppPreferences.on(this).getServerBaseURL())) {
-//            resetData();
-//        } else {
-//            BroadcastManager.getInstance(this).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_LOGIN));
-//        }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
 
@@ -366,12 +376,12 @@ public class LoginActivity extends BaseActivity
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, 1).show();
             }
         }
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -416,11 +426,12 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!AppPreferences.on(this).isOfflineMode()) {
-            // always reload the configuration...
+        if (!preferences.isOfflineMode() && preferences.needConfigRefresh()) {
+            // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
             dismissProgressSpinner();
+            slideUpBackdropDelayed();
         }
     }
 
@@ -523,11 +534,12 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
                 resetData();
             }
+            wakeUp = false;
         }
     }
 
@@ -553,7 +565,7 @@ public class LoginActivity extends BaseActivity
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
+            // no op
         }
 
         @Override

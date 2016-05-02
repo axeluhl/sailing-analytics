@@ -91,6 +91,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -229,6 +230,7 @@ import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
+import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.JoinedClassLoader;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
@@ -546,7 +548,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 replicate(new UpdateCompetitor(competitor.getId().toString(), competitor.getName(), competitor
                         .getColor(), competitor.getEmail(), competitor.getBoat().getSailID(), competitor.getTeam().getNationality(),
                         competitor.getTeam().getImage(), competitor.getFlagImage(),
-                        competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile()));
+                        competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                        competitor.getSearchTag()));
             }
         });
         this.windStore = windStore;
@@ -1442,7 +1445,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             result.put(
                     s.getName(),
-                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
+                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring()));
@@ -2509,7 +2512,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             competitorStore.getOrCreateCompetitor(dynamicCompetitor.getId(), dynamicCompetitor.getName(),
                     dynamicCompetitor.getColor(), dynamicCompetitor.getEmail(), dynamicCompetitor.getFlagImage(),
                     dynamicCompetitor.getTeam(), dynamicCompetitor.getBoat(), dynamicCompetitor.getTimeOnTimeFactor(),
-                    dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile());
+                    dynamicCompetitor.getTimeOnDistanceAllowancePerNauticalMile(), dynamicCompetitor.getSearchTag());
         }
         logoutput.append("Received " + competitorStore.size() + " NEW competitors\n");
 
@@ -3032,19 +3035,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         // Create/Update locally
         DataImportProgress progress = createOrUpdateDataImportProgressWithoutReplication(importOperationId,
-                overallProgressPct, subProgressName, subProgressPct);
+                overallProgressPct, subProgress, subProgressPct);
         // Create/Update on replicas
-        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgressName,
+        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgress,
                 subProgressPct));
         return progress;
     }
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         DataImportProgress progress = dataImportLock.getProgress(importOperationId);
         boolean newObject = false;
         if (progress == null) {
@@ -3052,7 +3055,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             newObject = true;
         }
         progress.setOverAllProgressPct(overallProgressPct);
-        progress.setNameOfCurrentSubProgress(subProgressName);
+        progress.setCurrentSubProgress(subProgress);
         progress.setCurrentSubProgressPct(subProgressPct);
         if (newObject) {
             dataImportLock.addProgress(importOperationId, progress);
@@ -3110,8 +3113,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     final URL eventsURL = new URL(remoteRef.getURL(), "sailingserver/api/v1/search?q="
                             + URLEncoder.encode(query.toString(), "UTF-8"));
                     logger.info("Searching remote server " + remoteRef + " for " + query);
-                    URLConnection urlConnection = eventsURL.openConnection();
-                    urlConnection.connect();
+                    URLConnection urlConnection = HttpUrlConnectionHelper.redirectConnection(eventsURL);
                     bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream(), "UTF-8"));
                     JSONParser parser = new JSONParser();
                     Object eventsAsObject = parser.parse(bufferedReader);

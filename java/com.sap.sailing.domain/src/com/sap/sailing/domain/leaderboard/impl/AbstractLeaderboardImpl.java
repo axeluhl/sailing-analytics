@@ -224,6 +224,6 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
     public void deregisterCompetitors(Iterable<Competitor> competitors) {
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         CompetitorDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new CompetitorDeregistrator<>(regattaLog, competitors, regattaLogEventAuthorForAbstractLeaderboard);
-        deregisterer.analyze();
+        deregisterer.deregister(deregisterer.analyze());
     }
 }

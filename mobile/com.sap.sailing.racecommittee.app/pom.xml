@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.h6ah4i.android.widget.advrecyclerview</groupId>
             <artifactId>advrecyclerview</artifactId>
-            <version>0.6.2</version>
+            <version>0.7.4</version>
             <type>aar</type>
             <exclusions>
                 <exclusion>

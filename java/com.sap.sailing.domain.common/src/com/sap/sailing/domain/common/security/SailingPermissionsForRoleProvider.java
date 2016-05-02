@@ -19,6 +19,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
                     // RaceBoard:
                     Permission.MANAGE_MEDIA,
                     Permission.MANAGE_MARK_PASSINGS,
+                    Permission.MANAGE_MARK_POSITIONS,
                     
                     // AdminConsole:
                     Permission.MANAGE_ALL_COMPETITORS,

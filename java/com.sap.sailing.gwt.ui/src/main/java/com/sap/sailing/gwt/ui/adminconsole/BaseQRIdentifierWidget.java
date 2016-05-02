@@ -4,6 +4,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -23,13 +24,18 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
     private final QRCodeComposite qrCodeComposite;
     private final Widget baseWidget;
     private final Label error;
-    private final Label url;
+    final Label url;
+    private RegExp urlValidator = null;
+    private RegExp urlPlusTldValidator = null;
+    StringMessages stringMessages;
 
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages) {
         this(qrCodeSize, stringMessages, QRCodeComposite.ERROR_CORRECTION_LEVEL_H);
     }
     
     public BaseQRIdentifierWidget(int qrCodeSize, StringMessages stringMessages, int errorCorrectionLevel) {
+        this.stringMessages = stringMessages;
+        
         serverBox = new TextBox();
         serverBox.setVisibleLength(40);
         serverBox.setValue(Window.Location.getProtocol() + "//" + Window.Location.getHost());
@@ -91,6 +97,21 @@ public abstract class BaseQRIdentifierWidget implements IsWidget {
             return serverUrl.substring(0, serverUrl.length() - 1);
         }
         return serverUrl;
+    }
+    
+    
+    //from: https://stackoverflow.com/questions/4498225/gwt-java-url-validator#4499412 as java.net.URL not available in GWT
+    private boolean isValidUrl(String url, boolean topLevelDomainRequired) {
+        if (urlValidator == null || urlPlusTldValidator == null) {
+            urlValidator = RegExp.compile("^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+            urlPlusTldValidator = RegExp.compile("^((ftp|http|https)://[\\w@.\\-\\_]+\\.[a-zA-Z]{2,}(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$");
+        }
+        return (topLevelDomainRequired ? urlPlusTldValidator : urlValidator).exec(url) != null;
+    }
+    
+    public boolean isServerUrlValid(){
+        String url = getServerUrlWithoutFinalSlash();
+        return isValidUrl(url, false);
     }
     
     protected void clear() {

@@ -34,7 +34,7 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, Polling
                 return null;
             }
             
-            HttpRequest request = new HttpJsonPostRequest(query.getB(), context);
+            HttpRequest request = new HttpJsonPostRequest(context, query.getB());
             InputStream responseStream = null;
             try {
                 responseStream = request.execute();

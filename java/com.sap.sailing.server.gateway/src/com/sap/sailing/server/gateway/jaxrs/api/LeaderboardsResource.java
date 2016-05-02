@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.ws.http.HTTPException;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -56,8 +57,11 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.SettableScoreCorrection;
@@ -100,7 +104,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             jsonLeaderboards.add(leaderboardName);
         }
         String json = jsonLeaderboards.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -134,7 +138,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonLeaderboard.writeJSONString(sw);
 
                 String json = sw.getBuffer().toString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                         .type(MediaType.TEXT_PLAIN).build();
@@ -505,7 +509,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         } else {
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
-            response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -539,7 +543,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
-                    Util.addAll(raceColumn.getCourseMarks(), marks);
+                    Util.addAll(raceColumn.getAvailableMarks(), marks);
                 }
             }
         } else {
@@ -558,13 +562,13 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                                     StringEscapeUtils.escapeHtml(leaderboardName)
                                     + "'.").type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    Util.addAll(raceColumn.getCourseMarks(fleet), marks);
+                    Util.addAll(raceColumn.getAvailableMarks(fleet), marks);
                 }
             } else {
                 // Return all marks for a certain race column
                 // if all races have a tracked race return all marks part of at least one tracked race
                 // if at least one race doesn't have a tracked race, return also the marks defined in the RegattaLog
-                Util.addAll(raceColumn.getCourseMarks(), marks);
+                Util.addAll(raceColumn.getAvailableMarks(), marks);
             }
         }
         JSONArray array = new JSONArray();
@@ -576,7 +580,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONObject result = new JSONObject();
         result.put("marks", array);
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
@@ -636,5 +640,94 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         final RaceLogTrackingAdapter adapter = getRaceLogTrackingAdapter();
         adapter.pingMark(regattaLog, mark, fix, service);
         return Response.ok().build();
+    }
+    
+    /**
+     * @param raceColumnName optional; if omitted, all race column factors in the leaderboard will be reported, otherwise only the one requested
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/racecolumnfactors")
+    public Response getRaceColumnFactors(@PathParam("leaderboardName") String leaderboardName, @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName) {
+        final Response response;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            final Iterable<RaceColumn> raceColumns;
+            final RaceColumn raceColumn;
+            if (raceColumnName == null) {
+                raceColumns = leaderboard.getRaceColumns();
+                raceColumn = null;
+            } else {
+                raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+                raceColumns = Collections.singleton(raceColumn);
+            }
+            if (raceColumnName != null && raceColumn == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a race column named '"+StringEscapeUtils.escapeHtml(raceColumnName)+"' in leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            } else {
+                final JSONObject json = getJsonForColumnFactors(leaderboard, raceColumns);
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        }
+        return response;
+    }
+
+    private JSONObject getJsonForColumnFactors(final Leaderboard leaderboard, final Iterable<RaceColumn> raceColumns) {
+        final JSONObject json = new JSONObject();
+        json.put(RaceColumnConstants.LEADERBOARD_NAME, leaderboard.getName());
+        json.put(RaceColumnConstants.LEADERBOARD_DISPLAY_NAME, leaderboard.getDisplayName());
+        final JSONArray raceColumnsAsJson = new JSONArray();
+        json.put(RaceColumnConstants.RACE_COLUMNS, raceColumnsAsJson);
+        for (final RaceColumn rc : raceColumns) {
+            final JSONObject raceColumnAsJson = new JSONObject();
+            raceColumnsAsJson.add(raceColumnAsJson);
+            raceColumnAsJson.put(RaceColumnConstants.RACE_COLUMN_NAME, rc.getName());
+            raceColumnAsJson.put(RaceColumnConstants.EXPLICIT_FACTOR, rc.getExplicitFactor());
+            raceColumnAsJson.put(RaceColumnConstants.FACTOR, rc.getFactor());
+        }
+        return json;
+    }
+    
+    /**
+     * @param raceColumnName
+     *            mandatory
+     * @param explicitFactor
+     *            may be {@code null} which means resetting the explicit factor and letting the leaderboard determine
+     *            the column factor implicitly.
+     * @see RaceColumn#setFactor(Double)
+     * @return a document that contains the leaderboard "header" data and the factor data for the race column specified,
+     *         after the change. This may be useful to validate the impact the change had on the resulting column factor
+     */
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/racecolumnfactors")
+    public Response setExplicitRaceColumnFactor(@PathParam("leaderboardName") String leaderboardName, @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam("explicit_factor") Double explicitFactor) {
+        final Response response;
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard == null) {
+            response = Response.status(Status.NOT_FOUND)
+                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
+        } else {
+            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboard.getName()));
+            final RaceColumn raceColumn;
+            raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+            if (raceColumn == null) {
+                response = Response.status(Status.NOT_FOUND)
+                        .entity("Could not find a race column named '"+StringEscapeUtils.escapeHtml(raceColumnName)+"' in leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
+            } else {
+                raceColumn.setFactor(explicitFactor);
+                final JSONObject json = getJsonForColumnFactors(leaderboard, Collections.singleton(raceColumn));
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
+        }
+        return response;
     }
 }

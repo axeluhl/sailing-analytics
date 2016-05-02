@@ -241,14 +241,14 @@ public class DomainFactoryImpl implements DomainFactory {
         final String name = competitor.getName();
         final String shortName = competitor.getShortName();
         Competitor result = getOrCreateCompetitor(competitorId, competitorClassName, nationalityAsString, name,
-                shortName, competitor.getHandicapToT(), competitor.getHandicapToD());
+                shortName, competitor.getHandicapToT(), competitor.getHandicapToD(), null);
         return result;
     }
 
     @Override
     public Competitor getOrCreateCompetitor(final UUID competitorId, final String competitorClassName,
             final String nationalityAsString, final String name, final String shortName, float timeOnTimeFactor,
-            float timeOnDistanceAllowanceInSecondsPerNauticalMile) {
+            float timeOnDistanceAllowanceInSecondsPerNauticalMile, String searchTag) {
         CompetitorStore competitorStore = baseDomainFactory.getCompetitorStore();
         Competitor result = competitorStore.getExistingCompetitorById(competitorId);
         if (result == null || competitorStore.isCompetitorToUpdateDuringGetOrCreate(result)) {
@@ -265,7 +265,7 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicBoat boat = new BoatImpl(shortName, boatClass, shortName);
             result = competitorStore.getOrCreateCompetitor(competitorId, name, null /* displayColor */,
                     null /* email */, null /* flagImag */, team, boat, (double) timeOnTimeFactor,
-                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)));
+                    new MillisecondsDurationImpl((long) (timeOnDistanceAllowanceInSecondsPerNauticalMile*1000)), searchTag);
         }
         return result;
     }

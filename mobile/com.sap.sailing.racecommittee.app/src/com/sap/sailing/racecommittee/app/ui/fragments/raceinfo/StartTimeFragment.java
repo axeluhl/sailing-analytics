@@ -12,6 +12,7 @@ import java.util.Map;
 import android.app.FragmentTransaction;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
@@ -31,7 +33,9 @@ import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
@@ -39,10 +43,8 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.utils.BitmapHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
 import com.sap.sse.common.Duration;
@@ -68,6 +70,7 @@ public class StartTimeFragment extends BaseFragment
     private View mRelative;
     private Button mAbsoluteButton;
     private Button mRelativeButton;
+    private Button mSetStartRelative;
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
@@ -168,9 +171,9 @@ public class StartTimeFragment extends BaseFragment
             setStartAbsolute.setOnClickListener(this);
         }
 
-        View setStartRelative = ViewHelper.get(layout, R.id.set_start_time_relative);
-        if (setStartRelative != null) {
-            setStartRelative.setOnClickListener(this);
+        mSetStartRelative = ViewHelper.get(layout, R.id.set_start_time_relative);
+        if (mSetStartRelative != null) {
+            mSetStartRelative.setOnClickListener(this);
         }
 
         mDebugTime = ViewHelper.get(layout, R.id.debug_time);
@@ -240,7 +243,7 @@ public class StartTimeFragment extends BaseFragment
                     StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();
                     if (result != null && result.isDependentStartTime()) {
                         mStartTimeOffset = result.getStartTimeDiff();
-                        mRaceId = Util.get(result.getRacesDependingOn(), 0);
+                        mRaceId = Util.get(result.getDependingOnRaces(), 0);
                     }
                     break;
 
@@ -361,15 +364,17 @@ public class StartTimeFragment extends BaseFragment
                 Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
                 if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
                     Util.Pair<String, String> data = new Util.Pair<>(races.getFleet().getName(), null);
-                    int position = mFleetAdapter.add(data);
-                    if (position >= 0) {
-                        if (mRaceId != null) {
-                            if (mRaceId.getFleetName().equals(data.getA())) {
-                                fleet = position;
-                            }
-                        } else {
-                            if (fleet == -1) { //TODO add more heuristic here - to be discussed
-                                fleet = position;
+                    if (hasRaces(data.getA())) {
+                        int position = mFleetAdapter.add(data);
+                        if (position >= 0) {
+                            if (mRaceId != null) {
+                                if (mRaceId.getFleetName().equals(data.getA())) {
+                                    fleet = position;
+                                }
+                            } else {
+                                if (fleet == -1) { //TODO add more heuristic here - to be discussed
+                                    fleet = position;
+                                }
                             }
                         }
                     }
@@ -422,8 +427,8 @@ public class StartTimeFragment extends BaseFragment
                     }
                     if (races.getFleet().getName().equals(fleet.getA())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
-                            if (!getRace().equals(race)) {
-                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
+                            if (!getRace().equals(race) && race.getStatus() != RaceLogRaceStatus.FINISHED) {
+                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceColumnName(), null);
                                 int position = mRaceAdapter.add(data);
                                 if (position >= 0) {
                                     if (mRaceId != null) {
@@ -441,10 +446,32 @@ public class StartTimeFragment extends BaseFragment
                     }
                 }
             }
+
             mRace.setAdapter(mRaceAdapter);
             mRace.setVisibility(View.VISIBLE);
             mRace.setSelection(racePos);
+            if (mRaceAdapter.getCount() > 1) {
+                mRace.setEnabled(true);
+            } else {
+                mRace.setEnabled(false);
+            }
         }
+    }
+
+    private boolean hasRaces(@Nullable String fleet) {
+        for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
+            Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
+            if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
+                if(races.getFleet().getName().equals(fleet)) {
+                    for (ManagedRace race : mGroupHeaders.get(races)) {
+                        if (!getRace().equals(race) && race.getStatus() != RaceLogRaceStatus.FINISHED) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private void initViewsAbsolute(Calendar time) {

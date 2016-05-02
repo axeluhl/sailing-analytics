@@ -58,8 +58,11 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         json.put(CompetitorJsonConstants.FIELD_COUNTRY_CODE, nationality==null?null:nationality.getCountryCode().getTwoLetterISOCode());
         json.put(CompetitorJsonConstants.FIELD_BOAT_CLASS_NAME, competitor.getBoat().getBoatClass().getName());
         json.put(CompetitorJsonConstants.FIELD_COLOR, competitor.getColor() != null ? competitor.getColor().getAsHtml() : null);
-        if(competitor.getFlagImage() != null) {
+        if (competitor.getFlagImage() != null) {
             json.put(CompetitorJsonConstants.FIELD_FLAG_IMAGE, competitor.getFlagImage().toString());
+        }
+        if (competitor.getTeam().getImage() != null) {
+            json.put(CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI, competitor.getTeam().getImage().toString());
         }
         return json;
     }
@@ -77,7 +80,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             String jsonString = getCompetitorJSON(competitor).toJSONString();
-            response = Response.ok(jsonString, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(jsonString).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -107,7 +110,7 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         JSONObject teamJson = teamJsonSerializer.serialize(team);
         String json = teamJson.toJSONString();
 
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     /**
@@ -162,7 +165,8 @@ public class CompetitorsResource extends AbstractSailingServerResource {
         }
 
         getService().getCompetitorStore().updateCompetitor(competitorId, competitor.getName(), competitor.getColor(), competitor.getEmail(), 
-                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                competitor.getBoat().getSailID(), competitor.getTeam().getNationality(), imageUri, competitor.getFlagImage(),
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, competitor.getSearchTag());
         logger.log(Level.INFO, "Set team image for competitor " + competitor.getName());
 
         JSONObject result = new JSONObject();
