@@ -1398,7 +1398,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingCache cache) {
+        final TimePoint timePoint;
+        // normalize the time point to get cache hits when asking for time points that are later than
+        // the last time point affected by any event received for this tracked race
+        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ true) <= 0) {
+            timePoint = unadjustedTimePoint;
+        } else {
+            timePoint = getTimePointOfNewestEvent();
+        }
         NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);

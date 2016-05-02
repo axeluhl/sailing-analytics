@@ -63,7 +63,7 @@ public class APIManager: NSObject {
         
         // set up reachability
         let operationQueue = manager!.operationQueue
-        manager!.reachabilityManager.setReachabilityStatusChangeBlock({(AFNetworkReachabilityStatus status) -> Void in
+        manager!.reachabilityManager.setReachabilityStatusChangeBlock({(status) -> Void in
             switch (status) {
             case AFNetworkReachabilityStatus.ReachableViaWWAN, AFNetworkReachabilityStatus.ReachableViaWiFi:
                 operationQueue?.suspended = false
@@ -106,7 +106,7 @@ public class APIManager: NSObject {
     }
 
     public func teamImage(competitorId: String!, result: (imageUrl: String?) -> Void) {
-        getTeam(competitorId, success: { (AFHTTPRequestOperation operation, AnyObject teamResponseObject) -> Void in
+        getTeam(competitorId, success: { (operation, teamResponseObject) -> Void in
 
             if let team = teamResponseObject as? [String: AnyObject],
                 let imageUrl = team["imageUri"] as? String {
@@ -115,7 +115,7 @@ public class APIManager: NSObject {
                 result(imageUrl: nil)
             }
 
-        }, failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+        }, failure: { (operation, error) -> Void in
             // No image & that's ok
             result(imageUrl: nil)
         })

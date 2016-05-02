@@ -36,10 +36,10 @@ public class LocalServerManagementPanel extends SimplePanel {
         setWidget(mainPanel);
         mainPanel.setWidth("100%");
 
-        serverInfoPanel = new CaptionPanel("Server Information");
+        serverInfoPanel = new CaptionPanel(stringMessages.serverInformation());
         mainPanel.add(serverInfoPanel);
 
-        serverConfigurationPanel = new CaptionPanel("Server Configuration");
+        serverConfigurationPanel = new CaptionPanel(stringMessages.serverConfiguration());
         mainPanel.add(serverConfigurationPanel);
         
         createServerInfoUI();
@@ -56,7 +56,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         Grid grid = new Grid(2, 2);
         grid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
         grid.setWidget(0, 1, serverNameLabel);
-        grid.setWidget(1, 0, new Label("Build version:"));
+        grid.setWidget(1, 0, new Label(stringMessages.buildVersion() + ":"));
         grid.setWidget(1, 1, buildVersionLabel);
         serverInfoContentPanel.add(grid);
         
@@ -76,7 +76,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         });
     
         Grid grid = new Grid(2, 2);
-        grid.setWidget(0, 0, new Label("Standalone server:"));
+        grid.setWidget(0, 0, new Label(stringMessages.standaloneServer() + ":"));
         grid.setWidget(0, 1, isStandaloneServerCheckbox);
         serverConfigurationContentPanel.add(grid);
         

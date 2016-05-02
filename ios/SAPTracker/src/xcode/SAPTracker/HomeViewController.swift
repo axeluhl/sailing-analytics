@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIActionSheetDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
+class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, QRCodeManagerDelegate {
     
     enum AlertView: Int {
         case NoCameraAvailable
@@ -157,25 +157,32 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 		qrCodeManager!.parseUrl(url2)
 	}
     
-    // MARK: - UIActionSheetDelegate
-    
     @IBAction func showActionSheet(sender: AnyObject) {
-        let actionSheet = UIActionSheet(title: nil, delegate: self, cancelButtonTitle: nil, destructiveButtonTitle: nil, otherButtonTitles: NSLocalizedString("Settings", comment: ""), NSLocalizedString("About", comment: ""), NSLocalizedString("Cancel", comment: ""))
-        actionSheet.cancelButtonIndex = 3
-        actionSheet.showInView(view)
-    }
-    
-    func actionSheet(actionSheet: UIActionSheet, clickedButtonAtIndex buttonIndex: Int) {
-        switch buttonIndex{
-         case 0:
-            performSegueWithIdentifier("Settings", sender: actionSheet)
-            break
-        case 1:
-            performSegueWithIdentifier("About", sender: actionSheet)
-            break
-        default:
-            break
+
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
+        if let popoverController = actionSheet.popoverPresentationController,
+            let barButtonItem = sender as? UIBarButtonItem {
+            popoverController.barButtonItem = barButtonItem
         }
+
+        let aSettings = UIAlertAction(title: NSLocalizedString("Settings", comment: ""), style: .Default) { (action) -> Void in
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("SettingsFromHome", sender: actionSheet)
+			}
+        }
+        actionSheet.addAction(aSettings)
+
+        let aAbout = UIAlertAction(title: NSLocalizedString("About", comment: ""), style: .Default) { (action) -> Void in
+			dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+				self.performSegueWithIdentifier("AboutFromHome", sender: actionSheet)
+			}
+        }
+        actionSheet.addAction(aAbout)
+
+        let aCancel = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .Cancel, handler: nil)
+        actionSheet.addAction(aCancel)
+
+        presentViewController(actionSheet, animated: true, completion: nil)
     }
     
     // MARK: - UITableViewDataSource

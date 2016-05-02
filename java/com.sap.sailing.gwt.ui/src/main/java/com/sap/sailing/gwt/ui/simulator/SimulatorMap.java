@@ -626,7 +626,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     public void generateWindField(final WindPatternDisplay windPatternDisplay, final boolean removeOverlays) {
         LOGGER.info("In generateWindField");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+            errorReporter.reportError(stringMessages.pleaseSelectAValidWindPattern());
             return;
         }
         
@@ -745,7 +745,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         LOGGER.info("In generatePath");
 
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+            errorReporter.reportError(stringMessages.pleaseSelectAValidWindPattern());
             return;
         }
 
