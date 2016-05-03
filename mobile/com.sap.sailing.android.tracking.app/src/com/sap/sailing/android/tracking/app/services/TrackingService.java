@@ -1,5 +1,11 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -32,12 +38,6 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.UUID;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -159,7 +159,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
 
-        if (prefs.getDisplayHeadingWithSubtractedDeclination()) {
+        if (prefs.getDisplayHeadingWithSubtractedDeclination() && bearing > 0.0) {
             GeomagneticField geomagneticField = new GeomagneticField((float) latitude, (float) longitude,
                     (float) altitude, System.currentTimeMillis());
             bearing = bearing - geomagneticField.getDeclination();
