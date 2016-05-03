@@ -104,10 +104,18 @@ public class RegattaFragment extends BaseFragment implements OnClickListener {
         if (System.currentTimeMillis() > regattaStart) {
             textView.setText(getString(R.string.regatta_in_progress));
             threeBoxesLayout.setVisibility(View.GONE);
+            centerViewInParent(textView);
         } else {
             textView.setText(getString(R.string.regatta_starts_in));
             threeBoxesLayout.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void centerViewInParent(View view) {
+        RelativeLayout.LayoutParams layoutParams =
+            (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        view.setLayoutParams(layoutParams);
     }
 
     public boolean isShowingBigCheckoutButton() {

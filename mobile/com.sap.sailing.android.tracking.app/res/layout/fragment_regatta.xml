@@ -3,6 +3,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                xmlns:Tools="http://schemas.android.com/apk/res-auto"
                 android:background="@drawable/main_background">
 
     <RelativeLayout
@@ -39,7 +40,7 @@
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_menu_camera"/>
 
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+            <TextView
                 android:id="@+id/add_photo_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -212,7 +213,8 @@
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
         android:layout_above="@+id/start_tracking_box"
         android:layout_below="@id/image"
         android:isScrollContainer="true"
@@ -234,7 +236,7 @@
                 android:paddingTop="10dp"
                 android:visibility="gone">
 
-                <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+                <TextView
                     android:id="@+id/thank_you_note"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
@@ -248,7 +250,7 @@
             <RelativeLayout
                 android:id="@+id/start_date_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:measureWithLargestChild="false"
                 android:orientation="horizontal">
 
@@ -271,9 +273,10 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/regatta_starts_in"
                     android:baselineAligned="false"
-                    android:gravity="center"
+                    android:gravity="center_horizontal"
                     android:measureWithLargestChild="false"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    tools:visibility="gone">
 
                     <LinearLayout
                         android:id="@+id/three_boxes_days_box"
