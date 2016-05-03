@@ -303,6 +303,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
+    /**
+     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
+     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
+     * second} element has those that have been removed.
+     */
     private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
         Course course = race.getRace().getCourse();
@@ -341,6 +346,11 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
+     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
+     * second} element has those that have been removed.
+     */
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
             Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
@@ -375,6 +385,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * @return a live collection of {@link #distanceCandidates distance candidates} for competitor {@code c} passing
+     *         waypoint {@code w}.
+     */
     private Map<GPSFix, Candidate> getDistanceCandidates(Competitor c, Waypoint w) {
         synchronized (distanceCandidates) {
             Map<GPSFix, Candidate> result = distanceCandidates.get(c).get(w);
@@ -386,6 +400,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
+    /**
+     * @return a live collection of {@link #xteCandidates cross track error candidates} for competitor {@code c} passing
+     *         waypoint {@code w}.
+     */
     private Map<List<GPSFix>, Candidate> getXteCandidates(Competitor c, Waypoint w) {
         synchronized (xteCandidates) {
             Map<List<GPSFix>, Candidate> result = xteCandidates.get(c).get(w);

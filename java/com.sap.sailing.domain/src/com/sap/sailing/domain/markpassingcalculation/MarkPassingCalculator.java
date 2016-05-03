@@ -145,8 +145,7 @@ public class MarkPassingCalculator {
                                         .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex.value);
                                 chooser.removeWaypoints(removedWaypoints);
                                 chooser.addWaypoints(addedWaypoints);
-                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas
-                                        .entrySet()) {
+                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
                                     Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
                                     chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
                                 }
