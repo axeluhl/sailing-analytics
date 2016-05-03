@@ -58,11 +58,11 @@ public abstract class AbstractRaceLogFixTracker {
         }
     };
 
-    public AbstractRaceLogFixTracker(DynamicTrackedRegatta trackedRegatta, DynamicTrackedRace trackedRace) {
+    public AbstractRaceLogFixTracker(DynamicTrackedRegatta trackedRegatta, DynamicTrackedRace trackedRace, String fixLoadingLockName) {
         this.trackedRegatta = trackedRegatta;
         this.trackedRace = trackedRace;
 
-        this.fixLoadingTask = new FixLoadingTask(trackedRace);
+        this.fixLoadingTask = new FixLoadingTask(trackedRace, fixLoadingLockName);
     }
 
     protected void waitForLoadingFromFixStoreToFinishRunning() {

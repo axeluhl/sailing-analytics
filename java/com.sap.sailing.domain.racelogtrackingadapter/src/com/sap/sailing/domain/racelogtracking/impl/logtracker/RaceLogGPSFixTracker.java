@@ -80,7 +80,7 @@ public class RaceLogGPSFixTracker extends AbstractRaceLogFixTracker {
     private final RaceLogMappingWrapper<Mark> markMappings = new MarkRaceLogMappings();
     
     public RaceLogGPSFixTracker(DynamicTrackedRegatta regatta, DynamicTrackedRace trackedRace, GPSFixStore gpsFixStore) {
-        super(regatta, trackedRace);
+        super(regatta, trackedRace, "Loading from GPSFix store lock for tracked race " + trackedRace.getRace().getName());
         this.gpsFixStore = gpsFixStore;
         startTracking();
     }

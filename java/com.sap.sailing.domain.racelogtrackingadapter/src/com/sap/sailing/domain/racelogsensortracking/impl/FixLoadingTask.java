@@ -10,12 +10,13 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 public class FixLoadingTask {
     private static final Logger logger = Logger.getLogger(FixLoadingTask.class.getName());
     
-    private final NamedReentrantReadWriteLock loadingFromFixStoreLock = new NamedReentrantReadWriteLock("TODO", false);
+    private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
     private final DynamicTrackedRace trackedRace;
     private boolean loadingFromGPSFixStore;
     
-    public FixLoadingTask(DynamicTrackedRace trackedRace) {
+    public FixLoadingTask(DynamicTrackedRace trackedRace, String lockName) {
         this.trackedRace = trackedRace;
+        loadingFromFixStoreLock = new NamedReentrantReadWriteLock(lockName, false);
     }
     
     public void loadFixesForLog(Runnable loadingAction, String description) {

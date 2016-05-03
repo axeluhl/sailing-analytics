@@ -52,7 +52,6 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
         }
     };
     
-    // TODO: move to AbstractRaceLogFixTracker
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
         public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -72,7 +71,6 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
             updateMappingsAndAddListeners();
         };
     };
-    // TODO: move to AbstractRaceLogFixTracker
     private final FixReceivedListener<DoubleVectorFix> listener = new FixReceivedListener<DoubleVectorFix>() {
         @Override
         public void fixReceived(DeviceIdentifier device, DoubleVectorFix fix) {
@@ -81,7 +79,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
                         sensorFixMapperFactory.createCompetitorMapper(mapping.getEventType());
                 DynamicSensorFixTrack<Competitor, SensorFix> track = mapper.getTrack(trackedRace,
                         mapping.getMappedTo());
-                if (trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint()) && track != null) {
+                if (track != null && trackedRace.isWithinStartAndEndOfTracking(fix.getTimePoint())) {
                     mapper.addFix(track, fix);
                 }
             });
@@ -92,7 +90,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
 
     public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
-        super(regatta, trackedRace);
+        super(regatta, trackedRace, "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName());
         this.sensorFixStore = sensorFixStore;
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         
