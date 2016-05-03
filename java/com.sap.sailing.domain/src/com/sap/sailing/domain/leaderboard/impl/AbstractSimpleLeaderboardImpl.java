@@ -439,11 +439,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public Double getNetPoints(final Competitor competitor, final RaceColumn raceColumn, final TimePoint timePoint) {
         return getScoreCorrection().getCorrectedScore(
-                new Callable<Integer>() {
-                    public Integer call() throws NoWindException {
-                        return getTrackedRank(competitor, raceColumn, timePoint);
-                    }
-                }, competitor,
+                ()->getTrackedRank(competitor, raceColumn, timePoint), competitor,
                 raceColumn, timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme()).getCorrectedScore();
     }
 
@@ -684,21 +680,13 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
     @Override
     public Entry getEntry(final Competitor competitor, final RaceColumn race, final TimePoint timePoint,
             Set<RaceColumn> discardedRaceColumns) throws NoWindException {
-        Callable<Integer> trackedRankProvider = new Callable<Integer>() {
-            public Integer call() throws NoWindException {
-                return getTrackedRank(competitor, race, timePoint);
-            }
-        };
+        Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, race, timePoint);
         final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, race,
                 timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
         boolean discarded = isDiscarded(competitor, race, timePoint, discardedRaceColumns);
         final Double correctedScore = correctedResults.getCorrectedScore();
-        return new EntryImpl(trackedRankProvider, correctedScore, new Callable<Double>() {
-            @Override
-            public Double call() {
-                return correctedResults.getUncorrectedScore();
-            }
-        }, correctedResults.isCorrected(), discarded ? DOUBLE_0 : correctedScore == null ? null
+        return new EntryImpl(trackedRankProvider, correctedScore, ()->correctedResults.getUncorrectedScore(),
+                correctedResults.isCorrected(), discarded ? DOUBLE_0 : correctedScore == null ? null
                 : Double.valueOf(correctedScore * race.getFactor()), correctedResults.getMaxPointsReason(), discarded,
                 race.getFleetOfCompetitor(competitor));
     }
@@ -756,12 +744,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
         Map<Competitor, Set<RaceColumn>> discardedRaces = new HashMap<Competitor, Set<RaceColumn>>();
         for (final RaceColumn raceColumn : getRaceColumns()) {
             for (final Competitor competitor : getCompetitors()) {
-                Callable<Integer> trackedRankProvider = new Callable<Integer>() {
-                    @Override
-                    public Integer call() throws Exception {
-                        return getTrackedRank(competitor, raceColumn, timePoint);
-                    }
-                };
+                Callable<Integer> trackedRankProvider = ()->getTrackedRank(competitor, raceColumn, timePoint);
                 final Result correctedResults = getScoreCorrection().getCorrectedScore(trackedRankProvider, competitor, raceColumn,
                         timePoint, new NumberOfCompetitorsFetcherImpl(), getScoringScheme());
                 Set<RaceColumn> discardedRacesForCompetitor = discardedRaces.get(competitor);
@@ -772,7 +755,7 @@ public abstract class AbstractSimpleLeaderboardImpl implements Leaderboard, Race
                 boolean discarded = discardedRacesForCompetitor.contains(raceColumn);
                 final Double correctedScore = correctedResults.getCorrectedScore();
                 Entry entry = new EntryImpl(trackedRankProvider, correctedScore,
-                        new Callable<Double>() { @Override public Double call() { return correctedResults.getUncorrectedScore(); } },
+                        ()->correctedResults.getUncorrectedScore(),
                         correctedResults.isCorrected(),
                                 discarded ? DOUBLE_0 : (correctedScore==null?null:
                                         Double.valueOf((correctedScore * raceColumn.getFactor()))), correctedResults.getMaxPointsReason(),

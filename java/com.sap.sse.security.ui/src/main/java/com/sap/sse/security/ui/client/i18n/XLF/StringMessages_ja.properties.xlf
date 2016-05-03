@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-04-27T10:05:34Z" original="/usr/sap/ljs/app/Converter_1765894632275589659/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2016-05-02T10:04:43Z" original="/usr/sap/ljs/app/Converter_1765894632275589659/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
 				<internal-file crc="ad098eb3d0a7bbfaf753d0f6d0a7c151" form="base64">H4sIAAAAAAAAAIVXS28bNxC+81cwJ7dAI6TXAEQgyDYa1K/KVowCvTDLkbTwitySXKtGkf/emSG53JWd5rLL1zw4882DVh9A3eBHNO7Qa/uiVukveh3C0Xmj7vJgXFlDDzqq9JNlVXRutwPz2aorHsjWSh3kEMDLfz98eydCu7O4e48/3OPppk/Toefp7RDT3A1RtPZZd63ZIL0lJT+nOTO0SeGhMzcu3mfKFc2ldVGGzOMjCRaNRzWB+KgVD5mFCBBja3dB3eeB2LZdBE8Hg7rkMZ8Mi8VCHKFDA4F6TP9f0pWif0HKB/cFfLt9YREPvCSjk8+8yCyIwxZis8ctOvXZbp0/6Ng6qy7zerJUW3eIiG5CNl0GNsxoVbpX3XtoYwezAx9F07kAakVf9Iw2KAEdw39iTMIUqcKjwMMgtDGb9VW6u1oaI3Emk1mEe1K3v4tG2wY6teKfKL5QxUsCDrrtFLyn37h9PYT4m36GZbwCHeLNaq+9biLJvetwBSRYsrYenSuPbdxLRBdtR7qubEaiEYg/5ov8kGs5L+MeWe7Rfj/iHM6djdcaPTPCP8gDipMHWhyxt5pga4RfU1GWEbjXdgeFkVrxtAYOHTyHiBZLfpAmTYSBDjL3cx4m5NblPwYIDKLJ9idh3J9uWIPuupdHbeODO5/wcfLFDdLzrjziNkHVVHJS+JMA751nsoxYtbSSF9F8fQ8EtOO+7SCRMuL3WT3doHVsVMjo/TKNRUAvqXv8CA8Hh+M1/whwhDMBpo3qAj9J8qY3mpiuXQdBXbDcIa9JT4ty6/yoL1r5129zyjvwhzYEtM0r+r5uvcWFkEhyKSmqC8YlSZQES4ocPlDZT45VxvUwiWaQFDsmZSh2Oeb7hPQR96MeKbo3/f3QNBDCdkB/qelEphPEotxgITPsmz00T+zoFImB8xGlTwImrvu8IbOzMCHYJ+uO9uKVwpu0kb0fx/QWUuJOwvkS5QKoBniECYYZhsM+p9F0hiOQD+oOpZgXCf+0IYaUkZZp7YKX1PIN3idkohm8R4/U2ErzGlxlMDVdCsBa2WSY2jVFa6U8dxAw1K8B4hr+HlpEMEoIldrgAQ78Ax7B0Kpnsv+JIWGyKJkw0OTlUdeULHLdQx8YZNFqTAql9DV1jSPmgpMthc3oTmM8XmQeC/nYPArmBEn01AxMDCbRznA3pJ0TDrNQWvxlvyS0UTAkNAZIuQbBvZjrRzC78w7DJ7avw5159uP2dzU94fKmypXNXF2Bs52rKLrkaQVRSoeDnzhxDdhAZF0N79Qy42kvp35tERl8uFA+Ip6xOckGKiZe8cFEWjl9hUYPoWbmirU9JlMsbSWoT90xadaQ4VVrn+7R/hhSHQ758ixpzNyjRKqOXwFs9deHb2dn4fuC2DbF23OwPY+rp2Bx29O0S9ujSWZJ7/ukE6WmgEgqrcv9TsKu3nu88+sqMGU3c94cVyfemmEKr3xNes8MikjDNTAP7j51w5c8HfNpaxdyVZK3nwb8YmYiDKuNrUqqSbShff4nMmWSv5DnmE8mnQCBjHDQoTWxy3meRK8z8Elw0VVcj8WkgKpJnc0NPsG7NPmcu6kO7rBj8Lp7nHfR74SFIxeZGzhKLBQoqOcKlq2Ty1kxTaq9pde89RlrtnTqqUo4fwpR3MJmnN1f+xjXcO0ofYyOEQ59zMWtwfYPW0I2SaJ+XVtRHET0+xOdttCwtbQ1VCOl3mlSmLqdCJiWGsAkASu0Nbc+WIXHRUmrWUd8U3WcvXiGzuFpLiPucBhs23BAkZXToVJNprupZiaWXClQGLbxkGpFyai0IlD2tFdadt2sQfqptU030KuBnibABtt6d0hd2M/YCNttuxt8esusprPxhXXJuvfOUgYqry1GJWXI7HBsI5s4OpxnwnVmjLtbbK7HfIywKRt3nW5gjyfp7fXSA79/0DPHenrC5q3T5GM35T5/505J8pOXKGYS/CxFrGdZQSBUlh7yQ5UfyNieS42Oz80Lhl95tfL7bUEk9ACht01uOUx1EpMbZ8/OchUgdXLXYSbOW5ROnL1Snpu5I5fNZDHha97p4Z22eK093ob/4j96Zp4iKhAAAA==</internal-file>
@@ -357,19 +357,19 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="oldPassword" resname="oldPassword">
 				<source>Old password</source>
-				<target state="signed-off">旧パスワード</target>
+				<target state="signed-off">現在のパスワード</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="newPasswordPlaceholder" resname="newPasswordPlaceholder">
 				<source>Type in a new password</source>
-				<target state="signed-off">新規パスワードを入力してください</target>
+				<target state="signed-off">新しいパスワードを入力してください</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="oldPasswordPlaceholder" resname="oldPasswordPlaceholder">
 				<source>Type in the old password</source>
-				<target state="signed-off">旧パスワードを入力してください</target>
+				<target state="signed-off">現在のパスワードを入力してください</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordRepeatPlaceholder" resname="passwordRepeatPlaceholder">
 				<source>Repeat the new password</source>
-				<target state="signed-off">新規パスワードを確認してください</target>
+				<target state="signed-off">新しいパスワードを確認してください</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="resetPassword" resname="resetPassword">
 				<source>Reset password</source>

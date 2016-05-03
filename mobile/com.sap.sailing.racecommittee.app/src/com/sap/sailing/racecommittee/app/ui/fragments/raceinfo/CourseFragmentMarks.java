@@ -453,13 +453,59 @@ public class CourseFragmentMarks extends CourseFragment implements CourseMarkAda
 
     private void createPassingInstructionDialog(final CourseListDataElementWithIdImpl courseElement) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-        builder.setTitle(R.string.pick_a_rounding_direction).setItems(R.array.rounding_directions, new DialogInterface.OnClickListener() {
+        final PassingInstruction[] passingInstructionsRelevantForUserEntry = PassingInstruction.relevantValues();
+        final CharSequence[] i18NPassingInstructions = getI18NPassingInstructions(passingInstructionsRelevantForUserEntry);
+        builder.setTitle(R.string.pick_a_rounding_direction).setItems(i18NPassingInstructions, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int position) {
-                PassingInstruction pickedDirection = PassingInstruction.relevantValues()[position];
+                PassingInstruction pickedDirection = passingInstructionsRelevantForUserEntry[position];
                 onPassingInstructionPicked(courseElement, pickedDirection);
             }
         });
         builder.create().show();
+    }
+
+    /**
+     * Cosntructs a message text for each of the {@link PassingIntsruction} values passed. The message strings
+     * returned correspond in their order with the {@link PassingInstruction}s passed in the array.
+     */
+    private CharSequence[] getI18NPassingInstructions(PassingInstruction[] passingInstructionsRelevantForUserEntry) {
+        final CharSequence[] result = new CharSequence[passingInstructionsRelevantForUserEntry.length];
+        int i=0;
+        for (final PassingInstruction passingInstruction : passingInstructionsRelevantForUserEntry) {
+            result[i++] = getI18NPassingInstruction(passingInstruction);
+        }
+        return result;
+    }
+
+    private CharSequence getI18NPassingInstruction(PassingInstruction passingInstruction) {
+        CharSequence result = "";
+        switch (passingInstruction) {
+        case FixedBearing:
+            result = getString(R.string.passing_instruction_fixed_bearing);
+            break;
+        case Gate:
+            result = getString(R.string.passing_instruction_gate);
+            break;
+        case Line:
+            result = getString(R.string.passing_instruction_line);
+            break;
+        case None:
+            result = getString(R.string.passing_instruction_none);
+            break;
+        case Offset:
+            result = getString(R.string.passing_instruction_offset);
+            break;
+        case Port:
+            result = getString(R.string.passing_instruction_port);
+            break;
+        case Single_Unknown:
+            result = getString(R.string.passing_instruction_single_unknown);
+            break;
+        case Starboard:
+            result = getString(R.string.passing_instruction_starboard);
+            break;
+        }
+        return result;
     }
 
     protected void onPassingInstructionPicked(CourseListDataElementWithIdImpl courseElement, PassingInstruction pickedDirection) {

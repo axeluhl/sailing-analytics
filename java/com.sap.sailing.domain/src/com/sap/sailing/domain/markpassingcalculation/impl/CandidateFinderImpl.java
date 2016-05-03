@@ -49,8 +49,19 @@ import com.sap.sse.common.Util.Pair;
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-    // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
-    private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
+    /**
+     * The higher this is, the closer the fixes have to be to waypoint to become a Candidate. The formula basically
+     * works like this:
+     * {@code probability := adjacentLegLength / fixDistanceFromWaypoint / STRICTNESS_OF_DISTANCE_BASED_PROBABILITY}. In
+     * other words, the larger the distance, the less the probability; and this strictness factor is applied to the
+     * denominator. Therefore, approximately, if the fix distance from the waypoint is {@code adjacentLegLength / }
+     * {@link #STRICTNESS_OF_DISTANCE_BASED_PROBABILITY} then the probability based on that distance is 1. Twice
+     * that distance brings down the probability to 1/2. Lesser distances can't increase the probability beyond 1.
+     * <p>
+     * 
+     * (Effectively, the formula is a bit more complicated as tolerances for GPS HDOP are included.)
+     */
+    private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 10;
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
@@ -349,7 +360,9 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate.
+     * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate by
+     * checking the distance of the fix before and after. If the distance at the fix is a local minimum and the
+     * probability exceeds {@link #penaltyForSkipping}, the fix is considered a candidate.
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
             Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
@@ -398,7 +411,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                     Boolean isCan = false;
                     Candidate oldCan = null;
                     Double probability = null;
-                    double sidePenalty = 1;
                     Distance distance = null;
                     Double startProbabilityBasedOnOtherCompetitors = null;
                     double onCorrectSideOfWaypoint = 0.8;
@@ -442,7 +454,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
                                             probability = newProbability;
-                                            sidePenalty = newOnCorrectSideOfWaypointPenalty;
                                             onCorrectSideOfWaypoint = newOnCorrectSideOfWaypointPenalty;
                                             distance = dis;
                                             startProbabilityBasedOnOtherCompetitors = newStartProbabilityBasedOnOtherCompetitors;
@@ -458,7 +469,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                         if (!wasCan && isCan) {
                             Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
+                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
                             logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
@@ -1011,7 +1022,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
                     // may have been caused by inaccurate GPS tracking
-                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).getMeters()) / legLength.getMeters()) + 1);
+                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
         } else {
             result = null;
         }
