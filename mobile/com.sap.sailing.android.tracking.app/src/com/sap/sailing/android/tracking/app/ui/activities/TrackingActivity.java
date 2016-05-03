@@ -38,6 +38,7 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
@@ -245,7 +246,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, float speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }
