@@ -47,8 +47,8 @@
 
     <Button
         android:id="@+id/noQrCode"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/no_qr_code_button_height"
         android:layout_above="@+id/bottomLayout"
         android:layout_marginLeft="@dimen/fragment_side_margin"
         android:layout_marginRight="@dimen/fragment_side_margin"
@@ -57,7 +57,7 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:text="@string/no_qr_code"
         android:textColor="@color/fiori_text_color"
-        android:textSize="@dimen/default_text_size"/>
+        android:textSize="@dimen/button_text_size"/>
 
     <ListView
         android:id="@+id/listRegatta"
