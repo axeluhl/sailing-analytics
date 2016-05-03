@@ -78,7 +78,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
             sortedProviderNames.add(providerName);
         }
         Collections.sort(sortedProviderNames);
-        scoreCorrectionProviderListBox.addItem("Please select a result import provider...");
+        scoreCorrectionProviderListBox.addItem(stringMessages.selectResultImportProvider());
         for(String providerName: sortedProviderNames) {
             scoreCorrectionProviderListBox.addItem(providerName);
         }

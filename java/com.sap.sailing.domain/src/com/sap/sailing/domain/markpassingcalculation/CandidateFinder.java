@@ -29,7 +29,7 @@ public interface CandidateFinder {
      */
     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
     
-    Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex);
+    Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex);
 
     /**
      * @return The fixes for each Competitor that may have changed their status as a {@link Candidate} because of new

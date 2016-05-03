@@ -79,7 +79,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             imageView.image = UIImage(data:  DataManager.sharedManager.selectedCheckIn!.userImage!)
             self.yourTeamPhotoButton.hidden = true
         } else if DataManager.sharedManager.selectedCheckIn?.imageUrl != nil {
-            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl! + "sa")
+            let imageUrl = NSURL(string: DataManager.sharedManager.selectedCheckIn!.imageUrl!)
             let urlRequest = NSURLRequest(URL: imageUrl!)
             imageView.setImageWithURLRequest(urlRequest,
                 placeholderImage: nil,
@@ -224,7 +224,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
             case 0:
                 showCheckOutAlertView()
             case 1:
-                performSegueWithIdentifier("Settings", sender: actionSheet)
+				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.6 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) { () -> Void in
+					self.performSegueWithIdentifier("Settings", sender: actionSheet)
+				}
                 break
             case 2:
                 showImageAlertView(actionSheet)
@@ -279,7 +281,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
         DataManager.sharedManager.selectedCheckIn!.userImage =  jpegData
         APIManager.sharedManager.postTeamImage(DataManager.sharedManager.selectedCheckIn!.competitorId,
             imageData: jpegData,
-            success: { (AnyObject responseObject) -> Void in
+            success: { (responseObject) -> Void in
                 // http://wiki.sapsailing.com/wiki/tracking-app/api-v1#Competitor-Information-%28in-general%29
                 // "Additional Notes: Competitor profile image left out for now."
                 let responseDictionary = responseObject as![String: AnyObject]
@@ -289,7 +291,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
 				NSUserDefaults.standardUserDefaults().setBool(false, forKey: self.uploadKey)
 				NSUserDefaults.standardUserDefaults().synchronize()
             },
-            failure: { (NSError error) -> Void in
+            failure: { (error) -> Void in
                 let alertView = UIAlertView(title: NSLocalizedString("Failed to upload image", comment: ""), message: error.localizedDescription, delegate: self, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
                 alertView.tag = AlertView.UploadFailed.rawValue;
 				alertView.show()
@@ -323,9 +325,9 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                     competitorId: DataManager.sharedManager.selectedCheckIn!.competitorId,
                     deviceUuid: DeviceUDIDManager.UDID,
                     toMillis: toMillis,
-                    success: { (AFHTTPRequestOperation operation, AnyObject competitorResponseObject) -> Void in
+                    success: { (operation, competitorResponseObject) -> Void in
                     },
-                    failure: { (AFHTTPRequestOperation operation, NSError error) -> Void in
+                    failure: { (operation, error) -> Void in
                     }
                 )
                 DataManager.sharedManager.deleteCheckIn(DataManager.sharedManager.selectedCheckIn!)

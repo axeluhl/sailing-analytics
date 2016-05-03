@@ -3,12 +3,14 @@ package com.sap.sailing.gwt.ui.client;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
+import com.sap.sailing.domain.common.i18n.CommonStringMessages;
 import com.sap.sse.gwt.client.DefaultRule_0_1_2_n;
 import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
 
 @DefaultLocale("en")
-public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, com.sap.sse.gwt.adminconsole.StringMessages {
+public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
+        com.sap.sse.gwt.adminconsole.StringMessages, CommonStringMessages {
     public static final StringMessages INSTANCE = GWT.create(StringMessages.class);
     
     String manage2Sail();
@@ -1535,4 +1537,53 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String fixSuccessfullyRemoved();
     String dragToChangePosition();
     String moveFix();
+    String manage2SailEvent();
+    String noEventsYet();
+    String selectResultImportProvider();
+    String buildVersion();
+    String serverInformation();
+    String serverConfiguration();
+    String standaloneServer();
+    String passId();
+    String createdAt();
+    String logicalTimepoint();
+    String info();
+    String windFixes();
+    String twoXMark();
+    String pagerStateInfo(int start , int end, int size, @Select boolean exact);
+    String strategySimulatorTitle();
+    String controlSettings();
+    String windDisplay();
+    String windSetup();
+    String sailingSetup();
+    String chooseAWindPattern();
+    String oscillations();
+    String oscillationWithGusts();
+    String gusts();
+    String measured();
+    String baseBearing();
+    String raceCourseDiff();
+    String baseSpeed();
+    String probability();
+    String gustSize();
+    String averageSpeed();
+    String speedVariance();
+    String averageDirection();
+    String speedLeftSide();
+    String speedMiddle();
+    String speedRightSide();
+    String currentSpeed();
+    String currentBearing();
+    String percentUnit();
+    String perHours();
+    String pleaseSelectAValidWindPattern();
+    String downwindLegsNotSupported();
+    String raceLeader();
+    String opportunistLeft();
+    String opportunistRight();
+    String oneTurnerLeft();
+    String oneTurnerRight();
+    String current();
+    String simulationLegendAlgorithmTimedOutText();
+    String simulationLegendMixedLegText();
 }
