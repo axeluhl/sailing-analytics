@@ -179,6 +179,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyze(RaceLog raceLog) {
+        trackedRace.setFinishedTime(getFinishedTime());
         analyzeCourseDesign(null);
         initializeWindTrack(raceLog);
         if (markPassingUpdateListener != null) {

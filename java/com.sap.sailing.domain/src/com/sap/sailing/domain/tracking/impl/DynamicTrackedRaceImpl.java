@@ -417,6 +417,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         final TimePoint oldFinishedTime = getFinishedTime();
         if (!Util.equalsWithNull(newFinishedTime, oldFinishedTime)) {
             logger.info("Finished time of race " + getRace().getName() + " updated from " + getFinishedTime() + " to " + newFinishedTime);
+            super.setFinishedTime(newFinishedTime);
             updateStartAndEndOfTracking();
             notifyListenersFinishedTimeChanged(oldFinishedTime, newFinishedTime);
         }
