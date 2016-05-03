@@ -32,6 +32,10 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
+/**
+ * The servlet just uses the available importers. Once we start consuming different files, we need to implement the
+ * differentiation here.
+ */
 public class SensorDataImportServlet extends AbstractFileUploadServlet {
     private static final long serialVersionUID = 1120226743039934620L;
     private static final Logger logger = Logger.getLogger(SensorDataImportServlet.class.getName());
@@ -39,7 +43,6 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
 
     public void storeFix(DoubleVectorFix fix, DeviceIdentifier deviceIdentifier) {
         try {
-            // TODO: use modified GPS fix
             getService().getSensorFixStore().storeFix(deviceIdentifier, fix);
         } catch (NoCorrespondingServiceRegisteredException e) {
             logger.log(Level.WARNING, "Could not store fix for " + deviceIdentifier);
@@ -113,16 +116,7 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
     protected void process(List<FileItem> fileItems, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         List<Pair<String, InputStream>> files = new ArrayList<>();
-        String prefImporterType;
-        for (FileItem item : fileItems) {
-            if (!item.isFormField()) {
-                files.add(new Pair<String, InputStream>(item.getName(), item.getInputStream()));
-            } else {
-                if (item.getFieldName() != null && item.getFieldName().equals(PREFERRED_IMPORTER)) {
-                    prefImporterType = item.getString();
-                }
-            }
-        }
+
         final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);
         resp.setContentType("text/html");
         for (TrackFileImportDeviceIdentifier mapping : mappingList) {
