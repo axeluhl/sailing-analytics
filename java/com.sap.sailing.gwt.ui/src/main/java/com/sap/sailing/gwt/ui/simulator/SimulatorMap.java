@@ -50,6 +50,7 @@ import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapAPIKey;
 import com.sap.sailing.gwt.ui.shared.racemap.GoogleMapStyleHelper;
+import com.sap.sailing.gwt.ui.shared.racemap.PathNameFormatter;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPalette;
 import com.sap.sailing.gwt.ui.simulator.util.ColorPaletteGenerator;
 import com.sap.sailing.gwt.ui.simulator.util.SimulatorResources;
@@ -110,7 +111,8 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     private static Logger LOGGER = Logger.getLogger(SimulatorMap.class.getName());
     private static boolean SHOW_ONLY_PATH_POLYLINE = false;
     private char raceCourseDirection;
-    private final CoordinateSystem coordinateSystem; 
+    private final CoordinateSystem coordinateSystem;
+    private final PathNameFormatter pathNameFormatter;
 
     public enum ViewName {
         SUMMARY, REPLAY, WINDDISPLAY
@@ -182,7 +184,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
                     }
 
                     ReplayPathCanvasOverlay replayPathCanvasOverlay = new ReplayPathCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATH_ZINDEX, 
-                            pathName.split("#")[1], timer, windParams, algorithmTimedOut, currentPath.getMixedLeg(), coordinateSystem);
+                            pathNameFormatter.format(currentPath), timer, windParams, algorithmTimedOut, currentPath.getMixedLeg(), coordinateSystem);
                     replayPathCanvasOverlays.add(replayPathCanvasOverlay);
                     replayPathCanvasOverlay.setPathColor(colorPalette.getColor(Integer.parseInt(pathName.split("#")[0])-1));
 
@@ -337,6 +339,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             TimePanel<TimePanelSettings> timePanel, WindFieldGenParamsDTO windParams,
             SimpleBusyIndicator busyIndicator, char mode, SimulatorMainPanel parent, boolean showMapControls, CoordinateSystem coordinateSystem) {
         this.coordinateSystem = coordinateSystem;
+        this.pathNameFormatter = new PathNameFormatter(stringMessages);
         this.simulatorService = simulatorSvc;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -595,7 +598,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
             windLineCanvasOverlay = new WindLineCanvasOverlay(map, SimulatorMapOverlaysZIndexes.WINDLINE_ZINDEX, timer, coordinateSystem);
         }
         replayPathCanvasOverlays = new ArrayList<PathCanvasOverlay>();
-        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode, coordinateSystem);
+        legendCanvasOverlay = new PathLegendCanvasOverlay(map, SimulatorMapOverlaysZIndexes.PATHLEGEND_ZINDEX, mode, coordinateSystem, stringMessages);
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
@@ -626,7 +629,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
     public void generateWindField(final WindPatternDisplay windPatternDisplay, final boolean removeOverlays) {
         LOGGER.info("In generateWindField");
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+            errorReporter.reportError(stringMessages.pleaseSelectAValidWindPattern());
             return;
         }
         
@@ -745,7 +748,7 @@ public class SimulatorMap extends AbsolutePanel implements RequiresDataInitializ
         LOGGER.info("In generatePath");
 
         if (windPatternDisplay == null) {
-            errorReporter.reportError("Please select a valid wind pattern.");
+            errorReporter.reportError(stringMessages.pleaseSelectAValidWindPattern());
             return;
         }
 

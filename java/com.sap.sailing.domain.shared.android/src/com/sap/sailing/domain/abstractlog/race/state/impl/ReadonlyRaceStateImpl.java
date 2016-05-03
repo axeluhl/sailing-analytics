@@ -186,7 +186,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         this.protestTimeAnalyzer = new ProtestStartTimeFinder(raceLog);
         this.finishPositioningListAnalyzer = new FinishPositioningListFinder(raceLog);
         this.confirmedFinishPositioningListAnalyzer = new ConfirmedFinishPositioningListFinder(raceLog);
-        this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog);
+        this.courseDesignerAnalyzer = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ false);
         this.lastWindFixAnalyzer = new LastWindFixFinder(raceLog);
 
         this.raceStateToObserveListener = new BaseRaceStateChangedListener() {

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
 import com.sap.sailing.gwt.ui.client.MediaService;
@@ -25,6 +25,8 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.shared.RaceWithCompetitorsDTO;
 import com.sap.sailing.gwt.ui.shared.RaceboardDataDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
@@ -88,16 +90,19 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         final boolean autoSelectMedia = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_AUTOSELECT_MEDIA, true);
         final String defaultMedia = GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_DEFAULT_MEDIA, null /* default*/);
         final boolean showMapControls = GwtHttpRequestUtils.getBooleanParameter(RaceBoardViewConfiguration.PARAM_VIEW_SHOW_MAPCONTROLS, true /* default*/);
+        final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(RaceBoardViewConfiguration.PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default*/));
         raceboardViewConfig = new RaceBoardViewConfiguration(activeCompetitorsFilterSetName, showLeaderboard,
-                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia);
+                showWindChart, showCompetitorsChart, showViewStreamlets, showViewStreamletColors, showViewSimulation, autoSelectMedia, defaultMedia,
+                initialDurationAfterRaceStartInReplay);
         sailingService.getRaceboardData(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, new AsyncCallback<RaceboardDataDTO>() {
             @Override
             public void onSuccess(RaceboardDataDTO result) {
-                // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
-                // This decision is made once based on the initial screen height. Resizing the window afterwards will have
-                // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
-                boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
-                checkUrlParameters(result, showMapControls, isScreenLargeEnoughToOfferChartSupport);
+                // Determine if the charts, such as the competitor chart or the wind chart, the edit marks
+                // panels, such as mark passing and mark position editors and manage media buttons should be shown. 
+                // Automatic selection of attached video (if any) also depends on this flag.
+                // The decision is made once during initial page load based on the device type (mobile or not).
+                boolean showChartMarkEditMediaButtonsAndVideo = !DeviceDetector.isMobile();
+                checkUrlParameters(result, showMapControls, showChartMarkEditMediaButtonsAndVideo);
             }
             
             @Override
@@ -107,6 +112,24 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         });
     }
     
+    /**
+     * Understands [hh:[mm:]]ss and parses into a {@link Duration}. If {@code durationAsString} is {@code null} then
+     * so is the result.
+     */
+    public static Duration parseDuration(String durationAsString) {
+        final Duration result;
+        if (durationAsString == null) {
+            result = null;
+        } else {
+            long seconds = 0;
+            for (final String hhmmss : durationAsString.split(":")) {
+                seconds = 60*seconds + Long.valueOf(hhmmss);
+            }
+            result = new MillisecondsDurationImpl(1000l * seconds);
+        }
+        return result;
+    }
+
     private void createErrorPage(String message) {
         final DockLayoutPanel vp = new DockLayoutPanel(Unit.PX);
         LogoAndTitlePanel logoAndTitlePanel = new LogoAndTitlePanel(getStringMessages(), this, getUserService());
@@ -117,7 +140,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void checkUrlParameters(RaceboardDataDTO raceboardData, boolean showMapControls,
-            boolean isScreenLargeEnoughToOfferChartSupport) {
+            boolean showChartMarkEditMediaButtonsAndVideo) {
         if (!raceboardData.isValidLeaderboard()) {
             createErrorPage(getStringMessages().noSuchLeaderboard());
             return;
@@ -148,7 +171,7 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
         RaceBoardPanel raceBoardPanel = new RaceBoardPanel(sailingService, mediaService, getUserService(), asyncActionsExecutor,
                 raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName, leaderboardGroupName, eventId, 
                 raceboardViewConfig, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider, showMapControls,
-                isScreenLargeEnoughToOfferChartSupport);
+                showChartMarkEditMediaButtonsAndVideo);
 
         createRaceBoardInOneScreenMode(raceBoardPanel, raceboardViewConfig);
     }  

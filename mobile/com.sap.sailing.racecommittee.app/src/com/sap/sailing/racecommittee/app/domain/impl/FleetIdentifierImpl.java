@@ -1,18 +1,18 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.SeriesBase;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.SeriesWithRows;
 import com.sap.sailing.racecommittee.app.domain.FleetIdentifier;
 import com.sap.sse.common.Util.Triple;
 
 public class FleetIdentifierImpl implements FleetIdentifier {
 
     private Fleet fleet;
-    private SeriesBase series;
+    private SeriesWithRows series;
     private RaceGroup raceGroup;
 
-    public FleetIdentifierImpl(Fleet fleet, SeriesBase series, RaceGroup raceGroup) {
+    public FleetIdentifierImpl(Fleet fleet, SeriesWithRows series, RaceGroup raceGroup) {
         this.fleet = fleet;
         this.series = series;
         this.raceGroup = raceGroup;
@@ -22,7 +22,7 @@ public class FleetIdentifierImpl implements FleetIdentifier {
         return fleet;
     }
 
-    public SeriesBase getSeries() {
+    public SeriesWithRows getSeries() {
         return series;
     }
 

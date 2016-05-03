@@ -112,7 +112,7 @@ public class TracTrac {
         raceRecords = getTracTracAdapter().getTracTracRaceRecords(new URL(eventJsonURL), /*loadClientParam*/ false);
         List<TracTracRaceRecordDTO> result = new ArrayList<TracTracRaceRecordDTO>();
         for (RaceRecord raceRecord : raceRecords.getB()) {
-            if (listHiddenRaces == false && raceRecord.getRaceStatus().equals(TracTracConnectionConstants.HIDDEN_STATUS)) {
+            if (listHiddenRaces == false && raceRecord.getRaceVisibility().equals(TracTracConnectionConstants.HIDDEN_VISIBILITY)) {
                 continue;
             }
             

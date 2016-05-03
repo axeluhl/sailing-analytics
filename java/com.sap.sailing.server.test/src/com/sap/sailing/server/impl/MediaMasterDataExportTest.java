@@ -180,7 +180,7 @@ public class MediaMasterDataExportTest {
     public static RegattaImpl createTestRegatta(String regattaName, Iterable<String> raceColumnNames) {
         Iterable<? extends Fleet> regattaFleets = Collections.singleton(regattaFleet);
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
-        Series series = new SeriesImpl("series name", isMedal, regattaFleets, raceColumnNames, trackedRegattaRegistry);
+        Series series = new SeriesImpl("series name", isMedal, /* isFleetsCanRunInParallel */ true, regattaFleets, raceColumnNames, trackedRegattaRegistry);
         Iterable<? extends Series> regattaSeries = Collections.singleton(series);
         return new RegattaImpl(regattaName, boatClass, startDate, endDate, regattaSeries, persistent, scoringScheme, regatteId , courseArea, OneDesignRankingMetric::new);
     }

@@ -178,7 +178,8 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     }
 
     private Regatta createRegatta() {
-        Series series = new SeriesImpl("Test Series", /* isMedal */ false, /* fleets */ Collections.singleton(new FleetImpl("Default")),
+        Series series = new SeriesImpl("Test Series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
+                /* fleets */ Collections.singleton(new FleetImpl("Default")),
                 Collections.singleton("R1"), /* trackedRegattaRegistry */ null);
         Regatta regatta = new RegattaImpl("test", null, null, null, Collections.singleton(series), false,
                 new LowPoint(), "test", null, OneDesignRankingMetric::new);

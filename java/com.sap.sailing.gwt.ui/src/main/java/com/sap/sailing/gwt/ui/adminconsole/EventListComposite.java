@@ -184,7 +184,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(filterTextbox);
         panel.add(eventTable);
         
-        noEventsLabel = new Label("No events defined yet.");
+        noEventsLabel = new Label(stringMessages.noEventsYet());
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
