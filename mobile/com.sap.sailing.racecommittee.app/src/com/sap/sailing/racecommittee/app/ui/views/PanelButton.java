@@ -6,18 +6,17 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.StringRes;
-import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.utils.TouchEventListener;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 public class PanelButton extends FrameLayout implements DialogInterface.OnClickListener {
@@ -40,13 +39,8 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     private int mType;
 
-    private Runnable mClickRunnable;
-    private float mStartX;
-    private boolean mUseThis;
-    private int mTouchSlop;
-    private boolean mClickEnabled;
-
     private PanelButtonClick mListener;
+    private TouchEventListener mTouchEventListener;
 
     public PanelButton(Context context) {
         this(context, null);
@@ -60,6 +54,31 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         super(context, attrs, defStyleAttr);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PanelButton);
+
+        Runnable clickRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (mLock != null && mLock.getVisibility() == VISIBLE && isNormal()) {
+                    if (mType == 2 && mSwitch != null) {
+                        mSwitch.setChecked(!mSwitch.isChecked());
+                    }
+                    showChangeDialog(PanelButton.this);
+                } else {
+                    if (mType == 2) {
+                        if (mListener != null && mSwitch != null) {
+                            mListener.onChangedSwitch(PanelButton.this, mSwitch.isChecked());
+                        }
+                    } else {
+                        if (mListener != null) {
+                            mListener.onClick(PanelButton.this);
+                        }
+                    }
+                }
+            }
+        };
+
+        mTouchEventListener = new TouchEventListener(this);
+        mTouchEventListener.setClickRunnable(clickRunnable);
 
         setPanelType(a.getInt(R.styleable.PanelButton_buttonType, 0));
 
@@ -93,31 +112,6 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         a.recycle();
 
         setMarkerLevel(LEVEL_NORMAL);
-
-        mClickRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mLock != null && mLock.getVisibility() == VISIBLE && isNormal()) {
-                    if (mType == 2 && mSwitch != null) {
-                        mSwitch.setChecked(!mSwitch.isChecked());
-                    }
-                    showChangeDialog(PanelButton.this);
-                } else {
-                    if (mType == 2) {
-                        if (mListener != null && mSwitch != null) {
-                            mListener.onChangedSwitch(PanelButton.this, mSwitch.isChecked());
-                        }
-                    } else {
-                        if (mListener != null) {
-                            mListener.onClick(PanelButton.this);
-                        }
-                    }
-                }
-            }
-        };
-
-        final ViewConfiguration configuration = ViewConfiguration.get(context);
-        mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
     }
 
     public void setListener(PanelButtonClick listener) {
@@ -150,11 +144,11 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         mType = type;
         switch (type) {
             case 2:
-                mClickEnabled = false;
+                mTouchEventListener.setEnabled(false);
                 break;
 
             default:
-                mClickEnabled = true;
+                mTouchEventListener.setEnabled(true);
         }
     }
 
@@ -346,34 +340,7 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getActionMasked();
-
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mUseThis = true;
-                getParent().requestDisallowInterceptTouchEvent(true);
-                mStartX = event.getX();
-                return true;
-
-            case MotionEvent.ACTION_MOVE:
-                boolean inLimit = false;
-                if (mUseThis) {
-                    inLimit = Math.abs(event.getX() - mStartX) <= mTouchSlop;
-                    mUseThis = inLimit;
-                } else {
-                    getParent().requestDisallowInterceptTouchEvent(false);
-                }
-                return inLimit;
-
-            case MotionEvent.ACTION_UP:
-                getParent().requestDisallowInterceptTouchEvent(false);
-                if (mUseThis && mClickEnabled) {
-                    performClick();
-                    mClickRunnable.run();
-                    return true;
-                }
-        }
-        return false;
+        return mTouchEventListener.onTouchEvent(event);
     }
 
     public interface PanelButtonClick {
