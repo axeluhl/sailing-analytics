@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="about_partnership_text">Die SAP Sail InSight App unterstützt Live-Tracking von Segelbooten mit Mobilgeräten, wodurch Freunde und Fans den Wettfahrten folgen können, bei der Veranstaltung oder online mit Live-Ergebnistabellen und 2D-Visualisierungen. Segler können ihre Rennen später wieder betrachten und ihre Strategie optimieren. All das ist verfügbar unter: https://www.sapsailing.com\n\nSAP unterstützt US Sailing durch die Implementierung einer Reihe innovativer Technologielösungen, die Analysen für Segler und Teams zur Performance-Verbesserung liefern und Organisatoren bei der errizienteren Abwicklung von Veranstaltungen helfen.\n\nAls nationaler Segelverband verhilft US Sailing dem Sport mit Integrität zu Wachstum, insbesondere auch durch Trainings- und Ausbildungsprogramme für Instruktoren und Wettfahrtleiter sowie Administration und Begleitung von Segelwettbewerben überall in den USA.</string>
+    <string name="about_partnership_clickable">sapsailing.com</string>
+
+</resources>

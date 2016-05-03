@@ -12,7 +12,7 @@
 	       "targetFolderPath":".",
 	       "pseudoLocFolderPath":"."
             },
-			{  
+ 	    {  
                "sourceFolderPath":"java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/common/client/i18n",
                "sourceFilters":[  
                   "TextMessages*.properties"
@@ -38,6 +38,20 @@
          ]
       },
       {
+         "collectionName":"Polars",
+         "folders":[  
+            {  
+               "sourceFolderPath":"java/com.sap.sailing.polars.datamining/resources/stringmessages",
+               "sourceFilters":[  
+                  "Polars_StringMessages*.properties"
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
+            }
+         ]
+      },
+      {
          "collectionName":"DataMining",
          "folders":[  
             {  
@@ -48,11 +62,20 @@
                "xlfFolderPath":"./XLF",
 	       "targetFolderPath":".",
 	       "pseudoLocFolderPath":"."
+            },
+            {  
+               "sourceFolderPath":"java/com.sap.sailing.datamining/resources/stringmessages",
+               "sourceFilters":[  
+                  "Sailing_StringMessages*.properties"
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             }
          ]
       },
       {
-         "collectionName":"SseGwtUi",
+         "collectionName":"FileStorage",
          "folders":[  
             {  
                "sourceFolderPath":"java/com.sap.sse.gwt/src/com/sap/sse/gwt/client/controls/filestorage",
@@ -62,10 +85,19 @@
                "xlfFolderPath":"./XLF",
 	       "targetFolderPath":".",
 	       "pseudoLocFolderPath":"."
+            },
+            {  
+               "sourceFolderPath":"java/com.sap.sse.filestorage/resources/stringmessages",
+               "sourceFilters":[  
+                  "FileStorageStringMessages*.properties"
+               ],
+               "xlfFolderPath":"./XLF",
+	       "targetFolderPath":".",
+	       "pseudoLocFolderPath":"."
             }
          ]
       },
-  	  {  
+      {  
          "collectionName":"SecurityGwtUi",
          "folders":[  
             {  
