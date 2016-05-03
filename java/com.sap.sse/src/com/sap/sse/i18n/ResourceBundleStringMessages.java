@@ -47,14 +47,12 @@ public interface ResourceBundleStringMessages {
             if (!supportedLocalesHaveBeenInitialized) {
                 initializeSupportedLocales();
             }
-            
             return supportedLocalesMappedByLocaleInfo;
         }
         
         private static void initializeSupportedLocales() {
             supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
             supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
-            
             supportedLocalesHaveBeenInitialized = true;
         }
         
