@@ -567,8 +567,8 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
         boolean hasDetailTypeChanged = !Util.equalsWithNull(newSelectedFirstDetailType, this.selectedFirstDetailType)
                 || !Util.equalsWithNull(newSelectedSecondDetailType, this.selectedSecondDetailType);
         if (hasDetailTypeChanged) {
-            final boolean oldReversedY0Axis = isY0AxisReversed();
-            final boolean oldReversedY1Axis = isY1AxisReversed();
+            // final boolean oldReversedY0Axis = isY0AxisReversed();
+            // final boolean oldReversedY1Axis = isY1AxisReversed();
             this.selectedFirstDetailType = newSelectedFirstDetailType;
             this.selectedSecondDetailType = newSelectedSecondDetailType;
             // TODO There is a bug in the highcharts library which prevents to change the reverse property of the YAxis
