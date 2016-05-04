@@ -50,7 +50,6 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
         raceName = race.getRace().getName();
         queue = new LinkedBlockingQueue<>();
         race.addListener(this);
-        race.getRace().getCourse().addCourseListener(this);
     }
 
     public BlockingQueue<StorePositionUpdateStrategy> getQueue() {
