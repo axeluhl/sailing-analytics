@@ -187,7 +187,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void setStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
+    public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status) {
         // FIXME implement loader status aggregation 
     }
 

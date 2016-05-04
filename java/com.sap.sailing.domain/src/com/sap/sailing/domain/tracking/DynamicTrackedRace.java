@@ -162,7 +162,7 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void setStatus(TrackedRaceStatus newStatus);
     
-    void setStatus(TrackingDataLoader loader, TrackedRaceStatus status);
+    void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status);
 
     /**
      * whenever a new course design is published by the race committee and the appropriate event occurs in the race log,

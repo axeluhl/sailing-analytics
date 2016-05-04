@@ -812,7 +812,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
     
     @Override
-    public void setStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
+    public void onStatusChanged(TrackingDataLoader loader, TrackedRaceStatus status) {
     }
 
     @Override

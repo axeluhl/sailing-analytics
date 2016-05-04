@@ -60,6 +60,7 @@ import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
@@ -69,7 +70,8 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 import difflib.PatchFailedException;
 
-public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implements SwissTimingRaceTracker, SailMasterListener {
+public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
+        implements SwissTimingRaceTracker, SailMasterListener, TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(SwissTimingRaceTrackerImpl.class.getName());
     
     private final SailMasterConnector connector;
@@ -146,6 +148,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
         this.delayToLiveInMillis = delayToLiveInMillis;
         this.competitorsByBoatId = new HashMap<String, Competitor>();
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+
     }
 
     @Override
@@ -161,7 +164,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
     public void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException {
         if (isTrackedRaceStillReachable()) {
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
-            trackedRace.setStatus(newStatus);
+            trackedRace.onStatusChanged(this, newStatus);
         }
         connector.removeSailMasterListener(this);
     }
@@ -416,7 +419,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl implemen
             } else {
                 newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.LOADING, progress);
             }
-            trackedRace.setStatus(newStatus);
+            trackedRace.onStatusChanged(this, newStatus);
         }
     }
 
