@@ -99,7 +99,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData data) {
-        if(data != null && data instanceof CheckinData) {
+        if (data != null && data instanceof CheckinData) {
             CheckinData checkinData = (CheckinData) data;
             if (!checkinData.isUpdate()) {
                 getHomeFragment().displayUserConfirmationScreen(data);

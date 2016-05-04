@@ -39,6 +39,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
     private TextBox seriesNameTextBox;
     private CheckBox isMedalCheckbox;
+    private CheckBox fleetsCanRunInParallelCheckbox;
     private CheckBox startWithZeroScoreCheckbox;
     private CheckBox hasSplitFleetContiguousScoringCheckbox;
     private CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
@@ -133,6 +134,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
             races.add(raceColumnDTO);
         }
         return new SeriesDescriptor(selectedSeries, seriesNameTextBox.getValue(), races, isMedalCheckbox.getValue(),
+                fleetsCanRunInParallelCheckbox.getValue(),
                 useSeriesResultDiscardingThresholdsCheckbox.getValue() ? discardThresholdBoxes.getDiscardThresholds()
                         : null, startWithZeroScoreCheckbox.getValue(),
                 firstColumnIsNonDiscardableCarryForwardCheckbox.getValue(), hasSplitFleetContiguousScoringCheckbox.getValue());
@@ -171,7 +173,12 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         isMedalCheckbox.ensureDebugId("MedalSeriesCheckbox");
         isMedalCheckbox.setValue(selectedSeries.isMedal());
         additionalWidgetPanel.add(isMedalCheckbox);
-        
+
+        fleetsCanRunInParallelCheckbox = createCheckbox(stringMessages.canFleetsRunInParallel());
+        fleetsCanRunInParallelCheckbox.ensureDebugId("FleetsCanRaceInParallelSeriesCheckbox");
+        fleetsCanRunInParallelCheckbox.setValue(selectedSeries.isFleetsCanRunInParallel());
+        additionalWidgetPanel.add(fleetsCanRunInParallelCheckbox);
+
         startWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
         startWithZeroScoreCheckbox.setValue(selectedSeries.isStartsWithZeroScore());

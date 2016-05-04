@@ -13,7 +13,9 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -156,7 +158,7 @@ public class RegattaActivity extends AbstractRegattaActivity
                 return true;
             case R.id.options_menu_checkout:
                 ExLog.i(this, TAG, "Clicked CHECKOUT.");
-                checkout();
+                displayCheckoutConfirmationDialog();
                 return true;
             case R.id.options_menu_add_team_image:
                 ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
@@ -444,6 +446,20 @@ public class RegattaActivity extends AbstractRegattaActivity
         return FLAG_IMAGE_FILENAME_PREFIX + countryCode;
     }
 
+    private void displayCheckoutConfirmationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.warning);
+        builder.setMessage(R.string.checkout_warning_message);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                checkout();
+            }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.show();
+    }
+
     /**
      * Check out from regatta;
      */
@@ -465,8 +481,7 @@ public class RegattaActivity extends AbstractRegattaActivity
         }
 
         try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(new URL(checkoutURLStr), checkoutData.toString(),
-                    this);
+            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
             NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
                     new NetworkHelperSuccessListener() {
 

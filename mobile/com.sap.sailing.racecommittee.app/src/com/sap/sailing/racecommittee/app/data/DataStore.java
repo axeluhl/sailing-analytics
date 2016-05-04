@@ -32,10 +32,12 @@ public interface DataStore {
 
     Collection<ManagedRace> getRaces();
     void addRace(ManagedRace race);
-    public ManagedRace getRace(String id);
-    public ManagedRace getRace(SimpleRaceLogIdentifier id);
-    public boolean hasRace(String id);
-    public boolean hasRace(SimpleRaceLogIdentifier id);
+    void addRace(int index, ManagedRace race);
+    void removeRace(ManagedRace race);
+    ManagedRace getRace(String id);
+    ManagedRace getRace(SimpleRaceLogIdentifier id);
+    boolean hasRace(String id);
+    boolean hasRace(SimpleRaceLogIdentifier id);
 
     Collection<Mark> getMarks();
     Mark getMark(Serializable id);

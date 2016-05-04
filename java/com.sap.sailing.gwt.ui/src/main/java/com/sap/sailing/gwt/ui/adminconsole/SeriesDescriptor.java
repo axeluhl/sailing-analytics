@@ -17,18 +17,20 @@ public class SeriesDescriptor {
     private final List<RaceColumnDTO> races;
     private final String seriesName;
     private final boolean isMedal;
+    private final boolean isFleetsCanRunInParallel;
     private final boolean startsWithZeroScore;
     private final boolean hasSplitFleetContiguousScoring;
     private final boolean firstColumnIsNonDiscardableCarryForward;
     private final int[] resultDiscardingThresholds;
     
-    public SeriesDescriptor(SeriesDTO series, String seriesName, List<RaceColumnDTO> races, boolean isMedal,
+    public SeriesDescriptor(SeriesDTO series, String seriesName, List<RaceColumnDTO> races, boolean isMedal, boolean isFleetsCanRunInParallel,
             int[] resultDiscardingThresholds, boolean startsWithZeroScore,
             boolean firstColumnIsNonDiscardableCarryForward, boolean hasSplitFleetContiguousScoring) {
         this.seriesName = seriesName;
         this.series = series;
         this.races = races;
         this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
         this.startsWithZeroScore = startsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.resultDiscardingThresholds = resultDiscardingThresholds;
@@ -51,6 +53,10 @@ public class SeriesDescriptor {
         return isMedal;
     }
 
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+    
     public int[] getResultDiscardingThresholds() {
         return resultDiscardingThresholds;
     }

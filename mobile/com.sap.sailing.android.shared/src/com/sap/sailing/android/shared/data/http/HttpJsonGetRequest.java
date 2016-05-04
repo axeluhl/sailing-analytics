@@ -10,8 +10,8 @@ import android.content.Context;
 public class HttpJsonGetRequest extends HttpRequest {
     public final static String ContentType = "application/json;charset=UTF-8";
 
-    public HttpJsonGetRequest(URL requestUrl, Context context) {
-        super(requestUrl, context);
+    public HttpJsonGetRequest(Context context, URL requestUrl) {
+        super(context, requestUrl);
     }
 
     @Override
