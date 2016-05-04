@@ -59,9 +59,7 @@ public class RegattaLogSensorDataTracker {
 
     public synchronized void stop() {
         trackedRegatta.removeRaceListener(raceListener);
-        knownTrackedRaces.keySet().forEach(raceIdentifier -> {
-            removeRaceLogSensorDataTracker(raceIdentifier);
-        });
+        knownTrackedRaces.keySet().forEach(this::removeRaceLogSensorDataTracker);
         knownTrackedRaces.clear();
         dataTrackers.clear();
     }
@@ -73,4 +71,10 @@ public class RegattaLogSensorDataTracker {
             dataTrackers.remove(currentActiveDataTracker);
         }
     }
+
+    @Override
+    public String toString() {
+        return "RegattaLogSensorDataTracker [regattaId=" + trackedRegatta.getRegatta().getId() + "]";
+    }
+    
 }

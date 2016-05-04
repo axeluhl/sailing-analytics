@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
@@ -24,6 +25,24 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
         this.trackName = trackName;
         this.valueNames = valueNames;
         this.listeners = new TrackListenerCollection<>();
+    }
+    
+    @Override
+    public boolean add(FixT fix, boolean replace) {
+        final boolean result;
+        lockForWrite();
+        try {
+            final boolean firstFixInTrack = getRawFixes().isEmpty();
+            result = addWithoutLocking(fix, replace);
+            this.notifyListeners((listener) -> listener.fixReceived(fix, trackedItem, trackName, firstFixInTrack));
+        } finally {
+            unlockAfterWrite();
+        }
+        return result;
+    }
+    
+    protected void notifyListeners(Consumer<SensorFixTrackListener<ItemType, FixT>> notification) {
+        listeners.getListeners().forEach(notification);
     }
 
     @Override

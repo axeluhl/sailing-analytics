@@ -58,6 +58,7 @@ import com.sap.sailing.domain.tracking.TrackFactory;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sse.common.TimePoint;
@@ -183,6 +184,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         TrackedRaceStatus oldStatus = getStatus();
         super.setStatus(newStatus);
         notifyListeners(newStatus, oldStatus);
+    }
+    
+    @Override
+    public void setStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
+        // FIXME implement loader status aggregation 
     }
 
     @Override

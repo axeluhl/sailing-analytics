@@ -74,6 +74,7 @@ import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -808,6 +809,10 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
     @Override
     public void setStatus(TrackedRaceStatus newStatus) {
+    }
+    
+    @Override
+    public void setStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
     }
 
     @Override

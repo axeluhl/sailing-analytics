@@ -35,6 +35,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.tracking.GPSFixJsonH
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.GPSFixJsonHandlerImpl;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.SmartphoneUUIDJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.replication.Replicable;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class Activator implements BundleActivator {
@@ -87,14 +88,14 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
         
         sensorFixMapperTracker = (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
-        
-        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(
-                context,
-                RacingEventService.class);
+        racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
 
+        RegattaLogSensorDataTrackerTrackedRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogSensorDataTrackerTrackedRegattaListener(
+                racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
         registrations.add(context.registerService(TrackedRegattaListener.class,
-                new RegattaLogSensorDataTrackerTrackedRegattaListener(racingEventServiceTracker,
-                        new SensorFixMapperFactoryImpl(sensorFixMapperTracker)), null));
+                regattaLogSensorDataTrackerTrackedRegattaListener, null));
+        registrations.add(context.registerService(Replicable.class,
+                regattaLogSensorDataTrackerTrackedRegattaListener, null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
     }
