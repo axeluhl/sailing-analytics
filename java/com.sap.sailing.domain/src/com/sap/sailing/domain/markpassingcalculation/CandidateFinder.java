@@ -7,12 +7,15 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Converts the incoming GPSFixes of competitors and marks into {@link Candidate}s for each competitor.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl (d043530)
  */
 public interface CandidateFinder {
     /**
@@ -36,4 +39,25 @@ public interface CandidateFinder {
      *         mark fixes..
      */
     Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> newMarkFixes);
+
+    /**
+     * Notifies this finder about the race's start time having changed. The finder is only interested in the non-inferred
+     * start time and double-checks whether this non-inferred start time has changed. If so, the candidates collections
+     * are adjusted accordingly: new candidates may be added if the start time was moved towards the past and therefore
+     * extends the time range for candidates; candidates are removed if the start time was moved to a later point in time
+     * and the candidate is no longer in the time range valid for mark passings. The candidates added and removed are
+     * returned in a map keyed by the competitors. The {@link Pair#getA() first} element of the value pair has the
+     * candidates added for this competitor, the {@link Pair#getB() second} element has the candidates removed.
+     */
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange();
+
+    /**
+     * Notifies this finder about the race's finished time having changed. The candidates collections are adjusted
+     * accordingly: new candidates may be added if the finished time was moved to a later point in time and therefore
+     * extends the time range for candidates; candidates are removed if the finished time was moved to an earlier point
+     * in time and the candidate is no longer in the time range valid for mark passings. The candidates added and
+     * removed are returned in a map keyed by the competitors. The {@link Pair#getA() first} element of the value pair
+     * has the candidates added for this competitor, the {@link Pair#getB() second} element has the candidates removed.
+     */
+    Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceFinishedTimeChange(TimePoint oldFinishedTime, TimePoint newFinishedTime);
 }

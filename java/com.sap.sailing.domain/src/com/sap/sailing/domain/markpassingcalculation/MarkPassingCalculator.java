@@ -136,7 +136,7 @@ public class MarkPassingCalculator {
                             } else {
                                 fixInsertion.storePositionUpdate(competitorFixes, markFixes, addedWaypoints, removedWaypoints,
                                         smallestChangedWaypointIndex, fixedMarkPassings, removedFixedMarkPassings,
-                                        suppressedMarkPassings, unsuppressedMarkPassings);
+                                        suppressedMarkPassings, unsuppressedMarkPassings, finder, chooser);
                             }
                         }
                         if (!finished && !suspended) {
@@ -277,7 +277,7 @@ public class MarkPassingCalculator {
                     IntHolder smallestChangedWaypointIndex,
                     List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings,
                     List<Pair<Competitor, Integer>> removedMarkPassings,
-                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings) {
+                    List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
             }
         });
     }
