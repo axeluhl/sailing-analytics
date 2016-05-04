@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -85,6 +86,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private transient Set<CourseDesignChangedListener> courseDesignChangedListeners;
     private transient Set<StartTimeChangedListener> startTimeChangedListeners;
     private transient Set<RaceAbortedListener> raceAbortedListeners;
+    private transient Map<TrackingDataLoader, TrackedRaceStatus> loaderStatus = new HashMap<>();
 
     /**
      * Caches the result from {@link #getResultsFromRaceLogs}. This cache is updated in
@@ -187,8 +189,34 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status) {
-        // FIXME implement loader status aggregation 
+    public synchronized void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
+        this.updateLoaderStatus(source, newStatus);
+        double totalProgress = 1.0, sumOfLoaderProgresses = 0.0;
+        TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
+        if (!loaderStatus.isEmpty()) {
+            raceStatus = TrackedRaceStatusEnum.TRACKING;
+            for (TrackedRaceStatus status : loaderStatus.values()) {
+                if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
+                    raceStatus = TrackedRaceStatusEnum.ERROR; break;
+                } 
+                if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                    raceStatus = TrackedRaceStatusEnum.LOADING;
+                }
+                sumOfLoaderProgresses += status.getLoadingProgress();
+            }
+            if (raceStatus == TrackedRaceStatusEnum.LOADING) {
+                totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+            }
+        }
+        this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
+    }
+   
+    private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
+        if (status.getStatus() == TrackedRaceStatusEnum.FINISHED) {
+            loaderStatus.remove(loader);
+        } else {
+            loaderStatus.put(loader, status);
+        }
     }
 
     @Override
