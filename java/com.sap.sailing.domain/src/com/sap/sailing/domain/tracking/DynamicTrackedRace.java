@@ -161,6 +161,8 @@ public interface DynamicTrackedRace extends TrackedRace {
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
     
     void setStatus(TrackedRaceStatus newStatus);
+    
+    void setStatus(TrackingDataLoader loader, TrackedRaceStatus status);
 
     /**
      * whenever a new course design is published by the race committee and the appropriate event occurs in the race log,
