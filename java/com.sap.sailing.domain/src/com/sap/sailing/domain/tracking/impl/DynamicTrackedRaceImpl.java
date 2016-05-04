@@ -182,7 +182,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void setStatus(TrackedRaceStatus newStatus) {
+    protected void setStatus(TrackedRaceStatus newStatus) {
         TrackedRaceStatus oldStatus = getStatus();
         super.setStatus(newStatus);
         notifyListeners(newStatus, oldStatus);

@@ -160,8 +160,6 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     void setRaceIsKnownToStartUpwind(boolean raceIsKnownToStartUpwind);
     
-    void setStatus(TrackedRaceStatus newStatus);
-    
     void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus status);
 
     /**
