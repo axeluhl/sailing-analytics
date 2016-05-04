@@ -514,22 +514,24 @@ public class CandidateFinderImpl implements CandidateFinder {
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            affectedFixes.add(fix);
-            GPSFix fixBefore;
-            GPSFix fixAfter;
-            try {
-                track.lockForRead();
-                TimePoint timePoint = fix.getTimePoint();
-                fixBefore = track.getLastFixBefore(timePoint);
-                fixAfter = track.getFirstFixAfter(timePoint);
-            } finally {
-                track.unlockAfterRead();
-            }
-            if (fixBefore != null) {
-                affectedFixes.add(fixBefore);
-            }
-            if (fixAfter != null) {
-                affectedFixes.add(fixAfter);
+            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+                affectedFixes.add(fix);
+                GPSFix fixBefore;
+                GPSFix fixAfter;
+                try {
+                    track.lockForRead();
+                    TimePoint timePoint = fix.getTimePoint();
+                    fixBefore = track.getLastFixBefore(timePoint);
+                    fixAfter = track.getFirstFixAfter(timePoint);
+                } finally {
+                    track.unlockAfterRead();
+                }
+                if (fixBefore != null) {
+                    affectedFixes.add(fixBefore);
+                }
+                if (fixAfter != null) {
+                    affectedFixes.add(fixAfter);
+                }
             }
         }
         for (GPSFix fix : affectedFixes) {
@@ -667,108 +669,110 @@ public class CandidateFinderImpl implements CandidateFinder {
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            TimePoint t = fix.getTimePoint();
-            GPSFix fixBefore;
-            GPSFix fixAfter;
-            track.lockForRead();
-            try {
-                fixBefore = track.getLastFixBefore(t);
-                fixAfter = track.getFirstFixAfter(t);
-            } finally {
-                track.unlockAfterRead();
-            }
-            Map<Waypoint, List<Distance>> xtesBefore = null;
-            Map<Waypoint, List<Distance>> xtesAfter = null;
-            TimePoint tBefore = null;
-            TimePoint tAfter = null;
-            if (fixBefore != null) {
-                xtesBefore = getXTE(c, fixBefore);
-                tBefore = fixBefore.getTimePoint();
-            }
-            if (fixAfter != null) {
-                xtesAfter = getXTE(c, fixAfter);
-                tAfter = fixAfter.getTimePoint();
-            }
-            Map<Waypoint, List<Distance>> xtes = getXTE(c, fix);
-            for (Waypoint w : waypoints) {
-                List<List<GPSFix>> oldCandidates = new ArrayList<>();
-                Map<List<GPSFix>, Candidate> newCandidates = new HashMap<List<GPSFix>, Candidate>();
-                Map<List<GPSFix>, Candidate> waypointCandidates = getXteCandidates(c, w);
-                for (List<GPSFix> fixPair : waypointCandidates.keySet()) {
-                    if (fixPair.contains(fix)) {
-                        oldCandidates.add(fixPair);
-                    }
+            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+                TimePoint t = fix.getTimePoint();
+                GPSFix fixBefore;
+                GPSFix fixAfter;
+                track.lockForRead();
+                try {
+                    fixBefore = track.getLastFixBefore(t);
+                    fixAfter = track.getFirstFixAfter(t);
+                } finally {
+                    track.unlockAfterRead();
                 }
-                List<Distance> wayPointXTEs = xtes.get(w);
-                int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
-                if (size > 0) {
-                    Double xte = wayPointXTEs.get(0).getMeters();
-                    if (xte == 0) {
-                        newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
-                    } else {
-                        if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
-                            Double xteAfter = xtesAfter.get(w).get(0).getMeters();
-                            if (xteAfter != null && xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter),
-                                        createCandidate(c, xte, xteAfter, t, tAfter, w, true));
-                            }
-                        }
-                        if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
-                            Double xteBefore = xtesBefore.get(w).get(0).getMeters();
-                            if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix),
-                                        createCandidate(c, xteBefore, xte, tBefore, t, w, true));
-                            }
+                Map<Waypoint, List<Distance>> xtesBefore = null;
+                Map<Waypoint, List<Distance>> xtesAfter = null;
+                TimePoint tBefore = null;
+                TimePoint tAfter = null;
+                if (fixBefore != null) {
+                    xtesBefore = getXTE(c, fixBefore);
+                    tBefore = fixBefore.getTimePoint();
+                }
+                if (fixAfter != null) {
+                    xtesAfter = getXTE(c, fixAfter);
+                    tAfter = fixAfter.getTimePoint();
+                }
+                Map<Waypoint, List<Distance>> xtes = getXTE(c, fix);
+                for (Waypoint w : waypoints) {
+                    List<List<GPSFix>> oldCandidates = new ArrayList<>();
+                    Map<List<GPSFix>, Candidate> newCandidates = new HashMap<List<GPSFix>, Candidate>();
+                    Map<List<GPSFix>, Candidate> waypointCandidates = getXteCandidates(c, w);
+                    for (List<GPSFix> fixPair : waypointCandidates.keySet()) {
+                        if (fixPair.contains(fix)) {
+                            oldCandidates.add(fixPair);
                         }
                     }
-                }
-                if (size > 1) {
-                    Double xte = wayPointXTEs.get(1).getMeters();
-                    if (xte == 0) {
-                        newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
-                    } else {
-                        if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
-                            Double xteAfter = xtesAfter.get(w).get(1).getMeters();
-                            if (xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter),
-                                        createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                    List<Distance> wayPointXTEs = xtes.get(w);
+                    int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
+                    if (size > 0) {
+                        Double xte = wayPointXTEs.get(0).getMeters();
+                        if (xte == 0) {
+                            newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
+                        } else {
+                            if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                Double xteAfter = xtesAfter.get(w).get(0).getMeters();
+                                if (xteAfter != null && xte < 0 != xteAfter <= 0) {
+                                    newCandidates.put(Arrays.asList(fix, fixAfter),
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                                }
                             }
-                        }
-                        if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
-                            Double xteBefore = xtesBefore.get(w).get(1).getMeters();
-                            if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix),
-                                        createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                            if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                Double xteBefore = xtesBefore.get(w).get(0).getMeters();
+                                if (xte < 0 != xteBefore <= 0) {
+                                    newCandidates.put(Arrays.asList(fixBefore, fix),
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                                }
                             }
                         }
                     }
-                }
-                for (Entry<List<GPSFix>, Candidate> candidateWithFixes : newCandidates.entrySet()) {
-                    Candidate newCan = candidateWithFixes.getValue();
-                    List<GPSFix> canFixes = candidateWithFixes.getKey();
-                    if (oldCandidates.contains(canFixes)) {
-                        oldCandidates.remove(canFixes);
-                        Candidate oldCan = waypointCandidates.get(canFixes);
-                        if (newCan.compareTo(oldCan) != 0) {
-                            result.getB().add(oldCan);
-                            waypointCandidates.remove(canFixes);
+                    if (size > 1) {
+                        Double xte = wayPointXTEs.get(1).getMeters();
+                        if (xte == 0) {
+                            newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
+                        } else {
+                            if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
+                                Double xteAfter = xtesAfter.get(w).get(1).getMeters();
+                                if (xte < 0 != xteAfter <= 0) {
+                                    newCandidates.put(Arrays.asList(fix, fixAfter),
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                                }
+                            }
+                            if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
+                                Double xteBefore = xtesBefore.get(w).get(1).getMeters();
+                                if (xte < 0 != xteBefore <= 0) {
+                                    newCandidates.put(Arrays.asList(fixBefore, fix),
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                                }
+                            }
+                        }
+                    }
+                    for (Entry<List<GPSFix>, Candidate> candidateWithFixes : newCandidates.entrySet()) {
+                        Candidate newCan = candidateWithFixes.getValue();
+                        List<GPSFix> canFixes = candidateWithFixes.getKey();
+                        if (oldCandidates.contains(canFixes)) {
+                            oldCandidates.remove(canFixes);
+                            Candidate oldCan = waypointCandidates.get(canFixes);
+                            if (newCan.compareTo(oldCan) != 0) {
+                                result.getB().add(oldCan);
+                                waypointCandidates.remove(canFixes);
+                                if (newCan.getProbability() > penaltyForSkipping) {
+                                    result.getA().add(newCan);
+                                    logger.finest("Added XTE " + newCan.toString() + "for " + c);
+                                    waypointCandidates.put(canFixes, newCan);
+                                }
+                            }
+                        } else {
                             if (newCan.getProbability() > penaltyForSkipping) {
                                 result.getA().add(newCan);
                                 logger.finest("Added XTE " + newCan.toString() + "for " + c);
                                 waypointCandidates.put(canFixes, newCan);
                             }
                         }
-                    } else {
-                        if (newCan.getProbability() > penaltyForSkipping) {
-                            result.getA().add(newCan);
-                            logger.finest("Added XTE " + newCan.toString() + "for " + c);
-                            waypointCandidates.put(canFixes, newCan);
-                        }
                     }
-                }
-                for (List<GPSFix> badCanFixes : oldCandidates) {
-                    result.getB().add(waypointCandidates.get(badCanFixes));
-                    waypointCandidates.remove(badCanFixes);
+                    for (List<GPSFix> badCanFixes : oldCandidates) {
+                        result.getB().add(waypointCandidates.get(badCanFixes));
+                        waypointCandidates.remove(badCanFixes);
+                    }
                 }
             }
         }
