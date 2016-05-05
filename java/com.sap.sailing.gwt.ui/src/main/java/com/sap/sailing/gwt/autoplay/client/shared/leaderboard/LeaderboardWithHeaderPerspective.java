@@ -26,7 +26,9 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -36,7 +38,9 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Frank Mittag
  *
  */
-public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
+public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
+    LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
+    private PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> perspectiveSettings;
     private LeaderboardWithHeaderPerspectiveSettings settings;
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 70;
@@ -50,6 +54,10 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
         super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle());
+
+        // TODO: which type should this be: PerspectiveCompositeSettings or PerspectiveCompositeLifecycleSettings
+        //this.perspectiveSettings = perspectiveLifecycleWithAllSettings.getAllSettings();
+
         this.settings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
         this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
         
@@ -109,13 +117,13 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     }
 
     @Override
-    public LeaderboardWithHeaderPerspectiveSettings getSettings() {
-        return settings;
+    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> getSettings() {
+        return perspectiveSettings;
     }
 
     @Override
-    public void updateSettings(LeaderboardWithHeaderPerspectiveSettings newSettings) {
-        this.settings = newSettings;
+    public void updateSettings(PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newSettings) {
+        this.perspectiveSettings = newSettings;
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.racemap;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class RaceMapLifecycle implements ComponentLifecycle<RaceMap, RaceMapSettings, RaceMapSettingsDialogComponent> {
+public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, RaceMapSettingsDialogComponent> {
     private final StringMessages stringMessages;
     
     public RaceMapLifecycle(StringMessages stringMessages) {

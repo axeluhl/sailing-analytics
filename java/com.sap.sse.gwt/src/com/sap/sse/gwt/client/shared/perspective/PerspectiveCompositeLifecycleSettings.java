@@ -5,15 +5,19 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 
 /**
- * A composite setting for a perspective and it's components.
+ * A composite setting for the perspective settings and the settings of all contained components.
  * @author Frank
- *
+ * @param <PL>
+ *      the type of the PerspectiveLifecycle
+ * @param <PS>
+ *      the type of the Perspective settings
  */
-public class PerspectiveCompositeLifecycleSettings<P extends PerspectiveLifecycle<?,S,?>, S extends Settings> extends AbstractSettings {
-    private final CompositeLifecycleSettings componentLifeycycleSettings;
-    private final PerspectiveLifecycleAndSettings<P,S> perspectiveLifecycleAndSettings;
+public class PerspectiveCompositeLifecycleSettings<PL extends PerspectiveLifecycle<?,?>, PS extends Settings> extends AbstractSettings {
     
-    public PerspectiveCompositeLifecycleSettings(PerspectiveLifecycleAndSettings<P,S> perspectiveLifecycleAndSettings, 
+    private final CompositeLifecycleSettings componentLifeycycleSettings;
+    private final PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings;
+    
+    public PerspectiveCompositeLifecycleSettings(PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings, 
             CompositeLifecycleSettings componentLifeycycleSettings) {
         this.perspectiveLifecycleAndSettings = perspectiveLifecycleAndSettings;
         this.componentLifeycycleSettings = componentLifeycycleSettings;
@@ -23,7 +27,7 @@ public class PerspectiveCompositeLifecycleSettings<P extends PerspectiveLifecycl
         return componentLifeycycleSettings;
     }
 
-    public PerspectiveLifecycleAndSettings<P, S> getPerspectiveLifecycleAndSettings() {
+    public PerspectiveLifecycleAndSettings<PL, PS> getPerspectiveLifecycleAndSettings() {
         return perspectiveLifecycleAndSettings;
     }    
 

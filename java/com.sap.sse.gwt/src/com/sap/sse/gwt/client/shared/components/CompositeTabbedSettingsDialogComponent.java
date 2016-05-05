@@ -21,7 +21,6 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
         public ComponentAndDialogComponent(Component<SettingsType> a, SettingsDialogComponent<SettingsType> b) {
             super(a, b);
         }
-        
     }
     
     private final Collection<ComponentAndDialogComponent<?>> components;

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.media;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerManagerComponent, MediaPlayerSettings, MediaPlayerSettingsDialogComponent> {
+public class MediaPlayerLifecycle implements ComponentLifecycle<MediaPlayerSettings, MediaPlayerSettingsDialogComponent> {
     
     private final StringMessages stringMessages;
     

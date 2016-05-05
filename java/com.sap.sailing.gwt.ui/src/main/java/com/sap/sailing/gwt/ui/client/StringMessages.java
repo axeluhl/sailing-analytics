@@ -88,6 +88,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages, c
     String leaderboardSettings();
     @Override
     String settings();
+    String page();
     String linkedRaces();
     String selectAtLeastOneLegDetail();
     String currentSpeedOverGroundInKnots();

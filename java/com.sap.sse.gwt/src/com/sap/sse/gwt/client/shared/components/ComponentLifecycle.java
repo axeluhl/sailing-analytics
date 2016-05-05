@@ -6,15 +6,13 @@ import com.sap.sse.common.settings.Settings;
  * A ComponentLifecycle decouples the lifecycle of a component from the corresponding component instance. This way we
  * can create e.g. settings for a component with a settings dialog without the need to instantiate the component.
  * 
- * @param <C>
- *            the component type
  * @param <S>
- *            the settings type
+ *            the Settings type
  * @param <SDC>
- *            the settings dialog component type
+ *            the SettingsDialogComponent type
  * @author Frank Mittag
  */
-public interface ComponentLifecycle<C extends Component<S>, S extends Settings, SDC extends SettingsDialogComponent<S>> {
+public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDialogComponent<S>> {
 
     SDC getSettingsDialogComponent(S settings);
 

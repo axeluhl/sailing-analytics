@@ -82,6 +82,7 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -150,6 +151,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     
     private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings;
     private RaceBoardPerspectiveSettings settings;
+    private PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveSettings;
     
     /**
      * @param eventId
@@ -172,6 +174,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
         this.settings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
+
+        // TODO: which type should this be: PerspectiveCompositeSettings or PerspectiveCompositeLifecycleSettings
+        //this.perspectiveSettings = perspectiveLifecycleWithAllSettings.getAllSettings();
+        
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -542,13 +548,13 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
 
     @Override
-    public RaceBoardPerspectiveSettings getSettings() {
-        return settings;
+    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> getSettings() {
+        return perspectiveSettings;
     }
 
     @Override
-    public void updateSettings(RaceBoardPerspectiveSettings newSettings) {
-        this.settings = newSettings;
+    public void updateSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newSettings) {
+        this.perspectiveSettings = newSettings;
     }
 
     @Override

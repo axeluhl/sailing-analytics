@@ -10,12 +10,13 @@ import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveAndDialogComponent;
 
-public class PerspectiveCompositeValidator implements Validator<PerspectiveCompositeSettings> {
+public class PerspectiveCompositeValidator<P extends Perspective<PST>, PST extends Settings>
+    implements Validator<PerspectiveCompositeSettings<PST>> {
     
     private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
-    private final Validator<?> perspectiveValidator;
+    private final Validator<PerspectiveCompositeSettings<PST>> perspectiveValidator;
     
-    public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<?> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
+    public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<PST> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
@@ -24,7 +25,7 @@ public class PerspectiveCompositeValidator implements Validator<PerspectiveCompo
     }
 
     @Override
-    public String getErrorMessage(PerspectiveCompositeSettings valueToValidate) {
+    public String getErrorMessage(PerspectiveCompositeSettings<PST> valueToValidate) {
         StringBuilder result = new StringBuilder();
         for (ComponentAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
@@ -32,19 +33,17 @@ public class PerspectiveCompositeValidator implements Validator<PerspectiveCompo
                 result.append(errorMessage);
             }
         }
-        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate.getPerspectiveSettings());
+        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate);
         if (perspectiveErrorMessage != null && !perspectiveErrorMessage.isEmpty()) {
             result.append(perspectiveErrorMessage);
         }
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getPerspectiveErrorMessage(PerspectiveAndSettingsPair<SettingsType> perspectiveAndSettings) {
+    private String getPerspectiveErrorMessage(PerspectiveCompositeSettings<PST> perspectiveSettings) {
         String errorMessage = null;
-        @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) perspectiveValidator;
-        if (validator != null) {
-            errorMessage = validator.getErrorMessage(perspectiveAndSettings.getSettings());
+        if (perspectiveValidator != null) {
+            errorMessage = perspectiveValidator.getErrorMessage(perspectiveSettings);
         }
         return errorMessage;
     }

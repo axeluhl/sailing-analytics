@@ -1,22 +1,27 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
-import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
-public class PerspectiveCompositeSettings extends AbstractSettings {
-    private final Iterable<ComponentAndSettings<?>> settingsPerComponent;
-    private final PerspectiveAndSettingsPair<?> perspectiveSettings;
+/**
+ * A composite settings class for a perspective aggregating the settings of the perspective itself as well
+ * as the settings of all contained components.
+ * @author Frank
+ *
+ * @param <PS>
+ *      the {@link Perspective} settings type
+ */
+public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
+    private final ComponentAndSettings<PS> perspectiveAndSettings;
     
-    public PerspectiveCompositeSettings(PerspectiveAndSettingsPair<?> perspectiveSettings, Iterable<ComponentAndSettings<?>> settingsPerComponent) {
-        this.settingsPerComponent = settingsPerComponent;
-        this.perspectiveSettings = perspectiveSettings;
+    public PerspectiveCompositeSettings(ComponentAndSettings<PS> perspectiveAndSettings, Iterable<ComponentAndSettings<?>> settingsPerComponent) {
+        super(settingsPerComponent);
+        
+        this.perspectiveAndSettings = perspectiveAndSettings;
     }
 
-    public Iterable<ComponentAndSettings<?>> getSettingsPerComponent() {
-        return settingsPerComponent;
-    }
-
-    public PerspectiveAndSettingsPair<?> getPerspectiveSettings() {
-        return perspectiveSettings;
+    public PS getPerspectiveSettings() {
+        return perspectiveAndSettings.getSettings();
     }
 }

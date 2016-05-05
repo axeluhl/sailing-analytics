@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.charts;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class WindChartLifecycle implements ComponentLifecycle<WindChart, WindChartSettings, WindChartSettingsDialogComponent> {
+public class WindChartLifecycle implements ComponentLifecycle<WindChartSettings, WindChartSettingsDialogComponent> {
     private final StringMessages stringMessages;
     
     public WindChartLifecycle(StringMessages stringMessages) {

@@ -4,28 +4,29 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 
 /**
- * A class for keeping together all settings of a PerspectiveLifecycle including it's components
+ * A class keeping together a {@link PerspectiveLifecycle} and all it's component settings together with the corresponding ComponentLifecycle's 
  *
- * @param <P>
+ * @param <PL>
  *            the type of the perspective lifecycle
- * @param <S>
+ * @param <PS>
  *            the type of the perspective settings
  * @author Frank Mittag
  */
-public class PerspectiveLifecycleWithAllSettings<P extends PerspectiveLifecycle<?,S,?>, S extends Settings> {
-    private final P perspectiveLifecycle;
-    private PerspectiveCompositeLifecycleSettings<P,S> allSettings;
+public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle<?, ?>, PS extends Settings> {
     
-    public PerspectiveLifecycleWithAllSettings(P perspectiveLifecycle, PerspectiveCompositeLifecycleSettings<P,S> allSettings) {
+    private final PL perspectiveLifecycle;
+    private PerspectiveCompositeLifecycleSettings<PL, PS> allSettings;
+    
+    public PerspectiveLifecycleWithAllSettings(PL perspectiveLifecycle, PerspectiveCompositeLifecycleSettings<PL,PS> allSettings) {
         this.perspectiveLifecycle = perspectiveLifecycle;
         this.allSettings = allSettings;
     }
 
-    public P getPerspectiveLifecycle() {
+    public PL getPerspectiveLifecycle() {
         return perspectiveLifecycle;
     }
 
-    public S getPerspectiveSettings() {
+    public PS getPerspectiveSettings() {
         return allSettings.getPerspectiveLifecycleAndSettings().getSettings();
     }
 
@@ -33,11 +34,11 @@ public class PerspectiveLifecycleWithAllSettings<P extends PerspectiveLifecycle<
         return allSettings.getComponentLifecyclesAndSettings();
     }
     
-    public PerspectiveCompositeLifecycleSettings<P,S> getAllSettings() {
+    public PerspectiveCompositeLifecycleSettings<PL,PS> getAllSettings() {
         return allSettings;
     }
 
-    public void setAllSettings(PerspectiveCompositeLifecycleSettings<P,S> allSettings) {
+    public void setAllSettings(PerspectiveCompositeLifecycleSettings<PL,PS> allSettings) {
         this.allSettings = allSettings;
     }
 }

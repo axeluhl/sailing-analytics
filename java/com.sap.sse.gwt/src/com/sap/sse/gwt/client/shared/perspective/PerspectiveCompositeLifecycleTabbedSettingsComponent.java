@@ -10,17 +10,22 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * A component, that contains a collection of settings components in a tabbed panel.
  *  
  * @author Frank (c5163874)
+ * @param <PL>
+ *      the {@link PerspectiveLifecycle} type
+ * @param <PS>
+ *      the {@link Perspective} settings type
  */
-public class PerspectiveCompositeLifecycleTabbedSettingsComponent<P extends PerspectiveLifecycle<?,S,?>, S extends Settings> implements Component<PerspectiveCompositeLifecycleSettings<P,S>> {
+public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<?,?>, PS extends Settings>
+    implements Component<PerspectiveCompositeLifecycleSettings<PL,PS>> {
     
-    private PerspectiveCompositeLifecycleSettings<P,S> compositeLifecycleSettings;
+    private PerspectiveCompositeLifecycleSettings<PL, PS> compositeLifecycleSettings;
     private final String title;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<P,S> compositeLifecycleSettings) {
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings) {
         this(compositeLifecycleSettings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<P,S> compositeLifecycleSettings, String title) {
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings, String title) {
         this.compositeLifecycleSettings = compositeLifecycleSettings;
         this.title = title;
     }
@@ -31,17 +36,17 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<P extends Pers
     }
 
     @Override
-    public SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<P,S>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<P,S>(compositeLifecycleSettings);
+    public SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> getSettingsDialogComponent() {
+        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL,PS>(compositeLifecycleSettings);
     }
 
     @Override
-    public PerspectiveCompositeLifecycleSettings<P,S> getSettings() {
+    public PerspectiveCompositeLifecycleSettings<PL,PS> getSettings() {
         return compositeLifecycleSettings;
     }
  
     @Override
-    public void updateSettings(PerspectiveCompositeLifecycleSettings<P,S> newSettings) {
+    public void updateSettings(PerspectiveCompositeLifecycleSettings<PL,PS> newSettings) {
         this.compositeLifecycleSettings = newSettings;
     }
     

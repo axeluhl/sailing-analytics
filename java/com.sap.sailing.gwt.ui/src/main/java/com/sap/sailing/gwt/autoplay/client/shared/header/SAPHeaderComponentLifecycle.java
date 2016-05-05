@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.autoplay.client.shared.header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
-public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeaderComponent, SAPHeaderComponentSettings, SAPHeaderComponentSettingsDialogComponent> {
+public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeaderComponentSettings, SAPHeaderComponentSettingsDialogComponent> {
     private final StringMessages stringMessages;
     private final String defaultTitle;
     

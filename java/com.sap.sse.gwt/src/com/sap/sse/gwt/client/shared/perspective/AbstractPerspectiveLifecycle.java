@@ -11,36 +11,43 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * An abstract base class for perspective lifecycles.
- * 
+ * @param <PS>
+ *            the perspective settings type
+ * @param <PCS>
+ *            the perspective composite settings type
+ * @param <SDP>
+ *            the settings dialog component type 
  * @author Frank Mittag
  *
  */
-public abstract class AbstractPerspectiveLifecycle<P extends Perspective<SettingsType>, SettingsType extends Settings, SDP extends SettingsDialogComponent<SettingsType>>
-    implements PerspectiveLifecycle<P, SettingsType, SDP> {
+public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS extends PerspectiveCompositeLifecycleSettings<?,?>, 
+        SDP extends SettingsDialogComponent<PCS>> implements PerspectiveLifecycle<PCS, SDP> {
 
-    protected final List<ComponentLifecycle<?,?,?>> componentLifecycles;
+    protected final List<ComponentLifecycle<?,?>> componentLifecycles;
     
     public AbstractPerspectiveLifecycle() {
         componentLifecycles = new ArrayList<>();
     }
     
+    protected abstract SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS perspectiveSettings);
+
     @Override
     public CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
         List<ComponentLifecycleAndSettings<?,?>> lifecyclesAndSettings = new ArrayList<>();
-        for (ComponentLifecycle<?,?,?> componentLifecycle : componentLifecycles) {
+        for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
             lifecyclesAndSettings.add(createComponentLifecycleAndSettings(componentLifecycle));
         }
         CompositeLifecycleSettings compositeSettings = new CompositeLifecycleSettings(lifecyclesAndSettings);
         return compositeSettings;
     }
 
-    private <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> createComponentLifecycleAndSettings(C componentLifecycle) {
+    private <C extends ComponentLifecycle<S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> createComponentLifecycleAndSettings(C componentLifecycle) {
         S defaultSettings = componentLifecycle.createDefaultSettings();
         ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings = new ComponentLifecycleAndSettings<>(componentLifecycle, defaultSettings);
         return componentLifecycleAndSettings;
     }
     
-    public Iterable<ComponentLifecycle<?,?,?>> getComponentLifecycles() {
+    public Iterable<ComponentLifecycle<?,?>> getComponentLifecycles() {
         return componentLifecycles;
     }
 }

@@ -6,17 +6,17 @@ import com.sap.sse.common.settings.Settings;
 public class CompositeLifecycleSettings extends AbstractSettings {
     private final Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponentLifecycle;
 
-    public CompositeLifecycleSettings(Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponent) {
-        this.settingsPerComponentLifecycle = settingsPerComponent;
+    public CompositeLifecycleSettings(Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponentLifecycle) {
+        this.settingsPerComponentLifecycle = settingsPerComponentLifecycle;
     }
 
     public Iterable<ComponentLifecycleAndSettings<?,?>> getSettingsPerComponentLifecycle() {
         return settingsPerComponentLifecycle;
     }
 
-    public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<?,S,?> componentLifecycle) {
+    public <S extends Settings> S getSettingsOfComponentLifecycle(ComponentLifecycle<S,?> componentLifecycle) {
         S result = null;
-        ComponentLifecycleAndSettings<ComponentLifecycle<?,S,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
+        ComponentLifecycleAndSettings<ComponentLifecycle<S,?>, S> componentLifecycleAndSettings = findComponentLifecycleAndSettings(componentLifecycle);
         if (componentLifecycleAndSettings != null) {
             result = componentLifecycleAndSettings.getSettings();
         }
@@ -24,11 +24,11 @@ public class CompositeLifecycleSettings extends AbstractSettings {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends ComponentLifecycle<?,S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> findComponentLifecycleAndSettings(ComponentLifecycle<?,S,?> componentLifecycle) {
-        ComponentLifecycleAndSettings<C,S> result = null;
+    public <CL extends ComponentLifecycle<S,?>, S extends Settings> ComponentLifecycleAndSettings<CL,S> findComponentLifecycleAndSettings(ComponentLifecycle<S,?> componentLifecycle) {
+        ComponentLifecycleAndSettings<CL,S> result = null;
         for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings : settingsPerComponentLifecycle) {
             if (componentLifecycleAndSettings.getComponentLifecycle() == componentLifecycle) {
-                result = (ComponentLifecycleAndSettings<C, S>) componentLifecycleAndSettings;
+                result = (ComponentLifecycleAndSettings<CL, S>) componentLifecycleAndSettings;
                 break;
             }
         }

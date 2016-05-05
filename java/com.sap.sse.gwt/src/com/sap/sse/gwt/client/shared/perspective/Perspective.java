@@ -4,21 +4,13 @@ import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
  * A perspective is a composition of UI components into a view/page The perspective itself is also an component and can
- * have settings
- * 
- * @author Frank Mittag (c5163874)
- *
+ * have settings.
+ * @param <PS>
+ *      the {@link Perspective} settings type
  */
-public interface Perspective<SettingsType extends Settings> extends Component<SettingsType>  {
-    
-    CompositeSettings getSettingsOfComponents();
-    
-    void updateSettingsOfComponents(CompositeSettings settingsOfComponents);
-
+public interface Perspective<PS extends Settings> extends Component<PerspectiveCompositeSettings<PS>> {
     List<Component<?>> getComponents();
-
 }
