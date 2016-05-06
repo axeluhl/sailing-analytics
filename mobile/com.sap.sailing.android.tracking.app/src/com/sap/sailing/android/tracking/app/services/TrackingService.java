@@ -38,7 +38,9 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
 import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
@@ -161,9 +163,16 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
         Bearing bearingImpl = null;
+        Speed speedImpl = null;
+
         if (bearing != 0.0) {
             bearingImpl = new DegreeBearingImpl(bearing);
         }
+
+        if (speed > 0.0) {
+            speedImpl = new MeterPerSecondSpeedImpl(speed);
+        }
+
         if (prefs.getDisplayHeadingWithSubtractedDeclination() && bearingImpl != null) {
             GeomagneticField geomagneticField = new GeomagneticField((float) latitude, (float) longitude,
                     (float) altitude, System.currentTimeMillis());
@@ -180,7 +189,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
                 quality = GPSQuality.great;
             }
 
-            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearingImpl, speed);
+            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearingImpl, speedImpl);
         }
     }
 
@@ -330,7 +339,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     public interface GPSQualityListener {
         void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
-                float gpsSpeed);
+            Speed gpsSpeed);
     }
 
 }
