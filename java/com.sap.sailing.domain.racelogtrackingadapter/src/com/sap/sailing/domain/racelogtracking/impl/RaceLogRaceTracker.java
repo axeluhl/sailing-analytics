@@ -436,7 +436,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
     private void onCourseDesignChangedEvent(RaceLogCourseDesignChangedEvent event) {
         if (trackedRace != null) {
-            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog()).analyze();
+            CourseBase base = new LastPublishedCourseDesignFinder(params.getRaceLog(), /* onlyCoursesWithValidWaypointList */ true).analyze();
             List<Util.Pair<ControlPoint, PassingInstruction>> update = new ArrayList<>();
             for (Waypoint waypoint : base.getWaypoints()) {
                 update.add(new Util.Pair<>(waypoint.getControlPoint(), waypoint.getPassingInstructions()));
@@ -462,7 +462,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
         }
         BoatClass boatClass = denoteEvent.getBoatClass();
         String raceName = denoteEvent.getRaceName();
-        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog).analyze();
+        CourseBase courseBase = new LastPublishedCourseDesignFinder(raceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         if (courseBase == null) {
             courseBase = new CourseDataImpl("Default course for " + raceName);
             logger.log(Level.FINE, "Using empty course in creation of race " + raceName);
@@ -532,7 +532,22 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
             for (DeviceMapping<Mark> mapping : markMappingsByDevices.get(device)) {
                 Mark mark = mapping.getMappedTo();
                 if (mapping.getTimeRange().includes(timePoint)) {
-                    trackedRace.recordFix(mark, fix);
+                    final DynamicGPSFixTrack<Mark, GPSFix> markTrack = trackedRace.getOrCreateTrack(mark);
+                    final GPSFix firstFixAtOrAfter;
+                    boolean forceFix;
+                    markTrack.lockForRead();
+                    try {
+                        forceFix = Util.isEmpty(markTrack.getRawFixes()) ||
+                                (firstFixAtOrAfter=markTrack.getFirstFixAtOrAfter(timePoint)) != null &&
+                                    firstFixAtOrAfter.getTimePoint().equals(timePoint);
+                    } finally {
+                        markTrack.unlockAfterRead();
+                    }
+                    if (forceFix) {
+                        trackedRace.recordFix(mark, fix, /* only when in tracking interval */ false); // force fix into track
+                    } else {
+                        trackedRace.recordFix(mark, fix);
+                    }
                 }
             }
         }

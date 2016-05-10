@@ -28,6 +28,7 @@
     <string name="server_sync_settings">Polling Interval (seconds)</string>
 
     <string name="options_menu_checkout">Checkout</string>
+    <string name="checkout_warning_message">Do you REALLY want to logout? You will need to re-login with the provided QR code to access your marks!</string>
 
     <string name="no_marks_message">No marks</string>
 

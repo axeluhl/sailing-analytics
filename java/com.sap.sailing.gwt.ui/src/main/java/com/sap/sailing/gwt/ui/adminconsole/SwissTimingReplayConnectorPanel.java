@@ -160,7 +160,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         // the regatta selection for a tracked race
         HorizontalPanel regattaPanel = new HorizontalPanel();
         racesPanel.add(regattaPanel);
-        Label lblRegattas = new Label("Regatta used for the tracked race:");
+        Label lblRegattas = new Label(stringMessages.regattaUsedForTheTrackedRace());
         lblRegattas.setWordWrap(false);
         regattaPanel.setCellVerticalAlignment(lblRegattas, HasVerticalAlignment.ALIGN_MIDDLE);
         regattaPanel.setSpacing(5);

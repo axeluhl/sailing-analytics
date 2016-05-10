@@ -85,7 +85,7 @@ public class WindHelper {
                 String raceName = raceState.getString("raceName");
                 boolean matchingLeaderboardName = leaderboardName != null && leaderboardName.equals(triple.getA());
                 boolean matchingFleetName = fleetName != null && fleetName.equals(triple.getC());
-                boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceName());
+                boolean matchingRaceName = raceName != null && raceName.equals(race.getRaceColumnName());
                 if (matchingLeaderboardName && matchingFleetName && matchingRaceName){
                     if (raceState.getBoolean("trackedRaceLinked")){
                         isTracked = true;

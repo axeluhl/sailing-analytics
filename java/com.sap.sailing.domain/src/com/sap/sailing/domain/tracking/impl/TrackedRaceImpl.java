@@ -281,7 +281,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    protected final MarkPassingCalculator markPassingCalculator;
+    protected transient MarkPassingCalculator markPassingCalculator;
+    private final boolean hasMarkPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
@@ -535,13 +536,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 public void raceAdded(TrackedRace trackedRace) {}
                 @Override
                 public void raceRemoved(TrackedRace trackedRace) {
-                    // stop mark passing calculator when tracked race is removed:
-                    markPassingCalculator.stop();
+                    if (trackedRace == TrackedRaceImpl.this) {
+                        // stop mark passing calculator when tracked race is removed:
+                        markPassingCalculator.stop();
+                    }
                 }
             });
         } else {
             markPassingCalculator = null;
         }
+        hasMarkPassingCalculator = useInternalMarkPassingAlgorithm;
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
@@ -642,6 +646,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
+    }
+    
+    /**
+     * After the object graph has entirely been re-constructed, create the mark passing calculator if
+     * the original object had one.
+     */
+    protected Object readResolve() {
+        if (hasMarkPassingCalculator) {
+            markPassingCalculator = createMarkPassingCalculator();
+        }
+        return this;
     }
 
     /**
@@ -1383,7 +1398,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingCache cache) {
+        final TimePoint timePoint;
+        // normalize the time point to get cache hits when asking for time points that are later than
+        // the last time point affected by any event received for this tracked race
+        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ true) <= 0) {
+            timePoint = unadjustedTimePoint;
+        } else {
+            timePoint = getTimePointOfNewestEvent();
+        }
         NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
