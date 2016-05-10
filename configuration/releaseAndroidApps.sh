@@ -43,6 +43,10 @@ upgrade_pom_and_manifest_versions() {
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-m -p -g -r <git-remote>] CR-Id: <TheJCWBCRId>"
     echo ""
+    echo "Request a new Java Correction Workbench (JCWB) Correction Request ID at:"
+    echo "  https://css.wdf.sap.corp/sap(bD1lbiZjPTAwMQ==)/bc/bsp/spn/jcwb/default.htm?newCMForProject=sapsailingcapture#"
+    echo "See more usage details in the sapsailing.com wiki at:"
+    echo "  https://wiki.sapsailing.com/wiki/building-and-deploying#building-deploying-stopping-and-starting-server-instances_app-build-process-for-ios-and-android_xmake-build-for-android-apps"
     echo "-m Disable upgrading the AndroidManifest.xml versionCode and versionName"
     echo "-p Disable upgrading the pom.xml and MANIFEST.MF versions"
     echo "-g Disable the final git push operation to refs/for/$RELEASE_BRANCH"
