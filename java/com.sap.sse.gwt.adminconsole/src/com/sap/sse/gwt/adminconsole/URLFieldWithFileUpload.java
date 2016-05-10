@@ -97,7 +97,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
-        final SubmitButton submitButton = new SubmitButton("Send...");
+        final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setEnabled(false);
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override

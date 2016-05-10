@@ -55,7 +55,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
                 nationality), null, null)), null);
         DynamicBoat boat = new BoatImpl(null, new BoatClassImpl(boatClassName, false), sailID);
         racingEventService.getBaseDomainFactory().getOrCreateCompetitor(id, name, null, null, null, team, boat,
-                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
     }
 
     @Test

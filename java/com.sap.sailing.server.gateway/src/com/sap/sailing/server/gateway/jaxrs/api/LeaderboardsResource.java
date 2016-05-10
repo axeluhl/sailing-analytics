@@ -57,6 +57,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.security.Permission;
@@ -103,7 +104,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             jsonLeaderboards.add(leaderboardName);
         }
         String json = jsonLeaderboards.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -137,7 +138,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonLeaderboard.writeJSONString(sw);
 
                 String json = sw.getBuffer().toString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
                 response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                         .type(MediaType.TEXT_PLAIN).build();
@@ -508,7 +509,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         } else {
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
-            response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -579,7 +580,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         JSONObject result = new JSONObject();
         result.put("marks", array);
-        return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
+        return Response.ok(result.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private final MarkJsonSerializer markSerializer = new MarkJsonSerializer();
@@ -670,7 +671,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 final JSONObject json = getJsonForColumnFactors(leaderboard, raceColumns);
-                response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -678,16 +679,16 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
     private JSONObject getJsonForColumnFactors(final Leaderboard leaderboard, final Iterable<RaceColumn> raceColumns) {
         final JSONObject json = new JSONObject();
-        json.put("leaderboard_name", leaderboard.getName());
-        json.put("leaderboard_display_name", leaderboard.getDisplayName());
+        json.put(RaceColumnConstants.LEADERBOARD_NAME, leaderboard.getName());
+        json.put(RaceColumnConstants.LEADERBOARD_DISPLAY_NAME, leaderboard.getDisplayName());
         final JSONArray raceColumnsAsJson = new JSONArray();
-        json.put("race_columns", raceColumnsAsJson);
+        json.put(RaceColumnConstants.RACE_COLUMNS, raceColumnsAsJson);
         for (final RaceColumn rc : raceColumns) {
             final JSONObject raceColumnAsJson = new JSONObject();
             raceColumnsAsJson.add(raceColumnAsJson);
-            raceColumnAsJson.put("race_column_name", rc.getName());
-            raceColumnAsJson.put("explicit_factor", rc.getExplicitFactor());
-            raceColumnAsJson.put("factor", rc.getFactor());
+            raceColumnAsJson.put(RaceColumnConstants.RACE_COLUMN_NAME, rc.getName());
+            raceColumnAsJson.put(RaceColumnConstants.EXPLICIT_FACTOR, rc.getExplicitFactor());
+            raceColumnAsJson.put(RaceColumnConstants.FACTOR, rc.getFactor());
         }
         return json;
     }
@@ -724,7 +725,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             } else {
                 raceColumn.setFactor(explicitFactor);
                 final JSONObject json = getJsonForColumnFactors(leaderboard, Collections.singleton(raceColumn));
-                response = Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;

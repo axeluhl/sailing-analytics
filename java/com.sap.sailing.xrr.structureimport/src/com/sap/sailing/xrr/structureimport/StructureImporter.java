@@ -31,6 +31,7 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.FleetColors;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
@@ -143,7 +144,7 @@ public class StructureImporter {
             for (Series raceType : regattaStructure.getSeries()) {
                 List<com.sap.sailing.domain.base.Fleet> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
-                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
+                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), true, fleets, raceType.getRaceNames(), null));
             }
         }
         return series;
@@ -161,7 +162,7 @@ public class StructureImporter {
         GuessFleetOrderingStrategy fleetOrderingStrategy = new GuessFleetOrderingFromFleetName();
         String fleetColor = "";
         if (fleets.size() <= 1) {
-            fleetColor = "Default";
+            fleetColor = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
             FleetImpl fleetImpl = new FleetImpl(fleetColor, 0, getColorFromString(fleetColor));
             fleetsImpl.add(fleetImpl);
         } else {
@@ -185,9 +186,6 @@ public class StructureImporter {
         if (result == null) {
             result = AbstractColor.getColorByLowercaseNameStatic(colorString.toLowerCase());
         }
-        if (result == null) {
-            result = Color.BLACK;
-        }
         return result;
     }
 
@@ -210,7 +208,7 @@ public class StructureImporter {
                     BoatAndTeam boatAndTeam = getBoatAndTeam(idAsString, name, nationality, boatClass);
                     this.baseDomainFactory.convertToCompetitorDTO(this.baseDomainFactory.getOrCreateCompetitor(
                             UUID.fromString(idAsString), name, color, email, flagImage, boatAndTeam.getTeam(), boatAndTeam.getBoat(),
-                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+                            /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
                 } else {
                     break;
                 }

@@ -46,9 +46,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class AbstractMockedRaceMarkPassingTest {
     final BoatClassImpl boatClass = new BoatClassImpl("boat", true, "boat", new MeterDistance(10), new MeterDistance(5), null);
-    protected Competitor ron = new CompetitorImpl("Ron", "Ron", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
-    protected Competitor tom = new CompetitorImpl("Tom", "Tom", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
-    protected Competitor ben = new CompetitorImpl("Ben", "Ben", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null);
+    protected Competitor ron = new CompetitorImpl("Ron", "Ron", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected Competitor tom = new CompetitorImpl("Tom", "Tom", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+    protected Competitor ben = new CompetitorImpl("Ben", "Ben", null, null, null, null, new BoatImpl("boat", boatClass, "boot"), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
 
     protected Mark m = new MarkImpl("Mark");
     protected Mark gate1 = new MarkImpl("Gate1");
@@ -68,7 +68,7 @@ public class AbstractMockedRaceMarkPassingTest {
         Waypoint w5 = new WaypointImpl(cp, PassingInstruction.Line);
         waypoints = Arrays.asList(w1, w2, w3, w4, w5);
         Regatta r = new RegattaImpl(RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, 
-                /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, Arrays.asList(new FleetImpl("fleet")),
+                /*startDate*/ null, /*endDate*/ null, Arrays.asList(new SeriesImpl("Series", true, /* isFleetsCanRunInParallel */ true, Arrays.asList(new FleetImpl("fleet")),
                 new ArrayList<String>(), null)), true, new HighPoint(), "ID", new CourseAreaImpl("area", new UUID(5, 5)), OneDesignRankingMetric::new);
         Course course = new CourseImpl("course", waypoints);
         RaceDefinition raceDef = new RaceDefinitionImpl("Performance Race", course, boatClass, Arrays.asList(ron, tom, ben));

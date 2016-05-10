@@ -161,7 +161,7 @@ public class LeaderboardCourseChangeTest {
         DynamicBoat mockedBoat = mock(DynamicBoat.class);
         when(mockedBoat.getBoatClass()).thenReturn(boatClass);
         competitors.add(new CompetitorImpl(UUID.randomUUID(), "TestCompetitor", Color.BLACK, null, null,
-                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null));
+                mock(DynamicTeam.class), mockedBoat, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null));
         return competitors;
     }
 
@@ -175,7 +175,7 @@ public class LeaderboardCourseChangeTest {
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
 
-        Series series = new SeriesImpl("TestSeries", false, fleets, new HashSet<String>(), trackedRegattaRegistry);
+        Series series = new SeriesImpl("TestSeries", false, true, fleets, new HashSet<String>(), trackedRegattaRegistry);
         return series;
     }
 

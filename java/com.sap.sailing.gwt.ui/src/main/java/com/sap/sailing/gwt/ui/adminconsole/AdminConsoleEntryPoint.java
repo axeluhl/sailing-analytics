@@ -75,7 +75,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 return createAdminConsolePanel();
             }
         });
-        
         headerPanel.setHeaderWidget(header);
         headerPanel.setContentWidget(authorizedContentDecorator);
         RootLayoutPanel rootPanel = RootLayoutPanel.get();
@@ -93,6 +92,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         leaderboardGroupsDisplayers = new HashSet<>();
 
         final EventManagementPanel eventManagementPanel = new EventManagementPanel(sailingService, this, this, getStringMessages());
+        eventManagementPanel.ensureDebugId("EventManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<EventManagementPanel>(eventManagementPanel) {
             @Override
             public void refreshAfterBecomingVisible() {

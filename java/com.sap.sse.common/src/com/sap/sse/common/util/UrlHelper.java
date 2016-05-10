@@ -6,4 +6,6 @@ package com.sap.sse.common.util;
  */
 public interface UrlHelper {
     String encodeUrl(String decodedUrlString);
+    
+    String encodeQueryString(String queryString);
 }

@@ -47,6 +47,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.CourseDataImpl;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
@@ -194,7 +195,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void copyCourse(RaceLog fromRaceLog, Set<RaceLog> toRaceLogs, SharedDomainFactory baseDomainFactory,
             RacingEventService service) {
-        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog).analyze();
+        CourseBase course = new LastPublishedCourseDesignFinder(fromRaceLog, /* onlyCoursesWithValidWaypointList */ true).analyze();
         final Set<Mark> marks = new HashSet<>();
         if (course != null) {
             course.getWaypoints().forEach(wp -> Util.addAll(wp.getMarks(), marks));
@@ -203,7 +204,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         for (RaceLog toRaceLog : toRaceLogs) {
             if (new RaceLogTrackingStateAnalyzer(toRaceLog).analyze().isForTracking()) {
                 if (course != null) {
-                    CourseBase newCourse = new CourseDataImpl("Copy of \"" + course.getName() + "\"");
+                    CourseBase newCourse = new CourseDataImpl(course.getName());
                     TimePoint now = MillisecondsTimePoint.now();
                     int i = 0;
                     for (Waypoint oldWaypoint : course.getWaypoints()) {
@@ -212,7 +213,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
                     int passId = toRaceLog.getCurrentPassId();
                     RaceLogEvent newCourseEvent = new RaceLogCourseDesignChangedEventImpl(now,
-                            service.getServerAuthor(), passId, newCourse);
+                            service.getServerAuthor(), passId, newCourse, CourseDesignerMode.ADMIN_CONSOLE);
                     toRaceLog.add(newCourseEvent);
                 }
 
@@ -298,8 +299,9 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                     logoUrl = imagesWithTag.get(0).getURL().toString();
                 }
                 try {
-                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url, iOSAppUrl,
-                            androidAppUrl, logoUrl);
+                    final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
+                    sendInvitationEmail(locale, toAddress, leaderboardName, competitorName, url, B.get(locale, "sailInSightAppName"),
+                            iOSAppUrl, androidAppUrl, logoUrl);
                 } catch (MailException e) {
                     occuredExceptions.append(e.getMessage() + "\r\n");
                 }
@@ -311,7 +313,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     }
 
     private void sendInvitationEmail(Locale locale, final String toAddress, String leaderboardName, String invitee,
-            String url, String iOSAppUrl, String androidAppUrl, String logoUrl) throws MailException {
+            String url, String appName, String iOSAppUrl, String androidAppUrl, String logoUrl) throws MailException {
         final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
         String subject = String.format("%s %s", B.get(locale, "trackingInvitationFor"), invitee);
 
@@ -322,45 +324,46 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         boolean hasAndroidAppUrl = androidAppUrl != null && !androidAppUrl.isEmpty();
         boolean hasLogoUrl = logoUrl != null && !logoUrl.isEmpty();
         StringBuilder htmlText = new StringBuilder();
+        htmlText.append("<!doctype html>\n");
         htmlText.append("<html>");
-        htmlText.append("<head>");
-        htmlText.append("<style>");
-        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}");
-        htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}");
-        htmlText.append(".qr {margin: 10px;height:250px; width: auto;}");
-        htmlText.append(".spacer {margin-top: 50px;}");
+        htmlText.append("<head><title>");
+        htmlText.append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</title>");
+        htmlText.append("<style type=\"text/css\">\n");
+        htmlText.append(".b,.b:active,b:visited {padding:15px;margin:10px;width:200px;display:inline-block;background-color:#337ab7;border-radius:4px;color:#ffffff;border:1px solid #2e6da4;text-decoration:none;}\n");
+        htmlText.append(".b:hover {background-color:#2b618e;border:1px solid #204d74;}\n");
+        htmlText.append(".qr {margin: 10px;height:250px; width: auto;}\n");
+        htmlText.append(".spacer {margin-top: 50px;}\n");
         htmlText.append("</style>");
         htmlText.append("</head>");
         htmlText.append("<body>");
         if (hasLogoUrl) {
-            htmlText.append("<p class='qr'><img src='").append(logoUrl).append("' /></p> ");
+            htmlText.append("<p><img src=\"").append(logoUrl).append("\" /></p> ");
         }
         htmlText.append("<h1>").append(B.get(locale, "welcomeTo")).append(" ").append(leaderboardName).append("</h1> ");
-        htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs")).append(" <b>").append(invitee)
+        htmlText.append("<p>").append(B.get(locale, "scanQRCodeOrVisitUrlToRegisterAs", appName)).append(" <b>").append(invitee)
                 .append("</b></p> ");
-        htmlText.append("<p class='qr'><img src='cid:image'  title='").append(url).append("' /></p> ");
-        htmlText.append("<p class='spacer'>").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
+        htmlText.append("<p class=\"qr\"><img src=\"cid:image\"  title=\"").append(url).append("\" /></p> ");
+        htmlText.append("<p class=\"spacer\">").append(B.get(locale, "alternativelyVisitThisLink")).append("</p> ");
         if (hasIOSAppUrl) {
-            htmlText.append("<a class='b' href='").append(IOS_DEEP_LINK_PREFIX + url).append("'>")
+            htmlText.append("<a class=\"b\" href=\"").append(IOS_DEEP_LINK_PREFIX + url).append("\">")
                     .append(B.get(locale, "iOSUsers")).append("</a> ");
         }
         if (hasAndroidAppUrl) {
-            htmlText.append("<a class='b' href='").append(url).append("'>").append(B.get(locale, "androidUsers"))
+            htmlText.append("<a class=\"b\" href=\"").append(url).append("\">").append(B.get(locale, "androidUsers"))
                     .append("</a> ");
         }
         if (hasIOSAppUrl || hasAndroidAppUrl) {
-            htmlText.append("<p class='spacer'>").append(B.get(locale, "appStoreInstallText")).append("</p> ");
+            htmlText.append("<p class=\"spacer\">").append(B.get(locale, "appStoreInstallText")).append("</p> ");
         }
         if (hasIOSAppUrl) {
-
-            htmlText.append("<a class='b' href='").append(iOSAppUrl).append("'>").append(B.get(locale, "appIos"))
+            htmlText.append("<a class=\"b\" href=\"").append(iOSAppUrl).append("\">").append(B.get(locale, "appIos"))
                     .append("</a> ");
         }
         if (hasAndroidAppUrl) {
-            htmlText.append("<a class='b' href='").append(androidAppUrl).append("'>")
+            htmlText.append("<a class=\"b\" href=\"").append(androidAppUrl).append("\">")
                     .append(B.get(locale, "appAndroid")).append("</a> ");
         }
-        htmlText.append("<p class='spacer' />");
+        htmlText.append("<p class=\"spacer\"></p>");
         htmlText.append("</body>");
         htmlText.append("</html>");
 
@@ -388,14 +391,10 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
     @Override
     public void inviteBuoyTenderViaEmail(Event event, Leaderboard leaderboard, String serverUrlWithoutTrailingSlash,
             String emails, String iOSAppUrl, String androidAppUrl, Locale locale) throws MailException {
-
         StringBuilder occuredExceptions = new StringBuilder();
-
         String[] emailArray = emails.split(",");
         String leaderboardName = leaderboard.getName();
-
         String eventId = event.getId().toString();
-
         String logoUrl = null;
         List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
@@ -406,14 +405,14 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                 eventId, NonGwtUrlHelper.INSTANCE);
         for (String toAddress : emailArray) {
             try {
+                final ResourceBundleStringMessages B = RaceLogTrackingI18n.STRING_MESSAGES;
                 sendInvitationEmail(locale, toAddress, leaderboardName,
-                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, iOSAppUrl, androidAppUrl,
-                        logoUrl);
+                        RaceLogTrackingI18n.STRING_MESSAGES.get(locale, "buoyTender"), url, B.get(locale, "buoyPingerAppName"), iOSAppUrl,
+                        androidAppUrl, logoUrl);
             } catch (MailException e) {
                 occuredExceptions.append(e.getMessage() + "\r\n");
             }
         }
-
         if (!(occuredExceptions.length() == 0)) {
             throw new MailException(occuredExceptions.toString());
         }

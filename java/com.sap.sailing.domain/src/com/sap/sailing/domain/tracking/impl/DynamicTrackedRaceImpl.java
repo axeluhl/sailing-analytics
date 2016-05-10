@@ -104,9 +104,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
-        if (markPassingCalculator != null) {
-            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
-        }
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
             for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
@@ -135,6 +132,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         startTimeChangedListeners = new HashSet<>();
         raceAbortedListeners = new HashSet<>();
     }
+    
+    protected Object readResolve() {
+        super.readResolve();
+        if (markPassingCalculator != null) {
+            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        }
+        return this;
+    }
 
     /**
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
@@ -156,8 +161,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix) {
-        if (isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
+    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        if (!onlyWhenInTrackingTimesInterval || isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
@@ -176,9 +181,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Mark mark, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval) {
         final TimePoint fixTimePoint = fix.getTimePoint();
-        if (isFixWithinStartAndEndOfTracking(fixTimePoint)) {
+        if (!onlyWhenInTrackingTimeInterval || isFixWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         }
     }
@@ -1011,7 +1016,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     protected MarkPassingCalculator createMarkPassingCalculator() {
-        return new MarkPassingCalculator(this, true); 
+        // not waiting for initial mark passing creation is essential for not holding up, e.g.,
+        // an initial load during replication where it is perfectly fine to obtain the results from
+        // mark passing analysis as they become available; for test cases, however, "true" would
+        // be a more appropriate choice
+        return new MarkPassingCalculator(this, true, /* waitForInitialMarkPassingCalculation */ false); 
     }
 
     @Override

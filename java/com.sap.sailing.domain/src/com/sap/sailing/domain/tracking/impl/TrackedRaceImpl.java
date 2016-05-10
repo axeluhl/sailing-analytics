@@ -84,6 +84,7 @@ import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidenceCluster;
 import com.sap.sailing.domain.common.confidence.HasConfidence;
@@ -280,7 +281,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
-    protected final MarkPassingCalculator markPassingCalculator;
+    protected transient MarkPassingCalculator markPassingCalculator;
+    private final boolean hasMarkPassingCalculator;
     
     private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
     
@@ -534,13 +536,16 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 public void raceAdded(TrackedRace trackedRace) {}
                 @Override
                 public void raceRemoved(TrackedRace trackedRace) {
-                    // stop mark passing calculator when tracked race is removed:
-                    markPassingCalculator.stop();
+                    if (trackedRace == TrackedRaceImpl.this) {
+                        // stop mark passing calculator when tracked race is removed:
+                        markPassingCalculator.stop();
+                    }
                 }
             });
         } else {
             markPassingCalculator = null;
         }
+        hasMarkPassingCalculator = useInternalMarkPassingAlgorithm;
         // now wait until wind loading has at least started; then we know that the serialization lock is safely held by the loader
         try {
             waitUntilLoadingFromWindStoreComplete();
@@ -641,6 +646,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
+    }
+    
+    /**
+     * After the object graph has entirely been re-constructed, create the mark passing calculator if
+     * the original object had one.
+     */
+    protected Object readResolve() {
+        if (hasMarkPassingCalculator) {
+            markPassingCalculator = createMarkPassingCalculator();
+        }
+        return this;
     }
 
     /**
@@ -748,10 +764,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * <li>start/end of tracking in Racelog</li>
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
      * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
-     * </ol
+     * </ol>
      */
     public void updateStartAndEndOfTracking() {
-        final Pair<TimePoint, TimePoint> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
+        final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimesFromRaceLog = this.getTrackingTimesFromRaceLogs();
         final Pair<TimePoint, TimePoint> startAndFinishedTimesFromRaceLog = this.getStartAndFinishedTimeFromRaceLogs();
         TimePoint oldStartOfTracking = getStartOfTracking();
         TimePoint oldEndOfTracking = getEndOfTracking();
@@ -759,22 +775,22 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean endOfTrackingFound = false;
         // check race log
         if (trackingTimesFromRaceLog != null){
-            if (trackingTimesFromRaceLog.getA() != null){
-                startOfTracking = trackingTimesFromRaceLog.getA();
+            if (trackingTimesFromRaceLog.getA() != null) {
+                startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                 startOfTrackingFound = true;
             }
-            if (trackingTimesFromRaceLog.getB() != null){
-                endOfTracking = trackingTimesFromRaceLog.getB();
+            if (trackingTimesFromRaceLog.getB() != null) {
+                endOfTracking = trackingTimesFromRaceLog.getB().getTimePoint();
                 endOfTrackingFound = true;
             }
         }
         // check "received" variants coming from a connector directly
-        if (!startOfTrackingFound || !endOfTrackingFound){
-            if (startOfTrackingReceived != null && !startOfTrackingFound){
+        if (!startOfTrackingFound || !endOfTrackingFound) {
+            if (startOfTrackingReceived != null && !startOfTrackingFound) {
                 startOfTrackingFound = true;
                 startOfTracking = startOfTrackingReceived;
             }
-            if (endOfTrackingReceived != null && !endOfTrackingFound){
+            if (endOfTrackingReceived != null && !endOfTrackingFound) {
                 endOfTrackingFound = true;
                 endOfTracking = endOfTrackingReceived;
             }
@@ -825,12 +841,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * tracking specification (see bug 3196). This method uses the {@link TrackingTimesFinder} to
      * analyze all {@link #attachedRaceLogs race logs attached} to find tracking times specifications.
      * If no tracking times specification is found at all, <code>null</code> is returned. Note that
-     * even when a valid pair is returned, the components may be <code>null</code>.
+     * even when a valid pair is returned, the components may be <code>null</code>. This may either
+     * indicate that no event for that part of the tracking interval was found, or that an event
+     * was found that explicitly specified {@code null} to force an open interval on that end.
      */
     @Override
-    public Pair<TimePoint, TimePoint> getTrackingTimesFromRaceLogs() {
+    public Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> getTrackingTimesFromRaceLogs() {
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
-            Pair<TimePoint, TimePoint> result = new TrackingTimesFinder(raceLog).analyze();
+            Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> result = new TrackingTimesFinder(raceLog).analyze();
             if (result != null) {
                 return result;
             }
@@ -1380,7 +1398,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint timePoint, WindLegTypeAndLegBearingCache cache) {
+    public List<Competitor> getCompetitorsFromBestToWorst(TimePoint unadjustedTimePoint, WindLegTypeAndLegBearingCache cache) {
+        final TimePoint timePoint;
+        // normalize the time point to get cache hits when asking for time points that are later than
+        // the last time point affected by any event received for this tracked race
+        if (Util.compareToWithNull(unadjustedTimePoint, getTimePointOfNewestEvent(), /* nullIsLess */ true) <= 0) {
+            timePoint = unadjustedTimePoint;
+        } else {
+            timePoint = getTimePointOfNewestEvent();
+        }
         NamedReentrantReadWriteLock readWriteLock;
         synchronized (competitorRankingsLocks) {
             readWriteLock = competitorRankingsLocks.get(timePoint);
