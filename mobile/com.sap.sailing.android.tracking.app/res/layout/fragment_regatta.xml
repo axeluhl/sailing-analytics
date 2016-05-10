@@ -410,10 +410,9 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="@dimen/fragment_side_margin"
                 android:layout_weight="1"
-                android:background="@drawable/normal_button"
+                android:background="@drawable/blue_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_event"
-                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/button_text_size"
                 tools:text="Show Event"/>
 
@@ -424,10 +423,9 @@
                 android:layout_marginLeft="@dimen/fragment_side_margin"
                 android:layout_marginRight="@dimen/fragment_side_margin"
                 android:layout_weight="1"
-                android:background="@drawable/normal_button"
+                android:background="@drawable/blue_button"
                 android:padding="@dimen/regatta_button_padding"
                 android:text="@string/show_leaderboard"
-                android:textColor="@color/fiori_text_color"
                 android:textSize="@dimen/button_text_size"/>
 
         </LinearLayout>
