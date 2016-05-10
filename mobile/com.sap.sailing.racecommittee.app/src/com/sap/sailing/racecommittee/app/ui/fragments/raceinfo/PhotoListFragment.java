@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.adapters.PhotoListAdapter;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
@@ -96,7 +95,7 @@ public class PhotoListFragment extends BaseFragment {
             mSubmit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String recipient = AppPreferences.on(getActivity()).getMailRecipient();
+                    String recipient = preferences.getMailRecipient();
                     MailHelper.send(new String[] { recipient }, getSubject(), getBody(), getPhotos(), getActivity());
                 }
             });

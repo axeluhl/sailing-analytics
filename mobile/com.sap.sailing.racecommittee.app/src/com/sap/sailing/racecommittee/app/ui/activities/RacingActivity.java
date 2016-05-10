@@ -52,6 +52,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderRes
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
 import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.Wind;
@@ -287,6 +288,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     private void loadWelcomeFragment() {
+        preferences = AppPreferences.on(this);
         getFragmentManager().beginTransaction().replace(R.id.racing_view_container, WelcomeFragment.newInstance()).commit();
     }
 
@@ -320,6 +322,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     public void onRaceItemClicked(ManagedRace managedRace, boolean forcedChange) {
         if (forcedChange || mSelectedRace != managedRace) {
+            preferences = AppPreferences.on(this, PreferenceHelper.getRegattaPrefFileName(managedRace.getRaceGroup().getName()));
             mSelectedRace = managedRace;
             infoFragment = new RaceInfoFragment();
             infoFragment.setArguments(RaceFragment.createArguments(managedRace));
