@@ -17,6 +17,85 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.2.0 ****************
+********************************************
+This is a final version. New functionality added:
+
+Release date: 05/06/2016
+Build number: 12293
+
+1) New functionality:
+
+ - IRace adds the new property, status, returning a value of the enum RaceStatusType.
+ - IRace property visibility has changed to return a value of the enum RaceVisibilityType.
+ - IRaceCompetitor adds a new property: status of type RaceCompetitorStatusType.
+ - Competitor updates during a race will be propagated to all subscriptors.
+ 
+********************************************
+************* TracAPI 3.1.6 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 22/02/2016
+Build number: 11976
+
+ 1) Bugs
+ 
+ - The bug of the previous release (3.1.2) was not fixed.
+ 
+********************************************
+************* TracAPI 3.1.5 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 17/02/2016
+Build number: 11948
+
+ 1) Bugs
+ 
+ - The bug of the previous release (3.1.2) was not fixed.
+ 
+********************************************
+************* TracAPI 3.1.4 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 15/02/2016
+Build number: 11938
+
+ 1) Bugs
+ 
+ - An infinity loop has been detected in the thread that sends the application
+ messages (Repored by Axel Uhl, 12/02/2016) 
+
+********************************************
+************* TracAPI 3.1.3 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 25/01/2016
+Build number: 11888
+
+ 1) Bugs
+ 
+ - The bug of the previous release (3.1.2) was not fixed.
+
+********************************************
+************* TracAPI 3.1.2 ****************
+********************************************
+This is a final version. Only fixes bugs in the implementation
+
+Release date: 21/01/2016
+Build number: 11864 
+
+ 1) Bugs
+ 
+ - The ISubscriber.stop() method never finishes due to a deadlock (it happens sometimes).
+ There is a deadlock between one of the internal threads responsible to update the progress 
+ and the thread that calls the stop method. The release 3.1.1 fixed a part of the bug but
+ it continues happening due to a new deadlock (Reported by Axel Uhl, 20/01/2016) 
+
+********************************************
 ************* TracAPI 3.1.1 ****************
 ********************************************
 This is a final version. Only fixes bugs in the implementation
