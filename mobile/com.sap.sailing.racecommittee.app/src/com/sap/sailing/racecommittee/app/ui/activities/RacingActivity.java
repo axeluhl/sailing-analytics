@@ -670,15 +670,16 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
         for (RaceGroup raceGroup : raceGroups) {
             String regattaPreference = PreferenceHelper.getRegattaPrefFileName(raceGroup.getName());
 
-            // reset temp preferences
+            // reset regatta preferences
             PreferenceHelper helper = new PreferenceHelper(this, regattaPreference);
             helper.clearPreferences();
-            helper.resetPreferences(true);
 
             RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
-            AppPreferences preferences = AppPreferences.on(this, regattaPreference);
-            PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
-            preferencesLoader.store();
+            if (configuration instanceof RegattaConfigurationImpl) {
+                AppPreferences preferences = AppPreferences.on(this, regattaPreference);
+                PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
+                preferencesLoader.store();
+            }
         }
     }
 
