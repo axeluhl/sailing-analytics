@@ -38,7 +38,7 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
 
     @Override
     protected void doUnexpectedFailure(Throwable e) {
-        if (e.getCause().getClass().getName().equals("org.apache.shiro.authz.UnauthenticatedException")) {
+        if (e.getCause().getClass().getName().matches("org\\.apache\\.shiro\\.authz\\..*[Aa]uth.*Exception")) {
             final HttpServletResponse servletResponse = getThreadLocalResponse();
             try {
                 servletResponse.reset();
