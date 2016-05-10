@@ -62,7 +62,11 @@ public class AppPreferences {
     }
 
     public static AppPreferences on(Context context, String preferenceName) {
-        return new AppPreferences(context, preferenceName);
+        return new AppPreferences(context, preferenceName, true);
+    }
+
+    public static AppPreferences on(Context context, String preferenceName, boolean overload) {
+        return new AppPreferences(context, preferenceName, overload);
     }
 
     protected final Context context;
@@ -86,9 +90,16 @@ public class AppPreferences {
         helper = new Helper(PreferenceManager.getDefaultSharedPreferences(context), null);
     }
 
-    public AppPreferences(Context context, String preferenceName) {
+    public AppPreferences(Context context, String preferenceName, boolean overload) {
         this.context = context;
-        helper = new Helper(PreferenceManager.getDefaultSharedPreferences(context), context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE));
+
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences customSharedPreferences = context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+        if (overload) {
+            helper = new Helper(defaultSharedPreferences, customSharedPreferences);
+        } else {
+            helper = new Helper(customSharedPreferences, null);
+        }
     }
 
     public void setAuthor(AbstractLogEventAuthor author) {

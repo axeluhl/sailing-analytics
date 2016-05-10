@@ -679,7 +679,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
             RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
             if (configuration instanceof RegattaConfigurationImpl) {
-                AppPreferences preferences = AppPreferences.on(this, regattaPreference);
+                AppPreferences preferences = AppPreferences.on(this, regattaPreference, false);
                 PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
                 preferencesLoader.store();
             }
