@@ -29,6 +29,8 @@ public interface CandidateFinder {
     /**
      * When initializing or refreshing the calculator, the whole race until now is evaluated. For that purpose all of the
      * {@link Candidate}s are needed instead of just the deltas.
+     * 
+     * @return new {@link Candidate}s and those that should be removed
      */
     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c);
     
