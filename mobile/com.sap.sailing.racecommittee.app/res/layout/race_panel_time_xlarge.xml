@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout
     android:id="@+id/race_content_header"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -98,4 +98,4 @@
         </RelativeLayout>
 
     </RelativeLayout>
-</RelativeLayout>
+</com.sap.sailing.racecommittee.app.ui.layouts.TimePanelHeaderLayout>
