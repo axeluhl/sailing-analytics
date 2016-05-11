@@ -81,7 +81,7 @@ public class CandidateFinderImplWhiteBoxTest {
         trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
         final TimePoint timeForStartLinePassing = trackedRace.getStartOfRace();
         createStartLinePassing(timeForStartLinePassing);
-        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        waitForMarkPassingCalculatorToFinishComputing();
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertFalse(Util.isEmpty(candidates.getA()));
@@ -91,6 +91,11 @@ public class CandidateFinderImplWhiteBoxTest {
         assertEquals(2, StreamSupport.stream(candidates.getA().spliterator(), /* parallel */ false).filter(c -> c.getWaypoint() == startWaypoint).count());
     }
 
+    private void waitForMarkPassingCalculatorToFinishComputing() throws InterruptedException {
+        // TODO implement wait/test support on MarkPassingCalculator so we don't depend on timing
+        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+    }
+
     @Test
     public void testNoCandidatesForStartLinePassingFiveMinutesBeforeStartOfRace() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InterruptedException {
         CandidateFinder finder = getCandidateFinderOfTrackedRace();
@@ -98,7 +103,7 @@ public class CandidateFinderImplWhiteBoxTest {
         trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
         final TimePoint timeForStartLinePassing = trackedRace.getStartOfRace().minus(Duration.ONE_MINUTE.times(5));
         createStartLinePassing(timeForStartLinePassing);
-        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        waitForMarkPassingCalculatorToFinishComputing();
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertTrue(Util.isEmpty(candidates.getA()));
@@ -122,7 +127,7 @@ public class CandidateFinderImplWhiteBoxTest {
         // pass the line a bit after the candidate finder is expected to ignore candidates (5min after blue flag down)
         final TimePoint timeForStartLinePassing = finishedTime.minus(Duration.ONE_MINUTE);
         createStartLinePassing(timeForStartLinePassing);
-        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        waitForMarkPassingCalculatorToFinishComputing();
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertFalse(Util.isEmpty(candidates.getA()));
@@ -146,7 +151,7 @@ public class CandidateFinderImplWhiteBoxTest {
         // pass the line a bit after the candidate finder is expected to ignore candidates (5min after blue flag down)
         final TimePoint timeForStartLinePassing = finishedTime.plus(Duration.ONE_MINUTE.times(6));
         createStartLinePassing(timeForStartLinePassing);
-        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        waitForMarkPassingCalculatorToFinishComputing();
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertTrue(Util.isEmpty(candidates.getA()));
