@@ -212,6 +212,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         } finally {
             unlockAfterWrite();
         }
+        getDistanceCache().clear();
     }
 
     protected MaxSpeedCache<ItemType, FixType> createMaxSpeedCache() {
