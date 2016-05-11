@@ -1379,10 +1379,11 @@ public class CandidateFinderImpl implements CandidateFinder {
             TimePoint oldFinishedTime, TimePoint newFinishedTime) {
         final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
         final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
+        final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
         if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
             timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
             result = updateCandiatesAfterRaceTimeRangeChanged(
-                    getTimePointWhenToFinishConsideringCandidates(oldFinishedTime),
+                    oldTimePointWhenToFinishConsideringCandidates,
                     newTimePointWhenToFinishConsideringCandidates);
         } else {
             result = Collections.emptyMap();

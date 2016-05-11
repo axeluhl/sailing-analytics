@@ -14,8 +14,15 @@ import java.util.stream.StreamSupport;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.ReadonlyRacingProcedureFactory;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
@@ -70,12 +77,13 @@ public class CandidateFinderImplWhiteBoxTest {
     }
 
     @Test
-    public void testTwoCandidatesForStartLinePassingAtStartOfRace() throws NoSuchFieldException, IllegalAccessException {
+    public void testTwoCandidatesForStartLinePassingAtStartOfRace() throws NoSuchFieldException, IllegalAccessException, InterruptedException {
         CandidateFinder finder = getCandidateFinderOfTrackedRace();
         trackedRace.setStartOfTrackingReceived(now.minus(Duration.ONE_MINUTE.times(10)));
         trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
         final TimePoint timeForStartLinePassing = trackedRace.getStartOfRace();
         createStartLinePassing(timeForStartLinePassing);
+        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertFalse(Util.isEmpty(candidates.getA()));
@@ -86,12 +94,61 @@ public class CandidateFinderImplWhiteBoxTest {
     }
 
     @Test
-    public void testNoCandidatesForStartLinePassingFiveMinutesBeforeStartOfRace() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public void testNoCandidatesForStartLinePassingFiveMinutesBeforeStartOfRace() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InterruptedException {
         CandidateFinder finder = getCandidateFinderOfTrackedRace();
         trackedRace.setStartOfTrackingReceived(now.minus(Duration.ONE_MINUTE.times(10)));
         trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
         final TimePoint timeForStartLinePassing = trackedRace.getStartOfRace().minus(Duration.ONE_MINUTE.times(5));
         createStartLinePassing(timeForStartLinePassing);
+        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
+        assertNotNull(candidates);
+        assertTrue(Util.isEmpty(candidates.getA()));
+        assertTrue(Util.isEmpty(candidates.getB()));
+        final Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
+        // expecting one distance and one XTE candidate
+        assertEquals(0, StreamSupport.stream(candidates.getA().spliterator(), /* parallel */ false).filter(c -> c.getWaypoint() == startWaypoint).count());
+    }
+
+    @Test
+    public void testTwoCandidatesForStartLinePassingOneMinuteBeforerBlueFlagDown() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InterruptedException {
+        CandidateFinder finder = getCandidateFinderOfTrackedRace();
+        final RaceLogImpl raceLog = new RaceLogImpl("RaceLog");
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.setStartOfTrackingReceived(now.minus(Duration.ONE_MINUTE.times(10)));
+        trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
+        // blue flag goes down again one minute after start
+        final TimePoint finishedTime = now.plus(Duration.ONE_MINUTE.times(2));
+        new RaceStateImpl(/* raceLogResolver */ null, raceLog, new LogEventAuthorImpl("Me", 0), new ReadonlyRacingProcedureFactory(
+                new EmptyRegattaConfiguration())).setFinishedTime(finishedTime);
+        // pass the line a bit after the candidate finder is expected to ignore candidates (5min after blue flag down)
+        final TimePoint timeForStartLinePassing = finishedTime.minus(Duration.ONE_MINUTE);
+        createStartLinePassing(timeForStartLinePassing);
+        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+        final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
+        assertNotNull(candidates);
+        assertFalse(Util.isEmpty(candidates.getA()));
+        assertTrue(Util.isEmpty(candidates.getB()));
+        final Waypoint startWaypoint = trackedRace.getRace().getCourse().getFirstWaypoint();
+        // expecting one distance and one XTE candidate
+        assertEquals(2, StreamSupport.stream(candidates.getA().spliterator(), /* parallel */ false).filter(c -> c.getWaypoint() == startWaypoint).count());
+    }
+
+    @Test
+    public void testNoCandidatesForStartLinePassingOneMinuteAfterBlueFlagDown() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, InterruptedException {
+        CandidateFinder finder = getCandidateFinderOfTrackedRace();
+        final RaceLogImpl raceLog = new RaceLogImpl("RaceLog");
+        trackedRace.attachRaceLog(raceLog);
+        trackedRace.setStartOfTrackingReceived(now.minus(Duration.ONE_MINUTE.times(10)));
+        trackedRace.setStartTimeReceived(now.plus(Duration.ONE_MINUTE));
+        // blue flag goes down again one minute after start
+        final TimePoint finishedTime = now.plus(Duration.ONE_MINUTE.times(2));
+        new RaceStateImpl(/* raceLogResolver */ null, raceLog, new LogEventAuthorImpl("Me", 0), new ReadonlyRacingProcedureFactory(
+                new EmptyRegattaConfiguration())).setFinishedTime(finishedTime);
+        // pass the line a bit after the candidate finder is expected to ignore candidates (5min after blue flag down)
+        final TimePoint timeForStartLinePassing = finishedTime.plus(Duration.ONE_MINUTE.times(6));
+        createStartLinePassing(timeForStartLinePassing);
+        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
         final Pair<Iterable<Candidate>, Iterable<Candidate>> candidates = finder.getAllCandidates(competitor);
         assertNotNull(candidates);
         assertTrue(Util.isEmpty(candidates.getA()));
