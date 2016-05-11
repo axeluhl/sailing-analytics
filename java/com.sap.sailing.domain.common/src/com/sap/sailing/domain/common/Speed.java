@@ -60,6 +60,11 @@ public interface Speed extends Comparable<Speed>, Serializable {
         public double getStatuteMilesPerHour() {
             return 0;
         }
+
+        @Override
+        public Distance travel(Duration duration) {
+            return Distance.NULL;
+        }
     };
     
     @Statistic(messageKey="", resultDecimals=2)
@@ -85,4 +90,6 @@ public interface Speed extends Comparable<Speed>, Serializable {
      * line" on a sphere) with this speed.
      */
     Duration getDuration(Distance distance);
+
+    Distance travel(Duration duration);
 }
