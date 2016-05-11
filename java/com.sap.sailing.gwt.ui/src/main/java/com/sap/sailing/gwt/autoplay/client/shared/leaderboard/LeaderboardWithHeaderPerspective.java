@@ -26,9 +26,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -40,8 +38,6 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  */
 public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposite<LeaderboardWithHeaderPerspectiveLifecycle,
     LeaderboardWithHeaderPerspectiveSettings> implements LeaderboardUpdateProvider {
-    private PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> perspectiveSettings;
-    private LeaderboardWithHeaderPerspectiveSettings settings;
     private final DockLayoutPanel dockPanel;
     private final static int SAP_HEADER_HEIGHT = 70;
     private final Widget currentContentWidget;
@@ -53,18 +49,14 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             CompetitorSelectionProvider competitorSelectionProvider, Timer timer,
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
-        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle());
+        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
 
-        // TODO: which type should this be: PerspectiveCompositeSettings or PerspectiveCompositeLifecycleSettings
-        //this.perspectiveSettings = perspectiveLifecycleWithAllSettings.getAllSettings();
-
-        this.settings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
         this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
         
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                if(LeaderboardWithHeaderPerspective.this.settings.isLeaderboardAutoZoom()) {
+                if(LeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
@@ -90,10 +82,10 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
         
         currentContentWidget = oldLeaderboard.getContentWidget();
         
-        if(settings.isLeaderboardAutoZoom()) {
+        if(getPerspectiveSettings().isLeaderboardAutoZoom()) {
             autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
         } else {
-            Double zoom = settings.getLeaderboardZoomFactor();
+            Double zoom = getPerspectiveSettings().getLeaderboardZoomFactor();
             zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
         }
 
@@ -114,16 +106,6 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
 
     @Override
     public void setVisible(boolean visibility) {
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> getSettings() {
-        return perspectiveSettings;
-    }
-
-    @Override
-    public void updateSettings(PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> newSettings) {
-        this.perspectiveSettings = newSettings;
     }
 
     @Override

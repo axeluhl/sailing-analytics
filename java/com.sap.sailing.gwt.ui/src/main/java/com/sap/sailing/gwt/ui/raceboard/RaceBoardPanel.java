@@ -82,7 +82,6 @@ import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.ui.authentication.generic.GenericAuthentication;
@@ -150,8 +149,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     private static final RaceMapResources raceMapResources = GWT.create(RaceMapResources.class);
     
     private final PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleWithAllSettings;
-    private RaceBoardPerspectiveSettings settings;
-    private PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveSettings;
     
     /**
      * @param eventId
@@ -168,16 +165,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider) {
-        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle());
+        super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
         this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
-        this.settings = perspectiveLifecycleWithAllSettings.getPerspectiveSettings();
-
-        // TODO: which type should this be: PerspectiveCompositeSettings or PerspectiveCompositeLifecycleSettings
-        //this.perspectiveSettings = perspectiveLifecycleWithAllSettings.getAllSettings();
-        
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         this.errorReporter = errorReporter;
         this.userAgent = userAgent;
@@ -210,7 +202,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
 
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
-                settings.isSimulationEnabled(), /* showHeaderPanel */ true) {
+                getPerspectiveSettings().isSimulationEnabled(), /* showHeaderPanel */ true) {
             private static final String INDENT_SMALL_CONTROL_STYLE = "indentsmall";
             private static final String INDENT_BIG_CONTROL_STYLE = "indentbig";
             @Override
@@ -261,17 +253,17 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
-        if (settings.getActiveCompetitorsFilterSetName() != null) {
+        if (getPerspectiveSettings().getActiveCompetitorsFilterSetName() != null) {
             for (FilterSet<CompetitorDTO, FilterWithUI<CompetitorDTO>> filterSet : competitorSearchTextBox.getCompetitorsFilterSets()
                     .getFilterSets()) {
-                if (filterSet.getName().equals(settings.getActiveCompetitorsFilterSetName())) {
+                if (filterSet.getName().equals(getPerspectiveSettings().getActiveCompetitorsFilterSetName())) {
                     competitorSearchTextBox.getCompetitorsFilterSets().setActiveFilterSet(filterSet);
                     break;
                 }
             }
         }
         racetimePanel = new RaceTimePanel(raceTimePanelLifecycle, userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                settings.isCanReplayDuringLiveRaces(), settings.isChartSupportEnabled(),
+                getPerspectiveSettings().isCanReplayDuringLiveRaces(), getPerspectiveSettings().isChartSupportEnabled(),
                 selectedRaceIdentifier);
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
@@ -316,7 +308,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> componentsForSideBySideViewer = new ArrayList<Component<?>>();
-        if (settings.isChartSupportEnabled()) {
+        if (getPerspectiveSettings().isChartSupportEnabled()) {
             competitorChart = new MultiCompetitorRaceChart(multiCompetitorRaceChartLifecycle, sailingService, asyncActionsExecutor,
                     competitorSelectionProvider, selectedRaceIdentifier, timer, timeRangeWithZoomModel, stringMessages,
                     errorReporter, true, true, leaderboardGroupName, leaderboardName);
@@ -350,11 +342,11 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         components.addAll(componentsForSideBySideViewer);
         this.setupUserManagementControlPanel(userService);
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
-        boolean showLeaderboard = settings.isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+        boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        if (settings.isChartSupportEnabled()) {
-            setWindChartVisible(settings.isShowWindChart());
-            setCompetitorChartVisible(settings.isShowCompetitorsChart());
+        if (getPerspectiveSettings().isChartSupportEnabled()) {
+            setWindChartVisible(getPerspectiveSettings().isShowWindChart());
+            setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
         }
         // make sure to load leaderboard data for filtering to work
         if (!showLeaderboard) {
@@ -545,16 +537,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     @Override
     public Widget getEntryWidget() {
         return this;
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> getSettings() {
-        return perspectiveSettings;
-    }
-
-    @Override
-    public void updateSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> newSettings) {
-        this.perspectiveSettings = newSettings;
     }
 
     @Override

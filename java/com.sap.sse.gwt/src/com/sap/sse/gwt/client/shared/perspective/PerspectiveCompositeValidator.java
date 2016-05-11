@@ -10,13 +10,13 @@ import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveAndDialogComponent;
 
-public class PerspectiveCompositeValidator<P extends Perspective<PST>, PST extends Settings>
-    implements Validator<PerspectiveCompositeSettings<PST>> {
+public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends Settings>
+    implements Validator<PerspectiveCompositeSettings<PS>> {
     
     private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
-    private final Validator<PerspectiveCompositeSettings<PST>> perspectiveValidator;
+    private final Validator<PerspectiveCompositeSettings<PS>> perspectiveValidator;
     
-    public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<PST> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
+    public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
@@ -25,7 +25,7 @@ public class PerspectiveCompositeValidator<P extends Perspective<PST>, PST exten
     }
 
     @Override
-    public String getErrorMessage(PerspectiveCompositeSettings<PST> valueToValidate) {
+    public String getErrorMessage(PerspectiveCompositeSettings<PS> valueToValidate) {
         StringBuilder result = new StringBuilder();
         for (ComponentAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
@@ -40,7 +40,7 @@ public class PerspectiveCompositeValidator<P extends Perspective<PST>, PST exten
         return result.toString();
     }
 
-    private String getPerspectiveErrorMessage(PerspectiveCompositeSettings<PST> perspectiveSettings) {
+    private String getPerspectiveErrorMessage(PerspectiveCompositeSettings<PS> perspectiveSettings) {
         String errorMessage = null;
         if (perspectiveValidator != null) {
             errorMessage = perspectiveValidator.getErrorMessage(perspectiveSettings);

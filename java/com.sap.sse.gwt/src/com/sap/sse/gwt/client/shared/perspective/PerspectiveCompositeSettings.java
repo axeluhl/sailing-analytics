@@ -13,9 +13,9 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *      the {@link Perspective} settings type
  */
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
-    private final ComponentAndSettings<PS> perspectiveAndSettings;
+    private final PerspectiveAndSettings<PS> perspectiveAndSettings;
     
-    public PerspectiveCompositeSettings(ComponentAndSettings<PS> perspectiveAndSettings, Iterable<ComponentAndSettings<?>> settingsPerComponent) {
+    public PerspectiveCompositeSettings(PerspectiveAndSettings<PS> perspectiveAndSettings, Iterable<ComponentAndSettings<?>> settingsPerComponent) {
         super(settingsPerComponent);
         
         this.perspectiveAndSettings = perspectiveAndSettings;
@@ -23,5 +23,9 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
 
     public PS getPerspectiveSettings() {
         return perspectiveAndSettings.getSettings();
+    }
+
+    public PerspectiveAndSettings<PS> getPerspectiveAndSettings() {
+        return perspectiveAndSettings;
     }
 }

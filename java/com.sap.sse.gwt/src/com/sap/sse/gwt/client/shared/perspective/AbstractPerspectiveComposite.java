@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -19,46 +20,44 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
      extends Composite implements Perspective<PS> {
 
     private final PL perspectiveLifecycle;
+    private PS perspectiveSettings;
 
     protected final List<Component<?>> components;
     
-    public AbstractPerspectiveComposite(PL perspectiveLifecycle) {
+    public AbstractPerspectiveComposite(PL perspectiveLifecycle, PS perspectiveSettings) {
         this.components = new ArrayList<>();
         this.perspectiveLifecycle = perspectiveLifecycle;
+        this.perspectiveSettings = perspectiveSettings;
     }
-    
-    
-//    @Override 
-//    public CompositeSettings getSettingsOfComponents() {
-//        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
-//        for (Component<?> component : components) {
-//            ComponentAndSettings<?> componentAndSettings = getComponentAndSettings(component);
-//            if (componentAndSettings != null) {
-//                settings.add(componentAndSettings);
-//            }
-//        }
-//        return new CompositeSettings(settings);
-//    }
-    
-//    private <ComponentSettingsType extends Settings> ComponentAndSettings<ComponentSettingsType> getComponentAndSettings(Component<ComponentSettingsType> component) {
-//        ComponentAndSettings<ComponentSettingsType> result = null;
-//        if (component.hasSettings()) {
-//            result = new ComponentAndSettings<ComponentSettingsType>(component, component.getSettings());
-//        }
-//        return result;
-//    }
 
-//    @Override
-//    public void updateSettingsOfComponents(CompositeSettings newSettings) {
-//        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
-//            updateSettings(componentAndSettings);
-//        }
-//    }
-//
-//    private <ComponentSettingsType extends Settings> void updateSettings(ComponentAndSettings<ComponentSettingsType> componentAndSettings) {
-//        Component<ComponentSettingsType> component = componentAndSettings.getComponent();
-//        component.updateSettings(componentAndSettings.getSettings());
-//    }
+    @Override
+    public PerspectiveCompositeSettings<PS> getSettings() {
+        List<ComponentAndSettings<?>> settingsPerComponent = new ArrayList<>();
+        for (Component<?> c: getComponents()) {
+            if (c.hasSettings()) {
+                settingsPerComponent.add(createComponentAndSettings(c));
+            }
+        }
+        PerspectiveAndSettings<PS> perspectiveAndSettings = new PerspectiveAndSettings<>(this, perspectiveSettings);         
+        return new PerspectiveCompositeSettings<>(perspectiveAndSettings, settingsPerComponent);
+    }
+
+    private <S extends Settings> ComponentAndSettings<S> createComponentAndSettings(Component<S> c) {
+        return new ComponentAndSettings<S>(c, c.getSettings());
+    }
+
+    @Override
+    public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
+        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+            updateSettings(componentAndSettings);
+        }
+        this.perspectiveSettings = newSettings.getPerspectiveSettings();
+    }
+
+    private <S extends Settings> void updateSettings(ComponentAndSettings<S> componentAndSettings) {
+        Component<S> component = componentAndSettings.getComponent();
+        component.updateSettings(componentAndSettings.getSettings());
+    }
 
     @Override
     public Widget getEntryWidget() {
@@ -80,9 +79,11 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        // TODO: What to do here? return PerspectiveCompositeSettings or PerspectiveCompositeLifecycleSettings
-        //return perspectiveLifecycle.getSettingsDialogComponent(getSettings());
-        return null;
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<>(getSettings());
+    }
+
+    protected PS getPerspectiveSettings() {
+        return perspectiveSettings;
     }
     
     protected PL getPerspectiveLifecycle() {
