@@ -549,22 +549,26 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
         if (!from.before(to)) {
             result = Distance.NULL;
         } else {
+            boolean perfectCacheHit = false;
             lockForRead();
             try {
                 Util.Pair<TimePoint, Util.Pair<TimePoint, Distance>> bestCacheEntry = getDistanceCache()
                         .getEarliestFromAndDistanceAtOrAfterFrom(from, to);
                 if (bestCacheEntry != null) {
+                    perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
                     // compute the missing stretches between best cache entry's "from" and our "from" and the cache
                     // entry's "to" and our "to"
                     Distance distanceFromFromToBeginningOfCacheEntry = Distance.NULL;
                     Distance distanceFromEndOfCacheEntryToTo = Distance.NULL;
                     if (!bestCacheEntry.getB().getA().equals(from)) {
                         assert bestCacheEntry.getB().getA().after(from);
+                        perfectCacheHit = false;
                         distanceFromFromToBeginningOfCacheEntry = getDistanceTraveledRecursively(from, bestCacheEntry
                                 .getB().getA(), recursionDepth + 1);
                     }
                     if (!bestCacheEntry.getA().equals(to)) {
                         assert bestCacheEntry.getA().before(to);
+                        perfectCacheHit = false;
                         distanceFromEndOfCacheEntryToTo = getDistanceTraveledRecursively(bestCacheEntry.getA(), to,
                                 recursionDepth + 1);
                     }
@@ -599,7 +603,7 @@ public class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends TrackImpl
             } finally {
                 unlockAfterRead();
             }
-            if (recursionDepth == 0) {
+            if (!perfectCacheHit && recursionDepth == 0) {
                 getDistanceCache().cache(from, to, result);
             }
         }
