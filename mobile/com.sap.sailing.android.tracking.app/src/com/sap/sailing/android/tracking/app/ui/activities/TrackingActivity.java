@@ -38,6 +38,8 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
@@ -70,7 +72,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText = "-";
+    public String lastSpeedIndicatorText;
     public String lastCompassIndicatorText = "-°";
 
     @Override
@@ -245,7 +247,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }
