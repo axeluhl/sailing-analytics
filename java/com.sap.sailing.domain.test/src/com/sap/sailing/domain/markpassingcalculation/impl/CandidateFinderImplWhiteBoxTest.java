@@ -91,9 +91,10 @@ public class CandidateFinderImplWhiteBoxTest {
         assertEquals(2, StreamSupport.stream(candidates.getA().spliterator(), /* parallel */ false).filter(c -> c.getWaypoint() == startWaypoint).count());
     }
 
-    private void waitForMarkPassingCalculatorToFinishComputing() throws InterruptedException {
-        // TODO implement wait/test support on MarkPassingCalculator so we don't depend on timing
-        Thread.sleep(100); // wait until mark passing calculator has finished updating after the start line passing was injected
+    private void waitForMarkPassingCalculatorToFinishComputing() throws InterruptedException, NoSuchFieldException, IllegalAccessException {
+        final MarkPassingCalculator markPassingCalculator = getMarkPassingCalculatorOfTrackedRace();
+        markPassingCalculator.stop();
+        markPassingCalculator.waitUntilStopped(10000);
     }
 
     @Test
@@ -162,12 +163,19 @@ public class CandidateFinderImplWhiteBoxTest {
     }
 
     private CandidateFinder getCandidateFinderOfTrackedRace() throws NoSuchFieldException, IllegalAccessException {
-        final Field markPassingCalculatorField = TrackedRaceImpl.class.getDeclaredField("markPassingCalculator");
-        markPassingCalculatorField.setAccessible(true);
+        final MarkPassingCalculator markPassingCalculator = getMarkPassingCalculatorOfTrackedRace();
         final Field finderField = MarkPassingCalculator.class.getDeclaredField("finder");
         finderField.setAccessible(true);
-        CandidateFinder finder = (CandidateFinder) finderField.get(((MarkPassingCalculator) markPassingCalculatorField.get(trackedRace)));
+        CandidateFinder finder = (CandidateFinder) finderField.get(markPassingCalculator);
         return finder;
+    }
+
+    private MarkPassingCalculator getMarkPassingCalculatorOfTrackedRace()
+            throws NoSuchFieldException, IllegalAccessException {
+        final Field markPassingCalculatorField = TrackedRaceImpl.class.getDeclaredField("markPassingCalculator");
+        markPassingCalculatorField.setAccessible(true);
+        final MarkPassingCalculator markPassingCalculator = (MarkPassingCalculator) markPassingCalculatorField.get(trackedRace);
+        return markPassingCalculator;
     }
 
     private void createStartLinePassing(final TimePoint timeForStartLinePassing) {
