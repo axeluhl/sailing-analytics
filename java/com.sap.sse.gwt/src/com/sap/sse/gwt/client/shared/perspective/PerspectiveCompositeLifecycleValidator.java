@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTa
  * @param <PS>
  *      the {@link Perspective} settings type
  */
-public class PerspectiveCompositeLifecycleValidator<PL extends PerspectiveLifecycle<?, ?>, PS extends Settings>
+public class PerspectiveCompositeLifecycleValidator<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
     implements Validator<PerspectiveCompositeLifecycleSettings<PL,PS>> {
     
     private final Map<ComponentLifecycleAndSettings<?,?>, Validator<?>> validatorsMappedByComponentLifecycle;

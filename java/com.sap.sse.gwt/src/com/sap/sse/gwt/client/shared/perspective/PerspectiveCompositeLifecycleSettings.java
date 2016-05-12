@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
  * @param <PS>
  *      the type of the Perspective settings
  */
-public class PerspectiveCompositeLifecycleSettings<PL extends PerspectiveLifecycle<?,?>, PS extends Settings> extends AbstractSettings {
+public class PerspectiveCompositeLifecycleSettings<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings> extends AbstractSettings {
     
     private final CompositeLifecycleSettings componentLifeycycleSettings;
     private final PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings;

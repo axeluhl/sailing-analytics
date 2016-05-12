@@ -60,7 +60,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    protected SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveSettingsDialogComponent(LeaderboardWithHeaderPerspectiveSettings perspectiveSettings) {
+    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveSettingsDialogComponent(LeaderboardWithHeaderPerspectiveSettings perspectiveSettings) {
         return new LeaderboardPerspectiveSettingsDialogComponent(perspectiveSettings, stringMessages);
     }
 

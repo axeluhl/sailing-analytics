@@ -42,9 +42,9 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
         private static final long serialVersionUID = -139706230424184935L;
 
         private final Perspective<PS> perspective;
-        private final SettingsDialogComponent<PerspectiveCompositeSettings<PS>> settingsDialog;
+        private final SettingsDialogComponent<PS> settingsDialog;
         
-        public PerspectiveAndDialogComponent(Perspective<PS> perspective, SettingsDialogComponent<PerspectiveCompositeSettings<PS>> settingsDialog) {
+        public PerspectiveAndDialogComponent(Perspective<PS> perspective, SettingsDialogComponent<PS> settingsDialog) {
             this.perspective = perspective;
             this.settingsDialog = settingsDialog;
         }
@@ -53,7 +53,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
             return perspective;
         }
 
-        public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialog() {
+        public SettingsDialogComponent<PS> getSettingsDialog() {
             return settingsDialog;
         }
     }
@@ -70,14 +70,23 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
     }
 
     private PerspectiveAndDialogComponent<PS> createPerspectiveAndDialogComponent(Perspective<PS> perspective) {
-        if(perspective.hasSettings()) {
-            return new PerspectiveAndDialogComponent<PS>(perspective, perspective.getSettingsDialogComponent());
+        PerspectiveAndDialogComponent<PS> result = null;
+        if(perspective.hasPerspectiveSettings()) {
+            result = new PerspectiveAndDialogComponent<PS>(perspective, perspective.getPerspectiveSettingsDialogComponent());
         }
-        return null;
+        return result;
     }
 
     private <SettingsType extends Settings> ComponentAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
         return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent());
+    }
+    
+    private <C extends Component<S>, S extends Settings> ComponentAndSettings<S> getComponentAndSettings(ComponentAndDialogComponent<S> componentAndDialog) {
+        return new ComponentAndSettings<S>(componentAndDialog.getComponent(), componentAndDialog.getSettingsDialog().getResult());
+    }
+
+    private PerspectiveAndSettings<PS> getPerspectiveAndSettings(PerspectiveAndDialogComponent<PS> perspectiveAndDialog) {
+        return new PerspectiveAndSettings<PS>(perspectiveAndDialog.getPerspective(), perspectiveAndDialog.getSettingsDialog().getResult());
     }
 
     @Override
@@ -103,7 +112,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
 
     @Override
     public PerspectiveCompositeSettings<PS> getResult() {
-        return perspectiveAndSettingsDialog.getSettingsDialog().getResult();
+        PerspectiveAndSettings<PS> perspectiveAndSettings = perspectiveAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveAndSettingsDialog) : null;
+        Collection<ComponentAndSettings<?>> componentSettings = new ArrayList<>();
+        for (ComponentAndDialogComponent<?> component : componentsAndSettingsDialogs) {
+            componentSettings.add(getComponentAndSettings(component));
+        }
+        return new PerspectiveCompositeSettings<PS>(perspectiveAndSettings, componentSettings);
     }
 
     @Override

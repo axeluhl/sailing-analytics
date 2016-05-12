@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * A perspective is a composition of UI components into a view/page The perspective itself is also an component and can
@@ -13,4 +14,8 @@ import com.sap.sse.gwt.client.shared.components.Component;
  */
 public interface Perspective<PS extends Settings> extends Component<PerspectiveCompositeSettings<PS>> {
     List<Component<?>> getComponents();
+    
+    SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent();
+    
+    boolean hasPerspectiveSettings();
 }

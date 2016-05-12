@@ -25,7 +25,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @param <PS>
  *      the perspective settings type
  */
-public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL extends PerspectiveLifecycle<?, ?>, PS extends Settings>
+public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
     implements SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> { 
     
     public static class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<S,?>, S extends Settings> {
@@ -54,7 +54,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
      * @param <PS>
      *          the {@link Perspective} settings type
      */
-    public static class PerspectiveLifecycleWithSettingsAndDialogComponent<PL extends PerspectiveLifecycle<?,?>, PS extends Settings> {
+    public static class PerspectiveLifecycleWithSettingsAndDialogComponent<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings> {
         private PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings;
         private SettingsDialogComponent<PS> dialogComponent;
 
@@ -97,9 +97,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
      */
     private PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> createPerspectiveLifecycleAndDialogComponent(PerspectiveLifecycleAndSettings<PL,PS> perspectiveLifecycleAndSettings) {
         PS settings = perspectiveLifecycleAndSettings.getSettings();
-        
-        // TODO: Move getPerspectiveSettingsDialogComponent() as new method to PerpectiveLifecycle 
-        AbstractPerspectiveLifecycle<PS,?,?> perspectiveLifecycle = (AbstractPerspectiveLifecycle<PS, ?, ?>) perspectiveLifecycleAndSettings.getPerspectiveLifecycle();
+        PL perspectiveLifecycle = perspectiveLifecycleAndSettings.getPerspectiveLifecycle();
         
         return new PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS>(perspectiveLifecycleAndSettings, perspectiveLifecycle.getPerspectiveSettingsDialogComponent(settings));
     }

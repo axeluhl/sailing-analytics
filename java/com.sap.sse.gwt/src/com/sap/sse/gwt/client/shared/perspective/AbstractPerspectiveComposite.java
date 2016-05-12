@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @author Frank Mittag
  *
  */
-public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecycle<?, ?>, PS extends Settings>
+public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
      extends Composite implements Perspective<PS> {
 
     private final PL perspectiveLifecycle;
@@ -24,6 +24,10 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     protected final List<Component<?>> components;
     
+    protected SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS perspectiveSettings) {
+        return perspectiveLifecycle.getPerspectiveSettingsDialogComponent(perspectiveSettings);
+    }
+
     public AbstractPerspectiveComposite(PL perspectiveLifecycle, PS perspectiveSettings) {
         this.components = new ArrayList<>();
         this.perspectiveLifecycle = perspectiveLifecycle;

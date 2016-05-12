@@ -81,6 +81,7 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -581,6 +582,16 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         timelinePanel.addStyleName("timeLinePanel");
         
         return timelinePanel;
+    }
+
+    @Override
+    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveSettingsDialogComponent() {
+        return new RaceBoardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
+    }
+
+    @Override
+    public boolean hasPerspectiveSettings() {
+        return true;
     }
 }
 

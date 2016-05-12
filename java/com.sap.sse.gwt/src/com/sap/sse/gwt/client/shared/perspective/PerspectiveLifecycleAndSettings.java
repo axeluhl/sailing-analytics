@@ -6,24 +6,24 @@ import com.sap.sse.common.settings.Settings;
  * The class combining the PerspectiveLifecycle and the settings of the corresponding Perspective (not the composite settings)
  * @author Frank
  *
- * @param <PLCT>
- * @param <PST>
+ * @param <PL>
+ * @param <PS>
  */
-public class PerspectiveLifecycleAndSettings<PLC extends PerspectiveLifecycle<?, ?>, PST extends Settings> {
-    private final PLC perspectiveLifecycle;
-    private final PST settings;
+public class PerspectiveLifecycleAndSettings<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings> {
+    private final PL perspectiveLifecycle;
+    private final PS settings;
 
-    public PerspectiveLifecycleAndSettings(PLC perspectiveLifecycle, PST settings) {
+    public PerspectiveLifecycleAndSettings(PL perspectiveLifecycle, PS settings) {
         super();
         this.perspectiveLifecycle = perspectiveLifecycle;
         this.settings = settings;
     }
 
-    public PLC getPerspectiveLifecycle() {
+    public PL getPerspectiveLifecycle() {
         return perspectiveLifecycle;
     }
     
-    public PST getSettings() {
+    public PS getSettings() {
         return settings;
     }
 }

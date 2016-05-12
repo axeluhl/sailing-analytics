@@ -26,6 +26,7 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
+import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveComposite;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
@@ -42,6 +43,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     private final static int SAP_HEADER_HEIGHT = 70;
     private final Widget currentContentWidget;
     private final LeaderboardPanel leaderboardPanel;
+    private final StringMessages stringMessages;
     private final PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> componentLifecyclesAndSettings;
     
     public LeaderboardWithHeaderPerspective(PerspectiveLifecycleWithAllSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleWithAllSettings,
@@ -51,6 +53,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
         super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
 
+        this.stringMessages = stringMessages;
         this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
         
         Window.addResizeHandler(new ResizeHandler() {
@@ -211,6 +214,16 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
                 /* adjustTimerDelay */true, /*autoApplyTopNFilter*/ false, false);
 
         return leaderboardPanel;
+    }
+
+    @Override
+    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveSettingsDialogComponent() {
+        return new LeaderboardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
+    }
+
+    @Override
+    public boolean hasPerspectiveSettings() {
+        return true;
     }
 
 }

@@ -76,22 +76,16 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> cloneSettings(
             PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> settings) {
-        // TODO Auto-generated method stub
+////    return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(),
+////    settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isSimulationEnabled(), settings.isCanReplayDuringLiveRaces(),
+////    settings.isChartSupportEnabled());
         return null;
     }
 
     @Override
-    protected SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveSettingsDialogComponent(RaceBoardPerspectiveSettings perspectiveSettings) {
+    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveSettingsDialogComponent(RaceBoardPerspectiveSettings perspectiveSettings) {
         return new RaceBoardPerspectiveSettingsDialogComponent(perspectiveSettings, stringMessages);
     }
-//
-//    @Override
-//    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> cloneSettings(PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings) {
-//        return null;
-////        return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(),
-////                settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isSimulationEnabled(), settings.isCanReplayDuringLiveRaces(),
-////                settings.isChartSupportEnabled());
-//    }
 
     @Override
     public String getLocalizedShortName() {

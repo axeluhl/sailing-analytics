@@ -10,7 +10,7 @@ package com.sap.sse.gwt.client.shared.perspective;
  * @param <PS>
  *      the {@link Perspective} composite settings type
  */
-public class PerspectiveLifecycleAndCompositeSettings<PL extends PerspectiveLifecycle<PCS, ?>, PCS extends PerspectiveCompositeLifecycleSettings<?,?>> {
+public class PerspectiveLifecycleAndCompositeSettings<PL extends PerspectiveLifecycle<? ,PCS, ?>, PCS extends PerspectiveCompositeLifecycleSettings<?,?>> {
     private final PL perspectiveLifecycle;
     private PCS settings;
 

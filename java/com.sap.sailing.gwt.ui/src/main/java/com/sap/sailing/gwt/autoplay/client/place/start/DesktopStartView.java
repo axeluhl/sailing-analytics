@@ -137,7 +137,7 @@ public class DesktopStartView extends Composite implements StartView {
                 new PerspectiveCompositeLifecycleSettings<>(raceboardPerspectiveLifecycleAndSettings,raceboardPerspectiveComponentsLifecyclesAndSettings));
     }
 
-    private <PL extends PerspectiveLifecycle<?,?>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleAndSettings) {
+    private <PL extends PerspectiveLifecycle<PS,?,?>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleAndSettings) {
         PerspectiveCompositeLifecycleTabbedSettingsDialog<PL,PS> dialog = new PerspectiveCompositeLifecycleTabbedSettingsDialog<>(StringMessages.INSTANCE,
                 perspectiveLifecycleAndSettings.getAllSettings(), perspectiveLifecycleAndSettings.getPerspectiveLifecycle().getLocalizedShortName(), 
                 new DialogCallback<PerspectiveCompositeLifecycleSettings<PL,PS>>() {
@@ -199,7 +199,7 @@ public class DesktopStartView extends Composite implements StartView {
         screenConfigurationUi.getStyle().setVisibility(selectedLeaderboardName != null ? Visibility.VISIBLE : Visibility.HIDDEN);
     }
 
-    private <PL extends PerspectiveLifecycle<?,?>, PS extends Settings> void createPerspectiveSettingsUI(
+    private <PL extends PerspectiveLifecycle<PS,?,?>, PS extends Settings> void createPerspectiveSettingsUI(
             final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleWithAllSettings,
             FlowPanel perspectiveSettingsPanel) { 
         perspectiveSettingsPanel.clear();

@@ -14,7 +14,7 @@ public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends
     implements Validator<PerspectiveCompositeSettings<PS>> {
     
     private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
-    private final Validator<PerspectiveCompositeSettings<PS>> perspectiveValidator;
+    private final Validator<PS> perspectiveValidator;
     
     public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
@@ -33,14 +33,14 @@ public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends
                 result.append(errorMessage);
             }
         }
-        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate);
+        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate.getPerspectiveSettings());
         if (perspectiveErrorMessage != null && !perspectiveErrorMessage.isEmpty()) {
             result.append(perspectiveErrorMessage);
         }
         return result.toString();
     }
 
-    private String getPerspectiveErrorMessage(PerspectiveCompositeSettings<PS> perspectiveSettings) {
+    private String getPerspectiveErrorMessage(PS perspectiveSettings) {
         String errorMessage = null;
         if (perspectiveValidator != null) {
             errorMessage = perspectiveValidator.getErrorMessage(perspectiveSettings);
