@@ -52,6 +52,7 @@ First of all, make sure you've looked at http://www.amazon.de/Patterns-Elements-
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Fortmatter)
   * Install the Eclipse GWT-Plugin (now called Google Plugin for Eclipse)
   * Install the Google Android SDK from the same Google Plugin for Eclipse update site
+  * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> Google -> Web Toolkit -> Add...)
   * Install Eclipse debugger for GWT SuperDevMode
   * Install Eclipse eGit (optional)

@@ -380,6 +380,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        // TODO alternatively, check for a markId here and then produce a RegattaLogDeviceMarkMappingEventImpl
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
 
