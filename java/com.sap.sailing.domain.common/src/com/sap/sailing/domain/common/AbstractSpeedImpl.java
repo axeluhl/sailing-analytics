@@ -16,7 +16,12 @@ public abstract class AbstractSpeedImpl implements Speed {
 
     @Override
     public Distance travel(TimePoint t1, TimePoint t2) {
-        return new NauticalMileDistance((t2.asMillis() - t1.asMillis()) / 1000. / 3600. * getKnots());
+        return travel(t1.until(t2));
+    }
+    
+    @Override
+    public Distance travel(Duration duration) {
+        return new NauticalMileDistance(duration.asHours() * getKnots());
     }
     
     @Override

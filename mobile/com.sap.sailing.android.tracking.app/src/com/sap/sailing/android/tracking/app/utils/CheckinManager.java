@@ -91,6 +91,7 @@ public class CheckinManager {
             String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
                 .replace("+", "%20");
             urlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+            // TODO alternatively consider a mark_id
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
             urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
             urlData.leaderboardName = leaderboardNameFromQR;

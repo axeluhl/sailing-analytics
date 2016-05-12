@@ -42,7 +42,7 @@ public class TackTest extends StoredTrackBasedTestWithTrackedRace {
                                         /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl("Wolfgang Hunger's boat",
                 new BoatClassImpl("505", /* typicallyStartsUpwind */ true), null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", Collections.singleton(competitor),
-                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime())));
+                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()), /* useMarkPassingCalculator */ false));
     }
     
     @Test

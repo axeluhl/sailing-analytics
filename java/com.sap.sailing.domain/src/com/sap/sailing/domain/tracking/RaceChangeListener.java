@@ -2,6 +2,10 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
@@ -48,6 +52,13 @@ public interface RaceChangeListener extends CourseListener {
      * passing-based start time inference is active or not.
      */
     void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace);
+    
+    /**
+     * Fired when in any of the attached {@link RaceLog}s a {@link RaceLogRaceStatusEvent} or a {@link RaceLogPassChangeEvent}
+     * or a {@link RaceLogRevokeEvent} has caused a change in the {@link RaceState#getFinishedTime() finished time} inferred
+     * from that race log.
+     */
+    void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime);
 
     void delayToLiveChanged(long delayToLiveInMillis);
 
