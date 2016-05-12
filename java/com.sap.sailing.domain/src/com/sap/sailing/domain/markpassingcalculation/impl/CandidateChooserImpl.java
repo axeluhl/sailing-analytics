@@ -56,7 +56,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * leg the candidates that require more distance than the minimum distance required receive an increasing penalty.
      * The maximum penalty for finishing candidates that have required
      * {@link #MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH} times the leg distance is expressed by
-     * this consttant.
+     * this constant.
      */
     private static final double PENALTY_FOR_LATEST_FINISH_PASSING = 0.95;
 
