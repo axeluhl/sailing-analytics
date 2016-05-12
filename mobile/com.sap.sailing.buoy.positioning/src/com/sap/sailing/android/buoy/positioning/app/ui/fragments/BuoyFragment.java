@@ -94,6 +94,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     @Override
     public void onResume() {
         super.onResume();
+        disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
         mapFragment = (MapFragment) positioningActivity.getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
