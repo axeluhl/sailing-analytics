@@ -38,6 +38,11 @@ public abstract class AbstractRaceChangeListener implements RaceChangeListener {
     public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
         defaultAction();
     }
+    
+    @Override
+    public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+        defaultAction();
+    }
 
     @Override
     public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {

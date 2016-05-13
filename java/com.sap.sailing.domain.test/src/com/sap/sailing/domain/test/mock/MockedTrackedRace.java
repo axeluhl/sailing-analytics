@@ -106,6 +106,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TimePoint getFinishedTime() {
+        return null;
+    }
+
+    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return null;
     }
@@ -1040,6 +1045,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+    public void setFinishedTime(TimePoint newFinishedTime) {
     }
 }

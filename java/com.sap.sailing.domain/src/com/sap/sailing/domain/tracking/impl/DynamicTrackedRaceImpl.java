@@ -412,6 +412,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    @Override
+    public void setFinishedTime(final TimePoint newFinishedTime) {
+        final TimePoint oldFinishedTime = getFinishedTime();
+        if (!Util.equalsWithNull(newFinishedTime, oldFinishedTime)) {
+            logger.info("Finished time of race " + getRace().getName() + " updated from " + getFinishedTime() + " to " + newFinishedTime);
+            super.setFinishedTime(newFinishedTime);
+            updateStartAndEndOfTracking();
+            notifyListenersFinishedTimeChanged(oldFinishedTime, newFinishedTime);
+        }
+    }
+    
     private void notifyListenersWindSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
         notifyListeners(listener -> listener.windSourcesToExcludeChanged(windSourcesToExclude));
     }
@@ -430,6 +441,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
+    }
+
+    private void notifyListenersFinishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+        notifyListeners(listener -> listener.finishedTimeChanged(oldFinishedTime, newFinishedTime));
     }
 
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -622,7 +637,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     /**
      * Updates the {@code markPassings} into the {@link #getMarkPassing(Competitor, Waypoint) mark passing data
      * structure for the waypoints passed} and the {@link #getMarkPassings(Competitor) mark passing data structure for
-     * the competitor}. The mark passings are use as-is, without considering any
+     * the competitor}. The mark passings are used as-is, without considering any
      * {@link CompetitorResult#getFinishingTime() finishing times} for competitors coming from any {@link RaceLog}.
      * See also {@link #updateMarkPassings(Competitor, Iterable)} which <em>does</em> consider those.
      */
@@ -984,12 +999,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
-        updateStartAndEndOfTracking();
-    }
-    
-    @Override
-    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
-        logger.info("Finished time of race "+getRace().getName()+" updated by race committee to "+newFinishedTime);
         updateStartAndEndOfTracking();
     }
     
