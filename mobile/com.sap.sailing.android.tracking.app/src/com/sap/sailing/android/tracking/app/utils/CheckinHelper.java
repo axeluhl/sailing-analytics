@@ -10,6 +10,7 @@ public class CheckinHelper {
             throws JSONException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitorId);
+        // TODO alternatively map device to a mark, providing a mark_id; see also LeaderboardsResource.postCheckin
         jsonObject.put(DeviceMappingConstants.JSON_DEVICE_TYPE, "android");
         jsonObject.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid);
         jsonObject.put(DeviceMappingConstants.JSON_PUSH_DEVICE_ID, pushDeviceId);

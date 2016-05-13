@@ -316,7 +316,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     }
 
     private void addContentToLeftPanel(VerticalPanel contentPanel) {
-        contentPanel.add(new Label(stringMessages.importLeaderboardGroups()));
+        contentPanel.add(new Label(stringMessages.availableLeaderboardGroups()));
         
         HorizontalPanel filterPanel = new HorizontalPanel();
         filterPanel.add(new Label(stringMessages.filterName() + ":"));

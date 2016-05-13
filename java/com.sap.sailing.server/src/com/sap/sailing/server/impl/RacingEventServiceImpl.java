@@ -1631,6 +1631,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
 
         @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // no action required; the update signaled by this call is implicit; the race log
+            // updates that led to this change are replicated separately
+        }
+
+        @Override
         public void waypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
             // no-op; the course change is replicated by the separate CourseChangeReplicator
         }
