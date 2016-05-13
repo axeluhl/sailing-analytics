@@ -209,10 +209,15 @@ public class MarkPassingCalculator {
                                 if (!removedWaypoints.isEmpty()) {
                                     chooser.removeWaypoints(removedWaypoints);
                                 }
+                                Set<Callable<Void>> tasks = new HashSet<>();
                                 for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
-                                    Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                    chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                    tasks.add(()->{
+                                        Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                                        chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                        return null;
+                                    });
                                 }
+                                executor.invokeAll(tasks);
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
                                     unsuppressedMarkPassings);
