@@ -1952,7 +1952,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setStartTimeReceived(TimePoint start) {
-        if ((start == null) != (startTimeReceived == null) || (start != null && !start.equals(startTimeReceived))) {
+        if (!Util.equalsWithNull(start, startTimeReceived)) {
             this.startTimeReceived = start;
             invalidateStartTime();
             invalidateMarkPassingTimes();

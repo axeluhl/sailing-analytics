@@ -807,7 +807,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             super.setStartTimeReceived(startTimeReceived);
             notifyListenersStartTimeReceivedChanged(getStartTimeReceived());
         }
-        invalidateStartTime();
     }
 
     @Override
