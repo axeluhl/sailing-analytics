@@ -188,7 +188,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     
     @Override
     public void updateEndProxyNodeWaypointIndex() {
-        end.setOneBasedWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints());
+        end.setOneBasedWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints()+1);
     }
 
     @Override
