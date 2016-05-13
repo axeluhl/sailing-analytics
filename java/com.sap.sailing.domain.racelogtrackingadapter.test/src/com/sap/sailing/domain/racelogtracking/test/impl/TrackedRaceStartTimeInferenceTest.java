@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.test.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 import java.util.Arrays;
@@ -35,13 +36,16 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
+import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
@@ -111,6 +115,79 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
     }    
     
+    /**
+     * tests notification of first start time update through race log; see bug 3660
+     */
+    @Test
+    public void testStartTimeChangeNotificationForFirstUpdateThroughRaceLog() throws TransformationException,
+            NoCorrespondingServiceRegisteredException, InterruptedException {
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
+        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
+                new WaypointImpl(mark2) }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
+                null, /* endDate */null, null, null, "a", null));
+        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        trackedRace.attachRaceLog(raceLog);
+        final TimePoint[] oldAndNewStartTimeNotifiedByRace = new TimePoint[2];
+        trackedRace.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+                oldAndNewStartTimeNotifiedByRace[0] = oldStartOfRace;
+                oldAndNewStartTimeNotifiedByRace[1] = newStartOfRace;
+            }
+        });
+        assertNull(trackedRace.getStartOfRace());
+        final TimePoint newStartOfRace = MillisecondsTimePoint.now();
+        raceLog.add(new RaceLogStartTimeEventImpl(newStartOfRace, author, 0, newStartOfRace));
+        assertNull(oldAndNewStartTimeNotifiedByRace[0]);
+        assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
+        assertEquals(newStartOfRace, trackedRace.getStartOfRace());
+    }    
+    
+    /**
+     * tests notification of first start time update through race log; see bug 3660
+     */
+    @Test
+    public void testStartTimeChangeNotificationForFirstUpdateThroughStartMarkPassing() throws TransformationException,
+            NoCorrespondingServiceRegisteredException, InterruptedException {
+        Competitor comp2 = DomainFactory.INSTANCE.getOrCreateCompetitor("comp2", "comp2", null, null, null, null, null,
+                /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Mark mark2 = DomainFactory.INSTANCE.getOrCreateMark("mark2");
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(1), author, new MillisecondsTimePoint(1), 0, mark));
+        regattaLog.add(new RegattaLogDefineMarkEventImpl(new MillisecondsTimePoint(2), author, new MillisecondsTimePoint(1), 0, mark2));
+        Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
+                new WaypointImpl(mark2) }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp, comp2 }));
+        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
+                null, /* endDate */null, null, null, "a", null));
+        final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
+                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        final TimePoint[] oldAndNewStartTimeNotifiedByRace = new TimePoint[2];
+        trackedRace.addListener(new AbstractRaceChangeListener() {
+            @Override
+            public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+                oldAndNewStartTimeNotifiedByRace[0] = oldStartOfRace;
+                oldAndNewStartTimeNotifiedByRace[1] = newStartOfRace;
+            }
+        });
+        assertNull(trackedRace.getStartOfRace());
+        final TimePoint newStartOfRace = MillisecondsTimePoint.now();
+        trackedRace.updateMarkPassings(comp, Arrays.asList(new MarkPassingImpl(newStartOfRace, Util.get(course.getWaypoints(),  0), comp),
+                new MarkPassingImpl(newStartOfRace.plus(Duration.ONE_MINUTE), Util.get(course.getWaypoints(),  1), comp)));
+        assertNull(oldAndNewStartTimeNotifiedByRace[0]);
+        assertEquals(newStartOfRace, oldAndNewStartTimeNotifiedByRace[1]);
+        assertEquals(newStartOfRace, trackedRace.getStartOfRace());
+    }    
     
     public void setStartAndEndOfTrackingInRaceLog(int startTime, int endTime){
         MillisecondsTimePoint startOfTrackingInRacelog = new MillisecondsTimePoint(startTime);
@@ -119,7 +196,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         raceLog.add(new RaceLogEndOfTrackingEventImpl(endOfTrackingInRacelog, author, 0));
     }
     
-    public void setStartAndEndOfRaceInRaceLog(int startTime, int endTime){
+    public void setStartAndEndOfRaceInRaceLog(int startTime, int endTime) {
         MillisecondsTimePoint startTimeInRaceLog2 = new MillisecondsTimePoint(startTime);
         MillisecondsTimePoint endTimeInRaceLog2 = new MillisecondsTimePoint(endTime);
         raceLog.add(new RaceLogStartTimeEventImpl(startTimeInRaceLog2, author, 0, startTimeInRaceLog2));
