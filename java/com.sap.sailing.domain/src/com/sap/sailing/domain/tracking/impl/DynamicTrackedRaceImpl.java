@@ -104,9 +104,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         this.startTimeChangedListeners = new HashSet<>();
         this.raceAbortedListeners = new HashSet<>();
         this.raceIsKnownToStartUpwind = race.getBoatClass().typicallyStartsUpwind();
-        if (markPassingCalculator != null) {
-            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
-        }
         if (!raceIsKnownToStartUpwind) {
             Set<WindSource> windSourcesToExclude = new HashSet<WindSource>();
             for (WindSource windSourceToExclude : getWindSourcesToExclude()) {
@@ -135,6 +132,14 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         startTimeChangedListeners = new HashSet<>();
         raceAbortedListeners = new HashSet<>();
     }
+    
+    protected Object readResolve() {
+        super.readResolve();
+        if (markPassingCalculator != null) {
+            logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
+        }
+        return this;
+    }
 
     /**
      * {@link #raceIsKnownToStartUpwind} (see also {@link #raceIsKnownToStartUpwind()}) is initialized based on the <code>race</code>'s
@@ -156,8 +161,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Competitor competitor, GPSFixMoving fix) {
-        if (isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
+    public void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimesInterval) {
+        if (!onlyWhenInTrackingTimesInterval || isFixWithinStartAndEndOfTracking(fix.getTimePoint())) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = getTrack(competitor);
             if (track != null) {
                 if (logger != null && logger.getLevel() != null && logger.getLevel().equals(Level.FINEST)) {
@@ -176,9 +181,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
 
     @Override
-    public void recordFix(Mark mark, GPSFix fix) {
+    public void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval) {
         final TimePoint fixTimePoint = fix.getTimePoint();
-        if (isFixWithinStartAndEndOfTracking(fixTimePoint)) {
+        if (!onlyWhenInTrackingTimeInterval || isFixWithinStartAndEndOfTracking(fixTimePoint)) {
             getOrCreateTrack(mark).addGPSFix(fix);
         }
     }
@@ -308,6 +313,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
             notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
         }
+        updateStartAndEndOfTracking();
     }
 
     @Override
@@ -406,6 +412,17 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    @Override
+    public void setFinishedTime(final TimePoint newFinishedTime) {
+        final TimePoint oldFinishedTime = getFinishedTime();
+        if (!Util.equalsWithNull(newFinishedTime, oldFinishedTime)) {
+            logger.info("Finished time of race " + getRace().getName() + " updated from " + getFinishedTime() + " to " + newFinishedTime);
+            super.setFinishedTime(newFinishedTime);
+            updateStartAndEndOfTracking();
+            notifyListenersFinishedTimeChanged(oldFinishedTime, newFinishedTime);
+        }
+    }
+    
     private void notifyListenersWindSourcesToExcludeChanged(Iterable<? extends WindSource> windSourcesToExclude) {
         notifyListeners(listener -> listener.windSourcesToExcludeChanged(windSourcesToExclude));
     }
@@ -424,6 +441,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     private void notifyListenersStartOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
         notifyListeners(listener -> listener.startOfRaceChanged(oldStartOfRace, newStartOfRace));
+    }
+
+    private void notifyListenersFinishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+        notifyListeners(listener -> listener.finishedTimeChanged(oldFinishedTime, newFinishedTime));
     }
 
     private void notifyListenersWaypointAdded(int zeroBasedIndex, Waypoint waypointThatGotAdded) {
@@ -616,7 +637,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     /**
      * Updates the {@code markPassings} into the {@link #getMarkPassing(Competitor, Waypoint) mark passing data
      * structure for the waypoints passed} and the {@link #getMarkPassings(Competitor) mark passing data structure for
-     * the competitor}. The mark passings are use as-is, without considering any
+     * the competitor}. The mark passings are used as-is, without considering any
      * {@link CompetitorResult#getFinishingTime() finishing times} for competitors coming from any {@link RaceLog}.
      * See also {@link #updateMarkPassings(Competitor, Iterable)} which <em>does</em> consider those.
      */
@@ -978,6 +999,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
+        updateStartAndEndOfTracking();
     }
     
     @Override
@@ -1003,12 +1025,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     protected MarkPassingCalculator createMarkPassingCalculator() {
-        return new MarkPassingCalculator(this, true); 
+        // not waiting for initial mark passing creation is essential for not holding up, e.g.,
+        // an initial load during replication where it is perfectly fine to obtain the results from
+        // mark passing analysis as they become available; for test cases, however, "true" would
+        // be a more appropriate choice
+        return new MarkPassingCalculator(this, true, /* waitForInitialMarkPassingCalculation */ false); 
     }
 
     @Override
     public DynamicGPSFixTrack<Mark, GPSFix> getTrack(Mark mark) {
         return (DynamicGPSFixTrack<Mark, GPSFix>) super.getTrack(mark);
     }
-
 }

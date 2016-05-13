@@ -2,6 +2,8 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,8 @@ import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.LogoAndTitlePanel;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.TimePanel;
 import com.sap.sailing.gwt.ui.client.TimePanelSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
@@ -40,10 +44,12 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
@@ -149,6 +155,16 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
                 return true;
             }
         };
+        RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingService, asyncActionsExecutor, /* errorReporter */ this,
+                Collections.singleton(selectedRaceIdentifier), 30000l /* requestInterval*/);
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(new RaceTimesInfoProviderListener() {
+            @Override
+            public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+                    long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest,
+                    long clientTimeWhenResponseWasReceived) {
+                timer.setLivePlayDelayInMillis(raceTimesInfo.get(selectedRaceIdentifier).delayToLiveInMs);
+            }
+        });
         final Button backToLivePlayButton = timePanel.getBackToLiveButton();
         timePanel.updateSettings(new TimePanelSettings(refreshInterval));
         raceMapResources.raceMapStyle().ensureInjected();
@@ -188,6 +204,8 @@ public class EmbeddedMapAndWindChartEntryPoint extends AbstractSailingEntryPoint
             windChart = null;
         }
         createRaceBoardInOneScreenMode(raceMap, windChart);
+        timeRangeWithZoomProvider.setTimeRange(new MillisecondsTimePoint(timer.getTime()).minus(Duration.ONE_MINUTE.times(15)).asDate(),
+                new MillisecondsTimePoint(timer.getTime()).plus(Duration.ONE_MINUTE.times(3)).asDate());
         timer.setTime(timer.getTime().getTime()-1000l);
     }  
 

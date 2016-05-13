@@ -94,6 +94,10 @@ public class FinishedButtonFragment extends BasePanelFragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
 
         sendIntent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE);
+
+        if (!preferences.getRacingProcedureIsResultEntryEnabled(getRaceState().getRacingProcedure().getType())) {
+            mList.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -180,7 +184,7 @@ public class FinishedButtonFragment extends BasePanelFragment {
                         break;
 
                     case LEVEL_TOGGLED:
-                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                        replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                         break;
 
                     default:

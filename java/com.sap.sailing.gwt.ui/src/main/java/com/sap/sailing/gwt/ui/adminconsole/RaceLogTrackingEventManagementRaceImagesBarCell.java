@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.gwt.ui.adminconsole.AbstractLeaderboardConfigPanel.RaceColumnDTOAndFleetDTOWithNameBasedEquality;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sse.common.Util.Pair;
 
 public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCell {
     public final static String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
@@ -19,14 +21,18 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
     public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
     public final static String ACTION_SET_TRACKING_TIMES = "ACTION_SET_TRACKING_TIMES";
+    public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
+    public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
 
     
     private final StringMessages stringMessages;
+    private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public RaceLogTrackingEventManagementRaceImagesBarCell(StringMessages stringConstants) {
+    public RaceLogTrackingEventManagementRaceImagesBarCell(StringMessages stringConstants, SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel) {
         super();
         this.stringMessages = stringConstants;
+        this.smartphoneTrackingEventManagementPanel = smartphoneTrackingEventManagementPanel;
     }
  
     @Override
@@ -46,6 +52,16 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
+        
+        Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> startEndTrackingTime = smartphoneTrackingEventManagementPanel.getTrackingTimesFor(object);
+        if (startEndTrackingTime == null) {
+            result.add(new ImageSpec(ACTION_START_TRACKING, stringMessages.startTracking(), makeImagePrototype(resources.startRaceLogTracking())));
+        } else {
+            if (startEndTrackingTime.getB() == null || startEndTrackingTime.getB().getTimePoint() == null) {
+                result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
+            }
+        }
+        
         return result;
     }
 }

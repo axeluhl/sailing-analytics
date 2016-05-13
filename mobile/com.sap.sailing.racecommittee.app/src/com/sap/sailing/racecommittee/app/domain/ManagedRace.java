@@ -7,13 +7,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.base.racegroup.FilterableRace;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.racecommittee.app.domain.impl.Result;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
-public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
+/**
+ * A managed race's {@link #getName()} is the race column's name.
+ * 
+ * @author Axel Uhl (d043530)
+ *
+ */
+public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Named, WithID {
 
     /**
      * @return the identifier of the race.
@@ -104,4 +111,19 @@ public interface ManagedRace extends ManagedRaceIdentifier, Named, WithID {
      * @return result object
      */
     Result setFinishingTime(TimePoint finishingTime);
+
+    /**
+     * @return
+     */
+    double getFactor();
+
+    /**
+     * @return factor
+     */
+    Double getExplicitFactor();
+
+    /**
+     * @param factor
+     */
+    void setExplicitFactor(Double factor);
 }

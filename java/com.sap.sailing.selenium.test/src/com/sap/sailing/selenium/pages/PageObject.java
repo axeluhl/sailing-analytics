@@ -5,13 +5,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
@@ -389,7 +393,53 @@ public class PageObject {
     
     protected void waitForAjaxRequestsExecuted(String category, int numberOfCalls, int timeout, int polling) {
         FluentWait<WebDriver> wait = createFluentWait(this.driver, timeout, polling);
-        
         wait.until(new AjaxCallsExecuted(category, numberOfCalls));
     }
+    
+    protected void waitForElement(String seleniumId) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(ExpectedConditions.presenceOfElementLocated(new BySeleniumId(seleniumId)));
+    }
+    
+    protected void waitUntil(Predicate<WebDriver> predicate) {
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        webDriverWait.until(predicate);
+    }
+    
+    protected void waitUntil(BooleanSupplier supplier) {
+        waitUntil((driver) -> supplier.getAsBoolean());
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id using the
+     * {@link WebDriver} as search context.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(SearchContext, String)
+     */
+    protected <T extends PageArea> T getPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(driver, seleniumId));
+    }
+    
+    /**
+     * Returns a {@link PageArea} instance representing the element with the specified selenium id in the search
+     * context of this page area.
+     * 
+     * @param supplier {@link PageAreaSupplier} used to instantiate the {@link PageArea}
+     * @param seleniumId the selenium id of the desired element
+     * @return {@link PageArea} representing the first matching element
+     * 
+     * @see #findElementBySeleniumId(String)
+     */
+    protected <T extends PageArea> T getChildPO(PageAreaSupplier<T> supplier, String seleniumId) {
+        return supplier.get(driver, findElementBySeleniumId(seleniumId));
+    }
+    
+    protected interface PageAreaSupplier<T extends PageArea> {
+        T get(WebDriver driver, WebElement element);
+    }
+    
 }

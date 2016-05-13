@@ -16,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -31,12 +32,14 @@ import com.sap.sailing.android.tracking.app.services.TrackingService.GPSQualityL
 import com.sap.sailing.android.tracking.app.services.TrackingService.TrackingBinder;
 import com.sap.sailing.android.tracking.app.ui.fragments.CompassFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.SpeedFragment;
-import com.sap.sailing.android.tracking.app.ui.fragments.StopTrackingButtonFragment;
 import com.sap.sailing.android.tracking.app.ui.fragments.TrackingFragment;
+import com.sap.sailing.android.tracking.app.ui.fragments.TrackingTimeFragment;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
@@ -69,7 +72,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText = "-";
+    public String lastSpeedIndicatorText;
     public String lastCompassIndicatorText = "-°";
 
     @Override
@@ -85,25 +88,24 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         }
         lastSpeedIndicatorText = getString(R.string.initial_hyphen);
 
-        setContentView(R.layout.fragment_hud_container);
+        setContentView(R.layout.activity_tracking);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         }
 
         if (getSupportActionBar() != null) {
-            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this,
-                    checkinDigest);
+            EventInfo eventInfo = DatabaseHelper.getInstance().getEventInfoWithLeaderboardAndCompetitor(this, checkinDigest);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
-            toolbar.setPadding(20, 0, 0, 0);
             getSupportActionBar().setTitle(eventInfo.leaderboardName);
             getSupportActionBar().setSubtitle(getString(R.string.tracking_colon) + " " + eventInfo.name);
+            if (toolbar != null) {
+                toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
+                toolbar.setPadding(20, 0, 0, 0);
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            }
         }
 
         // Instantiate a ViewPager and a PagerAdapter.
@@ -145,6 +147,14 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
             @Override
             public void onPageScrollStateChanged(int arg0) {
+            }
+        });
+
+        Button stopTracking = (Button) findViewById(R.id.stop_tracking);
+        stopTracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showStopTrackingConfirmationDialog();
             }
         });
 
@@ -237,7 +247,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }
@@ -332,7 +342,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         public final static int VIEW_PAGER_FRAGMENT_COMPASS = 1;
         public final static int VIEW_PAGER_FRAGMENT_SPEED = 2;
 
-        private StopTrackingButtonFragment stbFragment;
+        private TrackingTimeFragment trackingTimeFragment;
         private CompassFragment cFragment;
         private SpeedFragment sFragment;
 
@@ -343,8 +353,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         @Override
         public Fragment getItem(int position) {
             if (position == VIEW_PAGER_FRAGMENT_STOP_BUTTON) {
-                stbFragment = new StopTrackingButtonFragment();
-                return stbFragment;
+                trackingTimeFragment = new TrackingTimeFragment();
+                return trackingTimeFragment;
             } else if (position == VIEW_PAGER_FRAGMENT_COMPASS) {
                 cFragment = new CompassFragment();
                 return cFragment;
@@ -377,14 +387,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     public void showStopTrackingConfirmationDialog() {
-        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm)
-                .setMessage(R.string.do_you_really_want_to_stop_tracking).setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+        AlertDialog dialog = new AlertDialog.Builder(this).setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
+            .setIcon(android.R.drawable.ic_dialog_alert).setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        stopTracking();
-                    }
-                }).setNegativeButton(android.R.string.no, null).create();
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    stopTracking();
+                }
+            }).setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

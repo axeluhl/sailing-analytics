@@ -5,6 +5,7 @@ import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sse.common.TimePoint;
 
 public class CandidateImpl implements Candidate {
+    private static final long serialVersionUID = -4626280455738918911L;
     private final Waypoint w;
     private final TimePoint p;
     private final double probability;

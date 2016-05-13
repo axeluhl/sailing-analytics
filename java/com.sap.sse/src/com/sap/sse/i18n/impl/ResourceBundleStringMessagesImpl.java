@@ -26,7 +26,6 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
     @Override
     public String get(Locale locale, String messageKey, String... parameters) {
         String result = getResourceBundle(locale).getString(messageKey);
-        
         for (int i = 0; i < parameters.length; i++) {
             String target = MESSAGE_PARAMETER_START + i + MESSAGE_PARAMETER_END;
             result = result.replace(target, parameters[i]);

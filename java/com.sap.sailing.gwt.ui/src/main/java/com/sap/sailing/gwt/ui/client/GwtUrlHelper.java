@@ -19,4 +19,9 @@ public enum GwtUrlHelper implements UrlHelper {
         return URL.encode(decodedUrlString);
     }
 
+    @Override
+    public String encodeQueryString(String queryString) {
+        return URL.encodeQueryString(queryString);
+    }
+
 }

@@ -117,6 +117,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public TimePoint getFinishedTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -653,5 +658,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public IsManagedByCache<SharedDomainFactory> resolve(SharedDomainFactory domainFactory) {
         return this;
+    }
+
+    @Override
+    public void updateStartAndEndOfTracking() { 
     }
 }

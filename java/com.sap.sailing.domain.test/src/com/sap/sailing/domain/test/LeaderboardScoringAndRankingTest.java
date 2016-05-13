@@ -95,7 +95,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
-                /* medal */false, "testOneStartedRaceWithDifferentScores",
+                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -117,7 +117,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
-                /* medal */false, "testOneStartedRaceWithDifferentScores",
+                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -151,7 +151,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Default" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testColumnFactorInRegattaLeaderboard",
+                /* medal */false, /* medal */ 0, "testColumnFactorInRegattaLeaderboard",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -185,7 +185,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Yellow", "Blue" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
+                /* medal */false, /* medal */ 0, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -258,7 +258,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Yellow", "Blue" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
+                /* medal */false, /* medal */ 0, "testUnorderedGroupsWithOneGroupNotHavingRacedInAcolumn",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -319,7 +319,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "Yellow", "Blue" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testDiscardsForUnorderedGroupsWithOneGroupNotHavingRacedInAColumn",
+                /* medal */false, /* medal */ 0, "testDiscardsForUnorderedGroupsWithOneGroupNotHavingRacedInAColumn",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[]{2}); // one discard for two or more races
@@ -367,7 +367,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Default" }, /* final */2,
                 new String[] { "Gold", "Silver" },
-                /* medal */false, "testDiscardsForOrderedGroupsWithOneGroupNotHavingRacedInAColumn",
+                /* medal */false, /* medal */ 0, "testDiscardsForOrderedGroupsWithOneGroupNotHavingRacedInAColumn",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[]{2}); // one discard for two or more races
@@ -408,7 +408,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(10);
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1,
                 new String[] { "Default" },
-                /* medal */false, "testOneStartedRaceWithDifferentScoresAndDisqualification",
+                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScoresAndDisqualification",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         Series finalSeries;
@@ -447,7 +447,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         Regatta regatta = createRegatta(/* qualifying */1, new String[] { "Yellow", "Blue" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testDistributionAcrossQualifyingFleetsWithDifferentScores",
+                /* medal */false, /* medal */ 0, "testDistributionAcrossQualifyingFleetsWithDifferentScores",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -478,7 +478,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1, new String[] {
                 "Gold", "Silver" },
-                /* medal */false, "testSimpleLeaderboardWithHighPointScoringScheme",
+                /* medal */false, /* medal */ 0, "testSimpleLeaderboardWithHighPointScoringScheme",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("ESS40", /* typicallyStartsUpwind */false),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -521,7 +521,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         }
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */1, new String[] {
                 "Gold", "Silver" },
-                /* medal */false, "testDistributionAcrossFinalFleetsWithDifferentScores",
+                /* medal */false, /* medal */ 0, "testDistributionAcrossFinalFleetsWithDifferentScores",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -544,7 +544,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(20);
         List<Competitor> medal = competitors.subList(firstMedalCompetitorIndex, firstMedalCompetitorIndex+10);
         Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Default" }, /* final */ 1, new String[] { "Default" },
-                /* medal */ true, "testMedalTakesPrecedence",
+                /* medal */ true, /* medal */ 1, "testMedalTakesPrecedence",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint now = MillisecondsTimePoint.now();
@@ -574,7 +574,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     public void testLastRaceTakesPrecedenceWithHighPointLastBreaksTieScheme() throws NoWindException {
         List<Competitor> competitors = createCompetitors(20);
         Regatta regatta = createRegatta(/* qualifying */ 0, new String[] { "Default" }, /* final */ 2, new String[] { "Default" },
-                /* medal */ false, "testLastRaceTakesPrecedenceWithHighPointLastBreaksTieScheme",
+                /* medal */ false, /* medal */ 0, "testLastRaceTakesPrecedenceWithHighPointLastBreaksTieScheme",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */ true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_LAST_BREAKS_TIE));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -609,7 +609,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
         Competitor[] f3 = new Competitor[] { c[1], c[2], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
-                /* medal */ false, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
+                /* medal */ false, /* medal */ 0, "testTotalTimeNotCountedForRacesStartedLaterThanTimePointReqeusted",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         @SuppressWarnings("unchecked")
@@ -647,7 +647,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f2 = new Competitor[] { c[0], c[1], c[2] };
         Competitor[] f3 = new Competitor[] { c[1], c[2], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
-                /* medal */ false, "testTieBreakWithTwoVersusOneWins",
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTwoVersusOneWins",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3);
@@ -666,13 +666,47 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f5 = new Competitor[] { c[3], c[2], c[1], c[0] };
         Competitor[] f6 = new Competitor[] { c[3], c[2], c[1], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
-                /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5, f6);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
         assertTrue(rankedCompetitors.indexOf(c[0]) == rankedCompetitors.indexOf(c[1])-1);
+    }
+
+    /**
+     * Reported by Clemens Fackeldey:<p>
+     * 
+     * <pre>
+     *   GER2105: 8/6/(18,DNF)/10/9 => 33
+     *   GER2254: 6/10/9/8/(11) => 33
+     * </pre>
+     * GER2105 must rank better than GER2254 because while the scores are equal when including the discards and
+     * considering the discards and ordering the results from best to worst both have 6/8/9/10, the count-back
+     * shows that for the last race GER2254 scored worse in the last race (although that was discarded).
+     * But RRS A8.2 does not mention discards, so the last race score needs to be considered regardless of
+     * whether it was discarded.
+     */
+    @Test
+    public void testTieBreakByCountbackIncludesDiscards() throws NoWindException {
+        Competitor[] c = createCompetitors(18).toArray(new Competitor[0]);
+        Competitor GER2105 = c[0];
+        Competitor GER2254 = c[1];
+        Competitor[] f1 = new Competitor[] { c[ 7], c[ 5], c[2], c[3], c[4], c[1], c[6], c[0], c[8], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f2 = new Competitor[] { c[ 5], c[ 9], c[2], c[3], c[4], c[0], c[6], c[7], c[8], c[1], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f3 = new Competitor[] { c[17], c[ 8], c[2], c[3], c[4], c[5], c[6], c[7], c[1], c[9], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[0] };
+        Competitor[] f4 = new Competitor[] { c[ 9], c[ 7], c[2], c[3], c[4], c[5], c[6], c[1], c[8], c[0], c[10], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Competitor[] f5 = new Competitor[] { c[ 8], c[10], c[2], c[3], c[4], c[5], c[6], c[7], c[0], c[9], c[ 1], c[11], c[12], c[13], c[14], c[15], c[16], c[17] };
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
+                /* medal */ false, /* medal */ 0, "testTieBreakByCountbackIncludesDiscards",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3, f4, f5);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(33.0, leaderboard.getTotalPoints(GER2105, later), 0.0000001);
+        assertEquals(33.0, leaderboard.getTotalPoints(GER2254, later), 0.0000001);
+        assertTrue(rankedCompetitors.indexOf(GER2105) == rankedCompetitors.indexOf(GER2254)-1);
     }
 
     @Test
@@ -1082,7 +1116,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f5 = new Competitor[] { c[3], c[2], c[1], c[0] };
         Competitor[] f6 = new Competitor[] { c[3], c[2], c[1], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
-                /* medal */ false, "testTieBreakWithTwoVersusOneSeconds",
+                /* medal */ false, /* medal */ 0, "testTieBreakWithTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[] { 4 });
@@ -1136,7 +1170,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f2 = new Competitor[] { c[1], c[0] };
         Competitor[] m1 = new Competitor[] { c[0], c[1] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */2, new String[] { "Default" },
-                /* medal */ true, "testTieBreakWithTwoVersusOneSeconds",
+                /* medal */ true, /* medal */ 1, "testTieBreakByMedalRaceScoreOnlyIfEqualTotalScore",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
         TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2);
@@ -1149,6 +1183,32 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     @Test
+    public void testTieBreakByMedalRacesScoreOnlyIfEqualTotalScore() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        Competitor[] f1 = new Competitor[] { c[0], c[1], c[2], c[3]}; 
+        Competitor[] f2 = new Competitor[] { c[1], c[3], c[0], c[2]};
+        Competitor[] f3 = new Competitor[] { c[2], c[0], c[1], c[3]};
+        // points in series: c0 = 6, c1 = 6, c2 = 8, c3 = 12  
+        
+        Competitor[] m1 = new Competitor[] { c[1], c[0], c[2]};
+        Competitor[] m2 = new Competitor[] { c[0], c[2], c[1] };
+        Competitor[] m3 = new Competitor[] { c[1], c[0], c[3] };
+        // points in series: c0 = 10, c1 = 10, c2 = 16
+        
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */3, new String[] { "Default" },
+                /* medal */ true, /* medal */ 3, "testTieBreakByMedalRacesScoreOnlyIfEqualTotalScore",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("J/70", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint later = createAndAttachTrackedRaces(series.get(1), "Default", /* withScores */ true, f1, f2, f3);
+        createAndAttachTrackedRaces(series.get(2), "Medal", /* withScores */ true, m1, m2, m3);
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        // assert that both have equal score
+        assertEquals(leaderboard.getTotalPoints(c[0], later), leaderboard.getTotalPoints(c[1], later), 0.000000001);
+        // assert that c[1] ranks better than c[0] (reason: c[1] ranked better in medal race)
+        assertEquals(rankedCompetitors.indexOf(c[1]), rankedCompetitors.indexOf(c[0])-1);
+    }
+
+    @Test
     public void testTieBreakWithEqualWinsAndTwoVersusOneSeconds() throws NoWindException {
         Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
         Competitor[] f1 = new Competitor[] { c[2], c[0], c[1], c[3] }; // c[0] scores 16
@@ -1158,7 +1218,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f5 = new Competitor[] { c[0], c[2], c[1], c[3] };
         Competitor[] f6 = new Competitor[] { c[1], c[2], c[3], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
-                /* medal */ false, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
+                /* medal */ false, /* medal */ 0, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -1178,7 +1238,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         Competitor[] f5 = new Competitor[] { c[0], c[2], c[1], c[3] };
         Competitor[] f6 = new Competitor[] { c[1], c[2], c[3], c[0] };
         Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */6, new String[] { "Default" },
-                /* medal */ false, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
+                /* medal */ false, /* medal */ 0, "testTieBreakWithEqualWinsAndTwoVersusOneSeconds",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -1400,7 +1460,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         List<Competitor> competitors = createCompetitors(competitorsCount);
         Regatta regatta = createRegatta(/* qualifying */ 1, new String[] { "Fleet1", "Fleet2", "Fleet3" }, /* final */0,
                 new String[] { "Default" },
-                /* medal */false, "testHighPointScoringEightWithInterpolationWhenFleetNotComplete",
+                /* medal */false, /* medal */ 0, "testHighPointScoringEightWithInterpolationWhenFleetNotComplete",
                 DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_WINNER_GETS_EIGHT_AND_INTERPOLATION));
         Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
@@ -1545,6 +1605,65 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
         assertEquals(0., leaderboard1.getTotalPoints(c[0], beforeStartOfR1), 0.00000001); // not even the R1 scores apply before the start time of R1
     }
     
+    /**
+     * When a DNS score correction is made then both, the MaxPointsReason and the score shall apply at the start of the race.
+     */
+    @Test
+    public void testDNSScoreAppliesBeforeEndOfRace() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        final TimePoint endOfR1 = MillisecondsTimePoint.now();
+        final TimePoint withinR1 = endOfR1.minus(1000);
+        final TimePoint startOfR1 = withinR1.minus(10000);
+        final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
+        final TimePoint afterEndOfR1 = endOfR1.plus(1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new LowPoint(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(c)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return endOfR1;
+            }
+        }, "R1", /* medalRace */false);
+        leaderboard1.getScoreCorrection().correctScore(c[0], leaderboard1.getRaceColumnByName("R1"), 123.);
+        leaderboard1.getScoreCorrection().setMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), MaxPointsReason.DNS);
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
+        assertEquals(MaxPointsReason.DNS, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
+        assertNull(leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001);
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+    }
+    
+    /**
+     * When a DNS score correction is made then both, the MaxPointsReason and the score shall apply at the start of the race.
+     */
+    @Test
+    public void testDNFScoreDoesNotApplyBeforeEndOfRace() throws NoWindException {
+        Competitor[] c = createCompetitors(4).toArray(new Competitor[0]);
+        final TimePoint endOfR1 = MillisecondsTimePoint.now();
+        final TimePoint withinR1 = endOfR1.minus(1000);
+        final TimePoint startOfR1 = withinR1.minus(10000);
+        final TimePoint beforeStartOfR1 = startOfR1.minus(10000);
+        final TimePoint afterEndOfR1 = endOfR1.plus(1000);
+        FlexibleLeaderboard leaderboard1 = new FlexibleLeaderboardImpl("Leaderboard 1", new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new LowPoint(), null);
+        leaderboard1.addRace(new MockedTrackedRaceWithStartTimeAndRanks(startOfR1, Arrays.asList(c)) {
+            private static final long serialVersionUID = 8705622361027154428L;
+            public TimePoint getEndOfRace() {
+                return endOfR1;
+            }
+        }, "R1", /* medalRace */false);
+        leaderboard1.getScoreCorrection().correctScore(c[0], leaderboard1.getRaceColumnByName("R1"), 123.);
+        leaderboard1.getScoreCorrection().setMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), MaxPointsReason.DNF);
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(MaxPointsReason.NONE, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1));
+        assertEquals(MaxPointsReason.DNF, leaderboard1.getMaxPointsReason(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1));
+        assertNull(leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), beforeStartOfR1));
+        assertEquals(1.0, leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), withinR1), 0.00000001); // tracked rank is 1
+        assertEquals(123., leaderboard1.getNetPoints(c[0], leaderboard1.getRaceColumnByName("R1"), afterEndOfR1), 0.00000001);
+    }
+    
+
     /**
      * A test case for bug 1802. Competitors that didn't have a fleet (null fleet) were sorted to the end of the column even
      * if they had a score correction assigned.
@@ -1696,7 +1815,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
     }
 
     private Regatta createRegatta(final int numberOfQualifyingRaces, String[] qualifyingFleetNames, final int numberOfFinalRaces,
-            String[] finalFleetNames, boolean medalRaceAndSeries, final String regattaBaseName, BoatClass boatClass, ScoringScheme scoringScheme) {
+            String[] finalFleetNames, boolean medalRaceAndSeries, final int numberOfMedalRaces, final String regattaBaseName, BoatClass boatClass, ScoringScheme scoringScheme) {
         series = new ArrayList<Series>();
 
         // -------- qualifying series ------------
@@ -1709,7 +1828,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfQualifyingRaces; i++) {
                 qualifyingRaceColumnNames.add("Q" + i);
             }
-            Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, qualifyingFleets,
+            Series qualifyingSeries = new SeriesImpl("Qualifying", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualifyingFleets,
                     qualifyingRaceColumnNames, /* trackedRegattaRegistry */null);
             series.add(qualifyingSeries);
         }
@@ -1725,7 +1844,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfFinalRaces; i++) {
                 finalRaceColumnNames.add("F" + i);
             }
-            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(finalSeries);
         }
 
@@ -1734,8 +1853,14 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             List<Fleet> medalFleets = new ArrayList<Fleet>();
             medalFleets.add(new FleetImpl("Medal"));
             List<String> medalRaceColumnNames = new ArrayList<String>();
-            medalRaceColumnNames.add("M");
-            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            if(numberOfMedalRaces == 1) {
+                medalRaceColumnNames.add("M");
+            } else if(numberOfMedalRaces > 1) {
+                for (int i = 1; i <= numberOfMedalRaces; i++) {
+                    medalRaceColumnNames.add("M" + i);
+                }
+            }
+            Series medalSeries = new SeriesImpl("Medal", /* isMedal */true, /* isFleetsCanRunInParallel */ true, medalFleets, medalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(medalSeries);
         }
 
@@ -1774,7 +1899,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
                 } else {
                     roundName = "Round "+roundNumber;
                 }
-                Series seriesForRound = new SeriesImpl("E"+elimination+" "+roundName, /* isMedal */ false, fleetsInRound,
+                Series seriesForRound = new SeriesImpl("E"+elimination+" "+roundName, /* isMedal */ false, /* isFleetsCanRunInParallel */ true, fleetsInRound,
                         raceColumnNameForRound, /* trackedRegattaRegistry */null);
                 if (isFinalRound) {
                     // last "Final" round; here, the fleets are contiguously scored
@@ -1808,7 +1933,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = 1; i <= numberOfBeforeRaces; i++) {
                 beforeRaceColumnNames.add("R" + i);
             }
-            Series qualifyingSeries = new SeriesImpl("Before", /* isMedal */false, beforeFleets,
+            Series qualifyingSeries = new SeriesImpl("Before", /* isMedal */false, /* isFleetsCanRunInParallel */ true, beforeFleets,
                     beforeRaceColumnNames, /* trackedRegattaRegistry */null);
             series.add(qualifyingSeries);
         }
@@ -1820,7 +1945,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             }
             List<String> qualificationRaceColumnNames = new ArrayList<String>();
             qualificationRaceColumnNames.add("Q");
-            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series qualificationSeries = new SeriesImpl("Qualification", /* isMedal */false, /* isFleetsCanRunInParallel */ true, qualificationFleets, qualificationRaceColumnNames, /* trackedRegattaRegistry */ null);
             // discard the one and only qualification race; it doesn't score
             qualificationSeries.setResultDiscardingRule(new ThresholdBasedResultDiscardingRuleImpl(new int[] { 1 }));
             series.add(qualificationSeries);
@@ -1835,7 +1960,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             }
             List<String> finalRaceColumnNames = new ArrayList<String>();
             finalRaceColumnNames.add("F");
-            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("Final", /* isMedal */false, /* isFleetsCanRunInParallel */ true, finalFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             finalSeries.setSplitFleetContiguousScoring(true);
             series.add(finalSeries);
         }
@@ -1847,7 +1972,7 @@ public class LeaderboardScoringAndRankingTest extends AbstractLeaderboardTest {
             for (int i = numberOfBeforeRaces+1; i <= numberOfBeforeRaces+numberOfFinalRaces; i++) {
                 finalRaceColumnNames.add("R" + i);
             }
-            Series finalSeries = new SeriesImpl("After", /* isMedal */false, afterFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
+            Series finalSeries = new SeriesImpl("After", /* isMedal */false, /* isFleetsCanRunInParallel */ true, afterFleets, finalRaceColumnNames, /* trackedRegattaRegistry */ null);
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);

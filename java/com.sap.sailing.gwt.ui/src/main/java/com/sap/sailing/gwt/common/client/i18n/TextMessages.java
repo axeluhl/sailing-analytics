@@ -231,13 +231,5 @@ public interface TextMessages extends Messages {
 
     String impressum();
 
-    String playstoreCampaign();
 
-    String playstoreRacecommitteeApp();
-
-    String playstoreRacecommitteeBadge();
-
-    String appstoreStgTrainingstagebuch();
-
-    String appstoreBadgeSuffix();
 }

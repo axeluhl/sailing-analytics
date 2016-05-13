@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -45,16 +46,19 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      */
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
     
+    private final Duration initialTimeAfterRaceStartInReplayMode;
+    
     public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean chartSupportEnabled,
-            RegattaAndRaceIdentifier selectedRaceIdentifier) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, chartSupportEnabled);
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
         this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
         selectedRace = selectedRaceIdentifier;
+        this.initialTimeAfterRaceStartInReplayMode = initialTimeAfterRaceStartInReplayMode;
         if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
             raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
         }
@@ -280,7 +284,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         case Replay:
             // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
-                timer.setTime(newRaceTimesInfo.startOfRace.getTime());
+                timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
         }

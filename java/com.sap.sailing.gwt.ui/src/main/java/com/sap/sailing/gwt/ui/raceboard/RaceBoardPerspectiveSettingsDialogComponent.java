@@ -13,6 +13,7 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     private CheckBox showLeaderboardCheckBox; 
     private CheckBox showWindChartCheckBox; 
     private CheckBox showCompetitorsChartCheckBox;
+    private CheckBox showMapControlsCheckBox;
 
     private final StringMessages stringMessages;
     private final RaceBoardPerspectiveSettings initialSettings;
@@ -37,6 +38,10 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
         showCompetitorsChartCheckBox = dialog.createCheckbox(stringMessages.show() + " " + stringMessages.competitorCharts());
         showCompetitorsChartCheckBox.setValue(initialSettings.isShowCompetitorsChart());
         vp.add(showCompetitorsChartCheckBox);        
+
+        showMapControlsCheckBox = dialog.createCheckbox(stringMessages.show() + " map controls");
+        showMapControlsCheckBox.setValue(initialSettings.isShowMapControls());
+        vp.add(showMapControlsCheckBox);        
         
         return vp;
     }
@@ -45,7 +50,9 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     public RaceBoardPerspectiveSettings getResult() {
         RaceBoardPerspectiveSettings result = new RaceBoardPerspectiveSettings(initialSettings.getActiveCompetitorsFilterSetName(), 
                 showLeaderboardCheckBox.getValue(), showWindChartCheckBox.getValue(), showCompetitorsChartCheckBox.getValue(),
-                initialSettings.isSimulationEnabled(), initialSettings.isCanReplayDuringLiveRaces(), initialSettings.isChartSupportEnabled());
+                initialSettings.isSimulationEnabled(), initialSettings.isCanReplayDuringLiveRaces(), initialSettings.isChartSupportEnabled(),
+                showMapControlsCheckBox.getValue(), initialSettings.isShowChartMarkEditMediaButtonsAndVideo(), 
+                initialSettings.getInitialDurationAfterRaceStartInReplay());
         return result;
     }
     

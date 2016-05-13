@@ -1,7 +1,8 @@
 apply plugin: "com.android.application"
+apply plugin: 'com.getkeepsafe.dexcount'
 apply from: "../git.gradle"
 
-def packageName="com.sap.sailing.buoy.positioning.app"
+def packageName="com.sap.sailing.android.buoy.positioning.app"
 def verCode=1
 
 android {
@@ -22,7 +23,7 @@ android {
             manifest.srcFile "AndroidManifest.xml"
             java.srcDirs = ["src"]
             res.srcDirs = ["res"]
-            assets.srcDirs = ["assets"]
+            assets.srcDirs = ["assets", "assets_gen"]
         }
 
         androidTest {

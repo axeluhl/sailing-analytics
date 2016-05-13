@@ -13,6 +13,7 @@ import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProce
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedurePrerequisite.Resolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedurePrerequisiteAutoResolver;
 import com.sap.sailing.domain.base.CourseBase;
+import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
@@ -172,8 +173,14 @@ public interface RaceState extends ReadonlyRaceState {
 
     /**
      * Sets a new active course design.
+     * 
+     * @param courseDesignerMode
+     *            the type of course designer through which the course was created; this decides about whether the
+     *            waypoint specification will be considered at all. For example, the "By Marks" course designer does not
+     *            produce a valid waypoints list which therefore must be ignored instead of using it to update a
+     *            TrackedRace's course.
      */
-    void setCourseDesign(TimePoint now, CourseBase courseDesign);
+    void setCourseDesign(TimePoint now, CourseBase courseDesign, CourseDesignerMode courseDesignerMode);
 
     /**
      * Enters a new wind fix for this race.
