@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +81,7 @@ public class MarkPassingCalculator {
             listener = null;
         }
         this.race = race;
-        finder = new CandidateFinderImpl(race);
+        finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
         if (listen) {
             listenerThread = new Thread(new Listen(race.getRace().getName()), "MarkPassingCalculator for race " + race.getRace().getName());
@@ -88,9 +89,19 @@ public class MarkPassingCalculator {
             listenerThread = null;
         }
         Thread t = new Thread(() -> {
+            final Map<Competitor, Future<?>> futures = new HashMap<>();
             for (Competitor c : race.getRace().getCompetitors()) {
-                Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
-                chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+                futures.put(c, executor.submit(()->{
+                    Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
+                    chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
+                }));
+            }
+            for (final Entry<Competitor, Future<?>> competitorAndFuture : futures.entrySet()) {
+                try {
+                    competitorAndFuture.getValue().get();
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Error trying to compute mark passings for competitor "+competitorAndFuture.getKey(), e);
+                }
             }
             if (listen) {
                 listenerThread.setDaemon(true);
@@ -330,7 +341,7 @@ public class MarkPassingCalculator {
     }
 
     public void recalculateEverything() {
-        finder = new CandidateFinderImpl(race);
+        finder = new CandidateFinderImpl(race, executor);
         chooser = new CandidateChooserImpl(race);
         for (Competitor c : race.getRace().getCompetitors()) {
             Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);

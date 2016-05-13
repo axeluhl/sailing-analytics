@@ -13,6 +13,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -42,6 +50,7 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
@@ -133,9 +142,23 @@ public class CandidateFinderImpl implements CandidateFinder {
     private final double penaltyForSkipping = Edge.getPenaltyForSkipping();
     private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
     private final Comparator<Timed> comp = TimedComparator.INSTANCE;
-
+    
+    private final ExecutorService executor;
+    
+    /**
+     * Like {@link #CandidateFinderImpl(DynamicTrackedRace, ExecutorService)} but creates a default executor service
+     */
     public CandidateFinderImpl(DynamicTrackedRace race) {
+        this(race, new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
+                .getRuntime().availableProcessors() - 1, 3),
+                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
+                /* keepAliveTime */60, TimeUnit.SECONDS,
+                /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true)));
+    }
+
+    public CandidateFinderImpl(DynamicTrackedRace race, ExecutorService executor) {
         this.race = race;
+        this.executor = executor;
         this.timeRangeForValidCandidates = new TimeRangeImpl(
                 getTimePointWhenToStartConsideringCandidates(race.getStartOfRace(/* inferred */ false)),
                 getTimePointWhenToFinishConsideringCandidates(race.getFinishedTime()));
@@ -349,7 +372,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * second} element has those that have been removed.
      */
     private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
-        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
+        ConcurrentHashMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
         Course course = race.getRace().getCourse();
         for (Competitor c : race.getRace().getCompetitors()) {
             distanceCache.get(c).clear();
@@ -363,21 +386,31 @@ public class CandidateFinderImpl implements CandidateFinder {
                     changedWaypoints.add(w);
                 }
             }
+            final Map<Competitor, Future<?>> futures = new HashMap<>();;
             for (Competitor c : race.getRace().getCompetitors()) {
-                List<Candidate> badCans = new ArrayList<>();
-                List<Candidate> newCans = new ArrayList<>();
-                for (Waypoint w : changedWaypoints) {
-                    Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
-                    badCans.addAll(xteCans.values());
-                    xteCans.clear();
-                    Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
-                    badCans.addAll(distanceCans.values());
-                    distanceCans.clear();
+                futures.put(c, executor.submit(()->{
+                    List<Candidate> badCans = new ArrayList<>();
+                    List<Candidate> newCans = new ArrayList<>();
+                    for (Waypoint w : changedWaypoints) {
+                        Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
+                        badCans.addAll(xteCans.values());
+                        xteCans.clear();
+                        Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
+                        badCans.addAll(distanceCans.values());
+                        distanceCans.clear();
+                    }
+                    Set<GPSFix> allFixes = getAllFixes(c);
+                    newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+                    newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+                    result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                }));
+            }
+            for (final Entry<Competitor, Future<?>> e : futures.entrySet()) {
+                try {
+                    e.getValue().get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    logger.log(Level.SEVERE, "Couldn't compute new mark passing candidates for competitor "+e.getKey(), ex);
                 }
-                Set<GPSFix> allFixes = getAllFixes(c);
-                newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
-                newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
-                result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
             }
         } finally {
             course.unlockAfterRead();

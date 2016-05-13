@@ -117,7 +117,7 @@ public class MarkPassingUpdateListener extends AbstractRaceChangeListener {
                     List<Pair<Competitor, Integer>> removedMarkPassings,
                     List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser) {
                 addedWaypoints.add(waypointThatGotAdded);
-                if (smallestChangedWaypointIndex.value == -1|| smallestChangedWaypointIndex.value > zeroBasedIndex) {
+                if (smallestChangedWaypointIndex.value == -1 || smallestChangedWaypointIndex.value > zeroBasedIndex) {
                     smallestChangedWaypointIndex.value = zeroBasedIndex;
                 }
             }

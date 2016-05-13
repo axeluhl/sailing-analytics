@@ -190,7 +190,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     mButtonPathfinder.setVisibility(View.VISIBLE);
                 }
                 if (mButtonTiming != null) {
-                    mButtonTiming.setPanelText(RaceHelper.getGateTiming(getActivity(), typedProcedure));
+                    mButtonTiming.setPanelText(RaceHelper.getGateTiming(getActivity(), typedProcedure, getRace().getRaceGroup()));
                     mButtonTiming.setVisibility(View.VISIBLE);
                 }
             }
@@ -589,7 +589,7 @@ public class SetupPanelFragment extends BasePanelFragment {
                     break;
 
                 case LEVEL_TOGGLED:
-                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, getRace()));
+                    replaceFragment(CourseFragment.newInstance(BaseFragment.START_MODE_PLANNED, preferences));
                     break;
 
                 default:

@@ -6,15 +6,15 @@ import android.view.View;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.ui.layouts.HeaderLayout;
 
 public abstract class CourseFragment extends BaseFragment {
 
-    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, ManagedRace race) {
-        CourseDesignerMode mode = race.getState().getConfiguration().getDefaultCourseDesignerMode();
+    public static RaceFragment newInstance(@START_MODE_VALUES int startMode, AppPreferences preferences) {
+        CourseDesignerMode mode = preferences.getDefaultCourseDesignerMode();
 
         RaceFragment fragment;
         switch (mode) {

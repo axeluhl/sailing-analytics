@@ -1586,4 +1586,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String current();
     String simulationLegendAlgorithmTimedOutText();
     String simulationLegendMixedLegText();
+    String noTracksFound();
 }

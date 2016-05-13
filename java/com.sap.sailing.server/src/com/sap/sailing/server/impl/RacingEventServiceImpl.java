@@ -579,7 +579,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        /* workQueue */new LinkedBlockingQueue<Runnable>(),  new ThreadFactoryWithPriority(
+                Thread.NORM_PRIORITY, /* daemon */true));
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
