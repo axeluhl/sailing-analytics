@@ -804,14 +804,10 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void setStartTimeReceived(TimePoint startTimeReceived) {
         if (!Util.equalsWithNull(startTimeReceived, getStartTimeReceived())) {
-            TimePoint oldStartOfRace = getStartOfRace();
             super.setStartTimeReceived(startTimeReceived);
             notifyListenersStartTimeReceivedChanged(getStartTimeReceived());
-            TimePoint newStartOfRace = getStartOfRace();
-            if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
-                notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
-            }
         }
+        invalidateStartTime();
     }
 
     @Override
