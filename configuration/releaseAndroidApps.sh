@@ -118,3 +118,8 @@ $JCWB_CHANGE_REQUEST_ID_GIT_TAG"
 if [ "$PERFORM_GIT_OPERATIONS" = "1" ]; then
   git push $GIT_REMOTE $ANDROID_RELEASE_BRANCH:refs/for/$RELEASE_BRANCH
 fi
+
+echo "Now go to https://git.wdf.sap.corp/#/dashboard/self and vote on your change, using the \"Reply\" button."
+echo "Remove the pMiosVoter because it has nothing good to say on Android. Then \"Submit\" your change to merge it to $RELEASE_BRANCH."
+echo "After successful merge, launch a customer stage build here: https://xmake-ldi.wdf.sap.corp:8443/view/SAPSail/job/sapsailingcapture-Release/"
+echo "When done, create a BCP update ticket. See https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Patch+Releases (remove the saprole parameter from the URL)
