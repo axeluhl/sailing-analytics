@@ -19,7 +19,6 @@ import com.sap.sse.i18n.impl.NullResourceBundleStringMessages;
  * </pre>
  */
 public interface ResourceBundleStringMessages {
-    
     public static final ResourceBundleStringMessages NULL = new NullResourceBundleStringMessages();
 
     public String getResourceBaseName();
@@ -28,7 +27,6 @@ public interface ResourceBundleStringMessages {
     public String get(Locale locale, String messageKey, String... parameters);
     
     public static final class Util {
-        
         private static final Locale FALLBACK_LOCALE = Locale.ROOT;
         public static final Control CONTROL = new Control() {
             @Override
@@ -44,7 +42,5 @@ public interface ResourceBundleStringMessages {
         
         private Util () {
         }
-        
     }
-
 }
