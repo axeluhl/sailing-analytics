@@ -901,69 +901,75 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
         return result;
     }
-    
+
+    private final Object updateStartOfRaceCacheFieldsMonitor = new Object();
     private void updateStartOfRaceCacheFields() {
-        // no cache match; re-calculate
-        for (RaceLog raceLog : attachedRaceLogs.values()) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
-            }
-            startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
-            if (startTime != null) {
-                startTimeWithoutInferenceFromStartMarkPassings = startTime;
+        synchronized (updateStartOfRaceCacheFieldsMonitor) {
+            TimePoint newStartTime = null;
+            TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
+            for (RaceLog raceLog : attachedRaceLogs.values()) {
                 if (logger.isLoggable(Level.FINEST)) {
-                    logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
+                    logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 }
-                break;
+                newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
+                if (newStartTime != null) {
+                    newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
+                    if (logger.isLoggable(Level.FINEST)) {
+                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
+                    }
+                    break;
+                }
             }
-        }
-        if (startTime == null) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("No start time found in race logs for race "+getRace().getName());
-            }
-            startTime = getStartTimeReceived();
-            if (startTime != null) {
-                startTimeWithoutInferenceFromStartMarkPassings = startTime;
-            }
-            // If not null, check if the first mark passing for the start line is too much after the
-            // startTimeReceived; if so, return an adjusted, later start time.
-            // If no official start time was received, try to estimate the start time using the mark passings for
-            // the start line.
-            final Waypoint firstWaypoint;
-            if (getTrackedRegatta().getRegatta().useStartTimeInference() && (firstWaypoint = getRace().getCourse().getFirstWaypoint()) != null) {
-                // in this "if" branch update only startTime, not startTimeWithoutInferenceFromStartMarkPassings
-                if (startTimeReceived != null) {
-                    // plausibility check for start time received, based on start mark passings; if no boat started within
-                    // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
-                    // received then the startTimeReceived is believed to be wrong
-                    TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
-                    if (timeOfFirstMarkPassing != null) {
-                        long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
-                                - startTimeReceived.asMillis();
-                        if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                            startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
-                                    - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
-                            if (logger.isLoggable(Level.FINEST)) {
-                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+            if (newStartTime == null) {
+                if (logger.isLoggable(Level.FINEST)) {
+                    logger.finest("No start time found in race logs for race "+getRace().getName());
+                }
+                newStartTime = getStartTimeReceived();
+                if (newStartTime != null) {
+                    newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
+                }
+                // If not null, check if the first mark passing for the start line is too much after the
+                // startTimeReceived; if so, return an adjusted, later start time.
+                // If no official start time was received, try to estimate the start time using the mark passings for
+                // the start line.
+                final Waypoint firstWaypoint;
+                if (getTrackedRegatta().getRegatta().useStartTimeInference() && (firstWaypoint = getRace().getCourse().getFirstWaypoint()) != null) {
+                    // in this "if" branch update only startTime, not startTimeWithoutInferenceFromStartMarkPassings
+                    if (startTimeReceived != null) {
+                        // plausibility check for start time received, based on start mark passings; if no boat started within
+                        // a grace period of MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS after the start time
+                        // received then the startTimeReceived is believed to be wrong
+                        TimePoint timeOfFirstMarkPassing = getFirstPassingTime(firstWaypoint);
+                        if (timeOfFirstMarkPassing != null) {
+                            long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
+                                    - startTimeReceived.asMillis();
+                            if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
+                                newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                        - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
+                                }
+                            } else {
+                                newStartTime = startTimeReceived;
+                                if (logger.isLoggable(Level.FINEST)) {
+                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
+                                }
                             }
-                        } else {
-                            startTime = startTimeReceived;
-                            if (logger.isLoggable(Level.FINEST)) {
-                                logger.finest("Using start mark received for race "+this.getRace().getName()+": "+startTime);
+                        }
+                    } else {
+                        final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
+                        if (markPassingsForFirstWaypointInOrder != null) {
+                            newStartTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
+                                    getRace().getCompetitors());
+                            if (newStartTime != null && logger.isLoggable(Level.FINEST)) {
+                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
                             }
                         }
                     }
-                } else {
-                    final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
-                    if (markPassingsForFirstWaypointInOrder != null) {
-                        startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
-                                getRace().getCompetitors());
-                        if (startTime != null && logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
-                        }
-                    }
                 }
             }
+            startTime = newStartTime;
+            startTimeWithoutInferenceFromStartMarkPassings = newStartTimeWithoutInferenceFromStartMarkPassings;
         }
     }
 
