@@ -503,9 +503,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String competitorRegattaDataAfterRaceN(String detailType, String raceColumnName);
     String showRankChart();
     String rankChart();
-    String totalPoints();
-    String raceTotalPointsTooltip();
-    String regattaTotalPointsTooltip();
+    String netPoints();
+    String raceNetPointsTooltip();
+    String regattaNetPointsTooltip();
     String overallLeaderboardSelection();
     String errorTryingToObtainOverallLeaderboards(String message);
     String finished();
@@ -591,7 +591,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String sailIdColumnTooltip();
     String rankColumnTooltip();
     String carryColumnTooltip();
-    String totalsColumnTooltip();
+    String totalNetPointsColumnTooltip();
     String windData();
     String gpsData();
     String status();
@@ -625,7 +625,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String correctScore();
     String correctScoreFor(String competitorName, String raceColumnName);
     String penaltyOrRedress();
-    String netScore();
+    String totalScore();
     String timePointMustBeAfterStartOfTracking();
     String timePointMustBeBeforeEndOfTracking();
     String regattaUsedForTheTrackedRace();
@@ -1143,7 +1143,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String racesScored();
     String racesScoredTooltip();
     String averageNumberOfOperationsPerMessage();
-    String showUncorrectedNetPoints();
+    String showUncorrectedTotalPoints();
     String setStartTimeReceived();
     String setStartTimeReceivedDescription();
     String lastScoreCorrectionsTime();
@@ -1591,4 +1591,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String current();
     String simulationLegendAlgorithmTimedOutText();
     String simulationLegendMixedLegText();
+    String noTracksFound();
 }

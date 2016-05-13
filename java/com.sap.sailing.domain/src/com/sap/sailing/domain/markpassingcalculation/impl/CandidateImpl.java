@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation.impl;
 
+import java.util.Comparator;
+
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sse.common.TimePoint;
@@ -10,12 +12,14 @@ public class CandidateImpl implements Candidate {
     private final TimePoint p;
     private final double probability;
     private final Integer oneBasedIndexOfWaypoint;
+    private final Comparator<TimePoint> nullSafeTimePointComparator;
 
     public CandidateImpl(int oneBasedIndexOfWaypoint, TimePoint p, double probability, Waypoint w) {
         this.w = w;
         this.p = p;
         this.probability = probability;
         this.oneBasedIndexOfWaypoint = oneBasedIndexOfWaypoint;
+        this.nullSafeTimePointComparator = Comparator.nullsLast(Comparator.naturalOrder());
     }
 
     @Override
@@ -52,7 +56,7 @@ public class CandidateImpl implements Candidate {
     public int compareTo(Candidate arg0) {
         return getOneBasedIndexOfWaypoint() != arg0.getOneBasedIndexOfWaypoint() ? Integer.valueOf(
                 getOneBasedIndexOfWaypoint()).compareTo(arg0.getOneBasedIndexOfWaypoint())
-                : getTimePoint() != arg0.getTimePoint() ? getTimePoint().compareTo(arg0.getTimePoint()) : getProbability().compareTo(
-                        arg0.getProbability());
+                : getTimePoint() != arg0.getTimePoint() ? nullSafeTimePointComparator.compare(getTimePoint(), arg0.getTimePoint()) :
+                    getProbability().compareTo(arg0.getProbability());
     }
 }

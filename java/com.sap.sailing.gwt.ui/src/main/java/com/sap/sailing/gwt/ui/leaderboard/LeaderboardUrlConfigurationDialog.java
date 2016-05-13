@@ -181,10 +181,10 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             urlSettingsContent.add(chartDetailListBox);
             if (leaderboardType.isMetaLeaderboard()) {
                 chartDetailListBox.addItem(DetailType.OVERALL_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_NET_POINTS_SUM.name());
             } else {
                 chartDetailListBox.addItem(DetailType.REGATTA_RANK.name());
-                chartDetailListBox.addItem(DetailType.REGATTA_TOTAL_POINTS_SUM.name());
+                chartDetailListBox.addItem(DetailType.REGATTA_NET_POINTS_SUM.name());
             }
             chartDetailListBox.setSelectedIndex(0);
             
