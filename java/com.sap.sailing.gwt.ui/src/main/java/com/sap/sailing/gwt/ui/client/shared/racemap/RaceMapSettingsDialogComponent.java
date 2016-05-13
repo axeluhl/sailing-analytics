@@ -268,6 +268,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
         result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
+        result.setShowMapControls(initialSettings.isShowMapControls());
         if (isSimulationEnabled) {
             result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
         } else {

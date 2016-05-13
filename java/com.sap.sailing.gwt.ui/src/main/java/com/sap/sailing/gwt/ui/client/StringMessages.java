@@ -1542,6 +1542,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String dragToChangePosition();
     String moveFix();
     String raceViewer();
+    String mapControls();
     String manage2SailEvent();
     String noEventsYet();
     String selectResultImportProvider();
