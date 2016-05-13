@@ -13,10 +13,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -382,13 +381,17 @@ public class CandidateFinderImpl implements CandidateFinder {
         course.lockForRead();
         try {
             for (Waypoint w : course.getWaypoints()) {
+                // The candidates for the predecessor of the first waypoint added/removed are also affected
+                // because their adjacent leg will have changed its direction, so roundings / passings have
+                // to be decided differently
+                // TODO but why are *all* subsequent waypoints "invalidated" this way? Wouldn't we by that same token only have to move to the successor of the last waypoint changed?
                 if (course.getIndexOfWaypoint(w) > zeroBasedIndexOfWaypointChanged - 2) {
                     changedWaypoints.add(w);
                 }
             }
-            final Map<Competitor, Future<?>> futures = new HashMap<>();;
+            final Set<Callable<Void>> tasks = new HashSet<>();;
             for (Competitor c : race.getRace().getCompetitors()) {
-                futures.put(c, executor.submit(()->{
+                tasks.add(()->{
                     List<Candidate> badCans = new ArrayList<>();
                     List<Candidate> newCans = new ArrayList<>();
                     for (Waypoint w : changedWaypoints) {
@@ -403,15 +406,13 @@ public class CandidateFinderImpl implements CandidateFinder {
                     newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
                     newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
                     result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
-                }));
+                    return null;
+                });
             }
-            for (final Entry<Competitor, Future<?>> e : futures.entrySet()) {
-                try {
-                    e.getValue().get();
-                } catch (InterruptedException | ExecutionException ex) {
-                    logger.log(Level.SEVERE, "Couldn't compute new mark passing candidates for competitor "+e.getKey(), ex);
-                }
-            }
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
+                    zeroBasedIndexOfWaypointChanged+" have changed", e);
         } finally {
             course.unlockAfterRead();
         }
