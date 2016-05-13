@@ -5,10 +5,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,25 +79,13 @@ public class TestI18N {
     
     @Test
     public void testGetLocaleForLocaleInfoName() {
-        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("default"), is(Locale.ENGLISH));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("default"), is(Locale.forLanguageTag("default")));
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("en"), is(Locale.ENGLISH));
         assertThat(ResourceBundleStringMessages.Util.getLocaleFor("de"), is(Locale.GERMAN));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("zh"), is(Locale.CHINESE));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("ja"), is(Locale.JAPANESE));
 
-        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ENGLISH));
-    }
-    
-    @Test
-    public void testGetSupportedLocales() {
-        Set<Locale> supportedLocales = new HashSet<>();
-        for (Locale locale : ResourceBundleStringMessages.Util.getSupportedLocales()) {
-            supportedLocales.add(locale);
-        }
-        
-        Set<Locale> expectedSupportedLocales = new HashSet<>();
-        expectedSupportedLocales.add(Locale.GERMAN);
-        expectedSupportedLocales.add(Locale.ENGLISH);
-        
-        assertThat(supportedLocales, is(expectedSupportedLocales));
+        assertThat(ResourceBundleStringMessages.Util.getLocaleFor("Unsupported locale info name"), is(Locale.ROOT));
     }
     
     @Test(expected=MissingResourceException.class)

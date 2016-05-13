@@ -1,8 +1,7 @@
 package com.sap.sse.i18n;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
+import java.util.ResourceBundle.Control;
 
 import com.sap.sse.i18n.impl.NullResourceBundleStringMessages;
 
@@ -29,31 +28,18 @@ public interface ResourceBundleStringMessages {
     public String get(Locale locale, String messageKey, String... parameters);
     
     public static final class Util {
-
-        private static boolean supportedLocalesHaveBeenInitialized = false;
-        private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
-        private static final Map<String, Locale> supportedLocalesMappedByLocaleInfo = new HashMap<>();
-
-        public static Locale getLocaleFor(String localeInfoName) {
-            Locale locale = getSupportedLocalesMap().get(localeInfoName);
-            return locale != null ? locale : DEFAULT_LOCALE;
-        }
         
-        public static Iterable<Locale> getSupportedLocales() {
-            return getSupportedLocalesMap().values();
-        }
-        
-        private static Map<String, Locale> getSupportedLocalesMap() {
-            if (!supportedLocalesHaveBeenInitialized) {
-                initializeSupportedLocales();
+        private static final Locale FALLBACK_LOCALE = Locale.ROOT;
+        public static final Control CONTROL = new Control() {
+            @Override
+            public Locale getFallbackLocale(String baseName, Locale locale) {
+                if (baseName == null) throw new NullPointerException();
+                return locale.equals(FALLBACK_LOCALE) ? null : FALLBACK_LOCALE;
             }
-            return supportedLocalesMappedByLocaleInfo;
-        }
+        };
         
-        private static void initializeSupportedLocales() {
-            supportedLocalesMappedByLocaleInfo.put("en", Locale.ENGLISH);
-            supportedLocalesMappedByLocaleInfo.put("de", Locale.GERMAN);
-            supportedLocalesHaveBeenInitialized = true;
+        public static Locale getLocaleFor(String localeInfoName) {
+            return Locale.forLanguageTag(localeInfoName);
         }
         
         private Util () {
