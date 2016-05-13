@@ -60,7 +60,7 @@ public class MillisecondsDurationImpl implements Duration {
 
     @Override
     public double asHours() {
-        return asMillis() / Duration.ONE_HOUR.asMillis();
+        return ((double) asMillis()) / (double) Duration.ONE_HOUR.asMillis();
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -100,6 +102,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -225,6 +228,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The calculated race end time
      */
     private TimePoint endTime;
+    
+    /**
+     * The time set by race management ("Blue Flag Down" event) for when the race has finished. This field caches what
+     * today comes from the {@link RaceLog}s in the form of {@link RaceLogRaceStatusEvent}s setting the status to
+     * {@link RaceLogRaceStatus#FINISHED} and is computed by the {@link DynamicTrackedRaceLogListener#getFinishedTime()}
+     * method based on the {@link RaceState}s it manages for all the {@link RaceLog}s currently attached to this race.
+     */
+    private TimePoint finishedTime;
 
     /**
      * The first and last passing times of all course waypoints
@@ -972,6 +983,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return endTime;
     }
 
+    @Override
+    public TimePoint getFinishedTime() {
+        return finishedTime;
+    }
+    
+    protected void setFinishedTime(final TimePoint newFinishedTime) {
+        finishedTime = newFinishedTime;
+    }
+    
     private TimePoint getLastPassingOfFinishLine() {
         TimePoint passingTime = null;
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
@@ -1956,7 +1976,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
     }
     
-    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad){
+    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
         TimePoint inferedStartOfTracking = getStartOfTracking();
         if (!Util.equalsWithNull(oldStartOfTracking, inferedStartOfTracking) &&
                 (inferedStartOfTracking == null || (oldStartOfTracking != null && inferedStartOfTracking.before(oldStartOfTracking)))) {
@@ -1979,9 +1999,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
     
-    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad){
+    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
         TimePoint inferedEndOfTracking = getEndOfTracking();
-
         if (!Util.equalsWithNull(oldEndOfTracking, inferedEndOfTracking) &&
                 (inferedEndOfTracking == null || (oldEndOfTracking != null && inferedEndOfTracking.after(oldEndOfTracking)))) {
             logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferedEndOfTracking);

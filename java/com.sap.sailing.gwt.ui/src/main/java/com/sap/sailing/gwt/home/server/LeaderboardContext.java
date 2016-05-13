@@ -93,12 +93,12 @@ public class LeaderboardContext {
                 int raceCount = 0;
                 if(row.fieldsByRaceColumnName != null) {
                     for(LeaderboardEntryDTO lbEntry : row.fieldsByRaceColumnName.values()) {
-                        if(lbEntry.totalPoints != null) {
+                        if(lbEntry.netPoints != null) {
                             raceCount++;
                         }
                     }
                 }
-                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.totalPoints, raceCount));
+                result.addItem(new MiniLeaderboardItemDTO(new SimpleCompetitorDTO(competitor), rank, row.netPoints, raceCount));
                 if (limit > 0 && rank >= limit) break;
             }
             result.setTotalCompetitorCount(leaderboardDTO.competitors.size());

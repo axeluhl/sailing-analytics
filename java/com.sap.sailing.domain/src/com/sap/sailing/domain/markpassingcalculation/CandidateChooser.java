@@ -9,12 +9,12 @@ import com.sap.sse.common.TimePoint;
 
 public interface CandidateChooser {
     /**
-     * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace}.
+     * Calculates any new {@link MarkPassing}s and notifies the {@link DynamicTrackedRace} using the
+     * {@link DynamicTrackedRace#updateMarkPassings(Competitor, Iterable)} method.
      * 
      * @param candidateDeltas
      *            new {@link CandidateImpl}s and those that should be removed.
      */
-
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans);
 
     void removeWaypoints(Iterable<Waypoint> ways);

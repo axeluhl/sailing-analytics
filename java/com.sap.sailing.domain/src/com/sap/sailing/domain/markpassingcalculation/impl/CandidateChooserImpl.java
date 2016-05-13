@@ -56,7 +56,7 @@ public class CandidateChooserImpl implements CandidateChooser {
      * leg the candidates that require more distance than the minimum distance required receive an increasing penalty.
      * The maximum penalty for finishing candidates that have required
      * {@link #MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH} times the leg distance is expressed by
-     * this consttant.
+     * this constant.
      */
     private static final double PENALTY_FOR_LATEST_FINISH_PASSING = 0.95;
 
@@ -103,7 +103,6 @@ public class CandidateChooserImpl implements CandidateChooser {
      * {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the race start time or <code>null</code>
      * in case the race start time is not known.
      */
-    
     private final CandidateWithSettableTime start;
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
@@ -561,7 +560,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
 
-    private class CandidateWithSettableTime extends CandidateImpl {
+    private static class CandidateWithSettableTime extends CandidateImpl {
+        private static final long serialVersionUID = -1792983349299883266L;
         private TimePoint variableTimePoint;
         
         public CandidateWithSettableTime(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
@@ -579,7 +579,8 @@ public class CandidateChooserImpl implements CandidateChooser {
         }
     }
 
-    private class CandidateWithSettableWaypointIndex extends CandidateImpl {
+    private static class CandidateWithSettableWaypointIndex extends CandidateImpl {
+        private static final long serialVersionUID = 5868551535609781722L;
         private int variableOneBasedWaypointIndex;
         
         public CandidateWithSettableWaypointIndex(int oneBasedIndexOfWaypoint, TimePoint p, double distanceProbability, Waypoint w) {
