@@ -33,6 +33,7 @@ public class TestI18N {
     @Test
     public void testGettingASimpleMessage() {
         assertThat(testStringMessages.get(DEFAULT_LOCALE, SIMPLE_TEST_MESSAGE_KEY), is("English"));
+        assertThat(testStringMessages.get(Locale.ROOT, SIMPLE_TEST_MESSAGE_KEY), is("English"));
         assertThat(testStringMessages.get(Locale.ENGLISH, SIMPLE_TEST_MESSAGE_KEY), is("English"));
         assertThat(testStringMessages.get(Locale.GERMAN, SIMPLE_TEST_MESSAGE_KEY), is("Deutsch"));
     }
@@ -40,6 +41,7 @@ public class TestI18N {
     @Test
     public void testGettingADefaultMessage() {
         assertThat(testStringMessages.get(DEFAULT_LOCALE, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
+        assertThat(testStringMessages.get(Locale.ROOT, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
         assertThat(testStringMessages.get(Locale.ENGLISH, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
         assertThat(testStringMessages.get(Locale.GERMAN, DEFAULT_TEST_MESSAGE_KEY), is("Default"));
     }
@@ -47,6 +49,7 @@ public class TestI18N {
     @Test
     public void testGettingAMessageWithParameters() {
         assertThat(testStringMessages.get(DEFAULT_LOCALE, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
+        assertThat(testStringMessages.get(Locale.ROOT, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(testStringMessages.get(Locale.ENGLISH, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("English Param0 - Param1"));
         assertThat(testStringMessages.get(Locale.GERMAN, TEST_MESSAGE_WITH_PARAMETERS, "Param0", "Param1"), is("Deutsch Param0 - Param1"));
     }
