@@ -47,4 +47,5 @@
     <color name="gray">#333333</color>
     <color name="colorPrimary">@color/gray</color>
     <color name="yellow_button_pressed">#D6B363</color>
+    <color name="yellow_button_disabled">#7fEEAA29</color>
 </resources>

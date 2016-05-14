@@ -154,7 +154,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 timePointAndResultStateAndMaxCompetitorsCount.getA(), Collections.<String> emptyList(), /* addOverallDetails */
                 false, getService(), getService().getBaseDomainFactory(),
-                /* fillNetPointsUncorrected */false);
+                /* fillTotalPointsUncorrected */false);
 
         TimePoint resultTimePoint = timePointAndResultStateAndMaxCompetitorsCount.getA();
         ResultStates resultState = timePointAndResultStateAndMaxCompetitorsCount.getB();
@@ -183,7 +183,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
             jsonCompetitor.put("rank", counter);
             jsonCompetitor.put("carriedPoints", leaderboardRowDTO.carriedPoints);
-            jsonCompetitor.put("totalPoints", leaderboardRowDTO.totalPoints);
+            jsonCompetitor.put("netPoints", leaderboardRowDTO.netPoints);
             jsonCompetitorEntries.add(jsonCompetitor);
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
@@ -197,9 +197,9 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("netPoints", leaderboardEntry.netPointsCorrected);
-                jsonEntry.put("uncorrectedNetPoints", leaderboardEntry.netPoints);
-                jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
+                jsonEntry.put("totalPoints", leaderboardEntry.totalPointsCorrected);
+                jsonEntry.put("uncorrectedTotalPoints", leaderboardEntry.totalPoints);
+                jsonEntry.put("netPoints", leaderboardEntry.netPoints);
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
                 jsonEntry.put("maxPointsReason", maxPointsReason != null ? maxPointsReason.toString() : null);
                 jsonEntry.put("rank", regattaRankedCompetitorsForColumn.indexOf(competitor) + 1);
@@ -236,7 +236,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
             jsonCompetitor.put("rank", 0);
             jsonCompetitor.put("carriedPoints", null);
-            jsonCompetitor.put("totalPoints", null);
+            jsonCompetitor.put("netPoints", null);
             jsonCompetitorEntries.add(jsonCompetitor);
             JSONObject jsonRaceColumns = new JSONObject();
             jsonCompetitor.put("raceScores", jsonRaceColumns);
@@ -245,8 +245,8 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
                 jsonRaceColumns.put(raceColumn.getName(), jsonEntry);
                 final Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("netPoints", null);
                 jsonEntry.put("totalPoints", null);
+                jsonEntry.put("netPoints", null);
                 jsonEntry.put("maxPointsReason", "");
                 jsonEntry.put("rank", 0);
                 jsonEntry.put("isDiscarded", false);
@@ -380,6 +380,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         }
         final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
+        // TODO alternatively, check for a markId here and then produce a RegattaLogDeviceMarkMappingEventImpl
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         Long fromMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_FROM_MILLIS);
 

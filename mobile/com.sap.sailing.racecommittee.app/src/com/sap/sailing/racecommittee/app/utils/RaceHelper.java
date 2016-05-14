@@ -177,11 +177,11 @@ public class RaceHelper {
         return fleetName;
     }
 
-    public static String getGateTiming(Context context, GateStartRacingProcedure procedure) {
+    public static String getGateTiming(Context context, GateStartRacingProcedure procedure, RaceGroup raceGroup) {
         String timing;
         long launchTime = procedure.getGateLaunchStopTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
         long golfTime = procedure.getGolfDownTime() / GateStartTimingFragment.ONE_MINUTE_MILLISECONDS;
-        if (AppPreferences.on(context).getGateStartHasAdditionalGolfDownTime()) {
+        if (AppPreferences.on(context, PreferenceHelper.getRegattaPrefFileName(raceGroup.getName())).getGateStartHasAdditionalGolfDownTime()) {
             timing = context.getString(R.string.gate_time_schedule_long, launchTime, golfTime, launchTime + golfTime);
         } else {
             timing = context.getString(R.string.gate_time_schedule_short, launchTime);

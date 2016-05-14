@@ -291,18 +291,18 @@ public class ImportMasterDataOperation extends
                     RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
                     RaceLog currentPersistedLog = mongoRaceLogStore.getRaceLog(identifier, true);
                     if (currentPersistedLog.isEmpty()) {
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     } else if (override) {
                         // Clear existing race log
                         mongoRaceLogStore.removeRaceLog(identifier);
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     }
                 }
             }
         }
     }
 
-    private void addAllmportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
+    private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
             RaceLog log, RaceLogIdentifier identifier) {
         RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);

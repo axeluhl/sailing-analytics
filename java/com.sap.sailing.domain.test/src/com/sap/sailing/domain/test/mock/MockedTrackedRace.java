@@ -106,6 +106,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
+    public TimePoint getFinishedTime() {
+        return null;
+    }
+
+    @Override
     public Iterable<TrackedLeg> getTrackedLegs() {
         return null;
     }
@@ -534,7 +539,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
             }
 
             @Override
-            public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+            public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
                 return 0;
             }
 
@@ -1040,6 +1045,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime) {
+    public void setFinishedTime(TimePoint newFinishedTime) {
     }
 }

@@ -37,7 +37,7 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
     @Before
     public void setUp() {
         competitor = createCompetitor("Test Competitor");
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.singleton(competitor), MillisecondsTimePoint.now());
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.singleton(competitor), MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     
     @Test

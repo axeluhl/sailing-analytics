@@ -4,6 +4,7 @@ import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sse.common.TimePoint;
 
 public abstract class CandidateWithSide extends CandidateImpl {
+    private static final long serialVersionUID = -1670977291984975178L;
     private final double onCorrectSideOfWaypoint;
     private final Double startProbabilityBasedOnOtherCompetitors;
 
