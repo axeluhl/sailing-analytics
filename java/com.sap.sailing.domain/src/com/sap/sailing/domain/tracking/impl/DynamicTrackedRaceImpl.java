@@ -307,13 +307,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void invalidateStartTime() {
-        TimePoint oldStartOfRace = getStartOfRace();
+        final TimePoint oldStartOfRace = getStartOfRace();
         super.invalidateStartTime();
-        TimePoint newStartOfRace = getStartOfRace();
-        if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
-            notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
+        if (!Util.equalsWithNull(oldStartOfRace, getStartOfRace())) {
+            notifyListenersStartOfRaceChanged(oldStartOfRace, getStartOfRace());
         }
-        updateStartAndEndOfTracking();
     }
 
     @Override
@@ -646,8 +644,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         try {
             Map<Waypoint, MarkPassing> oldMarkPassings = new HashMap<Waypoint, MarkPassing>();
             MarkPassing oldStartMarkPassing = null;
-            TimePoint oldStartOfRace = getStartOfRace(); // getStartOfRace() may respond with a new result already after
-                                                         // updating the mark passings
             boolean requiresStartTimeUpdate = true;
             final NavigableSet<MarkPassing> markPassingsForCompetitor = getMarkPassings(competitor);
             lockForRead(markPassingsForCompetitor);
@@ -726,16 +722,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             triggerManeuverCacheRecalculation(competitor);
             // update the race times like start, end and the leg times
             if (requiresStartTimeUpdate) {
-                TimePoint interimsStartOfRace = getStartOfRace();
                 invalidateStartTime();
-                TimePoint newStartOfRace = getStartOfRace();
-                if (Util.equalsWithNull(interimsStartOfRace, newStartOfRace)
-                        && !Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
-                    // invalidateStartTime() will not have thrown a startOfRaceChanged event notification because it
-                    // already saw the new
-                    // start of race time; we have to throw the notification here:
-                    notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
-                }
             }
             invalidateMarkPassingTimes();
             invalidateEndTime();
@@ -817,13 +804,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void setStartTimeReceived(TimePoint startTimeReceived) {
         if (!Util.equalsWithNull(startTimeReceived, getStartTimeReceived())) {
-            TimePoint oldStartOfRace = getStartOfRace();
             super.setStartTimeReceived(startTimeReceived);
             notifyListenersStartTimeReceivedChanged(getStartTimeReceived());
-            TimePoint newStartOfRace = getStartOfRace();
-            if (!Util.equalsWithNull(oldStartOfRace, newStartOfRace)) {
-                notifyListenersStartOfRaceChanged(oldStartOfRace, newStartOfRace);
-            }
         }
     }
 

@@ -212,7 +212,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     }
 
     private void analyzeStartTime(TimePoint startTimeProvidedByEvent) {
-        /* start time will be set by StartTimeFinder in TrackedRace.getStartTime() */
+        /* start time will be set by StartTimeFinder in TrackedRace.getStartOfRace() */
         trackedRace.invalidateStartTime();
         TimePoint startTime = null;
         for (RaceLog raceLog : raceLogs.keySet()) {

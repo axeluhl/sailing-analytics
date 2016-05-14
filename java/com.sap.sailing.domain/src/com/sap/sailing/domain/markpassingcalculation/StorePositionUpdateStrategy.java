@@ -20,8 +20,6 @@ public interface StorePositionUpdateStrategy {
     /**
      * Adds its fix either to <code>competitorFixes</code> or <code>markFixes</code>, depending what the fix is for. If
      * no fixes exist yet for that object, a new entry is created.
-     * @param candidateFinder TODO
-     * @param candidateChooser TODO
      */
     void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
             List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,

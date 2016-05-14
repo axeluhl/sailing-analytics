@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
@@ -19,8 +20,6 @@ public interface CandidateChooser {
 
     void removeWaypoints(Iterable<Waypoint> ways);
 
-    void addWaypoints(Iterable<Waypoint> waypoints);
-
     void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t);
 
     void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint);
@@ -29,5 +28,9 @@ public interface CandidateChooser {
 
     void stopSuppressingMarkPassings(Competitor c);
 
-
+    /**
+     * Updates the end proxy node's waypoint index according to the current course. Precondition:
+     * the caller holds the {@link Course}'s read lock.
+     */
+    void updateEndProxyNodeWaypointIndex();
 }
