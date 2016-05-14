@@ -902,7 +902,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-    private final Object updateStartOfRaceCacheFieldsMonitor = new Object();
+    /**
+     * monitor for {@link #updateStartOfRaceCacheFields()}; has to be serializable, therefore {@link String}
+     * and not {@link Object}.
+     */
+    private final String updateStartOfRaceCacheFieldsMonitor = "";
     private void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;
