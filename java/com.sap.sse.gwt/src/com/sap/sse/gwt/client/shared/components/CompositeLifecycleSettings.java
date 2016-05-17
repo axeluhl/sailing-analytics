@@ -5,7 +5,7 @@ import com.sap.sse.common.settings.Settings;
 
 /**
  * @author Frank
- *
+ * 
  */
 public class CompositeLifecycleSettings extends AbstractSettings {
     private final Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponentLifecycle;
