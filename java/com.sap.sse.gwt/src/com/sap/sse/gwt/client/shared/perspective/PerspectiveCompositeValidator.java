@@ -10,6 +10,14 @@ import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveAndDialogComponent;
 
+/**
+ * @author Frank
+ *
+ * @param <P>
+ *      the type of the perspective
+ * @param <PS>
+ *      the type of the perspective settings
+ **/
 public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends Settings>
     implements Validator<PerspectiveCompositeSettings<PS>> {
     

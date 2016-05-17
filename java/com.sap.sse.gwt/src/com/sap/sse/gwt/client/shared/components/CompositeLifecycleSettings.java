@@ -3,6 +3,10 @@ package com.sap.sse.gwt.client.shared.components;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 
+/**
+ * @author Frank
+ *
+ */
 public class CompositeLifecycleSettings extends AbstractSettings {
     private final Iterable<ComponentLifecycleAndSettings<?,?>> settingsPerComponentLifecycle;
 

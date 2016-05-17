@@ -4,7 +4,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 
 /** 
- * A perspective and it's composite settings 
+ * A utility class to combine a {@link Perspective} and it's composite settings 
  * @param <PS>
  *      the {@link Perspective} settings type
  */

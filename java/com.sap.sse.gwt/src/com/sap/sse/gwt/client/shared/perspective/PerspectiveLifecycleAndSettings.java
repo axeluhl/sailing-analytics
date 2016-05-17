@@ -3,11 +3,12 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.sap.sse.common.settings.Settings;
 
 /**
- * The class combining the PerspectiveLifecycle and the settings of the corresponding Perspective (not the composite settings)
- * @author Frank
- *
+ * A utility class to combine the {@link PerspectiveLifecycle} and the settings of the corresponding {@link Perspective} (not the composite settings)
  * @param <PL>
+ *      the {@link PerspectiveLifecycle} type
  * @param <PS>
+ *      the {@link Perspective} composite settings type
+ * @author Frank
  */
 public class PerspectiveLifecycleAndSettings<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings> {
     private final PL perspectiveLifecycle;

@@ -6,23 +6,27 @@ import com.sap.sse.common.settings.Settings;
 
 /** 
  * A perspective and it's perspective specific settings 
- **/
-public class PerspectiveAndSettings<SettingsType extends Settings> implements Serializable {
+ *
+ * @param <PS>
+ *      the perspective settings type
+ * @author Frank Mittag
+ */
+public class PerspectiveAndSettings<PS extends Settings> implements Serializable {
     private static final long serialVersionUID = -6750964868964305325L;
 
-    private final Perspective<SettingsType> perspective;
-    private final SettingsType settings;
+    private final Perspective<PS> perspective;
+    private final PS settings;
     
-    public PerspectiveAndSettings(Perspective<SettingsType> perspective, SettingsType settings) {
+    public PerspectiveAndSettings(Perspective<PS> perspective, PS settings) {
         this.perspective = perspective;
         this.settings = settings;
     }
 
-    public Perspective<SettingsType> getPerspective() {
+    public Perspective<PS> getPerspective() {
         return perspective;
     }
 
-    public SettingsType getSettings() {
+    public PS getSettings() {
         return settings;
     }
 }

@@ -15,6 +15,14 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * @author Frank
+ *
+ * @param <P>
+ *      the type of the Perspective
+ * @param <PS>
+ *      the type of the Perspective settings
+ **/
 public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspective<PS>, PS extends Settings>
     implements SettingsDialogComponent<PerspectiveCompositeSettings<PS>> {
     

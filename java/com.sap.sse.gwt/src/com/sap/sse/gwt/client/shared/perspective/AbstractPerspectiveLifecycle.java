@@ -10,7 +10,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * An abstract base class for perspective lifecycles.
+ * An abstract base class for perspective lifecycle's.
  * @param <PS>
  *            the perspective settings type
  * @param <PCS>

@@ -11,6 +11,7 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTa
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialogComponent.PerspectiveLifecycleWithSettingsAndDialogComponent;
 
 /**
+ * A validator for the composite settings of a perspective based on the perspective lifecycle. 
  * @author Frank
  *
  * @param <PL>

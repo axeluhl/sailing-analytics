@@ -11,7 +11,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * An abstract base class for perspectives with a widget.
+ * An abstract base class for a {@link Perspective} with a widget.
  * 
  * @author Frank Mittag
  *
