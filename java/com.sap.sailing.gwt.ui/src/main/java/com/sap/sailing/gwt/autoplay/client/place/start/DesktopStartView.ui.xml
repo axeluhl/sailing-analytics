@@ -48,11 +48,11 @@
         
         <div ui:field="screenConfigurationUi">
 			<div class="{res.mediaCss.grid} {style.row} {style.headline}">
-				<div class="{res.mediaCss.columns}">Player settings</div>
+				<div class="{res.mediaCss.columns}"><ui:text from='{i18n.autoplaySettings}' /></div>
 			</div>			
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Start browser in full screen mode:</span>
+				    <span><ui:text from='{i18n.startBrowserFullscreen}' />:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:CheckBox ui:field="startInFullscreenModeBox" />
@@ -60,7 +60,7 @@
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>Switch automatically to live race:</span>
+				    <span><ui:text from='{i18n.switchToLiveRaceAutomatically}' />:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:CheckBox ui:field="autoSwitchToRaceboard" />
@@ -68,7 +68,7 @@
 			</div>
 			<div class="{res.mediaCss.grid} {style.row}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large3} {res.mediaCss.columns}">
-				    <span>...when to start is less than (in s):</span>
+				    <span><ui:text from='{i18n.timeBeforeRaceStart}' />:</span>
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
 					<g:IntegerBox ui:field="timeToRaceStartInSeconds" />
@@ -101,7 +101,7 @@
 				    &nbsp;
 		        </div>
 			    <div class="{res.mediaCss.small12} {res.mediaCss.medium6} {res.mediaCss.large9} {res.mediaCss.columns}">
-		    		<g:Button ui:field="startAutoPlayButton" text="Start autoplay" styleName="{res.mainCss.button}" />
+		    		<g:Button ui:field="startAutoPlayButton" text="{i18n.startAutoplay}" styleName="{res.mainCss.button}" />
 			    </div>
 			</div>
 		</div>

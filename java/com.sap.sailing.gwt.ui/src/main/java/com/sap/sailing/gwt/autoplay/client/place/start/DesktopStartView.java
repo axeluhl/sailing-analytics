@@ -78,7 +78,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.eventBus = eventBus;
         this.events = new ArrayList<EventDTO>();
         
-        sapHeader = new SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(), "Autoplayer configuration");
+        sapHeader = new SAPHeaderWithAuthentication(StringMessages.INSTANCE.sapSailingAnalytics(), StringMessages.INSTANCE.autoplayConfiguration());
         eventSelectionBox = new ListBox();
         eventSelectionBox.setMultipleSelect(false);
         leaderboardSelectionBox = new ListBox();
@@ -143,7 +143,7 @@ public class DesktopStartView extends Composite implements StartView {
         this.events.clear();
         this.events.addAll(events);
         
-        eventSelectionBox.addItem("Please select an event");
+        eventSelectionBox.addItem(StringMessages.INSTANCE.pleaseSelectAnEvent());
         for(EventDTO event: events) {
             eventSelectionBox.addItem(event.getName());
         }
@@ -154,7 +154,7 @@ public class DesktopStartView extends Composite implements StartView {
         EventDTO selectedEvent = getSelectedEvent();
         if(selectedEvent != null) {
             leaderboardSelectionBox.clear();
-            leaderboardSelectionBox.addItem("Please select a leaderboard");
+            leaderboardSelectionBox.addItem(StringMessages.INSTANCE.selectALeaderboard());
             for(LeaderboardGroupDTO leaderboardGroup: selectedEvent.getLeaderboardGroups()) {
                 for(StrippedLeaderboardDTO leaderboard: leaderboardGroup.getLeaderboards()) {
                     leaderboardSelectionBox.addItem(leaderboard.name);

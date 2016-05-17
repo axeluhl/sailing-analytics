@@ -1208,6 +1208,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String editSeries();
     String pleaseSelectAtLeastOneRegatta();
     String pleaseSelectAnEvent();
+    String selectALeaderboard();
+    String autoplayConfiguration();
+    String startAutoplay();
+    String autoplaySettings();
+    String startBrowserFullscreen();
+    String switchToLiveRaceAutomatically();
+    String timeBeforeRaceStart();
     String showXYDiagram();
     String xyDiagram();
     String boatSpeed();
@@ -1542,6 +1549,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String dragToChangePosition();
     String moveFix();
     String raceViewer();
+    
+    
     String mapControls();
     String manage2SailEvent();
     String noEventsYet();
