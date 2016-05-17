@@ -515,7 +515,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                         });
                         for (TracTracConfigurationDTO config : result) {
                             TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config);
-                            TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
+                            TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
                         }
                         
                         if (!result.isEmpty()) {
@@ -575,7 +575,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                                                         liveDataURI, storedDataURI, courseDesignUpdateURI, tractracUsername, tractracPassword);
                                                 
                                                 if (TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config) == null) {
-                                                    TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name);
+                                                    TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);
                                                 }
                                             }
                                         }));
@@ -626,19 +626,16 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private void updatePanelFromSelectedStoredConfiguration() {
         int index = connectionsHistoryListBox.getSelectedIndex();
-
-        if (index == -1)
-            return;
-        
-        String configurationKey = connectionsHistoryListBox.getItemText(index);
-        TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
-
-        jsonURLTextBox.setValue(config.jsonURL);
-        liveURITextBox.setValue(config.liveDataURI);
-        storedURITextBox.setValue(config.storedDataURI);
-        tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
-        tractracUsernameTextBox.setValue(config.tractracUsername);
-        tractracPasswordTextBox.setValue(config.tractracPassword);
+        if (index != -1) {        
+            String configurationKey = connectionsHistoryListBox.getValue(index);
+            TracTracConfigurationDTO config = previousConfigurations.get(configurationKey);
+            jsonURLTextBox.setValue(config.jsonURL);
+            liveURITextBox.setValue(config.liveDataURI);
+            storedURITextBox.setValue(config.storedDataURI);
+            tracTracUpdateURITextBox.setValue(config.courseDesignUpdateURI);
+            tractracUsernameTextBox.setValue(config.tractracUsername);
+            tractracPasswordTextBox.setValue(config.tractracPassword);
+        }
     }
 
 }

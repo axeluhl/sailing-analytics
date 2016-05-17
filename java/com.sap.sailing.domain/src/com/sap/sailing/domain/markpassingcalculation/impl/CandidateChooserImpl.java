@@ -184,12 +184,11 @@ public class CandidateChooserImpl implements CandidateChooser {
                 currentMarkPasses.get(c).remove(w);
             }
         }
-        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()-Util.size(waypoints));
     }
     
     @Override
-    public void addWaypoints(Iterable<Waypoint> waypoints) {
-        end.setOneBasedWaypointIndex(end.getOneBasedIndexOfWaypoint()+Util.size(waypoints));
+    public void updateEndProxyNodeWaypointIndex() {
+        end.setOneBasedWaypointIndex(race.getRace().getCourse().getNumberOfWaypoints()+1);
     }
 
     @Override

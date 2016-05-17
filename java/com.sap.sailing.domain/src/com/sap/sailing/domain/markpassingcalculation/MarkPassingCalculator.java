@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -89,19 +89,18 @@ public class MarkPassingCalculator {
             listenerThread = null;
         }
         Thread t = new Thread(() -> {
-            final Map<Competitor, Future<?>> futures = new HashMap<>();
+            final Set<Callable<Void>> tasks = new HashSet<>();
             for (Competitor c : race.getRace().getCompetitors()) {
-                futures.put(c, executor.submit(()->{
+                tasks.add(()->{
                     Util.Pair<Iterable<Candidate>, Iterable<Candidate>> allCandidates = finder.getAllCandidates(c);
                     chooser.calculateMarkPassDeltas(c, allCandidates.getA(), allCandidates.getB());
-                }));
+                    return null;
+                });
             }
-            for (final Entry<Competitor, Future<?>> competitorAndFuture : futures.entrySet()) {
-                try {
-                    competitorAndFuture.getValue().get();
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error trying to compute mark passings for competitor "+competitorAndFuture.getKey(), e);
-                }
+            try {
+                executor.invokeAll(tasks);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error trying to compute initial set of mark passings for race "+race.getRace().getName(), e);
             }
             if (listen) {
                 listenerThread.setDaemon(true);
@@ -195,14 +194,30 @@ public class MarkPassingCalculator {
                         }
                         if (!finished && !suspended) {
                             if (smallestChangedWaypointIndex.value != -1) {
-                                Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas = finder
-                                        .updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex.value);
-                                chooser.removeWaypoints(removedWaypoints);
-                                chooser.addWaypoints(addedWaypoints);
-                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
-                                    Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
-                                    chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                final Course course = race.getRace().getCourse();
+                                final Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> candidateDeltas;
+                                // obtain the course's read lock so that the finder creates the candidate deltas under the
+                                // premise of the same course as the chooser updates its end proxy node's index; they have
+                                // to be consistent. See also bug 3657.
+                                course.lockForRead();
+                                try {
+                                    candidateDeltas = finder.updateWaypoints(addedWaypoints, removedWaypoints, smallestChangedWaypointIndex.value);
+                                    chooser.updateEndProxyNodeWaypointIndex();
+                                } finally {
+                                    course.unlockAfterRead();
                                 }
+                                if (!removedWaypoints.isEmpty()) {
+                                    chooser.removeWaypoints(removedWaypoints);
+                                }
+                                Set<Callable<Void>> tasks = new HashSet<>();
+                                for (Entry<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> entry : candidateDeltas.entrySet()) {
+                                    tasks.add(()->{
+                                        Util.Pair<List<Candidate>, List<Candidate>> pair = entry.getValue();
+                                        chooser.calculateMarkPassDeltas(entry.getKey(), pair.getA(), pair.getB());
+                                        return null;
+                                    });
+                                }
+                                executor.invokeAll(tasks);
                             }
                             updateManuallySetMarkPassings(fixedMarkPassings, removedFixedMarkPassings, suppressedMarkPassings,
                                     unsuppressedMarkPassings);
