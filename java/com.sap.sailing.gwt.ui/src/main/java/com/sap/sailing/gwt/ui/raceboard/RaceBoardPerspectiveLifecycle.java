@@ -70,16 +70,21 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> createDefaultSettings() {
-        return null;
+        PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings = 
+                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());  
+        
+        return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
     }
 
     @Override
     public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> cloneSettings(
             PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> settings) {
-////    return new RaceBoardPerspectiveSettings(settings.getActiveCompetitorsFilterSetName(), settings.isShowLeaderboard(),
-////    settings.isShowWindChart(), settings.isShowCompetitorsChart(), settings.isSimulationEnabled(), settings.isCanReplayDuringLiveRaces(),
-////    settings.isChartSupportEnabled());
-        return null;
+        throw new UnsupportedOperationException("Method not implemented yet.");
+    }
+
+    @Override
+    public RaceBoardPerspectiveSettings createPerspectiveDefaultSettings() {
+        return new RaceBoardPerspectiveSettings();
     }
 
     @Override

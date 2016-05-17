@@ -4,7 +4,7 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 
 /**
- * A class keeping together a {@link PerspectiveLifecycle} and all it's component settings together with the corresponding ComponentLifecycle's 
+ * A utility class keeping together a {@link PerspectiveLifecycle} and all it's component settings together with the corresponding ComponentLifecycle's 
  *
  * @param <PL>
  *            the type of the perspective lifecycle

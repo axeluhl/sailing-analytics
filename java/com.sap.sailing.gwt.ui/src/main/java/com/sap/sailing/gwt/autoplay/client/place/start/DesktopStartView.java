@@ -37,11 +37,9 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.event.LocaleChangeEvent;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialog;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
@@ -117,24 +115,10 @@ public class DesktopStartView extends Composite implements StartView {
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        LeaderboardWithHeaderPerspectiveSettings leaderboardPerspectiveSettings = new LeaderboardWithHeaderPerspectiveSettings();
-        
-        CompositeLifecycleSettings leaderboardPerspectiveComponentsLifecyclesAndSettings = leaderboardPerspectiveLifecycle.getComponentLifecyclesAndDefaultSettings();
-        PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> leaderboardPerspectiveLifecycleAndSettings = 
-                new PerspectiveLifecycleAndSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveSettings);  
-        
-        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle,
-                new PerspectiveCompositeLifecycleSettings<>(leaderboardPerspectiveLifecycleAndSettings,leaderboardPerspectiveComponentsLifecyclesAndSettings));
+        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle,leaderboardPerspectiveLifecycle.createDefaultSettings());
         
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        RaceBoardPerspectiveSettings raceboardPerspectiveSettings = new RaceBoardPerspectiveSettings(); 
-
-        CompositeLifecycleSettings raceboardPerspectiveComponentsLifecyclesAndSettings = raceboardPerspectiveLifecycle.getComponentLifecyclesAndDefaultSettings();
-        PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecycleAndSettings =
-                new PerspectiveLifecycleAndSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveSettings);
-
-        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
-                new PerspectiveCompositeLifecycleSettings<>(raceboardPerspectiveLifecycleAndSettings,raceboardPerspectiveComponentsLifecyclesAndSettings));
+        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,raceboardPerspectiveLifecycle.createDefaultSettings());
     }
 
     private <PL extends PerspectiveLifecycle<PS,?,?>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL,PS> perspectiveLifecycleAndSettings) {

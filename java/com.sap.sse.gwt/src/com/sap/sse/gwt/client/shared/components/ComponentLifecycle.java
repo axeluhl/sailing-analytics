@@ -26,7 +26,7 @@ public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDial
     String getLocalizedShortName();
     
     /**
-     * @return whether this component has settings that a user may change. 
+     * @return true if the component has settings that a user may change. 
      */
     boolean hasSettings();
 

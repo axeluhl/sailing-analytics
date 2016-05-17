@@ -28,9 +28,8 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS exte
     public AbstractPerspectiveLifecycle() {
         componentLifecycles = new ArrayList<>();
     }
-    
-    @Override
-    public CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
+
+    protected CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings() {
         List<ComponentLifecycleAndSettings<?,?>> lifecyclesAndSettings = new ArrayList<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
             lifecyclesAndSettings.add(createComponentLifecycleAndSettings(componentLifecycle));

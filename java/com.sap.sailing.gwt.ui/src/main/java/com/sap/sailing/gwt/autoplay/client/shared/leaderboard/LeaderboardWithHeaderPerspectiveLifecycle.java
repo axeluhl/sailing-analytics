@@ -48,15 +48,21 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
 
     @Override
     public PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
-        // TODO Auto-generated method stub
-        return null;
+        PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleAndSettings = 
+                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());  
+        
+        return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
+    }
+
+    @Override
+    public LeaderboardWithHeaderPerspectiveSettings createPerspectiveDefaultSettings() {
+        return new LeaderboardWithHeaderPerspectiveSettings();
     }
 
     @Override
     public PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> cloneSettings(
             PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> settings) {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
     @Override

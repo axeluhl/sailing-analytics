@@ -2,7 +2,6 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -20,7 +19,7 @@ public interface PerspectiveLifecycle<PS extends Settings, PCS extends Perspecti
     
     Iterable<ComponentLifecycle<?,?>> getComponentLifecycles();
     
-    CompositeLifecycleSettings getComponentLifecyclesAndDefaultSettings();
-
+    PS createPerspectiveDefaultSettings();
+    
     SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS settings);
 }
