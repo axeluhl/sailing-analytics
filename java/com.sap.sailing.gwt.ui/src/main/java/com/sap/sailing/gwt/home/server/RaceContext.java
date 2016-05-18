@@ -525,7 +525,7 @@ public class RaceContext {
         RaceTrackingState trackingState = RaceTrackingState.NOT_TRACKED;
         if (trackedRace != null) {
             trackingState = RaceTrackingState.TRACKED_NO_VALID_DATA;
-            if (trackedRace.hasWindData() && trackedRace.hasGPSData()) {
+            if (trackedRace.hasGPSData()) {
                 trackingState = RaceTrackingState.TRACKED_VALID_DATA;
             }
         }
