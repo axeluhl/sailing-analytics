@@ -54,7 +54,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
 
     /**
-     * tests the precedence order described in {@link TrackedRaceImpl#updateStartAndEndOfTracking()}
+     * tests the precedence order described in {@link TrackedRaceImpl#updateStartAndEndOfTracking(boolean)}
      */
     @Test
     public void testStartTimeInferencePrecedenceOrder() throws TransformationException,
@@ -79,7 +79,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
         
-        //test inference via race start/end time in racelog
+        // test inference via race start/end time in racelog
         trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
         MillisecondsTimePoint startOfRaceInRaceLog = new MillisecondsTimePoint(10000);
         TimePoint expectedStartOfTracking = startOfRaceInRaceLog.minus(Duration.ONE_MINUTE.times(TrackedRaceImpl.TRACKING_BUFFER_IN_MINUTES));
@@ -88,30 +88,29 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         assertEquals(expectedStartOfTracking, trackedRace.getStartOfTracking());
         assertEquals(expectedEndOfTracking, trackedRace.getEndOfTracking());
         
-        
-        //test inference via manually set start/end of tracking
+        // test inference via manually set start/end of tracking
         setManualTrackingTimesOnTrackedRace(trackedRace, 30000, 40000);
         assertEquals(new MillisecondsTimePoint(30000), trackedRace.getStartOfTracking());
         assertEquals(new MillisecondsTimePoint(40000), trackedRace.getEndOfTracking());
         
-        //shouldn't change when setting time in raceLog again
+        // shouldn't change when setting time in raceLog again
         setStartAndEndOfRaceInRaceLog(100000, 200000);
         assertEquals(new MillisecondsTimePoint(30000), trackedRace.getStartOfTracking());
         assertEquals(new MillisecondsTimePoint(40000), trackedRace.getEndOfTracking());
         
-        //test inference via start/end of tracking in RaceLog
+        // test inference via start/end of tracking in RaceLog
         setStartAndEndOfTrackingInRaceLog(50000, 60000);
         MillisecondsTimePoint startOfTrackingInRacelog = new MillisecondsTimePoint(50000);
         MillisecondsTimePoint endOfTrackingInRacelog = new MillisecondsTimePoint(60000);
         assertEquals(startOfTrackingInRacelog, trackedRace.getStartOfTracking());
         assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
         
-        //shouldn't change when setting time in raceLog again
+        // shouldn't change when setting time in raceLog again
         setStartAndEndOfRaceInRaceLog(300000, 400000);
         assertEquals(startOfTrackingInRacelog, trackedRace.getStartOfTracking());
         assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
         
-        //shouldn't change when setting start/end of tracking
+        // shouldn't change when setting start/end of tracking
         setManualTrackingTimesOnTrackedRace(trackedRace, 500000, 600000);
         assertEquals(startOfTrackingInRacelog, trackedRace.getStartOfTracking());
         assertEquals(endOfTrackingInRacelog, trackedRace.getEndOfTracking());
@@ -195,7 +194,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
     
     
     /**
-     * tests the precedence order described in {@link TrackedRaceImpl#updateStartAndEndOfTracking()}
+     * tests the precedence order described in {@link TrackedRaceImpl#updateStartAndEndOfTracking(boolean)}
      */
     @Test
     public void testStartAndEndTrackingTimeInferencePrecedenceOrderTriggersListener() throws TransformationException,
@@ -211,6 +210,7 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
+        assertTrue(regatta.getRegatta().useStartTimeInference());
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
@@ -227,16 +227,37 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
                 newStartAndEndOfTrackingNotifiedByRace[1] = endOfTracking;
             }
         });
-        
-        // TODO test inference from startOfRace / raceFinished which may change through all sorts of other events
         assertNull(trackedRace.getStartOfTracking());
         assertNull(trackedRace.getEndOfTracking());
+
+        // test inference from implicit startOfRace change through start mark passing update
+        newStartAndEndOfTrackingNotifiedByRace[0] = null;
+        newStartAndEndOfTrackingNotifiedByRace[1] = null;
+        final TimePoint startMarkPassingTimePoint = MillisecondsTimePoint.now();
+        trackedRace.updateMarkPassings(comp, Collections.singleton(new MarkPassingImpl(startMarkPassingTimePoint, trackedRace.getRace().getCourse().getFirstWaypoint(), comp)));
+        assertNotNull(newStartAndEndOfTrackingNotifiedByRace[0]);
+        assertTrue(trackedRace.getStartOfTracking().before(startMarkPassingTimePoint));
+        assertTrue(trackedRace.getStartOfTracking().after(new MillisecondsTimePoint(123456)));
+
+        // test inference from finished time change by new blue flag down event
+        newStartAndEndOfTrackingNotifiedByRace[0] = null;
+        newStartAndEndOfTrackingNotifiedByRace[1] = null;
+        final TimePoint finishedTimePoint = MillisecondsTimePoint.now();
+        raceLog.add(new RaceLogRaceStatusEventImpl(finishedTimePoint, finishedTimePoint, author, UUID.randomUUID(), 0, RaceLogRaceStatus.FINISHED));
+        assertNotNull(newStartAndEndOfTrackingNotifiedByRace[1]);
+        assertTrue(trackedRace.getEndOfTracking().after(finishedTimePoint));
+
+        // verify that setting a start and finished time through the race log adjusts the start/end of tracking times
+        newStartAndEndOfTrackingNotifiedByRace[0] = null;
+        newStartAndEndOfTrackingNotifiedByRace[1] = null;
         setStartAndEndOfRaceInRaceLog(123456, 234567);
         assertNotNull(trackedRace.getStartOfTracking());
         assertNotNull(trackedRace.getEndOfTracking());
         assertTrue(trackedRace.getStartOfTracking().before(new MillisecondsTimePoint(123456)));
         assertTrue(trackedRace.getEndOfTracking().after(new MillisecondsTimePoint(234567)));
         
+        newStartAndEndOfTrackingNotifiedByRace[0] = null;
+        newStartAndEndOfTrackingNotifiedByRace[1] = null;
         setManualTrackingTimesOnTrackedRace(trackedRace, 1111, 2222); // wrong values; race log should take precedence when available
         // assert that the event listener was triggered
         assertEquals(new MillisecondsTimePoint(1111), newStartAndEndOfTrackingNotifiedByRace[0]);

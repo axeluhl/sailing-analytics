@@ -338,12 +338,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
-        trackedRace.updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
-        trackedRace.updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
 
     @Override

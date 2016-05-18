@@ -416,7 +416,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         if (!Util.equalsWithNull(newFinishedTime, oldFinishedTime)) {
             logger.info("Finished time of race " + getRace().getName() + " updated from " + getFinishedTime() + " to " + newFinishedTime);
             super.setFinishedTime(newFinishedTime);
-            updateStartAndEndOfTracking();
+            updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
             notifyListenersFinishedTimeChanged(oldFinishedTime, newFinishedTime);
         }
     }
@@ -814,10 +814,25 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         setStartOfTrackingReceived(startOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
     }
 
+    @Override
+    protected void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
+        super.startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+        if (!Util.equalsWithNull(oldStartOfTracking, getStartOfTracking())) {
+            notifyListenersStartOfTrackingChanged(getStartOfTracking());
+        }
+    }
+
+    @Override
+    protected void endOfTrackingChanged(TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
+        super.endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
+        if (!Util.equalsWithNull(oldEndOfTracking, getEndOfTracking())) {
+            notifyListenersEndOfTrackingChanged(getEndOfTracking());
+        }
+    }
+
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
         if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
             super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersStartOfTrackingChanged(getStartOfTracking());
         }
     }
 
@@ -833,7 +848,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
         if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
             super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersEndOfTrackingChanged(getEndOfTracking());
         }
     }
 
@@ -981,7 +995,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         } catch (IOException e) {
             logger.log(Level.INFO, "Exception trying to notify race status change listeners about start time change", e);
         }
-        updateStartAndEndOfTracking();
+        updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
     
     @Override
