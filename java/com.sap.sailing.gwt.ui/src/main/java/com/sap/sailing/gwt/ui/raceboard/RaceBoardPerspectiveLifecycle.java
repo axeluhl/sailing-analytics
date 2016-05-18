@@ -55,16 +55,13 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getSettingsDialogComponent(
             PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> settings) {
         // collect the component lifecycle's for contained components and combine them with the corresponding settings
-        
-        // TOOD: Take the settings from the settings parameter
+        // TODO: Take the settings from the settings parameter
         CompositeLifecycleSettings componentLifecyclesAndDefaultSettings = getComponentLifecyclesAndDefaultSettings();
-        
         RaceBoardPerspectiveSettings perspectiveSettings = settings.getPerspectiveLifecycleAndSettings().getSettings();
         PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings =
                 new PerspectiveLifecycleAndSettings<>(this, perspectiveSettings); 
-        
-        PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveCompositeSettings = new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
-        
+        PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveCompositeSettings =
+                new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
         return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>(perspectiveCompositeSettings);
     }
 

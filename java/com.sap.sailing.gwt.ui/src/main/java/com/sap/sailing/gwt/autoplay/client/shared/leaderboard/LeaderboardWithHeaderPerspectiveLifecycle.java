@@ -33,16 +33,13 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getSettingsDialogComponent(
             PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> settings) {
         // collect the component lifecycle's for contained components and combine them with the corresponding settings
-        
-        // TOOD: Take the settings from the settings parameter
+        // TODO: Take the settings from the settings parameter
         CompositeLifecycleSettings componentLifecyclesAndDefaultSettings = getComponentLifecyclesAndDefaultSettings();
-        
         LeaderboardWithHeaderPerspectiveSettings perspectiveSettings = settings.getPerspectiveLifecycleAndSettings().getSettings();
         PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleAndSettings =
-                new PerspectiveLifecycleAndSettings<>(this, perspectiveSettings); 
-        
-        PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveCompositeSettings = new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
-        
+                new PerspectiveLifecycleAndSettings<>(this, perspectiveSettings);
+        PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveCompositeSettings =
+                new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
         return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings>(perspectiveCompositeSettings);
     }
 
