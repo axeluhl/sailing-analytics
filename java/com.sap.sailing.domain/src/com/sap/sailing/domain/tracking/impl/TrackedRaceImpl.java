@@ -785,7 +785,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         boolean startOfTrackingFound = false;
         boolean endOfTrackingFound = false;
         // check race log
-        if (trackingTimesFromRaceLog != null){
+        if (trackingTimesFromRaceLog != null) {
             if (trackingTimesFromRaceLog.getA() != null) {
                 startOfTracking = trackingTimesFromRaceLog.getA().getTimePoint();
                 startOfTrackingFound = true;
@@ -809,11 +809,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         // check for start/finished times in race log and add a few minutes on the ends
         if (!startOfTrackingFound || !endOfTrackingFound) {
             if (startAndFinishedTimesFromRaceLog != null) {
-                if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null){
+                if (!startOfTrackingFound && startAndFinishedTimesFromRaceLog.getA() != null) {
                     startOfTracking = startAndFinishedTimesFromRaceLog.getA().minus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
                     startOfTrackingFound = true;
                 }
-                if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null){
+                if (!endOfTrackingFound && startAndFinishedTimesFromRaceLog.getB() != null) {
                     endOfTracking = startAndFinishedTimesFromRaceLog.getB().plus(Duration.ONE_MINUTE.times(TRACKING_BUFFER_IN_MINUTES));
                     endOfTrackingFound = true;
                 }
@@ -1982,11 +1982,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
-        TimePoint inferedStartOfTracking = getStartOfTracking();
-        if (!Util.equalsWithNull(oldStartOfTracking, inferedStartOfTracking) &&
-                (inferedStartOfTracking == null || (oldStartOfTracking != null && inferedStartOfTracking.before(oldStartOfTracking)))) {
-            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+inferedStartOfTracking);
-            loadGPSFixesForExtendedTimeRange(inferedStartOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
+        TimePoint inferredStartOfTracking = getStartOfTracking();
+        if (!Util.equalsWithNull(oldStartOfTracking, inferredStartOfTracking) &&
+                (inferredStartOfTracking == null || (oldStartOfTracking != null && inferredStartOfTracking.before(oldStartOfTracking)))) {
+            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+inferredStartOfTracking);
+            loadGPSFixesForExtendedTimeRange(inferredStartOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
         }
     }
 
@@ -2005,13 +2005,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
-        TimePoint inferedEndOfTracking = getEndOfTracking();
-        if (!Util.equalsWithNull(oldEndOfTracking, inferedEndOfTracking) &&
-                (inferedEndOfTracking == null || (oldEndOfTracking != null && inferedEndOfTracking.after(oldEndOfTracking)))) {
-            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferedEndOfTracking);
-            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, inferedEndOfTracking, waitForGPSFixesToLoad);
+        TimePoint inferredEndOfTracking = getEndOfTracking();
+        if (!Util.equalsWithNull(oldEndOfTracking, inferredEndOfTracking) &&
+                (inferredEndOfTracking == null || (oldEndOfTracking != null && inferredEndOfTracking.after(oldEndOfTracking)))) {
+            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferredEndOfTracking);
+            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, inferredEndOfTracking, waitForGPSFixesToLoad);
         }
-
     }
 
     /**
