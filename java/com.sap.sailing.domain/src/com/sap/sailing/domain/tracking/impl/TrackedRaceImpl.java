@@ -868,8 +868,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public Pair<TimePoint, TimePoint> getStartAndFinishedTimeFromRaceLogs() {
-        //Only one of the RaceLogs should have valid data, so one doesn't have to compare all the 
-        //start/finished time values in order to find the earliest startTime/latestFinishedTime
+        // Only one of the RaceLogs should have valid data, so one doesn't have to compare all the 
+        // start/finished time values in order to find the earliest startTime/latestFinishedTime
         for (final RaceLog raceLog : attachedRaceLogs.values()) {
             TimePoint startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
             TimePoint finishedTime = new FinishedTimeFinder(raceLog).analyze();
