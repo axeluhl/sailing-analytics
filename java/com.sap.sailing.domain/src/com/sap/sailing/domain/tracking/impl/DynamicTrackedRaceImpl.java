@@ -830,10 +830,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         }
     }
 
+    /**
+     * Making this method publicly visible for those tests seeing this implementation class
+     */
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        if (!Util.equalsWithNull(startOfTrackingReceived, getStartOfTracking())) {
-            super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
-        }
+        super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
+    }
+
+    /**
+     * Making this method publicly visible for those tests seeing this implementation class
+     */
+    @Override
+    public void setEndOfTrackingReceived(TimePoint endOfTracking, boolean waitForGPSFixesToLoad) {
+        super.setEndOfTrackingReceived(endOfTracking, waitForGPSFixesToLoad);
     }
 
     @Override
@@ -841,16 +850,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         setEndOfTrackingReceived(endOfTrackingReceived, /* waitForGPSFixesToLoad */ false);
     }
     
-    /**
-     * Non-interface method, mainly for testing purposes; callers can ask to wait for the loading of fixes in the
-     * potentially extended tracking interval to finish before returning from this method.
-     */
-    public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        if (!Util.equalsWithNull(endOfTrackingReceived, getEndOfTracking())) {
-            super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
-        }
-    }
-
     /**
      * In addition to calling the superclass implementation, for a stored wind track whose fixes were loaded by this
      * call, all listeners are notified about these existing wind fixes using their

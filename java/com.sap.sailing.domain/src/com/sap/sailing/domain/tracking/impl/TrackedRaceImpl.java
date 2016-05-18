@@ -816,8 +816,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                 endOfTrackingFound = true;
             }
         }
-        startOfTrackingChanged(oldStartOfTracking, false);
-        endOfTrackingChanged(oldEndOfTracking, false);
+        startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
+        endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
 
     @Override
