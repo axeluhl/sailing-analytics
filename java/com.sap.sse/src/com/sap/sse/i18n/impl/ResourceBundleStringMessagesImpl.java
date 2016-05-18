@@ -35,9 +35,9 @@ public class ResourceBundleStringMessagesImpl implements ResourceBundleStringMes
 
     private ResourceBundle getResourceBundle(Locale locale) {
         if (resourceClassLoader != null) {
-            return ResourceBundle.getBundle(resourceBaseName, locale, resourceClassLoader);
+            return ResourceBundle.getBundle(resourceBaseName, locale, resourceClassLoader, Util.CONTROL);
         } else {
-            return ResourceBundle.getBundle(resourceBaseName, locale);
+            return ResourceBundle.getBundle(resourceBaseName, locale, Util.CONTROL);
         }
     }
     

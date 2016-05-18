@@ -24,5 +24,5 @@ public interface StorePositionUpdateStrategy {
     void storePositionUpdate(Map<Competitor, List<GPSFix>> competitorFixes, Map<Mark, List<GPSFix>> markFixes,
             List<Waypoint> addedWaypoints, List<Waypoint> removedWaypoints, IntHolder smallestChangedWaypointIndex,
             List<Triple<Competitor, Integer, TimePoint>> fixedMarkPassings, List<Pair<Competitor, Integer>> removedMarkPassings,
-            List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings);
+            List<Pair<Competitor, Integer>> suppressedMarkPassings, List<Competitor> unSuppressedMarkPassings, CandidateFinder candidateFinder, CandidateChooser candidateChooser);
 }

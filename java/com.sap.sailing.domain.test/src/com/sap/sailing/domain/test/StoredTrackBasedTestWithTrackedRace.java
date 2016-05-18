@@ -21,7 +21,7 @@ public class StoredTrackBasedTestWithTrackedRace extends StoredTrackBasedTest {
     public void setUp() throws FileNotFoundException, IOException {
         Map<Competitor, DynamicGPSFixTrack<Competitor, GPSFixMoving>> tracks = loadTracks();
         setTrackedRace(createTestTrackedRace("Kieler Woche", "505 Race 2", "505", tracks.keySet(),
-                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime())));
+                new MillisecondsTimePoint(new GregorianCalendar(2011, 05, 23).getTime()), /* useMarkPassingCalculator */ false));
         copyTracks(tracks);
     }
     

@@ -38,6 +38,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogGateLineOpeningTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishedTimeFinder;
@@ -45,6 +46,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
+import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
@@ -100,6 +102,7 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
@@ -225,6 +228,14 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * The calculated race end time
      */
     private TimePoint endTime;
+    
+    /**
+     * The time set by race management ("Blue Flag Down" event) for when the race has finished. This field caches what
+     * today comes from the {@link RaceLog}s in the form of {@link RaceLogRaceStatusEvent}s setting the status to
+     * {@link RaceLogRaceStatus#FINISHED} and is computed by the {@link DynamicTrackedRaceLogListener#getFinishedTime()}
+     * method based on the {@link RaceState}s it manages for all the {@link RaceLog}s currently attached to this race.
+     */
+    private TimePoint finishedTime;
 
     /**
      * The first and last passing times of all course waypoints
@@ -818,8 +829,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     public void invalidateStartTime() {
-        startTime = null;
-        startTimeWithoutInferenceFromStartMarkPassings = null;
+        updateStartOfRaceCacheFields();
         updateStartAndEndOfTracking();
     }
 
@@ -884,33 +894,43 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     @Override
     public TimePoint getStartOfRace(boolean inferred) {
         final TimePoint result;
-        // check if we have in our caching fields what is asked:
-        if (inferred && startTime != null) {
+        if (inferred) {
             result = startTime;
-        } else if (!inferred && startTimeWithoutInferenceFromStartMarkPassings != null) {
-            result = startTimeWithoutInferenceFromStartMarkPassings;
         } else {
-            // no cache match; re-calculate
+            result = startTimeWithoutInferenceFromStartMarkPassings;
+        }
+        return result;
+    }
+
+    /**
+     * monitor for {@link #updateStartOfRaceCacheFields()}; has to be serializable, therefore {@link String}
+     * and not {@link Object}.
+     */
+    private final String updateStartOfRaceCacheFieldsMonitor = "";
+    private void updateStartOfRaceCacheFields() {
+        synchronized (updateStartOfRaceCacheFieldsMonitor) {
+            TimePoint newStartTime = null;
+            TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
             for (RaceLog raceLog : attachedRaceLogs.values()) {
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("Analyzing race log "+raceLog+" for race "+this.getRace().getName());
                 }
-                startTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
-                if (startTime != null) {
-                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
+                newStartTime = new StartTimeFinder(raceLogResolver, raceLog).analyze().getStartTime();
+                if (newStartTime != null) {
+                    newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
                     if (logger.isLoggable(Level.FINEST)) {
-                        logger.finest("Found start time "+startTime+" in race log "+raceLog+" for race "+this.getRace().getName());
+                        logger.finest("Found start time "+newStartTime+" in race log "+raceLog+" for race "+this.getRace().getName());
                     }
                     break;
                 }
             }
-            if (startTime == null) {
+            if (newStartTime == null) {
                 if (logger.isLoggable(Level.FINEST)) {
                     logger.finest("No start time found in race logs for race "+getRace().getName());
                 }
-                startTime = getStartTimeReceived();
-                if (startTime != null) {
-                    startTimeWithoutInferenceFromStartMarkPassings = startTime;
+                newStartTime = getStartTimeReceived();
+                if (newStartTime != null) {
+                    newStartTimeWithoutInferenceFromStartMarkPassings = newStartTime;
                 }
                 // If not null, check if the first mark passing for the start line is too much after the
                 // startTimeReceived; if so, return an adjusted, later start time.
@@ -928,37 +948,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                             long startTimeReceived2timeOfFirstMarkPassingFirstMark = timeOfFirstMarkPassing.asMillis()
                                     - startTimeReceived.asMillis();
                             if (startTimeReceived2timeOfFirstMarkPassingFirstMark > MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS) {
-                                startTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
+                                newStartTime = new MillisecondsTimePoint(timeOfFirstMarkPassing.asMillis()
                                         - MAX_TIME_BETWEEN_START_AND_FIRST_MARK_PASSING_IN_MILLISECONDS);
                                 if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                                    logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
                                 }
                             } else {
-                                startTime = startTimeReceived;
+                                newStartTime = startTimeReceived;
                                 if (logger.isLoggable(Level.FINEST)) {
-                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+startTime);
+                                    logger.finest("Using start mark received for race "+this.getRace().getName()+": "+newStartTime);
                                 }
                             }
                         }
                     } else {
                         final NavigableSet<MarkPassing> markPassingsForFirstWaypointInOrder = getMarkPassingsInOrderAsNavigableSet(firstWaypoint);
                         if (markPassingsForFirstWaypointInOrder != null) {
-                            startTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
+                            newStartTime = calculateStartOfRaceFromMarkPassings(markPassingsForFirstWaypointInOrder,
                                     getRace().getCompetitors());
-                            if (startTime != null && logger.isLoggable(Level.FINEST)) {
-                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+startTime);
+                            if (newStartTime != null && logger.isLoggable(Level.FINEST)) {
+                                logger.finest("Using start mark passings for start time of race "+this.getRace().getName()+": "+newStartTime);
                             }
                         }
                     }
                 }
             }
-            if (inferred) {
-                result = startTime;
-            } else {
-                result = startTimeWithoutInferenceFromStartMarkPassings;
-            }
+            startTime = newStartTime;
+            startTimeWithoutInferenceFromStartMarkPassings = newStartTimeWithoutInferenceFromStartMarkPassings;
         }
-        return result;
     }
 
     /**
@@ -972,6 +988,15 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return endTime;
     }
 
+    @Override
+    public TimePoint getFinishedTime() {
+        return finishedTime;
+    }
+    
+    protected void setFinishedTime(final TimePoint newFinishedTime) {
+        finishedTime = newFinishedTime;
+    }
+    
     private TimePoint getLastPassingOfFinishLine() {
         TimePoint passingTime = null;
         final Waypoint lastWaypoint = getRace().getCourse().getLastWaypoint();
@@ -1937,7 +1962,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     protected void setStartTimeReceived(TimePoint start) {
-        if ((start == null) != (startTimeReceived == null) || (start != null && !start.equals(startTimeReceived))) {
+        if (!Util.equalsWithNull(start, startTimeReceived)) {
             this.startTimeReceived = start;
             invalidateStartTime();
             invalidateMarkPassingTimes();
@@ -1956,7 +1981,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         startOfTrackingChanged(oldStartOfTracking, waitForGPSFixesToLoad);
     }
     
-    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad){
+    private void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
         TimePoint inferedStartOfTracking = getStartOfTracking();
         if (!Util.equalsWithNull(oldStartOfTracking, inferedStartOfTracking) &&
                 (inferedStartOfTracking == null || (oldStartOfTracking != null && inferedStartOfTracking.before(oldStartOfTracking)))) {
@@ -1979,9 +2004,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         endOfTrackingChanged(oldEndOfTracking, waitForGPSFixesToLoad);
     }
     
-    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad){
+    private void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
         TimePoint inferedEndOfTracking = getEndOfTracking();
-
         if (!Util.equalsWithNull(oldEndOfTracking, inferedEndOfTracking) &&
                 (inferedEndOfTracking == null || (oldEndOfTracking != null && inferedEndOfTracking.after(oldEndOfTracking)))) {
             logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferedEndOfTracking);
