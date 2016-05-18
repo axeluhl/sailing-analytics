@@ -4,11 +4,11 @@ import java.io.Serializable;
 
 import com.sap.sse.common.settings.Settings;
 
-/** 
- * A perspective and it's perspective specific settings 
+/**
+ * A perspective and it's perspective-specific settings
  *
  * @param <PS>
- *      the perspective settings type
+ *            the perspective settings type
  * @author Frank Mittag
  */
 public class PerspectiveAndSettings<PS extends Settings> implements Serializable {

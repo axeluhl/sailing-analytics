@@ -72,7 +72,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> createDefaultSettings() {
         PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings = 
                 new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());  
-        
         return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
     }
 

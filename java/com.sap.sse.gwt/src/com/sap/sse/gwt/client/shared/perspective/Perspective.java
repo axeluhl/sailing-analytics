@@ -7,10 +7,11 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * A perspective is a composition of UI components into a view/page. The perspective itself is also an {@link Component} and can
- * have {@link settings}.
+ * A perspective is a composition of UI components into a view/page. The perspective itself is also an {@link Component}
+ * and can have {@link Settings}.
+ * 
  * @param <PS>
- *      the {@link Perspective} settings type
+ *            the {@link Perspective} settings type
  */
 public interface Perspective<PS extends Settings> extends Component<PerspectiveCompositeSettings<PS>> {
     List<Component<?>> getComponents();

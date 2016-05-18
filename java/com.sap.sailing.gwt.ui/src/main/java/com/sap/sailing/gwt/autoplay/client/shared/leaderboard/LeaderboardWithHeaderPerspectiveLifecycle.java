@@ -49,8 +49,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     @Override
     public PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
         PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleAndSettings = 
-                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());  
-        
+                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());
         return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
     }
 
