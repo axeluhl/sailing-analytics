@@ -1,13 +1,13 @@
-## Leagues
+# Leagues
 
-### bundesliga2016
-#### Firing up replica's
+## bundesliga2016
+### Firing up replica's
 ```
 TBD
 ```
 
-### danishleague2016
-#### Firing up replica's
+## danishleague2016
+### Firing up replica's
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -20,8 +20,8 @@ EVENT_ID=3e8e08e1-05e2-4140-832f-1f4cf0065032
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
-### dutchleague2016
-#### Firing up replica's
+## dutchleague2016
+### Firing up replica's
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -34,8 +34,8 @@ EVENT_ID=77999de1-e925-4e7e-b9be-f0b8e14616ae
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
-### norwegianleague2016
-#### Firing up replica's
+## norwegianleague2016
+### Firing up replica's
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -48,8 +48,8 @@ EVENT_ID=69924f98-c00f-4f33-8264-d00ecc46c270
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
-### swedishleague2016
-#### Firing up replica's
+## swedishleague2016
+### Firing up replica's
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -62,8 +62,8 @@ EVENT_ID=1fa8905c-9449-419d-9986-c0a4a96632b0
 SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
-### finnishleague2016
-#### Firing up replica's
+## finnishleague2016
+### Firing up replica's
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
