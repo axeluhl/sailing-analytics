@@ -7,7 +7,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * A component, that contains a collection of settings components in a tabbed panel.
+ * A component that contains a collection of settings components in a tabbed panel.
  *  
  * @author Frank (c5163874)
  * @param <PL>

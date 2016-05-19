@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * @author Frank
+ * @author Frank Mittag
  *
  * @param <P>
  *      the type of the Perspective

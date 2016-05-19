@@ -18,7 +18,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
- * @author Frank
+ * @author Frank Mittag
  *
  * @param <PL>
  *      The {@link PerspectiveLifeycle} type
@@ -26,7 +26,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *      the perspective settings type
  */
 public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
-    implements SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> { 
+    implements SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> {
     
     public static class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<S,?>, S extends Settings> {
         private ComponentLifecycleAndSettings<ComponentLifecycleType, S> componentLifecycleAndSettings;
@@ -47,7 +47,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
     }
 
     /**
-     * @author Frank
+     * @author Frank Mittag
      *
      * @param <PL>
      *          the {@link PerspectiveLifecycle} type
@@ -98,7 +98,6 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
     private PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> createPerspectiveLifecycleAndDialogComponent(PerspectiveLifecycleAndSettings<PL,PS> perspectiveLifecycleAndSettings) {
         PS settings = perspectiveLifecycleAndSettings.getSettings();
         PL perspectiveLifecycle = perspectiveLifecycleAndSettings.getPerspectiveLifecycle();
-        
         return new PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS>(perspectiveLifecycleAndSettings, perspectiveLifecycle.getPerspectiveSettingsDialogComponent(settings));
     }
 
