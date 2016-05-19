@@ -1,13 +1,17 @@
-# Leagues
+# Sailing Leagues
 
 ## bundesliga2016
+
 ### Firing up replica's
+
 ```
 TBD
 ```
 
 ## danishleague2016
+
 ### Firing up replica's
+
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -21,7 +25,9 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## dutchleague2016
+
 ### Firing up replica's
+
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -35,7 +41,9 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## norwegianleague2016
+
 ### Firing up replica's
+
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -49,7 +57,9 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## swedishleague2016
+
 ### Firing up replica's
+
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
@@ -63,7 +73,9 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## finnishleague2016
+
 ### Firing up replica's
+
 ```
 INSTALL_FROM_RELEASE=build-201605131237
 USE_ENVIRONMENT=live-replica-server
