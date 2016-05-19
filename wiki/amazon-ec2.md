@@ -7,7 +7,8 @@
 #### Servers
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database and Queue Server: 172.31.25.253
+- Database Server: dbserver.internal.sapsailing.com
+- Database and Queue Server: rabbit.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -40,9 +41,9 @@ BUILD_COMPLETE_NOTIFY=you@email.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
@@ -206,11 +207,11 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=LIVE1
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=sapsailinganalytics-live
 TELNET_PORT=14888
 SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 EXPEDITION_PORT=2010
 REPLICATE_ON_START=False

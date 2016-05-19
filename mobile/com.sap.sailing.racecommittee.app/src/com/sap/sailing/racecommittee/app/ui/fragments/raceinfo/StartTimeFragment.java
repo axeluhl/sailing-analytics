@@ -33,16 +33,15 @@ import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
 import com.sap.sailing.racecommittee.app.ui.adapters.DependentRaceSpinnerAdapter;
 import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
@@ -428,7 +427,7 @@ public class StartTimeFragment extends BaseFragment
                     if (races.getFleet().getName().equals(fleet.getA())) {
                         for (ManagedRace race : mGroupHeaders.get(races)) {
                             if (!getRace().equals(race) && race.getStatus() != RaceLogRaceStatus.FINISHED) {
-                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceName(), null);
+                                Util.Pair<String, String> data = new Util.Pair<>(race.getRaceColumnName(), null);
                                 int position = mRaceAdapter.add(data);
                                 if (position >= 0) {
                                     if (mRaceId != null) {
@@ -594,7 +593,7 @@ public class StartTimeFragment extends BaseFragment
         }
 
         int id;
-        if (AppConstants.LIGHT_THEME.equals(AppPreferences.on(getActivity()).getTheme())) {
+        if (AppConstants.LIGHT_THEME.equals(preferences.getTheme())) {
             id = R.drawable.nav_drawer_tab_button_light;
         } else {
             id = R.drawable.nav_drawer_tab_button_dark;

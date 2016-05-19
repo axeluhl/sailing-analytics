@@ -91,6 +91,7 @@ import com.sap.sailing.domain.base.impl.EventImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.RemoteSailingServerReferenceImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -578,7 +579,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        /* workQueue */new LinkedBlockingQueue<Runnable>(),  new ThreadFactoryWithPriority(
+                Thread.NORM_PRIORITY, /* daemon */true));
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
@@ -1444,7 +1446,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
             result.put(
                     s.getName(),
-                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isStartsWithZeroScore(), s
+                    new SeriesCreationParametersDTO(fleetNamesAndOrdering, s.isMedal(), s.isFleetsCanRunInParallel(), s.isStartsWithZeroScore(), s
                             .isFirstColumnIsNonDiscardableCarryForward(), s.getResultDiscardingRule() == null ? null
                             : s.getResultDiscardingRule().getDiscardIndexResultsStartingWithHowManyRaces(), s
                             .hasSplitFleetContiguousScoring()));
@@ -1627,6 +1629,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // no action required; the update signaled by this call is implicit; for explicit updates
             // see raceTimesChanged(TimePoint, TimePoint, TimePoint).
+        }
+
+        @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // no action required; the update signaled by this call is implicit; the race log
+            // updates that led to this change are replicated separately
         }
 
         @Override
@@ -3034,19 +3042,19 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         // Create/Update locally
         DataImportProgress progress = createOrUpdateDataImportProgressWithoutReplication(importOperationId,
-                overallProgressPct, subProgressName, subProgressPct);
+                overallProgressPct, subProgress, subProgressPct);
         // Create/Update on replicas
-        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgressName,
+        replicate(new CreateOrUpdateDataImportProgress(importOperationId, overallProgressPct, subProgress,
                 subProgressPct));
         return progress;
     }
 
     @Override
     public DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct, String subProgressName, double subProgressPct) {
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct) {
         DataImportProgress progress = dataImportLock.getProgress(importOperationId);
         boolean newObject = false;
         if (progress == null) {
@@ -3054,7 +3062,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             newObject = true;
         }
         progress.setOverAllProgressPct(overallProgressPct);
-        progress.setNameOfCurrentSubProgress(subProgressName);
+        progress.setCurrentSubProgress(subProgress);
         progress.setCurrentSubProgressPct(subProgressPct);
         if (newObject) {
             dataImportLock.addProgress(importOperationId, progress);

@@ -117,6 +117,11 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
+    public TimePoint getFinishedTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -656,6 +661,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking() { 
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) { 
     }
 }

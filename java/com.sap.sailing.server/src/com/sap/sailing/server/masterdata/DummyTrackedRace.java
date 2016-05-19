@@ -107,6 +107,11 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
+    public TimePoint getFinishedTime() {
+        return null;
+    }
+
+    @Override
     public TimePoint getEndOfRace() {
         return null;
     }
@@ -631,6 +636,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
     }
 
     @Override
-    public void updateStartAndEndOfTracking() {
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
     }
 }

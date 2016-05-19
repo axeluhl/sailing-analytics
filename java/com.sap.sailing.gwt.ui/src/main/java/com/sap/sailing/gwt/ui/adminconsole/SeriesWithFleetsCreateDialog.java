@@ -34,6 +34,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
 
     protected final TextBox nameEntryField;
     protected CheckBox isMedalSeriesCheckbox;
+    protected CheckBox fleetsCanRunInParallelCheckbox;
     protected CheckBox startsWithZeroScoreCheckbox;
     protected CheckBox hasSplitFleetContiguousScoringCheckbox;
     protected CheckBox firstColumnIsNonDiscardableCarryForwardCheckbox;
@@ -122,6 +123,10 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         isMedalSeriesCheckbox = createCheckbox(stringMessages.medalSeries());
         isMedalSeriesCheckbox.ensureDebugId("MedalSeriesCheckbox");
         
+        fleetsCanRunInParallelCheckbox = createCheckbox(stringMessages.canFleetsRunInParallel());
+        fleetsCanRunInParallelCheckbox.setValue(true);
+        fleetsCanRunInParallelCheckbox.ensureDebugId("FleetsCanRaceInParallelSeriesCheckbox");
+
         startsWithZeroScoreCheckbox = createCheckbox(stringMessages.startsWithZeroScore());
         startsWithZeroScoreCheckbox.ensureDebugId("StartsWithZeroScoreCheckbox");
         
@@ -162,6 +167,7 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
     protected SeriesDTO getResult() {
         series.setName(nameEntryField.getText());
         series.setMedal(isMedalSeriesCheckbox.getValue());
+        series.setFleetsCanRunInParallel(fleetsCanRunInParallelCheckbox.getValue());
         series.setStartsWithZeroScore(startsWithZeroScoreCheckbox.getValue());
         series.setSplitFleetContiguousScoring(hasSplitFleetContiguousScoringCheckbox.getValue());
         series.setFirstColumnIsNonDiscardableCarryForward(firstColumnIsNonDiscardableCarryForwardCheckbox.getValue());
@@ -177,16 +183,17 @@ public class SeriesWithFleetsCreateDialog extends DataEntryDialog<SeriesDTO> {
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(7, 2);
+        Grid formGrid = new Grid(8, 2);
         panel.add(formGrid);
         formGrid.setWidget(0,  0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 1, isMedalSeriesCheckbox);
-        formGrid.setWidget(2, 1, startsWithZeroScoreCheckbox);
-        formGrid.setWidget(3, 1, hasSplitFleetContiguousScoringCheckbox);
-        formGrid.setWidget(4, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
-        formGrid.setWidget(5, 1, useSeriesResultDiscardingThresholdsCheckbox);
-        formGrid.setWidget(6, 1, discardThresholdBoxes.getWidget());
+        formGrid.setWidget(2, 1, fleetsCanRunInParallelCheckbox);
+        formGrid.setWidget(3, 1, startsWithZeroScoreCheckbox);
+        formGrid.setWidget(4, 1, hasSplitFleetContiguousScoringCheckbox);
+        formGrid.setWidget(5, 1, firstColumnIsNonDiscardableCarryForwardCheckbox);
+        formGrid.setWidget(6, 1, useSeriesResultDiscardingThresholdsCheckbox);
+        formGrid.setWidget(7, 1, discardThresholdBoxes.getWidget());
         
         TabPanel tabPanel = new TabPanel();
         tabPanel.setWidth("100%");

@@ -29,7 +29,7 @@ public class RacePositionsPollerTask extends AsyncTask<Util.Pair<String, URL>, P
                 return null;
             }
 
-            HttpRequest request = new HttpJsonGetRequest(query.getB(), context);
+            HttpRequest request = new HttpJsonGetRequest(context, query.getB());
             try {
                 InputStream responseStream = request.execute();
                 publishProgress(new PollingResult(true,

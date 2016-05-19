@@ -1,13 +1,5 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.preference;
 
-import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
-import com.sap.sailing.android.shared.ui.views.EditSetPreference;
-import com.sap.sailing.racecommittee.app.AppPreferences;
-import com.sap.sailing.racecommittee.app.BuildConfig;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.utils.QRHelper;
-import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -21,6 +13,14 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.ui.fragments.preference.BasePreferenceFragment;
+import com.sap.sailing.android.shared.ui.views.EditSetPreference;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.BuildConfig;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.utils.QRHelper;
+import com.sap.sailing.racecommittee.app.utils.autoupdate.AutoUpdater;
 
 public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
@@ -108,11 +108,12 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
         addOnPreferenceChangeListener(serverUrlPreference, new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
+                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
                 builder.setTitle(getString(R.string.url_refresh_title));
                 builder.setMessage(getString(R.string.url_refresh_message));
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.create().show();
+                builder.show();
                 return true;
             }
         });
@@ -182,8 +183,7 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             QRHelper.with(getActivity()).saveData(data.getStringExtra("SCAN_RESULT"));
-
-
+            AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
         } else {
             Toast.makeText(getActivity(), getString(R.string.error_scanning_qr, resultCode), Toast.LENGTH_LONG).show();
         }

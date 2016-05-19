@@ -120,7 +120,7 @@ public class LeaderboardCourseChangeTest {
         
         DomainFactory baseDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false,
-                trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
 
         assertEquals(6, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
@@ -129,7 +129,7 @@ public class LeaderboardCourseChangeTest {
         course.removeWaypoint(3);
 
         leaderboardDTO = leaderboard.getLeaderboardDTO(timePoint, raceColumnNames, false, trackedRegattaRegistry,
-                baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                baseDomainFactory, /* fillTotalPointsUncorrected */ false);
         assertEquals(4, leaderboardDTO.rows.values().iterator().next().fieldsByRaceColumnName.values().iterator()
                 .next().legDetails.size());
 
@@ -175,7 +175,7 @@ public class LeaderboardCourseChangeTest {
         Set<Fleet> fleets = new HashSet<>();
         fleets.add(fleet);
 
-        Series series = new SeriesImpl("TestSeries", false, fleets, new HashSet<String>(), trackedRegattaRegistry);
+        Series series = new SeriesImpl("TestSeries", false, true, fleets, new HashSet<String>(), trackedRegattaRegistry);
         return series;
     }
 

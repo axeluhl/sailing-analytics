@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
@@ -96,10 +97,10 @@ public class ImportMasterDataOperation extends
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
         this.progress = dataImportLock.getProgress(importOperationId);
-        progress.setNameOfCurrentSubProgress("Waiting for other data import operations to finish");
+        progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WAIT);
         LockUtil.lockForWrite(dataImportLock);
         try {
-            progress.setNameOfCurrentSubProgress("Importing leaderboard groups");
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_LEADERBOARD_GROUPS);
             progress.setCurrentSubProgressPct(0);
             int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
             int i = 0;
@@ -108,7 +109,7 @@ public class ImportMasterDataOperation extends
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
-            progress.setNameOfCurrentSubProgress("Updating Event-LeaderboardGroup links");
+            progress.setCurrentSubProgress(DataImportSubProgress.UPDATE_EVENT_LEADERBOARD_GROUP_LINKS);
             progress.setOverAllProgressPct(0.4);
             progress.setCurrentSubProgressPct(0);
             final Iterable<Event> allEvents = masterData.getAllEvents();
@@ -119,7 +120,7 @@ public class ImportMasterDataOperation extends
                 eventCounter++;
                 progress.setCurrentSubProgressPct((double) eventCounter / numOfEventsToHandle);
             }
-            progress.setNameOfCurrentSubProgress("Importing wind tracks");
+            progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WIND_TRACKS);
             progress.setOverAllProgressPct(0.5);
             progress.setCurrentSubProgressPct(0);
             createWindTracks(toState);
@@ -290,18 +291,18 @@ public class ImportMasterDataOperation extends
                     RaceLogIdentifier identifier = raceColumn.getRaceLogIdentifier(fleet);
                     RaceLog currentPersistedLog = mongoRaceLogStore.getRaceLog(identifier, true);
                     if (currentPersistedLog.isEmpty()) {
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     } else if (override) {
                         // Clear existing race log
                         mongoRaceLogStore.removeRaceLog(identifier);
-                        addAllmportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
+                        addAllImportedEvents(mongoObjectFactory, mongoRaceLogStore, log, identifier);
                     }
                 }
             }
         }
     }
 
-    private void addAllmportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
+    private void addAllImportedEvents(MongoObjectFactory mongoObjectFactory, RaceLogStore mongoRaceLogStore,
             RaceLog log, RaceLogIdentifier identifier) {
         RaceLogEventVisitor storeVisitor = MongoRaceLogStoreFactory.INSTANCE
                 .getMongoRaceLogStoreVisitor(identifier, mongoObjectFactory);

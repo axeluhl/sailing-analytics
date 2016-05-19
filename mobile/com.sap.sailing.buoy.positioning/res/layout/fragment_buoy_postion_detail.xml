@@ -141,9 +141,10 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/position_send_button"
-        android:text="@string/set_position"
         android:textSize="18sp"
+        android:textAllCaps="false"
         android:textStyle="bold"/>
 
 </LinearLayout>

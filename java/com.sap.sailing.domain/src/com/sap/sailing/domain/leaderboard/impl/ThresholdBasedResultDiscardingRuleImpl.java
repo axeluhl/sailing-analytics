@@ -79,12 +79,12 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
         int resultsToDiscard = getNumberOfResultsToDiscard(competitor, raceColumnsToConsider, leaderboard, timePoint);
         Set<RaceColumn> result;
         if (resultsToDiscard > 0) {
-            final Map<RaceColumn, Double> netPointsForCompetitorPerColumn = new HashMap<>();
+            final Map<RaceColumn, Double> totalPointsForCompetitorPerColumn = new HashMap<>();
             List<RaceColumn> sortedRaces = new ArrayList<RaceColumn>();
             for (RaceColumn raceColumn : raceColumnsToConsider) {
                 if (raceColumn.isDiscardable()) {
                     sortedRaces.add(raceColumn);
-                    netPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getNetPoints(competitor, raceColumn, timePoint));
+                    totalPointsForCompetitorPerColumn.put(raceColumn, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
                 }
             }
             result = new HashSet<RaceColumn>();
@@ -96,8 +96,8 @@ public class ThresholdBasedResultDiscardingRuleImpl implements ThresholdBasedRes
                     return -leaderboard
                             .getScoringScheme()
                             .getScoreComparator(/* nullScoresAreBetter */true)
-                            .compare(netPointsForCompetitorPerColumn.get(raceColumn1),
-                                    netPointsForCompetitorPerColumn.get(raceColumn2));
+                            .compare(totalPointsForCompetitorPerColumn.get(raceColumn1),
+                                    totalPointsForCompetitorPerColumn.get(raceColumn2));
                 }
             };
             Collections.sort(sortedRaces, comparator);

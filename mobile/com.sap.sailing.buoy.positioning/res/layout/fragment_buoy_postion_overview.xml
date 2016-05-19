@@ -14,10 +14,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="7dp"
-        android:layout_marginTop="18dp"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="18dp"
         android:text="@string/marks"
-        android:textSize="20sp"/>
+        android:textSize="@dimen/buoy_overview_text_size"/>
 
     <View style="@style/Divider"/>
 
@@ -26,4 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
+        android:id="@+id/no_marks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/no_marks_message"
+        android:visibility="gone"
+        android:textSize="@dimen/buoy_overview_text_size"/>
 </LinearLayout>

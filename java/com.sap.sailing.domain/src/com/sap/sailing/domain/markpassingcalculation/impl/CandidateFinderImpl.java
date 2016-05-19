@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +13,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -33,10 +41,15 @@ import com.sap.sailing.domain.markpassingcalculation.CandidateFinder;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.TimeRangeImpl;
+import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
  * The standard implemantation of {@link CandidateFinder}. There are two kinds of {@link Candidate}s. First of all,
@@ -46,11 +59,23 @@ import com.sap.sse.common.Util.Pair;
  * direction of its waypoint.
  * 
  * @author Nicolas Klose
+ * @author Axel Uhl (d043530)
  * 
  */
 public class CandidateFinderImpl implements CandidateFinder {
-    // The higher this is, the closer the fixes have to be to waypoint to become a Candidate
-    private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 7;
+    /**
+     * The higher this is, the closer the fixes have to be to waypoint to become a Candidate. The formula basically
+     * works like this:
+     * {@code probability := adjacentLegLength / fixDistanceFromWaypoint / STRICTNESS_OF_DISTANCE_BASED_PROBABILITY}. In
+     * other words, the larger the distance, the less the probability; and this strictness factor is applied to the
+     * denominator. Therefore, approximately, if the fix distance from the waypoint is {@code adjacentLegLength / }
+     * {@link #STRICTNESS_OF_DISTANCE_BASED_PROBABILITY} then the probability based on that distance is 1. Twice
+     * that distance brings down the probability to 1/2. Lesser distances can't increase the probability beyond 1.
+     * <p>
+     * 
+     * (Effectively, the formula is a bit more complicated as tolerances for GPS HDOP are included.)
+     */
+    private final int STRICTNESS_OF_DISTANCE_BASED_PROBABILITY = 10;
 
     // All of the penalties are multiplied onto the probability of a Candidate. A value of 0 excludes Candidates that do
     // not fit, a value of 1 imposes no penalty on each criteria
@@ -80,6 +105,19 @@ public class CandidateFinderImpl implements CandidateFinder {
     
     private static final double WORST_PENALTY_FOR_OTHER_COMPETITORS_BEING_FAR_FROM_START = 0.1;
     private static final double NUMBER_OF_HULL_LENGTHS_DISTANCE_FROM_START_AT_WHICH_WORST_PENALTY_APPLIES = 10;
+    
+    /**
+     * If a {@link TrackedRace#getStartOfRace(boolean)) non-inferred start time} is known for the {@link #race},
+     * candidates are not accepted if they are more than this duration earlier than the start time.
+     */
+    private static final Duration EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START = Duration.ONE_MINUTE;
+
+    /**
+     * If a {@link TrackedRace#getFinishedTime()) finished time} ("Blue Flag Down") is known for the {@link #race},
+     * candidates are not accepted if they are more than this duration later than the time when the race has officially
+     * finished.
+     */
+    private static final Duration LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED = Duration.ONE_MINUTE.times(5);
 
     private static final Logger logger = Logger.getLogger(CandidateFinderImpl.class.getName());
 
@@ -90,18 +128,40 @@ public class CandidateFinderImpl implements CandidateFinder {
     private Map<Competitor, Map<Waypoint, Map<List<GPSFix>, Candidate>>> xteCandidates = new HashMap<>();
     private Map<Competitor, Map<Waypoint, Map<GPSFix, Candidate>>> distanceCandidates = new HashMap<>();
     private final DynamicTrackedRace race;
+    
+    /**
+     * Fixes are not considered eligible as candidates if a non-inferred start time is known for the race and the fix is
+     * {@link #EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START reasonably} earlier than this start time point. They
+     * are also ignored if a non-inferred finished time for the race is known and the fix is
+     * {@link #LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED reasonably} after that time point. Always
+     * holds a non-{@code null} object after the constructor has terminated.
+     */
+    private TimeRange timeRangeForValidCandidates;
+    
     private final double penaltyForSkipping = Edge.getPenaltyForSkipping();
     private final Map<Waypoint, PassingInstruction> passingInstructions = new LinkedHashMap<>();
-    private final Comparator<GPSFix> comp = new Comparator<GPSFix>() {
-        @Override
-        public int compare(GPSFix arg0, GPSFix arg1) {
-            return arg0.getTimePoint().compareTo(arg1.getTimePoint());
-        }
-    };
-
+    private final Comparator<Timed> comp = TimedComparator.INSTANCE;
+    
+    private final ExecutorService executor;
+    
+    /**
+     * Like {@link #CandidateFinderImpl(DynamicTrackedRace, ExecutorService)} but creates a default executor service
+     */
     public CandidateFinderImpl(DynamicTrackedRace race) {
+        this(race, new ThreadPoolExecutor(/* corePoolSize */Math.max(Runtime
+                .getRuntime().availableProcessors() - 1, 3),
+                /* maximumPoolSize */Math.max(Runtime.getRuntime().availableProcessors() - 1, 3),
+                /* keepAliveTime */60, TimeUnit.SECONDS,
+                /* workQueue */new LinkedBlockingQueue<Runnable>(), new ThreadFactoryWithPriority(Thread.NORM_PRIORITY - 1, /* daemon */ true)));
+    }
+
+    public CandidateFinderImpl(DynamicTrackedRace race, ExecutorService executor) {
         this.race = race;
-        RaceDefinition raceDefinition = race.getRace();
+        this.executor = executor;
+        this.timeRangeForValidCandidates = new TimeRangeImpl(
+                getTimePointWhenToStartConsideringCandidates(race.getStartOfRace(/* inferred */ false)),
+                getTimePointWhenToFinishConsideringCandidates(race.getFinishedTime()));
+        final RaceDefinition raceDefinition = race.getRace();
         for (Competitor c : raceDefinition.getCompetitors()) {
             xteCache.put(c, new LimitedLinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>(25));
             distanceCache.put(c, new LimitedLinkedHashMap<GPSFix, Map<Waypoint, List<Distance>>>(25));
@@ -110,8 +170,106 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
-    private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+    /**
+     * For a given race start time {@code startOfRace} which is not inferred from any mark passings determines
+     * the earliest start mark passing time point. No candidates earlier than this time point need to be considered.
+     */
+    private TimePoint getTimePointWhenToStartConsideringCandidates(TimePoint startOfRace) {
+        return startOfRace == null ? null : startOfRace.minus(EARLIEST_START_MARK_PASSING_THIS_MUCH_BEFORE_START);
+    }
+    
+    /**
+     * For a given race finished time {@code finishedTime} which is not inferred from any mark passings determines
+     * the latest finish mark passing time point. No candidates later than this time point need to be considered.
+     */
+    private TimePoint getTimePointWhenToFinishConsideringCandidates(TimePoint finishedTime) {
+        return finishedTime == null ? null : finishedTime.plus(LATEST_FINISH_MARK_PASSING_THIS_MUCH_AFTER_RACE_FINISHED);
+    }
+    
+    /**
+     * Adds or removes candidates for a time range. If the {@code startOfRangeToAdd} is at or before
+     * {@code endOfRangeToAdd}, all fixes from this range for all competitors will be submitted for candidate analysis,
+     * and new candidates may emerge from this. If {@code startOfRangeToAdd} is after {@code endOfRangeToAdd}, all
+     * candidates within that (inverse) range are removed, and so are all edges attached to any of these candidates.
+     * 
+     * @param startOfRangeToAdd
+     *            the start of a range of fixes valid for candidate analysis if {@link TimePoint#before(TimePoint)}
+     *            {@code endOfRangeToAdd}; the end of the now invalid time range of fixes no longer valid for candidate
+     *            analysis otherwise; may be {@code null}, meaning that no start of the valid time range is known and
+     *            therefore all fixes from the beginning of the track up to {@code endOfRangeToAdd} are to be analyzed
+     * @param endOfRangeToAdd
+     *            the end of a range of fixes valid for candidate analysis if {@link TimePoint#after(TimePoint)}
+     *            {@code startOfRangeToAdd}; the start of the now invalid time range of fixes no longer valid for
+     *            candidate analysis otherwise; may be {@code null}, meaning that no end of the valid time range is
+     *            known and therefore all fixes starting at {@code startOfRangeToAdd} until the end of the track are to
+     *            be analyzed
+     * @return the fixes added and removed, keyed by competitor; the value pair's {@link Pair#getA() first} component
+     *         has the candidates added, the {@link Pair#getB() second} has the candidates removed
+     */
+    private Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> updateCandiatesAfterRaceTimeRangeChanged(
+            final TimePoint startOfRangeToAdd, final TimePoint endOfRangeToAdd) {
+        final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result = new HashMap<>();
+        if (startOfRangeToAdd.after(endOfRangeToAdd)) {
+            final TimeRange timeRangeToRemoveCandidatesFrom = new TimeRangeImpl(endOfRangeToAdd, startOfRangeToAdd);
+            // remove candidates in the time range starting at endOfRangeToAdd and ending at startOfRangeToAdd:
+            final Map<Competitor, Set<Candidate>> candidatesToRemovePerCompetitor = new HashMap<>();
+            removeCandidatesInTimeRange(timeRangeToRemoveCandidatesFrom, candidatesToRemovePerCompetitor, distanceCandidates);
+            removeCandidatesInTimeRange(timeRangeToRemoveCandidatesFrom, candidatesToRemovePerCompetitor, xteCandidates);
+            for (final Entry<Competitor, Set<Candidate>> e : candidatesToRemovePerCompetitor.entrySet()) {
+                result.put(e.getKey(), new Pair<>(Collections.emptySet(), e.getValue()));
+            }
+        } else {
+            for (final Competitor competitor : race.getRace().getCompetitors()) {
+                final List<GPSFix> newFixesForCompetitor = new ArrayList<>();
+                final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
+                if (track != null) {
+                    track.lockForRead();
+                    try {
+                        for (final Iterator<GPSFixMoving> i=track.getFixesIterator(startOfRangeToAdd, /* inclusive */ true); i.hasNext(); ) {
+                            final GPSFixMoving fix = i.next();
+                            if (fix.getTimePoint().after(endOfRangeToAdd)) {
+                                break;
+                            }
+                            newFixesForCompetitor.add(fix);
+                        }
+                    } finally {
+                        track.unlockAfterRead();
+                    }
+                }
+                final Pair<Iterable<Candidate>, Iterable<Candidate>> newAndRemovedCandidatesForCompetitor = getCandidateDeltas(competitor, newFixesForCompetitor);
+                result.put(competitor, newAndRemovedCandidatesForCompetitor);
+            }
+        }
+        return result;
+    }
 
+    /**
+     * @param candidatesRemovedPerCompetitor
+     *            updated by this method; candidates removed from {@code candidatePerWaypointPerCompetitor} are added to
+     *            this map, keyed by the respective competitor
+     */
+    private <K> void removeCandidatesInTimeRange(final TimeRange timeRangeToRemoveCandidatesFrom,
+            final Map<Competitor, Set<Candidate>> candidatesRemovedPerCompetitor,
+            Map<Competitor, Map<Waypoint, Map<K, Candidate>>> candidatePerWaypointPerCompetitor) {
+        for (final Entry<Competitor, Map<Waypoint, Map<K, Candidate>>> e : candidatePerWaypointPerCompetitor.entrySet()) {
+            Set<Candidate> candidatesRemoved = candidatesRemovedPerCompetitor.get(e.getKey());
+            if (candidatesRemoved == null) {
+                candidatesRemoved = new HashSet<>();
+                candidatesRemovedPerCompetitor.put(e.getKey(), candidatesRemoved);
+            }
+            for (final Map<K, Candidate> m : e.getValue().values()) {
+                for (final Iterator<Candidate> candidateIter=m.values().iterator(); candidateIter.hasNext(); ) {
+                    final Candidate candidate = candidateIter.next();
+                    if (timeRangeToRemoveCandidatesFrom.includes(candidate.getTimePoint())) {
+                        candidateIter.remove();
+                        candidatesRemoved.add(candidate);
+                    }
+                }
+            }
+        }
+    }
+
+    private class LimitedLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
         private static final long serialVersionUID = 1L;
         private int limit;
 
@@ -207,8 +365,13 @@ public class CandidateFinderImpl implements CandidateFinder {
         return new Util.Pair<Iterable<Candidate>, Iterable<Candidate>>(newCans, wrongCans);
     }
 
-    private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int indexOfChange) {
-        Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new HashMap<>();
+    /**
+     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
+     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
+     * second} element has those that have been removed.
+     */
+    private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
+        ConcurrentHashMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
         Course course = race.getRace().getCourse();
         for (Competitor c : race.getRace().getCompetitors()) {
             distanceCache.get(c).clear();
@@ -218,26 +381,38 @@ public class CandidateFinderImpl implements CandidateFinder {
         course.lockForRead();
         try {
             for (Waypoint w : course.getWaypoints()) {
-                if (course.getIndexOfWaypoint(w) > indexOfChange - 2) {
+                // The candidates for the predecessor of the first waypoint added/removed are also affected
+                // because their adjacent leg will have changed its direction, so roundings / passings have
+                // to be decided differently
+                // TODO but why are *all* subsequent waypoints "invalidated" this way? Wouldn't we by that same token only have to move to the successor of the last waypoint changed?
+                if (course.getIndexOfWaypoint(w) > zeroBasedIndexOfWaypointChanged - 2) {
                     changedWaypoints.add(w);
                 }
             }
+            final Set<Callable<Void>> tasks = new HashSet<>();;
             for (Competitor c : race.getRace().getCompetitors()) {
-                List<Candidate> badCans = new ArrayList<>();
-                List<Candidate> newCans = new ArrayList<>();
-                for (Waypoint w : changedWaypoints) {
-                    Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
-                    badCans.addAll(xteCans.values());
-                    xteCans.clear();
-                    Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
-                    badCans.addAll(distanceCans.values());
-                    distanceCans.clear();
-                }
-                Set<GPSFix> allFixes = getAllFixes(c);
-                newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
-                newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
-                result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                tasks.add(()->{
+                    List<Candidate> badCans = new ArrayList<>();
+                    List<Candidate> newCans = new ArrayList<>();
+                    for (Waypoint w : changedWaypoints) {
+                        Map<List<GPSFix>, Candidate> xteCans = getXteCandidates(c, w);
+                        badCans.addAll(xteCans.values());
+                        xteCans.clear();
+                        Map<GPSFix, Candidate> distanceCans = getDistanceCandidates(c, w);
+                        badCans.addAll(distanceCans.values());
+                        distanceCans.clear();
+                    }
+                    Set<GPSFix> allFixes = getAllFixes(c);
+                    newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
+                    newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
+                    result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
+                    return null;
+                });
             }
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            logger.log(Level.SEVERE, "Problem trying to update competitor candidate sets after waypoints starting at zero-based index "+
+                    zeroBasedIndexOfWaypointChanged+" have changed", e);
         } finally {
             course.unlockAfterRead();
         }
@@ -245,9 +420,14 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * determines the candidates that are new and those that have been removed, keyed by the competitors; the
+     * {@link Pair#getA() first} element of each value pair has the candidates that are new, the {@link Pair#getB()
+     * second} element has those that have been removed.
+     */
     @Override
     public Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> updateWaypoints(
-            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, Integer smallestIndex) {
+            Iterable<Waypoint> addedWaypoints, Iterable<Waypoint> removedWaypoints, int smallestIndex) {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
@@ -279,6 +459,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         return result;
     }
 
+    /**
+     * @return a live collection of {@link #distanceCandidates distance candidates} for competitor {@code c} passing
+     *         waypoint {@code w}.
+     */
     private Map<GPSFix, Candidate> getDistanceCandidates(Competitor c, Waypoint w) {
         synchronized (distanceCandidates) {
             Map<GPSFix, Candidate> result = distanceCandidates.get(c).get(w);
@@ -290,6 +474,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
     }
 
+    /**
+     * @return a live collection of {@link #xteCandidates cross track error candidates} for competitor {@code c} passing
+     *         waypoint {@code w}.
+     */
     private Map<List<GPSFix>, Candidate> getXteCandidates(Competitor c, Waypoint w) {
         synchronized (xteCandidates) {
             Map<List<GPSFix>, Candidate> result = xteCandidates.get(c).get(w);
@@ -336,10 +524,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         try {
             track.lockForRead();
             for (GPSFix fix : track.getFixes(
-                    race.getStartOfTracking() == null ? TimePoint.BeginningOfTime : race.getStartOfTracking(),
-                    /* fromInclusive */true,
-                    race.getEndOfTracking() == null ? TimePoint.EndOfTime : race.getEndOfTracking(),
-                    /* toInclusive */true)) {
+                    timeRangeForValidCandidates.from(), /* fromInclusive */ true,
+                    timeRangeForValidCandidates.to(),   /*  toInclusive  */ true)) {
                 fixes.add(fix);
             }
         } finally {
@@ -349,7 +535,9 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     /**
-     * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate.
+     * For each fix the distance to each waypoint is calculated. Then the fix is checked for being a candidate by
+     * checking the distance of the fix before and after. If the distance at the fix is a local minimum and the
+     * probability exceeds {@link #penaltyForSkipping}, the fix is considered a candidate.
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
             Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
@@ -358,22 +546,24 @@ public class CandidateFinderImpl implements CandidateFinder {
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            affectedFixes.add(fix);
-            GPSFix fixBefore;
-            GPSFix fixAfter;
-            try {
-                track.lockForRead();
-                TimePoint timePoint = fix.getTimePoint();
-                fixBefore = track.getLastFixBefore(timePoint);
-                fixAfter = track.getFirstFixAfter(timePoint);
-            } finally {
-                track.unlockAfterRead();
-            }
-            if (fixBefore != null) {
-                affectedFixes.add(fixBefore);
-            }
-            if (fixAfter != null) {
-                affectedFixes.add(fixAfter);
+            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+                affectedFixes.add(fix);
+                GPSFix fixBefore;
+                GPSFix fixAfter;
+                try {
+                    track.lockForRead();
+                    TimePoint timePoint = fix.getTimePoint();
+                    fixBefore = track.getLastFixBefore(timePoint);
+                    fixAfter = track.getFirstFixAfter(timePoint);
+                } finally {
+                    track.unlockAfterRead();
+                }
+                if (fixBefore != null) {
+                    affectedFixes.add(fixBefore);
+                }
+                if (fixAfter != null) {
+                    affectedFixes.add(fixAfter);
+                }
             }
         }
         for (GPSFix fix : affectedFixes) {
@@ -398,7 +588,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                     Boolean isCan = false;
                     Candidate oldCan = null;
                     Double probability = null;
-                    double sidePenalty = 1;
                     Distance distance = null;
                     Double startProbabilityBasedOnOtherCompetitors = null;
                     double onCorrectSideOfWaypoint = 0.8;
@@ -442,7 +631,6 @@ public class CandidateFinderImpl implements CandidateFinder {
                                                 && (probability == null || newProbability > probability)) {
                                             isCan = true;
                                             probability = newProbability;
-                                            sidePenalty = newOnCorrectSideOfWaypointPenalty;
                                             onCorrectSideOfWaypoint = newOnCorrectSideOfWaypointPenalty;
                                             distance = dis;
                                             startProbabilityBasedOnOtherCompetitors = newStartProbabilityBasedOnOtherCompetitors;
@@ -458,10 +646,10 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                         if (!wasCan && isCan) {
                             Candidate newCan = new DistanceCandidateImpl(race.getRace().getCourse().getIndexOfWaypoint(w) + 1,
-                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, sidePenalty, distance);
+                                    t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                         } else if (wasCan && !isCan) {
                             getDistanceCandidates(c, w).remove(fix);
                             result.getB().add(oldCan);
@@ -470,7 +658,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                                     t, probability, startProbabilityBasedOnOtherCompetitors, w, onCorrectSideOfWaypoint, distance);
                             getDistanceCandidates(c, w).put(fix, newCan);
                             result.getA().add(newCan);
-                            logger.finest("Added distance" + newCan.toString() + "for " + c);
+                            logger.finest("Added distance candidate " + newCan.toString() + "for " + c);
                             result.getB().add(oldCan);
                         }
                     }
@@ -513,108 +701,110 @@ public class CandidateFinderImpl implements CandidateFinder {
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
         for (GPSFix fix : fixes) {
-            TimePoint t = fix.getTimePoint();
-            GPSFix fixBefore;
-            GPSFix fixAfter;
-            track.lockForRead();
-            try {
-                fixBefore = track.getLastFixBefore(t);
-                fixAfter = track.getFirstFixAfter(t);
-            } finally {
-                track.unlockAfterRead();
-            }
-            Map<Waypoint, List<Distance>> xtesBefore = null;
-            Map<Waypoint, List<Distance>> xtesAfter = null;
-            TimePoint tBefore = null;
-            TimePoint tAfter = null;
-            if (fixBefore != null) {
-                xtesBefore = getXTE(c, fixBefore);
-                tBefore = fixBefore.getTimePoint();
-            }
-            if (fixAfter != null) {
-                xtesAfter = getXTE(c, fixAfter);
-                tAfter = fixAfter.getTimePoint();
-            }
-            Map<Waypoint, List<Distance>> xtes = getXTE(c, fix);
-            for (Waypoint w : waypoints) {
-                List<List<GPSFix>> oldCandidates = new ArrayList<>();
-                Map<List<GPSFix>, Candidate> newCandidates = new HashMap<List<GPSFix>, Candidate>();
-                Map<List<GPSFix>, Candidate> waypointCandidates = getXteCandidates(c, w);
-                for (List<GPSFix> fixPair : waypointCandidates.keySet()) {
-                    if (fixPair.contains(fix)) {
-                        oldCandidates.add(fixPair);
-                    }
+            if (timeRangeForValidCandidates.includes(fix.getTimePoint())) {
+                TimePoint t = fix.getTimePoint();
+                GPSFix fixBefore;
+                GPSFix fixAfter;
+                track.lockForRead();
+                try {
+                    fixBefore = track.getLastFixBefore(t);
+                    fixAfter = track.getFirstFixAfter(t);
+                } finally {
+                    track.unlockAfterRead();
                 }
-                List<Distance> wayPointXTEs = xtes.get(w);
-                int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
-                if (size > 0) {
-                    Double xte = wayPointXTEs.get(0).getMeters();
-                    if (xte == 0) {
-                        newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
-                    } else {
-                        if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
-                            Double xteAfter = xtesAfter.get(w).get(0).getMeters();
-                            if (xteAfter != null && xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter),
-                                        createCandidate(c, xte, xteAfter, t, tAfter, w, true));
-                            }
-                        }
-                        if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
-                            Double xteBefore = xtesBefore.get(w).get(0).getMeters();
-                            if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix),
-                                        createCandidate(c, xteBefore, xte, tBefore, t, w, true));
-                            }
+                Map<Waypoint, List<Distance>> xtesBefore = null;
+                Map<Waypoint, List<Distance>> xtesAfter = null;
+                TimePoint tBefore = null;
+                TimePoint tAfter = null;
+                if (fixBefore != null) {
+                    xtesBefore = getXTE(c, fixBefore);
+                    tBefore = fixBefore.getTimePoint();
+                }
+                if (fixAfter != null) {
+                    xtesAfter = getXTE(c, fixAfter);
+                    tAfter = fixAfter.getTimePoint();
+                }
+                Map<Waypoint, List<Distance>> xtes = getXTE(c, fix);
+                for (Waypoint w : waypoints) {
+                    List<List<GPSFix>> oldCandidates = new ArrayList<>();
+                    Map<List<GPSFix>, Candidate> newCandidates = new HashMap<List<GPSFix>, Candidate>();
+                    Map<List<GPSFix>, Candidate> waypointCandidates = getXteCandidates(c, w);
+                    for (List<GPSFix> fixPair : waypointCandidates.keySet()) {
+                        if (fixPair.contains(fix)) {
+                            oldCandidates.add(fixPair);
                         }
                     }
-                }
-                if (size > 1) {
-                    Double xte = wayPointXTEs.get(1).getMeters();
-                    if (xte == 0) {
-                        newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
-                    } else {
-                        if (fixAfter != null && xtesAfter != null) {
-                            Double xteAfter = xtesAfter.get(w).get(1).getMeters();
-                            if (xte < 0 != xteAfter <= 0) {
-                                newCandidates.put(Arrays.asList(fix, fixAfter),
-                                        createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                    List<Distance> wayPointXTEs = xtes.get(w);
+                    int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
+                    if (size > 0) {
+                        Double xte = wayPointXTEs.get(0).getMeters();
+                        if (xte == 0) {
+                            newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, true));
+                        } else {
+                            if (fixAfter != null && xtesAfter != null && !xtesAfter.get(w).isEmpty()) {
+                                Double xteAfter = xtesAfter.get(w).get(0).getMeters();
+                                if (xteAfter != null && xte < 0 != xteAfter <= 0) {
+                                    newCandidates.put(Arrays.asList(fix, fixAfter),
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w, true));
+                                }
                             }
-                        }
-                        if (fixBefore != null) {
-                            Double xteBefore = xtesBefore.get(w).get(1).getMeters();
-                            if (xte < 0 != xteBefore <= 0) {
-                                newCandidates.put(Arrays.asList(fixBefore, fix),
-                                        createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                            if (fixBefore != null && !xtesBefore.get(w).isEmpty()) {
+                                Double xteBefore = xtesBefore.get(w).get(0).getMeters();
+                                if (xte < 0 != xteBefore <= 0) {
+                                    newCandidates.put(Arrays.asList(fixBefore, fix),
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w, true));
+                                }
                             }
                         }
                     }
-                }
-                for (Entry<List<GPSFix>, Candidate> candidateWithFixes : newCandidates.entrySet()) {
-                    Candidate newCan = candidateWithFixes.getValue();
-                    List<GPSFix> canFixes = candidateWithFixes.getKey();
-                    if (oldCandidates.contains(canFixes)) {
-                        oldCandidates.remove(canFixes);
-                        Candidate oldCan = waypointCandidates.get(canFixes);
-                        if (newCan.compareTo(oldCan) != 0) {
-                            result.getB().add(oldCan);
-                            waypointCandidates.remove(canFixes);
+                    if (size > 1) {
+                        Double xte = wayPointXTEs.get(1).getMeters();
+                        if (xte == 0) {
+                            newCandidates.put(Arrays.asList(fix, fix), createCandidate(c, 0, 0, t, t, w, false));
+                        } else {
+                            if (fixAfter != null && xtesAfter != null && xtesAfter.get(w).size() >= 2) {
+                                Double xteAfter = xtesAfter.get(w).get(1).getMeters();
+                                if (xte < 0 != xteAfter <= 0) {
+                                    newCandidates.put(Arrays.asList(fix, fixAfter),
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                                }
+                            }
+                            if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
+                                Double xteBefore = xtesBefore.get(w).get(1).getMeters();
+                                if (xte < 0 != xteBefore <= 0) {
+                                    newCandidates.put(Arrays.asList(fixBefore, fix),
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                                }
+                            }
+                        }
+                    }
+                    for (Entry<List<GPSFix>, Candidate> candidateWithFixes : newCandidates.entrySet()) {
+                        Candidate newCan = candidateWithFixes.getValue();
+                        List<GPSFix> canFixes = candidateWithFixes.getKey();
+                        if (oldCandidates.contains(canFixes)) {
+                            oldCandidates.remove(canFixes);
+                            Candidate oldCan = waypointCandidates.get(canFixes);
+                            if (newCan.compareTo(oldCan) != 0) {
+                                result.getB().add(oldCan);
+                                waypointCandidates.remove(canFixes);
+                                if (newCan.getProbability() > penaltyForSkipping) {
+                                    result.getA().add(newCan);
+                                    logger.finest("Added XTE " + newCan.toString() + "for " + c);
+                                    waypointCandidates.put(canFixes, newCan);
+                                }
+                            }
+                        } else {
                             if (newCan.getProbability() > penaltyForSkipping) {
                                 result.getA().add(newCan);
                                 logger.finest("Added XTE " + newCan.toString() + "for " + c);
                                 waypointCandidates.put(canFixes, newCan);
                             }
                         }
-                    } else {
-                        if (newCan.getProbability() > penaltyForSkipping) {
-                            result.getA().add(newCan);
-                            logger.finest("Added XTE " + newCan.toString() + "for " + c);
-                            waypointCandidates.put(canFixes, newCan);
-                        }
                     }
-                }
-                for (List<GPSFix> badCanFixes : oldCandidates) {
-                    result.getB().add(waypointCandidates.get(badCanFixes));
-                    waypointCandidates.remove(badCanFixes);
+                    for (List<GPSFix> badCanFixes : oldCandidates) {
+                        result.getB().add(waypointCandidates.get(badCanFixes));
+                        waypointCandidates.remove(badCanFixes);
+                    }
                 }
             }
         }
@@ -1011,7 +1201,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             result = 1 / (STRICTNESS_OF_DISTANCE_BASED_PROBABILITY/* Raising this will make it stricter */
                     // reduce distance by 2x the typical HDOP, accounting for the possibility that some distance from the mark
                     // may have been caused by inaccurate GPS tracking
-                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).getMeters()) / legLength.getMeters()) + 1);
+                    * Math.abs(Math.max(0.0, distance.add(GPSFix.TYPICAL_HDOP.scale(-2)).divide(legLength))) + 1);
         } else {
             result = null;
         }
@@ -1202,6 +1392,37 @@ public class CandidateFinderImpl implements CandidateFinder {
             starboardMarkWhileApproachingLine = Util.get(w.getMarks(), 0);
         }
         return new Util.Pair<Mark, Mark>(portMarkWhileApproachingLine, starboardMarkWhileApproachingLine);
+    }
+
+    @Override
+    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceStartTimeChange() {
+        final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
+        final TimePoint newNonInferredStartTime = race.getStartOfRace(/* inferred */ false);
+        final TimePoint newTimePointWhenToStartConsideringCandidates = getTimePointWhenToStartConsideringCandidates(newNonInferredStartTime);
+        if (!Util.equalsWithNull(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from())) {
+            timeRangeForValidCandidates = new TimeRangeImpl(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.to());
+            result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, timeRangeForValidCandidates.from());
+        } else {
+            result = Collections.emptyMap();
+        }
+        return result;
+    }
+
+    @Override
+    public Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> getCandidateDeltasAfterRaceFinishedTimeChange(
+            TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+        final Map<Competitor, Pair<Iterable<Candidate>, Iterable<Candidate>>> result;
+        final TimePoint newTimePointWhenToFinishConsideringCandidates = getTimePointWhenToFinishConsideringCandidates(newFinishedTime);
+        final TimePoint oldTimePointWhenToFinishConsideringCandidates = timeRangeForValidCandidates.to();
+        if (!Util.equalsWithNull(timeRangeForValidCandidates.to(), newTimePointWhenToFinishConsideringCandidates)) {
+            timeRangeForValidCandidates = new TimeRangeImpl(timeRangeForValidCandidates.from(), newTimePointWhenToFinishConsideringCandidates);
+            result = updateCandiatesAfterRaceTimeRangeChanged(
+                    oldTimePointWhenToFinishConsideringCandidates,
+                    newTimePointWhenToFinishConsideringCandidates);
+        } else {
+            result = Collections.emptyMap();
+        }
+        return result;
     }
 
 }

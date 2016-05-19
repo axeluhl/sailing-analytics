@@ -4,6 +4,8 @@
     <string name="course_type">Kurstyp</string>
     <string name="marks">Kursmarkierungen</string>
     <string name="set_position">Position setzen</string>
+    <string name="set_position_disabled_gps">POSITION SETZEN\nBitte GPS aktivieren</string>
+    <string name="set_position_no_gps_yet">POSITION SETZEN\nWarte auf GPS Verbindung</string>
     <string name="reset_position">Position zurücksetzen</string>
     <string name="getting_marks">Empfangen der Markierungen&#8230;</string>
     <string name="set">Gesetzt</string>
@@ -26,5 +28,8 @@
     <string name="server_sync_settings">Abfrage Intervall (Sekunden)</string>
 
     <string name="options_menu_checkout">Checkout</string>
+    <string name="checkout_warning_message">Möchten Sie sich wirklich ausloggen? Sie müssen sich erneut mit dem QR code einloggen, um ihre Bojen zu sehen!</string>
+
+    <string name="no_marks_message">Kein Bojen</string>
 
 </resources>

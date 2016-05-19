@@ -258,8 +258,7 @@ public class CheckinManager {
         checkinData = data;
         if (activity != null) {
             activity.onCheckinDataAvailable(getCheckinData());
-        }
-        else if (dataChangedListner != null){
+        } else if (dataChangedListner != null){
             dataChangedListner.handleData(data);
         }
     }

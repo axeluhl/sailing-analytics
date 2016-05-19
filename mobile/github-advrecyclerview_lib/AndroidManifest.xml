@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
        Copyright (C) 2015 Haruki Hasegawa
 
@@ -14,10 +15,12 @@
        limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.h6ah4i.android.widget.advrecyclerview">
+    package="com.h6ah4i.android.widget.advrecyclerview"
+    android:versionCode="9"
+    android:versionName="0.7.4" >
 
-    <application>
-        <!--suppress AndroidDomInspection -->
-        <activity android:name=".TestActivity"/>
-    </application>
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="22" />
+
 </manifest>
