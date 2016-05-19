@@ -117,6 +117,14 @@ public interface DynamicTrackedRace extends TrackedRace {
      * significantly off.
      */
     void setStartTimeReceived(TimePoint start);
+
+    /**
+     * A new finished time has been received by the {@link DynamicTrackedRaceLogListener} and is announced to this race
+     * by calling this method. The {@link RaceChangeListener}s will be
+     * {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint) notified} about this change, and the result
+     * of {@link #getFinishedTime()} will return the {@code newFinishedTime} after this call returns.
+     */
+    void setFinishedTime(final TimePoint newFinishedTime);
     
     /** Sets the start of tracking as received from the tracking infrastructure.
      * This isn't necessarily what {@link #getStartOfTracking()} will deliver because we might consider other values to
@@ -172,7 +180,6 @@ public interface DynamicTrackedRace extends TrackedRace {
     void onCourseDesignChangedByRaceCommittee(CourseBase courseDesign);
     
     void onStartTimeChangedByRaceCommittee(TimePoint newStartTime);
-    void onFinishedTimeChangedByRaceCommittee(TimePoint newFinishedTime);
     
     void onAbortedByRaceCommittee(Flags flag);
 

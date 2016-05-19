@@ -45,7 +45,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     
     public ResultSelectionAndApplyDialog(EditableLeaderboardPanel leaderboardPanel, Iterable<String> scoreCorrectionProviderNames, 
             SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter) {
-        super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(),
+        super(stringMessages.importOfficialResults(), null, stringMessages.ok(), stringMessages.cancel(), new Validator(stringMessages),
                 new Callback(sailingService, leaderboardPanel, errorReporter, stringMessages));
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
@@ -180,11 +180,17 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
     }
 
     private static class Validator implements DataEntryDialog.Validator<Util.Triple<String, String, Util.Pair<String, Date>>> {
+        private final StringMessages stringMessages;
+
+        public Validator(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
         @Override
         public String getErrorMessage(Util.Triple<String, String, Util.Pair<String, Date>> valueToValidate) {
             String errorMessage = null;
-            if(valueToValidate == null) {
-                errorMessage = "";
+            if (valueToValidate == null) {
+                errorMessage = stringMessages.pleaseSelectAScoringResult();
             }
             return errorMessage;
         }
@@ -257,7 +263,7 @@ public class ResultSelectionAndApplyDialog extends DataEntryDialog<Util.Triple<S
          if (selectedProviderIndex > 0) {
              String selectedProviderName = scoreCorrectionProviderListBox.getItemText(selectedProviderIndex);
              int selectedScoreCorrectionIndex = scoreCorrectionListBox.getSelectedIndex();
-             if(selectedScoreCorrectionIndex > 0) {
+             if (selectedScoreCorrectionIndex > 0) {
                  Util.Pair<String, Util.Pair<String, Date>> pair = scoreCorrections.get(scoreCorrectionListBox.getValue(selectedScoreCorrectionIndex));
                  result = new Util.Triple<String, String, Util.Pair<String, Date>>(selectedProviderName, pair.getA(), pair.getB());
              }

@@ -5,7 +5,6 @@ package com.sap.sse.common.util;
  * GWT context does not offer full implementations of URL/URI. *
  */
 public interface UrlHelper {
-    String encodeUrl(String decodedUrlString);
-    
+
     String encodeQueryString(String queryString);
 }

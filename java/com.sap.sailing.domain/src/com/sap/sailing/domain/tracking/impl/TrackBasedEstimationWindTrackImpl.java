@@ -621,6 +621,12 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         }
 
         @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // no action required; we're calculating based on each competitor's individual finishing time, not the finishing of
+            // the race
+        }
+
+        @Override
         public void startTimeReceivedChanged(TimePoint startTimeReceived) {
         }
 

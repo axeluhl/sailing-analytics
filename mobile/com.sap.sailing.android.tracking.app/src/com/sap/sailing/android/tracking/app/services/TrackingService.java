@@ -1,5 +1,11 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -31,13 +37,11 @@ import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
+import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.UUID;
 
 public class TrackingService extends Service implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -153,16 +157,26 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        // no-op
     }
 
     public void reportGPSQualityBearingAndSpeed(float gpsAccurracy, float bearing, float speed, double latitude,
             double longitude, double altitude) {
+        Bearing bearingImpl = null;
+        Speed speedImpl = null;
 
-        if (prefs.getDisplayHeadingWithSubtractedDeclination()) {
+        if (bearing != 0.0) {
+            bearingImpl = new DegreeBearingImpl(bearing);
+        }
+
+        if (speed > 0.0) {
+            speedImpl = new MeterPerSecondSpeedImpl(speed);
+        }
+
+        if (prefs.getDisplayHeadingWithSubtractedDeclination() && bearingImpl != null) {
             GeomagneticField geomagneticField = new GeomagneticField((float) latitude, (float) longitude,
                     (float) altitude, System.currentTimeMillis());
-            bearing = bearing - geomagneticField.getDeclination();
+            bearingImpl.add(new DegreeBearingImpl(- geomagneticField.getDeclination()));
         }
 
         GPSQuality quality = GPSQuality.noSignal;
@@ -175,7 +189,7 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
                 quality = GPSQuality.great;
             }
 
-            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearing, speed);
+            gpsQualityListener.gpsQualityAndAccurracyUpdated(quality, gpsAccurracy, bearingImpl, speedImpl);
         }
     }
 
@@ -324,8 +338,8 @@ public class TrackingService extends Service implements GoogleApiClient.Connecti
     }
 
     public interface GPSQualityListener {
-        public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float gpsBearing,
-                float gpsSpeed);
+        void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
+            Speed gpsSpeed);
     }
 
 }

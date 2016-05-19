@@ -134,13 +134,13 @@ public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
                     
                     @Override
                     public void visit(RaceLogStartTimeEvent event) {
-                        trackedRace.updateStartAndEndOfTracking();
+                        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
                     }
                     
                     @Override
                     public void visit(RaceLogRaceStatusEvent event) {
                         if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
-                            trackedRace.updateStartAndEndOfTracking();
+                            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
                         }
                     }
                 };
@@ -252,13 +252,13 @@ public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.updateStartAndEndOfTracking();
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.updateStartAndEndOfTracking();
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         }
     }
 

@@ -592,7 +592,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         Executor simulatorExecutor = new ThreadPoolExecutor(/* corePoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* maximumPoolSize */SIMULATION_THREAD_POOL_SIZE,
         /* keepAliveTime */60, TimeUnit.SECONDS,
-        /* workQueue */new LinkedBlockingQueue<Runnable>());
+        /* workQueue */new LinkedBlockingQueue<Runnable>(),  new ThreadFactoryWithPriority(
+                Thread.NORM_PRIORITY, /* daemon */true));
         // TODO: initialize smart-future-cache for simulation-results and add to simulation-service
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
         this.raceLogReplicator = new RaceLogReplicator(this);
@@ -1646,6 +1647,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void startOfRaceChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
             // no action required; the update signaled by this call is implicit; for explicit updates
             // see raceTimesChanged(TimePoint, TimePoint, TimePoint).
+        }
+
+        @Override
+        public void finishedTimeChanged(TimePoint oldFinishedTime, TimePoint newFinishedTime) {
+            // no action required; the update signaled by this call is implicit; the race log
+            // updates that led to this change are replicated separately
         }
 
         @Override

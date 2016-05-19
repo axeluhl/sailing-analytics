@@ -161,10 +161,10 @@ public class TestStoringAndRetrievingLeaderboardGroups extends AbstractMongoDBTe
         Leaderboard loadedOverallLeaderboard = loadedLeaderboardGroup.getOverallLeaderboard();
         final RaceColumn leaderboard3Column = loadedOverallLeaderboard.getRaceColumnByName("Leaderboard 3");
         assertTrue(loadedOverallLeaderboard.getScoreCorrection().hasCorrectionFor(leaderboard3Column));
-        final Double totalPoints = loadedOverallLeaderboard.getTotalPoints(wolfgang, leaderboard3Column,
+        final Double netPoints = loadedOverallLeaderboard.getNetPoints(wolfgang, leaderboard3Column,
                 MillisecondsTimePoint.now());
-        assertNotNull(totalPoints);
-        assertEquals(99.9, totalPoints, 0.00000000001);
+        assertNotNull(netPoints);
+        assertEquals(99.9, netPoints, 0.00000000001);
     }
 
     @Test

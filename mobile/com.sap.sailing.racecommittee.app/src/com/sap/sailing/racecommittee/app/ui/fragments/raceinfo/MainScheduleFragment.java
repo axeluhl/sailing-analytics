@@ -124,7 +124,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, getRace()));
+                openFragment(CourseFragment.newInstance(START_MODE_PRESETUP, preferences));
             }
         };
         SelectionItem courseItem = new SelectionItem(getString(R.string.course), null, null, false, false, runnable);
@@ -185,7 +185,7 @@ public class MainScheduleFragment extends BaseFragment implements View.OnClickLi
                             openFragment(GateStartTimingFragment.newInstance(START_MODE_PRESETUP));
                         }
                     };
-                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper.getGateTiming(getActivity(), procedure), null, false, false, runnableTiming));
+                    mItems.add(new SelectionItem(getString(R.string.gate_start_timing), RaceHelper.getGateTiming(getActivity(), procedure, getRace().getRaceGroup()), null, false, false, runnableTiming));
                 }
             } else if (RacingProcedureType.ESS.equals(mRacingProcedureType)) {
                 // Extreme Sailing Series

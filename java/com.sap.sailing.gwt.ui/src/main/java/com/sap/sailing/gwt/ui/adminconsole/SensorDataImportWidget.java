@@ -12,7 +12,7 @@ public class SensorDataImportWidget extends AbstractFileImportWidget implements 
 
     public SensorDataImportWidget(TrackFileImportDeviceIdentifierTableWrapper table, StringMessages stringMessages,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
-        super("/sailingserver/sensordata/import", stringMessages.importFixes(), table, sailingService, errorReporter);
+        super("/sailingserver/sensordata/import", stringMessages, table, sailingService, errorReporter);
         setMultipleFileUploadEnabled(true);
     }
 

@@ -33,6 +33,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesDeviceConfigurationLoader;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaSpecificPreferenceFragment;
 import com.sap.sailing.racecommittee.app.ui.views.decoration.PreferenceMarginItemDecoration;
 
 public class MainPreferenceFragment extends LoggableFragment {
@@ -54,14 +58,10 @@ public class MainPreferenceFragment extends LoggableFragment {
         RecyclerView recyclerView = ViewHelper.get(layout, R.id.preference_header);
         if (recyclerView != null) {
             ArrayList<PreferenceItem> items = new ArrayList<>();
-            items
-                .add(new PreferenceItem(getString(R.string.settings_category_general), R.drawable.ic_more_horiz_yellow_24dp, "com.sap.sailing.racecommittee.app.ui.fragments.preference.GeneralPreferenceFragment"));
-            items
-                .add(new PreferenceItem(getString(R.string.settings_category_regatta_defaults), R.drawable.ic_boat_yellow_24dp, "com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaPreferenceFragment"));
-            items
-                .add(new PreferenceItem(getString(R.string.settings_category_regattas), R.drawable.ic_boat_yellow_24dp, "com.sap.sailing.racecommittee.app.ui.fragments.preference.RegattaSpecificPreferenceFragment"));
-            items
-                .add(new PreferenceItem(getString(R.string.settings_category_course_designer), R.drawable.ic_pin_drop_yellow_24dp, "com.sap.sailing.racecommittee.app.ui.fragments.preference.CourseDesignerPreferenceFragment"));
+            items.add(new PreferenceItem(getString(R.string.settings_category_general), R.drawable.ic_more_horiz_yellow_24dp, GeneralPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_regatta_defaults), R.drawable.ic_boat_yellow_24dp, RegattaPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_regattas), R.drawable.ic_boat_yellow_24dp, RegattaSpecificPreferenceFragment.class.getName()));
+            items.add(new PreferenceItem(getString(R.string.settings_category_course_designer), R.drawable.ic_pin_drop_yellow_24dp, CourseDesignerPreferenceFragment.class.getName()));
             items.add(new PreferenceItem(getString(R.string.reload_config), R.drawable.ic_autorenew_yellow_24dp, new Runnable() {
                 @Override
                 public void run() {
