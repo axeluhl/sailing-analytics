@@ -36,17 +36,19 @@ public class QRCodeData {
             serverUrl! += ":" + url!.port!.stringValue
         }
         
+        let comps = NSURLComponents(string: (url?.absoluteString)!);
+        comps!.percentEncodedQuery = comps!.percentEncodedQuery!.stringByReplacingOccurrencesOfString("+", withString: "%20");
+     
         // Get query parameter
-        eventId = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.eventId) // queryStringDictionary[QRCodeData.Keys.eventId]
-        leaderBoardName = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.leaderBoardName)
-        competitorId = getQueryStringParameter(url!.absoluteString, param: QRCodeData.Keys.competitorId) // queryStringDictionary[QRCodeData.Keys.competitorId]
+        eventId = getQueryStringParameter(comps!, param: QRCodeData.Keys.eventId) // queryStringDictionary[QRCodeData.Keys.eventId]
+        leaderBoardName = getQueryStringParameter(comps!, param: QRCodeData.Keys.leaderBoardName)
+        competitorId = getQueryStringParameter(comps!, param: QRCodeData.Keys.competitorId) // queryStringDictionary[QRCodeData.Keys.competitorId]
+        
         return eventId != nil && leaderBoardName != nil && competitorId != nil
     }
     
-    func getQueryStringParameter(url: String, param: String) -> String? {
-        return NSURLComponents(string: url)?.queryItems?.filter({ (item) -> Bool in
-            item.name == param
-        }).first?.value?.stringByRemovingPercentEncoding;
+    func getQueryStringParameter(comps: NSURLComponents, param: String) -> String? {
+        return comps.queryItems?.filter({(item) -> Bool in item.name == param}).first?.value;
     }
     
 }
