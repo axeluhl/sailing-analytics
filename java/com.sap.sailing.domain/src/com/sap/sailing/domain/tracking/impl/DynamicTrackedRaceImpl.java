@@ -866,11 +866,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * Making this method publicly visible for those tests seeing this implementation class
      */
     public void setStartOfTrackingReceived(TimePoint startOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        TimePoint oldStartOfTracking = getStartOfTracking();
-        if (!Util.equalsWithNull(startOfTrackingReceived, oldStartOfTracking)) {
-            super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersStartOfTrackingChanged(oldStartOfTracking, startOfTrackingReceived);
-        }
+        super.setStartOfTrackingReceived(startOfTrackingReceived, waitForGPSFixesToLoad);
     }
     
     @Override
@@ -893,11 +889,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * Making this method publicly visible for those tests seeing this implementation class
      */
     public void setEndOfTrackingReceived(final TimePoint endOfTrackingReceived, final boolean waitForGPSFixesToLoad) {
-        TimePoint oldEndOfTracking = getEndOfTracking();
-        if (!Util.equalsWithNull(endOfTrackingReceived, oldEndOfTracking)) {
-            super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
-            notifyListenersEndOfTrackingChanged(oldEndOfTracking, endOfTrackingReceived);
-        }
+        super.setEndOfTrackingReceived(endOfTrackingReceived, waitForGPSFixesToLoad);
     }
 
     @Override
