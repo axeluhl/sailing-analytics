@@ -661,6 +661,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking() { 
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) { 
     }
 }
