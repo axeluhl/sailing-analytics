@@ -219,12 +219,12 @@ public class TrackedRaceStartTimeInferenceTest extends AbstractGPSFixStoreTest {
         final TimePoint[] newStartAndEndOfTrackingNotifiedByRace = new TimePoint[2];
         trackedRace.addListener(new AbstractRaceChangeListener() {
             @Override
-            public void startOfTrackingChanged(TimePoint startOfTracking) {
-                newStartAndEndOfTrackingNotifiedByRace[0] = startOfTracking;
+            public void startOfTrackingChanged(TimePoint oldStartOfRace, TimePoint newStartOfRace) {
+                newStartAndEndOfTrackingNotifiedByRace[0] = newStartOfRace;
             }
             @Override
-            public void endOfTrackingChanged(TimePoint endOfTracking) {
-                newStartAndEndOfTrackingNotifiedByRace[1] = endOfTracking;
+            public void endOfTrackingChanged(TimePoint oldEndOfTracking, TimePoint newEndOfTracking) {
+                newStartAndEndOfTrackingNotifiedByRace[1] = newEndOfTracking;
             }
         });
         assertNull(trackedRace.getStartOfTracking());
