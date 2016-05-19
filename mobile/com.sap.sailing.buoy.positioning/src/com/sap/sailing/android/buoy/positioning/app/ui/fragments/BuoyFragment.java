@@ -215,7 +215,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             updateMap();
         }
 
-        if (initialLocationUpdate) {
+        if (initialLocationUpdate && lastKnownLocation != null) {
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
