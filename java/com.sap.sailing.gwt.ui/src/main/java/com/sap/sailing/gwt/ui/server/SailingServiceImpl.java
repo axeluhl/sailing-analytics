@@ -4921,7 +4921,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
-        // TODO If new is null and current is not, current should be revoked.
+        // the tracking start/end time events are not revoked; updates with null as TimePoint may be added instead
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
             raceLog.add(new RaceLogStartOfTrackingEventImpl(
                     dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),
