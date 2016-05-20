@@ -500,22 +500,17 @@ public class CandidateFinderImpl implements CandidateFinder {
             instruction = PassingInstruction.Line;
         }
         if (instruction == PassingInstruction.None || instruction == null) {
-            if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
-                instruction = PassingInstruction.Line;
-            } else {
-                int numberofMarks = 0;
-                Iterator<Mark> it = w.getMarks().iterator();
-                while (it.hasNext()) {
-                    it.next();
-                    numberofMarks++;
-                }
-                if (numberofMarks == 2) {
-                    instruction = PassingInstruction.Gate;
-                } else if (numberofMarks == 1) {
-                    instruction = PassingInstruction.Single_Unknown;
+            final int numberOfMarks = Util.size(w.getMarks());
+            if (numberOfMarks == 2) {
+                if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
+                    instruction = PassingInstruction.Line;
                 } else {
-                    instruction = PassingInstruction.None;
+                    instruction = PassingInstruction.Gate;
                 }
+            } else if (numberOfMarks == 1) {
+                instruction = PassingInstruction.Single_Unknown;
+            } else {
+                instruction = PassingInstruction.None;
             }
         }
         return instruction;
@@ -738,7 +733,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                     }
                     List<Distance> wayPointXTEs = xtes.get(w);
-                    int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
+                    final int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
                     if (size > 0) {
                         Double xte = wayPointXTEs.get(0).getMeters();
                         if (xte == 0) {
@@ -769,14 +764,16 @@ public class CandidateFinderImpl implements CandidateFinder {
                                 Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                                 if (xte < 0 != xteAfter <= 0) {
                                     newCandidates.put(Arrays.asList(fix, fixAfter),
-                                            createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w,
+                                                    /* still portMark in case of single-mark waypoint */ Util.size(w.getMarks()) < 2));
                                 }
                             }
                             if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
                                 Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                                 if (xte < 0 != xteBefore <= 0) {
                                     newCandidates.put(Arrays.asList(fixBefore, fix),
-                                            createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w,
+                                                    /* still portMark in case of single-mark waypoint */ Util.size(w.getMarks()) < 2));
                                 }
                             }
                         }
