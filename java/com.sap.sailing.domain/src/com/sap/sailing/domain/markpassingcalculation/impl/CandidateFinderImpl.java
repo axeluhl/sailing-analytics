@@ -431,7 +431,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
-            newAndUpdatedCandidates.get(entry.getKey()).getB().addAll(entry.getValue());
+            final Pair<List<Candidate>, List<Candidate>> candidatesForCompetitor = newAndUpdatedCandidates.get(entry.getKey());
+            if (candidatesForCompetitor != null) { // only possible if an exception struck in invalidateAfterCourseChange for the competitor
+                candidatesForCompetitor.getB().addAll(entry.getValue());
+            }
         }
         return newAndUpdatedCandidates;
     }
@@ -1333,21 +1336,41 @@ public class CandidateFinderImpl implements CandidateFinder {
                         after.getBearingGreatCircle(starboardPosition));
                 result.add(new Util.Pair<Position, Bearing>(starboardPosition, crossingStarboard));
             }
-        } else {
+        } else { // single mark
             Bearing b = null;
-            Position p;
+            Position p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
             if (instruction == PassingInstruction.FixedBearing) {
                 b = w.getFixedBearing();
             } else {
-                // TODO If the first of last waypoint is not a gate or line, this will lead to issues
-                Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
-                Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
-                if (before != null && after != null) {
-                    b = before.middle(after.reverse());
+                // If the first of last waypoint is a single mark, check the passing instructions and create a "beam"
+                // emerging orthogonal to the adjacent leg's direction from the mark to the side indicated by the
+                // passing instructions. If no passing instructions are given, construct two lines, one to each direction
+                // orthogonally to the adjacent leg:
+                if (w == race.getRace().getCourse().getFirstWaypoint()) {
+                    if (instruction == PassingInstruction.None || instruction == PassingInstruction.Single_Unknown) {
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(90));
+                        result.add(new Pair<>(p, b));
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(270));
+                    } else {
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(instruction == PassingInstruction.Port ? 90 : 270));
+                    }
+                } else if (w == race.getRace().getCourse().getLastWaypoint()) {
+                    if (instruction == PassingInstruction.None || instruction == PassingInstruction.Single_Unknown) {
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(90));
+                        result.add(new Pair<>(p, b));
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(270));
+                    } else {
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(instruction == PassingInstruction.Port ? 90 : 270));
+                    }
+                } else {
+                    Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
+                    Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
+                    if (before != null && after != null) {
+                        b = before.middle(after.reverse());
+                    }
                 }
             }
-            p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
-            result.add(new Util.Pair<Position, Bearing>(p, b));
+            result.add(new Pair<>(p, b));
         }
         return result;
     }
