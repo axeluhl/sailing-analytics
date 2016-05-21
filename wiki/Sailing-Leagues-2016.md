@@ -2,6 +2,12 @@
 
 ## bundesliga2016
 
+### URL
+- Public ELB: https://bundesliga2016.sapsailing.com
+- Public ELB: https://bundesliga2-2016.sapsailing.com
+- Public Master WEB: https://bundesliga2016-master.sapsailing.com
+- Master Instance: `german-master.league.sapsailing.com`
+
 ### Firing up replica's
 
 ```
@@ -17,6 +23,11 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## danishleague2016
+
+### URL
+- Public ELB: https://danishleague2016.sapsailing.com
+- Public Master WEB: https://danishleague2016-master.sapsailing.com
+- Master Instance: `danish-master.league.sapsailing.com`
 
 ### Firing up replica's
 
@@ -34,6 +45,11 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 
 ## dutchleague2016
 
+### URL
+- Public ELB: https://dutchleague2016.sapsailing.com
+- Public Master WEB: https://durchleague2016-master.sapsailing.com
+- Master Instance: `dutch-master.league.sapsailing.com`
+
 ### Firing up replica's
 
 ```
@@ -49,6 +65,11 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## norwegianleague2016
+
+### URL
+- Public ELB: https://norwegianleage2016.sapsailing.com
+- Public Master WEB: https://norwegianleague2016-master.sapsailing.com
+- Master Instance: `norwegian-master.league.sapsailing.com`
 
 ### Firing up replica's
 
@@ -66,6 +87,11 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 
 ## swedishleague2016
 
+### URL
+- Public ELB: https://swedishleague2016.sapsailing.com
+- Public Master WEB: https://swedishleague2016-master.sapsailing.com
+- Master Instance: `swedish-master.league.sapsailing.com`
+
 ### Firing up replica's
 
 ```
@@ -81,6 +107,11 @@ SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## finnishleague2016
+
+### URL
+- Public ELB: https://finnishleague2016.sapsailing.com
+- Public Master WEB: https://finnishleague2016-master.sapsailing.com
+- Master Instance: `finnish-master.league.sapsailing.com`
 
 ### Firing up replica's
 
