@@ -5,7 +5,15 @@
 ### Firing up replica's
 
 ```
-TBD
+INSTALL_FROM_RELEASE=build-201605131237
+USE_ENVIRONMENT=live-replica-server
+REPLICATE_MASTER_SERVLET_HOST=172.31.19.178
+REPLICATE_MASTER_EXCHANGE_NAME=germanleague2016
+REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl
+SERVER_NAME=germanleague2016
+MONGODB_NAME=germanleague2016-replica
+EVENT_ID=85a865fd-6af2-4ac6-90d6-7c5c592a0975
+SERVER_STARTUP_NOTIFY=steffen.tobias.wagner@sap.com
 ```
 
 ## danishleague2016
