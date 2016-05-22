@@ -36,19 +36,21 @@ public class QRCodeData {
             serverUrl! += ":" + url!.port!.stringValue
         }
         
-        let comps = NSURLComponents(string: (url?.absoluteString)!);
-        comps!.percentEncodedQuery = comps!.percentEncodedQuery!.stringByReplacingOccurrencesOfString("+", withString: "%20");
-     
+        // Get query items and replace '+' occurrences with '%20' as a workaround for bug 3664
+        let components = NSURLComponents(string: (url?.absoluteString)!)
+        components!.percentEncodedQuery = components!.percentEncodedQuery!.stringByReplacingOccurrencesOfString("+", withString: "%20")
+        let queryItems = components?.queryItems
+        
         // Get query parameter
-        eventId = getQueryStringParameter(comps!, param: QRCodeData.Keys.eventId) // queryStringDictionary[QRCodeData.Keys.eventId]
-        leaderBoardName = getQueryStringParameter(comps!, param: QRCodeData.Keys.leaderBoardName)
-        competitorId = getQueryStringParameter(comps!, param: QRCodeData.Keys.competitorId) // queryStringDictionary[QRCodeData.Keys.competitorId]
+        eventId = queryItemValue(queryItems, itemName: QRCodeData.Keys.eventId)
+        leaderBoardName = queryItemValue(queryItems, itemName: QRCodeData.Keys.leaderBoardName)
+        competitorId = queryItemValue(queryItems, itemName: QRCodeData.Keys.competitorId)
         
         return eventId != nil && leaderBoardName != nil && competitorId != nil
     }
     
-    func getQueryStringParameter(comps: NSURLComponents, param: String) -> String? {
-        return comps.queryItems?.filter({(item) -> Bool in item.name == param}).first?.value;
+    func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {
+        return queryItems?.filter({(item) -> Bool in item.name == itemName}).first?.value
     }
     
 }
