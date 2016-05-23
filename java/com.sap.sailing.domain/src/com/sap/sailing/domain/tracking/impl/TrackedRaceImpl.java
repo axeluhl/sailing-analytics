@@ -105,7 +105,6 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalablePosition;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -122,7 +121,6 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -149,7 +147,6 @@ import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
-import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
@@ -1995,19 +1992,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     protected void startOfTrackingChanged(final TimePoint oldStartOfTracking, boolean waitForGPSFixesToLoad) {
-        TimePoint inferredStartOfTracking = getStartOfTracking();
-        if (!Util.equalsWithNull(oldStartOfTracking, inferredStartOfTracking) &&
-                (inferredStartOfTracking == null || (oldStartOfTracking != null && inferredStartOfTracking.before(oldStartOfTracking)))) {
-            logger.info("Loading fixes after start of tracking for "+getRace()+" has been extended from "+oldStartOfTracking+" to "+inferredStartOfTracking);
-            loadGPSFixesForExtendedTimeRange(inferredStartOfTracking, oldStartOfTracking, waitForGPSFixesToLoad);
-        }
-    }
-
-    private void loadGPSFixesForExtendedTimeRange(final TimePoint start, final TimePoint end, final boolean waitForGPSFixesToLoad) {
-        for (final RegattaLog regattaLog : attachedRegattaLogs.values()) {
-            loadFixesForLog(regattaLog, /* no need to addLogToMap because log has already been added during attachRaceLog */ null,
-                    /* startOfTimeWindowToLoad */ start, /* endOfTimeWindowToLoad */ end, waitForGPSFixesToLoad);
-        }
     }
 
     protected void setEndOfTrackingReceived(final TimePoint endOfTracking, final boolean waitForGPSFixesToLoad) {
@@ -2016,12 +2000,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
     
     protected void endOfTrackingChanged(final TimePoint oldEndOfTracking, boolean waitForGPSFixesToLoad) {
-        TimePoint inferredEndOfTracking = getEndOfTracking();
-        if (!Util.equalsWithNull(oldEndOfTracking, inferredEndOfTracking) &&
-                (inferredEndOfTracking == null || (oldEndOfTracking != null && inferredEndOfTracking.after(oldEndOfTracking)))) {
-            logger.info("Loading fixes after end of tracking for "+getRace()+" has been extended from "+oldEndOfTracking+" to "+inferredEndOfTracking);
-            loadGPSFixesForExtendedTimeRange(oldEndOfTracking, inferredEndOfTracking, waitForGPSFixesToLoad);
-        }
     }
 
     /**
@@ -3420,23 +3398,23 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
                     TrackedRaceImpl.this.notifyAll();
                 }
                 try {
-                    logger.info("Started loading competitor tracks for " + getRace().getName() + " for log " + log.getId());
-                    for (Competitor competitor : race.getCompetitors()) {
-                        try {
-                            gpsFixStore.loadCompetitorTrack(
-                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
-                                    competitor, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load track for " + competitor, e);
-                        }
-                    }
-                    logger.info("Finished loading competitor tracks for " + getRace().getName());
-                    logger.info("Started loading mark tracks for " + getRace().getName());
-                    for (Mark mark : getMarksFromRegattaLogs()) {
-                        final DynamicGPSFixTrack<Mark, GPSFix> markTrack = (DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark);
-                        loadMarkTrack(log, mark, markTrack, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
-                    }
-                    logger.info("Finished loading mark tracks for " + getRace().getName());
+//                    logger.info("Started loading competitor tracks for " + getRace().getName() + " for log " + log.getId());
+//                    for (Competitor competitor : race.getCompetitors()) {
+//                        try {
+//                            gpsFixStore.loadCompetitorTrack(
+//                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
+//                                    competitor, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
+//                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+//                            logger.log(Level.WARNING, "Could not load track for " + competitor, e);
+//                        }
+//                    }
+//                    logger.info("Finished loading competitor tracks for " + getRace().getName());
+//                    logger.info("Started loading mark tracks for " + getRace().getName());
+//                    for (Mark mark : getMarksFromRegattaLogs()) {
+//                        final DynamicGPSFixTrack<Mark, GPSFix> markTrack = (DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark);
+//                        loadMarkTrack(log, mark, markTrack, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
+//                    }
+//                    logger.info("Finished loading mark tracks for " + getRace().getName());
                 } finally {
                     synchronized (TrackedRaceImpl.this) {
                         loadingFromGPSFixStore = false;
@@ -3455,32 +3433,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             } catch (InterruptedException e) {
                 logger.log(Level.WARNING, "Got interrupted while waiting for loading of GPS fixes from log "+log+" to finish", e);
             }
-        }
-    }
-
-    /**
-     * Loads the GPS fixes for a mark from the {@link #gpsFixStore} and adds them to {@code intoTrack}. The device
-     * mappings are expected to be found in {@code logWithDeviceMappings}. The fixes added have to be within
-     * {@code from} and {@code to}, inclusively, with one exception: if no fix is found within this interval at all, all
-     * fixes found for the mark are loaded to make sure that any position data that may give a hint for the interval
-     * requests is loaded.
-     */
-    private void loadMarkTrack(final RegattaLog logWithDeviceMappings, Mark mark,
-            final DynamicGPSFixTrack<Mark, GPSFix> intoTrack, final TimePoint from, final TimePoint to) {
-        try {
-            gpsFixStore.loadMarkTrack(intoTrack, logWithDeviceMappings, mark, from, to);
-            if (intoTrack.getFirstRawFix() == null) {
-                logger.fine("Loading mark positions from outside of start/end of tracking interval ("+
-                        from+".."+to+
-                        ") because no fixes were found in that interval");
-                // got an empty track for the mark; try again without constraining the mapping interval
-                // by start/end of tracking to at least attempt to get fixes at all in case there were any
-                // within the device mapping interval specified
-                gpsFixStore.loadMarkTrack(intoTrack,
-                        logWithDeviceMappings, mark, /* startOfTimeWindowToLoad */ null, /* endOfTimeWindowToLoad */ null);
-            }
-        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-            logger.log(Level.WARNING, "Could not load track for " + mark, e);
         }
     }
 
