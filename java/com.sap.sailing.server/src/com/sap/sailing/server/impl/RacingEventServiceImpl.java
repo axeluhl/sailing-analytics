@@ -137,7 +137,6 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
-import com.sap.sailing.domain.racelog.tracking.EmptyGPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -1571,8 +1570,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         public void raceAdded(TrackedRace trackedRace) {
             // replicate the addition of the tracked race:
             CreateTrackedRace op = new CreateTrackedRace(trackedRace.getRaceIdentifier(), trackedRace.getWindStore(),
-                    /* FIXME Remove parameter */ EmptyGPSFixStore.INSTANCE, trackedRace.getDelayToLiveInMillis(),
-                    trackedRace.getMillisecondsOverWhichToAverageWind(),
+                    trackedRace.getDelayToLiveInMillis(), trackedRace.getMillisecondsOverWhichToAverageWind(),
                     trackedRace.getMillisecondsOverWhichToAverageSpeed());
             replicate(op);
             linkRaceToConfiguredLeaderboardColumns(trackedRace);
