@@ -836,8 +836,6 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     SpeedWithConfidence<TimePoint> getAverageWindSpeedWithConfidence(long resolutionInMillis);
     
-    GPSFixStore getGPSFixStore();
-
     /**
      * Computes the center point of the course's marks at the given time point.
      */

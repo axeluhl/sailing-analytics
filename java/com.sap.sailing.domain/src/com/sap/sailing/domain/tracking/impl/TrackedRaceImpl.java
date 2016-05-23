@@ -3912,11 +3912,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return competitorSpeedWhenPassingStart;
     }
     
-    @Override
-    public GPSFixStore getGPSFixStore() {
-    	return null;
-    }
-    
     protected abstract MarkPassingCalculator createMarkPassingCalculator();
     
     @Override

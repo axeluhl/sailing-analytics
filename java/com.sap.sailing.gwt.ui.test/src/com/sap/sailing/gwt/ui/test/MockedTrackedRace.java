@@ -679,11 +679,6 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public GPSFixStore getGPSFixStore() {
-        return null;
-    }
-
-    @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint timePoint,
             boolean waitForLatestAnalysis) throws NoWindException {
         return null;

@@ -34,7 +34,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -533,11 +532,6 @@ public class DummyTrackedRace extends TrackedRaceWithWindEssentials {
 
     @Override
     public Distance getDistanceFromStarboardSideOfStartLine(Competitor competitor, TimePoint timePoint) {
-        return null;
-    }
-
-    @Override
-    public GPSFixStore getGPSFixStore() {
         return null;
     }
 

@@ -35,7 +35,6 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
@@ -558,11 +557,6 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     @Override
     public Distance getAverageSignedCrossTrackError(Competitor competitor, TimePoint from, TimePoint to,
             boolean upwindOnly, boolean waitForLatestAnalysis) throws NoWindException {
-        return null;
-    }
-
-    @Override
-    public GPSFixStore getGPSFixStore() {
         return null;
     }
 
