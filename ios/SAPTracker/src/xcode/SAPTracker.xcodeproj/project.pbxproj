@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F03FD3D19FA44CD00FA1327 /* APIManager.swift */; };
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
-		7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* QRCodeData.swift */; };
+		7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* CheckInData.swift */; };
 		7F06590419F8094C0077FF95 /* DeviceUDIDManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
@@ -277,7 +277,7 @@
 		7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A8E1A39ACF500D71773 /* TimerViewController.swift */; };
 		7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F193A901A39E54600D71773 /* GPSAccuracyView.swift */; };
 		7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */; };
-		7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */; };
+		7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */; };
 		7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F2C605919F160E400C32D93 /* LocationManager.swift */; };
 		7F3AA7C81A1CD7D700F8861F /* SendGPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */; };
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
@@ -317,6 +317,7 @@
 		7FED45CC1A25F5910022505F /* leaderboard1.json in Resources */ = {isa = PBXBuildFile; fileRef = 7FED45C61A25F5900022505F /* leaderboard1.json */; };
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
+		C852BA971CF2302D0093B0C5 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BA961CF2302D0093B0C5 /* CameraController.swift */; };
 		C8603D4A1C528832002B2F28 /* Acknowledgements.markdown in Sources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
@@ -373,7 +374,7 @@
 		7F03FD3D19FA44CD00FA1327 /* APIManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = APIManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		7F0658FE19F7EE910077FF95 /* QRCodeData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = QRCodeData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		7F0658FE19F7EE910077FF95 /* CheckInData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CheckInData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceUDIDManager.swift; sourceTree = "<group>"; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
@@ -641,7 +642,7 @@
 		7F193A8E1A39ACF500D71773 /* TimerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerViewController.swift; sourceTree = "<group>"; };
 		7F193A901A39E54600D71773 /* GPSAccuracyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSAccuracyView.swift; sourceTree = "<group>"; };
 		7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatteryManager.swift; sourceTree = "<group>"; };
-		7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QRCodeManager.swift; sourceTree = "<group>"; };
+		7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInController.swift; sourceTree = "<group>"; };
 		7F2C605919F160E400C32D93 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendGPSFixController.swift; sourceTree = "<group>"; };
 		7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreData.xcdatamodel; sourceTree = "<group>"; };
@@ -686,6 +687,7 @@
 		7FED45C61A25F5900022505F /* leaderboard1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = leaderboard1.json; sourceTree = "<group>"; };
 		9E95C3D51C723AB30016632B /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		C852BA961CF2302D0093B0C5 /* CameraController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		C8B31F771B68DAD400C8A809 /* Pods.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Pods.xcodeproj; path = Pods/Pods.xcodeproj; sourceTree = "<group>"; };
@@ -740,7 +742,6 @@
 		7F06590019F7FE750077FF95 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				7F0658FE19F7EE910077FF95 /* QRCodeData.swift */,
 				7F4EEDB91A6D2BAC0026F711 /* CheckIn.swift */,
 				7FCDB65F1A1636610075D7D9 /* Event.swift */,
 				7FCDB6601A1636610075D7D9 /* LeaderBoard.swift */,
@@ -776,13 +777,15 @@
 		7F06590219F7FEA40077FF95 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				7F23F0871A1A3DEF00F03F1C /* QRCodeManager.swift */,
+				7F0658FE19F7EE910077FF95 /* CheckInData.swift */,
+				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
 				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7FA6551919F6661900A1B92D /* DataManager.swift */,
 				7F03FD3D19FA44CD00FA1327 /* APIManager.swift */,
 				7F06590319F8094C0077FF95 /* DeviceUDIDManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
 				7F3AA7C71A1CD7D700F8861F /* SendGPSFixController.swift */,
+				C852BA961CF2302D0093B0C5 /* CameraController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -1603,10 +1606,11 @@
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
+				C852BA971CF2302D0093B0C5 /* CameraController.swift in Sources */,
 				7F03FD3E19FA44CD00FA1327 /* APIManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* DataManager.swift in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
-				7F23F0881A1A3DEF00F03F1C /* QRCodeManager.swift in Sources */,
+				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				7FCDB6631A1636610075D7D9 /* Event.swift in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
@@ -1627,7 +1631,7 @@
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderBoardViewController.swift in Sources */,
-				7F0658FF19F7EE910077FF95 /* QRCodeData.swift in Sources */,
+				7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */,
 				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

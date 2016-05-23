@@ -105,19 +105,17 @@ public class APIManager: NSObject {
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
 
-    public func teamImage(competitorId: String!, result: (imageUrl: String?) -> Void) {
+    /* Get team image URI */
+    public func getTeamImageURI(competitorId: String!, result: (imageURI: String?) -> Void) {
         getTeam(competitorId, success: { (operation, teamResponseObject) -> Void in
-
-            if let team = teamResponseObject as? [String: AnyObject],
-                let imageUrl = team["imageUri"] as? String {
-                result(imageUrl: imageUrl)
+            if let team = teamResponseObject as? [String: AnyObject], let imageURI = team["imageUri"] as? String {
+                result(imageURI: imageURI)
             } else {
-                result(imageUrl: nil)
+                result(imageURI: nil)
             }
-
-        }, failure: { (operation, error) -> Void in
-            // No image & that's ok
-            result(imageUrl: nil)
+            }, failure: { (operation, error) -> Void in
+                // No image & that's ok
+                result(imageURI: nil)
         })
     }
     

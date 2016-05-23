@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, QRCodeManagerDelegate {
+class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, CheckInControllerDelegate {
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
@@ -17,7 +17,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
     var activityIndicatorView: UIActivityIndicatorView!
     private var session: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
-    private var qrCodeManager: QRCodeManager?
+    private var checkInController: CheckInController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,14 +27,14 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         let barButton = UIBarButtonItem(customView: activityIndicatorView)
         self.navigationItem.rightBarButtonItem = barButton
         
-        qrCodeManager = QRCodeManager(delegate: self)
+        checkInController = CheckInController(delegate: self)
         startScanning()
     }
     
     /* Set up camera and QR code scanner */
     @IBAction func startScanning() {
         var output: AVCaptureMetadataOutput!
-        (session, output) = QRCodeManager.setUpCaptureSession(self)
+        (session, output) = CameraController.setUpCaptureSession(self)
         output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
         
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
@@ -56,7 +56,7 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
             session.stopRunning()
             activityIndicatorView.startAnimating()
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-            qrCodeManager!.parseUrl(metadataObject.stringValue)
+            checkInController!.startCheckIn(metadataObject.stringValue)
         }
     }
     
