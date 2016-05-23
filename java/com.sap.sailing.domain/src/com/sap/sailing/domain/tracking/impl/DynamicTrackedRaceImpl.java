@@ -100,9 +100,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation, boolean useInternalMarkPassingAlgorithm,
             RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
-                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+        super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
         if (markPassingCalculator != null) {

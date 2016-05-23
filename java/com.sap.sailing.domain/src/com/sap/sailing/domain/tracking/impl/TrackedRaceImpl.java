@@ -413,14 +413,13 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Constructs the tracked race with one-design ranking.
      */
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
-            final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
-            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
+            final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RaceLogResolver raceLogResolver) {
-        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
-                millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
-                delayForWindEstimationCacheInvalidation, useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver);
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                millisecondsOverWhichToAverageSpeed, delayForWindEstimationCacheInvalidation,
+                useInternalMarkPassingAlgorithm, OneDesignRankingMetric::new, raceLogResolver);
     }
     
     /**
@@ -430,9 +429,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      *            constructor method reference if the {@link RankingMetric} implementation to instantiate takes a single
      *            {@link TrackedRace} argument.
      */
-    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race,
-            final Iterable<Sideline> sidelines, final WindStore windStore, final GPSFixStore gpsFixStore,
-            long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
+    public TrackedRaceImpl(final TrackedRegatta trackedRegatta, RaceDefinition race, final Iterable<Sideline> sidelines,
+            final WindStore windStore, long delayToLiveInMillis, final long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, long delayForWindEstimationCacheInvalidation,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
             RaceLogResolver raceLogResolver) {
