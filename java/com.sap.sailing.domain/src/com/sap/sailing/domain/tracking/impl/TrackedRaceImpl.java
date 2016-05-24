@@ -33,7 +33,6 @@ import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.AbstractLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -3336,107 +3335,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
     
-    /**
-     * Loads the GPS fixes as per the device registrations in the <code>log</code> into this race. The <code>log</code>
-     * is added to the <code>addLogToMap</code> data structure while holding <code>this</code> object's monitor, and all
-     * waiters on <code>this</code> object are notified when done with adding the <code>log</code> to
-     * <code>addLogToMap</code>.
-     */
-    private void loadFixesForLog(
-            final RegattaLog log, ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final boolean waitForGPSFixesToLoad) {
-        if (log != null) {
-            // Use the new log, that possibly contains device mappings, to load GPSFix tracks from the DB
-            // When this tracked race is to be serialized, wait for the loading from stores to complete.
-            final TimePoint startOfTimeWindowToLoad = getStartOfTracking(); // TODO consider race log's startOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
-            final TimePoint endOfTimeWindowToLoad = getEndOfTracking(); // TODO consider race log's endOfTracking event; note, however, that the log is attached only by the call to loadFixesForLog below
-            loadFixesForLog(log, addLogToMap, startOfTimeWindowToLoad, endOfTimeWindowToLoad, waitForGPSFixesToLoad);
-        } else {
-            logger.severe("Got a request to attach log for an empty log!");
-        }
-    }
-
-    /**
-     * Loads the GPS fixes as per the device registrations in the <code>log</code> into this race, cropped to the time
-     * interval specified by <code>startOfTimeWindowToLoad</code> and </code>endOfTimeWindowToLoad</code>. The
-     * <code>log</code> is added to the <code>addLogToMap</code> data structure (if <code>addLogToMap</code> is not
-     * <code>null</code>) while holding <code>this</code> object's monitor, and all waiters on <code>this</code> object
-     * are notified when done with adding the <code>log</code> to <code>addLogToMap</code>.
-     * 
-     * @param addLogToMap
-     *            the log will be added to this map after the {@link #loadingFromGPSFixStore} flag has been set and only when the
-     *            loading thread has successfully acquired the write lock of {@link #getLoadingFromGPSFixStoreLock()}. When done loading,
-     *            all waiters on <code>this</code> object will be notified. If the map is not <code>null</code>, the key used to enter
-     *            the log is the {@link AbstractLog#getId() log's ID}.
-     * @param startOfTimeWindowToLoad
-     *            the time to use to crop the beginning of the time range for which to load fixes; if <code>null</code>,
-     *            the start of the time range will be restricted only by the device mapping intervals
-     * @param endOfTimeWindowToLoad
-     *            the time to use to crop the end of the time range for which to load fixes; if <code>null</code>,
-     *            the end of the time range will be restricted only by the device mapping intervals
-     */
-    private void loadFixesForLog(final RegattaLog log,
-            ConcurrentHashMap<Serializable, RegattaLog> addLogToMap, final TimePoint startOfTimeWindowToLoad,
-            final TimePoint endOfTimeWindowToLoad, final boolean waitForGPSFixesToLoad) {
-        Thread t = new Thread("Mongo mark and competitor track loader for tracked race " + getRace().getName() + ", log "
-                + log.getId()+" from "+startOfTimeWindowToLoad+" to "+endOfTimeWindowToLoad) {
-            @Override
-            public void run() {
-                LockUtil.lockForRead(getSerializationLock());
-                LockUtil.lockForWrite(getLoadingFromGPSFixStoreLock());
-                synchronized (TrackedRaceImpl.this) {
-                    loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
-                    if (addLogToMap != null) {
-                        addLogToMap.put(log.getId(), log);
-                    }
-                    TrackedRaceImpl.this.notifyAll();
-                }
-                try {
-//                    logger.info("Started loading competitor tracks for " + getRace().getName() + " for log " + log.getId());
-//                    for (Competitor competitor : race.getCompetitors()) {
-//                        try {
-//                            gpsFixStore.loadCompetitorTrack(
-//                                    (DynamicGPSFixTrack<Competitor, GPSFixMoving>) tracks.get(competitor), log,
-//                                    competitor, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
-//                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-//                            logger.log(Level.WARNING, "Could not load track for " + competitor, e);
-//                        }
-//                    }
-//                    logger.info("Finished loading competitor tracks for " + getRace().getName());
-//                    logger.info("Started loading mark tracks for " + getRace().getName());
-//                    for (Mark mark : getMarksFromRegattaLogs()) {
-//                        final DynamicGPSFixTrack<Mark, GPSFix> markTrack = (DynamicGPSFixTrack<Mark, GPSFix>) getOrCreateTrack(mark);
-//                        loadMarkTrack(log, mark, markTrack, startOfTimeWindowToLoad, endOfTimeWindowToLoad);
-//                    }
-//                    logger.info("Finished loading mark tracks for " + getRace().getName());
-                } finally {
-                    synchronized (TrackedRaceImpl.this) {
-                        loadingFromGPSFixStore = false;
-                        TrackedRaceImpl.this.notifyAll();
-                    }
-                    LockUtil.unlockAfterWrite(getLoadingFromGPSFixStoreLock());
-                    LockUtil.unlockAfterRead(getSerializationLock());
-                    logger.info("Thread "+getName()+" done.");
-                }
-            }
-        };
-        t.start();
-        if (waitForGPSFixesToLoad) {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                logger.log(Level.WARNING, "Got interrupted while waiting for loading of GPS fixes from log "+log+" to finish", e);
-            }
-        }
-    }
-
-    /**
-     * Tells if currently the race is loading GPS fixes from the {@link GPSFixStore}. Clients may {@link Object#wait()} on <code>this</code>
-     * object and will be notified whenever a change of this flag's value occurs.
-     */
-    public boolean isLoadingFromGPSFixStore() {
-        return loadingFromGPSFixStore;
-    }
-
     @Override
     public void attachRaceLog(RaceLog raceLog) {
         synchronized (TrackedRaceImpl.this) {
@@ -3489,8 +3387,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        loadFixesForLog(regattaLog, attachedRegattaLogs, /* wait for fixes to load */ false);
         informListenersBeforeAttachingRegattaLog(regattaLog);
+        attachToRegattaLogs(regattaLog);
         try {
             // The log is attached to the tracked race by a background thread; this method wants
             // to guarantee that the log is at least really attached to the TrackedRace before returning:
@@ -3500,6 +3398,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
         }
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+    }
+    
+    private void attachToRegattaLogs(RegattaLog regattaLog) {
+        LockUtil.lockForRead(getSerializationLock());
+        synchronized (TrackedRaceImpl.this) {
+            if (attachedRegattaLogs != null) {
+                attachedRegattaLogs.put(regattaLog.getId(), regattaLog);
+            }
+            TrackedRaceImpl.this.notifyAll();
+        }
+        LockUtil.unlockAfterRead(getSerializationLock());
     }
     
     @Override
