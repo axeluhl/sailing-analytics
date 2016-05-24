@@ -64,31 +64,35 @@ public class CheckInData {
     // MARK: - Leaderboard
     
     func dictionaryLeaderboardName() -> String! {
-        return valueFromDictionary(leaderboardDictionary, forKey: Leaderboard.name)
+        return valueFromLeaderboard(forKey: Leaderboard.name)
+    }
+    
+    private func valueFromLeaderboard(forKey key: String) -> String {
+        return valueFromDictionary(leaderboardDictionary, forKey: key)
     }
     
     // MARK: - Competitor
     
     func dictionaryCompetitorId() -> String {
-        return valueFromDictionary(competitorDictionary, forKey: Competitor.id)
+        return valueFromCompetitor(forKey: Competitor.id)
     }
     
     func dictionaryCompetitorName() -> String! {
-        return valueFromDictionary(competitorDictionary, forKey: Competitor.name)
+        return valueFromCompetitor(forKey: Competitor.name)
     }
     
     func dictionaryCompetitorSailId() -> String! {
-        return valueFromDictionary(competitorDictionary, forKey: Competitor.sailId)
+        return valueFromCompetitor(forKey: Competitor.sailId)
+    }
+    
+    private func valueFromCompetitor(forKey key: String) -> String {
+        return valueFromDictionary(competitorDictionary, forKey: key)
     }
     
     // MARK: - Helper
     
     private class func queryItemValue(queryItems: [NSURLQueryItem]?, itemName: String) -> String? {
         return queryItems?.filter({(item) -> Bool in item.name == itemName}).first?.value
-    }
-    
-    private func valueFromCompetitor(forKey key: String) -> String {
-        return valueFromDictionary(competitorDictionary, forKey: key)
     }
     
     private func valueFromDictionary(dictionary: [String: AnyObject]?, forKey key: String!) -> String {
