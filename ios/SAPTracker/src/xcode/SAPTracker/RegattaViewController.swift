@@ -240,12 +240,19 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
     // MARK: - Start tracking
     
     @IBAction func startTrackingButtonTapped(sender: AnyObject) {
-        let errorMessage = LocationManager.sharedManager.startTracking()
-        if errorMessage != nil {
-            let alertView = UIAlertView(title: errorMessage, message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-            alertView.show()
-        } else {
+        do {
+            try LocationManager.sharedManager.startTracking()
             performSegueWithIdentifier("Tracking", sender: sender)
+        } catch let error as LocationManager.TrackingError {
+            let title = error.description
+            let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
+            let alertView = UIAlertView(title: title,
+                                        message: nil,
+                                        delegate: nil,
+                                        cancelButtonTitle: cancelButtonTitle)
+            alertView.show()
+        } catch {
+            print("Unknown error")
         }
     }
     

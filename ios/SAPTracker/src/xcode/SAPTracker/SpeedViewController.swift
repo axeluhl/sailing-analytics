@@ -16,7 +16,12 @@ class SpeedViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
+        
+        // React on new locations
+        NSNotificationCenter.defaultCenter().addObserver(self,
+                                                         selector:#selector(SpeedViewController.newLocation(_:)),
+                                                         name:LocationManager.NotificationType.newLocation,
+                                                         object: nil)
     }
     
     deinit {

@@ -19,6 +19,27 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         static let locationManagerFailed = "locationManagerFailed"
     }
     
+    struct UserInfo {
+        static let timestamp = "timestamp"
+        static let latitude = "latitude"
+        static let longitude = "longitude"
+        static let speed = "speed"
+        static let course = "course"
+        static let horizontalAccuracy = "horizontalAccuracy"
+        static let isValid = "isValid"
+    }
+    
+    enum TrackingError: ErrorType {
+        case LocationServicesDisabled
+        case LocationServicesDenied
+        var description: String {
+            switch self {
+            case TrackingError.LocationServicesDenied: return NSLocalizedString("Please enable location services for this app.", comment: "")
+            case TrackingError.LocationServicesDisabled: return NSLocalizedString("Please enable location services.", comment: "")
+            }
+        }
+    }
+    
     class var sharedManager: LocationManager {
         struct Singleton {
             static let sharedManager = LocationManager()
@@ -35,31 +56,28 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         coreLocationManager.delegate = self
     }
     
-    func startTracking() -> String? {
-        if (!CLLocationManager.locationServicesEnabled()) {
-            return NSLocalizedString("Please enable location services.", comment: "")
+    func startTracking() throws {
+        guard CLLocationManager.locationServicesEnabled() else {
+            throw TrackingError.LocationServicesDisabled
         }
-        if (CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied) {
-            return NSLocalizedString("Please enable location services for this app.", comment: "")
+        guard CLLocationManager.authorizationStatus() != CLAuthorizationStatus.Denied else {
+            throw TrackingError.LocationServicesDenied
         }
-        if (coreLocationManager.respondsToSelector("requestAlwaysAuthorization")) {
-            coreLocationManager.requestAlwaysAuthorization()
-        }
-
-        // Now try everything to allow the app to use the GPS sensor
-	// while in background
-	coreLocationManager.pausesLocationUpdatesAutomatically = false; 
+        
+        // Allow the app to use the GPS sensor while in background
+        coreLocationManager.requestAlwaysAuthorization()
+        coreLocationManager.pausesLocationUpdatesAutomatically = false;
         if #available(iOS 9, *) {
-	    coreLocationManager.allowsBackgroundLocationUpdates = true;
+            coreLocationManager.allowsBackgroundLocationUpdates = true;
         }
 
+        // Start location updates
         coreLocationManager.startUpdatingLocation()
         coreLocationManager.startUpdatingHeading()
         coreLocationManager.delegate = self
         isTracking = true;
         let notification = NSNotification(name: NotificationType.trackingStarted, object: self)
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
-        return nil
     }
     
     func stopTracking() {
@@ -70,13 +88,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [CLLocation]!) {
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations.last
         let notification = NSNotification(name: NotificationType.newLocation, object: self, userInfo:LocationManager.dictionaryForLocation(location!))
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
 
-    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
         let notification = NSNotification(name: NotificationType.locationManagerFailed, object: self, userInfo: ["error": error])
         NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
     }
