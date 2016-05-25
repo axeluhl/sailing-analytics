@@ -2,12 +2,15 @@ package com.sap.sailing.domain.racelogsensortracking.impl;
 
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
-public class FixLoadingTask {
+public class FixLoadingTask implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(FixLoadingTask.class.getName());
     
     private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
@@ -24,6 +27,7 @@ public class FixLoadingTask {
             @Override
             public void run() {
                 trackedRace.lockForSerializationRead();
+                setStatusAndProress(TrackedRaceStatusEnum.LOADING, 0.5);
                 LockUtil.lockForWrite(loadingFromFixStoreLock);
                 synchronized (FixLoadingTask.this) {
                     loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
@@ -38,6 +42,7 @@ public class FixLoadingTask {
                         FixLoadingTask.this.notifyAll();
                     }
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
+                    setStatusAndProress(TrackedRaceStatusEnum.FINISHED, 1.0);
                     trackedRace.unlockAfterSerializationRead();
                     logger.info("Thread "+getName()+" done.");
                 }
@@ -65,6 +70,10 @@ public class FixLoadingTask {
      */
     public boolean isLoadingFromGPSFixStore() {
         return loadingFromGPSFixStore;
+    }
+    
+    private void setStatusAndProress(TrackedRaceStatusEnum status, double progress) {
+        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
     }
 
 }
