@@ -706,9 +706,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     @Override
     public synchronized void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
-        while (!attachedRegattaLogs.containsKey(fromRegattaLog.getId()) || loadingFromGPSFixStore) {
-            wait();
-        }
     }
 
     private SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> createManeuverCache() {
@@ -3387,28 +3384,17 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     @Override
     public void attachRegattaLog(RegattaLog regattaLog) {
-        informListenersBeforeAttachingRegattaLog(regattaLog);
-        attachToRegattaLogs(regattaLog);
-        try {
-            // The log is attached to the tracked race by a background thread; this method wants
-            // to guarantee that the log is at least really attached to the TrackedRace before returning:
-            waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
-            informListenersAboutAttachedRegattaLog(regattaLog);
-        } catch (InterruptedException e) {
-            logger.log(Level.WARNING, "Interrupted while waiting for race log being attached", e);
-        }
-        updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
-    }
-    
-    private void attachToRegattaLogs(RegattaLog regattaLog) {
         LockUtil.lockForRead(getSerializationLock());
         synchronized (TrackedRaceImpl.this) {
             if (attachedRegattaLogs != null) {
                 attachedRegattaLogs.put(regattaLog.getId(), regattaLog);
             }
+            informListenersBeforeAttachingRegattaLog(regattaLog);
+            // informListenersAboutAttachedRegattaLog(regattaLog);
             TrackedRaceImpl.this.notifyAll();
         }
         LockUtil.unlockAfterRead(getSerializationLock());
+        updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
     
     @Override
