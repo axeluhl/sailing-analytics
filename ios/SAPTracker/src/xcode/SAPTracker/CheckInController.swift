@@ -11,7 +11,6 @@ import UIKit
 import AVFoundation
 
 @objc protocol CheckInControllerDelegate {
-    optional var activityIndicatorView: UIActivityIndicatorView { get }
     optional func qrCodeOK()
     optional func qrCodeCancel()
 }
@@ -32,7 +31,6 @@ class CheckInController : NSObject, UIAlertViewDelegate {
     // MARK: - Start check-in
     
     func startCheckIn(urlString: String) {
-        self.delegate?.activityIndicatorView?.startAnimating()
         if let checkInData = CheckInData(urlString: urlString) {
             self.checkInData = checkInData
             APIManager.sharedManager.initManager(checkInData.serverURL)
@@ -223,7 +221,6 @@ class CheckInController : NSObject, UIAlertViewDelegate {
     
     private func checkInFinished() {
         checkInData = nil
-        delegate?.activityIndicatorView?.stopAnimating()
     }
     
     // MARK: - Helper
