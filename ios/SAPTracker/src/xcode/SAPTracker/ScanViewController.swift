@@ -70,14 +70,14 @@ class ScanViewController: UIViewController, AVCaptureMetadataOutputObjectsDelega
         }
     }
     
-    // MARK: - QRCodeManagerDelegate
+    // MARK: - CheckInControllerDelegate
     
-    func qrCodeOK() {
+    func checkInSucceed() {
         // pop back to home view
         navigationController!.popViewControllerAnimated(true)
     }
     
-    func qrCodeCancel() {
+    func checkInFailed() {
         self.session.startRunning()
         activityIndicatorView.stopAnimating()
         targetImageView.image = UIImage(named: "scan_white")

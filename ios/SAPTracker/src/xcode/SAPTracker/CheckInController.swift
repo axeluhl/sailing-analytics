@@ -11,8 +11,8 @@ import UIKit
 import AVFoundation
 
 @objc protocol CheckInControllerDelegate {
-    optional func qrCodeOK()
-    optional func qrCodeCancel()
+    optional func checkInSucceed()
+    optional func checkInFailed()
 }
 
 class CheckInController : NSObject, UIAlertViewDelegate {
@@ -210,12 +210,12 @@ class CheckInController : NSObject, UIAlertViewDelegate {
     // MARK: - Finish
     
     private func checkInFinishedWithSuccess() {
-        delegate?.qrCodeOK?()
+        delegate?.checkInSucceed?()
         checkInFinished()
     }
     
     private func checkInFinishedWithFailure() {
-        delegate?.qrCodeCancel?()
+        delegate?.checkInFailed?()
         checkInFinished()
     }
     
