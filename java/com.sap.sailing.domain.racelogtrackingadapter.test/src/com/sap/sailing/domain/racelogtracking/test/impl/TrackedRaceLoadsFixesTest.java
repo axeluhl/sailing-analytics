@@ -26,10 +26,12 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogGPSFixTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
-import com.sap.sailing.domain.tracking.TrackedRegatta;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceImpl;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
@@ -62,7 +64,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         store.storeFix(markDevice, createFix(1100, 10, 20, 30, 40));
         store.storeFix(markDevice, createFix(2100, 10, 20, 30, 40));
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+        DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
                 null, /* endDate */null, null, null, "a", null));
         final DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
@@ -70,6 +72,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
+        new RaceLogGPSFixTracker(regatta, trackedRace, store);
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
@@ -98,8 +101,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         DeviceIdentifier device3 = new SmartphoneImeiIdentifier("imei3");
         Course course = new CourseImpl("course", Arrays.asList(new Waypoint[] { new WaypointImpl(mark),
                 new WaypointImpl(mark2) }));
-        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(new Competitor[] { comp,
-                comp2 }));
+        RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, Arrays.asList(comp, comp2));
 
         map(comp, device, 0, 20000);
         map(comp2, device2, 0, 600);
@@ -117,12 +119,13 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
             store.storeFix(device, createFix(i + 1000, 10, 20, 30, 40));
         }
 
-        TrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, /* startDate */
-                null, /* endDate */null, null, null, "a", null));
-        DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(regatta, race,
-                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, /*useMarkPassingCalculator*/ false,
-                OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
+                /* startDate */ null, /* endDate */null, null, null, "a", null));
+        DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(regatta, race,
+                Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, store, 0, 0, 0, 
+                /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
+        new RaceLogGPSFixTracker(regatta, trackedRace, store);
         
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
