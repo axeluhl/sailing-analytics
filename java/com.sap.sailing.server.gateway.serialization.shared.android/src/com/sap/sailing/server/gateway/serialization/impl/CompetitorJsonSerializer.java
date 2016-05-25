@@ -13,6 +13,7 @@ import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.tracking.impl.CompetitorJsonConstants;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.CountryCode;
 
 public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
@@ -53,7 +54,8 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(idKeyAndValue.getKey(), idKeyAndValue.getValue());
         }
         result.put(CompetitorJsonConstants.FIELD_NAME, competitor.getName());
-        result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, competitor.getColor() == null ? null : competitor.getColor().getAsHtml());
+        Color color = getColor(competitor);
+        result.put(CompetitorJsonConstants.FIELD_DISPLAY_COLOR, color == null ? null : color.getAsHtml());
         result.put(CompetitorJsonConstants.FIELD_EMAIL, competitor.getEmail());
         result.put(CompetitorJsonConstants.FIELD_SEARCHTAG, competitor.getSearchTag());
         result.put(CompetitorJsonConstants.FIELD_SAIL_ID, competitor.getBoat() == null ? "" : competitor.getBoat().getSailID());
@@ -69,7 +71,7 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
             result.put(CompetitorJsonConstants.FIELD_TEAM, teamJsonSerializer.serialize(competitor.getTeam()));
         }
         if (boatJsonSerializer != null) {
-            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(competitor.getBoat()));
+            result.put(CompetitorJsonConstants.FIELD_BOAT, boatJsonSerializer.serialize(getBoat(competitor)));
         }
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR, competitor.getTimeOnTimeFactor());
         result.put(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE,
@@ -82,4 +84,13 @@ public class CompetitorJsonSerializer implements JsonSerializer<Competitor> {
         Serializable competitorId = competitor.getId() instanceof UUID ? competitor.getId().toString() : competitor.getId();
         return competitorId;
     }
+
+    protected Color getColor(Competitor competitor ) {
+        return competitor.getColor();
+    }
+    
+    protected Boat getBoat(Competitor competitor ) {
+        return competitor.getBoat();
+    }
+
 }
