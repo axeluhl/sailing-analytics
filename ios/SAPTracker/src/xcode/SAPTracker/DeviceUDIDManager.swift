@@ -10,21 +10,25 @@ import Foundation
 
 struct DeviceUDIDManager {
     
+    struct Keys {
+        static let UDID = "udid"
+    }
+    
     private static let preferences = NSUserDefaults.standardUserDefaults()
-    private static var staticUdid: String?
+    private static var staticUDID: String?
     
     static var UDID: String {
         get {
-            if (staticUdid == nil) {
-                if preferences.objectForKey("udid") == nil {
-                    staticUdid = NSUUID().UUIDString.lowercaseString
-                    preferences.setObject(staticUdid, forKey: "udid")
+            if (staticUDID == nil) {
+                if preferences.objectForKey(Keys.UDID) == nil {
+                    staticUDID = NSUUID().UUIDString.lowercaseString
+                    preferences.setObject(staticUDID, forKey: Keys.UDID)
                     preferences.synchronize()
                 } else {
-                    staticUdid = preferences.objectForKey("udid") as? String
+                    staticUDID = preferences.objectForKey(Keys.UDID) as? String
                 }
             }
-            return staticUdid!
+            return staticUDID!
         }
     }
     
