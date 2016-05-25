@@ -183,7 +183,7 @@ class RegattaViewController : UIViewController, UIActionSheetDelegate, UINavigat
                 hoursLabel.text = String(format: "%.0f", arguments: [hours])
                 minutesLabel.text = String(format: "%.0f", arguments: [minutes])
                 loop?.invalidate()
-                loop = NSTimer(timeInterval: 60, target: self, selector: "checkRegattaStatus", userInfo: nil, repeats: false)
+                loop = NSTimer(timeInterval: 60, target: self, selector: #selector(RegattaViewController.checkRegattaStatus), userInfo: nil, repeats: false)
                 NSRunLoop.currentRunLoop().addTimer(loop!, forMode:NSRunLoopCommonModes)
             }
                 // during race

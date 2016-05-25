@@ -43,7 +43,7 @@ class SendGPSFixController: NSObject {
     
     /* See if any rows need to be uploaded. Schedule timer again. */
     func timer() {
-        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:"timer", userInfo:nil, repeats:false)
+        let loop = NSTimer.scheduledTimerWithTimeInterval(syncPeriod, target:self, selector:#selector(SendGPSFixController.timer), userInfo:nil, repeats:false)
         NSRunLoop.currentRunLoop().addTimer(loop, forMode:NSRunLoopCommonModes)
 
         // get last 100 locations

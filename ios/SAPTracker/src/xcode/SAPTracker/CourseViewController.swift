@@ -19,7 +19,7 @@ class CourseViewController: UIViewController {
         
         courseLabel.text = defaultCourseText
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:"newLocation:", name:LocationManager.NotificationType.newLocation, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(CourseViewController.newLocation(_:)), name:LocationManager.NotificationType.newLocation, object: nil)
     }
 
     deinit {
