@@ -23,6 +23,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -189,7 +190,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public synchronized void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
+    public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
+        // logger.info("Status changed: " + newStatus.getStatus() + " | " + source);
         this.updateLoaderStatus(source, newStatus);
         double totalProgress = 1.0, sumOfLoaderProgresses = 0.0;
         TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
@@ -209,6 +211,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             }
         }
         this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
+        // logger.info("Global status: " + raceStatus + " | Progress: " + totalProgress);
     }
    
     private void updateLoaderStatus(TrackingDataLoader loader, TrackedRaceStatus status) {
@@ -216,6 +219,21 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             loaderStatus.remove(loader);
         } else {
             loaderStatus.put(loader, status);
+        }
+    }
+    
+    @Override
+    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+        synchronized (getStatusNotifier()) {
+            TrackedRaceStatusEnum status = getStatus().getStatus();
+            while (status != TrackedRaceStatusEnum.FINISHED && status != TrackedRaceStatusEnum.TRACKING) {
+                try {
+                    getStatusNotifier().wait();
+                } catch (InterruptedException e) {
+                    logger.info("waitUntilNotLoading on tracked race " + this + " interrupted: " + e.getMessage()
+                            + ". Continuing to wait.");
+                }
+            }
         }
     }
 
