@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="pqQ-jd-OwW">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
-        <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -49,6 +48,7 @@
             <string>OpenSans</string>
             <string>OpenSans</string>
             <string>OpenSans</string>
+            <string>OpenSans</string>
         </mutableArray>
         <mutableArray key="OpenSans-Semibold.ttf">
             <string>OpenSans-Semibold</string>
@@ -69,71 +69,123 @@
                         <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="home_bg" translatesAutoresizingMaskIntoConstraints="NO" id="npJ-tu-ac3">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="home_bg" translatesAutoresizingMaskIntoConstraints="NO" id="npJ-tu-ac3" userLabel="Background Image">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fp0-61-7he">
-                                <rect key="frame" x="20" y="449" width="560" height="50"/>
-                                <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
-                                <accessibility key="accessibilityConfiguration" label="Don't have a QR Code?"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mhw-sY-eah" userLabel="Title View">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="52"/>
+                                <subviews>
+                                    <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="lc2-1P-oDt">
+                                        <rect key="frame" x="20" y="0.0" width="580" height="52"/>
+                                        <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="0.87058823529411766" green="0.94509803921568625" blue="0.94509803921568625" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="JQy-0C-pEQ"/>
+                                    <constraint firstAttribute="height" constant="52" id="UBQ-1a-QOe"/>
+                                    <constraint firstItem="lc2-1P-oDt" firstAttribute="top" secondItem="mhw-sY-eah" secondAttribute="top" id="UZv-cq-0C9"/>
+                                    <constraint firstAttribute="bottom" secondItem="lc2-1P-oDt" secondAttribute="bottom" id="VXo-ML-3LT"/>
+                                    <constraint firstAttribute="trailing" secondItem="lc2-1P-oDt" secondAttribute="trailing" id="rfl-6n-9rQ"/>
+                                    <constraint firstItem="lc2-1P-oDt" firstAttribute="leading" secondItem="mhw-sY-eah" secondAttribute="leading" constant="20" id="uqT-sU-EdP"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
-                                <state key="normal" title="Don't have a QR Code?">
-                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
-                                        <real key="value" value="0.5"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="layer.borderUIColor">
-                                        <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="noQrCodeButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="z4z-oj-wN7"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You can find your QR code on your registration confirmation" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="OqX-q3-43s" customClass="PaddedLabel" customModule="SAPTracker" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="507" width="600" height="29"/>
-                                <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
-                                <accessibility key="accessibilityConfiguration" label="You can find your QR code on your registration confirmation"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="29" id="srL-oH-FbU"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="154"/>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kz1-Nl-j1h" userLabel="Button View">
+                                <rect key="frame" x="0.0" y="356" width="600" height="180"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ieu-ch-jeI">
+                                        <rect key="frame" x="8" y="8" width="584" height="82"/>
+                                        <color key="backgroundColor" red="0.0" green="0.61568627450980395" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <accessibility key="accessibilityConfiguration" label="Scan QR Code"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="82" id="1Rc-1w-BvQ"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
+                                        <state key="normal" title="Scan QR Code">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleShadowColor" red="0.5725490196078431" green="0.5725490196078431" blue="0.5725490196078431" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="5"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="scanButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="NTk-Cf-y9I"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fp0-61-7he">
+                                        <rect key="frame" x="8" y="98" width="584" height="48"/>
+                                        <color key="backgroundColor" red="0.95294117647058818" green="0.95294117647058818" blue="0.95294117647058818" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <accessibility key="accessibilityConfiguration" label="Don't have a QR Code?"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="48" id="cof-oZ-s1l"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
+                                        <state key="normal" title="Don't have a QR Code?">
+                                            <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <integer key="value" value="5"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
+                                                <real key="value" value="0.5"/>
+                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="color" keyPath="layer.borderUIColor">
+                                                <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <action selector="noCodeButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="B8s-ZV-ADJ"/>
+                                        </connections>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="You can find your QR code on your registration confirmation" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="OqX-q3-43s" customClass="PaddedLabel" customModule="SAPTracker" customModuleProvider="target">
+                                        <rect key="frame" x="20" y="154" width="560" height="18"/>
+                                        <color key="backgroundColor" white="1" alpha="0.5" colorSpace="calibratedWhite"/>
+                                        <accessibility key="accessibilityConfiguration" label="You can find your QR code on your registration confirmation"/>
+                                        <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" priority="250" constant="154" id="yuo-wx-0A1">
-                                        <variation key="heightClass=compact" constant="110"/>
-                                    </constraint>
+                                    <constraint firstAttribute="trailing" secondItem="Ieu-ch-jeI" secondAttribute="trailing" constant="8" id="0L5-76-fKQ"/>
+                                    <constraint firstAttribute="trailing" secondItem="OqX-q3-43s" secondAttribute="trailing" constant="20" id="DMl-Qs-6jR"/>
+                                    <constraint firstItem="OqX-q3-43s" firstAttribute="top" secondItem="Fp0-61-7he" secondAttribute="bottom" constant="8" id="Pn9-tu-wlk"/>
+                                    <constraint firstItem="Ieu-ch-jeI" firstAttribute="top" secondItem="kz1-Nl-j1h" secondAttribute="top" constant="8" id="Sdy-18-xLt"/>
+                                    <constraint firstAttribute="trailing" secondItem="Fp0-61-7he" secondAttribute="trailing" constant="8" id="fxM-AP-mYf"/>
+                                    <constraint firstItem="OqX-q3-43s" firstAttribute="leading" secondItem="kz1-Nl-j1h" secondAttribute="leading" constant="20" id="igZ-6K-Ref"/>
+                                    <constraint firstAttribute="bottom" secondItem="OqX-q3-43s" secondAttribute="bottom" constant="8" id="k54-PP-F27"/>
+                                    <constraint firstItem="Fp0-61-7he" firstAttribute="leading" secondItem="kz1-Nl-j1h" secondAttribute="leading" constant="8" id="oQF-3V-u6F"/>
+                                    <constraint firstItem="Fp0-61-7he" firstAttribute="top" secondItem="Ieu-ch-jeI" secondAttribute="bottom" constant="8" id="tMG-Wr-hmu"/>
+                                    <constraint firstItem="Ieu-ch-jeI" firstAttribute="leading" secondItem="kz1-Nl-j1h" secondAttribute="leading" constant="8" id="xXr-3b-KGp"/>
                                 </constraints>
+                            </view>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="OXU-ft-TXZ">
+                                <rect key="frame" x="0.0" y="52" width="600" height="304"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Regatta" textLabel="FzL-oN-acm" style="IBUITableViewCellStyleDefault" id="01f-yF-69S">
-                                        <rect key="frame" x="0.0" y="22" width="600" height="44"/>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Regatta" textLabel="FzL-oN-acm" rowHeight="74" style="IBUITableViewCellStyleDefault" id="01f-yF-69S" userLabel="Regatta Cell">
+                                        <rect key="frame" x="0.0" y="22" width="600" height="74"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="01f-yF-69S" id="vse-xJ-e2c">
-                                            <rect key="frame" x="0.0" y="0.0" width="567" height="43.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="567" height="73.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" id="FzL-oN-acm">
-                                                    <rect key="frame" x="15" y="0.0" width="550" height="43.5"/>
+                                                    <rect key="frame" x="15" y="0.0" width="550" height="73.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="16"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <color key="backgroundColor" red="0.96470588235294119" green="0.98431372549019602" blue="0.98431372549019602" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </prototypes>
@@ -142,75 +194,46 @@
                                     <outlet property="delegate" destination="vXZ-lx-hvc" id="MMa-h9-rDL"/>
                                 </connections>
                             </tableView>
-                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="3y9-Us-aIu">
-                                <rect key="frame" x="281" y="250" width="37" height="37"/>
-                                <color key="color" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                            </activityIndicatorView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ieu-ch-jeI">
-                                <rect key="frame" x="20" y="366" width="560" height="75"/>
-                                <color key="backgroundColor" red="0.93725490196078431" green="0.67843137254901964" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <accessibility key="accessibilityConfiguration" label="Scan QR Code"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="75" id="fwc-UC-0Ak">
-                                        <variation key="heightClass=compact" constant="50"/>
-                                    </constraint>
-                                </constraints>
-                                <fontDescription key="fontDescription" name="OpenSans-Bold" family="Open Sans" pointSize="15"/>
-                                <state key="normal" title="Scan QR Code">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="titleShadowColor" red="0.5725490196078431" green="0.5725490196078431" blue="0.5725490196078431" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                </state>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                        <integer key="value" value="5"/>
-                                    </userDefinedRuntimeAttribute>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
-                                </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="scanButtonTap:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="NTk-Cf-y9I"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="OXU-ft-TXZ" firstAttribute="trailing" secondItem="OqX-q3-43s" secondAttribute="trailing" id="0By-UZ-sE4"/>
-                            <constraint firstItem="Fp0-61-7he" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" id="4Dn-p7-PiC"/>
-                            <constraint firstItem="3y9-Us-aIu" firstAttribute="centerY" secondItem="kh9-bI-dsS" secondAttribute="centerY" id="4Mu-Fa-imb"/>
-                            <constraint firstAttribute="centerX" secondItem="3y9-Us-aIu" secondAttribute="centerX" id="53x-0Y-njH"/>
-                            <constraint firstItem="OqX-q3-43s" firstAttribute="top" secondItem="Fp0-61-7he" secondAttribute="bottom" constant="8" symbolic="YES" id="B05-JG-PP2"/>
-                            <constraint firstItem="npJ-tu-ac3" firstAttribute="trailing" secondItem="OXU-ft-TXZ" secondAttribute="trailing" id="EYo-J3-vux"/>
-                            <constraint firstItem="Fp0-61-7he" firstAttribute="centerX" secondItem="OqX-q3-43s" secondAttribute="centerX" id="QEn-dN-lh7"/>
-                            <constraint firstItem="npJ-tu-ac3" firstAttribute="bottom" secondItem="2fi-mo-0CV" secondAttribute="top" id="Qxi-bo-8BH"/>
-                            <constraint firstItem="OqX-q3-43s" firstAttribute="leading" secondItem="npJ-tu-ac3" secondAttribute="leading" id="Rdo-E1-LTq"/>
-                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="top" relation="greaterThanOrEqual" secondItem="OXU-ft-TXZ" secondAttribute="bottom" constant="8" symbolic="YES" id="SIS-eG-cTI"/>
-                            <constraint firstItem="npJ-tu-ac3" firstAttribute="top" secondItem="OXU-ft-TXZ" secondAttribute="top" id="esF-AU-D1j"/>
-                            <constraint firstItem="OqX-q3-43s" firstAttribute="bottom" secondItem="2fi-mo-0CV" secondAttribute="top" id="fc2-bq-WzB"/>
-                            <constraint firstItem="Ieu-ch-jeI" firstAttribute="leading" secondItem="Fp0-61-7he" secondAttribute="leading" id="jxt-dA-vzc"/>
-                            <constraint firstItem="Fp0-61-7he" firstAttribute="top" secondItem="Ieu-ch-jeI" secondAttribute="bottom" constant="8" symbolic="YES" id="lhN-KU-oKL"/>
-                            <constraint firstItem="OXU-ft-TXZ" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="nKc-E0-kzc"/>
-                            <constraint firstItem="npJ-tu-ac3" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="ov0-Tj-3HC"/>
-                            <constraint firstAttribute="trailing" secondItem="npJ-tu-ac3" secondAttribute="trailing" id="tJD-mK-Rj3"/>
-                            <constraint firstItem="npJ-tu-ac3" firstAttribute="leading" secondItem="OXU-ft-TXZ" secondAttribute="leading" id="yI1-LK-e3t"/>
-                            <constraint firstItem="Fp0-61-7he" firstAttribute="trailing" secondItem="Ieu-ch-jeI" secondAttribute="trailing" id="yXc-nv-JPo"/>
+                            <constraint firstItem="npJ-tu-ac3" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="IXB-ZZ-Esi"/>
+                            <constraint firstItem="mhw-sY-eah" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="LMF-0r-pNc"/>
+                            <constraint firstItem="OXU-ft-TXZ" firstAttribute="top" secondItem="mhw-sY-eah" secondAttribute="bottom" constant="8" symbolic="YES" id="Lcd-go-hdM"/>
+                            <constraint firstItem="OXU-ft-TXZ" firstAttribute="top" secondItem="mhw-sY-eah" secondAttribute="bottom" id="N3y-SV-Ygr"/>
+                            <constraint firstItem="mhw-sY-eah" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="NDl-hs-9Se"/>
+                            <constraint firstAttribute="trailing" secondItem="npJ-tu-ac3" secondAttribute="trailing" id="UPw-B3-yPf"/>
+                            <constraint firstAttribute="bottom" secondItem="npJ-tu-ac3" secondAttribute="bottom" id="UWZ-6H-1YV"/>
+                            <constraint firstItem="kz1-Nl-j1h" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="Xak-hl-8Xk"/>
+                            <constraint firstAttribute="trailing" secondItem="OXU-ft-TXZ" secondAttribute="trailing" id="fnN-91-3lR"/>
+                            <constraint firstItem="npJ-tu-ac3" firstAttribute="top" secondItem="jyV-Pf-zRb" secondAttribute="bottom" id="hOQ-9h-o8b"/>
+                            <constraint firstItem="OXU-ft-TXZ" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="hqs-d0-2eR"/>
+                            <constraint firstAttribute="trailing" secondItem="kz1-Nl-j1h" secondAttribute="trailing" id="n5f-fV-FRl"/>
+                            <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="kz1-Nl-j1h" secondAttribute="bottom" id="rDX-pW-YYX"/>
+                            <constraint firstAttribute="trailing" secondItem="mhw-sY-eah" secondAttribute="trailing" id="yBY-36-EY0"/>
+                            <constraint firstItem="kz1-Nl-j1h" firstAttribute="top" secondItem="OXU-ft-TXZ" secondAttribute="bottom" id="yG3-db-n2c"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="Lcd-go-hdM"/>
+                            </mask>
+                        </variation>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Tracker" id="lqI-5f-PEI">
                         <barButtonItem key="backBarButtonItem" title="Home" id="ASu-3l-KjT"/>
                         <barButtonItem key="rightBarButtonItem" image="settings" id="1wU-M4-Vaw">
                             <connections>
-                                <action selector="showActionSheet:" destination="vXZ-lx-hvc" id="dxA-5U-l3L"/>
+                                <action selector="optionButtonTap:" destination="vXZ-lx-hvc" id="UjO-AO-mEo"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="activityIndicatorView" destination="3y9-Us-aIu" id="NSb-XJ-NZ9"/>
-                        <outlet property="bottomNote" destination="OqX-q3-43s" id="dYC-gI-KoQ"/>
-                        <outlet property="btnNoCode" destination="Fp0-61-7he" id="DWs-iF-M4w"/>
-                        <outlet property="btnScan" destination="Ieu-ch-jeI" id="FWs-OF-b4i"/>
+                        <outlet property="bottomLabel" destination="OqX-q3-43s" id="GzR-dl-v3w"/>
+                        <outlet property="noCodeButton" destination="Fp0-61-7he" id="KZ9-6K-G1M"/>
+                        <outlet property="scanCodeButton" destination="Ieu-ch-jeI" id="keL-Mu-e7V"/>
                         <outlet property="tableView" destination="OXU-ft-TXZ" id="1BA-dy-00A"/>
-                        <outlet property="tableViewHeight" destination="yuo-wx-0A1" id="pFK-q1-1DI"/>
-                        <outlet property="vSplashScreen" destination="4Od-pk-xCd" id="3sj-Mx-34I"/>
+                        <outlet property="titleLabel" destination="lc2-1P-oDt" id="BJe-wC-1Xz"/>
                         <segue destination="G3a-SV-Maf" kind="show" identifier="Regatta" id="FMW-37-go1"/>
                         <segue destination="plm-Uw-c62" kind="show" identifier="Scan" id="U8l-If-CrF"/>
                         <segue destination="4Fb-v3-mkB" kind="presentation" identifier="SettingsFromHome" id="Xxn-jp-xEB"/>
@@ -218,28 +241,8 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" id="4Od-pk-xCd">
-                    <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="applogo" translatesAutoresizingMaskIntoConstraints="NO" id="K04-Lb-fSm">
-                            <rect key="frame" x="117.5" y="220" width="365" height="96"/>
-                            <constraints>
-                                <constraint firstAttribute="width" secondItem="K04-Lb-fSm" secondAttribute="height" multiplier="365:96" id="iTN-7Q-YkX"/>
-                            </constraints>
-                        </imageView>
-                    </subviews>
-                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    <constraints>
-                        <constraint firstItem="K04-Lb-fSm" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="4Od-pk-xCd" secondAttribute="leading" constant="30" id="0ML-xS-Lk4"/>
-                        <constraint firstItem="K04-Lb-fSm" firstAttribute="width" secondItem="K04-Lb-fSm" secondAttribute="height" multiplier="365:96" id="YeC-DN-aQX"/>
-                        <constraint firstItem="K04-Lb-fSm" firstAttribute="centerY" secondItem="4Od-pk-xCd" secondAttribute="centerY" id="lJN-eB-asJ"/>
-                        <constraint firstItem="K04-Lb-fSm" firstAttribute="centerX" secondItem="4Od-pk-xCd" secondAttribute="centerX" id="lP3-oq-Tj2"/>
-                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="K04-Lb-fSm" secondAttribute="trailing" constant="30" id="tNv-UR-6vj"/>
-                    </constraints>
-                </view>
             </objects>
-            <point key="canvasLocation" x="1222" y="-307"/>
+            <point key="canvasLocation" x="1221" y="-308"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="e3W-CJ-soQ">
@@ -420,12 +423,12 @@
                                 <rect key="frame" x="157" y="194" width="90" height="60"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="356" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="sGD-0U-P4b">
-                                        <rect key="frame" x="14" y="0.0" width="62" height="49.5"/>
+                                        <rect key="frame" x="14" y="0.0" width="62" height="50"/>
                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="36"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Days" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l8F-Sg-cUb">
-                                        <rect key="frame" x="34" y="46" width="23" height="14"/>
+                                        <rect key="frame" x="33" y="46" width="23" height="14"/>
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="10"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>
@@ -457,12 +460,12 @@
                                 <rect key="frame" x="255" y="194" width="90" height="60"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="24" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gaG-Iv-Xyq">
-                                        <rect key="frame" x="24" y="0.0" width="41.5" height="49.5"/>
+                                        <rect key="frame" x="24" y="0.0" width="42" height="50"/>
                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="36"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Hours" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="c2J-Uj-KEg">
-                                        <rect key="frame" x="31" y="46" width="28.5" height="14"/>
+                                        <rect key="frame" x="31" y="46" width="28" height="14"/>
                                         <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="10"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>
@@ -494,7 +497,7 @@
                                 <rect key="frame" x="353" y="194" width="90" height="60"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="59" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="18" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Txm-uf-MP4">
-                                        <rect key="frame" x="24" y="0.0" width="41.5" height="49.5"/>
+                                        <rect key="frame" x="24" y="0.0" width="42" height="50"/>
                                         <fontDescription key="fontDescription" name="OpenSans-Semibold" family="Open Sans" pointSize="36"/>
                                         <nil key="highlightedColor"/>
                                     </label>
@@ -781,53 +784,77 @@
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="8" width="111" height="20"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="r6d-OU-cRI">
-                                <rect key="frame" x="20" y="39" width="49.5" height="23.5"/>
+                                <rect key="frame" x="20" y="40" width="50" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="35.5" width="49" height="20"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mode" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Xww-rc-pOA">
-                                <rect key="frame" x="20" y="103" width="46" height="23.5"/>
+                                <rect key="frame" x="20" y="103.5" width="46" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="96" width="44" height="20"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tracking Running" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="5Xu-6g-tqP">
-                                <rect key="frame" x="444" y="39" width="136" height="23.5"/>
+                                <rect key="frame" x="444" y="40" width="136" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098039220000001" green="0.50196078430000002" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="648" y="35.5" width="132" height="20"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Cached Fixes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="Ujw-jg-ilY">
-                                <rect key="frame" x="20" y="71" width="102.5" height="24"/>
+                                <rect key="frame" x="20" y="71.5" width="102" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="24" id="aFo-6u-YNo"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="64" width="104" height="24"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="dz3-w7-CCh">
-                                <rect key="frame" x="570" y="71" width="10" height="24"/>
+                                <rect key="frame" x="570" y="71.5" width="10" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="24" id="itl-Pi-yYx"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="770" y="64" width="10" height="24"/>
+                                </variation>
                             </label>
                             <containerView opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="1000" translatesAutoresizingMaskIntoConstraints="NO" id="UcT-H2-Fxp">
-                                <rect key="frame" x="0.0" y="134" width="600" height="401.5"/>
+                                <rect key="frame" x="0.0" y="136" width="600" height="400.5"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="0.0" y="123.5" width="800" height="612.5"/>
+                                </variation>
                                 <connections>
                                     <segue destination="rjH-vb-OUF" kind="embed" id="ln5-SR-WkO"/>
                                 </connections>
                             </containerView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="no GPS" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DiM-MR-SGV">
-                                <rect key="frame" x="506" y="8" width="57.5" height="23.5"/>
+                                <rect key="frame" x="506" y="8" width="58" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="705" y="8" width="59" height="20"/>
+                                </variation>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BFc-m8-XKV" customClass="GPSAccuracyView" customModule="SAPTracker" customModuleProvider="target">
                                 <rect key="frame" x="572" y="11" width="12" height="16"/>
@@ -836,12 +863,18 @@
                                     <constraint firstAttribute="width" constant="12" id="L7J-jC-mZv"/>
                                     <constraint firstAttribute="height" constant="16" id="LMm-3U-vXx"/>
                                 </constraints>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="772" y="9.5" width="12" height="16"/>
+                                </variation>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Online" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="tJY-RR-vpe">
-                                <rect key="frame" x="527" y="103" width="52.5" height="23.5"/>
+                                <rect key="frame" x="528" y="103.5" width="52" height="24"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.25098040700000002" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="731" y="96" width="49" height="20"/>
+                                </variation>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mnl-aL-6R2">
                                 <rect key="frame" x="20" y="424" width="560" height="75"/>
@@ -934,12 +967,18 @@
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="0.0" width="106" height="24"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00.00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="48" preferredMaxLayoutWidth="0.0" translatesAutoresizingMaskIntoConstraints="NO" id="mUm-EE-6Is">
-                                <rect key="frame" x="20" y="250.5" width="560" height="98.5"/>
+                                <rect key="frame" x="20" y="251" width="560" height="98"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="358" width="760" height="84"/>
+                                </variation>
                             </label>
                         </subviews>
                         <constraints>
@@ -973,10 +1012,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0.0 kn" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l5u-i3-029">
-                                <rect key="frame" x="202.5" y="251.5" width="195.5" height="98.5"/>
+                                <rect key="frame" x="202.5" y="251" width="196" height="98"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="301.5" y="358" width="197.5" height="84"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Speed" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V9h-qX-rao">
                                 <rect key="frame" x="20" y="0.0" width="49.5" height="23.5"/>
@@ -1017,16 +1059,22 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0 °" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sGK-xV-9a0">
-                                <rect key="frame" x="255" y="251" width="91" height="98.5"/>
+                                <rect key="frame" x="255" y="251" width="91" height="98"/>
                                 <fontDescription key="fontDescription" name="OpenSans-Light" family="Open Sans" pointSize="72"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="355.5" y="358" width="89" height="84"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="COG" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsLetterSpacingToFitWidth="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Tn-6d-NlO">
                                 <rect key="frame" x="20" y="0.0" width="36.5" height="23.5"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="0.0" width="38.5" height="20"/>
+                                </variation>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1058,16 +1106,22 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Version" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YpQ-wa-mW3">
-                                <rect key="frame" x="20" y="484" width="45.5" height="18"/>
+                                <rect key="frame" x="20" y="484" width="46" height="18"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="689" width="43" height="15.5"/>
+                                </variation>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1.0.0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jsi-LA-7jU">
-                                <rect key="frame" x="20" y="510" width="29.5" height="18"/>
+                                <rect key="frame" x="20" y="510" width="30" height="18"/>
                                 <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="13"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="712.5" width="29" height="15.5"/>
+                                </variation>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8Vc-YY-1rh">
                                 <rect key="frame" x="20" y="416" width="560" height="60"/>
@@ -1086,6 +1140,9 @@
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="621" width="760" height="60"/>
+                                </variation>
                                 <connections>
                                     <action selector="openEULA:" destination="WMr-pC-C12" eventType="touchUpInside" id="PhA-bf-yMV"/>
                                 </connections>
@@ -1107,6 +1164,9 @@
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="boolean" keyPath="layer.masksToBounds" value="YES"/>
                                 </userDefinedRuntimeAttributes>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="545" width="760" height="60"/>
+                                </variation>
                                 <connections>
                                     <segue destination="awJ-L8-hjX" kind="show" id="0cD-Vt-sEk"/>
                                 </connections>
@@ -1119,7 +1179,7 @@
                                         <string key="content">The SAP Sail InSight app supports live tracking of race boats by leveraging mobile phone technology, allowing the ability for friends and fans to follow racing whether onsite or online through live leader boards and 2D visualization. Following racing sailors can replay their races allowing the opportunity to review performance and optimize strategies all available at: </string>
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1130,7 +1190,7 @@
                                     <fragment content="sapsailing.com">
                                         <attributes>
                                             <color key="NSColor" red="0.2196078431372549" green="0.43137254901960786" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <url key="NSLink" string="http://sapsailing.com/"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
@@ -1144,7 +1204,7 @@
                                     <fragment content="   ">
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1168,7 +1228,7 @@ Cg
                                     <fragment content=" ">
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1193,7 +1253,7 @@ Cg
                                         <string key="content">SAP supports US Sailing through the implementation of a range of innovative technology solutions, delivering analytics to help teams and sailors improve performance whilst also providing applications to help sailing operations run more efficiently.</string>
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1217,7 +1277,7 @@ Cg
                                     <fragment content=" ">
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1242,7 +1302,7 @@ Cg
                                         <string key="content">As the national governing body for sailing, US Sailing provides leadership, integrity and growth for the sport including training and education programs for instructors and race officials alongside administration and oversight of competitive sailing across the country.</string>
                                         <attributes>
                                             <color key="NSColor" red="0.094117647058823528" green="0.21568627450980393" blue="0.41568627450980394" alpha="1" colorSpace="calibratedRGB"/>
-                                            <font key="NSFont" size="16" name="Calibri"/>
+                                            <font key="NSFont" metaFont="system" size="16"/>
                                             <real key="NSKern" value="0.0"/>
                                             <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" defaultTabInterval="36" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
                                                 <tabStops/>
@@ -1253,6 +1313,9 @@ Cg
                                 </attributedString>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                 <dataDetectorType key="dataDetectorTypes" link="YES"/>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="20" y="20" width="760" height="505"/>
+                                </variation>
                             </textView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -1354,6 +1417,9 @@ Cg
                                                     <fontDescription key="fontDescription" name="OpenSans" family="Open Sans" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                                        <rect key="frame" x="15" y="10" width="111.5" height="24"/>
+                                                    </variation>
                                                 </label>
                                             </subviews>
                                             <constraints>
@@ -1493,7 +1559,7 @@ Cg
                                 </connections>
                             </webView>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="21B-fg-uNB">
-                                <rect key="frame" x="282" y="282" width="37" height="37"/>
+                                <rect key="frame" x="281.5" y="281" width="37" height="37"/>
                                 <color key="color" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                             </activityIndicatorView>
                         </subviews>
@@ -1544,7 +1610,6 @@ Cg
     </scenes>
     <resources>
         <image name="DE.png" width="64" height="64"/>
-        <image name="applogo" width="365" height="96"/>
         <image name="camera" width="24" height="24"/>
         <image name="edit" width="33" height="33"/>
         <image name="home_bg" width="980" height="653"/>
@@ -1554,7 +1619,7 @@ Cg
         <image name="settings" width="22" height="22"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="tzB-PL-31j"/>
-        <segue reference="Irs-ey-Uhs"/>
+        <segue reference="Xxn-jp-xEB"/>
+        <segue reference="QMa-LQ-D8c"/>
     </inferredMetricsTieBreakers>
 </document>
