@@ -41,29 +41,33 @@ class CheckInRequestManager: NSObject {
     
     // MARK: - Event
     
-    func getEvent(eventId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = "\(baseURLString)/events/\(eventId)"
+    func getEvent(eventID: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let encodedEventID = eventID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
+        let urlString = "\(baseURLString)/events/\(encodedEventID)"
         manager.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     // MARK: - Leaderboard
     
     func getLeaderboard(leaderboardName: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = "\(baseURLString)/leaderboards/\(leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(_:))"
+        let encodedLeaderboardName = leaderboardName.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
+        let urlString = "\(baseURLString)/leaderboards/\(encodedLeaderboardName)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     // MARK: - Competitor
     
-    func getCompetitor(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = "\(baseURLString)/competitors/\(competitorId)"
+    func getCompetitor(competitorID: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet())
+        let urlString = "\(baseURLString)/competitors/\(encodedCompetitorID)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     
     // MARK: - Team
     
-    func getTeam(competitorId: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let urlString = "\(baseURLString)/competitors/\(competitorId)/team"
+    func getTeam(competitorID: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
+        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet())
+        let urlString = "\(baseURLString)/competitors/\(encodedCompetitorID)/team"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
     

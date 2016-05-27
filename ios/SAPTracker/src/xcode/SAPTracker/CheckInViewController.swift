@@ -16,18 +16,15 @@ class CheckInViewController: UIViewController, CheckInControllerDelegate {
     }
     
     func checkInDidStart(checkInController: CheckInController) {
-        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
+
     }
     
     func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool) {
-        UIApplication.sharedApplication().endIgnoringInteractionEvents()
+
     }
     
     func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController) {
-        UIApplication.sharedApplication().endIgnoringInteractionEvents()
-        self.presentViewController(alertController, animated: true) {
-            UIApplication.sharedApplication().beginIgnoringInteractionEvents()
-        }
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
     
 }

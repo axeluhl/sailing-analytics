@@ -34,6 +34,7 @@ class CheckInController : NSObject {
     // MARK: - Start check-in
     
     func startCheckIn() {
+        self.delegate.checkInDidStart(self)
         self.checkInRequestManager.getEvent(checkInData.eventID,
                                             success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
                                             failure: { (operation, error) -> Void in self.eventFailed(error) })
@@ -43,7 +44,7 @@ class CheckInController : NSObject {
     
     private func eventSucceed(eventResponseObject: AnyObject) {
         self.checkInData.eventDictionary = eventResponseObject as? [String: AnyObject]
-        self.checkInRequestManager.getLeaderboard(checkInData!.leaderboardName,
+        self.checkInRequestManager.getLeaderboard(checkInData.leaderboardName,
                                                   success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
                                                   failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
     }
@@ -58,7 +59,7 @@ class CheckInController : NSObject {
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        self.showCheckInAlert(alertController)
     }
     
     // MARK: - Leaderboard
@@ -80,7 +81,7 @@ class CheckInController : NSObject {
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        self.showCheckInAlert(alertController)
     }
     
     // MARK: - Competitor
@@ -101,7 +102,7 @@ class CheckInController : NSObject {
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        self.showCheckInAlert(alertController)
     }
     
     // MARK: - Team
@@ -125,12 +126,13 @@ class CheckInController : NSObject {
             self.checkInOnServer()
         }
         alertController.addAction(okAction)
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        self.showCheckInAlert(alertController)
     }
     
     // MARK: - Check-in on server
     
     private func checkInOnServer() {
+        SVProgressHUD.show()
         checkInRequestManager.checkIn(checkInData.dictionaryLeaderboardName(),
                                       competitorID: checkInData!.dictionaryCompetitorId(),
                                       deviceUUID: DeviceUDIDManager.UDID,
@@ -183,19 +185,28 @@ class CheckInController : NSObject {
             self.checkInDidEnd(withSuccess: false)
         }
         alertController.addAction(cancelAction)
-        self.delegate.showCheckInAlert(self, alertController: alertController)
+        self.showCheckInAlert(alertController)
     }
     
     // MARK: - Controller
     
     private func checkInDidStart() {
-        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
-        delegate.checkInDidStart(self)
+        SVProgressHUD.show()
+        self.delegate.checkInDidStart(self)
     }
     
     private func checkInDidEnd(withSuccess succeed: Bool) {
-        UIApplication.sharedApplication().endIgnoringInteractionEvents()
-        delegate.checkInDidEnd(self, withSuccess: succeed)
+        SVProgressHUD.popActivity()
+        self.delegate.checkInDidEnd(self, withSuccess: succeed)
+    }
+    
+    private func showCheckInAlert(alertController: UIAlertController) {
+        SVProgressHUD.popActivity()
+        self.delegate.showCheckInAlert(self, alertController: alertController)
+    }
+    
+    private func checkInAlertDismissed() {
+        SVProgressHUD.show()
     }
     
     // MARK: - Helper
