@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate, CheckInControllerDelegate {
+class HomeViewController: CheckInViewController, UITableViewDataSource, UITableViewDelegate, NSFetchedResultsControllerDelegate {
     
     enum AlertView: Int {
         case NoCameraAvailable
@@ -28,7 +28,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 	@IBOutlet var vSplashScreen: UIView!
     
     var fetchedResultsController: NSFetchedResultsController?
-    private var checkInController: CheckInController?
+    //private var checkInController: CheckInController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,7 +36,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 		loadSplashScreen()		
 
         // set QR manager, needed in case app is being open by custom URL
-        checkInController = CheckInController(delegate: self)
+        //checkInController = CheckInController(delegate: self)
         
         // set up data source for list
         fetchedResultsController = DataManager.sharedManager.checkInFetchedResultsController()
@@ -148,13 +148,13 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
     func openUrl(notification: NSNotification) {
         let url = notification.userInfo!["url"] as! String
-        checkInController!.startCheckIn(url)
+        //checkInController!.startCheckIn(url)
     }
 	
 	func _DEBUG_OPEN_URL() {
 		//let url = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=9df7b4f6-611b-4be0-b028-c7b1bdd434c2"
-		let url2 = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=a5a00800-daf8-0131-89e6-60a44ce903c3"
-		checkInController!.startCheckIn(url2)
+		//let url2 = "http://ec2-54-171-89-140.eu-west-1.compute.amazonaws.com:8888/tracking/checkin?event_id=71c7b531-fb1b-441c-b2fa-f4e9ff672d60&leaderboard_name=Ubigatta&competitor_id=a5a00800-daf8-0131-89e6-60a44ce903c3"
+		//checkInController!.startCheckIn(url2)
 	}
     
     @IBAction func showActionSheet(sender: AnyObject) {
@@ -272,19 +272,19 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
 //		_DEBUG_OPEN_URL()
 //		return;
 		
-        if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
-            let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-            alertView.tag = AlertView.NoCameraAvailable.rawValue;
-            alertView.show()
-            return
-        }
+//        if !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera) {
+//            let alertView = UIAlertView(title: NSLocalizedString("No camera available.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
+//            alertView.tag = AlertView.NoCameraAvailable.rawValue;
+//            alertView.show()
+//            return
+//        }
         
-        if (!CameraController.deviceCanReadQRCodes()) {
-            let alertView = UIAlertView(title: NSLocalizedString("Cannot read QR codes with this device.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
-            alertView.tag = AlertView.NoCameraAvailable.rawValue;
-            alertView.show()
-            return
-        }
+//        if (!CameraController.deviceCanReadQRCodes()) {
+//            let alertView = UIAlertView(title: NSLocalizedString("Cannot read QR codes with this device.", comment: ""), message: nil, delegate: nil, cancelButtonTitle: NSLocalizedString("Cancel", comment: ""))
+//            alertView.tag = AlertView.NoCameraAvailable.rawValue;
+//            alertView.show()
+//            return
+//        }
         performSegueWithIdentifier("Scan", sender: sender)
     }
     
@@ -293,6 +293,20 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         alertView.tag = AlertView.NoCameraAvailable.rawValue;
         alertView.show()
     }
+    
+    // MARK: - CheckInControllerDelegate
+    
+    func displayCheckInAlert(alertController: UIAlertController, checkInController: CheckInController) {
+        self.presentViewController(alertController, animated: true, completion: nil)
+    }
 
+    func checkInSucceed(checkInController: CheckInController) {
+        
+    }
+    
+    func checkInFailed(checkInController: CheckInController) {
+        
+    }
+    
 }
 

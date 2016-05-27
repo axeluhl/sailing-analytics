@@ -1,8 +1,8 @@
 //
-//  QRCodeManager.swift
+//  CheckInController.swift
 //  SAPTracker
 //
-//  Created by computing on 17/11/14.
+//  Created by Raimund Wege on 25.05.16.
 //  Copyright (c) 2014 com.sap.sailing. All rights reserved.
 //
 
@@ -10,165 +10,142 @@ import Foundation
 import UIKit
 import AVFoundation
 
-@objc protocol CheckInControllerDelegate {
-    optional func checkInSucceed()
-    optional func checkInFailed()
+protocol CheckInControllerDelegate {
+    func checkInDidStart(checkInController: CheckInController)
+    func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool)
+    func showCheckInAlert(checkInController: CheckInController, alertController: UIAlertController)
 }
 
-class CheckInController : NSObject, UIAlertViewDelegate {
+class CheckInController : NSObject {
     
-    enum AlertViewTag: Int {
-        case ConfirmCompetitor, ConfirmFailure
-    }
+    private let checkInData: CheckInData!
+    private let delegate: CheckInControllerDelegate!
+    private let checkInRequestManager: CheckInRequestManager!
     
-    private var delegate: CheckInControllerDelegate?
-    private var checkInData: CheckInData?
+    // TODO: - own core data context
     
-    init(delegate: CheckInControllerDelegate) {
+    init(checkInData: CheckInData, delegate: CheckInControllerDelegate) {
+        self.checkInData = checkInData
         self.delegate = delegate
+        self.checkInRequestManager = CheckInRequestManager(checkInData: checkInData)
+        super.init()
     }
     
     // MARK: - Start check-in
     
-    func startCheckIn(urlString: String) {
-        if let checkInData = CheckInData(urlString: urlString) {
-            self.checkInData = checkInData
-            APIManager.sharedManager.initManager(checkInData.serverURL)
-            APIManager.sharedManager.getEvent(checkInData.eventId,
-                                              success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
-                                              failure: { (operation, error) -> Void in self.eventFailed(error) })
-        } else {
-            let alertView = UIAlertView(title: NSLocalizedString("Incorrect QR Code", comment: ""),
-                                        message: "",
-                                        delegate: self,
-                                        cancelButtonTitle: nil,
-                                        otherButtonTitles: NSLocalizedString("Cancel", comment: ""))
-            alertView.tag = AlertViewTag.ConfirmFailure.rawValue
-            alertView.show()
-        }
+    func startCheckIn() {
+        self.checkInRequestManager.getEvent(checkInData.eventID,
+                                            success: { (operation, responseObject) -> Void in self.eventSucceed(responseObject) },
+                                            failure: { (operation, error) -> Void in self.eventFailed(error) })
     }
     
     // MARK: - Event
     
     private func eventSucceed(eventResponseObject: AnyObject) {
-        checkInData!.eventDictionary = eventResponseObject as? [String: AnyObject]
-        APIManager.sharedManager.getLeaderBoard(checkInData!.leaderboardName,
-                                                success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
-                                                failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
+        self.checkInData.eventDictionary = eventResponseObject as? [String: AnyObject]
+        self.checkInRequestManager.getLeaderboard(checkInData!.leaderboardName,
+                                                  success: { (operation, responseObject) -> Void in self.leaderboardSucceed(responseObject) },
+                                                  failure: { (operation, error) -> Void in self.leaderboardFailed(error) })
     }
     
     private func eventFailed(error: AnyObject) {
-        let title = String(format: NSLocalizedString("Couldn't get event %@", comment: ""), checkInData!.eventId)
-        let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
-        let alertView = UIAlertView(title: title,
-                                    message: error.localizedDescription,
-                                    delegate: self,
-                                    cancelButtonTitle: cancelButtonTitle)
-        alertView.tag = AlertViewTag.ConfirmFailure.rawValue
-        alertView.show()
+        let alertTitle = String(format: NSLocalizedString("Couldn't get event %@", comment: ""), self.checkInData.eventID)
+        let alertController = UIAlertController(title: alertTitle,
+                                                message: error.localizedDescription,
+                                                preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
+        }
+        alertController.addAction(cancelAction)
+        self.delegate.showCheckInAlert(self, alertController: alertController)
     }
     
     // MARK: - Leaderboard
     
     private func leaderboardSucceed(leaderboardResponseObject: AnyObject) {
-        checkInData!.leaderboardDictionary = leaderboardResponseObject as? [String: AnyObject]
-        APIManager.sharedManager.getCompetitor(checkInData!.competitorId, success: { (operation, responseObject) in self.competitorSucceed(responseObject) },
-                                               failure: { (operation, error) in self.competitorFailed(error) })
+        self.checkInData.leaderboardDictionary = leaderboardResponseObject as? [String: AnyObject]
+        self.checkInRequestManager.getCompetitor(checkInData.competitorID,
+                                                 success: { (operation, responseObject) in self.competitorSucceed(responseObject) },
+                                                 failure: { (operation, error) in self.competitorFailed(error) })
     }
     
     private func leaderboardFailed(error: AnyObject) {
-        let title = String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), checkInData!.leaderboardName)
-        let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
-        let alertView = UIAlertView(title: title,
-                                    message: error.localizedDescription,
-                                    delegate: self,
-                                    cancelButtonTitle: cancelButtonTitle)
-        alertView.tag = AlertViewTag.ConfirmFailure.rawValue
-        alertView.show()
+        let alertTitle = String(format: NSLocalizedString("Couldn't get leader board %@", comment: ""), checkInData.leaderboardName)
+        let alertController = UIAlertController(title: alertTitle,
+                                                message: error.localizedDescription,
+                                                preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
+        }
+        alertController.addAction(cancelAction)
+        self.delegate.showCheckInAlert(self, alertController: alertController)
     }
     
     // MARK: - Competitor
     
     private func competitorSucceed(competitorResponseObject: AnyObject) {
-        checkInData!.competitorDictionary = competitorResponseObject as? [String: AnyObject]
-        APIManager.sharedManager.getTeamImageURI(checkInData?.dictionaryCompetitorId(),
-                                                 result: { (imageURI) in self.teamImageURIResult(imageURI) })
+        self.checkInData.competitorDictionary = competitorResponseObject as? [String: AnyObject]
+        self.checkInRequestManager.getTeamImageURI(checkInData.dictionaryCompetitorId(),
+                                                   result: { (imageURI) in self.teamImageURIResult(imageURI) })
     }
     
     private func competitorFailed(error: AnyObject) {
-        let title = String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), checkInData!.competitorId)
-        let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
-        let alertView = UIAlertView(title: title,
-                                    message: error.localizedDescription,
-                                    delegate: self,
-                                    cancelButtonTitle: cancelButtonTitle)
-        alertView.tag = AlertViewTag.ConfirmFailure.rawValue
-        alertView.show()
+        let alertTitle = String(format: NSLocalizedString("Couldn't get competitor %@", comment: ""), checkInData.competitorID)
+        let alertController = UIAlertController(title: alertTitle,
+                                                message: error.localizedDescription,
+                                                preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
+        }
+        alertController.addAction(cancelAction)
+        self.delegate.showCheckInAlert(self, alertController: alertController)
     }
     
-    // MARK: - Team image URI
+    // MARK: - Team
     
     private func teamImageURIResult(teamImageURI: String?) {
-        checkInData!.teamImageURI = teamImageURI
-        let title = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
-                           checkInData!.dictionaryCompetitorName(),
-                           checkInData!.dictionaryLeaderboardName(),
-                           checkInData!.dictionaryCompetitorSailId())
-        let alertView = UIAlertView(title: title,
-                                    message: "",
-                                    delegate: self,
-                                    cancelButtonTitle: NSLocalizedString("Cancel", comment: ""),
-                                    otherButtonTitles: NSLocalizedString("OK", comment: ""))
-        alertView.tag = AlertViewTag.ConfirmCompetitor.rawValue
-        alertView.show()
-    }
-    
-    // MARK: - AlertViewDelegate
-    
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch alertView.tag {
-        case AlertViewTag.ConfirmCompetitor.rawValue:
-            confirmCompetitorAlertView(alertView, clickedButtonAtIndex: buttonIndex)
-            break
-        default:
-            confirmFailureAlertView(alertView, clickedButtonAtIndex: buttonIndex)
-            break
+        self.checkInData.teamImageURI = teamImageURI
+        let alertTitle = String(format:NSLocalizedString("Hello %@. Welcome to %@. You are registered as %@.", comment: ""),
+                                self.checkInData.dictionaryCompetitorName(),
+                                self.checkInData.dictionaryLeaderboardName(),
+                                self.checkInData.dictionaryCompetitorSailId())
+        let alertController = UIAlertController(title: alertTitle,
+                                                message: nil,
+                                                preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
         }
-    }
-    
-    private func confirmCompetitorAlertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        switch buttonIndex {
-        case alertView.cancelButtonIndex:
-            checkInFinishedWithFailure()
-            break
-        default:
-            checkInOnServer()
-            break
+        alertController.addAction(cancelAction)
+        let okTitle = NSLocalizedString("OK", comment: "")
+        let okAction = UIAlertAction(title: okTitle, style: .Default) { (action) in
+            self.checkInOnServer()
         }
-    }
-    
-    private func confirmFailureAlertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
-        checkInFinishedWithFailure()
+        alertController.addAction(okAction)
+        self.delegate.showCheckInAlert(self, alertController: alertController)
     }
     
     // MARK: - Check-in on server
     
     private func checkInOnServer() {
-        APIManager.sharedManager.checkIn(checkInData!.dictionaryLeaderboardName(),
-                                         competitorId: checkInData!.dictionaryCompetitorId(),
-                                         deviceUuid: DeviceUDIDManager.UDID,
-                                         pushDeviceId: "",
-                                         fromMillis: millisSince1970(),
-                                         success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },
-                                         failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) })
+        checkInRequestManager.checkIn(checkInData.dictionaryLeaderboardName(),
+                                      competitorID: checkInData!.dictionaryCompetitorId(),
+                                      deviceUUID: DeviceUDIDManager.UDID,
+                                      pushDeviceID: "",
+                                      fromMillis: millisSince1970(),
+                                      success: { (operation, responseObject) -> Void in self.checkInOnServerSucceed() },
+                                      failure: { (operation, error) -> Void in self.checkInOnServerFailed(error) })
     }
     
     private func checkInOnServerSucceed() {
         
         // Check database if check-in already exist
-        if let checkIn = DataManager.sharedManager.getCheckIn(checkInData!.eventId,
-                                                              leaderBoardName: checkInData!.leaderboardName,
-                                                              competitorId: checkInData!.competitorId) {
+        if let checkIn = DataManager.sharedManager.getCheckIn(checkInData.eventID,
+                                                              leaderBoardName: checkInData.leaderboardName,
+                                                              competitorId: checkInData.competitorID) {
             // Delete old check-in
             DataManager.sharedManager.deleteCheckIn(checkIn)
             DataManager.sharedManager.saveContext()
@@ -177,9 +154,9 @@ class CheckInController : NSObject, UIAlertViewDelegate {
         // Create new check-in
         let checkIn = DataManager.sharedManager.newCheckIn()
         checkIn.serverUrl = checkInData!.serverURL
-        checkIn.eventId = checkInData!.eventId
+        checkIn.eventId = checkInData.eventID
         checkIn.leaderBoardName = checkInData!.leaderboardName
-        checkIn.competitorId = checkInData!.competitorId
+        checkIn.competitorId = checkInData!.competitorID
         checkIn.lastSyncDate = NSDate()
         checkIn.imageUrl = checkInData!.teamImageURI
         
@@ -193,34 +170,32 @@ class CheckInController : NSObject, UIAlertViewDelegate {
         DataManager.sharedManager.saveContext()
         
         // Check-in complete
-        checkInFinishedWithSuccess()
+        self.checkInDidEnd(withSuccess: true)
     }
     
     private func checkInOnServerFailed(error: AnyObject) {
-        let title = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), checkInData!.leaderboardName)
-        let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
-        let alertView = UIAlertView(title: title,
-                                    message: error.localizedDescription,
-                                    delegate: self,
-                                    cancelButtonTitle: cancelButtonTitle)
-        alertView.tag = AlertViewTag.ConfirmFailure.rawValue
-        alertView.show()
+        let alertTitle = String(format:NSLocalizedString("Couldn't check-in to %@", comment: ""), checkInData!.leaderboardName)
+        let alertController = UIAlertController(title: alertTitle,
+                                                message: error.localizedDescription,
+                                                preferredStyle: .Alert)
+        let cancelTitle = NSLocalizedString("Cancel", comment: "")
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel) { (action) in
+            self.checkInDidEnd(withSuccess: false)
+        }
+        alertController.addAction(cancelAction)
+        self.delegate.showCheckInAlert(self, alertController: alertController)
     }
     
-    // MARK: - Finish
+    // MARK: - Controller
     
-    private func checkInFinishedWithSuccess() {
-        delegate?.checkInSucceed?()
-        checkInFinished()
+    private func checkInDidStart() {
+        UIApplication.sharedApplication().beginIgnoringInteractionEvents()
+        delegate.checkInDidStart(self)
     }
     
-    private func checkInFinishedWithFailure() {
-        delegate?.checkInFailed?()
-        checkInFinished()
-    }
-    
-    private func checkInFinished() {
-        checkInData = nil
+    private func checkInDidEnd(withSuccess succeed: Bool) {
+        UIApplication.sharedApplication().endIgnoringInteractionEvents()
+        delegate.checkInDidEnd(self, withSuccess: succeed)
     }
     
     // MARK: - Helper
