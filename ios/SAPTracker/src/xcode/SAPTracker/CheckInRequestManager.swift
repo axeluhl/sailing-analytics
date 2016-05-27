@@ -58,7 +58,7 @@ class CheckInRequestManager: NSObject {
     // MARK: - Competitor
     
     func getCompetitor(competitorID: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet())
+        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(baseURLString)/competitors/\(encodedCompetitorID)"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
@@ -66,7 +66,7 @@ class CheckInRequestManager: NSObject {
     // MARK: - Team
     
     func getTeam(competitorID: String!, success: (AFHTTPRequestOperation!, AnyObject!) -> Void, failure: (AFHTTPRequestOperation!, AnyObject!) -> Void) {
-        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet())
+        let encodedCompetitorID = competitorID.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLPathAllowedCharacterSet()) ?? ""
         let urlString = "\(baseURLString)/competitors/\(encodedCompetitorID)/team"
         manager!.GET(urlString, parameters: nil, success: success, failure: failure)
     }
