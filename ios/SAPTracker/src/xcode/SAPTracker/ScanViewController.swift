@@ -1,8 +1,8 @@
 //
-//  QRCodeViewController.swift
+//  ScanViewController.swift
 //  SAPTracker
 //
-//  Created by computing on 22/10/14.
+//  Created by Raimund Wege on 22/10/14.
 //  Copyright (c) 2014 com.sap.sailing. All rights reserved.
 //
 
@@ -14,7 +14,6 @@ class ScanViewController: CheckInViewController, AVCaptureMetadataOutputObjectsD
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
     
-    private var activityIndicatorView: UIActivityIndicatorView!
     private var session: AVCaptureSession!
     private var output: AVCaptureMetadataOutput!
     private var previewLayer: AVCaptureVideoPreviewLayer!
@@ -23,25 +22,17 @@ class ScanViewController: CheckInViewController, AVCaptureMetadataOutputObjectsD
         super.viewDidLoad()
         
         // Setups
-        self.setupActivityIndicator()
         self.setupSession()
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         
         // Start scanning
         self.startScanning()
     }
     
     // MARK: - Setups
-    
-    private func setupActivityIndicator() {
-        activityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.White)
-        activityIndicatorView.hidesWhenStopped = true
-        let barButtonItem = UIBarButtonItem(customView: activityIndicatorView)
-        self.navigationItem.rightBarButtonItem = barButtonItem
-    }
     
     private func setupSession() {
         self.session = AVCaptureSession()
@@ -103,14 +94,8 @@ class ScanViewController: CheckInViewController, AVCaptureMetadataOutputObjectsD
     
     // MARK: - CheckInControllerDelegate
     
-    override func checkInDidStart(checkInController: CheckInController) {
-        super.checkInDidStart(checkInController)
-        self.activityIndicatorView.startAnimating()
-    }
-    
     override func checkInDidEnd(checkInController: CheckInController, withSuccess succeed: Bool) {
         super.checkInDidEnd(checkInController, withSuccess: succeed)
-        self.activityIndicatorView.stopAnimating()
         
         // Handle success and failure
         if succeed {
@@ -120,15 +105,16 @@ class ScanViewController: CheckInViewController, AVCaptureMetadataOutputObjectsD
         }
     }
     
-    // TODO: - Why this code?
-//    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
-//        if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeLeft {
-//            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeRight
-//        } else if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeRight {
-//            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeLeft
-//        } else {
-//            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
-//        }
-//    }
+    // MARK: - UIViewControllerDelegate
+    
+    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+        if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeLeft {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeRight
+        } else if UIDevice.currentDevice().orientation == UIDeviceOrientation.LandscapeRight {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.LandscapeLeft
+        } else {
+            previewLayer!.connection.videoOrientation = AVCaptureVideoOrientation.Portrait
+        }
+    }
     
 }
