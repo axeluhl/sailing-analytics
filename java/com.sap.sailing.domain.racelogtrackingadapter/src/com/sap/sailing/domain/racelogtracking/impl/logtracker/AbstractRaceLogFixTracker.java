@@ -28,11 +28,6 @@ public abstract class AbstractRaceLogFixTracker {
     // TODO: move to AbstractRaceLogFixTracker
    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
         @Override
-        public void regattaLogAttached(RegattaLog regattaLog) {
-            waitForLoadingFromFixStoreToFinishRunning();
-        }
-
-        @Override
         public void regattaLogAboutToBeAttached(RegattaLog regattaLog) {
             synchronized (knownRegattaLogs) {
                 addRegattaLogUnlocked(regattaLog);

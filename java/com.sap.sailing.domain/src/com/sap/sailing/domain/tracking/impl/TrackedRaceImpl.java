@@ -114,7 +114,6 @@ import com.sap.sailing.domain.leaderboard.caching.LeaderboardDTOCalculationReuse
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
@@ -352,17 +351,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * When completed all threads currently waiting on this object are notified.
      */
     private LoadingFromStoresState loadingFromWindStoreState = LoadingFromStoresState.NOT_STARTED;
-    
-    /**
-     * Describes the current state of loading fixes from the {@link GPSFixStore}, which is caused
-     * by {@link #attachRaceLog attaching race logs}. As none or multiple race logs may be attached,
-     * this only is a boolean flag instead of a {@link LoadingFromStoresState}, as there is no concept
-     * of "not started" or "finished", but simply of a loading thread currently running or not.<p>
-     * Threads loading fixes are forced to do so one after another. To make sure that the thread
-     * for loading fixes for the mappings in race log {@code R} has finished, call
-     * {@link #waitForLoadingFromGPSFixStoreToFinishRunning} with {@code R} as the argument.
-     */
-    private boolean loadingFromGPSFixStore = false;
 
     private transient CrossTrackErrorCache crossTrackErrorCache;
     
@@ -4025,10 +4013,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private void informListenersBeforeAttachingRegattaLog(RegattaLog regattaLog) {
         informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAboutToBeAttached);
-    }
-
-    private void informListenersAboutAttachedRegattaLog(RegattaLog regattaLog) {
-        informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAttached);
     }
 
     public void lockForSerializationRead() {
