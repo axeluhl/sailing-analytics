@@ -46,6 +46,7 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
     @Override
     public synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
+        // TODO: observe isReplica, it can change!
         if (!isReplica) {
             RegattaLogSensorDataTracker tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) 
                     trackedRegatta, racingEventServiceTracker.getService().getSensorFixStore(), sensorFixMapperFactory);
