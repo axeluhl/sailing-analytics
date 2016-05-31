@@ -53,7 +53,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
-        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentId()) {
             updateSettings(componentAndSettings);
         }
         this.perspectiveSettings = newSettings.getPerspectiveSettings();

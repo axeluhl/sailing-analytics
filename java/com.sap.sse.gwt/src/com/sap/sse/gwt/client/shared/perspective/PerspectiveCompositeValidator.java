@@ -35,7 +35,7 @@ public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends
     @Override
     public String getErrorMessage(PerspectiveCompositeSettings<PS> valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponentId()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);

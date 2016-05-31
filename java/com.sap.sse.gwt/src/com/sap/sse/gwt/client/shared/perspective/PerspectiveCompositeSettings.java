@@ -8,10 +8,10 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 /**
  * A composite settings class for a perspective aggregating the {@link #getPerspectiveSettings() settings of the
  * perspective itself} as well as the settings of all contained components. The perspective-specific settings are
- * <em>not</em> part of the general composite settings' {@link #getSettingsPerComponent()} result (although a
+ * <em>not</em> part of the general composite settings' {@link #getSettingsPerComponentId()} result (although a
  * {@link Perspective} is a {@link Component}) to make it clear that the perspective to which these settings belong is
  * not nested in itself. Note that any of the component of the component/settings pairs returned by
- * {@link #getSettingsPerComponent()} may again be a perspective, but not the perspective returned by
+ * {@link #getSettingsPerComponentId()} may again be a perspective, but not the perspective returned by
  * {@link #getPerspectiveAndSettings()}.{@link PerspectiveIdAndSettings#getPerspective() getPerspective()}.
  * 
  * @author Frank Mittag

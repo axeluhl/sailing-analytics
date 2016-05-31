@@ -22,7 +22,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
         final StringBuilder result = new StringBuilder();
-        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponentId()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);

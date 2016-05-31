@@ -90,7 +90,7 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentId()) {
             updateSettings(componentAndSettings);
         }
     }

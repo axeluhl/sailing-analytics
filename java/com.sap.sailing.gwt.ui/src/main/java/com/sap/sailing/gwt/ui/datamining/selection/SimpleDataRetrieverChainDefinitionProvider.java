@@ -245,7 +245,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     @Override
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
-        for (ComponentIdAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponentId()) {
             RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) findComponentById(settingsPerComponent.getComponentId());
             SerializableSettings settings = (SerializableSettings) settingsPerComponent.getSettings();
             chainSettings.put(component.getRetrieverLevel(), settings);
