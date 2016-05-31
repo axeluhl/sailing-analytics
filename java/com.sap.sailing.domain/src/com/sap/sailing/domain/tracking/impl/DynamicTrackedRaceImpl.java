@@ -225,8 +225,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     @Override
     public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
         synchronized (getStatusNotifier()) {
-            TrackedRaceStatusEnum status = getStatus().getStatus();
-            while (status != TrackedRaceStatusEnum.FINISHED && status != TrackedRaceStatusEnum.TRACKING) {
+            while (getStatus().getStatus() == TrackedRaceStatusEnum.PREPARED || getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
                 try {
                     getStatusNotifier().wait();
                 } catch (InterruptedException e) {

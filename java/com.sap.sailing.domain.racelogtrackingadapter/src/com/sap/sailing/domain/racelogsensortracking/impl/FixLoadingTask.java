@@ -42,7 +42,7 @@ public class FixLoadingTask implements TrackingDataLoader {
                         FixLoadingTask.this.notifyAll();
                     }
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
-                    setStatusAndProress(TrackedRaceStatusEnum.FINISHED, 1.0);
+                    setStatusAndProress(TrackedRaceStatusEnum.TRACKING, 1.0);
                     trackedRace.unlockAfterSerializationRead();
                     logger.info("Thread "+getName()+" done.");
                 }
