@@ -772,7 +772,8 @@ public class LeaderboardData extends ExportAction {
             addNamedElementWithValue(competitorLegDataElement, "leg_rank_at_leg_finish", competitorLeg.getRank(legFinishTime));
             
             if (legCounter>1) {
-                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", competitorLeg.getRank(competitorLeg.getStartTime())-competitorLeg.getRank(legFinishTime));
+                final TrackedLegOfCompetitor previousLeg = competitorLeg.getTrackedLeg().getTrackedRace().getTrackedLegFinishingAt(competitorLeg.getLeg().getFrom()).getTrackedLeg(competitor);
+                addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", previousLeg.getRank(previousLeg.getFinishTime())-competitorLeg.getRank(legFinishTime));
             } else {
                 addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", 0);
             }
