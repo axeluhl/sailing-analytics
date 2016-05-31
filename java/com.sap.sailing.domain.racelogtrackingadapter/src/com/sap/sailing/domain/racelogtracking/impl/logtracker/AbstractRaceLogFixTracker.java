@@ -104,12 +104,16 @@ public abstract class AbstractRaceLogFixTracker {
     
     protected void startTracking() {
         trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
+        final boolean hasRegattaLogs;
         synchronized (knownRegattaLogs) {
             trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
+            hasRegattaLogs = !knownRegattaLogs.isEmpty();
         }
         trackedRace.addListener(trackingTimesRaceChangeListener);
-        updateMappingsAndAddListeners();
-        waitForLoadingFromFixStoreToFinishRunning();
+        if (hasRegattaLogs) {
+            updateMappingsAndAddListeners();
+            waitForLoadingFromFixStoreToFinishRunning();
+        }
     }
 
     protected void updateMappingsAndAddListeners() {
