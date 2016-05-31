@@ -92,9 +92,12 @@ public class GPSFixStoreImpl implements GPSFixStore {
 
 
     @Override
-    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping)
+    public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
+            TimePoint end)
     throws TransformationException, NoCorrespondingServiceRegisteredException {
-        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+        final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
+        final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
+        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */);
     }
     
     @Override

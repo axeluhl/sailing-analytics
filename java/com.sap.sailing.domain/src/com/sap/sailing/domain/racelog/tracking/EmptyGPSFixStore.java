@@ -44,7 +44,7 @@ public enum EmptyGPSFixStore implements GPSFixStore {
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
-            DeviceMapping<Mark> mapping) {
+            DeviceMapping<Mark> mapping, TimePoint start, TimePoint end) {
 
     }
 

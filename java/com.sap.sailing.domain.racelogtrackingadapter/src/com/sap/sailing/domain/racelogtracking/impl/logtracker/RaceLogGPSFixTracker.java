@@ -184,7 +184,18 @@ public class RaceLogGPSFixTracker extends AbstractRaceLogFixTracker {
         protected void mappingAdded(DeviceMapping<Mark> mapping) {
             DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(mapping.getMappedTo());
             try {
-                gpsFixStore.loadMarkTrack(track, mapping);
+                TimePoint from = getStartOfTracking();
+                TimePoint to = getEndOfTracking();
+                gpsFixStore.loadMarkTrack(track, mapping, from, to);
+                if (track.getFirstRawFix() == null) {
+                    logger.fine("Loading mark positions from outside of start/end of tracking interval (" + from + ".."
+                            + to + ") because no fixes were found in that interval");
+                    // got an empty track for the mark; try again without constraining the mapping interval
+                    // by start/end of tracking to at least attempt to get fixes at all in case there were any
+                    // within the device mapping interval specified
+                    gpsFixStore.loadMarkTrack(track, mapping, /* startOfTimeWindowToLoad */ null,
+                            /* endOfTimeWindowToLoad */ null);
+                }
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Could not load mark track " + mapping.getMappedTo());
             }

@@ -56,7 +56,8 @@ public interface GPSFixStore {
     /**
      * Load all fixes that correspond to the {@code mapping}.
      */
-    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping) throws TransformationException,
+    void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping, TimePoint start,
+            TimePoint end) throws TransformationException,
     NoCorrespondingServiceRegisteredException;
     
     /**
