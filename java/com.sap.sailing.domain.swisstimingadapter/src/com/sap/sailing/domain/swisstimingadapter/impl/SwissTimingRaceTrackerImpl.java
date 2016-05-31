@@ -165,6 +165,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         if (isTrackedRaceStillReachable()) {
             TrackedRaceStatus newStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 1.0);
             trackedRace.onStatusChanged(this, newStatus);
+            trackedRace.onStopTracking(preemptive);
         }
         connector.removeSailMasterListener(this);
     }

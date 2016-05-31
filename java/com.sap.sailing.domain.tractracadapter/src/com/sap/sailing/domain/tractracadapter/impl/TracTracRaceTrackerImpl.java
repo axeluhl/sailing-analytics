@@ -566,6 +566,12 @@ public class TracTracRaceTrackerImpl extends AbstractRaceTrackerImpl
                 lastStatus = new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, /* will be ignored */1.0);
                 updateStatusOfTrackedRaces();
             }
+            for (RaceDefinition race : getRaces()) {
+                DynamicTrackedRace trackedRace = getTrackedRegatta().getExistingTrackedRace(race);
+                if (trackedRace != null) {
+                    trackedRace.onStopTracking(stopReceiversPreemtively);
+                }
+            }
             if (stopReceiversPreemtively && simulator != null) {
                 simulator.stop();
             }

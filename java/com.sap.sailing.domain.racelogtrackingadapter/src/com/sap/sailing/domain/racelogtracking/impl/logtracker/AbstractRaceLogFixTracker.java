@@ -34,6 +34,14 @@ public abstract class AbstractRaceLogFixTracker {
             }
             updateMappingsAndAddListeners();
         }
+
+        @Override
+        public void onStopTracking(boolean preemptive) {
+            if (preemptive) {
+                waitForLoadingFromFixStoreToFinishRunning();
+            }
+            stop();
+        }
     };
     private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
         

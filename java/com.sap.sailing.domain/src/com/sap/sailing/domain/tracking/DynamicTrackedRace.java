@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
+import com.sap.sailing.domain.tracking.impl.DynamicTrackedRaceLogListener;
 import com.sap.sse.common.TimePoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
@@ -189,4 +190,5 @@ public interface DynamicTrackedRace extends TrackedRace {
 
     void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
 
+    void onStopTracking(boolean preemptive);
 }

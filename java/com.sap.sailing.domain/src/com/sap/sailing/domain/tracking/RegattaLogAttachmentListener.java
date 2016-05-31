@@ -6,4 +6,5 @@ public interface RegattaLogAttachmentListener {
 
     void regattaLogAboutToBeAttached(RegattaLog regattaLog);
 
+    void onStopTracking(boolean preemptive);
 }

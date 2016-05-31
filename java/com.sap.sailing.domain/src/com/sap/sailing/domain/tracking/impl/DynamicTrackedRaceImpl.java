@@ -286,6 +286,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
 
     @Override
+    public void onStopTracking(final boolean preemptive) {
+        informListenersOnStopTracking(preemptive);
+    }
+
+    @Override
     public void setAndFixDelayToLiveInMillis(long delayToLiveInMillis) {
         if (getDelayToLiveInMillis() != delayToLiveInMillis) {
             super.setDelayToLiveInMillis(delayToLiveInMillis);

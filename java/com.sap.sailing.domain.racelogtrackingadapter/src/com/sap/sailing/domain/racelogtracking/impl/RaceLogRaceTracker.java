@@ -51,7 +51,6 @@ import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
@@ -65,10 +64,8 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
-import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -85,7 +82,7 @@ import difflib.PatchFailedException;
  * 
  * @author Fredrik Teschke
  */
-public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
+public class RaceLogRaceTracker implements RaceTracker {
     
     private static final String LOGGER_AND_LOGAUTHOR_NAME = RaceLogRaceTracker.class.getName();
     private static final Logger logger = Logger.getLogger(LOGGER_AND_LOGAUTHOR_NAME);
@@ -100,7 +97,6 @@ public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
     private final RaceLogResolver raceLogResolver;
 
     private DynamicTrackedRace trackedRace;
-    private RaceLogGPSFixTracker raceLogGPSFixTracker;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
             GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
@@ -179,14 +175,11 @@ public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
         
         // mark passing calculator is automatically stopped, when the race status is set to {@link
         // TrackedRaceStatusEnum#FINISHED}
-        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.FINISHED, 100));
-
+        trackedRace.onStopTracking(preemptive);
         // remove listeners on logs
         for (Entry<AbstractLog<?, ?>, Object> visitor : visitors.entrySet()) {
             visitor.getKey().removeListener(visitor.getValue());
         }
-
-        raceLogGPSFixTracker.stop();
 
         logger.info(String.format("Stopped tracking race-log race %s %s %s", params.getLeaderboard(),
                 params.getRaceColumn(), params.getFleet()));
@@ -316,9 +309,7 @@ public class RaceLogRaceTracker implements RaceTracker, TrackingDataLoader {
         trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
-        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, 0));
-
-        raceLogGPSFixTracker = new RaceLogGPSFixTracker(regatta, trackedRace, gpsFixStore);
+        new RaceLogGPSFixTracker(regatta, trackedRace, gpsFixStore);
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));
         // this wakes up all waiting race handles
         synchronized (this) {

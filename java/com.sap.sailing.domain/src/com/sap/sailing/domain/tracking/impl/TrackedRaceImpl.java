@@ -4003,7 +4003,8 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         }
     }
     
-    private void informRegattaLogAttachmentListeners(RegattaLog regattaLog, BiConsumer<RegattaLogAttachmentListener, RegattaLog> listenerCaller) {
+    private <T> void informRegattaLogAttachmentListeners(T regattaLog,
+            BiConsumer<RegattaLogAttachmentListener, T> listenerCaller) {
         Iterable<RegattaLogAttachmentListener> listeners;
         synchronized (regattaLogAttachmentListeners) {
             listeners = new ArrayList<>(regattaLogAttachmentListeners);
@@ -4013,6 +4014,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     private void informListenersBeforeAttachingRegattaLog(RegattaLog regattaLog) {
         informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAboutToBeAttached);
+    }
+
+    protected void informListenersOnStopTracking(boolean preemptive) {
+        informRegattaLogAttachmentListeners(preemptive, RegattaLogAttachmentListener::onStopTracking);
     }
 
     public void lockForSerializationRead() {

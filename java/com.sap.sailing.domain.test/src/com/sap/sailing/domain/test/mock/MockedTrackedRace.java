@@ -1091,4 +1091,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     @Override
     public void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track) {
     }
+
+    @Override
+    public void onStopTracking(boolean preemptive) {
+    }
 }
