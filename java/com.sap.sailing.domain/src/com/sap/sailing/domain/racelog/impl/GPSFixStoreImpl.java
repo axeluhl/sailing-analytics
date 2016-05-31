@@ -80,23 +80,16 @@ public class GPSFixStoreImpl implements GPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, DeviceMapping<Competitor> mapping)
-    throws TransformationException, NoCorrespondingServiceRegisteredException {
-        loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
+        // loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true
+        // /*inclusive*/);
+        final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
+        final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
+        loadTrack(track, mapping.getDevice(), from, to, true /* inclusive */);
     }
 
-    @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log,
-            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
-        List<DeviceMapping<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
-        if (mappings != null) {
-            for (DeviceMapping<Competitor> mapping : mappings) {
-                final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());
-                final TimePoint to = Util.getEarliestOfTimePoints(end, mapping.getTimeRange().to());
-                loadTrack(track, mapping.getDevice(), from, to, true /*inclusive*/);
-            }
-        }
-    }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, DeviceMapping<Mark> mapping)
@@ -140,4 +133,5 @@ public class GPSFixStoreImpl implements GPSFixStore {
             throws NoCorrespondingServiceRegisteredException, TransformationException {
         sensorFixStore.loadFixes(consumer, deviceIdentifier, start, end, inclusive);
     }
+
 }

@@ -153,7 +153,7 @@ public class RaceLogGPSFixTracker extends AbstractRaceLogFixTracker {
         protected void mappingAdded(DeviceMapping<Competitor> mapping) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(mapping.getMappedTo());
             try {
-                gpsFixStore.loadCompetitorTrack(track, mapping);
+                gpsFixStore.loadCompetitorTrack(track, mapping, getStartOfTracking(), getEndOfTracking());
             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                 logger.log(Level.WARNING, "Could not load competitor track " + mapping.getMappedTo());
             }

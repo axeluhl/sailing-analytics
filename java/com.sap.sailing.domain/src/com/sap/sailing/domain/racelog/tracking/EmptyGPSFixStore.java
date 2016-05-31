@@ -41,12 +41,6 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     public void removeListener(FixReceivedListener<GPSFix> listener) {
     }
 
-    @Override
-    public void loadCompetitorTrack(
-            DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
-            DeviceMapping<Competitor> mapping) {
-
-    }
 
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track,
@@ -70,11 +64,6 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     }
 
     @Override
-    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log,
-            Competitor competitor, TimePoint start, TimePoint end) throws TransformationException {
-    }
-
-    @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
             TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
@@ -83,5 +72,11 @@ public enum EmptyGPSFixStore implements GPSFixStore {
     public <FixT extends GPSFix> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
             TimePoint start, TimePoint end, boolean inclusive)
             throws NoCorrespondingServiceRegisteredException, TransformationException {
+    }
+
+    @Override
+    public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track,
+            DeviceMapping<Competitor> mapping, TimePoint start, TimePoint end)
+            throws TransformationException, NoCorrespondingServiceRegisteredException {
     }
 }
