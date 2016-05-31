@@ -191,23 +191,26 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     
     @Override
     public void onStatusChanged(TrackingDataLoader source, TrackedRaceStatus newStatus) {
-        // logger.info("Status changed: " + newStatus.getStatus() + " | " + source);
-        this.updateLoaderStatus(source, newStatus);
-        double totalProgress = 1.0, sumOfLoaderProgresses = 0.0;
         TrackedRaceStatusEnum raceStatus = TrackedRaceStatusEnum.FINISHED;
-        if (!loaderStatus.isEmpty()) {
-            raceStatus = TrackedRaceStatusEnum.TRACKING;
-            for (TrackedRaceStatus status : loaderStatus.values()) {
-                if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
-                    raceStatus = TrackedRaceStatusEnum.ERROR; break;
-                } 
-                if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                    raceStatus = TrackedRaceStatusEnum.LOADING;
+        double totalProgress = 1.0;
+        synchronized (loaderStatus) {
+            // logger.info("Status changed: " + newStatus.getStatus() + " | " + source);
+            this.updateLoaderStatus(source, newStatus);
+            double sumOfLoaderProgresses = 0.0;
+            if (!loaderStatus.isEmpty()) {
+                raceStatus = TrackedRaceStatusEnum.TRACKING;
+                for (TrackedRaceStatus status : loaderStatus.values()) {
+                    if (status.getStatus() == TrackedRaceStatusEnum.ERROR) {
+                        raceStatus = TrackedRaceStatusEnum.ERROR; break;
+                    } 
+                    if (status.getStatus() == TrackedRaceStatusEnum.LOADING) {
+                        raceStatus = TrackedRaceStatusEnum.LOADING;
+                    }
+                    sumOfLoaderProgresses += status.getLoadingProgress();
                 }
-                sumOfLoaderProgresses += status.getLoadingProgress();
-            }
-            if (raceStatus == TrackedRaceStatusEnum.LOADING) {
-                totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                if (raceStatus == TrackedRaceStatusEnum.LOADING) {
+                    totalProgress = sumOfLoaderProgresses / loaderStatus.size();
+                }
             }
         }
         this.setStatus(new TrackedRaceStatusImpl(raceStatus, totalProgress));
