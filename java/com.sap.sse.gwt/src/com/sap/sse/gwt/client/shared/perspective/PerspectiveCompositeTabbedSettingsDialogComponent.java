@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -69,12 +69,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
     private final Collection<ComponentAndDialogComponent<?>> componentsAndSettingsDialogs;
     private final PerspectiveAndDialogComponent<PS> perspectiveAndSettingsDialog;
     
-    public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveCompositeSettings<PS> perspectiveCompositeSettings) {
+    public PerspectiveCompositeTabbedSettingsDialogComponent(Perspective<PS> perspective, PerspectiveCompositeSettings<PS> perspectiveCompositeSettings) {
         this.componentsAndSettingsDialogs = new ArrayList<>();
-        for (ComponentAndSettings<?> componentAndSettings : perspectiveCompositeSettings.getSettingsPerComponent()) {
-            componentsAndSettingsDialogs.add(createComponentAndDialogComponent(componentAndSettings.getComponent()));
+        for (Component<?> component: perspective.getComponents()) {
+            componentsAndSettingsDialogs.add(createComponentAndDialogComponent(component));
         }
-        perspectiveAndSettingsDialog = createPerspectiveAndDialogComponent(perspectiveCompositeSettings.getPerspectiveAndSettings().getPerspective());
+        perspectiveAndSettingsDialog = createPerspectiveAndDialogComponent(perspective);
     }
 
     private PerspectiveAndDialogComponent<PS> createPerspectiveAndDialogComponent(Perspective<PS> perspective) {
@@ -89,12 +89,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
         return new ComponentAndDialogComponent<SettingsType>(component, component.getSettingsDialogComponent());
     }
     
-    private <C extends Component<S>, S extends Settings> ComponentAndSettings<S> getComponentAndSettings(ComponentAndDialogComponent<S> componentAndDialog) {
-        return new ComponentAndSettings<S>(componentAndDialog.getComponent(), componentAndDialog.getSettingsDialog().getResult());
+    private <C extends Component<S>, S extends Settings> ComponentIdAndSettings<S> getComponentAndSettings(ComponentAndDialogComponent<S> componentAndDialog) {
+        return new ComponentIdAndSettings<S>(componentAndDialog.getComponent().getId(), componentAndDialog.getSettingsDialog().getResult());
     }
 
-    private PerspectiveAndSettings<PS> getPerspectiveAndSettings(PerspectiveAndDialogComponent<PS> perspectiveAndDialog) {
-        return new PerspectiveAndSettings<PS>(perspectiveAndDialog.getPerspective(), perspectiveAndDialog.getSettingsDialog().getResult());
+    private PerspectiveIdAndSettings<PS> getPerspectiveAndSettings(PerspectiveAndDialogComponent<PS> perspectiveAndDialog) {
+        return new PerspectiveIdAndSettings<PS>(perspectiveAndDialog.getPerspective().getId(), perspectiveAndDialog.getSettingsDialog().getResult());
     }
 
     @Override
@@ -120,8 +120,8 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
 
     @Override
     public PerspectiveCompositeSettings<PS> getResult() {
-        PerspectiveAndSettings<PS> perspectiveAndSettings = perspectiveAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveAndSettingsDialog) : null;
-        Collection<ComponentAndSettings<?>> componentSettings = new ArrayList<>();
+        PerspectiveIdAndSettings<PS> perspectiveAndSettings = perspectiveAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveAndSettingsDialog) : null;
+        Collection<ComponentIdAndSettings<?>> componentSettings = new ArrayList<>();
         for (ComponentAndDialogComponent<?> component : componentsAndSettingsDialogs) {
             componentSettings.add(getComponentAndSettings(component));
         }

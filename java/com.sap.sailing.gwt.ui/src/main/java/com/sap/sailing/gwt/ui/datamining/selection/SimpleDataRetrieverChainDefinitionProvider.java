@@ -32,7 +32,7 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -238,7 +238,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     @Override
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
-        for (ComponentAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
             RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) settingsPerComponent.getComponent();
             SerializableSettings settings = (SerializableSettings) settingsPerComponent.getSettings();
             chainSettings.put(component.getRetrieverLevel(), settings);
@@ -248,7 +248,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
+        Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
 
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(getDataRetrieverChainDefinition()).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
@@ -268,7 +268,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
         return new CompositeSettings(settings);
     }
     
-    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentAndSettings<SettingsType>(component, component.getSettings()) : null;
+    private <SettingsType extends Settings> ComponentIdAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentIdAndSettings<SettingsType>(component.getId(), component.getSettings()) : null;
     }
 }

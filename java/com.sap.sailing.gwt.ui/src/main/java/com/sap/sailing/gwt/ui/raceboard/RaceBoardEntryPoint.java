@@ -136,6 +136,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 asyncActionsExecutor,  raceboardData.getCompetitorAndTheirBoats(), timer, selectedRace.getRaceIdentifier(), leaderboardName,
                 leaderboardGroupName, eventId, RaceBoardEntryPoint.this, getStringMessages(), userAgent, raceTimesInfoProvider);
 
-        RootLayoutPanel.get().add(raceBoardPerspective);
+        RootLayoutPanel.get().add(raceBoardPerspective.getEntryWidget());
     }  
 }

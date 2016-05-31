@@ -1,5 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -36,31 +37,43 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public PerspectiveCompositeSettings<PS> getSettings() {
-        List<ComponentAndSettings<?>> settingsPerComponent = new ArrayList<>();
+        List<ComponentIdAndSettings<?>> settingsPerComponent = new ArrayList<>();
         for (Component<?> c: getComponents()) {
             if (c.hasSettings()) {
                 settingsPerComponent.add(createComponentAndSettings(c));
             }
         }
-        PerspectiveAndSettings<PS> perspectiveAndSettings = new PerspectiveAndSettings<>(this, perspectiveSettings);         
+        PerspectiveIdAndSettings<PS> perspectiveAndSettings = new PerspectiveIdAndSettings<>(this.getId(), perspectiveSettings);         
         return new PerspectiveCompositeSettings<>(perspectiveAndSettings, settingsPerComponent);
     }
 
-    private <S extends Settings> ComponentAndSettings<S> createComponentAndSettings(Component<S> c) {
-        return new ComponentAndSettings<S>(c, c.getSettings());
+    private <S extends Settings> ComponentIdAndSettings<S> createComponentAndSettings(Component<S> c) {
+        return new ComponentIdAndSettings<S>(c.getId(), c.getSettings());
     }
 
     @Override
     public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
-        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
         this.perspectiveSettings = newSettings.getPerspectiveSettings();
     }
 
-    private <S extends Settings> void updateSettings(ComponentAndSettings<S> componentAndSettings) {
-        Component<S> component = componentAndSettings.getComponent();
-        component.updateSettings(componentAndSettings.getSettings());
+    private <S extends Settings> void updateSettings(ComponentIdAndSettings<S> componentAndSettings) {
+        @SuppressWarnings("unchecked")
+        Component<S> component = (Component<S>) findComponentById(componentAndSettings.getComponentId());
+        if (component != null) {
+            component.updateSettings(componentAndSettings.getSettings());
+        }
+    }
+
+    private Component<?> findComponentById(Serializable componentId) {
+        for (Component<?> component : getComponents()) {
+            if (component.getId().equals(componentId)) {
+                return component;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -83,7 +96,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<>(getSettings());
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<>(this, getSettings());
     }
 
     protected PS getPerspectiveSettings() {

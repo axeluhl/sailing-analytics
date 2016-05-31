@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
@@ -90,16 +90,16 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (ComponentAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
+        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponent()) {
             updateSettings(componentAndSettings);
         }
     }
 
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentAndSettings<?>> settings = new HashSet<>();
+        Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
         for (Component<?> component : components) {
-            ComponentAndSettings<?> componentAndSettings = getComponentAndSettings(component);
+            ComponentIdAndSettings<?> componentAndSettings = getComponentAndSettings(component);
             if (componentAndSettings != null) {
                 settings.add(componentAndSettings);
             }
@@ -107,12 +107,25 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
         return new CompositeSettings(settings);
     }
     
-    private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentAndSettings<SettingsType>(component, component.getSettings()) : null;
+    private <SettingsType extends Settings> ComponentIdAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
+        return component.hasSettings() ? new ComponentIdAndSettings<SettingsType>(component.getId(), component.getSettings()) : null;
     }
 
-    private <SettingsType extends Settings> void updateSettings(ComponentAndSettings<SettingsType> componentAndSettings) {
-        componentAndSettings.getComponent().updateSettings(componentAndSettings.getSettings());
+    private <SettingsType extends Settings> void updateSettings(ComponentIdAndSettings<SettingsType> componentAndSettings) {
+        @SuppressWarnings("unchecked")
+        Component<SettingsType> component = (Component<SettingsType>) findComponentById(componentAndSettings.getComponentId());
+        if (component != null) {
+            component.updateSettings(componentAndSettings.getSettings());
+        }
+    }
+
+    private Component<?> findComponentById(Serializable componentId) {
+        for (Component<?> component : components) {
+            if (component.getId().equals(componentId)) {
+                return component;
+            }
+        }
+        return null;
     }
 
     @Override

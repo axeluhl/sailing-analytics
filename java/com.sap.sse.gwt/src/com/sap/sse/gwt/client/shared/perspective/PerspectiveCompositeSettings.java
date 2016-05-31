@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
@@ -12,7 +12,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  * {@link Perspective} is a {@link Component}) to make it clear that the perspective to which these settings belong is
  * not nested in itself. Note that any of the component of the component/settings pairs returned by
  * {@link #getSettingsPerComponent()} may again be a perspective, but not the perspective returned by
- * {@link #getPerspectiveAndSettings()}.{@link PerspectiveAndSettings#getPerspective() getPerspective()}.
+ * {@link #getPerspectiveAndSettings()}.{@link PerspectiveIdAndSettings#getPerspective() getPerspective()}.
  * 
  * @author Frank Mittag
  *
@@ -20,9 +20,9 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *            the {@link Perspective} settings type
  */
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
-    private final PerspectiveAndSettings<PS> perspectiveAndSettings;
+    private final PerspectiveIdAndSettings<PS> perspectiveAndSettings;
     
-    public PerspectiveCompositeSettings(PerspectiveAndSettings<PS> perspectiveAndSettings, Iterable<ComponentAndSettings<?>> settingsPerComponent) {
+    public PerspectiveCompositeSettings(PerspectiveIdAndSettings<PS> perspectiveAndSettings, Iterable<ComponentIdAndSettings<?>> settingsPerComponent) {
         super(settingsPerComponent);
         this.perspectiveAndSettings = perspectiveAndSettings;
     }
@@ -38,7 +38,7 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
         return perspectiveAndSettings.getSettings();
     }
 
-    public PerspectiveAndSettings<PS> getPerspectiveAndSettings() {
+    public PerspectiveIdAndSettings<PS> getPerspectiveAndSettings() {
         return perspectiveAndSettings;
     }
 }

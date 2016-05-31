@@ -5,25 +5,25 @@ import java.io.Serializable;
 import com.sap.sse.common.settings.Settings;
 
 /**
- * A perspective and it's perspective-specific settings
+ * A perspective id and the perspective own settings
  *
  * @param <PS>
  *            the perspective settings type
  * @author Frank Mittag
  */
-public class PerspectiveAndSettings<PS extends Settings> implements Serializable {
+public class PerspectiveIdAndSettings<PS extends Settings> implements Serializable {
     private static final long serialVersionUID = -6750964868964305325L;
 
-    private final Perspective<PS> perspective;
+    private final Serializable perspectiveId;
     private final PS settings;
     
-    public PerspectiveAndSettings(Perspective<PS> perspective, PS settings) {
-        this.perspective = perspective;
+    public PerspectiveIdAndSettings(Serializable perspectiveId, PS settings) {
+        this.perspectiveId = perspectiveId;
         this.settings = settings;
     }
 
-    public Perspective<PS> getPerspective() {
-        return perspective;
+    public Serializable getPerspectiveId() {
+        return perspectiveId;
     }
 
     public PS getSettings() {
