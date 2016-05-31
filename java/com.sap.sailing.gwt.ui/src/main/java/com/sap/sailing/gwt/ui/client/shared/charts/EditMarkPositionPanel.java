@@ -101,11 +101,10 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
-import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class EditMarkPositionPanel extends AbstractRaceChart implements Component<AbstractSettings>, RequiresResize, SelectionChangeEvent.Handler {
+public class EditMarkPositionPanel extends AbstractRaceChart<AbstractSettings> implements RequiresResize, SelectionChangeEvent.Handler {
     protected static final int FIX_OVERLAY_Z_ORDER = 230;
     private final RaceMap raceMap;
     private final LeaderboardPanel leaderboardPanel;

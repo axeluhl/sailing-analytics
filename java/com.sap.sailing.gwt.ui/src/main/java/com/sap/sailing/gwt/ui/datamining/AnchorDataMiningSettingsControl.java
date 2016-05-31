@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.datamining;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -117,6 +118,11 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
     @Override
     public String getDependentCssClassName() {
         return "AnchorDataMiningSettingsControl";
+    }
+
+    @Override
+    public Serializable getId() {
+        return getLocalizedShortName();
     }
 
 }

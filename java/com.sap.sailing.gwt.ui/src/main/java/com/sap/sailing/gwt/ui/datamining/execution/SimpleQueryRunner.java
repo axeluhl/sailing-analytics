@@ -16,9 +16,10 @@ import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SimpleQueryRunner implements QueryRunner {
+public class SimpleQueryRunner extends AbstractComponent<QueryRunnerSettings> implements QueryRunner {
 
     private final DataMiningSession session;
     private final StringMessages stringMessages;

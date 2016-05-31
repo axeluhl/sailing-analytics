@@ -15,7 +15,7 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -28,7 +28,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         super(new ProxyLeaderboardUrlComponent(stringMessages, leaderboard), stringMessages, callback);
     }
     
-    private static class ProxyLeaderboardUrlComponent implements Component<LeaderboardUrlSettings> {
+    private static class ProxyLeaderboardUrlComponent extends AbstractComponent<LeaderboardUrlSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardUrlConfigurationDialogComponent settingsDialogComponent;
         private LeaderboardUrlSettings settings;

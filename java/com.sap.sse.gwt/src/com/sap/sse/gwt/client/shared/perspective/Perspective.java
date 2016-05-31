@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 public interface Perspective<PS extends Settings> extends Component<PerspectiveCompositeSettings<PS>> {
     List<Component<?>> getComponents();
     
-    SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent();
+    SettingsDialogComponent<PS> getPerspectiveOwnSettingsDialogComponent();
     
-    boolean hasPerspectiveSettings();
+    boolean hasPerspectiveOwnSettings();
 }

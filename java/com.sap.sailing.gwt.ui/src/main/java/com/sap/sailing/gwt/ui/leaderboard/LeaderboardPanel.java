@@ -3307,4 +3307,9 @@ public class LeaderboardPanel extends SimplePanel implements Component<Leaderboa
             }
         }
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

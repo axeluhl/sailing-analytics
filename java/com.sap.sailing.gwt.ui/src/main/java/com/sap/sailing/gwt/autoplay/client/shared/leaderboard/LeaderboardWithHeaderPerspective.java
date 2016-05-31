@@ -217,12 +217,12 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
     }
 
     @Override
-    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveSettingsDialogComponent() {
+    public SettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent() {
         return new LeaderboardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
     }
 
     @Override
-    public boolean hasPerspectiveSettings() {
+    public boolean hasPerspectiveOwnSettings() {
         return true;
     }
 

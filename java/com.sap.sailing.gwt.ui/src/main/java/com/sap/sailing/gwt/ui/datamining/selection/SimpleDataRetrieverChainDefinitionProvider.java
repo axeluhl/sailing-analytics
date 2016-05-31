@@ -30,13 +30,14 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SimpleDataRetrieverChainDefinitionProvider implements DataRetrieverChainDefinitionProvider {
+public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponent<CompositeSettings> implements DataRetrieverChainDefinitionProvider {
     
     private final StringMessages stringMessages;
     private final DataMiningServiceAsync dataMiningService;
@@ -270,4 +271,4 @@ public class SimpleDataRetrieverChainDefinitionProvider implements DataRetriever
     private <SettingsType extends Settings> ComponentAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
         return component.hasSettings() ? new ComponentAndSettings<SettingsType>(component, component.getSettings()) : null;
     }
- }
+}

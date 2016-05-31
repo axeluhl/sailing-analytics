@@ -458,4 +458,9 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     public AbstractSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

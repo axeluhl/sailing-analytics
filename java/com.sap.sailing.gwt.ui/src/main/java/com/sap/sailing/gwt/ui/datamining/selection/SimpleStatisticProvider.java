@@ -29,9 +29,10 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class SimpleStatisticProvider implements StatisticProvider {
+public class SimpleStatisticProvider extends AbstractComponent<SerializableSettings> implements StatisticProvider {
     
     private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
     

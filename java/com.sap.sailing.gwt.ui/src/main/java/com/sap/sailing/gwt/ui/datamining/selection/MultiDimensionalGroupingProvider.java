@@ -265,4 +265,9 @@ public class MultiDimensionalGroupingProvider implements GroupingProvider {
     public SerializableSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

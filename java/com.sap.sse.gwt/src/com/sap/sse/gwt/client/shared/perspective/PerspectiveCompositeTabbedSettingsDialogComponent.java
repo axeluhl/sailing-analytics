@@ -79,8 +79,8 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<P extends Perspec
 
     private PerspectiveAndDialogComponent<PS> createPerspectiveAndDialogComponent(Perspective<PS> perspective) {
         PerspectiveAndDialogComponent<PS> result = null;
-        if(perspective.hasPerspectiveSettings()) {
-            result = new PerspectiveAndDialogComponent<PS>(perspective, perspective.getPerspectiveSettingsDialogComponent());
+        if(perspective.hasPerspectiveOwnSettings()) {
+            result = new PerspectiveAndDialogComponent<PS>(perspective, perspective.getPerspectiveOwnSettingsDialogComponent());
         }
         return result;
     }

@@ -589,12 +589,12 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
     }
 
     @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveSettingsDialogComponent() {
+    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent() {
         return new RaceBoardPerspectiveSettingsDialogComponent(getPerspectiveSettings(), stringMessages);
     }
 
     @Override
-    public boolean hasPerspectiveSettings() {
+    public boolean hasPerspectiveOwnSettings() {
         return true;
     }
 }

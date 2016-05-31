@@ -2,14 +2,13 @@ package com.sap.sailing.gwt.autoplay.client.shared.header;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.FullscreenUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.sapheader.SAPHeader;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 
-public class SAPHeaderComponent extends Composite implements Component<SAPHeaderComponentSettings> {
+public class SAPHeaderComponent extends AbstractCompositeComponent<SAPHeaderComponentSettings> {
     private SAPHeaderComponentSettings settings;
     private final SAPHeaderComponentLifecycle componentLifecycle;
     

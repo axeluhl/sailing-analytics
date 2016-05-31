@@ -200,4 +200,9 @@ public class MultiResultsPresenter implements ResultsPresenter<Settings> {
         }
         
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

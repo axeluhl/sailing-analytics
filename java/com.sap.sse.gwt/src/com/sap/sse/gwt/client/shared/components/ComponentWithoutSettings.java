@@ -7,7 +7,7 @@ import com.sap.sse.common.settings.AbstractSettings;
  * @author Frank
  *
  */
-public abstract class ComponentWithoutSettings implements Component<AbstractSettings> {
+public abstract class ComponentWithoutSettings extends AbstractComponent<AbstractSettings> {
 
     @Override
     public boolean hasSettings() {

@@ -168,4 +168,9 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     public AbstractSettings getSettings() {
         return null;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

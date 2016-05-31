@@ -71,7 +71,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
+public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart<SettingsType> implements
         CompetitorSelectionChangeListener, RequiresResize {
     public static final String LOAD_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
     

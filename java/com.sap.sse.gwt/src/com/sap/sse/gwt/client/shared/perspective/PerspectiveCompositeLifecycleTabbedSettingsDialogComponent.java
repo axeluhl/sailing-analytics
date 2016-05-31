@@ -98,7 +98,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
     private PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> createPerspectiveLifecycleAndDialogComponent(PerspectiveLifecycleAndSettings<PL,PS> perspectiveLifecycleAndSettings) {
         PS settings = perspectiveLifecycleAndSettings.getSettings();
         PL perspectiveLifecycle = perspectiveLifecycleAndSettings.getPerspectiveLifecycle();
-        return new PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS>(perspectiveLifecycleAndSettings, perspectiveLifecycle.getPerspectiveSettingsDialogComponent(settings));
+        return new PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS>(perspectiveLifecycleAndSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(settings));
     }
 
     @Override

@@ -68,7 +68,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> createDefaultSettings() {
         PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings = 
-                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveDefaultSettings());  
+                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveOwnDefaultSettings());  
         return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
     }
 
@@ -79,12 +79,12 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     }
 
     @Override
-    public RaceBoardPerspectiveSettings createPerspectiveDefaultSettings() {
+    public RaceBoardPerspectiveSettings createPerspectiveOwnDefaultSettings() {
         return new RaceBoardPerspectiveSettings();
     }
 
     @Override
-    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveSettingsDialogComponent(RaceBoardPerspectiveSettings perspectiveSettings) {
+    public SettingsDialogComponent<RaceBoardPerspectiveSettings> getPerspectiveOwnSettingsDialogComponent(RaceBoardPerspectiveSettings perspectiveSettings) {
         return new RaceBoardPerspectiveSettingsDialogComponent(perspectiveSettings, stringMessages);
     }
 

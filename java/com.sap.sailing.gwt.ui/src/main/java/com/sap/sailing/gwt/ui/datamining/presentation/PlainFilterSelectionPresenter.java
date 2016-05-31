@@ -26,9 +26,10 @@ import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
-public class PlainFilterSelectionPresenter implements FilterSelectionPresenter, FilterSelectionChangedListener,
+public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements FilterSelectionPresenter, FilterSelectionChangedListener,
                                                       DataRetrieverChainDefinitionChangedListener {
 
     private final FilterSelectionProvider filterSelectionProvider;

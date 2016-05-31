@@ -19,7 +19,7 @@ public interface PerspectiveLifecycle<PS extends Settings, PCS extends Perspecti
     
     Iterable<ComponentLifecycle<?,?>> getComponentLifecycles();
     
-    PS createPerspectiveDefaultSettings();
+    PS createPerspectiveOwnDefaultSettings();
     
-    SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS settings);
+    SettingsDialogComponent<PS> getPerspectiveOwnSettingsDialogComponent(PS settings);
 }

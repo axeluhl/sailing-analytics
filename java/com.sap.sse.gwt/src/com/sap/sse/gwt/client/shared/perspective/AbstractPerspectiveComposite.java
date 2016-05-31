@@ -3,9 +3,9 @@ package com.sap.sse.gwt.client.shared.perspective;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *
  */
 public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
-     extends Composite implements Perspective<PS> {
+     extends AbstractCompositeComponent<PerspectiveCompositeSettings<PS>> implements Perspective<PS> {
 
     private final PL perspectiveLifecycle;
     private PS perspectiveSettings;
@@ -25,7 +25,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     protected final List<Component<?>> components;
     
     protected SettingsDialogComponent<PS> getPerspectiveSettingsDialogComponent(PS perspectiveSettings) {
-        return perspectiveLifecycle.getPerspectiveSettingsDialogComponent(perspectiveSettings);
+        return perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveSettings);
     }
 
     public AbstractPerspectiveComposite(PL perspectiveLifecycle, PS perspectiveSettings) {

@@ -2,7 +2,7 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *      the {@link Perspective} settings type
  */
 public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings>
-    implements Component<PerspectiveCompositeLifecycleSettings<PL,PS>> {
+    extends AbstractComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> {
     
     private PerspectiveCompositeLifecycleSettings<PL, PS> compositeLifecycleSettings;
     private final String title;
@@ -87,5 +87,5 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
     @Override
     public String getDependentCssClassName() {
         return null;
-    }   
+    }
 }
