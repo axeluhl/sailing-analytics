@@ -1,10 +1,12 @@
 package com.sap.sailing.gwt.ui.datamining.selection;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -52,11 +54,14 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     private final DataMiningSettingsControl settingsControl;
     private final Map<DataRetrieverChainDefinitionDTO, HashMap<DataRetrieverLevelDTO, SerializableSettings>> settingsMap;
 
+    private final List<Component<?>> retrieverLevelSettingsComponents;
+    
     public SimpleDataRetrieverChainDefinitionProvider(final StringMessages stringMessages, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSettingsControl settingsControl) {
         this.stringMessages = stringMessages;
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
+        this.retrieverLevelSettingsComponents = new ArrayList<>();
         listeners = new HashSet<>();
         isAwaitingReload = false;
         settingsManager = new DataMiningSettingsInfoManager();
@@ -212,11 +217,13 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
 
     @Override
     public SettingsDialogComponent<CompositeSettings> getSettingsDialogComponent() {
-        return new CompositeTabbedSettingsDialogComponent(createSettingsComponentsFor(getDataRetrieverChainDefinition()));
+        retrieverLevelSettingsComponents.clear();
+        retrieverLevelSettingsComponents.addAll(createSettingsComponentsFor(getDataRetrieverChainDefinition()));
+        return new CompositeTabbedSettingsDialogComponent(retrieverLevelSettingsComponents);
     }
 
-    private Iterable<Component<?>> createSettingsComponentsFor(final DataRetrieverChainDefinitionDTO retrieverChain) {
-        Collection<Component<?>> settingsComponents = new ArrayList<>();
+    private List<Component<?>> createSettingsComponentsFor(final DataRetrieverChainDefinitionDTO retrieverChain) {
+        List<Component<?>> settingsComponents = new ArrayList<>();
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(retrieverChain).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
@@ -239,13 +246,22 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
         for (ComponentIdAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponent()) {
-            RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) settingsPerComponent.getComponent();
+            RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) findComponentById(settingsPerComponent.getComponentId());
             SerializableSettings settings = (SerializableSettings) settingsPerComponent.getSettings();
             chainSettings.put(component.getRetrieverLevel(), settings);
         }
         notifyListeners();
     }
 
+    private Component<?> findComponentById(Serializable componentId) {
+        for (Component<?> component : retrieverLevelSettingsComponents) {
+            if (component.getId().equals(componentId)) {
+                return component;
+            }
+        }
+        return null;
+    }
+    
     @Override 
     public CompositeSettings getSettings() {
         Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
