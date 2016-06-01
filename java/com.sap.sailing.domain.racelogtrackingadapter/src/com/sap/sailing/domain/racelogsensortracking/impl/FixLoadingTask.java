@@ -27,7 +27,7 @@ public class FixLoadingTask implements TrackingDataLoader {
             @Override
             public void run() {
                 trackedRace.lockForSerializationRead();
-                setStatusAndProress(TrackedRaceStatusEnum.LOADING, 0.5);
+                setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
                 LockUtil.lockForWrite(loadingFromFixStoreLock);
                 synchronized (FixLoadingTask.this) {
                     loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
@@ -42,7 +42,7 @@ public class FixLoadingTask implements TrackingDataLoader {
                         FixLoadingTask.this.notifyAll();
                     }
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
-                    setStatusAndProress(TrackedRaceStatusEnum.TRACKING, 1.0);
+                    setStatusAndProgress(TrackedRaceStatusEnum.TRACKING, 1.0);
                     trackedRace.unlockAfterSerializationRead();
                     logger.info("Thread "+getName()+" done.");
                 }
@@ -72,7 +72,7 @@ public class FixLoadingTask implements TrackingDataLoader {
         return loadingFromGPSFixStore;
     }
     
-    private void setStatusAndProress(TrackedRaceStatusEnum status, double progress) {
+    private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
         trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
     }
 
