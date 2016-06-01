@@ -117,6 +117,21 @@ public class SensorDataImportServlet extends AbstractFileUploadServlet {
             throws IOException {
         List<Pair<String, InputStream>> files = new ArrayList<>();
 
+        String importerName = null;
+        searchForPrefferedImporter: for (FileItem fi : fileItems) {
+            if ("preferredImporter".equalsIgnoreCase(fi.getFieldName())) {
+                importerName = fi.getString();
+                break searchForPrefferedImporter;
+            }
+        }
+        if (importerName == null) {
+            importerName = "BRAVO";
+        }
+        for (FileItem fi : fileItems) {
+            if ("file".equalsIgnoreCase(fi.getFieldName())) {
+                files.add(new Pair<>(importerName, fi.getInputStream()));
+            }
+        }
         final Iterable<TrackFileImportDeviceIdentifier> mappingList = importFiles(files);
         resp.setContentType("text/html");
         for (TrackFileImportDeviceIdentifier mapping : mappingList) {
