@@ -138,6 +138,7 @@ public abstract class AbstractRaceLogFixTracker implements TrackingDataLoader {
             knownRegattaLogs.forEach((log) -> log.removeListener(getRegattaLogEventVisitor()));
             knownRegattaLogs.clear();
         }
+        setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
     }
     
     protected void updateMappingsAndAddListeners() {
