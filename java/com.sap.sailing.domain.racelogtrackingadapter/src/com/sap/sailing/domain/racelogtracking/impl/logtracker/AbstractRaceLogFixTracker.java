@@ -8,14 +8,19 @@ import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
-import com.sap.sailing.domain.racelogsensortracking.impl.FixLoadingTask;
+import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
+import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
-public abstract class AbstractRaceLogFixTracker {
+public abstract class AbstractRaceLogFixTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(AbstractRaceLogFixTracker.class.getName());
 
     protected final DynamicTrackedRegatta trackedRegatta;
@@ -23,7 +28,8 @@ public abstract class AbstractRaceLogFixTracker {
     
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     
-    private final FixLoadingTask fixLoadingTask;
+    private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
+    private boolean loadingFromGPSFixStore;
 
     // TODO: move to AbstractRaceLogFixTracker
    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
@@ -65,12 +71,12 @@ public abstract class AbstractRaceLogFixTracker {
         this.trackedRegatta = trackedRegatta;
         this.trackedRace = trackedRace;
 
-        this.fixLoadingTask = new FixLoadingTask(trackedRace, fixLoadingLockName);
+        loadingFromFixStoreLock = new NamedReentrantReadWriteLock(fixLoadingLockName, false);
     }
 
     protected void waitForLoadingFromFixStoreToFinishRunning() {
         try {
-            fixLoadingTask.waitForLoadingFromGPSFixStoreToFinishRunning();
+            waitForLoadingFromGPSFixStoreToFinishRunning();
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
         }
@@ -118,11 +124,6 @@ public abstract class AbstractRaceLogFixTracker {
             waitForLoadingFromFixStoreToFinishRunning();
         }
     }
-
-    protected void updateMappingsAndAddListeners() {
-        fixLoadingTask.loadFixesForLog(this::updateMappingsAndAddListenersImpl,
-                "Mongo sensor track loader for tracked race " + trackedRace.getRace().getName());
-    }
     
     protected abstract void updateMappingsAndAddListenersImpl();
     
@@ -137,5 +138,59 @@ public abstract class AbstractRaceLogFixTracker {
             knownRegattaLogs.forEach((log) -> log.removeListener(getRegattaLogEventVisitor()));
             knownRegattaLogs.clear();
         }
+    }
+    
+    protected void updateMappingsAndAddListeners() {
+        Thread t = new Thread(this.getClass().getSimpleName() + " loader for tracked race " + trackedRace.getRace().getName()) {
+            @Override
+            public void run() {
+                trackedRace.lockForSerializationRead();
+                setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
+                LockUtil.lockForWrite(loadingFromFixStoreLock);
+                synchronized (AbstractRaceLogFixTracker.this) {
+                    loadingFromGPSFixStore = true; // indicates that the serialization lock is now safely held
+                    AbstractRaceLogFixTracker.this.notifyAll();
+                }
+                
+                try {
+                    updateMappingsAndAddListenersImpl();
+                } finally {
+                    synchronized (AbstractRaceLogFixTracker.this) {
+                        loadingFromGPSFixStore = false;
+                        AbstractRaceLogFixTracker.this.notifyAll();
+                    }
+                    LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
+                    setStatusAndProgress(TrackedRaceStatusEnum.TRACKING, 1.0);
+                    trackedRace.unlockAfterSerializationRead();
+                    logger.info("Thread "+getName()+" done.");
+                }
+            }
+        };
+        t.start();
+//        if (waitForGPSFixesToLoad) {
+//            try {
+//                t.join();
+//            } catch (InterruptedException e) {
+//                logger.log(Level.WARNING, "Got interrupted while waiting for loading of GPS fixes from log "+log+" to finish", e);
+//            }
+//        }
+    }
+    
+    private synchronized void waitForLoadingFromGPSFixStoreToFinishRunning() throws InterruptedException {
+        while (loadingFromGPSFixStore) {
+            wait();
+        }
+    }
+    
+    /**
+     * Tells if currently the race is loading GPS fixes from the {@link GPSFixStore}. Clients may {@link Object#wait()} on <code>this</code>
+     * object and will be notified whenever a change of this flag's value occurs.
+     */
+    public boolean isLoadingFromGPSFixStore() {
+        return loadingFromGPSFixStore;
+    }
+    
+    private void setStatusAndProgress(TrackedRaceStatusEnum status, double progress) {
+        trackedRace.onStatusChanged(this, new TrackedRaceStatusImpl(status, progress));
     }
 }
