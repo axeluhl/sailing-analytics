@@ -13,7 +13,6 @@ import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -27,8 +26,6 @@ import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Track;
-import com.sap.sailing.domain.tracking.TrackedRaceStatus;
-import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -41,17 +38,6 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     private final SensorFixStore sensorFixStore;
     private final RaceLogMappingWrapper<Competitor> competitorMappings;
 
-    private final AbstractRaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
-        @Override
-        public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
-            if (newStatus.getStatus() == TrackedRaceStatusEnum.TRACKING) {
-                startTracking();
-            } else {
-                stopTracking();
-            }
-        }
-    };
-    
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
         public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -118,7 +104,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
             
         };
 
-        start();
+        startTracking();
     }
     
     @Override
@@ -173,15 +159,5 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     protected void stopTracking() {
         super.stopTracking();
         sensorFixStore.removeListener(listener);
-    }
-    
-    private void start() {
-        trackedRace.addListener(raceChangeListener);
-    }
-    
-    @Override
-    public void stop() {
-        super.stop();
-        trackedRace.removeListener(raceChangeListener);
     }
 }
