@@ -189,6 +189,7 @@ import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMa
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
@@ -2263,6 +2264,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
             if (leaderboardGroup != null) {
+                for (final Event event : eventsById.values()) {
+                    if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
+                        // unlink the leaderboard group from the event; note that the operation is not "apply"-ed to
+                        // this service because it would redundantly replicate; a replica, however, would already have
+                        // received the call to this method and should carry out the following statement locally.
+                        // As such, using the operation to unlink the leaderboard group from the event is only trying
+                        // to avoid duplication of code contained in the operation's internalApplyTo method
+                        new RemoveLeaderboardGroupFromEvent(event.getId(), leaderboardGroup.getId()).internalApplyTo(this);
+                    }
+                }
                 leaderboardGroupsByID.remove(leaderboardGroup.getId());
             }
         } finally {
