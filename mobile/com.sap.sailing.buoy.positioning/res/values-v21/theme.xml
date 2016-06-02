@@ -10,7 +10,7 @@
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">?android:attr/listDivider</item>
+        <item name="android:background">@color/separator_color</item>
     </style>
 
     <style name="shadowLessButtonStyle" parent="@android:style/Widget.Material.Button.Borderless">

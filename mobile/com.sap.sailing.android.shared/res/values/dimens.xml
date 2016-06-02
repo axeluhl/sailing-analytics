@@ -32,6 +32,11 @@
     <dimen name="toolbar_separator_height">1dp</dimen>
     <dimen name="toolbar_left_padding">@dimen/fragment_side_margin</dimen>
 
+    <!-- List -->
+    <dimen name="list_header_height">50dp</dimen>
+    <dimen name="list_row_height">80dp</dimen>
+    <dimen name="list_arrow_right_margin">10dp</dimen>
+
     <!-- Values for buttons -->
     <dimen name="about_button_top_bottom_margin">10dp</dimen>
     <dimen name="about_button_side_margin">16dp</dimen>
@@ -44,5 +49,6 @@
     <!-- Values for text -->
     <dimen name="default_text_size">16sp</dimen>
     <dimen name="highlight_text_size">21sp</dimen>
+    <dimen name="list_header_text_size">18sp</dimen>
 
 </resources>

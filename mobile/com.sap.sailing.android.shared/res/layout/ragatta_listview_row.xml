@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="@dimen/list_row_height"
     android:background="@color/list_item_background_color"
     tools:ignore="Overdraw" >
 
@@ -17,8 +17,8 @@
         android:contentDescription="@string/empty"
         android:src="@drawable/white_arrow_right"
         android:paddingTop="15dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp" />
+        android:layout_marginRight="@dimen/list_arrow_right_margin"
+        android:layout_marginEnd="@dimen/list_arrow_right_margin" />
 
     <TextView
         android:id="@+id/regattaName"
