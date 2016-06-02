@@ -4,11 +4,6 @@
                 android:layout_height="match_parent">
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/toolbar_separator_height"
-        android:background="@color/sap_yellow"/>
-
-    <View
         android:id="@+id/center_anchor"
         android:layout_width="match_parent"
         android:layout_height="0dp"
