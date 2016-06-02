@@ -5,11 +5,6 @@
               android:background="@color/black_transparent"
               android:orientation="vertical">
 
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/toolbar_separator_height"
-        android:background="@color/sap_yellow"/>
-
     <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
