@@ -33,14 +33,14 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
             setSupportActionBar(toolbar);
-            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
-            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
+            getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(getString(R.string.settings));
         }
