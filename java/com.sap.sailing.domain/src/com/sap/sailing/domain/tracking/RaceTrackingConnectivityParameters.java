@@ -21,7 +21,6 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 public interface RaceTrackingConnectivityParameters {
     /**
      * Starts a {@link RaceTracker} using the connectivity parameters provided by this object.
-     * @param raceLogResolver TODO
      */
     RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception;
     
@@ -30,7 +29,6 @@ public interface RaceTrackingConnectivityParameters {
      * instead of using the tracker's domain factory to obtain a default {@link Regatta} object for the tracking
      * parameters. This is particularly useful if a predefined regatta with {@link Series} and {@link Fleet}s
      * is to be used.
-     * @param raceLogResolver TODO
      */
     RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore, GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) throws Exception;
     

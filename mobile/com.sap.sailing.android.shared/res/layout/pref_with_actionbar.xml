@@ -43,7 +43,7 @@
     <View
         android:id="@+id/toolbar_separator"
         android:layout_width="fill_parent"
-        android:layout_height="4dp"
+        android:layout_height="@dimen/toolbar_separator_height"
         android:background="@color/sap_yellow"/>
 
     <FrameLayout

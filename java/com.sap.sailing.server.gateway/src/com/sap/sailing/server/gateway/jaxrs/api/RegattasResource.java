@@ -59,10 +59,12 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithChangingBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceEntriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
@@ -168,6 +170,40 @@ public class RegattasResource extends AbstractSailingServerResource {
 
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
+    /**
+     * Gets all entries for a race.
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @return
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/entries")
+    public Response getEntries(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorWithChangingBoatJsonSerializer(race, new TeamJsonSerializer(
+                        new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
+                        new BoatClassJsonSerializer()));
+                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
+                JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
+    
+                String json = serializedRaceEntries.toJSONString();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
         }
         return response;
     }
