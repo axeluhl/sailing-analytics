@@ -3,6 +3,8 @@ package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 import java.text.DecimalFormat;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -53,7 +55,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private OpenSansTextView accuracyTextView;
     private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
-    private OpenSansButton resetPositionButton;
     private MapFragment mapFragment;
     private Location lastKnownLocation;
     private LatLng savedPosition;
@@ -78,16 +79,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
 
         setUpSetPositionButton(layout, clickListener);
 
-        resetPositionButton = ViewHelper.get(layout, R.id.marker_reset_position_button);
-        resetPositionButton.setOnClickListener(clickListener);
-        resetPositionButton.setVisibility(View.GONE);
-
         signalQualityIndicatorView = ViewHelper.get(layout, R.id.signal_quality_indicator);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal.toInt());
 
         mReceiver = new IntentReceiver();
         mGpsListener = new GPSListener();
         mBroadcastManager = LocalBroadcastManager.getInstance(inflater.getContext());
+        initMapFragment();
+
         return layout;
     }
 
@@ -96,7 +95,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onResume();
         disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
-        mapFragment = (MapFragment) positioningActivity.getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMap().setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         initialLocationUpdate = true;
         initLocationProvider();
@@ -114,6 +112,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         }
         initMarkerReceiver();
         checkGPS();
+    }
+
+    private void initMapFragment() {
+        mapFragment = new MapFragment();
+        FragmentManager manager = getActivity().getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.replace(R.id.map, mapFragment);
+        transaction.commit();
     }
 
     private void setUpSetPositionButton(View layout, ClickListener clickListener) {
@@ -209,7 +215,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
             updateMap();
         }
 
-        if (initialLocationUpdate) {
+        if (initialLocationUpdate && lastKnownLocation != null) {
             LatLng lastKnownLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             GoogleMap map = mapFragment.getMap();
             configureMap(map);
@@ -330,8 +336,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
                 } else {
                     Toast.makeText(getActivity(), "Location is not available yet", Toast.LENGTH_LONG).show();
                 }
-            } else if (id == R.id.marker_reset_position_button) {
-                // Reset position
             }
         }
     }

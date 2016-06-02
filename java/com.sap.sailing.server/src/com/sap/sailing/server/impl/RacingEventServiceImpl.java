@@ -197,6 +197,7 @@ import com.sap.sailing.server.operationaltransformation.RecordMarkGPSFixForNewMa
 import com.sap.sailing.server.operationaltransformation.RecordWindFix;
 import com.sap.sailing.server.operationaltransformation.RemoveDeviceConfiguration;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroupFromEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveMediaTrackOperation;
 import com.sap.sailing.server.operationaltransformation.RemoveWindFix;
 import com.sap.sailing.server.operationaltransformation.RenameEvent;
@@ -1022,15 +1023,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     /**
-     * Checks all groups, if they contain a leaderboard with the <code>removedLeaderboardName</code> and removes it from
-     * the group.
+     * Checks all groups, if they contain a leaderboard with the <code>removedLeaderboardName</code> or reference it as their
+     * overall leaderboard and removes it from the group or unlinks it as the overall leaderboard, respectively.
      * 
      * @param removedLeaderboardName
      */
     private void syncGroupsAfterLeaderboardRemove(String removedLeaderboardName, boolean doDatabaseUpdate) {
         boolean groupNeedsUpdate = false;
         for (LeaderboardGroup leaderboardGroup : leaderboardGroupsByName.values()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+            for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 if (leaderboard.getName().equals(removedLeaderboardName)) {
                     leaderboardGroup.removeLeaderboard(leaderboard);
                     groupNeedsUpdate = true;
@@ -1038,7 +1039,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     break;
                 }
             }
-
+            if (leaderboardGroup.getOverallLeaderboard() != null && leaderboardGroup.getOverallLeaderboard().getName().equals(removedLeaderboardName)) {
+                leaderboardGroup.setOverallLeaderboard(null);
+                groupNeedsUpdate = true;
+            }
             if (doDatabaseUpdate && groupNeedsUpdate) {
                 mongoObjectFactory.storeLeaderboardGroup(leaderboardGroup);
             }
@@ -2290,6 +2294,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         try {
             leaderboardGroup = leaderboardGroupsByName.remove(groupName);
             if (leaderboardGroup != null) {
+                for (final Event event : eventsById.values()) {
+                    if (Util.contains(event.getLeaderboardGroups(), leaderboardGroup)) {
+                        // unlink the leaderboard group from the event; note that the operation is not "apply"-ed to
+                        // this service because it would redundantly replicate; a replica, however, would already have
+                        // received the call to this method and should carry out the following statement locally.
+                        // As such, using the operation to unlink the leaderboard group from the event is only trying
+                        // to avoid duplication of code contained in the operation's internalApplyTo method
+                        new RemoveLeaderboardGroupFromEvent(event.getId(), leaderboardGroup.getId()).internalApplyTo(this);
+                    }
+                }
                 leaderboardGroupsByID.remove(leaderboardGroup.getId());
             }
         } finally {
