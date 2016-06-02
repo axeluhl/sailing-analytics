@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client.shared.charts;
 
+import java.io.Serializable;
+
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
@@ -33,6 +35,11 @@ public class MultiCompetitorRaceChartLifecycle implements ComponentLifecycle<Mul
     @Override
     public String getLocalizedShortName() {
         return stringMessages.competitorCharts();
+    }
+
+    @Override
+    public Serializable getComponentId() {
+        return getLocalizedShortName();
     }
 
     @Override

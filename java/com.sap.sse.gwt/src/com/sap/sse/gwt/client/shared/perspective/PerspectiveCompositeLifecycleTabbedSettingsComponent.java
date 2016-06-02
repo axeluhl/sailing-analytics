@@ -3,7 +3,6 @@ package com.sap.sse.gwt.client.shared.perspective;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
-import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -16,57 +15,48 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *      the {@link Perspective} settings type
  */
 public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings>
-    extends AbstractComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> {
+    extends AbstractComponent<PerspectiveCompositeSettings<PS>> {
     
-    private PerspectiveCompositeLifecycleSettings<PL, PS> compositeLifecycleSettings;
+    private PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
     private final String title;
+    private PerspectiveCompositeSettings<PS> perspectiveCompositeSettings;
     
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings) {
-        this(compositeLifecycleSettings, null);
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings) {
+        this(perspectiveLifecycleWithAllSettings, null);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings, String title) {
-        this.compositeLifecycleSettings = compositeLifecycleSettings;
+    public PerspectiveCompositeLifecycleTabbedSettingsComponent(PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings, String title) {
+        this.perspectiveLifecycleWithAllSettings = perspectiveLifecycleWithAllSettings;
+        this.perspectiveCompositeSettings = perspectiveLifecycleWithAllSettings.getAllSettings(); 
         this.title = title;
     }
 
     @Override
     public boolean hasSettings() {
-        return compositeLifecycleSettings.hasSettings();
+        return true;
     }
 
     @Override
-    public SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL,PS>(compositeLifecycleSettings);
+    public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
+        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
     }
 
     @Override
-    public PerspectiveCompositeLifecycleSettings<PL,PS> getSettings() {
-        return compositeLifecycleSettings;
+    public PerspectiveCompositeSettings<PS> getSettings() {
+        return perspectiveCompositeSettings;
     }
  
     @Override
-    public void updateSettings(PerspectiveCompositeLifecycleSettings<PL,PS> newSettings) {
-        this.compositeLifecycleSettings = newSettings;
+    public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
+        this.perspectiveCompositeSettings = newSettings;
     }
     
     @Override
     public String getLocalizedShortName() {
         if (title != null && !title.isEmpty()) {
             return title;
-        } else {
-            StringBuilder result = new StringBuilder();
-            boolean first = true;
-            for (ComponentLifecycleAndSettings<?,?> component : compositeLifecycleSettings.getComponentLifecyclesAndSettings().getSettingsPerComponentLifecycle()) {
-                if (first) {
-                    first = false;
-                } else {
-                    result.append(" / ");
-                }
-                result.append(component.getComponentLifecycle().getLocalizedShortName());
-            }
-            return result.toString();
         }
+        return perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getLocalizedShortName();
     }
 
     @Override

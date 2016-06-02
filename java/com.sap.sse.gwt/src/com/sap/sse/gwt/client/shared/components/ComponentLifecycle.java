@@ -1,5 +1,7 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.settings.Settings;
 
 /**
@@ -24,7 +26,12 @@ public interface ComponentLifecycle<S extends Settings, SDC extends SettingsDial
      * @return the display name of the component
      */
     String getLocalizedShortName();
-    
+
+    /**
+     * @return the id of the component
+     */
+    Serializable getComponentId();
+
     /**
      * @return true if the component has settings that a user may change. 
      */

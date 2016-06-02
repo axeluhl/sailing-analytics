@@ -96,7 +96,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeTabbedSettingsDialogComponent<>(this, getSettings());
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<>(this);
     }
 
     protected PS getPerspectiveSettings() {

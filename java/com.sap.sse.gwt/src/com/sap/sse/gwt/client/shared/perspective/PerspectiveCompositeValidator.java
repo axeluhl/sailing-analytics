@@ -7,28 +7,24 @@ import java.util.Map;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveAndDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentIdWithSettingsAndDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveIdWithSettingsAndDialogComponent;
 
 /**
  * @author Frank
  *
- * @param <P>
- *      the type of the perspective
  * @param <PS>
- *      the type of the perspective settings
+ *      the type of the perspective own settings
  **/
-public class PerspectiveCompositeValidator<P extends Perspective<PS>, PS extends Settings>
-    implements Validator<PerspectiveCompositeSettings<PS>> {
-    
+public class PerspectiveCompositeValidator<PS extends Settings> implements Validator<PerspectiveCompositeSettings<PS>> {
     private final Map<Serializable, Validator<?>> validatorsMappedByComponent;
     private final Validator<PS> perspectiveValidator;
-    
-    public PerspectiveCompositeValidator(PerspectiveAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
+
+    public PerspectiveCompositeValidator(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialogComponent, Iterable<ComponentIdWithSettingsAndDialogComponent<?>> componentsAndDialogComponents) {
         this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
         validatorsMappedByComponent = new HashMap<>();
-        for (ComponentAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
-            validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponent().getId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
+        for (ComponentIdWithSettingsAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
+            validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponentIdAndSettings().getComponentId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
         }
     }
 

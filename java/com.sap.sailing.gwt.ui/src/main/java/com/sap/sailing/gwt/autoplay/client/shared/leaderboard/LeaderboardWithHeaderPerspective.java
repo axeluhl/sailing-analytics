@@ -67,7 +67,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
 
         SAPHeaderComponentLifecycle sapHeaderLifecycle = getPerspectiveLifecycle().getSapHeaderLifecycle();
         SAPHeaderComponent sapHeader = createSAPHeader(sapHeaderLifecycle, 
-                perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(sapHeaderLifecycle),
+                perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(sapHeaderLifecycle),
                 stringMessages, startInFullScreenMode);
         leaderboardPanel = createLeaderboardPanel(sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, userAgent);
@@ -203,7 +203,7 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             final UserAgentDetails userAgent) {
         LeaderboardPanelLifecycle leaderboardPanelLifecycle = getPerspectiveLifecycle().getLeaderboardPanelLifecycle();
-        LeaderboardSettings leaderboardSettings = componentLifecyclesAndSettings.getComponentSettings().getSettingsOfComponentLifecycle(leaderboardPanelLifecycle);
+        LeaderboardSettings leaderboardSettings = componentLifecyclesAndSettings.findComponentSettingsByLifecycle(leaderboardPanelLifecycle);
 
         LeaderboardPanel leaderboardPanel = new LeaderboardPanel(sailingService, asyncActionsExecutor,
                 leaderboardSettings, /*isEmbedded*/true, /* preSelectedRace */null,

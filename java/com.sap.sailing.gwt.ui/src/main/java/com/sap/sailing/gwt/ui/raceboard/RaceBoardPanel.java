@@ -196,10 +196,10 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
                 
         raceMapResources.raceMapStyle().ensureInjected();
         RaceMapLifecycle raceMapLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceMapLifecycle();
-        RaceMapSettings raceMapSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceMapLifecycle);
+        RaceMapSettings raceMapSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceMapLifecycle);
 
         RaceTimePanelLifecycle raceTimePanelLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getRaceTimePanelLifecycle();
-        RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(raceTimePanelLifecycle);
+        RaceTimePanelSettings raceTimePanelSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(raceTimePanelLifecycle);
 
         raceMap = new RaceMap(raceMapLifecycle, raceMapSettings, sailingService, asyncActionsExecutor, errorReporter, timer,
                 competitorSelectionProvider, stringMessages, selectedRaceIdentifier, raceMapResources, 
@@ -298,13 +298,13 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
         
         MediaPlayerLifecycle mediaPlayerLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getMediaPlayerLifecycle();
-        MediaPlayerSettings mediaPlayerSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(mediaPlayerLifecycle);
+        MediaPlayerSettings mediaPlayerSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(mediaPlayerLifecycle);
 
         WindChartLifecycle windChartLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getWindChartLifecycle();
-        WindChartSettings windChartSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(windChartLifecycle);
+        WindChartSettings windChartSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(windChartLifecycle);
 
         MultiCompetitorRaceChartLifecycle multiCompetitorRaceChartLifecycle = perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getMultiCompetitorRaceChartLifecycle();
-        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = perspectiveLifecycleWithAllSettings.getComponentSettings().getSettingsOfComponentLifecycle(multiCompetitorRaceChartLifecycle);
+        MultiCompetitorRaceChartSettings multiCompetitorRaceChartSettings = perspectiveLifecycleWithAllSettings.findComponentSettingsByLifecycle(multiCompetitorRaceChartLifecycle);
 
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);

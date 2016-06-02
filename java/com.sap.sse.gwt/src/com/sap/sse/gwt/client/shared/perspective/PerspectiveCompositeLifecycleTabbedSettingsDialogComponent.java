@@ -1,8 +1,7 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -12,10 +11,12 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
+import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
-import com.sap.sse.gwt.client.shared.components.ComponentLifecycleAndSettings;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentIdWithSettingsAndDialogComponent;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveIdWithSettingsAndDialogComponent;
 
 /**
  * @author Frank Mittag
@@ -25,92 +26,52 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @param <PS>
  *      the perspective settings type
  */
-public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings>
-    implements SettingsDialogComponent<PerspectiveCompositeLifecycleSettings<PL,PS>> {
+public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS extends Settings>
+    implements SettingsDialogComponent<PerspectiveCompositeSettings<PS>> {
     
-    public static class ComponentLifecycleWithSettingsAndDialogComponent<ComponentLifecycleType extends ComponentLifecycle<S,?>, S extends Settings> {
-        private ComponentLifecycleAndSettings<ComponentLifecycleType, S> componentLifecycleAndSettings;
-        private SettingsDialogComponent<S> dialogComponent;
+    private final List<ComponentIdWithSettingsAndDialogComponent<?>> componentIdsAndDialogComponents;
+    private final PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveIdsAndSettingsDialog;
 
-        public ComponentLifecycleWithSettingsAndDialogComponent(ComponentLifecycleAndSettings<ComponentLifecycleType, S> componentLifecycleAndSettings, SettingsDialogComponent<S> dialogComponent) {
-            this.componentLifecycleAndSettings = componentLifecycleAndSettings;
-            this.dialogComponent = dialogComponent;
-        }
-        
-        public ComponentLifecycleAndSettings<ComponentLifecycleType,S> getComponentLifecycleAndSettings() {
-            return componentLifecycleAndSettings;
-        }
-
-        public SettingsDialogComponent<S> getDialogComponent() {
-            return dialogComponent;
-        }
-    }
-
-    /**
-     * @author Frank Mittag
-     *
-     * @param <PL>
-     *          the {@link PerspectiveLifecycle} type
-     * @param <PS>
-     *          the {@link Perspective} settings type
-     */
-    public static class PerspectiveLifecycleWithSettingsAndDialogComponent<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings> {
-        private PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings;
-        private SettingsDialogComponent<PS> dialogComponent;
-
-        public PerspectiveLifecycleWithSettingsAndDialogComponent(PerspectiveLifecycleAndSettings<PL, PS> perspectiveLifecycleAndSettings, 
-                SettingsDialogComponent<PS> dialogComponent) {
-            this.perspectiveLifecycleAndSettings = perspectiveLifecycleAndSettings;
-            this.dialogComponent = dialogComponent;
-        }
-        
-        public PerspectiveLifecycleAndSettings<PL,PS> getPerspectiveLifecycleAndSettings() {
-            return perspectiveLifecycleAndSettings;
-        }
-
-        public SettingsDialogComponent<PS> getDialogComponent() {
-            return dialogComponent;
-        }
-    }
-
-    private final Collection<ComponentLifecycleWithSettingsAndDialogComponent<?,?>> componentLifecycleAndDialogComponents;
-    private final PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> perspectiveLifecycleAndSettingsDialog;
-
-    public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent(PerspectiveCompositeLifecycleSettings<PL,PS> componentLifecyclesSettings) {
-        this.componentLifecycleAndDialogComponents = new ArrayList<>();
-        for (ComponentLifecycleAndSettings<?,?> componentLifecycleAndSettings : componentLifecyclesSettings.getComponentLifecyclesAndSettings().getSettingsPerComponentLifecycle()) {
-            if (componentLifecycleAndSettings.getComponentLifecycle().hasSettings()) {
-                this.componentLifecycleAndDialogComponents.add(createComponentLifecycleAndDialogComponent(componentLifecycleAndSettings));
+    public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent(PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings) {
+        this.componentIdsAndDialogComponents = new ArrayList<>();
+        CompositeSettings componentSettings = perspectiveLifecycleWithAllSettings.getComponentSettings();
+        for(ComponentLifecycle<?,?> componentLifecycle: perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
+            if (componentLifecycle.hasSettings()) {
+                ComponentIdAndSettings<?> settingsOfComponent = componentSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
+                this.componentIdsAndDialogComponents.add(createComponentIdAndDialogComponent(componentLifecycle, settingsOfComponent));
             }
         }
-        perspectiveLifecycleAndSettingsDialog = createPerspectiveLifecycleAndDialogComponent(componentLifecyclesSettings.getPerspectiveLifecycleAndSettings()); 
+        perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(),
+                perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveAndSettings()); 
     }
-
-    private <C extends ComponentLifecycle<S,?>, S extends Settings> ComponentLifecycleWithSettingsAndDialogComponent<C,S> createComponentLifecycleAndDialogComponent(ComponentLifecycleAndSettings<C,S> componentLifecycleAndSettings) {
+    
+    private <S extends Settings> ComponentIdWithSettingsAndDialogComponent<?> createComponentIdAndDialogComponent(ComponentLifecycle<?,?> componentLifecycle, ComponentIdAndSettings<S> componentLifecycleAndSettings) {
         S settings = componentLifecycleAndSettings.getSettings();
-        return new ComponentLifecycleWithSettingsAndDialogComponent<C,S>(componentLifecycleAndSettings, componentLifecycleAndSettings.getComponentLifecycle().getSettingsDialogComponent(settings));
+        @SuppressWarnings("unchecked")
+        ComponentLifecycle<S,?> typedComponentLifecycle =  (ComponentLifecycle<S, ?>) componentLifecycle;
+        return new ComponentIdWithSettingsAndDialogComponent<S>(componentLifecycle.getLocalizedShortName(), componentLifecycleAndSettings,
+                typedComponentLifecycle.getSettingsDialogComponent(settings));
     }
 
     /**
      * Creates the dialog for the settings of perspective itself 
      * @param perspectiveLifecycleAndSettings
      */
-    private PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> createPerspectiveLifecycleAndDialogComponent(PerspectiveLifecycleAndSettings<PL,PS> perspectiveLifecycleAndSettings) {
-        PS settings = perspectiveLifecycleAndSettings.getSettings();
-        PL perspectiveLifecycle = perspectiveLifecycleAndSettings.getPerspectiveLifecycle();
-        return new PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS>(perspectiveLifecycleAndSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(settings));
+    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS,?,?> perspectiveLifecycle, PerspectiveIdAndSettings<PS> perspectiveIdAndSettings) {
+        PS settings = perspectiveIdAndSettings.getSettings();
+        return new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspectiveLifecycle.getLocalizedShortName(), perspectiveIdAndSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(settings));
     }
 
     @Override
     public Widget getAdditionalWidget(final DataEntryDialog<?> dialog) {
         TabPanel result = new TabPanel();
-        if(perspectiveLifecycleAndSettingsDialog != null) {
-            Widget w = perspectiveLifecycleAndSettingsDialog.getDialogComponent().getAdditionalWidget((DataEntryDialog<?>) dialog);
-            result.add(w, perspectiveLifecycleAndSettingsDialog.getPerspectiveLifecycleAndSettings().getPerspectiveLifecycle().getLocalizedShortName());
+        if(perspectiveIdsAndSettingsDialog != null) {
+            Widget w = perspectiveIdsAndSettingsDialog.getSettingsDialog().getAdditionalWidget((DataEntryDialog<?>) dialog);
+            result.add(w, perspectiveIdsAndSettingsDialog.getPerspectiveName());
         }
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
-            Widget w = component.getDialogComponent().getAdditionalWidget((DataEntryDialog<?>) dialog);
-            result.add(w, component.getComponentLifecycleAndSettings().getComponentLifecycle().getLocalizedShortName());
+        for (ComponentIdWithSettingsAndDialogComponent<?> componentIdAndSettingsAndDialog : componentIdsAndDialogComponents) {
+            Widget w = componentIdAndSettingsAndDialog.getSettingsDialog().getAdditionalWidget((DataEntryDialog<?>) dialog);
+            result.add(w, componentIdAndSettingsAndDialog.getComponentName());
         }
         result.selectTab(0);
         result.addSelectionHandler(new SelectionHandler<Integer>() {
@@ -123,32 +84,32 @@ public class PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PL exten
     }
 
     @Override
-    public PerspectiveCompositeLifecycleSettings<PL,PS> getResult() {
-        PerspectiveLifecycleAndSettings<PL,PS> perspectiveLifeycycleAndSettings = perspectiveLifecycleAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveLifecycleAndSettingsDialog) : null;
-        Collection<ComponentLifecycleAndSettings<?,?>> settings = new HashSet<>();
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
+    public PerspectiveCompositeSettings<PS> getResult() {
+        PerspectiveIdAndSettings<PS> perspectiveLifeycycleAndSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveIdsAndSettingsDialog) : null;
+        List<ComponentIdAndSettings<?>> settings = new ArrayList<>();
+        for (ComponentIdWithSettingsAndDialogComponent<?> component : componentIdsAndDialogComponents) {
             settings.add(getComponentAndSettings(component));
         }
-        return new PerspectiveCompositeLifecycleSettings<PL,PS>(perspectiveLifeycycleAndSettings, new CompositeLifecycleSettings(settings));
+        return new PerspectiveCompositeSettings<PS>(perspectiveLifeycycleAndSettings, settings);
     }
 
-    private <C extends ComponentLifecycle<S,?>, S extends Settings> ComponentLifecycleAndSettings<C,S> getComponentAndSettings(ComponentLifecycleWithSettingsAndDialogComponent<C,S> component) {
-        return new ComponentLifecycleAndSettings<C,S>(component.getComponentLifecycleAndSettings().getComponentLifecycle(), component.getDialogComponent().getResult());
+    private <C extends ComponentLifecycle<S,?>, S extends Settings> ComponentIdAndSettings<S> getComponentAndSettings(ComponentIdWithSettingsAndDialogComponent<S> component) {
+        return new ComponentIdAndSettings<S>(component.getComponentIdAndSettings().getComponentId(), component.getSettingsDialog().getResult());
     }
 
-    private PerspectiveLifecycleAndSettings<PL,PS> getPerspectiveAndSettings(PerspectiveLifecycleWithSettingsAndDialogComponent<PL,PS> perspective) {
-        return new PerspectiveLifecycleAndSettings<PL,PS>(perspective.getPerspectiveLifecycleAndSettings().getPerspectiveLifecycle(), perspective.getDialogComponent().getResult());
+    private PerspectiveIdAndSettings<PS> getPerspectiveAndSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspective) {
+        return new PerspectiveIdAndSettings<PS>(perspective.getPerspectiveIdAndSettings().getPerspectiveId(), perspective.getSettingsDialog().getResult());
     }
 
     @Override
-    public Validator<PerspectiveCompositeLifecycleSettings<PL,PS>> getValidator() {
-        return new PerspectiveCompositeLifecycleValidator<PL,PS>(perspectiveLifecycleAndSettingsDialog, componentLifecycleAndDialogComponents);
+    public Validator<PerspectiveCompositeSettings<PS>> getValidator() {
+        return new PerspectiveCompositeValidator<PS>(perspectiveIdsAndSettingsDialog, componentIdsAndDialogComponents);
     }
 
     @Override
     public FocusWidget getFocusWidget() {
-        for (ComponentLifecycleWithSettingsAndDialogComponent<?,?> component : componentLifecycleAndDialogComponents) {
-            FocusWidget fw = component.getDialogComponent().getFocusWidget();
+        for (ComponentIdWithSettingsAndDialogComponent<?> component : componentIdsAndDialogComponents) {
+            FocusWidget fw = component.getSettingsDialog().getFocusWidget();
             if (fw != null) {
                 return fw;
             }

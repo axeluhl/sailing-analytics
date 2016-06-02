@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.client;
 
+import java.io.Serializable;
+
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -29,6 +31,11 @@ public class RaceTimePanelLifecycle implements
     @Override
     public String getLocalizedShortName() {
         return "TimePanel";
+    }
+
+    @Override
+    public Serializable getComponentId() {
+        return getLocalizedShortName();
     }
 
     @Override

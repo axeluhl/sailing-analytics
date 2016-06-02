@@ -4,16 +4,15 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.autoplay.client.shared.header.SAPHeaderComponentLifecycle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings,
-    PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings>,
-    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings>> {
+    PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>,
+    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings>> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
@@ -30,24 +29,10 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
     
     @Override
-    public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> getSettingsDialogComponent(
-            PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> settings) {
-        // collect the component lifecycle's for contained components and combine them with the corresponding settings
-        // TODO: Take the settings from the settings parameter
-        CompositeLifecycleSettings componentLifecyclesAndDefaultSettings = getComponentLifecyclesAndDefaultSettings();
-        LeaderboardWithHeaderPerspectiveSettings perspectiveSettings = settings.getPerspectiveLifecycleAndSettings().getSettings();
-        PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleAndSettings =
-                new PerspectiveLifecycleAndSettings<>(this, perspectiveSettings);
-        PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveCompositeSettings =
-                new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings>(perspectiveCompositeSettings);
-    }
-
-    @Override
-    public PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
-        PerspectiveLifecycleAndSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> perspectiveLifecycleAndSettings = 
-                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveOwnDefaultSettings());
-        return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
+    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
+        PerspectiveIdAndSettings<LeaderboardWithHeaderPerspectiveSettings> perspectiveIdAndSettings = 
+                new PerspectiveIdAndSettings<>(getComponentId(), createPerspectiveOwnDefaultSettings());
+        return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 
     @Override
@@ -56,8 +41,8 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     }
 
     @Override
-    public PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> cloneSettings(
-            PerspectiveCompositeLifecycleSettings<LeaderboardWithHeaderPerspectiveLifecycle, LeaderboardWithHeaderPerspectiveSettings> settings) {
+    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> cloneSettings(
+            PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> settings) {
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 

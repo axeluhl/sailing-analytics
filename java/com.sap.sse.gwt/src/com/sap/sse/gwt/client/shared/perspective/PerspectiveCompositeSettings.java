@@ -41,4 +41,9 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
     public PerspectiveIdAndSettings<PS> getPerspectiveAndSettings() {
         return perspectiveAndSettings;
     }
+    
+    public boolean hasSettings() {
+        return getSettingsPerComponentId() != null || perspectiveAndSettings != null;
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.autoplay.client.shared.header;
 
+import java.io.Serializable;
+
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 
@@ -35,6 +37,11 @@ public class SAPHeaderComponentLifecycle implements ComponentLifecycle<SAPHeader
     @Override
     public boolean hasSettings() {
         return true;
+    }
+    
+    @Override
+    public Serializable getComponentId() {
+        return getLocalizedShortName();
     }
 }
 

@@ -8,17 +8,16 @@ import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartLifec
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
-import com.sap.sse.gwt.client.shared.components.CompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleAndSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings,
-    PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>,
-    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>> {
+    PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>,
+    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveSettings>> {
 
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
@@ -50,31 +49,16 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         componentLifecycles.add(raceTimePanelLifecycle);
     }
 
-
     @Override
-    public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> getSettingsDialogComponent(
-            PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> settings) {
-        // collect the component lifecycle's for contained components and combine them with the corresponding settings
-        // TODO: Take the settings from the settings parameter
-        CompositeLifecycleSettings componentLifecyclesAndDefaultSettings = getComponentLifecyclesAndDefaultSettings();
-        RaceBoardPerspectiveSettings perspectiveSettings = settings.getPerspectiveLifecycleAndSettings().getSettings();
-        PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings =
-                new PerspectiveLifecycleAndSettings<>(this, perspectiveSettings); 
-        PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveCompositeSettings =
-                new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, componentLifecyclesAndDefaultSettings);
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings>(perspectiveCompositeSettings);
+    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> createDefaultSettings() {
+        PerspectiveIdAndSettings<RaceBoardPerspectiveSettings> perspectiveIdAndSettings = 
+                new PerspectiveIdAndSettings<>(getComponentId(), createPerspectiveOwnDefaultSettings());  
+        return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 
     @Override
-    public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> createDefaultSettings() {
-        PerspectiveLifecycleAndSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> perspectiveLifecycleAndSettings = 
-                new PerspectiveLifecycleAndSettings<>(this, createPerspectiveOwnDefaultSettings());  
-        return new PerspectiveCompositeLifecycleSettings<>(perspectiveLifecycleAndSettings, getComponentLifecyclesAndDefaultSettings());
-    }
-
-    @Override
-    public PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> cloneSettings(
-            PerspectiveCompositeLifecycleSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> settings) {
+    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> cloneSettings(
+            PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> settings) {
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 

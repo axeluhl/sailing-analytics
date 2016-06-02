@@ -15,13 +15,14 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
  *       
  */
 public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings>
-    extends SettingsDialog<PerspectiveCompositeLifecycleSettings<PL,PS>> {
+    extends SettingsDialog<PerspectiveCompositeSettings<PS>> {
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(StringMessages stringConstants, PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings, String title) {
-        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL,PS>(compositeLifecycleSettings, title), stringConstants);
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(StringMessages stringConstants, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings, String title) {
+        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL,PS>(perspectiveLifecycleWithAllSettings, title), stringConstants);
     }
 
-    public PerspectiveCompositeLifecycleTabbedSettingsDialog(StringMessages stringConstants, PerspectiveCompositeLifecycleSettings<PL,PS> compositeLifecycleSettings, String title, DialogCallback<PerspectiveCompositeLifecycleSettings<PL,PS>> callback) {
-        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL,PS>(compositeLifecycleSettings, title), stringConstants, callback);
+    public PerspectiveCompositeLifecycleTabbedSettingsDialog(StringMessages stringConstants, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings,
+            String title, DialogCallback<PerspectiveCompositeSettings<PS>> callback) {
+        super(new PerspectiveCompositeLifecycleTabbedSettingsComponent<PL,PS>(perspectiveLifecycleWithAllSettings, title), stringConstants, callback);
     }
 }
