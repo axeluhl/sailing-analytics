@@ -13,7 +13,7 @@
         android:layout_marginRight="14dp"
         android:layout_centerVertical="true"
         android:contentDescription="@string/empty"
-        android:src="@drawable/yellow_arrow_right"
+        android:src="@drawable/white_arrow_right"
         android:textColor="@color/white"/>
 
     <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView

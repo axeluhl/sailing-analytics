@@ -4,7 +4,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 xmlns:Tools="http://schemas.android.com/apk/res-auto"
-                android:background="@drawable/main_background">
+                android:background="@drawable/fiori_main_background">
 
     <RelativeLayout
         android:id="@+id/image"

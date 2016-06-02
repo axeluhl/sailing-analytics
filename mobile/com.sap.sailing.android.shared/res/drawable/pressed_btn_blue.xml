@@ -4,5 +4,5 @@
     <corners
         android:radius="@dimen/button_radius"/>
 
-    <solid android:color="@color/qr_code_button_normal"/>
+    <solid android:color="@color/blue_button_pressed"/>
 </shape>
