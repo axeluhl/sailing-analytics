@@ -53,7 +53,7 @@ define(`SMART_HOST', `smtp.internalsapsailing.com')dnl
           permit_mynetworks,
           check_relay_domains
        ```
-- create a normal linux user via `useradd <name>` and give it a password via `passwd <password>`
+- create a normal linux user via `useradd <name>` and give it a password via `passwd <user>`
 - create a destination alias where mails shall go (currently internally only, see above) to, if someone responds to the mail <name>@<myhostname> via `/etc/aliases` and add additional destination mails comma-seperated
   ```
   # USSailing Mailing
