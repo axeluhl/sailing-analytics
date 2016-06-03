@@ -31,21 +31,9 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS exte
     }
     
     public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
-        PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings = getPerspectiveLifecycleWithAllSettings(settings); 
+        PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(this, settings); 
         
         return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
-    }
-
-    protected PerspectiveLifecycleWithAllSettings<?, PS> getPerspectiveLifecycleWithAllSettings(PerspectiveCompositeSettings<PS> settings) {
-        // collect the component lifecycle's for contained components and combine them with the corresponding settings
-        // TODO: Take the settings from the settings parameter
-        CompositeSettings componentAndDefaultSettings = getComponentIdsAndDefaultSettings();
-        PS perspectiveSettings = settings.getPerspectiveAndSettings().getSettings();
-        PerspectiveIdAndSettings<PS> perspectiveIdAndSettings = new PerspectiveIdAndSettings<>(getComponentId(), perspectiveSettings);
-        PerspectiveCompositeSettings<PS> perspectiveCompositeSettings =
-                new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, componentAndDefaultSettings.getSettingsPerComponentId());
-        
-        return new PerspectiveLifecycleWithAllSettings<>(this, perspectiveCompositeSettings); 
     }
     
     protected CompositeSettings getComponentIdsAndDefaultSettings() {
