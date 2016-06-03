@@ -31,7 +31,7 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     @Override
     public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
         PerspectiveIdAndSettings<LeaderboardWithHeaderPerspectiveSettings> perspectiveIdAndSettings = 
-                new PerspectiveIdAndSettings<>(getComponentId(), createPerspectiveOwnDefaultSettings());
+                new PerspectiveIdAndSettings<>(createPerspectiveOwnDefaultSettings());
         return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 

@@ -123,7 +123,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
         PerspectiveIdWithSettingsAndDialogComponent<PS> result = null;
         if(perspective.hasPerspectiveOwnSettings()) {
             result = new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspective.getLocalizedShortName(),
-                    new PerspectiveIdAndSettings<PS>(perspective.getId(), perspective.getSettings().getPerspectiveSettings()),
+                    new PerspectiveIdAndSettings<PS>(perspective.getSettings().getPerspectiveSettings()),
                     perspective.getPerspectiveOwnSettingsDialogComponent());
         }
         return result;
@@ -140,7 +140,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     }
 
     private PerspectiveIdAndSettings<PS> getPerspectiveAndSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {
-        return new PerspectiveIdAndSettings<PS>(perspectiveAndDialog.perspectiveIdAndSettings.getPerspectiveId(), perspectiveAndDialog.getSettingsDialog().getResult());
+        return new PerspectiveIdAndSettings<PS>(perspectiveAndDialog.getSettingsDialog().getResult());
     }
 
     @Override

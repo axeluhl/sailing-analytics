@@ -52,7 +52,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     @Override
     public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> createDefaultSettings() {
         PerspectiveIdAndSettings<RaceBoardPerspectiveSettings> perspectiveIdAndSettings = 
-                new PerspectiveIdAndSettings<>(getComponentId(), createPerspectiveOwnDefaultSettings());  
+                new PerspectiveIdAndSettings<>(createPerspectiveOwnDefaultSettings());  
         return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 
