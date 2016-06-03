@@ -29,7 +29,6 @@ import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
-import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindLegTypeAndLegBearingCache;
@@ -302,15 +301,8 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
     }
 
     /**
-     * For now, we have an incredibly simple wind "model" which assigns a single common wind force and bearing to all
-     * positions on the course, only variable over time.
-     * 
-     * @param windPositionMode
-     *            For {@link WindPositionMode#EXACT}, the wind at position <code>p</code> is determined. For type
-     *            {@link WindPositionMode#LEG_MIDDLE}, the {@link TrackedLeg#getMiddleOfLeg middle of the tracked leg}
-     *            is determined and used as position. If the mode is {@link WindPositionMode#GLOBAL_AVERAGE}, <code>null</code>
-     *            is passed as position to {@link TrackedRace#getWind(Position, TimePoint)} which yields a general average
-     *            of the various wind sources available for the race, independent of any position.
+     * Calculates the competitor's rank at {@code timePoint} based on the {@link WindPositionMode#LEG_MIDDLE} wind
+     * direction for upwind and downwind legs, or based on the leg's rhumb line for reaching legs.
      */
     @Override
     public int getRank(TimePoint timePoint) {
