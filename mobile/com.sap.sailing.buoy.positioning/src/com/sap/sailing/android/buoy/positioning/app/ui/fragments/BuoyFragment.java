@@ -51,7 +51,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private static final int GPS_MIN_DISTANCE = 1;
     private static final int GPS_MIN_TIME = 1000;
     private static final String N_A = "n/a";
-    private OpenSansTextView markHeaderTextView;
     private OpenSansTextView accuracyTextView;
     private OpenSansTextView distanceTextView;
     private OpenSansButton setPositionButton;
@@ -72,7 +71,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View layout = inflater.inflate(R.layout.fragment_buoy_postion_detail, container, false);
 
-        markHeaderTextView = ViewHelper.get(layout, R.id.mark_header);
         accuracyTextView = ViewHelper.get(layout, R.id.marker_gps_accuracy);
         distanceTextView = ViewHelper.get(layout, R.id.marker_gps_distance);
         ClickListener clickListener = new ClickListener();
@@ -173,8 +171,6 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     public void setUpTextUI(Location location) {
-        MarkInfo mark = positioningActivity.getMarkInfo();
-        markHeaderTextView.setText(mark.getName());
         String accuracyText = N_A;
         String distanceText = N_A;
         DecimalFormat accuracyFormatter = new DecimalFormat("#.##");

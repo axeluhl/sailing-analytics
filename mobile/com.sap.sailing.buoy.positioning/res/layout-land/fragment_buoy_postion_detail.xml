@@ -14,36 +14,12 @@
         android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <RelativeLayout
+        <FrameLayout
+            android:id="@+id/map"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginBottom="@dimen/position_detail_bottom_margin"
             android:layout_weight="1"
-            android:background="@color/white">
-
-            <FrameLayout
-                android:id="@+id/map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-            <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-                android:id="@+id/mark_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="start"
-                android:background="@color/black_slightly_transparent"
-                android:gravity="start"
-                android:paddingBottom="7dp"
-                android:paddingLeft="16dp"
-                android:paddingTop="7dp"
-                android:textColor="@color/white"
-                android:textSize="14sp"/>
-
-        </RelativeLayout>
+            android:layout_marginBottom="@dimen/position_detail_bottom_margin"/>
 
         <!-- Begin of detailed mark information -->
 

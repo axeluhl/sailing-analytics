@@ -7,36 +7,11 @@
               android:orientation="vertical"
               android:paddingLeft="0dp"
               android:paddingRight="0dp">
-
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/white">
-
-        <FrameLayout
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-        <com.sap.sailing.android.shared.ui.customviews.OpenSansTextView
-            android:id="@+id/mark_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:layout_gravity="left"
-            android:background="@color/black_slightly_transparent"
-            android:gravity="left"
-            android:paddingBottom="7dp"
-            android:paddingLeft="16dp"
-            android:paddingTop="7dp"
-            android:textColor="@color/white"
-            android:textSize="14sp"/>
-
-    </RelativeLayout>
+        android:layout_weight="1"/>
 
     <View
         android:layout_width="match_parent"
