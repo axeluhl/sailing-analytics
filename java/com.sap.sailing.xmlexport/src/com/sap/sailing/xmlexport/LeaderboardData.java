@@ -810,31 +810,35 @@ public class LeaderboardData extends ExportAction {
     }
     
     private List<Element> createFullWindDataXML(TrackedRace race, Fleet fleet, int sameDayIndex) {
-        List<Element> windElements = new ArrayList<>();
-        List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
-        WindSourceImpl windSource = new WindSourceImpl(WindSourceType.COMBINED);
+        final List<Element> windElements = new ArrayList<>();
+        final List<WindSource> windSourcesToDeliver = new ArrayList<WindSource>();
+        final WindSource windSource = new WindSourceImpl(WindSourceType.COMBINED);
         windSourcesToDeliver.add(windSource);
-        TimePoint fromTimePoint = race.getStartOfRace();
-        TimePoint toTimePoint = race.getEndOfRace();
-        int numberOfFixes = (int) ((toTimePoint.asMillis() - fromTimePoint.asMillis()) / /*resolutionInMillis*/ 1000*60*5);
-        WindTrack windTrack = race.getOrCreateWindTrack(windSource);
-        TimePoint timePoint = fromTimePoint;
-        for (int i = 0; i < numberOfFixes && toTimePoint != null && timePoint.compareTo(toTimePoint) < 0; i++) {
-            WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
-                    .getAveragedWindWithConfidence(null, timePoint);
-            if (averagedWindWithConfidence != null) {
-                Element windElement = new Element("windFix");
-                addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
-                addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
-                addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
-                windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
-                addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
-                addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
-                windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
-                        averagedWindWithConfidence.getConfidence(), toTimePoint)));
-                windElements.add(windElement);
+        final TimePoint fromTimePoint = race.getStartOfRace();
+        if (fromTimePoint != null) {
+            final TimePoint toTimePoint = race.getEndOfRace();
+            final Duration samplingInterval = Duration.ONE_MINUTE.times(5);
+            final WindTrack windTrack = race.getOrCreateWindTrack(windSource);
+            TimePoint timePoint = fromTimePoint;
+            int attemptedNumberOfFixes = 0;
+            while (toTimePoint == null ? (attemptedNumberOfFixes<5) : (timePoint.compareTo(toTimePoint) < 0)) {
+                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>> averagedWindWithConfidence = windTrack
+                        .getAveragedWindWithConfidence(null, timePoint);
+                if (averagedWindWithConfidence != null) {
+                    Element windElement = new Element("windFix");
+                    addNamedElementWithValue(windElement, "same_day_index", sameDayIndex);
+                    addNamedElementWithValue(windElement, "race_name", race.getRace().getName());
+                    addNamedElementWithValue(windElement, "fleet_name", fleet.getName());
+                    windElement.addContent(createTimedXML("", averagedWindWithConfidence.getObject().getTimePoint()));
+                    addNamedElementWithValue(windElement, "bearingInDegrees", averagedWindWithConfidence.getObject().getBearing().getDegrees());
+                    addNamedElementWithValue(windElement, "directionFromInDegrees", averagedWindWithConfidence.getObject().getBearing().reverse().getDegrees());
+                    windElement.addContent(createWindXML("", new SpeedWithConfidenceImpl<TimePoint>(new KnotSpeedImpl(averagedWindWithConfidence.getObject().getKnots()), 
+                            averagedWindWithConfidence.getConfidence(), timePoint)));
+                    windElements.add(windElement);
+                }
+                timePoint = timePoint.plus(samplingInterval);
+                attemptedNumberOfFixes++;
             }
-            timePoint = new MillisecondsTimePoint(timePoint.asMillis() + 1000*60*5);
         }
         return windElements;
     }
