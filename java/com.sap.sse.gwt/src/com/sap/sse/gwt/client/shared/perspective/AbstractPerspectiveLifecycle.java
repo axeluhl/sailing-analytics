@@ -30,10 +30,10 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS exte
         componentLifecycles = new ArrayList<>();
     }
     
-    public PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
+    public PerspectiveCompositeTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
         PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(this, settings); 
         
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
     }
     
     protected CompositeSettings getComponentIdsAndDefaultSettings() {

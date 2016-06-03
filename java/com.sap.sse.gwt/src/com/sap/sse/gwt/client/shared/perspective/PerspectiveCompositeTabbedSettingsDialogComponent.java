@@ -12,6 +12,8 @@ import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
+import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
+import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -78,7 +80,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
 
     private final List<ComponentIdWithSettingsAndDialogComponent<?>> componentIdsAndDialogComponents;
     private final PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveIdsAndSettingsDialog;
-    
+
     public PerspectiveCompositeTabbedSettingsDialogComponent(Perspective<PS> perspective) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
         for (Component<?> component: perspective.getComponents()) {
@@ -87,6 +89,36 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
         perspectiveIdsAndSettingsDialog = createPerspectiveAndDialogComponent(perspective);
     }
 
+    public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings) {
+        this.componentIdsAndDialogComponents = new ArrayList<>();
+        CompositeSettings componentSettings = perspectiveLifecycleWithAllSettings.getComponentSettings();
+        for(ComponentLifecycle<?,?> componentLifecycle: perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
+            if (componentLifecycle.hasSettings()) {
+                ComponentIdAndSettings<?> settingsOfComponent = componentSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
+                this.componentIdsAndDialogComponents.add(createComponentIdAndDialogComponent(componentLifecycle, settingsOfComponent));
+            }
+        }
+        perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(),
+                perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveAndSettings()); 
+    }
+    
+    private <S extends Settings> ComponentIdWithSettingsAndDialogComponent<?> createComponentIdAndDialogComponent(ComponentLifecycle<?,?> componentLifecycle, ComponentIdAndSettings<S> componentLifecycleAndSettings) {
+        S settings = componentLifecycleAndSettings.getSettings();
+        @SuppressWarnings("unchecked")
+        ComponentLifecycle<S,?> typedComponentLifecycle =  (ComponentLifecycle<S, ?>) componentLifecycle;
+        return new ComponentIdWithSettingsAndDialogComponent<S>(componentLifecycle.getLocalizedShortName(), componentLifecycleAndSettings,
+                typedComponentLifecycle.getSettingsDialogComponent(settings));
+    }
+
+    /**
+     * Creates the dialog for the settings of perspective itself 
+     * @param perspectiveLifecycleAndSettings
+     */
+    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS,?,?> perspectiveLifecycle, PerspectiveIdAndSettings<PS> perspectiveIdAndSettings) {
+        PS settings = perspectiveIdAndSettings.getSettings();
+        return new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspectiveLifecycle.getLocalizedShortName(), perspectiveIdAndSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(settings));
+    }
+    
     private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveAndDialogComponent(Perspective<PS> perspective) {
         PerspectiveIdWithSettingsAndDialogComponent<PS> result = null;
         if(perspective.hasPerspectiveOwnSettings()) {

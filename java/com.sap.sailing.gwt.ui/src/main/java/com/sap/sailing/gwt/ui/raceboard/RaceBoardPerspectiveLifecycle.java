@@ -10,14 +10,14 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings,
     PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>,
-    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<RaceBoardPerspectiveSettings>> {
+    PerspectiveCompositeTabbedSettingsDialogComponent<RaceBoardPerspectiveSettings>> {
 
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;

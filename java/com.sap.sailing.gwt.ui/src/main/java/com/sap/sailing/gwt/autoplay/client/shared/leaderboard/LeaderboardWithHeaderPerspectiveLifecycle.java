@@ -6,13 +6,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeLifecycleTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings,
     PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>,
-    PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings>> {
+    PerspectiveCompositeTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings>> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;

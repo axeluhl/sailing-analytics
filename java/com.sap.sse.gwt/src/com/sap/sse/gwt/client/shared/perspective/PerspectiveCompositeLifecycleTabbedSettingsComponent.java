@@ -38,7 +38,7 @@ public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends Per
 
     @Override
     public SettingsDialogComponent<PerspectiveCompositeSettings<PS>> getSettingsDialogComponent() {
-        return new PerspectiveCompositeLifecycleTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+        return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
     }
 
     @Override
