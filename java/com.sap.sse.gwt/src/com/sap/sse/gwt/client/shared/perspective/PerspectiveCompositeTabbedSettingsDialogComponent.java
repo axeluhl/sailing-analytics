@@ -54,19 +54,19 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
      *          the {@link Perspective} own settings type
      */
     public static class PerspectiveIdWithSettingsAndDialogComponent<PS extends Settings> {
-        private final PerspectiveIdAndSettings<PS> perspectiveIdAndSettings;
+        private final PS perspectiveOwnSettings;
         private final SettingsDialogComponent<PS> settingsDialog;
         private final String perspectiveName;
 
-        public PerspectiveIdWithSettingsAndDialogComponent(String perspectiveName, PerspectiveIdAndSettings<PS> perspectiveIdAndSettings, 
+        public PerspectiveIdWithSettingsAndDialogComponent(String perspectiveName, PS perspectiveOwnSettings, 
                 SettingsDialogComponent<PS> settingsDialog) {
             this.perspectiveName = perspectiveName;
-            this.perspectiveIdAndSettings = perspectiveIdAndSettings;
+            this.perspectiveOwnSettings = perspectiveOwnSettings;
             this.settingsDialog = settingsDialog;
         }
         
-        public PerspectiveIdAndSettings<PS> getPerspectiveIdAndSettings() {
-            return perspectiveIdAndSettings;
+        public PS getPerspectiveOwnSettings() {
+            return perspectiveOwnSettings;
         }
 
         public SettingsDialogComponent<PS> getSettingsDialog() {
@@ -99,7 +99,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
             }
         }
         perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(),
-                perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveAndSettings()); 
+                perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveOwnSettings()); 
     }
     
     private <S extends Settings> ComponentIdWithSettingsAndDialogComponent<?> createComponentIdAndDialogComponent(ComponentLifecycle<?,?> componentLifecycle, ComponentIdAndSettings<S> componentLifecycleAndSettings) {
@@ -114,16 +114,16 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
      * Creates the dialog for the settings of perspective itself 
      * @param perspectiveLifecycleAndSettings
      */
-    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS,?,?> perspectiveLifecycle, PerspectiveIdAndSettings<PS> perspectiveIdAndSettings) {
-        PS settings = perspectiveIdAndSettings.getSettings();
-        return new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspectiveLifecycle.getLocalizedShortName(), perspectiveIdAndSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(settings));
+    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS,?,?> perspectiveLifecycle, PS perspectiveOwnSettings) {
+        return new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspectiveLifecycle.getLocalizedShortName(),
+                perspectiveOwnSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveOwnSettings));
     }
     
     private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveAndDialogComponent(Perspective<PS> perspective) {
         PerspectiveIdWithSettingsAndDialogComponent<PS> result = null;
         if(perspective.hasPerspectiveOwnSettings()) {
             result = new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspective.getLocalizedShortName(),
-                    new PerspectiveIdAndSettings<PS>(perspective.getSettings().getPerspectiveSettings()),
+                    perspective.getSettings().getPerspectiveOwnSettings(),
                     perspective.getPerspectiveOwnSettingsDialogComponent());
         }
         return result;
@@ -139,8 +139,8 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
         return new ComponentIdAndSettings<S>(componentAndDialog.componentIdAndSettings.getComponentId(), componentAndDialog.getSettingsDialog().getResult());
     }
 
-    private PerspectiveIdAndSettings<PS> getPerspectiveAndSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {
-        return new PerspectiveIdAndSettings<PS>(perspectiveAndDialog.getSettingsDialog().getResult());
+    private PS getPerspectiveOwnSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {
+        return perspectiveAndDialog.getSettingsDialog().getResult();
     }
 
     @Override
@@ -166,12 +166,12 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
 
     @Override
     public PerspectiveCompositeSettings<PS> getResult() {
-        PerspectiveIdAndSettings<PS> perspectiveLifeycycleAndSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveAndSettings(perspectiveIdsAndSettingsDialog) : null;
+        PS perspectiveOwnSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveOwnSettings(perspectiveIdsAndSettingsDialog) : null;
         List<ComponentIdAndSettings<?>> settings = new ArrayList<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> component : componentIdsAndDialogComponents) {
             settings.add(getComponentAndSettings(component));
         }
-        return new PerspectiveCompositeSettings<PS>(perspectiveLifeycycleAndSettings, settings);
+        return new PerspectiveCompositeSettings<PS>(perspectiveOwnSettings, settings);
     }
 
     @Override

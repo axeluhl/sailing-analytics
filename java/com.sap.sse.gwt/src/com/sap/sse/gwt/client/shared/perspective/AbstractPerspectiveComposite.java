@@ -21,7 +21,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
      extends AbstractCompositeComponent<PerspectiveCompositeSettings<PS>> implements Perspective<PS> {
 
     private final PL perspectiveLifecycle;
-    private PS perspectiveSettings;
+    private PS perspectiveOwnSettings;
 
     protected final List<Component<?>> components;
     
@@ -32,7 +32,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     public AbstractPerspectiveComposite(PL perspectiveLifecycle, PS perspectiveSettings) {
         this.components = new ArrayList<>();
         this.perspectiveLifecycle = perspectiveLifecycle;
-        this.perspectiveSettings = perspectiveSettings;
+        this.perspectiveOwnSettings = perspectiveSettings;
     }
 
     @Override
@@ -43,8 +43,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
                 settingsPerComponent.add(createComponentAndSettings(c));
             }
         }
-        PerspectiveIdAndSettings<PS> perspectiveAndSettings = new PerspectiveIdAndSettings<>(perspectiveSettings);         
-        return new PerspectiveCompositeSettings<>(perspectiveAndSettings, settingsPerComponent);
+        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, settingsPerComponent);
     }
 
     private <S extends Settings> ComponentIdAndSettings<S> createComponentAndSettings(Component<S> c) {
@@ -56,7 +55,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
         for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentId()) {
             updateSettings(componentAndSettings);
         }
-        this.perspectiveSettings = newSettings.getPerspectiveSettings();
+        this.perspectiveOwnSettings = newSettings.getPerspectiveOwnSettings();
     }
 
     private <S extends Settings> void updateSettings(ComponentIdAndSettings<S> componentAndSettings) {
@@ -100,7 +99,7 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
     }
 
     protected PS getPerspectiveSettings() {
-        return perspectiveSettings;
+        return perspectiveOwnSettings;
     }
     
     protected PL getPerspectiveLifecycle() {

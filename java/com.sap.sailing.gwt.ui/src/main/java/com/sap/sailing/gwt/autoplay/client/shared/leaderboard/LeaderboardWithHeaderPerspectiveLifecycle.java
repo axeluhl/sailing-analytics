@@ -8,7 +8,6 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings,
     PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>,
@@ -30,9 +29,8 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
     
     @Override
     public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
-        PerspectiveIdAndSettings<LeaderboardWithHeaderPerspectiveSettings> perspectiveIdAndSettings = 
-                new PerspectiveIdAndSettings<>(createPerspectiveOwnDefaultSettings());
-        return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
+        LeaderboardWithHeaderPerspectiveSettings perspectiveOwnSettings = createPerspectiveOwnDefaultSettings();
+        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 
     @Override

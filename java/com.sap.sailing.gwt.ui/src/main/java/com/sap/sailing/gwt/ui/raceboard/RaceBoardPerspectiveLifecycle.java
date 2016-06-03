@@ -12,7 +12,6 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveIdAndSettings;
 
 
 public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings,
@@ -51,8 +50,7 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
 
     @Override
     public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> createDefaultSettings() {
-        PerspectiveIdAndSettings<RaceBoardPerspectiveSettings> perspectiveIdAndSettings = 
-                new PerspectiveIdAndSettings<>(createPerspectiveOwnDefaultSettings());  
+        RaceBoardPerspectiveSettings perspectiveIdAndSettings = createPerspectiveOwnDefaultSettings();  
         return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 

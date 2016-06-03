@@ -29,7 +29,7 @@ public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle
     }
 
     public PS getPerspectiveSettings() {
-        return allSettings.getPerspectiveAndSettings().getSettings();
+        return allSettings.getPerspectiveOwnSettings();
     }
 
     public CompositeSettings getComponentSettings() {

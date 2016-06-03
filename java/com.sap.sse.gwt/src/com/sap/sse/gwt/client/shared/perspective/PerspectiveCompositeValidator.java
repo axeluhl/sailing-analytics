@@ -37,7 +37,7 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
                 result.append(errorMessage);
             }
         }
-        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate.getPerspectiveSettings());
+        String perspectiveErrorMessage = getPerspectiveErrorMessage(valueToValidate.getPerspectiveOwnSettings());
         if (perspectiveErrorMessage != null && !perspectiveErrorMessage.isEmpty()) {
             result.append(perspectiveErrorMessage);
         }

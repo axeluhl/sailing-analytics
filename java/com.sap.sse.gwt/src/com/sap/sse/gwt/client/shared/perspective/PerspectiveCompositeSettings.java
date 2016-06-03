@@ -6,13 +6,12 @@ import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
- * A composite settings class for a perspective aggregating the {@link #getPerspectiveSettings() settings of the
+ * A composite settings class for a perspective aggregating the {@link #getPerspectiveOwnSettings() settings of the
  * perspective itself} as well as the settings of all contained components. The perspective-specific settings are
  * <em>not</em> part of the general composite settings' {@link #getSettingsPerComponentId()} result (although a
  * {@link Perspective} is a {@link Component}) to make it clear that the perspective to which these settings belong is
  * not nested in itself. Note that any of the component of the component/settings pairs returned by
- * {@link #getSettingsPerComponentId()} may again be a perspective, but not the perspective returned by
- * {@link #getPerspectiveAndSettings()}.{@link PerspectiveIdAndSettings#getPerspective() getPerspective()}.
+ * {@link #getSettingsPerComponentId()} may again be a perspective.
  * 
  * @author Frank Mittag
  *
@@ -20,11 +19,11 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *            the {@link Perspective} settings type
  */
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
-    private final PerspectiveIdAndSettings<PS> perspectiveAndSettings;
+    private final PS perspectiveOwnSettings;
     
-    public PerspectiveCompositeSettings(PerspectiveIdAndSettings<PS> perspectiveAndSettings, Iterable<ComponentIdAndSettings<?>> settingsPerComponent) {
+    public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Iterable<ComponentIdAndSettings<?>> settingsPerComponent) {
         super(settingsPerComponent);
-        this.perspectiveAndSettings = perspectiveAndSettings;
+        this.perspectiveOwnSettings = perspectiveOwnSettings;
     }
 
     /**
@@ -34,16 +33,12 @@ public class PerspectiveCompositeSettings<PS extends Settings> extends Composite
      *         particular component, such as a background color, presence of a general header or general refresh
      *         behavior.
      */
-    public PS getPerspectiveSettings() {
-        return perspectiveAndSettings.getSettings();
+    public PS getPerspectiveOwnSettings() {
+        return perspectiveOwnSettings;
     }
 
-    public PerspectiveIdAndSettings<PS> getPerspectiveAndSettings() {
-        return perspectiveAndSettings;
-    }
-    
     public boolean hasSettings() {
-        return getSettingsPerComponentId() != null || perspectiveAndSettings != null;
+        return getSettingsPerComponentId() != null || perspectiveOwnSettings != null;
     }
 
 }
