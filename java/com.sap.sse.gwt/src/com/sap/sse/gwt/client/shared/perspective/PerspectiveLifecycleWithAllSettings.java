@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
@@ -44,14 +43,9 @@ public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle
         this.allSettings = allSettings;
     }
     
-    public <C extends ComponentLifecycle<S,?> ,S extends Settings> S findComponentSettingsByLifecycle(C componentLifecycle) {
-        final ComponentIdAndSettings<S> componentAndSettings = allSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
-        final S result;
-        if (componentAndSettings != null) {
-            result = componentAndSettings.getSettings();
-        } else {
-            result = null;
-        }
+    public <C extends ComponentLifecycle<S,?>, S extends Settings> S findComponentSettingsByLifecycle(C componentLifecycle) {
+        @SuppressWarnings("unchecked")
+        final S result = (S) allSettings.findSettingsByComponentId(componentLifecycle.getComponentId());
         return result;
     }
 }

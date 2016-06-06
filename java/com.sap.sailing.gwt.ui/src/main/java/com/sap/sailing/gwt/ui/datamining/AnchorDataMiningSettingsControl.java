@@ -2,8 +2,10 @@ package com.sap.sailing.gwt.ui.datamining;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,7 +16,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
@@ -90,35 +91,30 @@ public class AnchorDataMiningSettingsControl implements DataMiningSettingsContro
 
     @Override
     public void updateSettings(CompositeSettings newSettings) {
-        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentId()) {
+        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
     }
 
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
+        Map<Serializable, Settings> settings = new HashMap<>();
         for (Component<?> component : components) {
-            ComponentIdAndSettings<?> componentAndSettings = getComponentAndSettings(component);
-            if (componentAndSettings != null) {
-                settings.add(componentAndSettings);
-            }
+            settings.put(component.getId(), component.hasSettings() ? component.getSettings() : null);
         }
         return new CompositeSettings(settings);
     }
     
-    private <SettingsType extends Settings> ComponentIdAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentIdAndSettings<SettingsType>(component.getId(), component.getSettings()) : null;
-    }
-
-    private <SettingsType extends Settings> void updateSettings(ComponentIdAndSettings<SettingsType> componentAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
+        // we assume that the component to which the ID resolves matches with the settings type provided
         @SuppressWarnings("unchecked")
-        Component<SettingsType> component = (Component<SettingsType>) findComponentById(componentAndSettings.getComponentId());
+        Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
         if (component != null) {
-            component.updateSettings(componentAndSettings.getSettings());
+            final S settings = componentIdAndSettings.getValue();
+            component.updateSettings(settings);
         }
     }
-
+    
     private Component<?> findComponentById(Serializable componentId) {
         for (Component<?> component : components) {
             if (component.getId().equals(componentId)) {

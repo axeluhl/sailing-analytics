@@ -1,5 +1,10 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.Perspective;
@@ -10,23 +15,17 @@ import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
  * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.
  */
 public class CompositeSettings extends AbstractSettings {
-    private final Iterable<ComponentIdAndSettings<?>> settingsPerComponentId;
+    private final Map<Serializable, Settings> settingsPerComponentId;
 
-    public CompositeSettings(Iterable<ComponentIdAndSettings<?>> settingsPerComponentId) {
-        this.settingsPerComponentId = settingsPerComponentId;
+    public CompositeSettings(Map<Serializable, Settings> settingsPerComponentId) {
+        this.settingsPerComponentId = new HashMap<>(settingsPerComponentId);
     }
 
-    public Iterable<ComponentIdAndSettings<?>> getSettingsPerComponentId() {
-        return settingsPerComponentId;
+    public Map<Serializable, Settings> getSettingsPerComponentId() {
+        return Collections.unmodifiableMap(settingsPerComponentId);
     }
     
-    @SuppressWarnings("unchecked")
-    public <C extends ComponentLifecycle<S,?> ,S extends Settings> ComponentIdAndSettings<S> findComponentAndSettingsByLifecycle(C componentLifecycle) {
-        for (ComponentIdAndSettings<?> componentIdAndSettings : settingsPerComponentId) {
-            if (componentIdAndSettings.getComponentId().equals(componentLifecycle.getComponentId())) {
-                return (ComponentIdAndSettings<S>) componentIdAndSettings;
-            }
-        }
-        return null;
+    public <C extends ComponentLifecycle<S,?>, S extends Settings> Settings findSettingsByComponentId(Serializable componentId) {
+        return settingsPerComponentId.get(componentId);
     }
 }

@@ -1,8 +1,10 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.io.Serializable;
+import java.util.Map;
+
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
@@ -22,7 +24,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
     private final PS perspectiveOwnSettings;
     
-    public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Iterable<ComponentIdAndSettings<?>> settingsPerComponent) {
+    public PerspectiveCompositeSettings(PS perspectiveOwnSettings, Map<Serializable, Settings> settingsPerComponent) {
         super(settingsPerComponent);
         this.perspectiveOwnSettings = perspectiveOwnSettings;
     }

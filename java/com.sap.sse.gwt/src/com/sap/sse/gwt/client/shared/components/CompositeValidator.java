@@ -3,6 +3,7 @@ package com.sap.sse.gwt.client.shared.components;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
@@ -22,7 +23,7 @@ public class CompositeValidator implements Validator<CompositeSettings> {
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
         final StringBuilder result = new StringBuilder();
-        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponentId()) {
+        for (Entry<Serializable, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -31,12 +32,12 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(ComponentIdAndSettings<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getErrorMessage(Entry<Serializable, SettingsType> componentIdAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponentId());
+        final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(componentAndSettings.getSettings());
+            errorMessage = validator.getErrorMessage(componentIdAndSettings.getValue());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
                 errorMessage += "; ";
             }

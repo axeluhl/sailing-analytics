@@ -2,13 +2,15 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
@@ -37,32 +39,28 @@ public abstract class AbstractPerspectiveComposite<PL extends PerspectiveLifecyc
 
     @Override
     public PerspectiveCompositeSettings<PS> getSettings() {
-        List<ComponentIdAndSettings<?>> settingsPerComponent = new ArrayList<>();
-        for (Component<?> c: getComponents()) {
+        Map<Serializable, Settings> settingsPerComponent = new HashMap<>();
+        for (Component<?> c : getComponents()) {
             if (c.hasSettings()) {
-                settingsPerComponent.add(createComponentAndSettings(c));
+                settingsPerComponent.put(c.getId(), c.getSettings());
             }
         }
         return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, settingsPerComponent);
     }
 
-    private <S extends Settings> ComponentIdAndSettings<S> createComponentAndSettings(Component<S> c) {
-        return new ComponentIdAndSettings<S>(c.getId(), c.getSettings());
-    }
-
     @Override
     public void updateSettings(PerspectiveCompositeSettings<PS> newSettings) {
-        for (ComponentIdAndSettings<?> componentAndSettings : newSettings.getSettingsPerComponentId()) {
+        for (Entry<Serializable, Settings> componentAndSettings : newSettings.getSettingsPerComponentId().entrySet()) {
             updateSettings(componentAndSettings);
         }
         this.perspectiveOwnSettings = newSettings.getPerspectiveOwnSettings();
     }
 
-    private <S extends Settings> void updateSettings(ComponentIdAndSettings<S> componentAndSettings) {
+    private <S extends Settings> void updateSettings(Entry<Serializable, S> componentIdAndSettings) {
         @SuppressWarnings("unchecked")
-        Component<S> component = (Component<S>) findComponentById(componentAndSettings.getComponentId());
+        Component<S> component = (Component<S>) findComponentById(componentIdAndSettings.getKey());
         if (component != null) {
-            component.updateSettings(componentAndSettings.getSettings());
+            component.updateSettings(componentIdAndSettings.getValue());
         }
     }
 

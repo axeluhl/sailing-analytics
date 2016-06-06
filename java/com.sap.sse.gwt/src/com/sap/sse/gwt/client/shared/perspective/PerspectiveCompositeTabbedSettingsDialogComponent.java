@@ -1,7 +1,10 @@
 package com.sap.sse.gwt.client.shared.perspective;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -11,7 +14,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -26,19 +28,26 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     implements SettingsDialogComponent<PerspectiveCompositeSettings<PS>> {
     
     public static class ComponentIdWithSettingsAndDialogComponent<S extends Settings> {
-        private final ComponentIdAndSettings<S> componentIdAndSettings;
+        private final Serializable componentId;
+        private final S settings;
         private final SettingsDialogComponent<S> settingsDialog;
         private final String componentName;
 
-        public ComponentIdWithSettingsAndDialogComponent(String componentName, ComponentIdAndSettings<S> componentIdAndSettings, SettingsDialogComponent<S> settingsDialog) {
+        public ComponentIdWithSettingsAndDialogComponent(String componentName, Serializable componentId, S settings, SettingsDialogComponent<S> settingsDialog) {
             this.componentName = componentName;
-            this.componentIdAndSettings = componentIdAndSettings;
+            this.componentId = componentId;
+            this.settings = settings;
             this.settingsDialog = settingsDialog;
         }
         
-        public ComponentIdAndSettings<S> getComponentIdAndSettings() {
-            return componentIdAndSettings;
+        public Serializable getComponentId() {
+            return componentId;
         }
+
+        public S getSettings() {
+            return settings;
+        }
+
 
         public SettingsDialogComponent<S> getSettingsDialog() {
             return settingsDialog;
@@ -83,33 +92,41 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
 
     public PerspectiveCompositeTabbedSettingsDialogComponent(Perspective<PS> perspective) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
-        for (Component<?> component: perspective.getComponents()) {
+        for (Component<?> component : perspective.getComponents()) {
             componentIdsAndDialogComponents.add(createComponentAndDialogComponent(component));
         }
         perspectiveIdsAndSettingsDialog = createPerspectiveAndDialogComponent(perspective);
     }
 
+    /**
+     * From the {@link PerspectiveLifecycle} {@link PerspectiveLifecycleWithAllSettings#getPerspectiveLifecycle()
+     * referenced} by {@code perspectiveLifecycleWithAllSettings}, this constructor grabs all the
+     * {@link ComponentLifecycle} objects for those nested components that have settings,
+     * {@link ComponentLifecycle#getSettingsDialogComponent(Settings) fetches their settings dialog component} and maps
+     * it in {@link #componentIdsAndDialogComponents}. Then, the
+     * {@link #createPerspectiveIdAndDialogComponent(PerspectiveLifecycle, Settings)} method assembles them, together
+     * with the perspective's own settings dialog component.
+     */
     public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
         CompositeSettings componentSettings = perspectiveLifecycleWithAllSettings.getComponentSettings();
-        for (ComponentLifecycle<?,?> componentLifecycle: perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
+        for (ComponentLifecycle<?,?> componentLifecycle : perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
             if (componentLifecycle.hasSettings()) {
-                ComponentIdAndSettings<?> settingsOfComponent = componentSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
-                this.componentIdsAndDialogComponents.add(createComponentIdAndDialogComponent(componentLifecycle, settingsOfComponent));
+                createComponentIdWithSettingsAndDialogComponent(componentSettings, componentLifecycle);
             }
         }
         perspectiveIdsAndSettingsDialog = createPerspectiveIdAndDialogComponent(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(),
                 perspectiveLifecycleWithAllSettings.getAllSettings().getPerspectiveOwnSettings()); 
     }
-    
-    private <S extends Settings> ComponentIdWithSettingsAndDialogComponent<?> createComponentIdAndDialogComponent(ComponentLifecycle<?,?> componentLifecycle, ComponentIdAndSettings<S> componentLifecycleAndSettings) {
-        S settings = componentLifecycleAndSettings.getSettings();
-        @SuppressWarnings("unchecked")
-        ComponentLifecycle<S,?> typedComponentLifecycle =  (ComponentLifecycle<S, ?>) componentLifecycle;
-        return new ComponentIdWithSettingsAndDialogComponent<S>(componentLifecycle.getLocalizedShortName(), componentLifecycleAndSettings,
-                typedComponentLifecycle.getSettingsDialogComponent(settings));
-    }
 
+    private <S extends Settings, C extends Component<S>> void createComponentIdWithSettingsAndDialogComponent(CompositeSettings componentSettings,
+            ComponentLifecycle<S, ?> componentLifecycle) {
+        @SuppressWarnings("unchecked")
+        S settingsOfComponent = (S) componentSettings.findSettingsByComponentId(componentLifecycle.getComponentId());
+        this.componentIdsAndDialogComponents.add(new ComponentIdWithSettingsAndDialogComponent<S>(componentLifecycle.getLocalizedShortName(), componentLifecycle.getComponentId(), settingsOfComponent,
+                componentLifecycle.getSettingsDialogComponent(settingsOfComponent)));
+    }
+    
     /**
      * Creates the dialog for the settings of perspective itself 
      * @param perspectiveLifecycleAndSettings
@@ -130,15 +147,10 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     }
 
     private <SettingsType extends Settings> ComponentIdWithSettingsAndDialogComponent<SettingsType> createComponentAndDialogComponent(Component<SettingsType> component) {
-        return new ComponentIdWithSettingsAndDialogComponent<SettingsType>(component.getLocalizedShortName(),
-                new ComponentIdAndSettings<SettingsType>(component.getId(), component.getSettings()),
+        return new ComponentIdWithSettingsAndDialogComponent<SettingsType>(component.getLocalizedShortName(), component.getId(), component.getSettings(),
                 component.getSettingsDialogComponent());
     }
     
-    private <C extends Component<S>, S extends Settings> ComponentIdAndSettings<S> getComponentAndSettings(ComponentIdWithSettingsAndDialogComponent<S> componentAndDialog) {
-        return new ComponentIdAndSettings<S>(componentAndDialog.componentIdAndSettings.getComponentId(), componentAndDialog.getSettingsDialog().getResult());
-    }
-
     private PS getPerspectiveOwnSettings(PerspectiveIdWithSettingsAndDialogComponent<PS> perspectiveAndDialog) {
         return perspectiveAndDialog.getSettingsDialog().getResult();
     }
@@ -167,9 +179,9 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     @Override
     public PerspectiveCompositeSettings<PS> getResult() {
         PS perspectiveOwnSettings = perspectiveIdsAndSettingsDialog != null ? getPerspectiveOwnSettings(perspectiveIdsAndSettingsDialog) : null;
-        List<ComponentIdAndSettings<?>> settings = new ArrayList<>();
-        for (ComponentIdWithSettingsAndDialogComponent<?> component : componentIdsAndDialogComponents) {
-            settings.add(getComponentAndSettings(component));
+        Map<Serializable, Settings> settings = new HashMap<>();
+        for (ComponentIdWithSettingsAndDialogComponent<?> componentAndDialog : componentIdsAndDialogComponents) {
+            settings.put(componentAndDialog.getComponentId(), componentAndDialog.getSettingsDialog().getResult());
         }
         return new PerspectiveCompositeSettings<PS>(perspectiveOwnSettings, settings);
     }

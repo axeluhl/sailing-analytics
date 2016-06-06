@@ -2,10 +2,11 @@ package com.sap.sse.gwt.client.shared.perspective;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sap.sse.common.settings.Settings;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -37,20 +38,14 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS exte
     }
     
     protected CompositeSettings getComponentIdsAndDefaultSettings() {
-        List<ComponentIdAndSettings<?>> componentIdsAndSettings = new ArrayList<>();
+        Map<Serializable, Settings> componentIdsAndSettings = new HashMap<>();
         for (ComponentLifecycle<?,?> componentLifecycle : componentLifecycles) {
-            componentIdsAndSettings.add(createComponentIdAndSettings(componentLifecycle));
+            componentIdsAndSettings.put(componentLifecycle.getComponentId(), componentLifecycle.createDefaultSettings());
         }
         CompositeSettings compositeSettings = new CompositeSettings(componentIdsAndSettings);
         return compositeSettings;
     }
 
-    private <C extends ComponentLifecycle<S,?>, S extends Settings> ComponentIdAndSettings<S> createComponentIdAndSettings(C componentLifecycle) {
-        S defaultSettings = componentLifecycle.createDefaultSettings();
-        ComponentIdAndSettings<S> componentLifecycleAndSettings = new ComponentIdAndSettings<>(componentLifecycle.getComponentId(), defaultSettings);
-        return componentLifecycleAndSettings;
-    }
-    
     public Iterable<ComponentLifecycle<?,?>> getComponentLifecycles() {
         return componentLifecycles;
     }

@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.datamining.selection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +33,6 @@ import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -245,9 +243,9 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     @Override
     public void updateSettings(CompositeSettings newSettings) {
         Map<DataRetrieverLevelDTO, SerializableSettings> chainSettings = settingsMap.get(getDataRetrieverChainDefinition());
-        for (ComponentIdAndSettings<?> settingsPerComponent : newSettings.getSettingsPerComponentId()) {
-            RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) findComponentById(settingsPerComponent.getComponentId());
-            SerializableSettings settings = (SerializableSettings) settingsPerComponent.getSettings();
+        for (Entry<Serializable, Settings> settingsPerComponent : newSettings.getSettingsPerComponentId().entrySet()) {
+            RetrieverLevelSettingsComponent component = (RetrieverLevelSettingsComponent) findComponentById(settingsPerComponent.getKey());
+            SerializableSettings settings = (SerializableSettings) settingsPerComponent.getValue();
             chainSettings.put(component.getRetrieverLevel(), settings);
         }
         notifyListeners();
@@ -264,8 +262,7 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
     
     @Override 
     public CompositeSettings getSettings() {
-        Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
-
+        Map<Serializable, Settings> settings = new HashMap<>();
         for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap.get(getDataRetrieverChainDefinition()).entrySet()) {
             final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
             final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
@@ -278,13 +275,9 @@ public class SimpleDataRetrieverChainDefinitionProvider extends AbstractComponen
                 public void updateSettings(SerializableSettings newSettings) {
                 }
             };
-            settings.add(getComponentAndSettings(c));
+            settings.put(c.getId(), c.hasSettings() ? c.getSettings() : null);
         }
         
         return new CompositeSettings(settings);
-    }
-    
-    private <SettingsType extends Settings> ComponentIdAndSettings<SettingsType> getComponentAndSettings(Component<SettingsType> component) {
-        return component.hasSettings() ? new ComponentIdAndSettings<SettingsType>(component.getId(), component.getSettings()) : null;
     }
 }

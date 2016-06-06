@@ -1,8 +1,10 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -11,7 +13,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 
 public class CompositeTabbedSettingsDialogComponent implements SettingsDialogComponent<CompositeSettings> {
     
@@ -51,15 +52,11 @@ public class CompositeTabbedSettingsDialogComponent implements SettingsDialogCom
 
     @Override
     public CompositeSettings getResult() {
-        Collection<ComponentIdAndSettings<?>> settings = new HashSet<>();
+        Map<Serializable, Settings> settings = new HashMap<>();
         for (ComponentAndDialogComponent<?> component : components) {
-            settings.add(getComponentAndSettings(component));
+            settings.put(component.getA().getId(), component.getB().getResult());
         }
         return new CompositeSettings(settings);
-    }
-
-    private <SettingsType extends Settings> ComponentIdAndSettings<SettingsType> getComponentAndSettings(ComponentAndDialogComponent<SettingsType> component) {
-        return new ComponentIdAndSettings<SettingsType>(component.getA().getId(), component.getB().getResult());
     }
 
     @Override

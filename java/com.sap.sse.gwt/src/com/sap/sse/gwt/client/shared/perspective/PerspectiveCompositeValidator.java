@@ -3,10 +3,10 @@ package com.sap.sse.gwt.client.shared.perspective;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.ComponentIdAndSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.ComponentIdWithSettingsAndDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent.PerspectiveIdWithSettingsAndDialogComponent;
 
@@ -24,14 +24,14 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
         this.perspectiveValidator = perspectiveAndDialogComponent.getSettingsDialog().getValidator();
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentIdWithSettingsAndDialogComponent<?> componentsAndSettingsDialog : componentsAndDialogComponents) {
-            validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponentIdAndSettings().getComponentId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
+            validatorsMappedByComponent.put(componentsAndSettingsDialog.getComponentId(), componentsAndSettingsDialog.getSettingsDialog().getValidator());
         }
     }
 
     @Override
     public String getErrorMessage(PerspectiveCompositeSettings<PS> valueToValidate) {
         StringBuilder result = new StringBuilder();
-        for (ComponentIdAndSettings<?> componentAndSettings : valueToValidate.getSettingsPerComponentId()) {
+        for (Entry<Serializable, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getComponentErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -52,12 +52,12 @@ public class PerspectiveCompositeValidator<PS extends Settings> implements Valid
         return errorMessage;
     }
     
-    private <SettingsType extends Settings> String getComponentErrorMessage(ComponentIdAndSettings<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getComponentErrorMessage(Entry<Serializable, SettingsType> componentIdAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getComponentId());
+        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(componentAndSettings.getSettings());
+            errorMessage = validator.getErrorMessage(componentIdAndSettings.getValue());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
                 errorMessage += "; ";
             }
