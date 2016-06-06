@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * @param <PS>
  *      the {@link Perspective} settings type
  */
-public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS, ?>, PS extends Settings>
+public class PerspectiveCompositeLifecycleTabbedSettingsComponent<PL extends PerspectiveLifecycle<PS>, PS extends Settings>
     extends AbstractComponent<PerspectiveCompositeSettings<PS>> {
     
     private PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings;
