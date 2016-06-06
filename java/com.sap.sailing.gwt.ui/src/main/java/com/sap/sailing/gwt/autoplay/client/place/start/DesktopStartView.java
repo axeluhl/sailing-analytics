@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.autoplay.client.app.PlaceNavigator;
 import com.sap.sailing.gwt.autoplay.client.place.player.AutoPlayerConfiguration;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveLifecycle;
 import com.sap.sailing.gwt.autoplay.client.shared.leaderboard.LeaderboardWithHeaderPerspectiveSettings;
+import com.sap.sailing.gwt.common.client.GWTLocaleUtil;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveLifecycle;
@@ -88,15 +89,13 @@ public class DesktopStartView extends Composite implements StartView {
         
         LocaleInfo currentLocale = LocaleInfo.getCurrentLocale();
         int i = 0;
-        for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
-            if (!localeName.equals("default")) {
-                String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
-                localeSelectionBox.addItem(displayName);
-                if (currentLocale.getLocaleName().equals(localeName)) {
-                    localeSelectionBox.setSelectedIndex(i);
-                }
-                i++;
+        for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
+            String displayName = GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(localeName);
+            localeSelectionBox.addItem(displayName, localeName);
+            if (currentLocale.getLocaleName().equals(localeName)) {
+                localeSelectionBox.setSelectedIndex(i);
             }
+            i++;
         }
 
         initWidget(uiBinder.createAndBindUi(this));
@@ -220,18 +219,14 @@ public class DesktopStartView extends Composite implements StartView {
     private String getSelectedLocale() {
         String result = null;
         int selectedIndex = localeSelectionBox.getSelectedIndex();
-        if(selectedIndex >= 0) {
-            String selectedLocale = localeSelectionBox.getItemText(selectedIndex);
-            for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
-                if(!localeName.equals("default")) {
-                    String displayName = LocaleInfo.getLocaleNativeDisplayName(localeName);
-                    if(displayName.equals(selectedLocale)) {
-                        result = localeName;
-                        break;
-                    }
+        if (selectedIndex >= 0) {
+            String selectedLocale = localeSelectionBox.getValue(selectedIndex);
+            for (String localeName : GWTLocaleUtil.getAvailableLocales()) {
+                if (selectedLocale.equals(localeName)) {
+                    result = localeName;
+                    break;
                 }
-             }
-
+            }
         }
         return result;
     }

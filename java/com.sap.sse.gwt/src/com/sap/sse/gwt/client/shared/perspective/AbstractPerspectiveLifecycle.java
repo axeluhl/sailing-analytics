@@ -11,7 +11,9 @@ import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 
 /**
- * An abstract base class for perspective lifecycle's.
+ * An abstract base class for perspective lifecycle's. Subclasses need to add the {@link ComponentLifecycle} instances
+ * for their child components to the {@link #componentLifecycles} structure in their constructor.
+ * 
  * @param <PS>
  *            the perspective settings type
  * @author Frank Mittag
