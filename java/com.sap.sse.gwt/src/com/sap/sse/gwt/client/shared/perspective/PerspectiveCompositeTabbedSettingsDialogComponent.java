@@ -92,7 +92,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
     public PerspectiveCompositeTabbedSettingsDialogComponent(PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings) {
         this.componentIdsAndDialogComponents = new ArrayList<>();
         CompositeSettings componentSettings = perspectiveLifecycleWithAllSettings.getComponentSettings();
-        for(ComponentLifecycle<?,?> componentLifecycle: perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
+        for (ComponentLifecycle<?,?> componentLifecycle: perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle().getComponentLifecycles()) {
             if (componentLifecycle.hasSettings()) {
                 ComponentIdAndSettings<?> settingsOfComponent = componentSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
                 this.componentIdsAndDialogComponents.add(createComponentIdAndDialogComponent(componentLifecycle, settingsOfComponent));

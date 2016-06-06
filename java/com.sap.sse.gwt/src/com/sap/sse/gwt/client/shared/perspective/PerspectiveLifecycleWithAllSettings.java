@@ -45,10 +45,13 @@ public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle
     }
     
     public <C extends ComponentLifecycle<S,?> ,S extends Settings> S findComponentSettingsByLifecycle(C componentLifecycle) {
-        ComponentIdAndSettings<S> componentAndSettings = allSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
-        if(componentAndSettings != null) {
-            return componentAndSettings.getSettings();
+        final ComponentIdAndSettings<S> componentAndSettings = allSettings.findComponentAndSettingsByLifecycle(componentLifecycle);
+        final S result;
+        if (componentAndSettings != null) {
+            result = componentAndSettings.getSettings();
+        } else {
+            result = null;
         }
-        return null;
+        return result;
     }
 }

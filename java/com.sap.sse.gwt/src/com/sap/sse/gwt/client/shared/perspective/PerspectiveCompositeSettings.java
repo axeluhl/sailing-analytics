@@ -16,7 +16,8 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  * @author Frank Mittag
  *
  * @param <PS>
- *            the {@link Perspective} settings type
+ *            the {@link Perspective}'s own settings type; those could, e.g., hold settings such as how much space
+ *            is assigned to which component, or how the perspective displays itself, such as embedded or not
  */
 public class PerspectiveCompositeSettings<PS extends Settings> extends CompositeSettings {
     private final PS perspectiveOwnSettings;
