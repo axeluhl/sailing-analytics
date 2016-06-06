@@ -1,25 +1,30 @@
+# Source of all pods
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '8.0'
-project 'SAPTracker.xcodeproj'
 
+# Specify ios version support
+platform :ios, '8.0'
+
+# Maven can't handle workspaces so don't create one
+install! 'cocoapods', :integrate_targets => false
+
+# Define the project and all targets
+project 'SAPTracker.xcodeproj'
 def pods
 	pod 'AFNetworking', '2.5.0'
 	pod 'AFNetworkActivityLogger', '2.0.3', :configurations => ['Debug']
-	pod 'SVProgressHUD'
-	pod 'TSMarkdownParser'
+	pod 'SVProgressHUD', '2.0.3'
+	pod 'TSMarkdownParser', '1.0.19'
 end
-
 target 'SAPTracker' do
 	pods
 end
-
 target 'SAPTrackerTests' do
 	pods
 end
 
 # Update acknowledgements in build settings
 post_install do | installer |
-  require 'fileutils'
-  FileUtils.cp_r('Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-Acknowledgements.plist', 'SAPTracker/Settings.bundle/Acknowledgements.plist', :remove_destination => true)
-  FileUtils.cp_r('Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-Acknowledgements.markdown', 'SAPTracker/Acknowledgements.markdown', :remove_destination => true)
+	require 'fileutils'
+	FileUtils.cp_r('Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-Acknowledgements.plist', 'SAPTracker/Settings.bundle/Acknowledgements.plist', :remove_destination => true)
+	FileUtils.cp_r('Pods/Target Support Files/Pods-SAPTracker/Pods-SAPTracker-Acknowledgements.markdown', 'SAPTracker/Acknowledgements.markdown', :remove_destination => true)
 end

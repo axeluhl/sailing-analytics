@@ -29,8 +29,8 @@ PODS:
 DEPENDENCIES:
   - AFNetworkActivityLogger (= 2.0.3)
   - AFNetworking (= 2.5.0)
-  - SVProgressHUD
-  - TSMarkdownParser
+  - SVProgressHUD (= 2.0.3)
+  - TSMarkdownParser (= 1.0.19)
 
 SPEC CHECKSUMS:
   AFNetworkActivityLogger: e82c9ba285b37042d86729bff5b14036c4312cd7
@@ -38,6 +38,6 @@ SPEC CHECKSUMS:
   SVProgressHUD: b0830714205bea1317ea1a2ebc71e5633af334d4
   TSMarkdownParser: 0341662db14b17a13a79f3ddcb08ab7a4b6ed834
 
-PODFILE CHECKSUM: 3714efc2cad0ff205a63fe3561c6b5600b44aed3
+PODFILE CHECKSUM: 19d7a4af10c144c6410c46bb32d5e2f1eaacf9b7
 
 COCOAPODS: 1.0.0
