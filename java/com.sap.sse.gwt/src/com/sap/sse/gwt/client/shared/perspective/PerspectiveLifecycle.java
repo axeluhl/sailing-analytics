@@ -8,15 +8,11 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  * A lifecycle interface for a {@link Perspective}
  *
  * @param <PS>
- *      the perspective specific settings type
- * @param <PCS>
- *      the perspective composite settings type
- * @param <SDP>
- *      the settings dialog component type
+ *            the perspective specific settings type
  * @author Frank Mittag
  */
-public interface PerspectiveLifecycle<PS extends Settings, SDP extends SettingsDialogComponent<PerspectiveCompositeSettings<PS>>> extends ComponentLifecycle<PerspectiveCompositeSettings<PS>, SDP> {
-    
+public interface PerspectiveLifecycle<PS extends Settings> extends
+        ComponentLifecycle<PerspectiveCompositeSettings<PS>, PerspectiveCompositeTabbedSettingsDialogComponent<PS>> {
     Iterable<ComponentLifecycle<?,?>> getComponentLifecycles();
     
     PS createPerspectiveOwnDefaultSettings();

@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  * @author Frank Mittag
  *
  */
-public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS, PerspectiveCompositeTabbedSettingsDialogComponent<PS>> {
+public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS> {
 
     protected final List<ComponentLifecycle<?,?>> componentLifecycles;
     
