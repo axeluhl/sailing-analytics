@@ -9,21 +9,15 @@ import java.util.Map;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.components.ComponentLifecycle;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
-import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 /**
  * An abstract base class for perspective lifecycle's.
  * @param <PS>
  *            the perspective settings type
- * @param <PCS>
- *            the perspective composite settings type
- * @param <SDP>
- *            the settings dialog component type 
  * @author Frank Mittag
  *
  */
-public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS extends PerspectiveCompositeSettings<PS>, 
-        SDP extends SettingsDialogComponent<PCS>> implements PerspectiveLifecycle<PS, PCS, SDP> {
+public abstract class AbstractPerspectiveLifecycle<PS extends Settings> implements PerspectiveLifecycle<PS, PerspectiveCompositeTabbedSettingsDialogComponent<PS>> {
 
     protected final List<ComponentLifecycle<?,?>> componentLifecycles;
     
@@ -33,8 +27,13 @@ public abstract class AbstractPerspectiveLifecycle<PS extends Settings, PCS exte
     
     public PerspectiveCompositeTabbedSettingsDialogComponent<PS> getSettingsDialogComponent(PerspectiveCompositeSettings<PS> settings) {
         PerspectiveLifecycleWithAllSettings<?, PS> perspectiveLifecycleWithAllSettings = new PerspectiveLifecycleWithAllSettings<>(this, settings); 
-        
         return new PerspectiveCompositeTabbedSettingsDialogComponent<PS>(perspectiveLifecycleWithAllSettings);
+    }
+    
+    @Override
+    public PerspectiveCompositeSettings<PS> createDefaultSettings() {
+        PS perspectiveOwnSettings = createPerspectiveOwnDefaultSettings();
+        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
     
     protected CompositeSettings getComponentIdsAndDefaultSettings() {

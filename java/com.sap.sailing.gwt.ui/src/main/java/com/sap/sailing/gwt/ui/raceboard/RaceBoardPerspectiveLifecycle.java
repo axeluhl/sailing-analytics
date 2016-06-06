@@ -11,12 +11,9 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
 
 
-public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings,
-    PerspectiveCompositeSettings<RaceBoardPerspectiveSettings>,
-    PerspectiveCompositeTabbedSettingsDialogComponent<RaceBoardPerspectiveSettings>> {
+public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<RaceBoardPerspectiveSettings> {
 
     private final StringMessages stringMessages;
     private final RaceMapLifecycle raceMapLifecycle;
@@ -46,12 +43,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         componentLifecycles.add(multiCompetitorRaceChartLifecycle);
         componentLifecycles.add(mediaPlayerLifecycle);
         componentLifecycles.add(raceTimePanelLifecycle);
-    }
-
-    @Override
-    public PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> createDefaultSettings() {
-        RaceBoardPerspectiveSettings perspectiveIdAndSettings = createPerspectiveOwnDefaultSettings();  
-        return new PerspectiveCompositeSettings<>(perspectiveIdAndSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
     }
 
     @Override

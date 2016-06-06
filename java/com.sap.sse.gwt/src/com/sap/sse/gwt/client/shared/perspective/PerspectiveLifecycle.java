@@ -15,7 +15,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
  *      the settings dialog component type
  * @author Frank Mittag
  */
-public interface PerspectiveLifecycle<PS extends Settings, PCS extends PerspectiveCompositeSettings<PS>, SDP extends SettingsDialogComponent<PCS>> extends ComponentLifecycle<PCS, SDP> {
+public interface PerspectiveLifecycle<PS extends Settings, SDP extends SettingsDialogComponent<PerspectiveCompositeSettings<PS>>> extends ComponentLifecycle<PerspectiveCompositeSettings<PS>, SDP> {
     
     Iterable<ComponentLifecycle<?,?>> getComponentLifecycles();
     

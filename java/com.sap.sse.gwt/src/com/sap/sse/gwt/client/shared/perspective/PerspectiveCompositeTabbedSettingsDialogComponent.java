@@ -131,7 +131,7 @@ public class PerspectiveCompositeTabbedSettingsDialogComponent<PS extends Settin
      * Creates the dialog for the settings of perspective itself 
      * @param perspectiveLifecycleAndSettings
      */
-    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS,?,?> perspectiveLifecycle, PS perspectiveOwnSettings) {
+    private PerspectiveIdWithSettingsAndDialogComponent<PS> createPerspectiveIdAndDialogComponent(PerspectiveLifecycle<PS, ?> perspectiveLifecycle, PS perspectiveOwnSettings) {
         return new PerspectiveIdWithSettingsAndDialogComponent<PS>(perspectiveLifecycle.getLocalizedShortName(),
                 perspectiveOwnSettings, perspectiveLifecycle.getPerspectiveOwnSettingsDialogComponent(perspectiveOwnSettings));
     }

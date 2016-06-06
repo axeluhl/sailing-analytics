@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialog;
  *      the type of the Perspective settings
  *       
  */
-public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends PerspectiveLifecycle<PS, ?,?>, PS extends Settings>
+public class PerspectiveCompositeLifecycleTabbedSettingsDialog<PL extends PerspectiveLifecycle<PS, ?>, PS extends Settings>
     extends SettingsDialog<PerspectiveCompositeSettings<PS>> {
 
     public PerspectiveCompositeLifecycleTabbedSettingsDialog(StringMessages stringConstants, PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleWithAllSettings, String title) {

@@ -7,11 +7,8 @@ import com.sap.sailing.gwt.ui.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.perspective.AbstractPerspectiveLifecycle;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
-import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeTabbedSettingsDialogComponent;
 
-public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings,
-    PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings>,
-    PerspectiveCompositeTabbedSettingsDialogComponent<LeaderboardWithHeaderPerspectiveSettings>> {
+public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspectiveLifecycle<LeaderboardWithHeaderPerspectiveSettings> {
     
     private final SAPHeaderComponentLifecycle sapHeaderLifecycle;
     private final LeaderboardPanelLifecycle leaderboardPanelLifecycle;
@@ -27,12 +24,6 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         this.componentLifecycles.add(sapHeaderLifecycle);
     }
     
-    @Override
-    public PerspectiveCompositeSettings<LeaderboardWithHeaderPerspectiveSettings> createDefaultSettings() {
-        LeaderboardWithHeaderPerspectiveSettings perspectiveOwnSettings = createPerspectiveOwnDefaultSettings();
-        return new PerspectiveCompositeSettings<>(perspectiveOwnSettings, getComponentIdsAndDefaultSettings().getSettingsPerComponentId());
-    }
-
     @Override
     public LeaderboardWithHeaderPerspectiveSettings createPerspectiveOwnDefaultSettings() {
         return new LeaderboardWithHeaderPerspectiveSettings();

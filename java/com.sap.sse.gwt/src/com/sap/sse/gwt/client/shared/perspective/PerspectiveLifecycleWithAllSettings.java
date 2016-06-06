@@ -13,7 +13,7 @@ import com.sap.sse.gwt.client.shared.components.CompositeSettings;
  *            the type of the perspective own settings
  * @author Frank Mittag
  */
-public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle<PS, ?, ?>, PS extends Settings> {
+public class PerspectiveLifecycleWithAllSettings<PL extends PerspectiveLifecycle<PS, ?>, PS extends Settings> {
     
     private final PL perspectiveLifecycle;
     private PerspectiveCompositeSettings<PS> allSettings;
