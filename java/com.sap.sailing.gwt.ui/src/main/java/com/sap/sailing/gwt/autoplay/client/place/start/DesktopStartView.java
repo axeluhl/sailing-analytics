@@ -114,10 +114,10 @@ public class DesktopStartView extends Composite implements StartView {
 
     private void updatePerspectives(AbstractLeaderboardDTO leaderboard) {
         LeaderboardWithHeaderPerspectiveLifecycle leaderboardPerspectiveLifecycle = new LeaderboardWithHeaderPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle,leaderboardPerspectiveLifecycle.createDefaultSettings());
+        leaderboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(leaderboardPerspectiveLifecycle, leaderboardPerspectiveLifecycle.createDefaultSettings());
         
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(leaderboard, StringMessages.INSTANCE);
-        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,raceboardPerspectiveLifecycle.createDefaultSettings());
+        raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle, raceboardPerspectiveLifecycle.createDefaultSettings());
     }
 
     private <PL extends PerspectiveLifecycle<PS>, PS extends Settings> void openPerspectiveSettingsDialog(final PerspectiveLifecycleWithAllSettings<PL, PS> perspectiveLifecycleAndSettings) {
