@@ -229,13 +229,12 @@ class MediaLibrary {
         assert lock.isWriteLocked();
         if (mediaTrack.assignedRaces != null) {
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
-                if (mediaTracksByRace.containsKey(assignedRace)) {
-                    mediaTracksByRace.get(assignedRace).add(mediaTrack);
-                } else {
-                    Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
-                    mediaTracks.add(mediaTrack);
+                Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
+                if (mediaTracks == null) {
+                    mediaTracks = new HashSet<MediaTrack>();
                     mediaTracksByRace.put(assignedRace, mediaTracks);
                 }
+                mediaTracks.add(mediaTrack);
             }
         }
     }
