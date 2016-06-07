@@ -222,7 +222,9 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     }
 
     private void configureMap(GoogleMap map) {
-        map.getUiSettings().setZoomControlsEnabled(true);
+        if (map != null) {
+            map.getUiSettings().setZoomControlsEnabled(true);
+        }
     }
 
     @Override
