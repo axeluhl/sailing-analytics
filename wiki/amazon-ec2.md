@@ -7,7 +7,8 @@
 #### Servers
 
 - Web Server: ec2-54-229-94-254.eu-west-1.compute.amazonaws.com
-- Database and Queue Server: 172.31.25.253
+- Database Server: dbserver.internal.sapsailing.com
+- Database and Queue Server: rabbit.internal.sapsailing.com
 
 #### Starting an instance
 
@@ -40,9 +41,9 @@ BUILD_COMPLETE_NOTIFY=you@email.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=MYSPECIFICEVENT
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 MONGODB_NAME=myspecificevent
 </pre>
@@ -206,11 +207,11 @@ BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
 SERVER_STARTUP_NOTIFY=
 SERVER_NAME=LIVE1
 MEMORY=2048m
-REPLICATION_HOST=172.31.25.253
+REPLICATION_HOST=rabbit.internal.sapsailing.com
 REPLICATION_CHANNEL=sapsailinganalytics-live
 TELNET_PORT=14888
 SERVER_PORT=8888
-MONGODB_HOST=172.31.25.253
+MONGODB_HOST=dbserver.internal.sapsailing.com
 MONGODB_PORT=10202
 EXPEDITION_PORT=2010
 REPLICATE_ON_START=False
@@ -331,15 +332,18 @@ Follow these steps to upgrade the AMI:
 * Log in as user `root`
 * Run `yum update` to update the operating system
 * Remove any obsolete logs from `/home/sailing/servers/server/logs`
-* Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing <pre>
-    su - sailing
-    cd code
-    mvn clean
-    git fetch
-    git merge origin/master</pre>
+* Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing
+```
+    > su - sailing
+    > cd code
+    > mvn clean
+    > git fetch
+    > git merge origin/master
+```
 * Then, still as user `sailing`, edit `~sailing/servers/server/env.sh` and remove everything after the line `# **** Overwritten environment variables ****` as this will then be the place where any downloaded environment and the EC2 user data variables will be appended later during automatic installation upon reboot.
 * Check the sizes of the mounted partitions by doing `df; swapon -s`. These will come in handy after creating the new AMI in order to tag the new volume snapshots accordingly
 * Update any keys in `/root/.ssh/authorized_keys` and `/home/sailing/.ssh/authorized_keys`
+* Remove created http rewrite entries in `/etc/httpd/conf.d/001-events.conf`
 * In the EC2 administration console go to the "Instances" tab, select your running instance and from the "Actions" drop-down select "Create Image". Give the image the name "SAP Sailing Analytics App x.y" where "x.y" is the updated version number of the image. Just make sure it's greater than the previous one. If you feel like it, you may provide a short description telling the most important features of the image.
 * Once the image creation has completed, go to the Snapshots list in the "Elastic Block Store" category and name the new snapshots appropriately. Now the information about the device sizes obtained earlier from the `df` and `swapon` commands will help you to identify which snapshot is which. Usually, the three snapshots would be something like AMI Analytics Home x.y, AMI Analytics System x.y and AMI Analytics Swap x.y with "x.y" being the version number matching that of your image.
 * Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.

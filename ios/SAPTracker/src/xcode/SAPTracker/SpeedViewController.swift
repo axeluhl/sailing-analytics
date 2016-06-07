@@ -25,8 +25,12 @@ class SpeedViewController: UIViewController {
     
     func newLocation(notification: NSNotification) {
         let ms = notification.userInfo!["speed"] as! Double
-        let kn = ms * knPerMs
-        speedLabel.text = String(format: "%0.1f kn", kn)
+        if(ms >= 0) {
+            let kn = ms * knPerMs
+            speedLabel.text = String(format: "%0.1f kn", kn)
+        } else {
+            speedLabel.text = "– kn"
+        }
     }
 
 }

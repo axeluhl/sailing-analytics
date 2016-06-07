@@ -14,7 +14,7 @@
     <dimen name="listView_row_height">80dp</dimen>
     <dimen name="listView_row_min_height">64dp</dimen>
 
-    <dimen name="preference_margin">0dp</dimen>
+    <dimen name="header_line">@dimen/thin_line</dimen>
 
     <dimen name="panel_text_padding">5dp</dimen>
 
@@ -72,6 +72,12 @@
     <dimen name="panel_lock_padding">2dp</dimen>
     <dimen name="flags">64dp</dimen>
 
+    <dimen name="competitor_dialog_width">420dp</dimen>
+    <dimen name="competitor_edit_width">200dp</dimen>
+    <dimen name="dialog_top_padding">24dp</dimen>
+
+    <dimen name="abort_dialog_height">215dp</dimen>
+
     <!-- custom dimens (float, integer) -->
     <item name="picker_scale" format="float" type="integer">1</item>
     <item name="flag_size" format="integer" type="integer">32</item>
@@ -96,13 +102,18 @@
     <dimen name="switch_height">32dp</dimen>
     <dimen name="switch_padding">8dp</dimen>
 
+    <dimen name="preference_side_margin">0dp</dimen>
+    <dimen name="preference_margin">0dp</dimen>
+    <dimen name="preference_line_margin">72dp</dimen>
+    <dimen name="preference_item_height">72dp</dimen>
+    <item name="preference_columns" format="integer" type="integer">1</item>
+
     <!-- race state dependent -->
     <!-- login -->
     <dimen name="login_text_size_small">@dimen/textSize_18</dimen>
     <dimen name="login_text_size">@dimen/textSize_20</dimen>
 
     <!-- unscheduled -->
-    <dimen name="unscheduled_header_line">@dimen/thin_line</dimen>
     <dimen name="unscheduled_confirm_button_margin">@dimen/default_margin</dimen>
     <dimen name="unscheduled_padding_dependent_race_item">6dp</dimen>
     <dimen name="unscheduled_spinner_width">240dp</dimen>

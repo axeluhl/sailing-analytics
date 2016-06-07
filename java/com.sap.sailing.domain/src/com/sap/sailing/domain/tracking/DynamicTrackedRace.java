@@ -14,10 +14,39 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sse.common.TimePoint;
 
 public interface DynamicTrackedRace extends TrackedRace {
-    void recordFix(Competitor competitor, GPSFixMoving fix);
+    /**
+     * Records a position and speed and course over ground fix for a competitor, but only if the fix's {@link GPSFixMoving#getTimePoint()}
+     * is within this race's {@link #getStartOfTracking() start} and {@link #getEndOfTracking() end} of tracking time interval.
+     */
+    default void recordFix(Competitor competitor, GPSFixMoving fix) {
+        recordFix(competitor, fix, /* onlyWhenInTrackingTimeInterval */ true);
+    }
+
+    /**
+     * Records a position and speed and course over ground fix for a competitor. If
+     * {@code onlyWhenInTrackingTimeInterval} is {@code true}, the fix is recorded only if the fix's
+     * {@link GPSFixMoving#getTimePoint()} is within this race's {@link #getStartOfTracking() start} and
+     * {@link #getEndOfTracking() end} of tracking time interval. If {@code onlyWhenInTrackingTimeInterval} is
+     * {@code false}, the fix is recorded regardless of this race's tracking times interval.
+     */
+    void recordFix(Competitor competitor, GPSFixMoving fix, boolean onlyWhenInTrackingTimeInterval);
     
-    void recordFix(Mark mark, GPSFix fix);
+    /**
+     * Records a position fix for a mark, but only if the fix's {@link GPSFixMoving#getTimePoint()} is within this
+     * race's {@link #getStartOfTracking() start} and {@link #getEndOfTracking() end} of tracking time interval.
+     */
+    default void recordFix(Mark mark, GPSFix fix) {
+        recordFix(mark, fix, /* onlyWhenInTrackingTimeInterval */ true);
+    }
     
+    /**
+     * Records a position fix for a mark. If {@code onlyWhenInTrackingTimeInterval} is {@code true}, the fix is recorded
+     * only if the fix's {@link GPSFixMoving#getTimePoint()} is within this race's {@link #getStartOfTracking() start}
+     * and {@link #getEndOfTracking() end} of tracking time interval. If {@code onlyWhenInTrackingTimeInterval} is
+     * {@code false}, the fix is recorded regardless of this race's tracking times interval.
+     */
+    void recordFix(Mark mark, GPSFix fix, boolean onlyWhenInTrackingTimeInterval);
+
     /**
      * Inserts a <code>wind</code> fix into a {@link WindTrack} for the <code>windSource</code> if the current filtering
      * rules accept the wind fix. Filtering applies based upon timing considerations, assuming that wind fixes are not
@@ -79,6 +108,14 @@ public interface DynamicTrackedRace extends TrackedRace {
      * significantly off.
      */
     void setStartTimeReceived(TimePoint start);
+
+    /**
+     * A new finished time has been received by the {@link DynamicTrackedRaceLogListener} and is announced to this race
+     * by calling this method. The {@link RaceChangeListener}s will be
+     * {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint) notified} about this change, and the result
+     * of {@link #getFinishedTime()} will return the {@code newFinishedTime} after this call returns.
+     */
+    void setFinishedTime(final TimePoint newFinishedTime);
     
     /** Sets the start of tracking as received from the tracking infrastructure.
      * This isn't necessarily what {@link #getStartOfTracking()} will deliver because we might consider other values to
@@ -134,4 +171,5 @@ public interface DynamicTrackedRace extends TrackedRace {
     void invalidateStartTime();
     
     void invalidateEndTime();
+
 }

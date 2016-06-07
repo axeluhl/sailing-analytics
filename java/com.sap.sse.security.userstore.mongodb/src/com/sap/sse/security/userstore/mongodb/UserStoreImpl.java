@@ -54,6 +54,10 @@ public class UserStoreImpl implements UserStore {
     private final transient MongoObjectFactory mongoObjectFactory;
 
     public UserStoreImpl() {
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory());
+    }
+    
+    public UserStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory) {
         users = new ConcurrentHashMap<>();
         usersByEmail = new ConcurrentHashMap<>();
         emailForUsername = new ConcurrentHashMap<>();
@@ -61,36 +65,37 @@ public class UserStoreImpl implements UserStore {
         settingTypes = new ConcurrentHashMap<>();
         usersByAccessToken = new ConcurrentHashMap<>();
         preferences = new ConcurrentHashMap<>();
-        final DomainObjectFactory domainObjectFactory = PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory();
-        mongoObjectFactory = PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory();
-        for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
-            settingTypes.put(e.getKey(), e.getValue());
-        }
-        for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
-            settings.put(e.getKey(), e.getValue());
-        }
-        for (Entry<String, Map<String, String>> e : domainObjectFactory.loadPreferences().entrySet()) {
-            preferences.put(e.getKey(), e.getValue());
-        }
-        boolean changed = false;
-        changed = changed || initSocialSettingsIfEmpty();
-        if (changed) {
-            mongoObjectFactory.storeSettingTypes(settingTypes);
-            mongoObjectFactory.storeSettings(settings);
-        }
-        for (User u : domainObjectFactory.loadAllUsers()) {
-            users.put(u.getName(), u);
-            addToUsersByEmail(u);
-        }
-        for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
-            if (e.getValue() != null) {
-                final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
-                if (accessToken != null) {
-                    final User user = users.get(e.getKey());
-                    if (user != null) {
-                        usersByAccessToken.put(accessToken, user);
-                    } else {
-                        logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
+        this.mongoObjectFactory = mongoObjectFactory;
+        if (domainObjectFactory != null) {
+            for (Entry<String, Class<?>> e : domainObjectFactory.loadSettingTypes().entrySet()) {
+                settingTypes.put(e.getKey(), e.getValue());
+            }
+            for (Entry<String, Object> e : domainObjectFactory.loadSettings().entrySet()) {
+                settings.put(e.getKey(), e.getValue());
+            }
+            for (Entry<String, Map<String, String>> e : domainObjectFactory.loadPreferences().entrySet()) {
+                preferences.put(e.getKey(), e.getValue());
+            }
+            boolean changed = false;
+            changed = changed || initSocialSettingsIfEmpty();
+            if (changed) {
+                mongoObjectFactory.storeSettingTypes(settingTypes);
+                mongoObjectFactory.storeSettings(settings);
+            }
+            for (User u : domainObjectFactory.loadAllUsers()) {
+                users.put(u.getName(), u);
+                addToUsersByEmail(u);
+            }
+            for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
+                if (e.getValue() != null) {
+                    final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
+                    if (accessToken != null) {
+                        final User user = users.get(e.getKey());
+                        if (user != null) {
+                            usersByAccessToken.put(accessToken, user);
+                        } else {
+                            logger.warning("Couldn't find user \""+e.getKey()+"\" for which an access token was found in the preferences");
+                        }
                     }
                 }
             }
@@ -105,6 +110,7 @@ public class UserStoreImpl implements UserStore {
         settingTypes.clear();
         users.clear();
         usersByEmail.clear();
+        usersByAccessToken.clear();
     }
 
     @Override
@@ -115,6 +121,9 @@ public class UserStoreImpl implements UserStore {
             addToUsersByEmail(user);
             for (Entry<String, String> userPref : newUserStore.getAllPreferences(user.getName()).entrySet()) {
                 setPreference(user.getName(), userPref.getKey(), userPref.getValue());
+                if (userPref.getKey().equals(ACCESS_TOKEN_KEY)) {
+                    usersByAccessToken.put(userPref.getValue(), user);
+                }
             }
         }
         for (Entry<String, Object> setting : newUserStore.getAllSettings().entrySet()) {

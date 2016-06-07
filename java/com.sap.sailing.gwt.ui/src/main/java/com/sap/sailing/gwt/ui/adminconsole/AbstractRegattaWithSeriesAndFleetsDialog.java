@@ -73,8 +73,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         }
         startDateBox = createDateTimeBox(regatta.startDate);
         startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        startDateBox.ensureDebugId("StartDateTimeBox");
         endDateBox = createDateTimeBox(regatta.endDate);
         endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");
         for (ScoringSchemeType scoringSchemeType : ScoringSchemeType.values()) {
@@ -240,7 +242,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected void fillCourseAreaListBox(EventDTO selectedEvent) {
         courseAreaListBox.addItem(stringMessages.selectCourseArea());
         for (CourseAreaDTO courseArea : selectedEvent.venue.getCourseAreas()) {
-            courseAreaListBox.addItem(courseArea.getName());
+            courseAreaListBox.addItem(courseArea.getName(), courseArea.id.toString());
             if (courseArea.id.equals(regatta.defaultCourseAreaUuid)) {
                 courseAreaListBox.setSelectedIndex(courseAreaListBox.getItemCount() - 1);
             }
@@ -268,9 +270,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         EventDTO event = getSelectedEvent();
         int selIndex = courseAreaListBox.getSelectedIndex();
         if (selIndex > 0 && event != null) { // the zero index represents the 'no selection' text
-            String itemText = courseAreaListBox.getItemText(selIndex);
+            String selectedCourseAreaIdAsString = courseAreaListBox.getValue(selIndex);
             for (CourseAreaDTO courseAreaDTO : event.venue.getCourseAreas()) {
-                if (courseAreaDTO.getName().equals(itemText)) {
+                if (courseAreaDTO.id.toString().equals(selectedCourseAreaIdAsString)) {
                     result = courseAreaDTO;
                     break;
                 }

@@ -6,7 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.dto.NamedDTO;
 
 /**
- * Equality and hash code are based on the course area's name, as inherited from {@link NamedDTO}.
+ * Equality and hash code are based on the course area's {@link #id}.
  */
 public class CourseAreaDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -5279690838452265454L;
@@ -17,5 +17,27 @@ public class CourseAreaDTO extends NamedDTO implements IsSerializable {
 
     public CourseAreaDTO(String name) {
         super(name);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = prime * ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+        CourseAreaDTO other = (CourseAreaDTO) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 }

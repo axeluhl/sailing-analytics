@@ -91,6 +91,7 @@ public class CheckinManager {
             String leaderboardNameFromQR = URLEncoder.encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
                 .replace("+", "%20");
             urlData.competitorId = uri.getQueryParameter(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING);
+            // TODO alternatively consider a mark_id
             urlData.checkinURLStr = urlData.hostWithPort + prefs.getServerCheckinPath().replace("{leaderboard-name}", leaderboardNameFromQR);
             urlData.eventId = uri.getQueryParameter(DeviceMappingConstants.URL_EVENT_ID);
             urlData.leaderboardName = leaderboardNameFromQR;
@@ -122,7 +123,6 @@ public class CheckinManager {
                     final String leaderboardName;
 
                     try {
-                        //TODO use constants
                         leaderboardName = response.getString("name");
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.leaderboardUrl + ", Error: " + e.getMessage());
@@ -202,18 +202,16 @@ public class CheckinManager {
     private void getCompetitorFromServer(HttpGetRequest getCompetitorRequest, final URLData urlData, final String leaderboardName) {
         NetworkHelper.getInstance(activity)
             .executeHttpJsonRequestAsync(getCompetitorRequest, new NetworkHelper.NetworkHelperSuccessListener() {
-
                 @Override
                 public void performAction(JSONObject response) {
                     activity.dismissProgressDialog();
-
                     try {
-                        // TODO review constants
                         urlData.competitorName = response.getString(CompetitorJsonConstants.FIELD_NAME);
                         urlData.competitorId = response.getString(CompetitorJsonConstants.FIELD_ID);
                         urlData.competitorSailId = response.getString(CompetitorJsonConstants.FIELD_SAIL_ID);
                         urlData.competitorNationality = response.getString(CompetitorJsonConstants.FIELD_NATIONALITY);
                         urlData.competitorCountryCode = response.getString(CompetitorJsonConstants.FIELD_COUNTRY_CODE);
+                        // TODO Bug 3358: get optional team image from CompetitorJsonConstants.FIELD_TEAM_IMAGE_URI
                     } catch (JSONException e) {
                         ExLog.e(activity, TAG, "Error getting data from call on URL: " + urlData.competitorUrl + ", Error: " + e.getMessage());
                         handleApiError();

@@ -60,13 +60,16 @@ import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResult
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
+import com.sap.sailing.server.operationaltransformation.AddLeaderboardGroupToEvent;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateEvent;
+import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
 import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
+import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
@@ -104,12 +107,16 @@ public class SearchServiceTest {
         server = new RacingEventServiceImpl();
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
-        for (Event e : allEvents) {
+        for (final Event e : allEvents) {
             server.apply(new RemoveEvent(e.getId()));
         }
         Map<String, Leaderboard> allLeaderboards = new HashMap<>(server.getLeaderboards());
-        for (String leaderboardName : allLeaderboards.keySet()) {
+        for (final String leaderboardName : allLeaderboards.keySet()) {
             server.apply(new RemoveLeaderboard(leaderboardName));
+        }
+        Map<String, LeaderboardGroup> allLeaderboardGroups = new HashMap<>(server.getLeaderboardGroups());
+        for (final String leaderboardGroupName : allLeaderboardGroups.keySet()) {
+            server.apply(new RemoveLeaderboardGroup(leaderboardGroupName));
         }
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (29er)")));
         server.apply(new RemoveRegatta(new RegattaName("Pfingstbusch (470)")));
@@ -119,8 +126,8 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
-        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate, /* isPublic */
-                "Kiel", true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /* sailorsInfoWebsiteURLAsString */ null,
+        pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate,
+                "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /* sailorsInfoWebsiteURLAsString */ null,
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
@@ -130,7 +137,7 @@ public class SearchServiceTest {
         final LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParams = new LinkedHashMap<String, SeriesCreationParametersDTO>();
         seriesCreationParams.put("Default",
                 new SeriesCreationParametersDTO(Collections.singletonList(new FleetDTO("Default", /* order */-1, Color.RED)),
-                /* medal */false, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
+                /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false));
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", 
                 /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
@@ -149,12 +156,16 @@ public class SearchServiceTest {
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch470Leaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch470.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
+        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+                /* displayGroupsInReverseOrder */ false, Arrays.asList(new String[] { RegattaImpl.getDefaultName("Pfingstbusch", "29er"), RegattaImpl.getDefaultName("Pfingstbusch", "470") }),
+                new int[0], /* overallLeaderboardScoringSchemeType */ null));
+        server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));
         cal.set(2014, 5, 7, 10, 00);
         final TimePoint aalStartDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 18, 00);
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
-        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate, /* isPublic */
-                "Flensburg", true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*sailorsInfoWebsiteURLAsString */ null,
+        aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate,
+                "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*sailorsInfoWebsiteURLAsString */ null,
                 /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
@@ -167,6 +178,10 @@ public class SearchServiceTest {
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
+        final LeaderboardGroup aalLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Aal Regatta", "Aal Regatta", /* displayName */ null,
+                /* displayGroupsInReverseOrder */ false, Collections.singletonList(RegattaImpl.getDefaultName("Aalregatta", "ORC")),
+                new int[0], /* overallLeaderboardScoringSchemeType */ null));
+        server.apply(new AddLeaderboardGroupToEvent(aalEvent.getId(), aalLeaderboardGroup.getId()));
         hassoPlattner = AbstractTracTracLiveTest.createCompetitor("Hasso Plattner");
         alexanderRies = AbstractTracTracLiveTest.createCompetitor("Alexander Ries");
         antonKoch = AbstractTracTracLiveTest.createCompetitor("Anton Koch");

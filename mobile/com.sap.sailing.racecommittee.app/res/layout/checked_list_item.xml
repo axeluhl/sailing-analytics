@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?attr/sap_gray_black_30"
+    android:background="?attr/checkedItemBackground"
     android:minHeight="@dimen/listView_row_min_height">
 
     <ImageView

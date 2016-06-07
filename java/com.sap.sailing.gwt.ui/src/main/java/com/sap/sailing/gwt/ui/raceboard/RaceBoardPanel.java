@@ -37,7 +37,6 @@ import com.sap.sailing.gwt.ui.client.CompetitorColorProviderImpl;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
-import com.sap.sailing.gwt.ui.client.GlobalNavigationPanel;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
@@ -47,6 +46,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent;
 import com.sap.sailing.gwt.ui.client.media.PopupPositionProvider;
 import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPassingsPanel;
+import com.sap.sailing.gwt.ui.client.shared.charts.EditMarkPositionPanel;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.WindChartSettings;
@@ -107,6 +107,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
     private WindChart windChart;
     private MultiCompetitorRaceChart competitorChart;
     private EditMarkPassingsPanel editMarkPassingPanel;
+    private EditMarkPositionPanel editMarkPositionPanel;
     
     /**
      * The component viewer in <code>ONESCREEN</code> view mode. <code>null</code> if in <code>CASCADE</code> view mode
@@ -131,17 +132,18 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
      * @param eventId
      *            an optional event that can be used for "back"-navigation in case the race board shows a race in the
      *            context of an event; may be <code>null</code>.
-     * @param isScreenLargeEnoughToOfferChartSupport
-     *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
-     *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created. This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
+     * @param showChartMarkEditMediaButtonsAndVideo
+     *            if <code>true</code> charts, such as the competitor chart or the wind chart, (as well as edit mark 
+     *            panels and manage media buttons) are shown and a padding is provided for the RaceTimePanel that
+     *            aligns its right border with that of the chart. Otherwise those components will be hidden.
+     *            This decision is made once on startup in the {@link RaceBoardEntryPoint} class.
      */
-    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService,
-            UserService userService, AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
+    public RaceBoardPanel(SailingServiceAsync sailingService, MediaServiceAsync mediaService, UserService userService,
+            AsyncActionsExecutor asyncActionsExecutor, Map<CompetitorDTO, BoatDTO> competitorsAndTheirBoats,
             Timer timer, RegattaAndRaceIdentifier selectedRaceIdentifier, String leaderboardName,
             String leaderboardGroupName, UUID eventId, RaceBoardViewConfiguration raceboardViewConfiguration,
-            ErrorReporter errorReporter, final StringMessages stringMessages,
-            UserAgentDetails userAgent, RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport) {
+            ErrorReporter errorReporter, final StringMessages stringMessages, UserAgentDetails userAgent,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean showMapControls, boolean showChartMarkEditMediaButtonsAndVideo) {
         this.sailingService = sailingService;
         this.mediaService = mediaService;
         this.stringMessages = stringMessages;
@@ -218,7 +220,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         leaderboardPanel.setTitle(stringMessages.leaderboard());
         leaderboardPanel.getElement().getStyle().setMarginLeft(6, Unit.PX);
         leaderboardPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, showMapControls, isScreenLargeEnoughToOfferChartSupport, isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService); // initializes the raceMap field
+        createOneScreenView(leaderboardName, leaderboardGroupName, eventId, mainPanel, showMapControls, showChartMarkEditMediaButtonsAndVideo, isScreenLargeEnoughToInitiallyDisplayLeaderboard, raceMap, userService); // initializes the raceMap field
         leaderboardPanel.addLeaderboardUpdateListener(this);
         // in case the URL configuration contains the name of a competitors filter set we try to activate it
         // FIXME the competitorsFilterSets has now moved to CompetitorSearchTextBox (which should probably be renamed); pass on the parameters to the LeaderboardPanel and see what it does with it
@@ -232,48 +234,52 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
             }
         }
         timePanel = new RaceTimePanel(userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                false, isScreenLargeEnoughToOfferChartSupport, selectedRaceIdentifier);
+                false, showChartMarkEditMediaButtonsAndVideo, selectedRaceIdentifier, getConfiguration().getInitialDurationAfterRaceStartInReplay());
         timeRangeWithZoomModel.addTimeZoomChangeListener(timePanel);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(timePanel);
     }
     
-    /**
-     * @param event
-     *            an optional event; may be <code>null</code> or else can be used to show some context information in
-     *            the {@link GlobalNavigationPanel}.
-     * @param isScreenLargeEnoughToOfferChartSupport
-     *            if the screen is large enough to display charts such as the competitor chart or the wind chart, a
-     *            padding is provided for the RaceTimePanel that aligns its right border with that of the charts, and
-     *            the charts are created.
-     * @param isScreenLargeEnoughToInitiallyDisplayLeaderboard TODO
-     */
     private void createOneScreenView(String leaderboardName, String leaderboardGroupName, UUID event, FlowPanel mainPanel,
-            boolean showMapControls, boolean isScreenLargeEnoughToOfferChartSupport, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard, RaceMap raceMap, UserService userService) {
+            boolean showMapControls, boolean showChartMarkEditMediaButtonsAndVideo, boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard,
+            RaceMap raceMap, UserService userService) {
         // create the default leaderboard and select the right race
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         List<Component<?>> components = new ArrayList<Component<?>>();
-        if (isScreenLargeEnoughToOfferChartSupport) {
-        competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, 
+        if (showChartMarkEditMediaButtonsAndVideo) {
+            competitorChart = new MultiCompetitorRaceChart(sailingService, asyncActionsExecutor, competitorSelectionProvider, selectedRaceIdentifier, 
                         timer, timeRangeWithZoomModel, stringMessages, errorReporter, true, true, leaderboardGroupName, leaderboardName);
             competitorChart.getEntryWidget().setTitle(stringMessages.competitorCharts());
             competitorChart.setVisible(false);
             components.add(competitorChart);
-        windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel, new WindChartSettings(),
+            
+            windChart = new WindChart(sailingService, selectedRaceIdentifier, timer, timeRangeWithZoomModel, new WindChartSettings(),
                     stringMessages, asyncActionsExecutor, errorReporter, /* compactChart */ true);
             windChart.setVisible(false);
             windChart.getEntryWidget().setTitle(stringMessages.windChart());
             components.add(windChart);
-            editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
-                    stringMessages, competitorSelectionProvider, errorReporter, timer);
+        }
+            
+        editMarkPassingPanel = new EditMarkPassingsPanel(sailingService, selectedRaceIdentifier,
+                stringMessages, competitorSelectionProvider, errorReporter, timer);
+        if (showChartMarkEditMediaButtonsAndVideo) {
             editMarkPassingPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
             editMarkPassingPanel.getEntryWidget().setTitle(stringMessages.editMarkPassings());
             components.add(editMarkPassingPanel);
         }
-        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia();
+        
+        editMarkPositionPanel = new EditMarkPositionPanel(raceMap, leaderboardPanel, selectedRaceIdentifier, leaderboardName,
+                stringMessages, sailingService, timer, timeRangeWithZoomModel, asyncActionsExecutor, errorReporter);
+        if (showChartMarkEditMediaButtonsAndVideo) {
+            editMarkPositionPanel.setLeaderboard(leaderboardPanel.getLeaderboard());
+            components.add(editMarkPositionPanel);
+        }
+        
+        boolean autoSelectMedia = getConfiguration().isAutoSelectMedia() && showChartMarkEditMediaButtonsAndVideo;
         MediaPlayerManagerComponent mediaPlayerManagerComponent = new MediaPlayerManagerComponent(
                 selectedRaceIdentifier, raceTimesInfoProvider, timer, mediaService, userService, stringMessages,
                 errorReporter, userAgent, this, autoSelectMedia);
-        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent, components, stringMessages, userService, editMarkPassingPanel);
+        leaderboardAndMapViewer = new SideBySideComponentViewer(leaderboardPanel, raceMap, mediaPlayerManagerComponent,
+                components, stringMessages, userService, editMarkPassingPanel, editMarkPositionPanel);
         this.setupUserManagementControlPanel(userService);
         componentViewers.add(leaderboardAndMapViewer);
         for (ComponentViewer componentViewer : componentViewers) {
@@ -281,7 +287,7 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         }
         boolean showLeaderboard = getConfiguration().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        if (isScreenLargeEnoughToOfferChartSupport) {
+        if (showChartMarkEditMediaButtonsAndVideo) {
             setWindChartVisible(getConfiguration().isShowWindChart());
             setCompetitorChartVisible(getConfiguration().isShowCompetitorsChart());
         }
@@ -402,6 +408,9 @@ public class RaceBoardPanel extends SimplePanel implements LeaderboardUpdateList
         leaderboardAndMapViewer.setLeftComponentWidth(leaderboardPanel.getContentPanel().getOffsetWidth());
         if (editMarkPassingPanel != null) {
             editMarkPassingPanel.setLeaderboard(leaderboard);
+        }
+        if (editMarkPositionPanel != null) {
+            editMarkPositionPanel.setLeaderboard(leaderboard);
         }
     }
 

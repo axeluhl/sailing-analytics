@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.android.tracking.app.R;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
@@ -54,9 +58,9 @@ public class AppPreferences extends BaseAppPreferences {
                 "{leaderboard_name}", leaderboardName);
     }
 
-    public String getServerCompetitorPath(String competitorId) {
+    public String getServerCompetitorPath(String competitorId) throws UnsupportedEncodingException {
         return context.getString(R.string.preference_server_competitor_path).replace("{competitor_id}",
-                competitorId);
+                URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
     public String getServerCompetiorTeamPath(String competitorId){

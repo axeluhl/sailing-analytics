@@ -26,7 +26,7 @@ import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.TimePoint;
 
-public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving>{
+public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<ItemType, GPSFixMoving> implements DynamicGPSFixTrack<ItemType, GPSFixMoving> {
     private static final long serialVersionUID = 9111448573301259784L;
     private static final double MAX_SPEED_FACTOR_COMPARED_TO_MEASURED_SPEED_FOR_FILTERING = 2;
 
@@ -47,12 +47,17 @@ public class DynamicGPSFixMovingTrackImpl<ItemType> extends GPSFixTrackImpl<Item
      */
     @Override
     public void addGPSFix(GPSFixMoving gpsFix) {
-        add(gpsFix);
+        add(gpsFix, /* replace */ true);
     }
     
     @Override
     public boolean add(GPSFixMoving fix) {
-        return super.add(new CompactGPSFixMovingImpl(fix));
+        return super.add(fix); // ends up calling this.add(fix, false) where conversion in CompactGPSFixMovingImpl will happen
+    }
+
+    @Override
+    public boolean add(GPSFixMoving fix, boolean replace) {
+        return super.add(new CompactGPSFixMovingImpl(fix), replace);
     }
 
     /**

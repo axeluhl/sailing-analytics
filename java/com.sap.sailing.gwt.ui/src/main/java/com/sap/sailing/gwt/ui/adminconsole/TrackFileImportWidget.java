@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -30,30 +31,32 @@ public class TrackFileImportWidget implements IsWidget {
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
     private static Image loaderImage = new Image(resources.loaderGif());
     
-    public TrackFileImportWidget(final TrackFileImportDeviceIdentifierTableWrapper table, StringMessages stringMessages,
+    public TrackFileImportWidget(final TrackFileImportDeviceIdentifierTableWrapper table, final StringMessages stringMessages,
             final SailingServiceAsync sailingService, final ErrorReporter errorReporter) {
         this(new SubmitCompleteHandler() {
             @Override
             public void onSubmitComplete(SubmitCompleteEvent event) {
                 table.getDataProvider().getList().clear();
-                
                 String[] uuids = event.getResults().split("\\n");
-                sailingService.getTrackFileImportDeviceIds(Arrays.asList(uuids),
-                        new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
-                    
-                    @Override
-                    public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
-                        table.getDataProvider().getList().addAll(result);
-                        loaderImage.setResource(resources.transparentGif());
-                    }
-                    
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
-                        loaderImage.setResource(resources.transparentGif());
-                    }
-                });
-                
+                if (uuids.length != 1 || (uuids.length > 0 && !uuids[0].isEmpty())) {
+                    sailingService.getTrackFileImportDeviceIds(Arrays.asList(uuids),
+                            new AsyncCallback<List<TrackFileImportDeviceIdentifierDTO>>() {
+                        @Override
+                        public void onSuccess(List<TrackFileImportDeviceIdentifierDTO> result) {
+                            table.getDataProvider().getList().addAll(result);
+                            loaderImage.setResource(resources.transparentGif());
+                        }
+                        
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            errorReporter.reportError("Could not load TrackFileImportDeviceIds: " + caught.getMessage());
+                            loaderImage.setResource(resources.transparentGif());
+                        }
+                    });
+                } else {
+                    loaderImage.setResource(resources.transparentGif());
+                    Window.alert(stringMessages.noTracksFound());
+                }
             }
         }, stringMessages, sailingService, errorReporter);
     }

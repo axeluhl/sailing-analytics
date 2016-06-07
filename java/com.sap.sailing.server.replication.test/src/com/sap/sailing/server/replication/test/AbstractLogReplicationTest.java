@@ -96,7 +96,7 @@ public abstract class AbstractLogReplicationTest<LogT extends AbstractLog<EventT
     protected Regatta setupRegatta(final String regattaName, String seriesName, String fleetName, String boatClassName) {
         LinkedHashMap<String, SeriesCreationParametersDTO> seriesCreationParameters = new LinkedHashMap<>();
         SeriesCreationParametersDTO creationParametersForDefaultSeries = new SeriesCreationParametersDTO(
-                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* startsWithZero */
+                Arrays.asList(new FleetDTO[] { new FleetDTO(fleetName, 0, Color.BLACK), }), /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */
                 false, /* firstColumnIsNonDiscardableCarryForward */false, /* discardingThresholds */new int[0], /* hasSplitFleetContiguousScoring */
                 false);
         seriesCreationParameters.put(seriesName, creationParametersForDefaultSeries);

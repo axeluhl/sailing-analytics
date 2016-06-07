@@ -112,6 +112,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                 null, getEventSubscriber(), getRaceSubscriber(), /*ignoreTracTracMarkPassings*/ false, ReceiverType.RACECOURSE, ReceiverType.MARKPOSITIONS,
                 ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS)) {
             receivers.add(r);
+            addReceiverToStopDuringTearDown(r);
         }
         addListenersForStoredDataAndStartController(receivers);
         raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race.getId());

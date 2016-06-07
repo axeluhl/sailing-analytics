@@ -28,6 +28,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         prefs = new AppPreferences(this);
         if (getSupportActionBar() != null) {
@@ -93,7 +94,7 @@ public class StartActivity extends AbstractStartActivity {
 
     @Override
     public void onCheckinDataAvailable(AbstractCheckinData data) {
-        if(data != null && data instanceof CheckinData) {
+        if (data != null && data instanceof CheckinData) {
             CheckinData checkinData = (CheckinData) data;
             if (!checkinData.isUpdate()) {
                 getHomeFragment().displayUserConfirmationScreen(data);

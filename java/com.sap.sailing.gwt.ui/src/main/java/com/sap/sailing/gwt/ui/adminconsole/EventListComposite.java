@@ -54,6 +54,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -118,6 +119,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(eventControlsPanel);
         
         Button refreshButton = new Button(stringMessages.refresh());
+        refreshButton.ensureDebugId("RefreshEventsButton");
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -127,6 +129,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventControlsPanel.add(refreshButton);
 
         Button createEventBtn = new Button(stringMessages.actionAddEvent());
+        createEventBtn.ensureDebugId("CreateEventButton");
         createEventBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -136,6 +139,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventControlsPanel.add(createEventBtn);
 
         removeEventsButton = new Button(stringMessages.remove());
+        removeEventsButton.ensureDebugId("RemoveEventsButton");
         removeEventsButton.setEnabled(false);
         removeEventsButton.addClickHandler(new ClickHandler() {
             @Override
@@ -180,7 +184,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         panel.add(filterTextbox);
         panel.add(eventTable);
         
-        noEventsLabel = new Label("No events defined yet.");
+        noEventsLabel = new Label(stringMessages.noEventsYet());
         noEventsLabel.ensureDebugId("NoRegattasLabel");
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
@@ -455,6 +459,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 createNewEvent(newEvent, existingLeaderboardGroups);
             }
         });
+        dialog.ensureDebugId("EventCreateDialog");
         dialog.show();
     }
     
@@ -556,7 +561,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             public void cancel() {
             }
         });
-        leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName());
+        leaderboardGroupCreateDialog.setFieldsBasedOnEventName(newEvent.getName(), newEvent.getDescription());
+        leaderboardGroupCreateDialog.ensureDebugId("LeaderboardGroupCreateDialog");
         leaderboardGroupCreateDialog.show();
     }
 
@@ -678,7 +684,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 fillEvents();
                 if (newEvent.getLeaderboardGroups().isEmpty()) {
                     // show simple Dialog
-                    new CreateDefaultLeaderboardGroupDialog(sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
+                    DataEntryDialog<Void> dialog = new CreateDefaultLeaderboardGroupDialog(
+                            sailingService, stringMessages, errorReporter, new DialogCallback<Void>() {
                         @Override
                         public void ok(Void editedObject) {
                             openLeaderboardGroupCreationDialog(existingLeaderboardGroups, newEvent);
@@ -687,7 +694,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                         @Override
                         public void cancel() {
                         }
-                    }).show();
+                    });
+                    dialog.ensureDebugId("CreateDefaultLeaderboardGroupConfirmDialog");
+                    dialog.show();
                 } else {
                     openCreateDefaultRegattaDialog(newEvent);
                 }

@@ -1,7 +1,9 @@
 package com.sap.sailing.racecommittee.app.utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.content.Context;
@@ -20,10 +22,6 @@ public class TimeUtils {
 
     private TimeUtils() {
         // only static methods
-    }
-
-    public static long timeUntil(TimePoint targetTime) {
-        return targetTime.asMillis() - MillisecondsTimePoint.now().asMillis();
     }
 
     /**
@@ -199,6 +197,21 @@ public class TimeUtils {
             date.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             datePicker.getLayoutParams().width = date.getMeasuredWidth();
         }
+    }
+
+    public static ArrayList<String> getDates(Context context, TimePoint start, TimePoint end) {
+        ArrayList<String> dates = new ArrayList<>();
+        SimpleDateFormat simpleFormat = new SimpleDateFormat(context.getString(R.string.date_short), Locale.US);
+        Calendar startDate = Calendar.getInstance();
+        Calendar endDate = (Calendar) startDate.clone();
+        startDate.setTime(start.asDate());
+        endDate.setTime(end.asDate());
+        int dayDiff = daysBetween(endDate, startDate);
+        for (int i = 0; i <= dayDiff; i++) {
+            dates.add(simpleFormat.format(startDate.getTime()));
+            startDate.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return dates;
     }
 
     public static TimePoint getTime(TimePicker timePicker) {
