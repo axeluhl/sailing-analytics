@@ -226,6 +226,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Add(MediaTrack mediaTrack) {
+        assert lock.isWriteLocked();
         if (mediaTrack.assignedRaces != null) {
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
                 if (mediaTracksByRace.containsKey(assignedRace)) {
@@ -244,7 +245,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Remove(MediaTrack mediaTrack) {
-
+        assert lock.isWriteLocked();
         for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
             Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
             if (mediaTracks != null) {
