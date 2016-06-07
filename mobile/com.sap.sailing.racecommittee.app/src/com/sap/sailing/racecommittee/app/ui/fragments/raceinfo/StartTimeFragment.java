@@ -10,21 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import android.app.FragmentTransaction;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.TimePicker;
-
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.BitmapHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
@@ -54,6 +39,21 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.util.NaturalComparator;
 
+import android.app.FragmentTransaction;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
+
 public class StartTimeFragment extends BaseFragment
     implements View.OnClickListener, NumberPicker.OnValueChangeListener, TimePicker.OnTimeChangedListener {
 
@@ -81,7 +81,6 @@ public class StartTimeFragment extends BaseFragment
     private TextView mCountdown;
     private TextView mDebugTime;
     private TimePoint mStartTime;
-    private Calendar mCalendar;
     private SimpleRaceLogIdentifier mRaceId;
     private Duration mStartTimeOffset;
     private boolean mListenerIgnore = true;
@@ -95,10 +94,6 @@ public class StartTimeFragment extends BaseFragment
      * Listens for start time changes
      */
     private RaceStateChangedListener raceStateChangedListener;
-
-    public StartTimeFragment() {
-        mCalendar = Calendar.getInstance();
-    }
 
     public static StartTimeFragment newInstance(int startMode) {
         StartTimeFragment fragment = new StartTimeFragment();
@@ -630,35 +625,10 @@ public class StartTimeFragment extends BaseFragment
     }
 
     private void syncToMinute() {
-        TimePoint now = MillisecondsTimePoint.now();
-        if (mStartTime.after(now)) {
-            mStartTime = getNewStart( mStartTime.minus(now.asMillis()), false);
-        } else {
-            mStartTime = getNewStart(now.minus(mStartTime.asMillis()), true);
-        }
+        final TimePoint now = MillisecondsTimePoint.now();
+        mStartTime = mStartTime.getNearestModuloOneMinute(now);
         mListenerIgnore = true;
         setPickerTime();
-    }
-
-    private TimePoint getNewStart(TimePoint timePoint, boolean running) {
-        TimePoint result;
-        mCalendar.setTime(timePoint.asDate());
-        int msec = mCalendar.get(Calendar.SECOND) * 1000 + mCalendar.get(Calendar.MILLISECOND);
-        if (running) {
-            if (msec >= 30000) {
-                result = mStartTime.minus(60000 - msec);
-            } else {
-                result = mStartTime.plus(msec);
-            }
-        } else {
-            if (msec >= 30000) {
-                result = mStartTime.plus(60000 - msec);
-            } else {
-                result = mStartTime.minus(msec);
-            }
-        }
-
-        return result;
     }
 
     @Override
@@ -688,6 +658,9 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
+    /**
+     * sets the time displayed in the time picker to the value of {@link #mStartTime}
+     */
     private void setPickerTime() {
         Calendar today = Calendar.getInstance();
         Calendar newTime = (Calendar) today.clone();

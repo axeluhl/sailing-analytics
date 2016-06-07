@@ -6,6 +6,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.DurationFormatter;
@@ -22,7 +25,7 @@ public class DurationTest {
         TimePoint t2 = t1.plus(d);
         assertEquals(123+234, t2.asMillis());
     }
-
+    
     @Test
     public void testDurationMinus() {
         TimePoint t1 = new MillisecondsTimePoint(234);
