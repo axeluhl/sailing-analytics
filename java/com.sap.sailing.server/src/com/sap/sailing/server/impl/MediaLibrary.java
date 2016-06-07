@@ -236,7 +236,6 @@ class MediaLibrary {
                     mediaTracks.add(mediaTrack);
                     mediaTracksByRace.put(assignedRace, mediaTracks);
                 }
-
             }
         }
     }
