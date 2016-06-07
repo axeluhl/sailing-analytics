@@ -16,6 +16,7 @@ import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
+import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -45,7 +46,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public void loadCompetitorTrack(DynamicGPSFixTrack<Competitor, GPSFixMoving> track, RegattaLog log, Competitor competitor)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze().get(competitor);
+        List<DeviceMappingWithRegattaLogEvent<Competitor>> mappings = new RegattaLogDeviceCompetitorMappingFinder(log)
+                .analyze().get(competitor);
         if (mappings != null) {
             for (DeviceMapping<Competitor> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
@@ -56,7 +58,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark)
     throws NoCorrespondingServiceRegisteredException, TransformationException{
-        List<DeviceMapping<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze().get(mark);
+        List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze()
+                .get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 loadTrack(track, mapping.getDevice(), mapping.getTimeRange().from(), mapping.getTimeRange().to(), true /*inclusive*/);
@@ -103,7 +106,8 @@ public class GPSFixStoreImpl implements GPSFixStore {
     @Override
     public void loadMarkTrack(DynamicGPSFixTrack<Mark, GPSFix> track, RegattaLog log, Mark mark,
             TimePoint start, TimePoint end) throws TransformationException, NoCorrespondingServiceRegisteredException {
-        List<DeviceMapping<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze().get(mark);
+        List<DeviceMappingWithRegattaLogEvent<Mark>> mappings = new RegattaLogDeviceMarkMappingFinder(log).analyze()
+                .get(mark);
         if (mappings != null) {
             for (DeviceMapping<Mark> mapping : mappings) {
                 final TimePoint from = Util.getLatestOfTimePoints(start, mapping.getTimeRange().from());

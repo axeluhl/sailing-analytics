@@ -91,9 +91,8 @@ import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMa
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceMarkMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogRevokeEventImpl;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorBravoMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorMappingFinder;
-import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.BaseRegattaLogDeviceMappingFinder;
+import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMarkMappingFinder;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogOpenEndedDeviceMappingCloser;
 import com.sap.sailing.domain.base.Boat;
@@ -5437,18 +5436,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<DeviceMappingDTO> getDeviceMappings(RegattaLog regattaLog)
             throws TransformationException {
         List<DeviceMappingDTO> result = new ArrayList<DeviceMappingDTO>();
-        for (List<? extends DeviceMapping<Competitor>> list : new RegattaLogDeviceCompetitorMappingFinder(regattaLog).analyze().values()) {
-            for (DeviceMapping<Competitor> mapping : list) {
-                result.add(convertToDeviceMappingDTO(mapping));
-            }
-        }
-        for (List<? extends DeviceMapping<Mark>> list : new RegattaLogDeviceMarkMappingFinder(regattaLog).analyze().values()) {
-            for (DeviceMapping<Mark> mapping : list) {
-                result.add(convertToDeviceMappingDTO(mapping));
-            }
-        }
-        for (List<? extends DeviceMapping<Competitor>> list : new RegattaLogDeviceCompetitorBravoMappingFinder(regattaLog).analyze().values()) {
-            for (DeviceMapping<Competitor> mapping : list) {
+        for (List<? extends DeviceMapping<WithID>> list : new RegattaLogDeviceCompetitorSensordataMappingFinder(
+                regattaLog).analyze().values()) {
+            for (DeviceMapping<WithID> mapping : list) {
                 result.add(convertToDeviceMappingDTO(mapping));
             }
         }
@@ -6247,7 +6237,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             if (raceColumn != null) {
                 final TimePoint fixTimePoint = new MillisecondsTimePoint(fix.timepoint);
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(
+                        regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     for (final Mark mark : raceColumn.getAvailableMarks(fleet)) {
@@ -6289,7 +6280,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
-                final RegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(regattaLog);
+                final BaseRegattaLogDeviceMappingFinder<Mark> mappingFinder = new RegattaLogDeviceMarkMappingFinder(
+                        regattaLog);
                 final Fleet fleet = raceColumn.getFleetByName(fleetName);
                 if (fleet != null) {
                     final TimePoint fixTimePoint = new MillisecondsTimePoint(oldFix.timepoint);

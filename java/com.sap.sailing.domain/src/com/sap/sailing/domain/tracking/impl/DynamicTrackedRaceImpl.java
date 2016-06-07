@@ -96,11 +96,22 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private Map<Competitor, CompetitorResult> competitorResultsFromRaceLog;
 
+    @Deprecated
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             long delayForCacheInvalidationOfWindEstimation, boolean useInternalMarkPassingAlgorithm,
             RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+    }
+
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, long delayForCacheInvalidationOfWindEstimation,
+            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor,
+            RaceLogResolver raceLogResolver) {
         super(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
                 useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
@@ -160,11 +171,21 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromWindStoreComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
+    @Deprecated
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
             boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        this(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
+                millisecondsOverWhichToAverageSpeed, millisecondsOverWhichToAverageWind / 2,
+                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+    }
+
+    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
+            WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
+            RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
+        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 millisecondsOverWhichToAverageWind / 2, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
     }
