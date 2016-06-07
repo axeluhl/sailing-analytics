@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +44,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     private final Account account;
     private final FixFactory fixFactory;
     private boolean receivedServerHeartbeatInInterval;
-    private final ConcurrentHashMap<BulkFixReceiver, BulkFixReceiver> listeners;
+    private final ConcurrentMap<BulkFixReceiver, BulkFixReceiver> listeners;
     private TimePoint igtimiServerTimepoint;
     private TimePoint localTimepointWhenServerTimepointWasReceived;
     

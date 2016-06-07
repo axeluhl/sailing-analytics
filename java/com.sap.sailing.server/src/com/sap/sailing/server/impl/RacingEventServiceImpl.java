@@ -2795,7 +2795,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void mediaTracksAdded(Collection<MediaTrack> mediaTracks) {
+    public void mediaTracksAdded(Iterable<MediaTrack> mediaTracks) {
         mediaLibrary.addMediaTracks(mediaTracks);
     }
 
@@ -2843,7 +2843,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override) {
+    public void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override) {
         for (MediaTrack trackToImport : mediaTracksToImport) {
             MediaTrack existingTrack = mediaLibrary.lookupMediaTrack(trackToImport);
             if (existingTrack == null) {
@@ -2877,12 +2877,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+    public Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         return mediaLibrary.findMediaTracksForRace(regattaAndRaceIdentifier);
     }
 
     @Override
-    public Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
+    public Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier) {
         TrackedRace trackedRace = getExistingTrackedRace(regattaAndRaceIdentifier);
         if (trackedRace != null) {
             if (trackedRace.isLive(MillisecondsTimePoint.now())) {
@@ -2900,7 +2900,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     @Override
-    public Collection<MediaTrack> getAllMediaTracks() {
+    public Iterable<MediaTrack> getAllMediaTracks() {
         return mediaLibrary.allTracks();
     }
 
