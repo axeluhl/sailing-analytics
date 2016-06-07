@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.StreamSupport;
@@ -146,7 +147,7 @@ public abstract class AbstractRankingMetric implements RankingMetric {
          * <code>null</code> values are encoded as the {@link #NULL_COMPETITOR} and must be translated back to <code>null</code> before returning
          * to a caller outside of this class.
          */
-        private final ConcurrentHashMap<Leg, Competitor> competitorFarthestAheadInLeg;
+        private final ConcurrentMap<Leg, Competitor> competitorFarthestAheadInLeg;
         
         public AbstractRankingInfo(final TimePoint timePoint) {
             this.timePoint = timePoint;

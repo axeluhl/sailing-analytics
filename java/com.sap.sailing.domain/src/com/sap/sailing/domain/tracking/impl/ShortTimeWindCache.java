@@ -5,6 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,8 +27,8 @@ import com.sap.sse.util.impl.ApproximateTime;
  */
 public class ShortTimeWindCache {
     private static final Logger logger = Logger.getLogger(ShortTimeWindCache.class.getName());
-    private final ConcurrentHashMap<Triple<Position, TimePoint, Set<WindSource>>,
-                                    WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> cache;
+    private final ConcurrentMap<Triple<Position, TimePoint, Set<WindSource>>,
+                                WindWithConfidence<com.sap.sse.common.Util.Pair<Position, TimePoint>>> cache;
 
     /**
      * The keys of {@link #cache} in the order in which to invalidate them, keyed by the time they were entered into the cache.
