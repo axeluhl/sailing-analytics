@@ -38,6 +38,7 @@ import com.sap.sailing.gwt.ui.client.media.shared.MediaPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
 import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaType;
 import com.sap.sse.common.settings.AbstractSettings;
@@ -282,9 +283,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
      * 
      * @return
      */
-    private AsyncCallback<Collection<MediaTrack>> getAssignedMediaCallback() {
+    private AsyncCallback<Iterable<MediaTrack>> getAssignedMediaCallback() {
 
-        return new AsyncCallback<Collection<MediaTrack>>() {
+        return new AsyncCallback<Iterable<MediaTrack>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -294,9 +295,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
                 MediaPlayerManagerComponent.this.assignedMediaTracks.clear();
-                MediaPlayerManagerComponent.this.assignedMediaTracks.addAll(mediaTracks);
+                Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.assignedMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.assignedMediaTracks) {
                     setStatus(mediaTrack);
                 }
@@ -316,9 +317,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
      * 
      * @return
      */
-    private AsyncCallback<Collection<MediaTrack>> getOverlappingMediaCallback() {
+    private AsyncCallback<Iterable<MediaTrack>> getOverlappingMediaCallback() {
 
-        return new AsyncCallback<Collection<MediaTrack>>() {
+        return new AsyncCallback<Iterable<MediaTrack>>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -328,9 +329,9 @@ public class MediaPlayerManagerComponent implements Component<AbstractSettings>,
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> mediaTracks) {
+            public void onSuccess(Iterable<MediaTrack> mediaTracks) {
                 MediaPlayerManagerComponent.this.overlappingMediaTracks.clear();
-                MediaPlayerManagerComponent.this.overlappingMediaTracks.addAll(mediaTracks);
+                Util.addAll(mediaTracks, MediaPlayerManagerComponent.this.overlappingMediaTracks);
                 for (MediaTrack mediaTrack : MediaPlayerManagerComponent.this.overlappingMediaTracks) {
                     setStatus(mediaTrack);
                 }

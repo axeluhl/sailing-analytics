@@ -278,7 +278,7 @@ public class WaypointPositionAndDistanceCache {
             for (Waypoint otherWaypoint : waypoints) {
                 ControlPoint otherControlPoint = otherWaypoint.getControlPoint();
                 if (otherControlPoint != controlPoint) {
-                    for (ConcurrentHashMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> cache : Arrays.asList(distanceCache, minimumDistanceCache)) {
+                    for (ConcurrentMap<Pair<ControlPoint, ControlPoint>, SortedMap<TimePoint, Distance>> cache : Arrays.asList(distanceCache, minimumDistanceCache)) {
                         final Map<TimePoint, Distance> distanceMap = cache.get(new Pair<>(controlPoint, otherControlPoint));
                         if (distanceMap != null) {
                             distanceMap.remove(timePoint);

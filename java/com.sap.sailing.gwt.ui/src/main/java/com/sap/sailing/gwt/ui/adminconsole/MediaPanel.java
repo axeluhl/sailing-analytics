@@ -4,7 +4,6 @@ import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYUP;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +48,7 @@ import com.sap.sailing.gwt.ui.client.media.NewMediaWithRaceSelectionDialog;
 import com.sap.sailing.gwt.ui.client.media.TimeFormatUtil;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
@@ -137,18 +137,16 @@ public class MediaPanel extends FlowPanel {
 
     protected void loadMediaTracks() {
         mediaTrackListDataProvider.getList().clear();
-        mediaService.getAllMediaTracks(new AsyncCallback<Collection<MediaTrack>>() {
+        mediaService.getAllMediaTracks(new AsyncCallback<Iterable<MediaTrack>>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError(t.toString());
             }
 
             @Override
-            public void onSuccess(Collection<MediaTrack> allMediaTracks) {
-                mediaTrackListDataProvider.getList().addAll(allMediaTracks);
-                allMediaTracks.clear();
-                allMediaTracks.addAll(mediaTrackListDataProvider.getList());
-                filterableMediaTracks.updateAll(allMediaTracks);
+            public void onSuccess(Iterable<MediaTrack> allMediaTracks) {
+                Util.addAll(allMediaTracks, mediaTrackListDataProvider.getList());
+                filterableMediaTracks.updateAll(mediaTrackListDataProvider.getList());
                 mediaTrackListDataProvider.refresh();
             }
         });

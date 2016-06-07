@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import junit.framework.Assert;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -127,6 +125,7 @@ import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -134,6 +133,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
+
+import junit.framework.Assert;
 
 public class MasterDataImportTest {
 
@@ -1797,9 +1798,9 @@ public class MasterDataImportTest {
 
         Assert.assertNotNull(creationCount);
 
-        Collection<MediaTrack> targetTracks = destService.getAllMediaTracks();
+        Iterable<MediaTrack> targetTracks = destService.getAllMediaTracks();
 
-        Assert.assertEquals(1, targetTracks.size());
+        Assert.assertEquals(1, Util.size(targetTracks));
 
         MediaTrack trackOnTarget = targetTracks.iterator().next();
 
