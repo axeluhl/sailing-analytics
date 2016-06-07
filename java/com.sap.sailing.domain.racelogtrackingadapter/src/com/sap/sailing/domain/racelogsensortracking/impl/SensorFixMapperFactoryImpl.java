@@ -3,7 +3,6 @@ package com.sap.sailing.domain.racelogsensortracking.impl;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelog.tracking.SensorFixMapper;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
@@ -16,12 +15,6 @@ public class SensorFixMapperFactoryImpl implements SensorFixMapperFactory {
 
     public SensorFixMapperFactoryImpl(ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> tracker) {
         this.tracker = tracker;
-    }
-    
-    @Override
-    public <FixT extends Timed, TrackT extends Track<?>> SensorFixMapper<FixT, TrackT, Competitor>
-            createCompetitorMapper(RegattaLogDeviceCompetitorMappingEvent event) {
-        return createCompetitorMapper(event.getClass());
     }
     
     @Override
