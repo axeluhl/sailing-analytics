@@ -83,6 +83,7 @@ public class StartTimeFragment extends BaseFragment
     private TextView mDebugTime;
     private Button mMinuteInc;
     private Button mMinuteDec;
+    private Button mSyncMinute;
     private TimePoint mStartTime;
     private Calendar mTimeLeft;
     private Calendar mTimeRight;
@@ -157,6 +158,7 @@ public class StartTimeFragment extends BaseFragment
         }
 
         mCountdown = ViewHelper.get(layout, R.id.start_countdown);
+
         mMinuteInc = ViewHelper.get(layout, R.id.minute_inc);
         if (mMinuteInc != null) {
             mMinuteInc.setOnClickListener(this);
@@ -165,6 +167,11 @@ public class StartTimeFragment extends BaseFragment
         mMinuteDec = ViewHelper.get(layout, R.id.minute_dec);
         if (mMinuteDec != null) {
             mMinuteDec.setOnClickListener(this);
+        }
+
+        mSyncMinute = ViewHelper.get(layout, R.id.sync_to_minute);
+        if (mSyncMinute != null) {
+            mSyncMinute.setOnClickListener(this);
         }
 
         View setStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
@@ -571,7 +578,7 @@ public class StartTimeFragment extends BaseFragment
                 if (ZERO_TIME.equals(countdown)) {
                     countdown = countdown.substring(1);
                 }
-                mMinuteDec.setText(countdown);
+//                mMinuteDec.setText(countdown);
             }
 
             if (mMinuteInc != null) {
@@ -579,7 +586,7 @@ public class StartTimeFragment extends BaseFragment
                 if (ZERO_TIME.equals(countdown)) {
                     countdown = countdown.substring(1);
                 }
-                mMinuteInc.setText(countdown);
+//                mMinuteInc.setText(countdown);
             }
 
             if (mDebugTime != null) {
@@ -695,6 +702,10 @@ public class StartTimeFragment extends BaseFragment
                 changeFragment(MillisecondsTimePoint.now(), new MillisecondsDurationImpl(mTimeOffset.getValue() * 60 * 1000), identifier);
                 break;
 
+            case R.id.sync_to_minute:
+                syncToMinute();
+                break;
+
             case R.id.header_text:
                 if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == START_MODE_PRESETUP) {
                     changeFragment();
@@ -707,6 +718,38 @@ public class StartTimeFragment extends BaseFragment
             default:
                 break;
         }
+    }
+
+    private void syncToMinute() {
+        TimePoint now = MillisecondsTimePoint.now();
+        if (mStartTime.after(now)) {
+            mStartTime = getNewStart( mStartTime.minus(now.asMillis()), false);
+        } else {
+            mStartTime = getNewStart(now.minus(mStartTime.asMillis()), true);
+        }
+        mListenerIgnore = true;
+        setPickerTime();
+    }
+
+    private TimePoint getNewStart(TimePoint timePoint, boolean running) {
+        TimePoint result;
+        mCalendar.setTime(timePoint.asDate());
+        int msec = mCalendar.get(Calendar.SECOND) * 1000 + mCalendar.get(Calendar.MILLISECOND);
+        if (running) {
+            if (msec >= 30000) {
+                result = mStartTime.minus(60000 - msec);
+            } else {
+                result = mStartTime.plus(msec);
+            }
+        } else {
+            if (msec >= 30000) {
+                result = mStartTime.plus(60000 - msec);
+            } else {
+                result = mStartTime.minus(msec);
+            }
+        }
+
+        return result;
     }
 
     @Override
