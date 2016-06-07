@@ -25,11 +25,11 @@
         
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/list_header_height"
+            android:paddingLeft="@dimen/fragment_side_margin"
+            android:paddingRight="@dimen/fragment_side_margin"
             android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="12dp">
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="0dp"
@@ -43,27 +43,17 @@
                 android:id="@+id/marker_gps_accuracy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
                 android:textColor="@color/fiori_text_color"
                 android:textSize="20sp"
-                android:textStyle="bold"
                 tools:text="ca. 13m"/>
 
             <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
                 android:id="@+id/signal_quality_indicator"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/signal_quality_indicator_left_margin"
+                android:layout_marginStart="@dimen/signal_quality_indicator_left_margin"/>
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="12dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:text="@string/accuracy_detail"
-            android:textColor="@color/fiori_text_color"/>
 
         <View style="@style/Divider"/>
 
@@ -72,17 +62,17 @@
     <!-- Distance to old buoy -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/list_header_height"
         android:orientation="vertical"
         android:background="@color/list_item_background_color">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/fragment_side_margin"
+            android:paddingRight="@dimen/fragment_side_margin"
             android:orientation="horizontal"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="12dp">
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="0dp"
@@ -101,15 +91,6 @@
                 android:textSize="20sp"
                 tools:text="11,4m"/>
         </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="12dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:text="@string/distance_detail"
-            android:textColor="@color/fiori_text_color"/>
 
         <View style="@style/Divider"/>
 

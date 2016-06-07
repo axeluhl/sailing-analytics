@@ -32,103 +32,114 @@
 
             <!-- Accuracy -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/list_item_background_color"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
+                    android:orientation="vertical"
+                    android:paddingLeft="@dimen/fragment_side_margin"
                     android:paddingTop="12dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="@string/accuracy"
                         android:textColor="@color/fiori_text_color"
                         android:textSize="20sp"/>
 
                     <TextView
-                        android:id="@+id/marker_gps_accuracy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginRight="5dp"
-                        android:textColor="@color/fiori_text_color"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        tools:text="ca. 13m"/>
+                        android:paddingBottom="12dp"
+                        android:text="@string/accuracy_detail"
+                        android:textColor="@color/fiori_text_color"/>
 
-                    <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
-                        android:id="@+id/signal_quality_indicator"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
                 </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="12dp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:text="@string/accuracy_detail"
-                    android:textColor="@color/fiori_text_color"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
 
-                <View style="@style/Divider"/>
+                <TextView
+                    android:id="@+id/marker_gps_accuracy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@color/fiori_text_color"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:text="ca. 13m"/>
+
+                <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
+                    android:id="@+id/signal_quality_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="@dimen/signal_quality_indicator_left_margin"
+                    android:layout_marginStart="@dimen/signal_quality_indicator_left_margin"
+                    android:layout_marginEnd="@dimen/fragment_side_margin"
+                    android:layout_marginRight="@dimen/fragment_side_margin"/>
 
             </LinearLayout>
 
+            <View style="@style/Divider"/>
 
             <!-- Distance to old buoy -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/list_item_background_color"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
+                    android:orientation="vertical"
+                    android:paddingLeft="@dimen/fragment_side_margin"
                     android:paddingTop="12dp">
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="@string/distance"
                         android:textColor="@color/fiori_text_color"
                         android:textSize="20sp"/>
 
                     <TextView
-                        android:id="@+id/marker_gps_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:textColor="@color/fiori_text_color"
-                        android:textSize="20sp"
-                        tools:text="11,4m"/>
+                        android:paddingBottom="12dp"
+                        android:text="@string/distance_detail"
+                        android:textColor="@color/fiori_text_color"/>
+
                 </LinearLayout>
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="12dp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:text="@string/distance_detail"
-                    android:textColor="@color/fiori_text_color"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    />
 
-                <View style="@style/Divider"/>
+                <TextView
+                    android:id="@+id/marker_gps_distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="@dimen/fragment_side_margin"
+                    android:layout_marginEnd="@dimen/fragment_side_margin"
+                    android:textColor="@color/fiori_text_color"
+                    android:textSize="20sp"
+                    tools:text="11,4m"/>
 
             </LinearLayout>
+
+            <View style="@style/Divider"/>
 
             <View
                 android:layout_width="match_parent"
