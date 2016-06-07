@@ -188,6 +188,7 @@ public class StartTimeFragment extends BaseFragment
             View header = ViewHelper.get(getView(), R.id.header);
             View back = ViewHelper.get(getView(), R.id.header_back);
             View text = ViewHelper.get(getView(), R.id.header_text);
+            View sync = ViewHelper.get(getView(), R.id.sync_to_minute);
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
                 case START_MODE_PLANNED:
                     if (back != null) {
@@ -216,6 +217,9 @@ public class StartTimeFragment extends BaseFragment
                         if (text != null) {
                             text.setOnClickListener(this);
                         }
+                    }
+                    if (sync != null) {
+                        sync.setVisibility(View.VISIBLE);
                     }
 
                     StartTimeFinderResult result = getRaceState().getStartTimeFinderResult();

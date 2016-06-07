@@ -136,7 +136,9 @@
                         android:layout_margin="@dimen/default_margin"
                         android:background="?attr/button_filled_bordered"
                         android:text="@string/sync_to_minute"
-                        android:textColor="?attr/white"/>
+                        android:textColor="?attr/white"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
 
                     <Button
                         android:id="@+id/set_start_time_absolute"

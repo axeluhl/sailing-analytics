@@ -174,14 +174,16 @@
                 android:id="@+id/sync_to_minute"
                 android:layout_width="@dimen/default_button_width"
                 android:layout_height="@dimen/default_button_height"
+                android:layout_above="@id/set_start_time_absolute"
                 android:layout_centerHorizontal="true"
                 android:background="?attr/button_filled_bordered"
-                android:layout_above="@id/set_start_time_absolute"
                 android:paddingLeft="@dimen/default_padding_half"
                 android:paddingRight="@dimen/default_padding_half"
                 android:text="@string/sync_to_minute"
                 android:textColor="?attr/white"
-                android:textSize="@dimen/textSize_18"/>
+                android:textSize="@dimen/textSize_18"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <TextView
                 android:id="@+id/debug_time"
