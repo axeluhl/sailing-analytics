@@ -3,6 +3,7 @@ package com.sap.sailing.domain.abstractlog.regatta.events.impl;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
@@ -27,6 +28,11 @@ public class RegattaLogDeviceMarkMappingEventImpl extends RegattaLogDeviceMappin
 
     @Override
     public void accept(RegattaLogEventVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public void accept(EventMappingVisitor visitor) {
         visitor.visit(this);
     }
 }

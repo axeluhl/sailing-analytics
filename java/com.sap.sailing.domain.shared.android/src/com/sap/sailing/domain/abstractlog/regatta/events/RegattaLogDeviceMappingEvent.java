@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.abstractlog.regatta.events;
 
 import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.base.Competitor;
@@ -37,4 +38,11 @@ public interface RegattaLogDeviceMappingEvent<ItemType extends WithID> extends R
      * In that case the device should be mapped to the item for any timepoint after that specified by {@link #getFrom()}.
      */
     TimePoint getTo();
+
+    /**
+     * Visitor patter implementation for event mapping handling differentiation.
+     * 
+     * @param visitor
+     */
+    void accept(EventMappingVisitor visitor);
 }
