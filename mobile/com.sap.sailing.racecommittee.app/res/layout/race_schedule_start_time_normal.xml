@@ -106,19 +106,6 @@
                     android:layout_marginTop="@dimen/default_margin_half"
                     android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/minute_inc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:background="?attr/button_filled_bordered"
-                        android:drawableLeft="?attr/chevron_left"
-                        android:paddingRight="@dimen/default_padding_half"
-                        android:textColor="?attr/white"
-                        android:textSize="@dimen/textSize_20"
-                        android:visibility="gone"
-                        tools:text="1:00:00"/>
-
                     <TextView
                         android:id="@+id/start_countdown"
                         android:layout_width="wrap_content"
@@ -130,19 +117,6 @@
                         android:textSize="@dimen/textSize_72"
                         android:visibility="visible"
                         tools:text="1:01:00"/>
-
-                    <Button
-                        android:id="@+id/minute_dec"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:background="?attr/button_filled_bordered"
-                        android:drawableRight="?attr/chevron_right"
-                        android:paddingLeft="@dimen/default_padding_half"
-                        android:textColor="?attr/white"
-                        android:textSize="@dimen/textSize_20"
-                        android:visibility="gone"
-                        tools:text="1:02:00"/>
                 </LinearLayout>
             </RelativeLayout>
 

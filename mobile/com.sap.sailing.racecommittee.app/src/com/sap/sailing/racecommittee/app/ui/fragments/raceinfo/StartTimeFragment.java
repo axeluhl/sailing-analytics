@@ -62,7 +62,6 @@ public class StartTimeFragment extends BaseFragment
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = 3;
     private static final int MAX_DIFF_MIN = 60;
-    private static final String ZERO_TIME = "-00:00:00";
     private static final int ABSOLUTE = 0;
     private static final int RELATIVE = 1;
 
@@ -81,12 +80,7 @@ public class StartTimeFragment extends BaseFragment
     private NumberPicker mStartSeconds;
     private TextView mCountdown;
     private TextView mDebugTime;
-    private Button mMinuteInc;
-    private Button mMinuteDec;
-    private Button mSyncMinute;
     private TimePoint mStartTime;
-    private Calendar mTimeLeft;
-    private Calendar mTimeRight;
     private Calendar mCalendar;
     private SimpleRaceLogIdentifier mRaceId;
     private Duration mStartTimeOffset;
@@ -159,19 +153,9 @@ public class StartTimeFragment extends BaseFragment
 
         mCountdown = ViewHelper.get(layout, R.id.start_countdown);
 
-        mMinuteInc = ViewHelper.get(layout, R.id.minute_inc);
-        if (mMinuteInc != null) {
-            mMinuteInc.setOnClickListener(this);
-        }
-
-        mMinuteDec = ViewHelper.get(layout, R.id.minute_dec);
-        if (mMinuteDec != null) {
-            mMinuteDec.setOnClickListener(this);
-        }
-
-        mSyncMinute = ViewHelper.get(layout, R.id.sync_to_minute);
-        if (mSyncMinute != null) {
-            mSyncMinute.setOnClickListener(this);
+        Button syncMinute = ViewHelper.get(layout, R.id.sync_to_minute);
+        if (syncMinute != null) {
+            syncMinute.setOnClickListener(this);
         }
 
         View setStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
@@ -538,55 +522,23 @@ public class StartTimeFragment extends BaseFragment
             int resId;
             TimePoint timePoint;
             String time;
-            String timeLeft;
-            String timeRight;
             if (mStartTime == null) {
                 mStartTime = getPickerTime();
             }
             if (mStartTime.after(now)) {
                 resId = R.string.race_start_time_in;
                 timePoint = mStartTime.minus(now.asMillis());
-                setButtonTime(timePoint, false);
                 time = TimeUtils.formatDurationUntil(timePoint.asMillis());
-                timeLeft = TimeUtils.formatDurationUntil(mTimeLeft.getTimeInMillis());
-                timeRight = TimeUtils.formatDurationUntil(mTimeRight.getTimeInMillis());
-                if (timeRight.equals(time)) {
-                    mTimeRight.add(Calendar.MINUTE, 1);
-                    timeRight = TimeUtils.formatDurationUntil(mTimeRight.getTimeInMillis());
-                }
             } else {
                 resId = R.string.race_start_time_ago;
                 timePoint = now.minus(mStartTime.asMillis());
-                setButtonTime(timePoint, true);
                 time = TimeUtils.formatDurationSince(timePoint.asMillis());
-                timeLeft = TimeUtils.formatDurationSince(mTimeLeft.getTimeInMillis());
-                timeRight = TimeUtils.formatDurationSince(mTimeRight.getTimeInMillis());
-                if (timeRight.equals(time)) {
-                    mTimeRight.add(Calendar.MINUTE, -1);
-                    timeRight = TimeUtils.formatDurationSince(mTimeRight.getTimeInMillis());
-                }
             }
 
             if (mCountdown != null) {
                 String countdown = getString(resId, time);
                 mCountdown.setText(countdown);
                 mCountdown.setTag(resId);
-            }
-
-            if (mMinuteDec != null) {
-                String countdown = getString(resId, timeLeft);
-                if (ZERO_TIME.equals(countdown)) {
-                    countdown = countdown.substring(1);
-                }
-//                mMinuteDec.setText(countdown);
-            }
-
-            if (mMinuteInc != null) {
-                String countdown = getString(resId, timeRight);
-                if (ZERO_TIME.equals(countdown)) {
-                    countdown = countdown.substring(1);
-                }
-//                mMinuteInc.setText(countdown);
             }
 
             if (mDebugTime != null) {
@@ -644,56 +596,9 @@ public class StartTimeFragment extends BaseFragment
         }
     }
 
-    private void setButtonTime(TimePoint timePoint, boolean reverse) {
-        mCalendar.setTime(timePoint.asDate());
-        mTimeLeft = getNewTime(mCalendar, (reverse) ? 1 : 0);
-        mTimeRight = getNewTime(mCalendar, (reverse) ? 0 : 1);
-    }
-
-    private Calendar getNewTime(Calendar calendar, int upDown) {
-        Calendar newCalendar = (Calendar) calendar.clone();
-        newCalendar.add(Calendar.MINUTE, upDown);
-        newCalendar.set(Calendar.SECOND, 0);
-        newCalendar.set(Calendar.MILLISECOND, 0);
-        return newCalendar;
-    }
-
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.minute_inc:
-            case R.id.minute_dec:
-                mCalendar = Calendar.getInstance();
-                int msec = mCalendar.get(Calendar.MILLISECOND);
-                mCalendar.set(Calendar.MILLISECOND, msec);
-                String button = ((TextView) view).getText().toString();
-                boolean down = button.substring(0, 1).equals("-");
-                String[] values = button.split(":");
-                int hour = Integer.parseInt(values[0]);
-                int min = Integer.parseInt(values[1]);
-                if (view.getId() == R.id.minute_dec) { // button right
-                    if (!down) { // time is positive
-                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                        mCalendar.add(Calendar.MINUTE, -1 * min);
-                    } else {
-                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                        mCalendar.add(Calendar.MINUTE, min);
-                    }
-                } else { // button left
-                    if (!down) { // time is positive
-                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                        mCalendar.add(Calendar.MINUTE, -1 * min);
-                    } else {
-                        mCalendar.add(Calendar.HOUR_OF_DAY, -1 * hour);
-                        mCalendar.add(Calendar.MINUTE, min);
-                    }
-                }
-
-                mStartTime = new MillisecondsTimePoint(mCalendar.getTimeInMillis());
-                mListenerIgnore = true;
-                setPickerTime();
-                break;
-
             case R.id.set_start_time_absolute:
                 changeFragment(mStartTime);
                 break;
