@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -50,9 +51,9 @@ public class RemoteSailingServerSet {
      * Holds the remote server references managed by this set. Keys are the
      * {@link RemoteSailingServerReference#getName() names} of the server references.
      */
-    private final ConcurrentHashMap<String, RemoteSailingServerReference> remoteSailingServers;
+    private final ConcurrentMap<String, RemoteSailingServerReference> remoteSailingServers;
     
-    private final ConcurrentHashMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
+    private final ConcurrentMap<RemoteSailingServerReference, Util.Pair<Iterable<EventBase>, Exception>> cachedEventsForRemoteSailingServers;
 
     /**
      * @param scheduler

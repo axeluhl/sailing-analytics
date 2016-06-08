@@ -114,7 +114,7 @@ class MediaLibrary {
         addMediaTracks(Collections.singleton(mediaTrack));
     }
 
-    void addMediaTracks(Collection<MediaTrack> mediaTracks) {
+    void addMediaTracks(Iterable<MediaTrack> mediaTracks) {
         LockUtil.lockForWrite(lock);
         try {
             for (MediaTrack mediaTrack : mediaTracks) {

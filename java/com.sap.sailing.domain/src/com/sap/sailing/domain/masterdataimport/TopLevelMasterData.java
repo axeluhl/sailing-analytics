@@ -66,7 +66,7 @@ public class TopLevelMasterData implements Serializable {
     private final Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
-            final Map<String, Regatta> regattaForRaceIdString, final Collection<MediaTrack> allMediaTracks,
+            final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
             GPSFixStore gpsFixStore, boolean exportWind, Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
@@ -302,7 +302,7 @@ public class TopLevelMasterData implements Serializable {
      * Copies only those media tracks from allMediaTracks to filteredMediaTracks which are 
      * assigned to races related to the exported LeaderboardGroup.
      */
-    private void filterMediaTracks(Collection<MediaTrack> allMediaTracks, Set<MediaTrack> filteredMediaTracks) {
+    private void filterMediaTracks(Iterable<MediaTrack> allMediaTracks, Set<MediaTrack> filteredMediaTracks) {
         Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport();
         for (MediaTrack mediaTrack : allMediaTracks) {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {

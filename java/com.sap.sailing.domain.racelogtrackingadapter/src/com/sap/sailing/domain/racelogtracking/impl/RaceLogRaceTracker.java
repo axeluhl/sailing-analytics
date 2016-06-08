@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -109,8 +110,8 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     private final RaceLogResolver raceLogResolver;
     private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
 
-    private final ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
 
     private final Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
