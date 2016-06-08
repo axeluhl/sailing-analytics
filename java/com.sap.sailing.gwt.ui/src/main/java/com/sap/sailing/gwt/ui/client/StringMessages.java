@@ -1589,4 +1589,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noTracksFound();
     String noRacesAvailable();
     String loadingRegattasAndRaces();
+    String selectFromRacesWithOverlappingTimeRange();
 }
