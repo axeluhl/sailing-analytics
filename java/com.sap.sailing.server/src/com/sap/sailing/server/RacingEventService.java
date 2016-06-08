@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -417,7 +416,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Calling mediaTrackAdded for every entry in the specified collection. 
      * @param mediaTracks
      */
-    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    void mediaTracksAdded(Iterable<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
 
@@ -439,13 +438,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
      */
-    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override);
     
-    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
-    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Collection<MediaTrack> getAllMediaTracks();
+    Iterable<MediaTrack> getAllMediaTracks();
 
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 

@@ -3,7 +3,6 @@ package com.sap.sailing.domain.base.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -176,7 +175,7 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
 
     @Override
     public TrackedRaceStatisticsDTO createTrackedRaceStatisticsDTO(TrackedRace trackedRace, Leaderboard leaderboard,
-            RaceColumn raceColumn, Fleet fleet, Collection<MediaTrack> mediaTracks) {
+            RaceColumn raceColumn, Fleet fleet, Iterable<MediaTrack> mediaTracks) {
         TrackedRaceStatisticsDTO statisticsDTO = new TrackedRaceStatisticsDTO();
         // GPS data
         statisticsDTO.hasGPSData = trackedRace.hasGPSData();

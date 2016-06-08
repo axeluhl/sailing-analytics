@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -101,7 +102,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private static final Logger logger = Logger.getLogger(RegattaImpl.class.getName());
     private static final long serialVersionUID = 6509564189552478869L;
-    private ConcurrentHashMap<String, RaceDefinition> races;
+    private ConcurrentMap<String, RaceDefinition> races;
     private final BoatClass boatClass;
     private transient Set<RegattaListener> regattaListeners;
     private List<? extends Series> series;

@@ -12,9 +12,13 @@ import com.sap.sse.common.media.MediaSubType;
 import com.sap.sse.common.media.MimeType;
 
 /**
- * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
+ * The {@link #hashCode()} and {@link #equals(Object)} methods are based solely on the {@link #dbId} field.
+ * <p>
  * 
- * @author D047974
+ * See http://my.opera.com/core/blog/2010/03/03/everything-you-need-to-know-about-html5-video-and-audio-2
+ * <p>
+ * 
+ * @author Jens Rommel (D047974)
  * 
  */
 public class MediaTrack implements Serializable {
