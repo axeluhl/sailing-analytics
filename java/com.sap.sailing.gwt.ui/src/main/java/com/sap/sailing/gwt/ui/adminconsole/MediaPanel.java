@@ -537,20 +537,21 @@ public class MediaPanel extends FlowPanel {
     }
 
     private String listAssignedRaces(MediaTrack mediaTrack) {
-
+        final String result;
         if (mediaTrack.assignedRaces.size() > 1) {
-            return String.valueOf(mediaTrack.assignedRaces.size());
+            result = String.valueOf(mediaTrack.assignedRaces.size());
         } else {
             String value = "";
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
                 value += assignedRace.getRegattaName() + " " + assignedRace.getRaceName() + ", ";
             }
             if (value.length() > 1) {
-                return value.substring(0, value.length() - 2);
-            } else
-                return value;
-
+                result = value.substring(0, value.length() - 2);
+            } else {
+                result = value;
+            }
         }
+        return result;
     }
 
     public void onShow() {
