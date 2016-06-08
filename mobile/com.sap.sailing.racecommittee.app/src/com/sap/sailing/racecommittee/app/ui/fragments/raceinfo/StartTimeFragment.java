@@ -1,5 +1,6 @@
 package com.sap.sailing.racecommittee.app.ui.fragments.raceinfo;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -458,7 +459,7 @@ public class StartTimeFragment extends BaseFragment
         for (RaceGroupSeriesFleet races : mGroupHeaders.keySet()) {
             Util.Pair<String, String> leaderBoard = mLeaderBoardAdapter.getItem(mLeaderBoard.getSelectedItemPosition());
             if (races.getRaceGroup().getName().equals(leaderBoard.getA())) {
-                if(races.getFleet().getName().equals(fleet)) {
+                if (races.getFleet().getName().equals(fleet)) {
                     for (ManagedRace race : mGroupHeaders.get(races)) {
                         if (!getRace().equals(race) && race.getStatus() != RaceLogRaceStatus.FINISHED) {
                             return true;
@@ -506,8 +507,9 @@ public class StartTimeFragment extends BaseFragment
 
         mStartSeconds = ViewHelper.get(getView(), R.id.start_time_seconds);
         if (mStartSeconds != null) {
-            ThemeHelper.setPickerColor(getActivity(), mStartSeconds, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-                .getColor(getActivity(), R.attr.sap_yellow_1));
+            ThemeHelper.setPickerColor(getActivity(), mStartSeconds, ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray), ThemeHelper
+                .getColor(getActivity(), R.attr.sap_light_gray));
+            ThemeHelper.setPickerTextSize(getActivity(), mStartSeconds, R.dimen.textSize_14);
             mStartSeconds.setEnabled(false);
             setSeconds();
         }
@@ -650,11 +652,14 @@ public class StartTimeFragment extends BaseFragment
     }
 
     private void setSeconds() {
-        setSeconds("00,000");
+        setSeconds(0, 0);
     }
-    private void setSeconds(String seconds) {
+
+    private void setSeconds(int sec, int msec) {
         if (mStartSeconds != null) {
-            mStartSeconds.setDisplayedValues(new String[] { seconds });
+            double seconds = sec + msec / (double) 1000;
+            DecimalFormat format = new DecimalFormat("0.000");
+            mStartSeconds.setDisplayedValues(new String[] { format.format(seconds) });
         }
     }
 
@@ -676,7 +681,7 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setCurrentMinute(newTime.get(Calendar.MINUTE));
         }
 
-        setSeconds(String.format(Locale.US, "%02d,%03d", newTime.get(Calendar.SECOND), newTime.get(Calendar.MILLISECOND)));
+        setSeconds(newTime.get(Calendar.SECOND), newTime.get(Calendar.MILLISECOND));
     }
 
     private TimePoint getPickerTime() {
