@@ -63,7 +63,7 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         Grid formGrid = new Grid(2, 2);
         panel.add(formGrid);
         Label message = new Label();
-        message.setText("Loading Regattas and Races");
+        message.setText(stringMessages.loadingRegattasAndRaces());
         formGrid.setWidget(0, 0, message);    
         formGrid.setWidget(1, 1, trackedRacesListComposite);
         formGrid.getWidget(1, 1).setVisible(false);
@@ -76,7 +76,6 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         return panel;
     }
     
-
     @Override
     protected Set<RegattaAndRaceIdentifier> getResult() {
         return getAssignedRaces();
@@ -92,15 +91,15 @@ public class AssignRacesToMediaDialog extends DataEntryDialog<Set<RegattaAndRace
         updateUI();
     }
 
-    public void updateUI() {
+    private void updateUI() {
         Grid grid = (Grid) panel.getWidget(0);
         if (hasRaceCandidates) {
             grid.getWidget(0, 0).setVisible(false);
             grid.getWidget(1, 1).setVisible(true);
             this.getOkButton().setVisible(true);
         } else {
-            Label label = (Label)grid.getWidget(0, 0);
-            label.setText("No Races available");
+            Label label = (Label) grid.getWidget(0, 0);
+            label.setText(stringMessages.noRacesAvailable());
             grid.getWidget(0, 0).setVisible(true);
             grid.getWidget(1, 1).setVisible(false);
             this.getOkButton().setVisible(false);
