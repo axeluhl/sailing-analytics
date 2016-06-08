@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.tracking.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -55,7 +56,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
 
     private static final Logger logger = Logger.getLogger(DynamicTrackedRaceLogListener.class.getName());
 
-    private ConcurrentHashMap<RaceLog, ReadonlyRaceState> raceLogs = new ConcurrentHashMap<>();
+    private ConcurrentMap<RaceLog, ReadonlyRaceState> raceLogs = new ConcurrentHashMap<>();
 
     private DynamicTrackedRace trackedRace;
 
@@ -338,12 +339,12 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
     
     @Override
     public void visit(RaceLogStartOfTrackingEvent event) {
-        trackedRace.updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
     
     @Override
     public void visit(RaceLogEndOfTrackingEvent event) {
-        trackedRace.updateStartAndEndOfTracking();
+        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
     }
 
     @Override

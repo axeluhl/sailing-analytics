@@ -1,8 +1,8 @@
 package com.sap.sailing.domain.trackfiles;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
@@ -16,7 +16,7 @@ public class TrackFileImportDeviceIdentifierImpl implements TrackFileImportDevic
     private final String trackName;
     private final TimePoint timePoint;
     
-    private static final Map<UUID, TrackFileImportDeviceIdentifier> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<UUID, TrackFileImportDeviceIdentifier> cache = new ConcurrentHashMap<>();
     
     public static TrackFileImportDeviceIdentifier getOrCreate(UUID uuid) {
         if (cache.containsKey(uuid)) {

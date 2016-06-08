@@ -29,6 +29,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RaceTimesInfoDTO lastRaceTimesInfo;
     private boolean hasCanReplayDuringLiveRacesPermission = false;
     private final UserService userService;
+    private final RaceTimePanelLifecycle componentLifecycle;
+    
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user) {
@@ -43,13 +45,14 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * will be issued and the flag is cleared.
      */
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
-
+    
     private final Duration initialTimeAfterRaceStartInReplayMode;
     
-    public RaceTimePanel(UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+    public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
             RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
             RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
         super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
+        this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
@@ -60,7 +63,6 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
             raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
         }
     }
-    
     
     @Override
     protected void onLoad() {
@@ -107,15 +109,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public RaceTimePanelSettings getSettings() {
-        RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
-        return result;
+        return new RaceTimePanelSettings(timer.getRefreshInterval());
     }
 
     @Override
     public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return new RaceTimePanelSettingsDialogComponent(getSettings(), stringMessages);
+        return componentLifecycle.getSettingsDialogComponent(getSettings());
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {

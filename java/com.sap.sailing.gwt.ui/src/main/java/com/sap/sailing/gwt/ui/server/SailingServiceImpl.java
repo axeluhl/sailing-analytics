@@ -2441,7 +2441,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
                     if(withStatisticalData) {
-                        Collection<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
+                        Iterable<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
                         raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, leaderboard, raceColumn, fleet, mediaTracksForRace); 
                     }
                 }    
@@ -4921,7 +4921,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void setTrackingTimes(RaceLogSetTrackingTimesDTO dto) throws NotFoundException {
         RaceLog raceLog = getRaceLog(dto.leaderboardName, dto.raceColumnName, dto.fleetName);
-        // TODO If new is null and current is not, current should be revoked.
+        // the tracking start/end time events are not revoked; updates with null as TimePoint may be added instead
         if (!Util.equalsWithNull(dto.newStartOfTracking, dto.currentStartOfTracking)) {
             raceLog.add(new RaceLogStartOfTrackingEventImpl(
                     dto.newStartOfTracking, new LogEventAuthorImpl(dto.authorName, dto.authorPriority),

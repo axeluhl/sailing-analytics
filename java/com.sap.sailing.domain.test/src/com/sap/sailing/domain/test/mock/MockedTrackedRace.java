@@ -1041,7 +1041,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
     }
 
     @Override
-    public void updateStartAndEndOfTracking() {
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad) {
     }
 
     @Override

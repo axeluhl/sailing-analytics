@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -371,7 +372,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * second} element has those that have been removed.
      */
     private Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> invalidateAfterCourseChange(int zeroBasedIndexOfWaypointChanged) {
-        ConcurrentHashMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
+        ConcurrentMap<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> result = new ConcurrentHashMap<>();
         Course course = race.getRace().getCourse();
         for (Competitor c : race.getRace().getCompetitors()) {
             distanceCache.get(c).clear();
@@ -431,7 +432,10 @@ public class CandidateFinderImpl implements CandidateFinder {
         Map<Competitor, List<Candidate>> removedWaypointCandidates = removeWaypoints(removedWaypoints);
         Map<Competitor, Util.Pair<List<Candidate>, List<Candidate>>> newAndUpdatedCandidates = invalidateAfterCourseChange(smallestIndex);
         for (Entry<Competitor, List<Candidate>> entry : removedWaypointCandidates.entrySet()) {
-            newAndUpdatedCandidates.get(entry.getKey()).getB().addAll(entry.getValue());
+            final Pair<List<Candidate>, List<Candidate>> candidatesForCompetitor = newAndUpdatedCandidates.get(entry.getKey());
+            if (candidatesForCompetitor != null) { // only possible if an exception struck in invalidateAfterCourseChange for the competitor
+                candidatesForCompetitor.getB().addAll(entry.getValue());
+            }
         }
         return newAndUpdatedCandidates;
     }
@@ -497,22 +501,17 @@ public class CandidateFinderImpl implements CandidateFinder {
             instruction = PassingInstruction.Line;
         }
         if (instruction == PassingInstruction.None || instruction == null) {
-            if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
-                instruction = PassingInstruction.Line;
-            } else {
-                int numberofMarks = 0;
-                Iterator<Mark> it = w.getMarks().iterator();
-                while (it.hasNext()) {
-                    it.next();
-                    numberofMarks++;
-                }
-                if (numberofMarks == 2) {
-                    instruction = PassingInstruction.Gate;
-                } else if (numberofMarks == 1) {
-                    instruction = PassingInstruction.Single_Unknown;
+            final int numberOfMarks = Util.size(w.getMarks());
+            if (numberOfMarks == 2) {
+                if (w.equals(firstWaypoint) || w.equals(lastWaypoint)) {
+                    instruction = PassingInstruction.Line;
                 } else {
-                    instruction = PassingInstruction.None;
+                    instruction = PassingInstruction.Gate;
                 }
+            } else if (numberOfMarks == 1) {
+                instruction = PassingInstruction.Single_Unknown;
+            } else {
+                instruction = PassingInstruction.None;
             }
         }
         return instruction;
@@ -735,7 +734,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                         }
                     }
                     List<Distance> wayPointXTEs = xtes.get(w);
-                    int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
+                    final int size = wayPointXTEs == null ? 0 : wayPointXTEs.size();
                     if (size > 0) {
                         Double xte = wayPointXTEs.get(0).getMeters();
                         if (xte == 0) {
@@ -766,14 +765,16 @@ public class CandidateFinderImpl implements CandidateFinder {
                                 Double xteAfter = xtesAfter.get(w).get(1).getMeters();
                                 if (xte < 0 != xteAfter <= 0) {
                                     newCandidates.put(Arrays.asList(fix, fixAfter),
-                                            createCandidate(c, xte, xteAfter, t, tAfter, w, false));
+                                            createCandidate(c, xte, xteAfter, t, tAfter, w,
+                                                    /* still portMark in case of single-mark waypoint */ Util.size(w.getMarks()) < 2));
                                 }
                             }
                             if (fixBefore != null && xtesBefore.get(w).size() >= 2) {
                                 Double xteBefore = xtesBefore.get(w).get(1).getMeters();
                                 if (xte < 0 != xteBefore <= 0) {
                                     newCandidates.put(Arrays.asList(fixBefore, fix),
-                                            createCandidate(c, xteBefore, xte, tBefore, t, w, false));
+                                            createCandidate(c, xteBefore, xte, tBefore, t, w,
+                                                    /* still portMark in case of single-mark waypoint */ Util.size(w.getMarks()) < 2));
                                 }
                             }
                         }
@@ -1333,21 +1334,41 @@ public class CandidateFinderImpl implements CandidateFinder {
                         after.getBearingGreatCircle(starboardPosition));
                 result.add(new Util.Pair<Position, Bearing>(starboardPosition, crossingStarboard));
             }
-        } else {
+        } else { // single mark
             Bearing b = null;
-            Position p;
+            Position p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
             if (instruction == PassingInstruction.FixedBearing) {
                 b = w.getFixedBearing();
             } else {
-                // TODO If the first of last waypoint is not a gate or line, this will lead to issues
-                Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
-                Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
-                if (before != null && after != null) {
-                    b = before.middle(after.reverse());
+                // If the first of last waypoint is a single mark, check the passing instructions and create a "beam"
+                // emerging orthogonal to the adjacent leg's direction from the mark to the side indicated by the
+                // passing instructions. If no passing instructions are given, construct two lines, one to each direction
+                // orthogonally to the adjacent leg:
+                if (w == race.getRace().getCourse().getFirstWaypoint()) {
+                    if (instruction == PassingInstruction.None || instruction == PassingInstruction.Single_Unknown) {
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(90));
+                        result.add(new Pair<>(p, b));
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(270));
+                    } else {
+                        b = race.getTrackedLegStartingAt(w).getLegBearing(t).add(new DegreeBearingImpl(instruction == PassingInstruction.Port ? 90 : 270));
+                    }
+                } else if (w == race.getRace().getCourse().getLastWaypoint()) {
+                    if (instruction == PassingInstruction.None || instruction == PassingInstruction.Single_Unknown) {
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(90));
+                        result.add(new Pair<>(p, b));
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(270));
+                    } else {
+                        b = race.getTrackedLegFinishingAt(w).getLegBearing(t).add(new DegreeBearingImpl(instruction == PassingInstruction.Port ? 90 : 270));
+                    }
+                } else {
+                    Bearing before = race.getTrackedLegFinishingAt(w).getLegBearing(t);
+                    Bearing after = race.getTrackedLegStartingAt(w).getLegBearing(t);
+                    if (before != null && after != null) {
+                        b = before.middle(after.reverse());
+                    }
                 }
             }
-            p = race.getOrCreateTrack(w.getMarks().iterator().next()).getEstimatedPosition(t, false);
-            result.add(new Util.Pair<Position, Bearing>(p, b));
+            result.add(new Pair<>(p, b));
         }
         return result;
     }

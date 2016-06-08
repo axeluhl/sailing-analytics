@@ -15,13 +15,14 @@ public enum GwtUrlHelper implements UrlHelper {
     INSTANCE;
     
     @Override
-    public String encodeUrl(String decodedUrlString) {
-        return URL.encode(decodedUrlString);
-    }
-
-    @Override
     public String encodeQueryString(String queryString) {
-        return URL.encodeQueryString(queryString);
+        // TODO See bug3664 => https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=3664
+        // Because of changes in the query string encoding, the Sail InSight-App for iOS will now have problems
+        // while parsing the registration URLs, which are sent to invited competitors, if e.g. the leaderboard name
+        // contains whitespaces. To avoid this problems, we use this temporary fix until a new version of the Sail
+        // InSight-App for iOS is rolled out. Afterwards this fix must be replaced by the line below.
+        return URL.encodePathSegment(queryString);
+        // return URL.encodeQueryString(queryString);
     }
 
 }

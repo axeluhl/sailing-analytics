@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -109,8 +110,8 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     private final RaceLogResolver raceLogResolver;
     private final Map<AbstractLog<?, ?>, Object> visitors = new HashMap<AbstractLog<?, ?>, Object>();
 
-    private final ConcurrentHashMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Competitor, List<DeviceMapping<Competitor>>> competitorMappings = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Mark, List<DeviceMapping<Mark>>> markMappings = new ConcurrentHashMap<>();
 
     private final Map<DeviceIdentifier, List<DeviceMapping<Mark>>> markMappingsByDevices = new HashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMapping<Competitor>>> competitorMappingsByDevices = new HashMap<>();
@@ -153,13 +154,13 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
                     
                     @Override
                     public void visit(RaceLogStartTimeEvent event) {
-                        trackedRace.updateStartAndEndOfTracking();
+                        trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
                     }
                     
                     @Override
                     public void visit(RaceLogRaceStatusEvent event) {
                         if (event.getNextStatus().equals(RaceLogRaceStatus.FINISHED)){
-                            trackedRace.updateStartAndEndOfTracking();
+                            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
                         }
                     }
                 };
@@ -304,7 +305,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
 
     /**
      * Adjusts the contents of {@link #markMappings} according to the device mappings for marks found in the regatta
-     * log. Afterwards, the start end end of tracking is {@link #updateStartAndEndOfTracking() updated}.
+     * log. Afterwards, the start end end of tracking is {@link #updateStartAndEndOfTracking(boolean) updated}.
      * 
      * @param loadIfNotCovered
      *            If <code>true</code>, for additional time ranges added compared to the previous contents of
@@ -380,7 +381,7 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     /**
      * Adjusts the {@link #competitorMappings} map according to the competitor registrations for the race managed by
      * this tracked, either from the regatta log or the race log. Then, the {@link TrackedRace}'s start and end of
-     * tracking time frame is {@link #updateStartAndEndOfTracking() updated} from the mapping intervals.
+     * tracking time frame is {@link #updateStartAndEndOfTracking(boolean) updated} from the mapping intervals.
      * 
      * @param loadIfNotCovered
      *            if <code>true</code>, the GPS fixes for the mappings will be loaded based on a comparison of the
@@ -424,13 +425,13 @@ public class RaceLogRaceTracker implements RaceTracker, GPSFixReceivedListener {
     
     private void onStartOfTrackingEvent(RaceLogStartOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.updateStartAndEndOfTracking();
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         }
     }
     
     private void onEndOfTrackingEvent(RaceLogEndOfTrackingEvent event) {
         if (trackedRace != null) {
-            trackedRace.updateStartAndEndOfTracking();
+            trackedRace.updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         }
     }
 
