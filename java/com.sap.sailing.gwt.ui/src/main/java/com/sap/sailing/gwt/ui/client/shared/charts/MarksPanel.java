@@ -163,4 +163,14 @@ public class MarksPanel extends SimplePanel implements Component<AbstractSetting
     public void select(MarkDTO mark) {
         markTable.getSelectionModel().setSelected(mark, true);
     }
+    
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

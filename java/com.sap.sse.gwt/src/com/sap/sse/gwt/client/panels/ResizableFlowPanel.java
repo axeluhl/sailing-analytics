@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.raceboard;
+package com.sap.sse.gwt.client.panels;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.WidgetCollection;
  * {@link #getChildren() children} also implementing {@link RequiresResize} are informed by calling their
  * {@link RequiresResize#onResize()} method.
  */
-class ResizableFlowPanel extends FlowPanel implements RequiresResize {
+public class ResizableFlowPanel extends FlowPanel implements RequiresResize {
     @Override
     public void onResize() {
         WidgetCollection children = getChildren();

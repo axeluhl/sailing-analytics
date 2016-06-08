@@ -235,6 +235,7 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
 
     @Override
     public void updateSettings(Settings newSettings) {
+        // no-op
     }
 
     @Override
@@ -242,4 +243,8 @@ public class PolarBackendResultsPresenter extends AbstractResultsPresenter<Setti
         return "polarResultsPresenter";
     }
 
+    @Override
+    public Settings getSettings() {
+        return null;
+    }
 }
