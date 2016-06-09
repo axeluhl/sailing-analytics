@@ -114,7 +114,7 @@ class MediaLibrary {
         addMediaTracks(Collections.singleton(mediaTrack));
     }
 
-    void addMediaTracks(Collection<MediaTrack> mediaTracks) {
+    void addMediaTracks(Iterable<MediaTrack> mediaTracks) {
         LockUtil.lockForWrite(lock);
         try {
             for (MediaTrack mediaTrack : mediaTracks) {
@@ -226,16 +226,15 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Add(MediaTrack mediaTrack) {
+        assert lock.isWriteLocked();
         if (mediaTrack.assignedRaces != null) {
             for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
-                if (mediaTracksByRace.containsKey(assignedRace)) {
-                    mediaTracksByRace.get(assignedRace).add(mediaTrack);
-                } else {
-                    Set<MediaTrack> mediaTracks = new HashSet<MediaTrack>();
-                    mediaTracks.add(mediaTrack);
+                Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
+                if (mediaTracks == null) {
+                    mediaTracks = new HashSet<MediaTrack>();
                     mediaTracksByRace.put(assignedRace, mediaTracks);
                 }
-
+                mediaTracks.add(mediaTrack);
             }
         }
     }
@@ -244,7 +243,7 @@ class MediaLibrary {
      * To be called only under write lock!
      */
     private void updateMapByRace_Remove(MediaTrack mediaTrack) {
-
+        assert lock.isWriteLocked();
         for (RegattaAndRaceIdentifier assignedRace : mediaTrack.assignedRaces) {
             Set<MediaTrack> mediaTracks = mediaTracksByRace.get(assignedRace);
             if (mediaTracks != null) {

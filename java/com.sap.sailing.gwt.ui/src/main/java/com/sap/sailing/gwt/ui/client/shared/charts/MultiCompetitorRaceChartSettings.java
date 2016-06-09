@@ -6,9 +6,9 @@ public class MultiCompetitorRaceChartSettings extends ChartSettings {
     private final DetailType firstDetailType;
     private final DetailType secondDetailType;
 
-    public MultiCompetitorRaceChartSettings(ChartSettings superResult, DetailType firstDetailType,
+    public MultiCompetitorRaceChartSettings(ChartSettings settings, DetailType firstDetailType,
             DetailType secondDetailType) {
-        super(superResult);
+        super(settings);
         this.firstDetailType = firstDetailType;
         this.secondDetailType = secondDetailType;
     }

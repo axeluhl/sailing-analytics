@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
@@ -53,7 +53,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     /**
      * FIXME make sure listeners and replication interact correctly
      */
-    private transient ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners;
+    private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
     private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
 
@@ -182,7 +182,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return polynomialFunction;
     }
 
-    public void setListeners(ConcurrentHashMap<BoatClass, Set<PolarsChangedListener>> listeners) {
+    public void setListeners(ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners) {
         this.listeners = listeners;
     }
 

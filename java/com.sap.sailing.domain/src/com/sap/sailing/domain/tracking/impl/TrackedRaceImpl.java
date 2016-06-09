@@ -25,6 +25,7 @@ import java.util.TimerTask;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -183,7 +184,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * By default, all wind sources are used, none are excluded. However, e.g., for performance reasons, particular wind
      * sources such as the track-based estimation wind source, may be excluded by adding them to this set.
      */
-    private final ConcurrentHashMap<WindSource, TrackedRaceImpl> windSourcesToExclude;
+    private final ConcurrentMap<WindSource, TrackedRaceImpl> windSourcesToExclude;
 
     /**
      * Keeps the oldest timestamp that is fed into this tracked race, either from a boat fix, a mark fix, a race
@@ -291,12 +292,12 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private transient SmartFutureCache<Competitor, com.sap.sse.common.Util.Triple<TimePoint, TimePoint, List<Maneuver>>, EmptyUpdateInterval> maneuverCache;
     
-    private transient ConcurrentHashMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
+    private transient ConcurrentMap<TimePoint, Future<Wind>> directionFromStartToNextMarkCache;
 
     protected transient MarkPassingCalculator markPassingCalculator;
     private final boolean hasMarkPassingCalculator;
     
-    private final ConcurrentHashMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
+    private final ConcurrentMap<Mark, GPSFixTrack<Mark, GPSFix>> markTracks;
 
     private final Map<Pair<Competitor, String>, DynamicTrack<?>> sensorTracks;
     
@@ -323,7 +324,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Keys are the {@link RaceLog#getId() IDs} of the race logs that are stored as values.
      */
-    protected transient ConcurrentHashMap<Serializable, RaceLog> attachedRaceLogs;
+    protected transient ConcurrentMap<Serializable, RaceLog> attachedRaceLogs;
     
     /**
      * Holds optional race states for the race logs in {@link #attachedRaceLogs}. By using a {@link WeakHashMap},
@@ -335,9 +336,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     /**
      * Keys are the {@link RegattaLog#getId() IDs} of the regatta logs that are stored as values.
      */
-    protected transient ConcurrentHashMap<Serializable, RegattaLog> attachedRegattaLogs;
+    protected transient ConcurrentMap<Serializable, RegattaLog> attachedRegattaLogs;
     
-    private transient ConcurrentHashMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProviders;
+    private transient ConcurrentMap<RaceExecutionOrderProvider, RaceExecutionOrderProvider> attachedRaceExecutionOrderProviders;
 
     /**
      * The time delay to the current point in time in milliseconds.
@@ -366,7 +367,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      */
     private final NamedReentrantReadWriteLock loadingFromGPSFixStoreLock;
 
-    private final ConcurrentHashMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock> locksForMarkPassings;
+    private final ConcurrentMap<IdentityWrapper<Iterable<MarkPassing>>, NamedReentrantReadWriteLock> locksForMarkPassings;
     
     /**
      * Caches wind requests for a few seconds to accelerate access in live mode

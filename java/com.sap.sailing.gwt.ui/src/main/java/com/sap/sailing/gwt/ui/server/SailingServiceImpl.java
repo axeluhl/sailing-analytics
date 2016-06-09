@@ -2445,7 +2445,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     raceIdentifier = new RegattaNameAndRaceName(trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName());
                     raceDTO = baseDomainFactory.createRaceDTO(getService(), withGeoLocationData, raceIdentifier, trackedRace);
                     if(withStatisticalData) {
-                        Collection<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
+                        Iterable<MediaTrack> mediaTracksForRace = getService().getMediaTracksForRace(raceIdentifier);
                         raceDTO.trackedRaceStatistics = baseDomainFactory.createTrackedRaceStatisticsDTO(trackedRace, leaderboard, raceColumn, fleet, mediaTracksForRace); 
                     }
                 }    

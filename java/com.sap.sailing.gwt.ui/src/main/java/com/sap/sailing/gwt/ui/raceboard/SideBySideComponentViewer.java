@@ -31,7 +31,6 @@ import com.sap.sailing.gwt.ui.raceboard.TouchSplitLayoutPanel.Splitter;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.shared.components.Component;
-import com.sap.sse.gwt.client.shared.components.ComponentViewer;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -43,7 +42,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * TODO: Refactor to make sure it is really only performing operations that are related to view. Currently it is digging
  * too deep into components and setting titles or even creating video buttons.
  */
-public class SideBySideComponentViewer implements ComponentViewer, UserStatusEventHandler {
+public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
@@ -168,8 +167,8 @@ public class SideBySideComponentViewer implements ComponentViewer, UserStatusEve
         List<Pair<Button, String>> additionalVerticalButtons = new ArrayList<Pair<Button, String>>();
         additionalVerticalButtons.add(new Pair<Button, String>(mediaSelectionButton,
                 mediaPlayerManagerComponent.getDependentCssClassName()));
-        additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
-                "managemedia"));
+            additionalVerticalButtons.add(new Pair<Button, String>(mediaManagementButton,
+                    "managemedia"));
         onUserStatusChange(userService.getCurrentUser());
         // ensure that toggle buttons are positioned right
         splitLayoutPanel.lastComponentHasBeenAdded(this, panelForMapAndHorizontalToggleButtons,

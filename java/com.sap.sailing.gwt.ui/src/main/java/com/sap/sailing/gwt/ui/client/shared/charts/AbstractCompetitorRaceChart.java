@@ -74,9 +74,11 @@ import com.sap.sse.gwt.client.shared.components.Component;
  * @author Benjamin Ebling (D056866), Axel Uhl (d043530)
  * 
  */
-public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart implements
+public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSettings> extends AbstractRaceChart<SettingsType> implements
         CompetitorSelectionChangeListener, RequiresResize {
     public static final String LOAD_COMPETITOR_CHART_DATA_CATEGORY = "loadCompetitorChartData";
+    
+    public static final long DEFAULT_STEPSIZE = 5000;
     
     private static final int LINE_WIDTH = 1;
     
@@ -90,7 +92,7 @@ public abstract class AbstractCompetitorRaceChart<SettingsType extends ChartSett
     private final boolean allowTimeAdjust;
     private final String leaderboardGroupName;
     private final String leaderboardName;
-    private long stepSize = 5000;
+    private long stepSize = DEFAULT_STEPSIZE;
     private final Map<Pair<CompetitorDTO, DetailType>, Series> dataSeriesForDetailTypeAndCompetitor = new HashMap<>();
     private final Map<Pair<CompetitorDTO, DetailType>, Series> markPassingSeriesByCompetitor = new HashMap<>();
     private Long timeOfEarliestRequestInMillis;
