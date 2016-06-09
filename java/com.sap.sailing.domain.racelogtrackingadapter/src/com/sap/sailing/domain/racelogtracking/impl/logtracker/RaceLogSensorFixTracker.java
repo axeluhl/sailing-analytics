@@ -45,6 +45,11 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     private static final Logger logger = Logger.getLogger(RaceLogSensorFixTracker.class.getName());
+    
+    public interface Owner {
+        void stopped(RaceLogSensorFixTracker tracker);
+    }
+    
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
     private final RaceLogMappingWrapper<WithID> competitorMappings;
@@ -134,12 +139,19 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
         }
     };
     private final SensorFixMapperFactory sensorFixMapperFactory;
+    private final Owner owner;
 
     public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
+        this(trackedRace, sensorFixStore, sensorFixMapperFactory, tracker -> {});
+    }
+    
+    public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
+            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory, Owner owner) {
         super(trackedRace,
                 "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName());
         this.sensorFixStore = sensorFixStore;
+        this.owner = owner;
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.competitorMappings = new RaceLogMappingWrapper<WithID>() {
@@ -255,5 +267,6 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     protected void stopTracking() {
         super.stopTracking();
         sensorFixStore.removeListener(listener);
+        owner.stopped(this);
     }
 }

@@ -52,9 +52,13 @@ public class RegattaLogSensorDataTracker {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
             RaceLogSensorFixTracker dataTracker = new RaceLogSensorFixTracker((DynamicTrackedRace) trackedRace,
-                    sensorFixStore, sensorFixMapperFactory);
+                    sensorFixStore, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
             dataTrackers.put(raceIdentifier, dataTracker);
         }
+    }
+
+    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogSensorFixTracker tracker) {
+        dataTrackers.remove(raceIdentifier, tracker);
     }
 
     public synchronized void stop() {
@@ -68,7 +72,7 @@ public class RegattaLogSensorDataTracker {
         RaceLogSensorFixTracker currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
             currentActiveDataTracker.stop();
-            dataTrackers.remove(currentActiveDataTracker);
+            trackerStopped(raceIdentifier, currentActiveDataTracker);
         }
     }
 
