@@ -15,19 +15,23 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.shared.components.Component;
+import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
 public class LeaderboardUrlConfigurationDialog extends SettingsDialog<LeaderboardUrlSettings> {
-
     public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
         super(new ProxyLeaderboardUrlComponent(stringMessages, leaderboard), stringMessages, /* animationEnabled */ false);
     }
 
-    private static class ProxyLeaderboardUrlComponent implements Component<LeaderboardUrlSettings> {
+    public LeaderboardUrlConfigurationDialog(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard, DialogCallback<LeaderboardUrlSettings> callback) {
+        super(new ProxyLeaderboardUrlComponent(stringMessages, leaderboard), stringMessages, callback);
+    }
+    
+    private static class ProxyLeaderboardUrlComponent extends AbstractComponent<LeaderboardUrlSettings> {
         private final StringMessages stringMessages;
         private final LeaderboardUrlConfigurationDialogComponent settingsDialogComponent;
+        private LeaderboardUrlSettings settings;
         
         public ProxyLeaderboardUrlComponent(StringMessages stringMessages, AbstractLeaderboardDTO leaderboard) {
             this.stringMessages = stringMessages;
@@ -46,7 +50,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
 
         @Override
         public void updateSettings(LeaderboardUrlSettings newSettings) {
-            // no-op; the resulting URL has already been updated to the anchor in the dialog
+            this.settings = newSettings;
         }
 
         @Override
@@ -74,6 +78,11 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         public String getDependentCssClassName() {
             return "leaderboardUrlConfigurationDialog";
         }
+
+        @Override
+        public LeaderboardUrlSettings getSettings() {
+            return settings;
+        }
     }
     
     private static class LeaderboardUrlConfigurationDialogComponent implements SettingsDialogComponent<LeaderboardUrlSettings> {
@@ -93,7 +102,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
         private final String leaderboardDisplayName;
         
         private final LeaderboardType leaderboardType; 
-
+        
         public LeaderboardUrlConfigurationDialogComponent(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages) {
             this.stringMessages = stringMessages;
             this.leaderboardType = leaderboard.type;
@@ -107,13 +116,7 @@ public class LeaderboardUrlConfigurationDialog extends SettingsDialog<Leaderboar
             LeaderboardSettings settings = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(
                     namesOfRaceColumnsToShow, /* namesOfRacesToShow */null, /* nameOfRaceToSort */null, /* autoExpandPreSelectedRace */
                     false, /* showRegattaRank */ true, /* showCompetitorSailIdColumn */ true, /* showCompetitorFullNameColumn */ true);
-            leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings.getManeuverDetailsToShow(),
-                settings.getLegDetailsToShow(), settings.getRaceDetailsToShow(), settings.getOverallDetailsToShow(), raceList, 
-                /* select all races by default */ raceList, new ExplicitRaceColumnSelection(),
-                /* autoExpandPreSelectedRace */ false, settings.isShowAddedScores(),
-                /* delayBetweenAutoAdvancesInMilliseconds */ 3000l, settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
-                settings.isShowCompetitorSailIdColumn(), settings.isShowCompetitorFullNameColumn(),
-                stringMessages);
+            leaderboardSettingsDialogComponent = new LeaderboardSettingsDialogComponent(settings, raceList, stringMessages);
         }
 
         private void updateURL(LeaderboardUrlSettings settings, String leaderboardName, String leaderboardDisplayName) {

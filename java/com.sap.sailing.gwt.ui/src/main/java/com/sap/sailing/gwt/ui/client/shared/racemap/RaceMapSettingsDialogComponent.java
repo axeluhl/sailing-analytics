@@ -48,15 +48,16 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private DoubleBox buoyZoneRadiusBox;
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
-    private boolean showViewSimulation;
+    
+    private boolean isSimulationEnabled;
     
     private final StringMessages stringMessages;
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
     
-    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean showViewSimulation) {
-        this.showViewSimulation = showViewSimulation;
+    public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
+        this.isSimulationEnabled = isSimulationEnabled;
         this.stringMessages = stringMessages;
         initialSettings = settings;
     }
@@ -89,7 +90,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
             }
         });
         
-        if (showViewSimulation) {
+        if (isSimulationEnabled) {
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
@@ -267,7 +268,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         result.setShowOnlySelectedCompetitors(showOnlySelectedCompetitorsCheckBox.getValue());
         result.setShowWindStreamletOverlay(showWindStreamletOverlayCheckbox.getValue());
         result.setShowWindStreamletColors(showWindStreamletColorsCheckbox.getValue());
-        if (showViewSimulation) {
+        result.setShowMapControls(initialSettings.isShowMapControls());
+        if (isSimulationEnabled) {
             result.setShowSimulationOverlay(showSimulationOverlayCheckbox.getValue());
         } else {
             result.setShowSimulationOverlay(false);            

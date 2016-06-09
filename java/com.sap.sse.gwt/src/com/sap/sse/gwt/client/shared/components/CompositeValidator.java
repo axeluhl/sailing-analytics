@@ -1,28 +1,29 @@
 package com.sap.sse.gwt.client.shared.components;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
-import com.sap.sse.gwt.client.shared.components.CompositeSettings.ComponentAndSettingsPair;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent.ComponentAndDialogComponent;
 
 public class CompositeValidator implements Validator<CompositeSettings> {
     
-    private final Map<Component<?>, Validator<?>> validatorsMappedByComponent;
+    private final Map<Serializable, Validator<?>> validatorsMappedByComponent;
 
     public CompositeValidator(Iterable<ComponentAndDialogComponent<?>> componentsAndDialogComponents) {
         validatorsMappedByComponent = new HashMap<>();
         for (ComponentAndDialogComponent<?> component : componentsAndDialogComponents) {
-            validatorsMappedByComponent.put(component.getA(), component.getB().getValidator());
+            validatorsMappedByComponent.put(component.getA().getId(), component.getB().getValidator());
         }
     }
 
     @Override
     public String getErrorMessage(CompositeSettings valueToValidate) {
-        StringBuilder result = new StringBuilder();
-        for (ComponentAndSettingsPair<?> componentAndSettings : valueToValidate.getSettingsPerComponent()) {
+        final StringBuilder result = new StringBuilder();
+        for (Entry<Serializable, Settings> componentAndSettings : valueToValidate.getSettingsPerComponentId().entrySet()) {
             final String errorMessage = getErrorMessage(componentAndSettings);
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 result.append(errorMessage);
@@ -31,12 +32,12 @@ public class CompositeValidator implements Validator<CompositeSettings> {
         return result.toString();
     }
 
-    private <SettingsType extends Settings> String getErrorMessage(ComponentAndSettingsPair<SettingsType> componentAndSettings) {
+    private <SettingsType extends Settings> String getErrorMessage(Entry<Serializable, SettingsType> componentIdAndSettings) {
         String errorMessage = null;
         @SuppressWarnings("unchecked")
-        Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentAndSettings.getA());
+        final Validator<SettingsType> validator = (Validator<SettingsType>) validatorsMappedByComponent.get(componentIdAndSettings.getKey());
         if (validator != null) {
-            errorMessage = validator.getErrorMessage(componentAndSettings.getB());
+            errorMessage = validator.getErrorMessage(componentIdAndSettings.getValue());
             if (errorMessage != null && !errorMessage.isEmpty() && !getClass().equals(validator.getClass())) {
                 errorMessage += "; ";
             }

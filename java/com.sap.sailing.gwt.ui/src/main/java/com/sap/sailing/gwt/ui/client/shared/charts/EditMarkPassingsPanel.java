@@ -453,4 +453,14 @@ public class EditMarkPassingsPanel extends AbsolutePanel implements Component<Ab
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
     }
+
+    @Override
+    public AbstractSettings getSettings() {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

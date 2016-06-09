@@ -15,6 +15,7 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -47,18 +48,18 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     @Test
     public void testBasicInitialLoad() throws Exception {
         assertNotSame(master, replica);
-        assertEquals(master.getAllMediaTracks().size(), replica.getAllMediaTracks().size());
+        assertEquals(Util.size(master.getAllMediaTracks()), Util.size(replica.getAllMediaTracks()));
     }
     
     @Test
     public void testAddMediaTrackReplication() throws InterruptedException {
-        assertThat(master.getAllMediaTracks().size(), is(0));
-        assertThat(replica.getAllMediaTracks().size(), is(0));
+        assertThat(Util.size(master.getAllMediaTracks()), is(0));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(0));
         MediaTrack mediaTrack = createMediaTrack();
         master.mediaTrackAdded(mediaTrack);
-        assertThat(master.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(master.getAllMediaTracks()), is(1));
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().title, is(mediaTrack.title));
         assertThat(replica.getAllMediaTracks().iterator().next().url, is(mediaTrack.url));
         assertThat(replica.getAllMediaTracks().iterator().next().startTime, is(mediaTrack.startTime));
@@ -75,7 +76,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         MediaTrack mediaTrackClone = cloneMediaTrack(mediaTrack);
         master.mediaTrackDeleted(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(0));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(0));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.title = mediaTrack.title + "x";
         master.mediaTrackTitleChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().title, is(mediaTrack.title));
     }
 
@@ -98,7 +99,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.url = mediaTrack.url + "x";
         master.mediaTrackUrlChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().url, is(mediaTrack.url));
     }
 
@@ -110,7 +111,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.startTime = mediaTrack.startTime.plus(1000);
         master.mediaTrackStartTimeChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().startTime, is(mediaTrack.startTime));
     }
 
@@ -122,7 +123,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.duration = mediaTrack.duration.plus(1000);
         master.mediaTrackDurationChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().duration, is(mediaTrack.duration));
     }
     
@@ -134,7 +135,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.assignedRaces.add(new RegattaNameAndRaceName("505", "R1"));
         master.mediaTrackAssignedRacesChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces.size(), is(2));
         assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces, is(mediaTrack.assignedRaces));
     }
@@ -147,7 +148,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         mediaTrackClone.assignedRaces.remove(new RegattaNameAndRaceName("49er", "R1"));
         master.mediaTrackAssignedRacesChanged(mediaTrackClone);
         waitSomeTime();
-        assertThat(replica.getAllMediaTracks().size(), is(1));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(1));
         assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces.size(), is(0));
         assertThat(replica.getAllMediaTracks().iterator().next().assignedRaces, is(mediaTrack.assignedRaces));
     }
