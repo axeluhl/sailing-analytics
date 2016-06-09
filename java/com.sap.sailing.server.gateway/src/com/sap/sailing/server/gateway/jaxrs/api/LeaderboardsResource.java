@@ -197,7 +197,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
 
                 final FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
                 jsonEntry.put("fleet", fleetOfCompetitor == null ? "" : fleetOfCompetitor.getName());
-                jsonEntry.put("totalPoints", leaderboardEntry.totalPointsCorrected);
+                jsonEntry.put("totalPoints", leaderboardEntry.totalPoints);
                 jsonEntry.put("uncorrectedTotalPoints", leaderboardEntry.totalPoints);
                 jsonEntry.put("netPoints", leaderboardEntry.netPoints);
                 MaxPointsReason maxPointsReason = leaderboardEntry.reasonForMaxPoints;
