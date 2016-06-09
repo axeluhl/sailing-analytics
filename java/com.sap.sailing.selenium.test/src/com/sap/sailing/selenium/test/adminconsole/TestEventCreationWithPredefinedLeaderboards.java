@@ -25,12 +25,17 @@ public class TestEventCreationWithPredefinedLeaderboards extends AbstractSeleniu
         adminConsolePage = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
     }
     
+    /**
+     * See bug 3693: this test asserts that when specifying leaderboard groups already in the event creation
+     * dialog, those leaderboard groups can be expected to be linked to the event when confirming the
+     * creation operation.
+     */
     @Test
     public void createTestEventLinkingToExistingLeaderboardGroups() {
         LeaderboardGroupConfigurationPanelPO leaderboardGroupsConfigPanel = adminConsolePage.goToLeaderboardGroupConfiguration();
-        leaderboardGroupsConfigPanel.deleteLeaderboardGroup("A");
-        leaderboardGroupsConfigPanel.deleteLeaderboardGroup("B");
-        leaderboardGroupsConfigPanel.deleteLeaderboardGroup("C");
+        leaderboardGroupsConfigPanel.createLeaderboardGroup("A", "A");
+        leaderboardGroupsConfigPanel.createLeaderboardGroup("B", "B");
+        leaderboardGroupsConfigPanel.createLeaderboardGroup("C", "C");
         EventConfigurationPanelPO eventConfigPanel = adminConsolePage.goToEvents();
         eventConfigPanel.createEventWithExistingLeaderboardGroups("My Event", "My Description", "My Venue", getPastDate(3), getFutureDate(3), true, "A", "C");
         EventConfigurationPanelPO eventsPanel = adminConsolePage.goToEvents();
@@ -39,7 +44,5 @@ public class TestEventCreationWithPredefinedLeaderboards extends AbstractSeleniu
         assertTrue(leaderboardGroupsListedInEventsTable.contains("A"));
         assertTrue(leaderboardGroupsListedInEventsTable.contains("C"));
         assertFalse(leaderboardGroupsListedInEventsTable.contains("B"));
-
     }
-
 }
