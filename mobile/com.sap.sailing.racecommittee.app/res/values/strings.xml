@@ -540,5 +540,6 @@
     <string name="race_factor_format" translatable="false">x #.####</string>
     <string name="set_column_factor">Set Factor</string>
     <string name="set_factor_error">There was an error while setting the factor: %s</string>
+    <string name="sync_to_minute">Sync to minute</string>
 
 </resources>

@@ -491,4 +491,9 @@ public abstract class AbstractTrackedRacesListComposite extends SimplePanel impl
     public RefreshableSelectionModel<RaceDTO> getSelectionModel() {
         return refreshableSelectionModel;
     }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
+    }
 }

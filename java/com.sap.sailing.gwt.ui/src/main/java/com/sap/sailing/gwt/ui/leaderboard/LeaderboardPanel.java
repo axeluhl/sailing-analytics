@@ -126,9 +126,8 @@ import com.sap.sse.gwt.client.useragent.UserAgentDetails;
  * @author Axel Uhl (D043530)
  * 
  */
-public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
-        Component<LeaderboardSettings>, IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher,
-        BusyStateProvider, LeaderboardUpdateProvider {
+public class LeaderboardPanel extends SimplePanel implements Component<LeaderboardSettings>, TimeListener, PlayStateListener, DisplayedLeaderboardRowsProvider,
+    IsEmbeddableComponent, CompetitorSelectionChangeListener, LeaderboardFetcher, BusyStateProvider, LeaderboardUpdateProvider {
     public static final String LOAD_LEADERBOARD_DATA_CATEGORY = "loadLeaderboardData";
 
     protected static final NumberFormat scoreFormat = NumberFormat.getFormat("0.##");
@@ -1726,7 +1725,6 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
             final UserAgentDetails userAgent, boolean showRaceDetails, CompetitorFilterPanel competitorSearchTextBox,
             boolean showSelectionCheckbox, RaceTimesInfoProvider optionalRaceTimesInfoProvider,
             boolean autoExpandLastRaceColumn, boolean adjustTimerDelay, boolean autoApplyTopNFilter, boolean showCompetitorFilterStatus) {
-        this.setTitle(stringMessages.leaderboard());
         this.showSelectionCheckbox = showSelectionCheckbox;
         this.showRaceDetails = showRaceDetails;
         this.sailingService = sailingService;
@@ -1748,6 +1746,7 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         this.showCompetitorFilterStatus = showCompetitorFilterStatus;
         overallDetailColumnMap = createOverallDetailColumnMap();
         settingsUpdatedExplicitly = !settings.isUpdateUponPlayStateChange();
+        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
         this.leaderboardUpdateListener = new ArrayList<LeaderboardUpdateListener>();
         if (settings.getLegDetailsToShow() != null) {
             selectedLegDetails.addAll(settings.getLegDetailsToShow());
@@ -1827,10 +1826,8 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         setShowCompetitorSailId(settings.isShowCompetitorSailIdColumn());
         setShowCompetitorFullName(settings.isShowCompetitorFullNameColumn());
         setShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(settings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor());
-        if (timer.isInitialized()) {
-            loadCompleteLeaderboard(getLeaderboardDisplayDate());
-        }
 
+        SimplePanel mainPanel = new SimplePanel();
         contentPanel = new VerticalPanel();
         leaderboardTable.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.setStyleName(STYLE_LEADERBOARD_CONTENT);
@@ -1862,8 +1859,13 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
         if (showCompetitorFilterStatus) {
             contentPanel.add(createFilterDeselectionControl());
         }
-        setWidget(contentPanel);
-        raceNameForDefaultSorting = settings.getNameOfRaceToSort();
+        setWidget(mainPanel);
+        mainPanel.setWidget(contentPanel);
+        this.setTitle(stringMessages.leaderboard());
+        if (timer.isInitialized()) {
+            loadCompleteLeaderboard(getLeaderboardDisplayDate());
+        }
+
     }
 
     private Widget createToolbarPanel() {
@@ -3100,14 +3102,26 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
 
     @Override
     public SettingsDialogComponent<LeaderboardSettings> getSettingsDialogComponent() {
-        return new LeaderboardSettingsDialogComponent(Collections.unmodifiableList(selectedManeuverDetails),
-                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
-                Collections.unmodifiableList(selectedOverallDetailColumns), /* All races to select */ leaderboard.getRaceList(),
-                raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard), raceColumnSelection, autoExpandPreSelectedRace,
-                isShowAddedScores(), timer.getRefreshInterval(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
-                isShowCompetitorSailId(), isShowCompetitorFullName(), stringMessages);
+        return new LeaderboardSettingsDialogComponent(getSettings(), leaderboard.getRaceList(), stringMessages);
     }
 
+    @Override 
+    public LeaderboardSettings getSettings() {
+        Iterable<RaceColumnDTO> selectedRaceColumns = raceColumnSelection.getSelectedRaceColumnsOrderedAsInLeaderboard(leaderboard);
+        List<String> namesOfRaceColumnsToShow = new ArrayList<>();
+        for (RaceColumnDTO raceColumn : selectedRaceColumns) {
+            namesOfRaceColumnsToShow.add(raceColumn.getName());
+        }
+        return new LeaderboardSettings(Collections.unmodifiableList(selectedManeuverDetails),
+                Collections.unmodifiableList(selectedLegDetails), Collections.unmodifiableList(selectedRaceDetails),
+                Collections.unmodifiableList(selectedOverallDetailColumns), namesOfRaceColumnsToShow, /*namesOfRacesToShow*/ null,
+                raceColumnSelection.getNumberOfLastRaceColumnsToShow(), 
+                autoExpandPreSelectedRace, timer.getRefreshInterval(), /* nameOfRaceToSort*/ null,
+                /*sortAscending*/ true, /*updateUponPlayStateChange*/ true, raceColumnSelection.getType(),
+                isShowAddedScores(), isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(), 
+                isShowCompetitorSailId(), isShowCompetitorFullName());
+    }
+    
     @Override
     public String getLocalizedShortName() {
         return stringMessages.leaderboard();
@@ -3292,5 +3306,10 @@ public class LeaderboardPanel extends SimplePanel implements TimeListener, PlayS
                 listener.onBusyStateChange(isBusy);
             }
         }
+    }
+
+    @Override
+    public String getId() {
+        return getLocalizedShortName();
     }
 }
