@@ -1,5 +1,6 @@
 package com.sap.sailing.selenium.pages;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,6 +21,7 @@ import com.google.common.base.Predicate;
 import com.sap.sailing.selenium.core.AjaxCallsComplete;
 import com.sap.sailing.selenium.core.AjaxCallsExecuted;
 import com.sap.sailing.selenium.core.BySeleniumId;
+import com.sap.sailing.selenium.core.ElementSearchConditions;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.core.FindBys;
 import com.sap.sailing.selenium.core.SeleniumElementLocatorFactory;
@@ -51,6 +54,12 @@ public class PageObject {
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
+    
+    private static final MessageFormat TAB_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-TabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
+    
+    private static final MessageFormat VERTICAL_TAB_EXPRESSION = new MessageFormat(
+            ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
     /**
      * </p>The default timeout of 5 seconds for the lookup of other elements.</p>
@@ -442,4 +451,21 @@ public class PageObject {
         T get(WebDriver driver, WebElement element);
     }
     
+    protected WebElement goToTab(WebElement tabPanel, String tabName, final String id, boolean isVertical) {
+        final String expression;
+        if (isVertical) {
+            expression = VERTICAL_TAB_EXPRESSION.format(new Object[] {tabName});
+        } else {
+            expression = TAB_EXPRESSION.format(new Object[] {tabName});
+        }
+        WebElement tab = tabPanel.findElement(By.xpath(expression));
+        WebDriverWait waitForTab = new WebDriverWait(driver, 20); // here, wait time is 20 seconds
+        waitForTab.until(ExpectedConditions.visibilityOf(tab)); // this will wait for tab to be visible for 20 seconds
+        tab.click();
+        // Wait for the tab to become visible due to the used animations.
+        FluentWait<WebElement> wait = createFluentWait(tabPanel);
+        WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
+        return content;
+    }
 }

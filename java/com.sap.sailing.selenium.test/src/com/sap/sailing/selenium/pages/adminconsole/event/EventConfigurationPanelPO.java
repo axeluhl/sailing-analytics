@@ -72,6 +72,19 @@ public class EventConfigurationPanelPO extends PageArea {
         getPO(ConfirmDialogPO::new, ID_LINK_LEADERBORAD_TO_GROUP_DIALOG).pressOk();
     }
     
+    public void createEventWithExistingLeaderboardGroups(String eventName, String eventDesc, String venue,
+            Date eventStartDate, Date eventEndDate, boolean isPublic, String... leaderboardGroupNames) {
+        createEventButton.click();
+        EventCreateDialogPO createDialog = getPO(EventCreateDialogPO::new, ID_EVENT_CREATE_DIALOG);
+        createDialog.setValues(eventName, eventDesc, venue, eventStartDate, eventEndDate, isPublic);
+        WebElement leaderboardGroupsTab = createDialog.goToLeaderboardGroupsTab();
+        for (final String leaderboardGroupName : leaderboardGroupNames) {
+            createDialog.addLeaderboardGroup(leaderboardGroupsTab, leaderboardGroupName);
+        }
+        createDialog.pressOk();
+        getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG).pressNo();
+    }
+    
     public EventEntryPO getEventEntry(String event) {
         return getEventsTable().getEntry(event);
     }
