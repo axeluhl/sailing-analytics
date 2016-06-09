@@ -77,7 +77,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        trackedRace.waitForLoadingToFinish();
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 1);
         testNumberOfRawFixes(trackedRace.getOrCreateTrack(mark), 1);
@@ -131,7 +131,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
         
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
-        trackedRace.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        trackedRace.waitForLoadingToFinish();
 
         testNumberOfRawFixes(trackedRace.getTrack(comp), 10002);
         testNumberOfRawFixes(trackedRace.getTrack(comp2), 1);

@@ -685,9 +685,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * Whenever a {@link RegattaLog} is attached, fixes are loaded from the {@link GPSFixStore} for all mappings
      * found in the {@code RegattaLog} in a separate thread. This method blocks if there is such a thread loading
      * fixes, until that thread is finished.
-     * @param fromRegattaLog Make sure that the fixes defined by the mappings in this regattalog were loaded.
      */
-    void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException;
+    void waitForLoadingToFinish() throws InterruptedException;
     
     TrackedRaceStatus getStatus();
 

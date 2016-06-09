@@ -189,11 +189,11 @@ public class CreateAndTrackWithRaceLogTest {
         
         new RaceLogSensorFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, 0, comp1, dev1, t(11), t(20)));
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         // add another mapping on the fly, other old fixes should be loaded
         addFixes2(race, comp1, dev1);
 
@@ -229,13 +229,13 @@ public class CreateAndTrackWithRaceLogTest {
         
         new RaceLogSensorFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
 
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
 
         // add another mapping on the fly, other old fixes should be loaded
         regattaLog.add(new RegattaLogDeviceCompetitorMappingEventImpl(t(), t(), author, UUID.randomUUID(), comp1, dev1,
                 t(11), t(20)));
-        race.waitForLoadingFromGPSFixStoreToFinishRunning(regattaLog);
+        race.waitForLoadingToFinish();
         addFixes2(race, comp1, dev1);
 
         // stop tracking, then no more fixes arrive at race

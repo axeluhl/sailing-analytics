@@ -23,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -247,7 +246,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     }
     
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    public void waitForLoadingToFinish() throws InterruptedException {
         synchronized (getStatusNotifier()) {
             while (getStatus().getStatus() == TrackedRaceStatusEnum.PREPARED || getStatus().getStatus() == TrackedRaceStatusEnum.LOADING) {
                 try {

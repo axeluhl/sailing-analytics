@@ -721,7 +721,7 @@ public class MockedTrackedRace implements DynamicTrackedRace {
 
 
     @Override
-    public void waitForLoadingFromGPSFixStoreToFinishRunning(RegattaLog fromRegattaLog) throws InterruptedException {
+    public void waitForLoadingToFinish() throws InterruptedException {
     }
 
     @Override
