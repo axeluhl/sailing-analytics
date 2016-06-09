@@ -34,7 +34,9 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
 import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -67,10 +69,11 @@ public class TopLevelMasterData implements Serializable {
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
             final Map<String, Regatta> regattaForRaceIdString, final Iterable<MediaTrack> allMediaTracks,
-            GPSFixStore gpsFixStore, boolean exportWind, Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
+            SensorFixStore sensorFixStore, boolean exportWind,
+            Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations) {
         this.raceIdStringsForRegatta = convertToRaceIdStringsForRegattaMap(regattaForRaceIdString);
         this.leaderboardGroups = groupsToExport;
-        this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(gpsFixStore);
+        this.raceLogTrackingFixes = getAllRelevantRaceLogTrackingFixes(sensorFixStore);
         if (exportWind) {
             this.windTrackMasterData = fillWindMap(groupsToExport);
         } else {
@@ -82,7 +85,7 @@ public class TopLevelMasterData implements Serializable {
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
     }
 
-    private Map<DeviceIdentifier, Set<GPSFix>> getAllRelevantRaceLogTrackingFixes(GPSFixStore gpsFixStore) {
+    private Map<DeviceIdentifier, Set<GPSFix>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
         Map<DeviceIdentifier, Set<GPSFix>> relevantFixes = new HashMap<>();
         
         //Add fixes for regatta log mappings
@@ -91,7 +94,7 @@ public class TopLevelMasterData implements Serializable {
             try {
                 regattaLog.lockForRead();
                 for (RegattaLogEvent logEvent : regattaLog.getRawFixes()) {
-                    addAllFixesIfMappingEvent(gpsFixStore, relevantFixes, logEvent);
+                    addAllFixesIfMappingEvent(sensorFixStore, relevantFixes, logEvent);
                 }
             } finally {
                 regattaLog.unlockAfterRead();
@@ -106,7 +109,7 @@ public class TopLevelMasterData implements Serializable {
                         try {
                             raceLog.lockForRead();
                             for (RaceLogEvent logEvent : raceLog.getRawFixes()) {
-                                addAllFixesIfMappingEvent(gpsFixStore, relevantFixes, logEvent);
+                                addAllFixesIfMappingEvent(sensorFixStore, relevantFixes, logEvent);
                             }
                         } finally {
                             raceLog.unlockAfterRead();
@@ -118,12 +121,13 @@ public class TopLevelMasterData implements Serializable {
         return relevantFixes;
     }
 
-    private void addAllFixesIfMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
+    private void addAllFixesIfMappingEvent(SensorFixStore sensorFixStore,
+            Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
             AbstractLogEvent<?> logEvent) {
         if (logEvent instanceof RegattaLogDeviceMappingEvent<?>) {
             RegattaLogDeviceMappingEvent<?> mappingEvent = (RegattaLogDeviceMappingEvent<?>) logEvent;
             try {
-                addAllFixesForMappingEvent(gpsFixStore, relevantFixes, mappingEvent);
+                addAllFixesForMappingEvent(sensorFixStore, relevantFixes, mappingEvent);
             } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                 logger.severe("Failed to add fixes to exportdata for mapping Event");
                 e.printStackTrace();
@@ -131,7 +135,8 @@ public class TopLevelMasterData implements Serializable {
         }
     }
 
-    private void addAllFixesForMappingEvent(GPSFixStore gpsFixStore, Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
+    private void addAllFixesForMappingEvent(SensorFixStore sensorFixStore,
+            Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
             RegattaLogDeviceMappingEvent<?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
         DynamicGPSFixTrack<WithID, ?> track;
         if (isMarkMappingEvent(mappingEvent)) {
@@ -140,6 +145,7 @@ public class TopLevelMasterData implements Serializable {
             track = new DynamicGPSFixMovingTrackImpl<WithID>(mappingEvent.getMappedTo(), 1000);
         }
         DeviceIdentifier device = mappingEvent.getDevice();
+        GPSFixStore gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         gpsFixStore.loadTrack(track, new DeviceMappingImpl<WithID>(mappingEvent.getMappedTo(), device,
                 new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo()), mappingEvent.getClass()));
         if (!relevantFixes.containsKey(device)) {

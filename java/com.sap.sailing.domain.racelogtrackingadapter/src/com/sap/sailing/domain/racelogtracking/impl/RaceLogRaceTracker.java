@@ -56,7 +56,6 @@ import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLo
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.RaceNotCreatedException;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
@@ -91,17 +90,15 @@ public class RaceLogRaceTracker implements RaceTracker {
     
     private final RaceLogConnectivityParams params;
     private final WindStore windStore;
-    private final GPSFixStore gpsFixStore;
     private final DynamicTrackedRegatta regatta;
     private final RaceLogResolver raceLogResolver;
 
     private DynamicTrackedRace trackedRace;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            GPSFixStore gpsFixStore, RaceLogResolver raceLogResolver) {
+            RaceLogResolver raceLogResolver) {
         this.params = params;
         this.windStore = windStore;
-        this.gpsFixStore = gpsFixStore;
         this.regatta = regatta;
         this.raceLogResolver = raceLogResolver;
 
@@ -216,11 +213,6 @@ public class RaceLogRaceTracker implements RaceTracker {
     }
 
     @Override
-    public GPSFixStore getGPSFixStore() {
-        return gpsFixStore;
-    }
-
-    @Override
     public Object getID() {
         return params.getRaceLog().getId();
     }
@@ -306,7 +298,7 @@ public class RaceLogRaceTracker implements RaceTracker {
         // set race definition, so race is linked to leaderboard automatically
         regatta.getRegatta().addRace(raceDef);
         raceColumn.setRaceIdentifier(fleet, regatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore, gpsFixStore,
+        trackedRace = regatta.createTrackedRace(raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver);
         logger.info(String.format("Started tracking race-log race (%s)", raceLog));

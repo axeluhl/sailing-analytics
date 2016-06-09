@@ -287,7 +287,7 @@ public class MasterDataImportTest {
         regatta.getRegattaLog().add(mappingEvent);
         GPSFix gpsFix = new GPSFixMovingImpl(new DegreePosition(54.333, 10.133), logTimePoint2,
                 new KnotSpeedWithBearingImpl(10, new DegreeBearingImpl(90)));
-        sourceService.getGPSFixStore().storeFix(deviceIdentifier, gpsFix);
+        sourceService.getSensorFixStore().storeFix(deviceIdentifier, gpsFix);
 
         // Set score correction
         double scoreCorrection = 12.0;
@@ -426,7 +426,7 @@ public class MasterDataImportTest {
         Assert.assertEquals(competitor.getId(), registerEventOnTarget.getCompetitor().getId());
 
         // Check for import of racelogtracking fix
-        Assert.assertTrue(destService.getGPSFixStore().getNumberOfFixes(deviceIdentifier) == 1);
+        Assert.assertTrue(destService.getSensorFixStore().getNumberOfFixes(deviceIdentifier) == 1);
 
         // Check for persisting of race log events:
         RacingEventService dest2 = new RacingEventServiceImplMock();

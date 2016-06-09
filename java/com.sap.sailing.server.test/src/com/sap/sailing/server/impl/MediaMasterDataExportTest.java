@@ -46,7 +46,7 @@ import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sse.common.Duration;
@@ -164,9 +164,10 @@ public class MediaMasterDataExportTest {
         Set<LeaderboardGroup> groupsToExport = Collections.singleton(leaderboardGroup);
         Iterable<Event> allEvents = Collections.emptyList();
         Map<String, Regatta> regattaForRaceIdString = Collections.emptyMap();
-        GPSFixStore gpsFixStore = mock(GPSFixStore.class);
+        SensorFixStore sensorFixStore = mock(SensorFixStore.class);
         boolean exportWind = false;
-        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport , allEvents , regattaForRaceIdString, allMediaTracks , gpsFixStore , exportWind, new HashMap<>());
+        TopLevelMasterData topLevelMasterData = new TopLevelMasterData(groupsToExport, allEvents,
+                regattaForRaceIdString, allMediaTracks, sensorFixStore, exportWind, new HashMap<>());
         return topLevelMasterData;
     }
 

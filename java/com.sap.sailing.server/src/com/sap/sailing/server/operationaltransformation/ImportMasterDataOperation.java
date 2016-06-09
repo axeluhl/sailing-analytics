@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
@@ -49,7 +48,7 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.persistence.MongoRegattaLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.regattalike.IsRegattaLike;
@@ -403,7 +402,7 @@ public class ImportMasterDataOperation extends
     private void importRaceLogTrackingGPSFixes(RacingEventService toState) {
         Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
         if (raceLogTrackingFixes != null) {
-            GPSFixStore store = toState.getGPSFixStore();
+            SensorFixStore store = toState.getSensorFixStore();
             for (Entry<DeviceIdentifier, Set<GPSFix>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
                 for (GPSFix fixToAdd : entry.getValue()) {
@@ -415,7 +414,7 @@ public class ImportMasterDataOperation extends
                             fixToAdd = new GPSFixImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint());
                         } 
                         store.storeFix(device, fixToAdd);
-                    } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                    } catch (NoCorrespondingServiceRegisteredException e) {
                         logger.severe("Failed to store race log tracking fix while importing.");
                         e.printStackTrace();
                     }

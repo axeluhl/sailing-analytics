@@ -247,6 +247,8 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.racelog.RaceStateOfSameDayHelper;
+import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
+import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
@@ -5650,8 +5652,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         for (String uuidAsString : uuids) {
             UUID uuid = UUID.fromString(uuidAsString);
             TrackFileImportDeviceIdentifier device = TrackFileImportDeviceIdentifierImpl.getOrCreate(uuid);
-            long numFixes = getService().getGPSFixStore().getNumberOfFixes(device);
-            TimeRange timeRange = getService().getGPSFixStore().getTimeRangeCoveredByFixes(device);
+            long numFixes = getService().getSensorFixStore().getNumberOfFixes(device);
+            TimeRange timeRange = getService().getSensorFixStore().getTimeRangeCoveredByFixes(device);
             Date from = timeRange == null ? null : timeRange.from().asDate();
             Date to = timeRange == null ? null : timeRange.to().asDate();
             result.add(new TrackFileImportDeviceIdentifierDTO(uuidAsString, device.getFileName(), device.getTrackName(),
@@ -6163,7 +6165,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             final TrackingTimesFinder trackingTimesFinder = new TrackingTimesFinder(raceLog);
                             final Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog> trackingTimes = trackingTimesFinder.analyze();
                             try {
-                                getService().getGPSFixStore().loadMarkTrack(writeableMarkTrack, regattaLog, mark,
+                                GPSFixStore gfs = new GPSFixStoreImpl(getService().getSensorFixStore());
+                                gfs.loadMarkTrack(writeableMarkTrack, regattaLog, mark,
                                         trackingTimes.getA().getTimePoint(), trackingTimes.getB().getTimePoint());
                             } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
                                 logger.info("Error trying to load mark track for mark "+mark+" from "+trackingTimes.getA()+" to "+trackingTimes.getB());

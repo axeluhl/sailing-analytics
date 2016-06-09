@@ -136,8 +136,6 @@ import com.sap.sailing.domain.persistence.racelog.tracking.MongoSensorFixStoreFa
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.racelog.RaceLogIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
-import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.RankingMetric.CompetitorRankingInfo;
@@ -369,7 +367,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     protected final DeviceConfigurationMapImpl configurationMap;
 
     private final WindStore windStore;
-    private final GPSFixStore gpsFixStore;
     private final SensorFixStore sensorFixStore;
 
     /**
@@ -608,12 +605,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-        try {
-            this.gpsFixStore = new GPSFixStoreImpl(this.sensorFixStore);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+
         this.configurationMap = new DeviceConfigurationMapImpl();
         this.serviceFinderFactory = serviceFinderFactory;
 
@@ -1371,10 +1363,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 Regatta regatta = regattaToAddTo == null ? null : getRegatta(regattaToAddTo);
                 if (regatta == null) {
                     // create tracker and use an existing or create a default regatta
-                    tracker = params.createRaceTracker(this, windStore, gpsFixStore, /* raceLogResolver */ this);
+                    tracker = params.createRaceTracker(this, windStore, /* raceLogResolver */ this);
                 } else {
                     // use the regatta selected by the RaceIdentifier regattaToAddTo
-                    tracker = params.createRaceTracker(regatta, this, windStore, gpsFixStore, /* raceLogResolver */ this);
+                    tracker = params.createRaceTracker(regatta, this, windStore, /* raceLogResolver */ this);
                     assert tracker.getRegatta() == regatta;
                 }
                 LockUtil.lockForWrite(raceTrackersByRegattaLock);
@@ -1420,11 +1412,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 if (!existingTrackersWindStore.equals(windStore)) {
                     logger.warning("Wind store mismatch. Requested wind store: " + windStore
                             + ". Wind store in use by existing tracker: " + existingTrackersWindStore);
-                }
-                GPSFixStore existingTrackersGPSFixStore = tracker.getGPSFixStore();
-                if (!existingTrackersGPSFixStore.equals(gpsFixStore)) {
-                    logger.warning("GPSFix store mismatch. Requested GPSFix store: " + gpsFixStore
-                            + ". GPSFix store in use by existing tracker: " + existingTrackersGPSFixStore);
                 }
             }
             if (timeoutInMilliseconds != -1) {
@@ -1512,11 +1499,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public DynamicTrackedRace createTrackedRace(RegattaAndRaceIdentifier raceIdentifier, WindStore windStore,
-            GPSFixStore gpsFixStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
+            long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, boolean useMarkPassingCalculator) {
         DynamicTrackedRegatta trackedRegatta = getOrCreateTrackedRegatta(getRegatta(raceIdentifier));
         RaceDefinition race = getRace(raceIdentifier);
-        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore, gpsFixStore,
+        return trackedRegatta.createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
                 delayToLiveInMillis, millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 /* raceDefinitionSetToUpdate */null, useMarkPassingCalculator, /* raceLogResolver */ this);
     }
@@ -3054,11 +3041,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return result;
     }
 
-    @Override
-    public GPSFixStore getGPSFixStore() {
-        return gpsFixStore;
-    }
-    
     @Override
     public SensorFixStore getSensorFixStore() {
         return sensorFixStore;

@@ -102,7 +102,8 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         for (DeviceMappingWithRegattaLogEvent<Mark> i : mappingsForMark) {
             DeviceIdentifier device = i.getDevice();
             // first ping produces exactly one fix:
-            assertThat("all fixes stored", racingEventService.getGPSFixStore().getNumberOfFixes(device), equalTo(1L));
+            assertThat("all fixes stored", racingEventService.getSensorFixStore().getNumberOfFixes(device),
+                    equalTo(1L));
         }
     }
 }
