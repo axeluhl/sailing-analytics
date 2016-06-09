@@ -6,7 +6,9 @@ import static org.mockito.Mockito.mock;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDefineMarkEventImpl;
@@ -41,6 +43,9 @@ import com.sap.sse.common.impl.TimeRangeImpl;
 
 public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
     private final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
+
+    @Rule
+    public Timeout TrackedRaceLoadsFixesTestTimeout = new Timeout(3 * 60 * 1000);
 
     @Test
     public void doesRaceLoadOnlyBetweenStartAndEndOfTracking() throws TransformationException,

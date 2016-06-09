@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Timeout;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -71,6 +72,9 @@ public class CreateAndTrackWithRaceLogTest {
     private SensorFixStore sensorFixStore;
 
     private long time = 0;
+
+    @Rule
+    public Timeout CreateAndTrackWithRaceLogTestTimeout = new Timeout(3 * 60 * 1000);
 
     @Before
     public void setup() {
