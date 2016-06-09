@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -148,6 +147,7 @@ public class RaceLogRaceTracker implements RaceTracker {
                     public void visit(RegattaLogDefineMarkEvent event) {
                         RaceLogRaceTracker.this.onDefineMarkEvent(event);
                     }
+
                 };
                 visitors.put(log, visitor);
                 ((RegattaLog) log).addListener(visitor);

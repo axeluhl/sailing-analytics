@@ -41,7 +41,6 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.tracking.CourseDesignChangedListener;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
@@ -95,16 +94,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private Map<Competitor, CompetitorResult> competitorResultsFromRaceLog;
 
-    @Deprecated
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            long delayForCacheInvalidationOfWindEstimation, boolean useInternalMarkPassingAlgorithm,
-            RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, delayForCacheInvalidationOfWindEstimation,
-                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
-    }
+
 
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
@@ -170,16 +160,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * the caller cannot assume that all wind tracks have yet been loaded completely. The caller may call {@link #waitUntilLoadingFromWindStoreComplete()}
      * to wait until all persistent wind sources have been successfully and completely loaded.
      */
-    @Deprecated
-    public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
-            WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
-            long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
-            boolean useInternalMarkPassingAlgorithm, RankingMetricConstructor rankingMetricConstructor, RaceLogResolver raceLogResolver) {
-        this(trackedRegatta, race, sidelines, windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
-                millisecondsOverWhichToAverageSpeed, millisecondsOverWhichToAverageWind / 2,
-                useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
-    }
-
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
             long millisecondsOverWhichToAverageSpeed, boolean useInternalMarkPassingAlgorithm,
