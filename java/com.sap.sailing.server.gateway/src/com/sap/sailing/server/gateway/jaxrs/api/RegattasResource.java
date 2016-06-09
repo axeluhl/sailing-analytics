@@ -48,7 +48,7 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sailing.server.gateway.jaxrs.UnitSerializationUtil;
+import com.sap.sailing.server.gateway.jaxrs.RoundingUtil;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.ControlPointJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.coursedata.impl.CourseBaseJsonSerializer;
@@ -288,13 +288,13 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 }
                                 JSONObject jsonFix = new JSONObject();
                                 jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
-                                jsonFix.put("lat-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix
+                                jsonFix.put("lat-deg", RoundingUtil.latLngDecimalFormatter.format(fix
                                         .getPosition().getLatDeg()));
-                                jsonFix.put("lng-deg", UnitSerializationUtil.latLngDecimalFormatter.format(fix
+                                jsonFix.put("lng-deg", RoundingUtil.latLngDecimalFormatter.format(fix
                                         .getPosition().getLngDeg()));
                                 jsonFix.put("truebearing-deg", fix.getSpeed().getBearing().getDegrees());
                                 jsonFix.put("speed-kts",
-                                        UnitSerializationUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
+                                        RoundingUtil.knotsDecimalFormatter.format(fix.getSpeed().getKnots()));
                                 if (withTack != null && withTack) {
                                     String tackName;
                                     try {
@@ -447,9 +447,9 @@ public class RegattasResource extends AbstractSailingServerResource {
         JSONObject jsonFix = new JSONObject();
         jsonFix.put("timepoint-ms", fix.getTimePoint().asMillis());
         jsonFix.put("lat-deg",
-                UnitSerializationUtil.latLngDecimalFormatter.format(fix.getPosition().getLatDeg()));
+                RoundingUtil.latLngDecimalFormatter.format(fix.getPosition().getLatDeg()));
         jsonFix.put("lng-deg",
-                UnitSerializationUtil.latLngDecimalFormatter.format(fix.getPosition().getLngDeg()));
+                RoundingUtil.latLngDecimalFormatter.format(fix.getPosition().getLngDeg()));
         return jsonFix;
     }
 
@@ -617,7 +617,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 jsonLegInfo.put("type", trackedLeg.getLegType(firstPassingTime));
                                 jsonLegInfo.put(
                                         "bearing-deg",
-                                        UnitSerializationUtil.bearingDecimalFormatter.format(trackedLeg.getLegBearing(
+                                        RoundingUtil.bearingDecimalFormatter.format(trackedLeg.getLegBearing(
                                                 firstPassingTime).getDegrees()));
                             }
                         } catch (NoWindException e) {
@@ -890,7 +890,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                                         .getAverageSpeedOverGround(timePoint);
                                 if (averageSpeedOverGround != null) {
                                     jsonCompetitorInLeg.put("averageSOG-kts",
-                                            UnitSerializationUtil.knotsDecimalFormatter.format(averageSpeedOverGround
+                                            RoundingUtil.knotsDecimalFormatter.format(averageSpeedOverGround
                                                     .getKnots()));
                                 }
                                 try {
@@ -928,21 +928,23 @@ public class RegattasResource extends AbstractSailingServerResource {
                                     Distance distanceSinceGun = trackedRace.getTrack(competitor).getDistanceTraveled(
                                             startOfRace, finishTime != null ? finishTime : timePoint);
                                     if (distanceSinceGun != null) {
-                                        jsonCompetitorInLeg.put("distanceSinceGun-m", distanceSinceGun.getMeters());
+                                        jsonCompetitorInLeg.put("distanceSinceGun-m",
+                                                RoundingUtil.distanceDecimalFormatter.format(distanceSinceGun
+                                                        .getMeters()));
                                     }
                                 }
 
                                 Distance distanceTraveled = trackedLegOfCompetitor.getDistanceTraveled(timePoint);
                                 if (distanceTraveled != null) {
                                     jsonCompetitorInLeg.put("distanceTraveled-m",
-                                            UnitSerializationUtil.distanceDecimalFormatter.format(distanceTraveled
+                                            RoundingUtil.distanceDecimalFormatter.format(distanceTraveled
                                                     .getMeters()));
                                 }
                                 Distance distanceTraveledIncludingGateStart = trackedLegOfCompetitor
                                         .getDistanceTraveledConsideringGateStart(timePoint);
                                 if (distanceTraveledIncludingGateStart != null) {
                                     jsonCompetitorInLeg.put("distanceTraveledIncludingGateStart-m",
-                                            UnitSerializationUtil.distanceDecimalFormatter
+                                            RoundingUtil.distanceDecimalFormatter
                                                     .format(distanceTraveledIncludingGateStart.getMeters()));
                                 }
                                 try {
