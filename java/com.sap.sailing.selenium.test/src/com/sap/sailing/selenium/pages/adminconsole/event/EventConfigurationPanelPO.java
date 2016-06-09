@@ -82,7 +82,11 @@ public class EventConfigurationPanelPO extends PageArea {
             createDialog.addLeaderboardGroup(leaderboardGroupsTab, leaderboardGroupName);
         }
         createDialog.pressOk();
-        getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG).pressNo();
+        if (leaderboardGroupNames.length == 0) {
+            getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_LEADERBOARD_GROUP_CONFIRM_DIALOG).pressNo();
+        } else {
+            getPO(ConfirmDialogPO::new, ID_CREATE_DEFAULT_REGATTA_CONFIRM_DIALOG).pressNo();
+        }
     }
     
     public EventEntryPO getEventEntry(String event) {

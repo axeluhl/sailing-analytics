@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -51,6 +53,8 @@ import com.sap.sailing.selenium.core.SeleniumFieldDecorator;
  *   D049941
  */
 public class PageObject {
+    private static final Logger logger = Logger.getLogger(PageObject.class.getName());
+    
     public static final int DEFAULT_WAIT_TIMEOUT_SECONDS = 120;
     
     public static final int DEFAULT_POLLING_INTERVAL = 5;
@@ -465,6 +469,11 @@ public class PageObject {
         // Wait for the tab to become visible due to the used animations.
         FluentWait<WebElement> wait = createFluentWait(tabPanel);
         WebElement content = wait.until(ElementSearchConditions.visibilityOfElementLocated(new BySeleniumId(id)));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            logger.log(Level.WARNING, "internal error sleeping for 500ms", e);
+        } // wait for a bit to make sure the UI had a change to trigger any asynchronous background update/refresh
         waitForAjaxRequests(); // switching tabs can trigger asynchronous updates, replacing UI elements
         return content;
     }
