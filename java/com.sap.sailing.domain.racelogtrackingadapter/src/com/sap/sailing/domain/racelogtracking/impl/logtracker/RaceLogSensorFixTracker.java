@@ -34,7 +34,6 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -136,9 +135,9 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     };
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace, DynamicTrackedRegatta regatta,
+    public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
-        super(regatta, trackedRace,
+        super(trackedRace,
                 "Loading from SensorFix store lock for tracked race " + trackedRace.getRace().getName());
         this.sensorFixStore = sensorFixStore;
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);

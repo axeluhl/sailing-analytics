@@ -52,7 +52,7 @@ public class RegattaLogSensorDataTracker {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
             RaceLogSensorFixTracker dataTracker = new RaceLogSensorFixTracker((DynamicTrackedRace) trackedRace,
-                    trackedRegatta, sensorFixStore, sensorFixMapperFactory);
+                    sensorFixStore, sensorFixMapperFactory);
             dataTrackers.put(raceIdentifier, dataTracker);
         }
     }

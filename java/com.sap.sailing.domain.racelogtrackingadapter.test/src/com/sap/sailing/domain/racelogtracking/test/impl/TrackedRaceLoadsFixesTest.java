@@ -73,7 +73,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
-        new RaceLogSensorFixTracker(trackedRace, regatta, store, null);
+        new RaceLogSensorFixTracker(trackedRace, store, null);
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
@@ -127,7 +127,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
-        new RaceLogSensorFixTracker(trackedRace, regatta, store, null);
+        new RaceLogSensorFixTracker(trackedRace, store, null);
         
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
