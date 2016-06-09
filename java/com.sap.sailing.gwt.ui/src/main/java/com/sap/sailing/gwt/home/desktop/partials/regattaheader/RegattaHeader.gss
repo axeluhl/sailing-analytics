@@ -118,6 +118,7 @@
   width: 4.666667em;
   margin: .666666666666667em 0 1em;
   cursor: default;
+  font-size: 1rem;
 }
 
 .regattaheader_indicators:hover {
@@ -127,19 +128,26 @@
 .regattaheader_indicators.regattaheader_indicators_next_to_arrow {
   right: 5em;
   border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
   cursor: inherit;
 }
-
 .regattaheader_indicators > div {
-  background-size: 1.666666666666667em 1.666666666666667em;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 1.666666666666667em;
-  height: 1.666666666666667em;
-  display: inline-block;
+  font-size: 0;
+  text-align: center;
+  margin-top: -0.1rem;
 }
 
-.regattaheader_indicators > div.regattaheader_indicator_disabled {
+.regattaheader_indicators > div > div {
+  background-size: 1.666666666666667rem 1.666666666666667rem;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 1.666666666666667rem;
+  height: 1.666666666666667rem;
+  display: inline-block;
+  margin: 0.1rem 0.2rem
+}
+
+.regattaheader_indicators > div > div.regattaheader_indicator_disabled {
   opacity: 0.15;
 }
 
