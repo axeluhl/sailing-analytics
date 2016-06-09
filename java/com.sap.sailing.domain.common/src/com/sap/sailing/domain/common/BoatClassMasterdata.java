@@ -85,6 +85,7 @@ public enum BoatClassMasterdata {
     SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
     STAR ("Star", true, 6.92, 1.74, BoatHullType.MONOHULL, false, "STR"),
     STREAMLINE ("Streamline", true, 7.15, 2.55, BoatHullType.MONOHULL, true),
+    SUNBEAM_22 ("Sunbeam 22", true, 6.70, 2.15, BoatHullType.MONOHULL, true, "Sunbeam 22.1"),
     SWAN_45 ("Swan 45", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "Swan", "Swan-45"),
     TARTAN_10 ("Tartan 10", true, 10.10, 2.82, BoatHullType.MONOHULL, true),
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
