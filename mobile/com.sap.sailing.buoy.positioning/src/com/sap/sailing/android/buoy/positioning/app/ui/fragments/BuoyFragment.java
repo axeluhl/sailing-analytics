@@ -251,6 +251,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
     private void initLocationProvider() {
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         locationManager.removeUpdates(this);
+        locationManager.removeGpsStatusListener(mGpsListener);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, GPS_MIN_DISTANCE, this);
         locationManager.addGpsStatusListener(mGpsListener);
         
@@ -343,7 +344,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Log.d(TAG, "Action: " + action);
-            if (action.equals(getString(R.string.database_changed))) {
+            if (action.equals(getString(R.string.database_changed)) && isAdded()) {
                 positioningActivity.loadDataFromDatabase();
                 setUpTextUI(lastKnownLocation);
                 updateMap();
@@ -361,12 +362,14 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         public void onGpsStatusChanged(int event) {
             switch (event) {
                 case GpsStatus.GPS_EVENT_STOPPED: {
-                    disablePositionButton();
-                    distanceTextView.setText(N_A);
-                    accuracyTextView.setText(N_A);
-                    mapFragment.getMap().setMyLocationEnabled(false);
-                    reportGPSQuality(0);
-                    break;
+                    if (isAdded()) {
+                        disablePositionButton();
+                        distanceTextView.setText(N_A);
+                        accuracyTextView.setText(N_A);
+                        mapFragment.getMap().setMyLocationEnabled(false);
+                        reportGPSQuality(0);
+                        break;
+                    }
                 }
             }
         }
