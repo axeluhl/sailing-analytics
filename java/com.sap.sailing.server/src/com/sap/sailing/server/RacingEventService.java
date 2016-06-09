@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +17,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CourseArea;
@@ -40,6 +40,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.DataImportProgress;
+import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -415,7 +416,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * Calling mediaTrackAdded for every entry in the specified collection. 
      * @param mediaTracks
      */
-    void mediaTracksAdded(Collection<MediaTrack> mediaTracks);
+    void mediaTracksAdded(Iterable<MediaTrack> mediaTracks);
     
     void mediaTrackTitleChanged(MediaTrack mediaTrack);
 
@@ -437,13 +438,13 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
      */
-    void mediaTracksImported(Collection<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override);
     
-    Collection<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
-    Collection<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
+    Iterable<MediaTrack> getMediaTracksInTimeRange(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
 
-    Collection<MediaTrack> getAllMediaTracks();
+    Iterable<MediaTrack> getAllMediaTracks();
 
     void reloadRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
@@ -548,12 +549,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     DataImportLockWithProgress getDataImportLock();
 
     DataImportProgress createOrUpdateDataImportProgressWithReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     DataImportProgress createOrUpdateDataImportProgressWithoutReplication(UUID importOperationId,
-            double overallProgressPct,
-            String subProgressName, double subProgressPct);
+            double overallProgressPct, DataImportSubProgress subProgress, double subProgressPct);
 
     void setDataImportFailedWithReplication(UUID importOperationId, String errorMessage);
 

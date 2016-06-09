@@ -5,6 +5,7 @@ import com.sap.sailing.domain.markpassingcalculation.impl.CandidateChooserImpl;
 import com.sap.sailing.domain.markpassingcalculation.impl.CandidateImpl;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Timed;
 
 /**
  * Represent the possible {@link MarkPassing} of a {@link Waypoint}. It contains the {@link Waypoint} it might be passing, a
@@ -16,13 +17,11 @@ import com.sap.sse.common.TimePoint;
  * @author Nicolas Klose
  * 
  */
-public interface Candidate extends Comparable<CandidateImpl> {
+public interface Candidate extends Comparable<CandidateImpl>, Timed {
 
     Waypoint getWaypoint();
 
     int getOneBasedIndexOfWaypoint();
-
-    TimePoint getTimePoint();
 
     /**
      * @return the probability that this actually is a passing.

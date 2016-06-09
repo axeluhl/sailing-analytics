@@ -8,9 +8,11 @@ public class SeriesCreationParametersDTO implements Serializable {
 
     private List<FleetDTO> fleets;
 
-    private boolean medal;
+    private boolean isMedal;
 
-    private boolean startsWithZero;
+    private boolean isFleetsCanRunInParallel;
+
+    private boolean isStartsWithZeroScore;
     
     private boolean firstColumnIsNonDiscardableCarryForward;
 
@@ -20,12 +22,13 @@ public class SeriesCreationParametersDTO implements Serializable {
     
     SeriesCreationParametersDTO() {}
 
-    public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean medal, boolean startsWithZero, boolean firstColumnIsNonDiscardableCarryForward,
+    public SeriesCreationParametersDTO(List<FleetDTO> fleets, boolean isMedal, boolean isFleetsCanRunInParallel, boolean isStartsWithZeroScore, boolean firstColumnIsNonDiscardableCarryForward,
             int[] discardingThresholds, boolean hasSplitFleetContiguousScoring) {
         super();
         this.fleets = fleets;
-        this.medal = medal;
-        this.startsWithZero = startsWithZero;
+        this.isMedal = isMedal;
+        this.isFleetsCanRunInParallel = isFleetsCanRunInParallel;
+        this.isStartsWithZeroScore = isStartsWithZeroScore;
         this.hasSplitFleetContiguousScoring = hasSplitFleetContiguousScoring;
         this.firstColumnIsNonDiscardableCarryForward = firstColumnIsNonDiscardableCarryForward;
         this.discardingThresholds = discardingThresholds;
@@ -36,13 +39,17 @@ public class SeriesCreationParametersDTO implements Serializable {
     }
 
     public boolean isMedal() {
-        return medal;
+        return isMedal;
     }
 
     public boolean isStartsWithZero() {
-        return startsWithZero;
+        return isStartsWithZeroScore;
     }
 
+    public boolean isFleetsCanRunInParallel() {
+        return isFleetsCanRunInParallel;
+    }
+    
     public boolean hasSplitFleetContiguousScoring() {
         return hasSplitFleetContiguousScoring;
     }

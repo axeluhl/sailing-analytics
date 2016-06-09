@@ -117,7 +117,7 @@ public class Activator extends AbstractDataMiningActivatorWithPredefinedQueries 
     
     @Override
     public Map<PredefinedQueryIdentifier, StatisticQueryDefinitionDTO> getPredefinedQueries() {
-        return predefinedQueries.get();
+        return predefinedQueries.getQueries();
     }
     
     private void initializeDataSourceProviders() {

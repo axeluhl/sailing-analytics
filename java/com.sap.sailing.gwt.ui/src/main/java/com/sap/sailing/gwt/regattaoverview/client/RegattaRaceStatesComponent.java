@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.regattaoverview.client;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -765,6 +766,11 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
         storeRegattaRaceStatesSettings(settings);
     }
 
+    @Override
+    public RegattaRaceStatesSettings getSettings() {
+        return settings;
+    }
+
     private void refreshTableWithNewSettings() {
         if (eventDTO != null && raceGroupDTOs != null) {
             loadAndUpdateEventLog();
@@ -963,5 +969,10 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
     }
     public void setRepeatedInfoLabel(FlowPanel repeatedInfoLabel) {
         this.repeatedInfoLabel = repeatedInfoLabel;
+    }
+
+    @Override
+    public Serializable getId() {
+        return getLocalizedShortName();
     }
 }

@@ -9,17 +9,18 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 
 public final class ListBoxUtils {
 
-
     public static void setupCourseDesignerModeListBox(ListBox box, CourseDesignerMode selectedCourseDesignerMode, 
             String noItemText) {
         for (CourseDesignerMode mode : CourseDesignerMode.values()) {
-            if (mode == CourseDesignerMode.UNKNOWN) {
-                box.addItem(noItemText, mode.name());
-            } else {
-                box.addItem(mode.toString(), mode.name());
-            }
-            if (mode == selectedCourseDesignerMode) {
-                box.setSelectedIndex(box.getItemCount() - 1);
+            if (mode != CourseDesignerMode.ADMIN_CONSOLE) {
+                if (mode == CourseDesignerMode.UNKNOWN) {
+                    box.addItem(noItemText, mode.name());
+                } else {
+                    box.addItem(mode.toString(), mode.name());
+                }
+                if (mode == selectedCourseDesignerMode) {
+                    box.setSelectedIndex(box.getItemCount() - 1);
+                }
             }
         }
     }

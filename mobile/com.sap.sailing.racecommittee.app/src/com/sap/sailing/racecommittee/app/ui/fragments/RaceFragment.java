@@ -1,5 +1,9 @@
 package com.sap.sailing.racecommittee.app.ui.fragments;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -20,16 +24,13 @@ import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.ui.activities.BaseActivity;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TickListener;
 import com.sap.sailing.racecommittee.app.utils.TickSingleton;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
@@ -102,7 +103,12 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        preferences = AppPreferences.on(activity);
+        BaseActivity baseActivity = (BaseActivity) activity;
+        if (baseActivity != null) {
+            preferences = baseActivity.getPreferences();
+        } else {
+            preferences = AppPreferences.on(activity);
+        }
     }
 
     @Override

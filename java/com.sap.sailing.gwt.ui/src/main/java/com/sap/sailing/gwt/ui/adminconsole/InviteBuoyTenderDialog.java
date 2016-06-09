@@ -16,6 +16,9 @@ import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * The result of this dialog is a triple (event, serverUrlString, emailsString).
+ */
 public class InviteBuoyTenderDialog extends DataEntryDialog<Triple<EventDTO, String, String>> {
     private GenericListBox<EventDTO> events;
     private TextBox serverUrl;
@@ -25,7 +28,8 @@ public class InviteBuoyTenderDialog extends DataEntryDialog<Triple<EventDTO, Str
     private String leaderboardName;
     private ErrorReporter errorReporter;
 
-    public InviteBuoyTenderDialog(final StringMessages stringMessages, SailingServiceAsync sailingService, String leaderboardName, ErrorReporter errorReporter, DialogCallback<Triple<EventDTO, String, String>> callback) {
+    public InviteBuoyTenderDialog(final StringMessages stringMessages, SailingServiceAsync sailingService,
+            String leaderboardName, ErrorReporter errorReporter, DialogCallback<Triple<EventDTO, String, String>> callback) {
         super(stringMessages.selectEventForInvitation(), null, stringMessages.inviteBuoyTenders(), stringMessages
                 .cancel(), new Validator<Triple<EventDTO, String, String>>() {
             @Override
@@ -64,7 +68,6 @@ public class InviteBuoyTenderDialog extends DataEntryDialog<Triple<EventDTO, Str
         serverUrl = createTextBox(Window.Location.getProtocol() + "//" + Window.Location.getHost());
         emails = createTextBox("test@example.com,test2@example.com");
         grid.setWidget(0, 1, serverUrl);
-
         grid.setWidget(1, 0, createLabel(stringMessages.event()));
         events = createGenericListBox(new ValueBuilder<EventDTO>() {
             @Override
@@ -76,7 +79,6 @@ public class InviteBuoyTenderDialog extends DataEntryDialog<Triple<EventDTO, Str
             }
         }, false);
         grid.setWidget(1, 1, events);
-
         events.addItem((EventDTO) null);
         sailingService.getEventsForLeaderboard(leaderboardName, new AsyncCallback<Collection<EventDTO>>() {
             @Override

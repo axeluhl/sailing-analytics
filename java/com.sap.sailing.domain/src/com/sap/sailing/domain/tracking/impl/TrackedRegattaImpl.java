@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,7 +49,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
      */
     private final Map<RaceDefinition, TrackedRace> trackedRaces;
     
-    private transient ConcurrentHashMap<RaceListener, RaceListener> raceListeners;
+    private transient ConcurrentMap<RaceListener, RaceListener> raceListeners;
 
     public TrackedRegattaImpl(Regatta regatta) {
         super();
@@ -229,7 +230,7 @@ public class TrackedRegattaImpl implements TrackedRegatta {
     }
 
     @Override
-    public int getNetPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
+    public int getTotalPoints(Competitor competitor, TimePoint timePoint) throws NoWindException {
         int result = 0;
         lockTrackedRacesForRead();
         try {

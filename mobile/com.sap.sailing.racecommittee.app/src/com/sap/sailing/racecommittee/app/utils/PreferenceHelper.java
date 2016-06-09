@@ -2,10 +2,12 @@ package com.sap.sailing.racecommittee.app.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.ui.activities.PreferenceActivity;
 
 /**
  * Helps you with maintaining preferences over different app builds
@@ -93,5 +95,10 @@ public class PreferenceHelper {
 
     private SharedPreferences getSharedPreferences(String preferenceName) {
         return context.getSharedPreferences(preferenceName, Context.MODE_PRIVATE);
+    }
+
+    public static String getRegattaPrefFileName(String regattaName) {
+        String fileName = PreferenceActivity.SPECIFIC_REGATTA_PREFERENCES_NAME + regattaName;
+        return Uri.encode(fileName);
     }
 }

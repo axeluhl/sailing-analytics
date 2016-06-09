@@ -1,26 +1,31 @@
 package com.sap.sse.gwt.client.shared.components;
 
-import com.sap.sse.common.Util;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.Perspective;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
+/**
+ * Groups settings for multiple {@link Component}s. This can be of particular interest when working with
+ * {@link Perspective}s and the perspective's {@link PerspectiveCompositeSettings composite settings}.
+ */
 public class CompositeSettings extends AbstractSettings {
-    public static class ComponentAndSettingsPair<SettingsType extends Settings> extends Util.Pair<Component<SettingsType>, SettingsType> {
-        private static final long serialVersionUID = -569811233041583043L;
+    private final Map<Serializable, Settings> settingsPerComponentId;
 
-        public ComponentAndSettingsPair(Component<SettingsType> a, SettingsType b) {
-            super(a, b);
-        }
+    public CompositeSettings(Map<Serializable, Settings> settingsPerComponentId) {
+        this.settingsPerComponentId = new HashMap<>(settingsPerComponentId);
+    }
+
+    public Map<Serializable, Settings> getSettingsPerComponentId() {
+        return Collections.unmodifiableMap(settingsPerComponentId);
     }
     
-    private final Iterable<ComponentAndSettingsPair<?>> settingsPerComponent;
-
-    public CompositeSettings(Iterable<ComponentAndSettingsPair<?>> settingsPerComponent) {
-        this.settingsPerComponent = settingsPerComponent;
+    public <C extends ComponentLifecycle<S,?>, S extends Settings> Settings findSettingsByComponentId(Serializable componentId) {
+        return settingsPerComponentId.get(componentId);
     }
-
-    public Iterable<ComponentAndSettingsPair<?>> getSettingsPerComponent() {
-        return settingsPerComponent;
-    }
-
 }

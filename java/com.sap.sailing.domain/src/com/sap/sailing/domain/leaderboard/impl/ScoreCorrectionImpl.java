@@ -7,6 +7,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +40,12 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
     /**
      * If no max point reason is provided for a competitor/race, {@link MaxPointsReason#NONE} should be the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
+    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, MaxPointsReason> maxPointsReasons;
 
     /**
      * If no score correction is provided here, the uncorrected points are the default.
      */
-    private final ConcurrentHashMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
+    private final ConcurrentMap<com.sap.sse.common.Util.Pair<Competitor, RaceColumn>, Double> correctedScores;
 
     /**
      * If <code>null</code>, despite a non-<code>null</code> {@link #timePointOfLastCorrectionsValidity} value the
@@ -324,11 +325,39 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
 
     @Override
     public MaxPointsReason getMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
-        MaxPointsReason result = maxPointsReasons.get(raceColumn.getKey(competitor));
-        if (result == null || !isMaxPointsReasonApplicable(result, timePoint, raceColumn, competitor)) {
-            result = MaxPointsReason.NONE;
+        return getAnnotatedMaxPointsReason(competitor, raceColumn, timePoint).getMaxPointsReason();
+    }
+
+    private static class AnnotatedMaxPointsReason {
+        private final MaxPointsReason maxPointsReason;
+        private final boolean maxPointsReasonExistsButIsNotApplicableForTimePoint;
+        public AnnotatedMaxPointsReason(MaxPointsReason maxPointsReason,
+                boolean maxPointsReasonExistsButIsNotApplicableForTimePoint) {
+            super();
+            this.maxPointsReason = maxPointsReason;
+            this.maxPointsReasonExistsButIsNotApplicableForTimePoint = maxPointsReasonExistsButIsNotApplicableForTimePoint;
         }
-        return result;
+        public MaxPointsReason getMaxPointsReason() {
+            return maxPointsReason;
+        }
+        public boolean isMaxPointsReasonExistsButIsNotApplicableForTimePoint() {
+            return maxPointsReasonExistsButIsNotApplicableForTimePoint;
+        }
+    }
+    
+    private AnnotatedMaxPointsReason getAnnotatedMaxPointsReason(Competitor competitor, RaceColumn raceColumn, TimePoint timePoint) {
+        MaxPointsReason maxPointsReason = maxPointsReasons.get(raceColumn.getKey(competitor));
+        boolean maxPointsReasonExistsButIsNotApplicableForTimePoint;
+        if (maxPointsReason == null) {
+            maxPointsReason = MaxPointsReason.NONE;
+            maxPointsReasonExistsButIsNotApplicableForTimePoint = false;
+        } else if (!isMaxPointsReasonApplicable(maxPointsReason, timePoint, raceColumn, competitor)) {
+            maxPointsReason = MaxPointsReason.NONE;
+            maxPointsReasonExistsButIsNotApplicableForTimePoint = true;
+        } else {
+            maxPointsReasonExistsButIsNotApplicableForTimePoint = false;
+        }
+        return new AnnotatedMaxPointsReason(maxPointsReason, maxPointsReasonExistsButIsNotApplicableForTimePoint);
     }
 
     private boolean isMaxPointsReasonApplicable(MaxPointsReason maxPointsReason, TimePoint timePoint, RaceColumn raceColumn, Competitor competitor) {
@@ -360,15 +389,21 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
             final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher,
             final ScoringScheme scoringScheme) {
         Double result;
-        final MaxPointsReason maxPointsReason = getMaxPointsReason(competitor, raceColumn, timePoint);
-        if (maxPointsReason == MaxPointsReason.NONE) {
-            result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+        final AnnotatedMaxPointsReason maxPointsReason = getAnnotatedMaxPointsReason(competitor, raceColumn, timePoint);
+        if (maxPointsReason.getMaxPointsReason() == MaxPointsReason.NONE) {
+            // could be that there is a MaxPointsReason that just doesn't apply yet at timePoint; in this
+            // case ignore the score correction and deliver the uncorrected result
+            if (maxPointsReason.isMaxPointsReasonExistsButIsNotApplicableForTimePoint()) {
+                result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+            } else {
+                result = getCorrectedNonMaxedScore(competitor, raceColumn, trackedRankProvider, scoringScheme, numberOfCompetitorsInLeaderboardFetcher, timePoint);
+            }
         } else {
             // allow explicit override even when max points reason is specified; calculation may be wrong,
             // e.g., in case we have an untracked race and the number of competitors is estimated incorrectly
             Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
             if (correctedNonMaxedScore == null) {
-                result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason,
+                result = scoringScheme.getPenaltyScore(raceColumn, competitor, maxPointsReason.getMaxPointsReason(),
                         getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
                         numberOfCompetitorsInLeaderboardFetcher);
             } else {
@@ -379,7 +414,7 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         return new Result() {
             @Override
             public MaxPointsReason getMaxPointsReason() {
-                return maxPointsReason;
+                return maxPointsReason.getMaxPointsReason();
             }
 
             @Override
@@ -446,21 +481,26 @@ public class ScoreCorrectionImpl implements SettableScoreCorrection {
         Double correctedNonMaxedScore = correctedScores.get(raceColumn.getKey(competitor));
         Double result;
         if (correctedNonMaxedScore == null || isCertainlyBeforeRaceFinish(timePoint, raceColumn, competitor)) {
-            try {
-                int trackedRank = trackedRankProvider.call();
-                result = scoringScheme.getScoreForRank(leaderboard, raceColumn, competitor,
-                        trackedRank, new Callable<Integer>() {
-                            @Override
-                            public Integer call() {
-                                return getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher);
-                            }
-                        }, numberOfCompetitorsInLeaderboardFetcher, timePoint);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Exception while computing corrected non maxed score", e);
-                throw new RuntimeException(e);
-            }
+            result = getUncorrectedScore(competitor, raceColumn, trackedRankProvider, scoringScheme,
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint);
         } else {
             result = correctedNonMaxedScore;
+        }
+        return result;
+    }
+
+    private Double getUncorrectedScore(final Competitor competitor, final RaceColumn raceColumn,
+            Callable<Integer> trackedRankProvider, ScoringScheme scoringScheme,
+            final NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsInLeaderboardFetcher, TimePoint timePoint) {
+        final Double result;
+        try {
+            int trackedRank = trackedRankProvider.call();
+            result = scoringScheme.getScoreForRank(leaderboard, raceColumn, competitor,
+                    trackedRank, ()->getNumberOfCompetitorsInRace(raceColumn, competitor, numberOfCompetitorsInLeaderboardFetcher),
+                    numberOfCompetitorsInLeaderboardFetcher, timePoint);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception while computing uncorrected score", e);
+            throw new RuntimeException(e);
         }
         return result;
     }

@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.Mark;
@@ -58,10 +59,12 @@ import com.sap.sailing.server.gateway.serialization.impl.BoatClassJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.BoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.ColorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.CompetitorWithChangingBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.DurationJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FleetJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.NationalityJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.PersonJsonSerializer;
+import com.sap.sailing.server.gateway.serialization.impl.RaceEntriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.RegattaJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.SeriesJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.TeamJsonSerializer;
@@ -75,6 +78,15 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
     private static final Logger logger = Logger.getLogger(RegattasResource.class.getName());
+
+    private DataMiningResource dataMiningResource;
+    
+    private DataMiningResource getDataMiningResource() {
+        if (dataMiningResource == null) {
+            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
+        }
+        return dataMiningResource;
+    }
 
     private Response getBadRegattaErrorResponse(String regattaName) {
         return Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
@@ -110,7 +122,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             regattasJson.add(regattaJsonSerializer.serialize(regatta));
         }
         String json = regattasJson.toJSONString();
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     @GET
@@ -128,7 +140,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 
             String json = serializedRegatta.toJSONString();
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -157,7 +169,41 @@ public class RegattasResource extends AbstractSailingServerResource {
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
 
             String json = serializedRegatta.toJSONString();
-            response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
+    /**
+     * Gets all entries for a race.
+     * 
+     * @param regattaName
+     *            the name of the regatta
+     * @return
+     */
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/entries")
+    public Response getEntries(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        Regatta regatta = findRegattaByName(regattaName);
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
+                CompetitorJsonSerializer competitorJsonSerializer = new CompetitorWithChangingBoatJsonSerializer(race, new TeamJsonSerializer(
+                        new PersonJsonSerializer(nationalityJsonSerializer)), new BoatJsonSerializer(
+                        new BoatClassJsonSerializer()));
+                JsonSerializer<RaceDefinition> raceEntriesSerializer = new RaceEntriesJsonSerializer(competitorJsonSerializer);
+                JSONObject serializedRaceEntries = raceEntriesSerializer.serialize(race);
+    
+                String json = serializedRaceEntries.toJSONString();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            }
         }
         return response;
     }
@@ -273,7 +319,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRace.put("competitors", jsonCompetitors);
 
                 String json = jsonRace.toJSONString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -388,7 +434,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
         String json = jsonRace.toJSONString();
 
-        return Response.ok(json, MediaType.APPLICATION_JSON).build();
+        return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
 
     private JSONObject addFixToJsonFixes(JSONArray jsonFixes, GPSFix fix) {
@@ -434,7 +480,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                 JSONObject jsonCourse = serializer.serialize(course);
                 String json = jsonCourse.toJSONString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -475,7 +521,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                         JSONObject jsonCourse = serializer.serialize(targetTime);
                         String json = jsonCourse.toJSONString();
-                        response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                        response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
                     } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
                         response = getNotEnoughDataAvailabeErrorResponse(regattaName, raceName);
                     }
@@ -590,7 +636,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRaceTimes.put("currentServerTime-ms", now.getTime());
 
                 String json = jsonRaceTimes.toJSONString();
-                response = Response.ok(json, MediaType.APPLICATION_JSON).build();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -623,7 +669,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                         windSourcesAvailable.add(windSourceJson);
                     }
                 }
-                return Response.ok(windSourcesAvailable.toString(), MediaType.APPLICATION_JSON).build();
+                return Response.ok(windSourcesAvailable.toString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -681,7 +727,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
                 JSONObject jsonWindTracks = serializer.serialize(trackedRace);
                 String json = jsonWindTracks.toJSONString();
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -723,7 +769,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONObject jsonBearing = serializer.serialize(trackedRace.getDirectionFromStartToNextMark(timePoint)
                         .getFrom());
                 String json = jsonBearing.toJSONString();
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -750,7 +796,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 MarkPassingsJsonSerializer serializer = new MarkPassingsJsonSerializer();
                 JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
                 String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -778,7 +824,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRace.put("id", race.getId().toString());
             }
             String json = jsonRaceResults.toJSONString();
-            return Response.ok(json, MediaType.APPLICATION_JSON).build();
+            return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -925,7 +971,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 jsonRaceResults.put("legs", jsonLegs);
 
                 String json = jsonRaceResults.toJSONString();
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
@@ -1034,36 +1080,23 @@ public class RegattasResource extends AbstractSailingServerResource {
                 }
                 jsonLiveData.put("competitors", jsonCompetitors);
                 String json = jsonLiveData.toJSONString();
-                return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
             }
         }
         return response;
     }
     
-    private DataMiningResource dataMiningResource;
-    
-    private DataMiningResource getDataMiningResource() {
-        if (dataMiningResource == null) {
-            dataMiningResource = getResourceContext().getResource(DataMiningResource.class);
-        }
-        return dataMiningResource;
-    }
-
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("datamining")
     public Response getRegattaPredefinedQueries() {
-        // TODO Fetch the predefined queries for regattas dynamically
-        ArrayList<PredefinedQueryIdentifier> predefinedRegattaQueries = new ArrayList<>();
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("AvgSpeed_Per_Competitor-LegType", "Average Speed grouped by Competitor Team Name and Leg Type"));
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumDistance_Per_Competitor-LegType", "Sum of the traveled Distance grouped by Competitor Team Name and Leg Type"));
-        predefinedRegattaQueries.add(new PredefinedQueryIdentifier("SumManeuvers_Per_Competitor", "Sum of the performed Maneuvers grouped by Competitor Team Name"));
+        List<PredefinedQueryIdentifier> predefinedRegattaQueries = getDataMiningResource().getPredefinedRegattaDataMiningQueries();
         return getDataMiningResource().predefinedQueryIdentifiersToJSON(predefinedRegattaQueries);
     }
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/AvgSpeed_Per_Competitor-LegType")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE)
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1078,7 +1111,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/AvgSpeed_Per_Competitor-LegType")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR_LEGTYPE)
     public Response avgSpeedPerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1098,7 +1131,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/SumDistance_Per_Competitor-LegType")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1106,14 +1139,14 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
-            response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName);
+            response = getDataMiningResource().sumDistanceTraveledPerCompetitorAndLegType(regattaName);
         }
         return response;
     }
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/SumDistance_Per_Competitor-LegType")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR_LEGTYPE)
     public Response sumDistancePerCompetitorAndLegType(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1125,7 +1158,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
             } else {
-                response = getDataMiningResource().sumDistancePerCompetitorAndLegType(regattaName, raceName);
+                response = getDataMiningResource().sumDistanceTraveledPerCompetitorAndLegType(regattaName, raceName);
             }
         }
         return response;
@@ -1133,7 +1166,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/datamining/SumManeuvers_Per_Competitor")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName) {
         Response response;
         
@@ -1148,7 +1181,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     @GET
     @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/races/{racename}/datamining/SumManeuvers_Per_Competitor")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_MANEUVERS_PER_COMPETITOR)
     public Response sumManeuversPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
         Response response;
         
@@ -1165,5 +1198,74 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         return response;
     }
-    
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
+    public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().avgSpeedPerCompetitor(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_AVERAGE_SPEED_PER_COMPETITOR)
+    public Response avgSpeedPerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().avgSpeedPerCompetitor(regattaName, raceName);
+            }
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/datamining/"+ SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
+    public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            response = getDataMiningResource().sumDistanceTraveledPerCompetitor(regattaName);
+        }
+        return response;
+    }
+
+    @GET
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/races/{racename}/datamining/" + SailingPredefinedQueries.QUERY_DISTANCE_TRAVELED_PER_COMPETITOR)
+    public Response sumDistancePerCompetitor(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+        Response response;
+        
+        Regatta regatta = getService().getRegatta(new RegattaName(regattaName));
+        if (regatta == null) {
+            response = getBadRegattaErrorResponse(regattaName);
+        } else {
+            RaceDefinition race = findRaceByName(regatta, raceName);
+            if (race == null) {
+                response = getBadRaceErrorResponse(regattaName, raceName);
+            } else {
+                response = getDataMiningResource().sumDistanceTraveledPerCompetitor(regattaName, raceName);
+            }
+        }
+        return response;
+    }
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
@@ -39,6 +40,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLog;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.racelog.Flags;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -110,6 +112,15 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * present.
      */
     TimePoint getStartOfRace(boolean inferred);
+
+    /**
+     * @return the time point taken from a valid, non-revoked {@link RaceLogRaceStatusEvent} that transfers the race
+     *         into status {@link RaceLogRaceStatus#FINISHED} from any of the {@link RaceLog}s attached to this race,
+     *         or {@code null} if no such event is found.
+     *         
+     * @see {@link RaceChangeListener#finishedTimeChanged(TimePoint, TimePoint)}
+     */
+    TimePoint getFinishedTime();
 
     /**
      * Determine the race end time is tricky. Boats may sink, stop, not finish, although they started the race. We
@@ -897,6 +908,7 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * <li>manually set start/end of tracking via {@link #setStartOfTrackingReceived(TimePoint, boolean)} and {@link #setEndOfTrackingReceived(TimePoint, boolean)}</li>
      * <li>start/end of race in Racelog +/- TRACKING_BUFFER_IN_MINUTES</li>
      * </ol>
+     * @param waitForGPSFixesToLoad TODO
      */
-    public void updateStartAndEndOfTracking();
+    public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
 }
