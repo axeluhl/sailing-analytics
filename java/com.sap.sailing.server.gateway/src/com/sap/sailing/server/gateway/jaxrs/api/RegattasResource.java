@@ -957,6 +957,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 }
                                 Duration gapToLeaderDuration = trackedLegOfCompetitor.getGapToLeader(timePoint, rankingInfo, WindPositionMode.LEG_MIDDLE);
                                 jsonCompetitorInLeg.put("gapToLeader-s", gapToLeaderDuration != null ? gapToLeaderDuration.asSeconds() : 0.0);
+                                Distance gapToLeaderDistance = trackedLegOfCompetitor.getWindwardDistanceToCompetitorFarthestAhead(timePoint, WindPositionMode.LEG_MIDDLE, rankingInfo);
+                                jsonCompetitorInLeg.put("gapToLeader-m", gapToLeaderDistance != null ? gapToLeaderDistance.getMeters() : 0.0);
                                 jsonCompetitorInLeg.put("started", trackedLegOfCompetitor.hasStartedLeg(timePoint));
                                 jsonCompetitorInLeg.put("finished", trackedLegOfCompetitor.hasFinishedLeg(timePoint));
                                 jsonCompetitors.add(jsonCompetitorInLeg);
