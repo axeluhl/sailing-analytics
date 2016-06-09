@@ -116,4 +116,21 @@ public abstract class AbstractTimePoint implements TimePoint {
      * as {@link #getDate()}.
      */
     protected void cacheDate(Date date) {}
+
+    @Override
+    public TimePoint getNearestModuloOneMinute(final TimePoint syncToClosestSecondsAndMillisOf) {
+        final Duration diffModOneMinute = this.until(syncToClosestSecondsAndMillisOf).mod(Duration.ONE_MINUTE);
+        final Duration diffToAdd;
+        if (diffModOneMinute.compareTo(Duration.ONE_SECOND.times(30l)) > 0) {
+            diffToAdd = Duration.ONE_MINUTE.minus(diffModOneMinute).times(-1l);
+        } else if (diffModOneMinute.compareTo(Duration.ONE_SECOND.times(-30l)) < 0) {
+            diffToAdd = Duration.ONE_MINUTE.minus(diffModOneMinute.times(-1l));
+        } else {
+            diffToAdd = diffModOneMinute;
+        }
+        final TimePoint result = this.plus(diffToAdd);
+        assert this.until(result).abs().compareTo(Duration.ONE_SECOND.times(30)) <= 0;
+        assert syncToClosestSecondsAndMillisOf.asMillis() % 60000 == result.asMillis() % 60000;
+        return result;
+    }
 }
