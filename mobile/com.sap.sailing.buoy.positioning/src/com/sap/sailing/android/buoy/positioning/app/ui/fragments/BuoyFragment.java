@@ -16,9 +16,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.AbsoluteSizeSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,10 +128,7 @@ public class BuoyFragment extends BaseFragment implements LocationListener {
         boolean gpsEnabled = LocationHelper.isGPSEnabled(getActivity());
         int buttonTextId = gpsEnabled ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
         String text = getString(buttonTextId);
-        SpannableString disabledButtonText = new SpannableString(text);
-        AbsoluteSizeSpan absoluteSizeSpan = new AbsoluteSizeSpan(10, true);
-        disabledButtonText.setSpan(absoluteSizeSpan, text.indexOf("\n"), text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        setPositionButton.setText(disabledButtonText);
+        setPositionButton.setText(text);
     }
 
     private void checkGPS() {
