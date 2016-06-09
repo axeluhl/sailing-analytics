@@ -6,6 +6,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
+import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
@@ -17,6 +22,7 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisito
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceCompetitorSensordataMappingFinder;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
+import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -53,6 +59,17 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     private final SensorFixStore sensorFixStore;
     private final GPSFixStore gpsFixStore;
     private final RaceLogMappingWrapper<WithID> competitorMappings;
+    
+    private final RaceLogEventVisitor raceLogEventVisitor = new BaseRaceLogEventVisitor() {
+        @Override
+        public void visit(RaceLogDenoteForTrackingEvent event) {
+            updateDenotionState();
+        }
+        @Override
+        public void visit(RaceLogRevokeEvent event) {
+            updateDenotionState();
+        }
+    };
 
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
         @Override
@@ -140,6 +157,7 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
     };
     private final SensorFixMapperFactory sensorFixMapperFactory;
     private final Owner owner;
+    private boolean tracking = false;
 
     public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
             SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
@@ -181,7 +199,22 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
                 // additional time range.
             }
         };
+        
+//        trackedRace.getRaceLog(trackedRace.getRaceIdentifier()).addListener(raceLogEventVisitor);
+//        updateDenotionState();
         startTracking();
+    }
+    
+    private synchronized void updateDenotionState() {
+        RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(trackedRace.getRaceLog(trackedRace.getRaceIdentifier())).analyze();
+        boolean forTracking = raceLogTrackingState.isForTracking();
+        if(!tracking && forTracking) {
+            startTracking();
+        }
+        if(tracking && !forTracking) {
+            stopTracking();
+        }
+        
     }
 
     @Override
@@ -263,10 +296,22 @@ public class RaceLogSensorFixTracker extends AbstractRaceLogFixTracker {
         // add listeners for devices in mappings already present
         competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
     }
+    
+    @Override
+    public void stop() {
+        super.stop();
+        owner.stopped(this);
+    }
+    
+    @Override
+    protected void startTracking() {
+        super.startTracking();
+        tracking = true;
+    }
 
     protected void stopTracking() {
         super.stopTracking();
         sensorFixStore.removeListener(listener);
-        owner.stopped(this);
+        tracking = false;
     }
 }
