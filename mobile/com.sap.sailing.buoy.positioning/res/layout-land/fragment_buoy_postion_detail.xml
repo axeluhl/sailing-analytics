@@ -73,7 +73,6 @@
                     android:layout_gravity="center_vertical"
                     android:textColor="@color/fiori_text_color"
                     android:textSize="20sp"
-                    android:textStyle="bold"
                     tools:text="ca. 13m"/>
 
                 <com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView
