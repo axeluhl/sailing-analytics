@@ -122,9 +122,6 @@ public class LeaderboardSettingsFactory {
      *            show the regatta rank are left unchanged; otherwise, a non-<code>null</code> overall details
      *            collection will be put to the settings and the {@link DetailType#REGATTA_RANK} will be added to the
      *            overall details if and only if this parameter is <code>true</code>
-     * @param showOverallLeaderboardsOnSamePage
-     *            tells whether a meta leaderboard should be shown beneath the actual leaderboard on the same page, if
-     *            such a meta leaderboard exists; if multiple such meta leaderboards exist, they are all shown
      */
     public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, String nameOfRaceToSort, boolean autoExpandPreSelectedRace, Boolean showRegattaRank,
@@ -139,7 +136,7 @@ public class LeaderboardSettingsFactory {
      * Like {@link #createNewDefaultSettings(List, List, String, boolean, boolean, boolean, boolean)}, only that an additional refresh interval for auto-refresh
      * may be specified; if <code>null</code>, no auto-refresh shall be performed
      */
-    private LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
+    public LeaderboardSettings createNewDefaultSettings(List<String> namesOfRaceColumnsToShow,
             List<String> namesOfRacesToShow, List<DetailType> overallDetailsToShow, String nameOfRaceToSort,
             boolean autoExpandPreSelectedRace, Long refreshIntervalMillis, boolean showCompetitorSailIdColumns, boolean showCompetitorFullNameColumn) {
         return createNewDefaultSettings(namesOfRaceColumnsToShow, namesOfRacesToShow, overallDetailsToShow,

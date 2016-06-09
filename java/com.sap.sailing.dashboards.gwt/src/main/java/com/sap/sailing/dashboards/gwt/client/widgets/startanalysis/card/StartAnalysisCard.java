@@ -33,6 +33,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
@@ -150,11 +152,12 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             zoomTypes.add(ZoomTypes.BUOYS);
         }
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
+        RaceMapSettings raceMapSettings = RaceMapSettings.readSettingsFromURL();
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
-        raceMap = new RaceMap(sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
-                StringMessages.INSTANCE, false, false, false, false, startAnalysisDTO.regattaAndRaceIdentifier,
-                raceMapResources, /* showHeaderPanel */ true);
+        raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
+                StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
+                raceMapResources, /* isSimulationEnabled */ false, /* showHeaderPanel */ true);
         raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
         raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
         raceMap.getSettings().setTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);

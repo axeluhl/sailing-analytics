@@ -166,7 +166,7 @@ public class LeaderboardDTOCache implements LeaderboardCache {
                     try {
                         LeaderboardDTO result = leaderboard.computeDTO(adjustedTimePoint,
                                 namesOfRaceColumnsForWhichToLoadLegDetails, addOverallDetails,
-                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillNetPointsUncorrected */ false);
+                                waitForLatestAnalyses, trackedRegattaRegistry, baseDomainFactory, /* fillTotalPointsUncorrected */ false);
                         return result;
                     } finally {
                         LockUtil.unpropagateLockSetFrom(callerThread);

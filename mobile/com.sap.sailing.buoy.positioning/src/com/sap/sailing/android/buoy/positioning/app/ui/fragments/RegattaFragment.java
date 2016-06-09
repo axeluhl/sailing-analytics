@@ -39,8 +39,9 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
         super.onCreateView(inflater, container, savedInstanceState);
 
         View view = inflater.inflate(R.layout.fragment_buoy_postion_overview, container, false);
-        ListView markListView = (ListView) view.findViewById(R.id.listMarks);
         adapter = new MarkAdapter(getActivity(), R.layout.mark_listview_row, null, 0);
+        ListView markListView = (ListView) view.findViewById(R.id.listMarks);
+        markListView.setEmptyView(view.findViewById(R.id.no_marks));
         markListView.setAdapter(adapter);
         markListView.setOnItemClickListener(new ItemClickListener());
         getLoaderManager().initLoader(MARKER_LOADER, null, this);

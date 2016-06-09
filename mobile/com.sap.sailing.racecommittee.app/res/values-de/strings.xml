@@ -78,13 +78,14 @@
     <string name="pick_a_rounding_direction">Wenderichtung auswählen</string>
     <string name="select_penalty_reason">Strafe auswählen</string>
 
-    <string-array name="rounding_directions">
-        <item>Backbord</item>
-        <item>Steuerbord</item>
-        <item>Gate</item>
-        <item>Linie</item>
-        <item>Ablauf</item>
-    </string-array>
+    <string name="passing_instruction_none">Leer</string>
+    <string name="passing_instruction_port">Backbord</string>
+    <string name="passing_instruction_starboard">Steuerbord</string>
+    <string name="passing_instruction_single_unknown">Einzel, unbekannt</string>
+    <string name="passing_instruction_gate">Gate</string>
+    <string name="passing_instruction_line">Linie</string>
+    <string name="passing_instruction_offset">Ablauf</string>
+    <string name="passing_instruction_fixed_bearing">Feste Peilung</string>
 
     <string name="publish">Veröffentlichen</string>
     <string name="unpublish">Zurücknehmen</string>
@@ -511,5 +512,6 @@
     <string name="abort_dismiss">Verwerfen</string>
     <string name="set_column_factor">Setze Faktor</string>
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
+    <string name="sync_to_minute">Sync zur Minute</string>
 
 </resources>

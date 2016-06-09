@@ -68,6 +68,7 @@ import com.sap.sailing.server.operationaltransformation.AddDefaultRegatta;
 import com.sap.sailing.server.operationaltransformation.AddRaceDefinition;
 import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboard;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -207,7 +208,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         assertNotNull(replica.getLeaderboardByName(leaderboardName));
         assertTrue(replica.getAllRegattas().iterator().hasNext());
         assertSame(replicaLeaderboardGroup, replicaEvent.getLeaderboardGroups().iterator().next());
-        assertThat(replica.getAllMediaTracks().size(), is(3));
+        assertThat(Util.size(replica.getAllMediaTracks()), is(3));
         Leaderboard replicaLeaderboard = replica.getLeaderboardByName(leaderboardName);
         RaceColumn replicaR1 = replicaLeaderboard.getRaceColumnByName("R1");
         TrackedRace replicaTrackedRace = replicaR1.getTrackedRace(replicaR1.getFleets().iterator().next());

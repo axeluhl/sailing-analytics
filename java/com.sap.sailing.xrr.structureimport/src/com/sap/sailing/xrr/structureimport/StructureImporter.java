@@ -31,9 +31,11 @@ import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.FleetColors;
+import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.xrr.resultimport.ParserFactory;
+import com.sap.sailing.xrr.resultimport.impl.XRRParserUtil;
 import com.sap.sailing.xrr.schema.Boat;
 import com.sap.sailing.xrr.schema.Crew;
 import com.sap.sailing.xrr.schema.Division;
@@ -51,6 +53,7 @@ import com.sap.sailing.xrr.structureimport.buildstructure.Series;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberStrategy;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractColor;
 import com.sapsailing.xrr.structureimport.eventimport.EventImport;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
@@ -80,12 +83,12 @@ public class StructureImporter {
     }
 
     public Iterable<Regatta> getRegattas(Iterable<RegattaJSON> regattas) {
-        Iterable<RegattaResults> parsedRegattas = parseRegattas(regattas);
+        Iterable<Pair<RegattaJSON, RegattaResults>> parsedRegattas = parseRegattas(regattas);
         Set<Regatta> addSpecificRegattas = new HashSet<Regatta>();
-        for (RegattaResults result : parsedRegattas) {
+        for (Pair<RegattaJSON, RegattaResults> result : parsedRegattas) {
             List<Race> races = new ArrayList<Race>();
             // assuming that the last element in getPersonOrBoatOrTeam is an event
-            Event event = (Event) result.getPersonOrBoatOrTeam().get(result.getPersonOrBoatOrTeam().size() - 1);
+            Event event = (Event) result.getB().getPersonOrBoatOrTeam().get(result.getB().getPersonOrBoatOrTeam().size() - 1);
             Iterable<Object> raceOrDivisionOrRegattaSeriesResults = event.getRaceOrDivisionOrRegattaSeriesResult();
             for (Object raceOrDivisionOrRegattaSeriesResult : raceOrDivisionOrRegattaSeriesResults) {
                 if (raceOrDivisionOrRegattaSeriesResult instanceof Race) {
@@ -97,23 +100,22 @@ public class StructureImporter {
             final TimePoint endDate = null; // TODO can regatta end time be inferred from XRR document?
             RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
-                    baseDomainFactory.getOrCreateBoatClass(((Division) event.getRaceOrDivisionOrRegattaSeriesResult()
-                            .get(0)).getTitle()), startDate, endDate, getSeries(buildStructure), false,
+                    baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);
         }
         return addSpecificRegattas;
     }
 
-    private Iterable<RegattaResults> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
-        final Set<RegattaResults> result = Collections.synchronizedSet(new HashSet<RegattaResults>());
+    private Iterable<Pair<RegattaJSON, RegattaResults>> parseRegattas(final Iterable<RegattaJSON> selectedRegattas) {
+        final Set<Pair<RegattaJSON, RegattaResults>> result = Collections.synchronizedSet(new HashSet<Pair<RegattaJSON, RegattaResults>>());
         Set<Thread> threads = new HashSet<Thread>();
         for (final RegattaJSON selectedRegatta : selectedRegattas) {
             Thread thread = new Thread("XRR Importer " + selectedRegatta.getName()) {
                 @Override
                 public void run() {
                     try {
-                        result.add(parseRegattaXML(selectedRegatta.getXrrEntriesUrl()));
+                        result.add(new Pair<>(selectedRegatta, parseRegattaXML(selectedRegatta.getXrrEntriesUrl())));
                     } catch (JAXBException | IOException e) {
                         logger.info("Parse error during XRR import. Ignoring document " + selectedRegatta.getName());
                     }
@@ -143,7 +145,7 @@ public class StructureImporter {
             for (Series raceType : regattaStructure.getSeries()) {
                 List<com.sap.sailing.domain.base.Fleet> fleets = getFleets(raceType.getFleets());
                 setRaceNames(index, raceType, raceType.getFleets());
-                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), fleets, raceType.getRaceNames(), null));
+                series.add(new SeriesImpl(raceType.getSeries(), raceType.isMedal(), true, fleets, raceType.getRaceNames(), null));
             }
         }
         return series;
@@ -161,7 +163,7 @@ public class StructureImporter {
         GuessFleetOrderingStrategy fleetOrderingStrategy = new GuessFleetOrderingFromFleetName();
         String fleetColor = "";
         if (fleets.size() <= 1) {
-            fleetColor = "Default";
+            fleetColor = LeaderboardNameConstants.DEFAULT_FLEET_NAME;
             FleetImpl fleetImpl = new FleetImpl(fleetColor, 0, getColorFromString(fleetColor));
             fleetsImpl.add(fleetImpl);
         } else {
@@ -184,9 +186,6 @@ public class StructureImporter {
         }
         if (result == null) {
             result = AbstractColor.getColorByLowercaseNameStatic(colorString.toLowerCase());
-        }
-        if (result == null) {
-            result = Color.BLACK;
         }
         return result;
     }

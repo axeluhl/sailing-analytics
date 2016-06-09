@@ -17,6 +17,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 
 /**
  * Compares two competitors that occur in a {@link Leaderboard#getCompetitors()} set in the context of the
@@ -50,6 +51,7 @@ import com.sap.sse.common.Util;
 public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     private final Leaderboard leaderboard;
     private final ScoringScheme scoringScheme;
+    private final Map<Util.Pair<Competitor, RaceColumn>, Double> netPointsCache;
     private final Map<Util.Pair<Competitor, RaceColumn>, Double> totalPointsCache;
     private final boolean nullScoresAreBetter;
     private final TimePoint timePoint;
@@ -80,13 +82,15 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         this.timePoint = timePoint;
         this.scoringScheme = scoringScheme;
         this.nullScoresAreBetter = nullScoresAreBetter;
+        netPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         totalPointsCache = new HashMap<Util.Pair<Competitor, RaceColumn>, Double>();
         for (Competitor competitor : leaderboard.getCompetitors()) {
             Set<RaceColumn> discardedRaceColumns = leaderboard.getResultDiscardingRule().getDiscardedRaceColumns(
                     competitor, leaderboard, raceColumnsToConsider, timePoint);
             for (RaceColumn raceColumn : raceColumnsToConsider) {
-                totalPointsCache.put(new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn),
-                        leaderboard.getTotalPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
+                Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(competitor, raceColumn);
+                netPointsCache.put(key, leaderboard.getNetPoints(competitor, raceColumn, timePoint, discardedRaceColumns));
+                totalPointsCache.put(key, leaderboard.getTotalPoints(competitor, raceColumn, timePoint));
             }
         }
     }
@@ -97,8 +101,10 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     
     @Override
     public int compare(Competitor o1, Competitor o2) {
-        List<Util.Pair<RaceColumn, Double>> o1Scores = new ArrayList<Util.Pair<RaceColumn, Double>>();
-        List<Util.Pair<RaceColumn, Double>> o2Scores = new ArrayList<Util.Pair<RaceColumn, Double>>();
+        List<Util.Pair<RaceColumn, Double>> o1Scores = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o2Scores = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o1TotalPoints = new ArrayList<>();
+        List<Util.Pair<RaceColumn, Double>> o2TotalPoints = new ArrayList<>();
         double o1ScoreSum = getLeaderboard().getCarriedPoints(o1);
         double o2ScoreSum = getLeaderboard().getCarriedPoints(o2);
         Double o1MedalRaceScore = 0.0;
@@ -110,25 +116,31 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
         for (RaceColumn raceColumn : getLeaderboard().getRaceColumns()) {
             needToResetO1ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
             needToResetO2ScoreUponNextValidResult = raceColumn.isStartsWithZeroScore();
-            final boolean o1ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o1, timePoint);
-            final boolean o2ValidInTotalScore = getLeaderboard().getScoringScheme().isValidInTotalScore(getLeaderboard(), raceColumn, o2, timePoint);
+            final boolean o1ValidInNetScore = getLeaderboard().getScoringScheme().isValidInNetScore(getLeaderboard(), raceColumn, o1, timePoint);
+            final boolean o2ValidInNetScore = getLeaderboard().getScoringScheme().isValidInNetScore(getLeaderboard(), raceColumn, o2, timePoint);
             final Double o1Score;
-            if (o1ValidInTotalScore) {
-                o1Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o1, raceColumn));
+            if (o1ValidInNetScore) {
+                Pair<Competitor, RaceColumn> key = new Util.Pair<>(o1, raceColumn);
+                o1Score = netPointsCache.get(key);
                 if (o1Score != null) {
-                    o1Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o1Score));
+                    o1Scores.add(new Util.Pair<>(raceColumn, o1Score));
                     if (needToResetO1ScoreUponNextValidResult) {
                         o1ScoreSum = 0;
                         needToResetO1ScoreUponNextValidResult = false;
                     }
                     o1ScoreSum += o1Score;
                 }
+                final Double o1Total = totalPointsCache.get(key);
+                if (o1Total != null) {
+                    o1TotalPoints.add(new Util.Pair<>(raceColumn, o1Total));
+                }
             } else {
                 o1Score = null;
             }
             final Double o2Score;
-            if (o2ValidInTotalScore) {
-                o2Score = totalPointsCache.get(new Util.Pair<Competitor, RaceColumn>(o2, raceColumn));
+            if (o2ValidInNetScore) {
+                Pair<Competitor, RaceColumn> key = new Util.Pair<Competitor, RaceColumn>(o2, raceColumn);
+                o2Score = netPointsCache.get(key);
                 if (o2Score != null) {
                     o2Scores.add(new Util.Pair<RaceColumn, Double>(raceColumn, o2Score));
                     if (needToResetO2ScoreUponNextValidResult) {
@@ -137,10 +149,14 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     }
                     o2ScoreSum += o2Score;
                 }
+                final Double o2Total = totalPointsCache.get(key);
+                if (o2Total != null) {
+                    o2TotalPoints.add(new Util.Pair<>(raceColumn, o2Total));
+                }
             } else {
                 o2Score = null;
             }
-            if (o1ValidInTotalScore && o2ValidInTotalScore) {
+            if (o1ValidInNetScore && o2ValidInNetScore) {
                 int preemptiveColumnResult = 0;
                 if (raceColumn.isMedalRace()) {
                     // only count the score for the medal race score if it wasn't a carry-forward column
@@ -176,7 +192,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
                     result = compareByBetterScore(o1, Collections.unmodifiableList(o1Scores), o2, Collections.unmodifiableList(o2Scores), timePoint);
                     if (result == 0) {
                         // compare by last race:
-                        result = scoringScheme.compareByLastRace(o1Scores, o2Scores, nullScoresAreBetter);
+                        result = scoringScheme.compareByLastRace(o1TotalPoints, o2TotalPoints, nullScoresAreBetter);
                         if (result == 0) {
                             try {
                                 result = scoringScheme.compareByLatestRegattaInMetaLeaderboard(getLeaderboard(), o1, o2, timePoint);
@@ -193,7 +209,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
 
     /**
      * Precondition: either both scored in medal race or both didn't. If both scored, the better score wins.
-     * This is to be applied only if the total score of both competitors are equal to each other.
+     * This is to be applied only if the net score of both competitors are equal to each other.
      */
     private int compareByMedalRaceScore(Double o1MedalRaceScore, Double o2MedalRaceScore) {
         assert o1MedalRaceScore != null || o2MedalRaceScore == null;
@@ -274,7 +290,7 @@ public class LeaderboardTotalRankComparator implements Comparator<Competitor> {
     }
 
     /**
-     * Assuming both competitors scored in the same number of races, and assuming they scored the same total score,
+     * Assuming both competitors scored in the same number of races, and assuming they scored the same net score,
      * break the tie according to the {@link #scoringScheme scoring scheme} set for this comparator.
      * @see ScoringScheme#compareByBetterScore(Competitor, List, Competitor, List, boolean, TimePoint)
      */

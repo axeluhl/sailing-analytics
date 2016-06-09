@@ -1,5 +1,15 @@
 package com.sap.sailing.android.shared.services.sending;
 
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,11 +28,6 @@ import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
-
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
 
 /**
  * Service that handles sending messages to a webservice. Deals with an offline setting
@@ -234,6 +239,7 @@ public class MessageSendingService extends Service implements MessageSendingList
             ConnectivityChangedReceiver.enable(this);
             serviceLogger.onMessageSentFailed();
             reportApiConnectivity(APIConnectivity.notReachable);
+            reportUnsentGPSFixesCount();
         } else {
             sendMessage(intent);
         }

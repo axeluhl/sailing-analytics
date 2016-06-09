@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -82,7 +83,7 @@ public class SmartFutureCache<K, V, U extends UpdateInterval<U>> {
      * {@link #ongoingManeuverCacheRecalculations}. This will let {@link Future#cancel(boolean)} return <code>false</code>
      * should it be called on that Future.
      */
-    private final ConcurrentHashMap<K, FutureTaskWithCancelBlocking> ongoingRecalculations;
+    private final ConcurrentMap<K, FutureTaskWithCancelBlocking> ongoingRecalculations;
     
     private final Map<K, V> cache;
     

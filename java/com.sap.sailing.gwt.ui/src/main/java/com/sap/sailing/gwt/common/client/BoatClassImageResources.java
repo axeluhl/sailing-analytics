@@ -130,6 +130,9 @@ public interface BoatClassImageResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/LAGO_26.png")
     ImageResource Lago26Icon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/M32.png")
+    ImageResource M32Icon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/MELGES_20.png")
     ImageResource Melges20Icon();
 
@@ -174,6 +177,9 @@ public interface BoatClassImageResources extends ClientBundle {
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/STREAMLINE.png")
     ImageResource StreamlineIcon();
+    
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SUNBEAM22.png")
+    ImageResource Sunbeam22Icon();
     
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/SWAN_45.png")
     ImageResource Swan45Icon();

@@ -3,50 +3,10 @@ package com.sap.sailing.racecommittee.app.ui.activities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import com.sap.sailing.android.shared.logging.ExLog;
-import com.sap.sailing.android.shared.util.AppUtils;
-import com.sap.sailing.android.shared.util.BitmapHelper;
-import com.sap.sailing.android.shared.util.BroadcastManager;
-import com.sap.sailing.android.shared.util.CollectionUtils;
-import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
-import com.sap.sailing.domain.base.CourseArea;
-import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
-import com.sap.sailing.racecommittee.app.AppConstants;
-import com.sap.sailing.racecommittee.app.R;
-import com.sap.sailing.racecommittee.app.data.DataManager;
-import com.sap.sailing.racecommittee.app.data.DataStore;
-import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
-import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
-import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
-import com.sap.sailing.racecommittee.app.domain.ManagedRace;
-import com.sap.sailing.racecommittee.app.domain.impl.RaceGroupSeriesFleet;
-import com.sap.sailing.racecommittee.app.logging.LogEvent;
-import com.sap.sailing.racecommittee.app.services.RaceStateService;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
-import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
-import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
-import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
-import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
-import com.sap.sailing.racecommittee.app.utils.RaceHelper;
-import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
+import java.util.Set;
 
 import android.annotation.TargetApi;
 import android.app.Fragment;
@@ -80,6 +40,54 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.AppUtils;
+import com.sap.sailing.android.shared.util.BitmapHelper;
+import com.sap.sailing.android.shared.util.BroadcastManager;
+import com.sap.sailing.android.shared.util.CollectionUtils;
+import com.sap.sailing.android.shared.util.ViewHelper;
+import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
+import com.sap.sailing.domain.base.CourseArea;
+import com.sap.sailing.domain.base.EventBase;
+import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.configuration.impl.RegattaConfigurationImpl;
+import com.sap.sailing.domain.base.racegroup.RaceGroup;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
+import com.sap.sailing.domain.common.Wind;
+import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.racecommittee.app.AppConstants;
+import com.sap.sailing.racecommittee.app.AppPreferences;
+import com.sap.sailing.racecommittee.app.R;
+import com.sap.sailing.racecommittee.app.data.DataManager;
+import com.sap.sailing.racecommittee.app.data.DataStore;
+import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
+import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
+import com.sap.sailing.racecommittee.app.data.loaders.DataLoaderResult;
+import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.configuration.impl.PreferencesRegattaConfigurationLoader;
+import com.sap.sailing.racecommittee.app.logging.LogEvent;
+import com.sap.sailing.racecommittee.app.services.RaceStateService;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataType;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeHeader;
+import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceListDataTypeRace;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceInfoFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.RaceListFragment.RaceListCallbacks;
+import com.sap.sailing.racecommittee.app.ui.fragments.WelcomeFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.BaseFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFinishingFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceFlagViewerFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.RaceSummaryFragment;
+import com.sap.sailing.racecommittee.app.ui.fragments.raceinfo.TrackingListFragment;
+import com.sap.sailing.racecommittee.app.ui.views.PanelButton;
+import com.sap.sailing.racecommittee.app.utils.PreferenceHelper;
+import com.sap.sailing.racecommittee.app.utils.RaceHelper;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RacingActivity extends SessionActivity implements RaceListCallbacks {
     private static final String TAG = RacingActivity.class.getName();
@@ -280,6 +288,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
     }
 
     private void loadWelcomeFragment() {
+        preferences = AppPreferences.on(this);
         getFragmentManager().beginTransaction().replace(R.id.racing_view_container, WelcomeFragment.newInstance()).commit();
     }
 
@@ -313,6 +322,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
 
     public void onRaceItemClicked(ManagedRace managedRace, boolean forcedChange) {
         if (forcedChange || mSelectedRace != managedRace) {
+            preferences = AppPreferences.on(this, PreferenceHelper.getRegattaPrefFileName(managedRace.getRaceGroup().getName()));
             mSelectedRace = managedRace;
             infoFragment = new RaceInfoFragment();
             infoFragment.setArguments(RaceFragment.createArguments(managedRace));
@@ -543,9 +553,8 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 TintImageView overflow = (TintImageView) outViews.get(0);
                 overflow.setMinimumWidth(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_width));
                 overflow.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.bigger_over_flow_height));
-                Bitmap bitmap = BitmapHelper
-                    .decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp,
-                            ViewCompat.getMinimumWidth(overflow), ViewCompat.getMinimumHeight(overflow));
+                Bitmap bitmap = BitmapHelper.decodeSampledBitmapFromResource(getResources(), R.drawable.ic_more_vert_white_48dp,
+                    ViewCompat.getMinimumWidth(overflow), ViewCompat.getMinimumHeight(overflow));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     overflow.setScaleType(ImageView.ScaleType.FIT_END);
                 }
@@ -596,7 +605,7 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                     transaction.remove(extra);
                                 }
                             }
-                            if (findViewById(R.id.race_content) != null) {
+                            if (findViewById(R.id.race_content) != null && mSelectedRace != null) {
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {
@@ -636,14 +645,14 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                     transaction.remove(extra);
                                 }
                             }
-        }
+                        }
 
-        if (AppConstants.INTENT_ACTION_SHOW_WELCOME.equals(action)) {
-            loadWelcomeFragment();
-        }
+                        if (AppConstants.INTENT_ACTION_SHOW_WELCOME.equals(action)) {
+                            loadWelcomeFragment();
+                        }
 
-        if (AppConstants.INTENT_ACTION_RELOAD_RACES.equals(action)) {
-            loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
+                        if (AppConstants.INTENT_ACTION_RELOAD_RACES.equals(action)) {
+                            loadRaces(dataManager.getDataStore().getCourseArea(getCourseAreaIdFromIntent()));
                         }
 
                         transaction.commit();
@@ -651,6 +660,30 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 });
             }
         }).start();
+    }
+
+    private void setupRegattaSpecificConfiguration() {
+        Set<RaceGroup> raceGroups = new HashSet<>();
+        for (ManagedRace race : lastSeenRaces) {
+            if (!raceGroups.contains(race.getRaceGroup())) {
+                raceGroups.add(race.getRaceGroup());
+            }
+        }
+
+        for (RaceGroup raceGroup : raceGroups) {
+            String regattaPreference = PreferenceHelper.getRegattaPrefFileName(raceGroup.getName());
+
+            // reset regatta preferences
+            PreferenceHelper helper = new PreferenceHelper(this, regattaPreference);
+            helper.clearPreferences();
+
+            RegattaConfiguration configuration = raceGroup.getRegattaConfiguration();
+            if (configuration instanceof RegattaConfigurationImpl) {
+                AppPreferences preferences = AppPreferences.on(this, regattaPreference, false);
+                PreferencesRegattaConfigurationLoader preferencesLoader = new PreferencesRegattaConfigurationLoader(configuration, preferences);
+                preferencesLoader.store();
+            }
+        }
     }
 
     private class RaceLoadClient implements LoadClient<Collection<ManagedRace>> {
@@ -689,13 +722,11 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                 ExLog.i(RacingActivity.this, TAG, "Same races are already loaded...");
             } else {
                 lastSeenRaces = data;
-
                 registerOnService(data);
                 mRaceList.setupOn(data);
-
+                setupRegattaSpecificConfiguration();
                 Toast.makeText(RacingActivity.this, String.format(getString(R.string.racing_load_success), data.size()), Toast.LENGTH_SHORT).show();
             }
-
             setProgressSpinnerVisibility(false);
         }
     }

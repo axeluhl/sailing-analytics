@@ -2,22 +2,13 @@ package com.sap.sailing.racecommittee.app.ui.adapters.racelist;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.text.TextUtils;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import java.util.Map;
+import java.util.Set;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -28,6 +19,10 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderRes
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.FlagPoleState;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.base.SeriesBase;
+import com.sap.sailing.domain.base.racegroup.CurrentRaceComparator;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeries;
+import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesComparator;
 import com.sap.sailing.domain.common.racelog.FlagPole;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.racecommittee.app.AppConstants;
@@ -43,15 +38,32 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
 public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> implements FilterSubscriber {
 
     private final static String TAG = ManagedRaceListAdapter.class.getName();
     private final Object mLockObject = new Object();
-    private List<RaceListDataType> mAllViewItems;
-    private RaceFilter mFilter;
+    private final RaceFilter mFilter;
     private LayoutInflater mInflater;
     private Resources mResources;
-    private List<RaceListDataType> mShownViewItems;
+    private final List<RaceListDataType> mShownViewItems;
+    private final Map<ManagedRace, RaceListDataTypeRace> viewItemsRaces;
+    private final Map<SeriesBase, RaceListDataTypeHeader> viewItemsSeriesHeaders;
     private ImageView marker;
     private ImageView update_badge;
     private LinearLayout race_flag;
@@ -75,17 +87,33 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private TextView explicit_factor;
     private int flag_size;
     private DecimalFormat factor_format;
+    private final Set<ManagedRace> mAllRaces;
 
-    public ManagedRaceListAdapter(Context context, List<RaceListDataType> viewItems) {
+    public ManagedRaceListAdapter(Context context, Set<ManagedRace> allRaces) {
         super(context, 0);
-
-        mAllViewItems = viewItems;
-        mShownViewItems = viewItems;
+        mAllRaces = allRaces;
+        mShownViewItems = new ArrayList<>();
+        this.viewItemsRaces = new HashMap<>();
+        this.viewItemsSeriesHeaders = new HashMap<>();
+        createViewItemsForRacesAndSeries();
+        mFilter = new RaceFilter(allRaces, this);
         mInflater = LayoutInflater.from(getContext());
         mResources = getContext().getResources();
         dateFormat = new SimpleDateFormat("kk:mm", getContext().getResources().getConfiguration().locale);
         flag_size = getContext().getResources().getInteger(R.integer.flag_size);
         factor_format = new DecimalFormat(context.getString(R.string.race_factor_format));
+    }
+
+    private void createViewItemsForRacesAndSeries() {
+        viewItemsRaces.clear();
+        viewItemsSeriesHeaders.clear();
+        for (final ManagedRace race : mAllRaces) {
+            viewItemsRaces.put(race, new RaceListDataTypeRace(race, mInflater));
+            final SeriesBase series = race.getSeries();
+            if (!viewItemsSeriesHeaders.containsKey(series)) {
+                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater));
+            }
+        }
     }
 
     @Override
@@ -97,9 +125,6 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public RaceFilter getFilter() {
-        if (mFilter == null) {
-            mFilter = new RaceFilter(mAllViewItems, this);
-        }
         return mFilter;
     }
 
@@ -122,18 +147,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        RaceListDataType raceListElement;
-        raceListElement = getItem(position);
+        final RaceListDataType raceListElement = getItem(position);
 
         int type = getItemViewType(position);
         TimePoint now = MillisecondsTimePoint.now();
 
         if (convertView == null) {
-            if (type == ViewType.HEADER.index) {
-                convertView = mInflater.inflate(R.layout.race_list_area_header, parent, false);
-            } else if (type == ViewType.RACE.index) {
-                convertView = mInflater.inflate(R.layout.race_list_area_item, parent, false);
-            }
+            convertView = raceListElement.getView(parent);
         }
         findViews(convertView);
         resetValues(convertView);
@@ -145,25 +165,26 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 regatta = header.getRaceGroup().getName();
             }
             boat_class.setText(regatta);
-            if (header.isFleetVisible()) {
-                fleet_series.setText(RaceHelper.getFleetSeries(header.getFleet(), header.getSeries()));
-            } else {
-                fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
-            }
+            fleet_series.setText(RaceHelper.getSeriesName(header.getSeries(), ""));
             if (fleet_series.getText().length() == 0) {
                 fleet_series.setVisibility(View.GONE);
             } else {
                 fleet_series.setVisibility(View.VISIBLE);
             }
             protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
-            protest_image.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
-                    intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, header.toString());
-                    BroadcastManager.getInstance(getContext()).addIntent(intent);
-                }
-            });
+            if (protest_image.getTag(R.id.protest_flag_image_click_listener) == null ||
+                    protest_image.getTag(R.id.protest_flag_image_click_listener) != Boolean.TRUE) {
+                protest_image.setTag(R.id.protest_flag_image_click_listener, Boolean.TRUE);
+                protest_image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
+                        // TODO don't use toString() to convey semantics and perform check; bug 3617
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, new RaceGroupSeries(header.getRaceGroup(), header.getSeries()).getDisplayName());
+                        BroadcastManager.getInstance(getContext()).addIntent(intent);
+                    }
+                });
+            }
         } else if (type == ViewType.RACE.index) {
             final RaceListDataTypeRace race = (RaceListDataTypeRace) raceListElement;
 
@@ -259,11 +280,80 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     }
 
     @Override
-    public void onResult(List<RaceListDataType> filtered) {
+    public void onResult(List<ManagedRace> filteredRaces) {
         synchronized (mLockObject) {
-            mShownViewItems = filtered;
+            mShownViewItems.clear();
+            if (filteredRaces != null) {
+                mShownViewItems.addAll(getShownViewItems(filteredRaces));
+            }
             notifyDataSetChanged();
         }
+    }
+
+    /**
+     * For the {@code filteredRaces} ensure that exactly the required view items are in {@link #mShownViewItems}. This
+     * encompasses the header items for all non-empty series and the race items for all races in their series.
+     */
+    private List<RaceListDataType> getShownViewItems(List<ManagedRace> races) {
+        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = getRaceItemsGroupedBySeriesHeader(races);
+        final List<RaceListDataType> result = serializeItems(raceItemsByHeader);
+        return result;
+    }
+
+    private List<RaceListDataType> serializeItems(final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader) {
+        final List<RaceListDataType> result = new ArrayList<>();
+        final List<RaceListDataTypeHeader> headers = new ArrayList<>(raceItemsByHeader.keySet());
+        Collections.sort(headers, new Comparator<RaceListDataTypeHeader>() {
+            private final RaceGroupSeriesComparator c = new RaceGroupSeriesComparator();
+
+            @Override
+            public int compare(RaceListDataTypeHeader lhs, RaceListDataTypeHeader rhs) {
+                return c.compare(lhs.getRegattaSeries(), rhs.getRegattaSeries());
+            }
+        });
+        for (final RaceListDataTypeHeader header : headers) {
+            result.add(header);
+            final List<RaceListDataTypeRace> raceItems = new ArrayList<>(raceItemsByHeader.get(header));
+            Collections.sort(raceItems, new Comparator<RaceListDataTypeRace>() {
+                final CurrentRaceComparator c = new CurrentRaceComparator();
+
+                @Override
+                public int compare(RaceListDataTypeRace lhs, RaceListDataTypeRace rhs) {
+                    final int result;
+                    if (lhs != null && rhs != null) {
+                        result = c.compare(lhs.getRace(), rhs.getRace());
+                    } else {
+                        Log.e(TAG, "Internal error; found null for NavDrawer item while sorting");
+                        result = 0;
+                    }
+                    return result;
+                }
+            });
+            for (final RaceListDataTypeRace raceItem : raceItems) {
+                result.add(raceItem);
+            }
+        }
+        return result;
+    }
+
+    private Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> getRaceItemsGroupedBySeriesHeader(final List<ManagedRace> filteredRaces) {
+        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = new HashMap<>();
+        for (final ManagedRace race : filteredRaces) {
+            final SeriesBase series = race.getSeries();
+            final RaceListDataTypeHeader seriesHeader = viewItemsSeriesHeaders.get(series);
+            List<RaceListDataTypeRace> raceItemsInSeries = raceItemsByHeader.get(seriesHeader);
+            if (raceItemsInSeries == null) {
+                raceItemsInSeries = new ArrayList<>();
+                raceItemsByHeader.put(seriesHeader, raceItemsInSeries);
+            }
+            final RaceListDataTypeRace viewItemForRace = viewItemsRaces.get(race);
+            if (viewItemForRace != null) {
+                raceItemsInSeries.add(viewItemForRace);
+            } else {
+                Log.w(TAG, "A view item for race "+race+" provided by the filter could not be found", new RuntimeException("Here is where it happened"));
+            }
+        }
+        return raceItemsByHeader;
     }
 
     public void setSelectedRace(RaceListDataType id) {
@@ -448,6 +538,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
         ViewType(int index) {
             this.index = index;
+        }
+    }
+
+    public void onRacesChanged() {
+        synchronized (mLockObject) {
+            createViewItemsForRacesAndSeries();
+            getFilter().refreshRegattaStructures();
         }
     }
 }

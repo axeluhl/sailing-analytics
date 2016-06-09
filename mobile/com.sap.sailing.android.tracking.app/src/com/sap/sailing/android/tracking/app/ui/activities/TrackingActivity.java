@@ -38,6 +38,8 @@ import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.utils.ServiceHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
+import com.sap.sailing.domain.common.Bearing;
+import com.sap.sailing.domain.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class TrackingActivity extends BaseActivity implements GPSQualityListener, APIConnectivityListener {
@@ -70,11 +72,18 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
      * This isn't nice. The callbacks for fragments inside a view pager are unreliable, but I want the values to be
      * displayed immediately after device rotation. Thus they are cached here and the fragments can pick them up.
      */
-    public String lastSpeedIndicatorText = "-";
-    public String lastCompassIndicatorText = "-°";
+    public String lastSpeedIndicatorText;
+    public String lastCompassIndicatorText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
+            lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+        } else {
+            lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
+            lastSpeedIndicatorText = getString(R.string.initial_hyphen);
+        }
         super.onCreate(savedInstanceState);
 
         prefs = new AppPreferences(this);
@@ -84,10 +93,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         } else {
             checkinDigest = prefs.getTrackerIsTrackingCheckinDigest();
         }
-        lastSpeedIndicatorText = getString(R.string.initial_hyphen);
-
         setContentView(R.layout.activity_tracking);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
@@ -121,10 +127,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             } else {
                 trackingFragment = new TrackingFragment();
             }
-
             lastViewPagerItem = savedInstanceState.getInt(SIS_LAST_VIEWPAGER_ITEM);
-            lastSpeedIndicatorText = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, "-");
-            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, "-°");
         } else {
             trackingFragment = new TrackingFragment();
         }
@@ -245,7 +248,7 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, float bearing, float speed) {
+    public void gpsQualityAndAccurracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing bearing, Speed speed) {
         if (trackingFragment.isAdded()) {
             trackingFragment.setGPSQualityAndAcurracy(quality, gpsAccurracy);
         }

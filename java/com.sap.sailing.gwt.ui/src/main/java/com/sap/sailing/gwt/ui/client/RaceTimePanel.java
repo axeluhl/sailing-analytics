@@ -10,6 +10,7 @@ import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
@@ -28,6 +29,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private RaceTimesInfoDTO lastRaceTimesInfo;
     private boolean hasCanReplayDuringLiveRacesPermission = false;
     private final UserService userService;
+    private final RaceTimePanelLifecycle componentLifecycle;
+    
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user) {
@@ -42,22 +45,24 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
      * will be issued and the flag is cleared.
      */
     private boolean redrawAllMarkersPendingForMinMaxBeingInitialized;
-
     
-    public RaceTimePanel(UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
-            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean isScreenLargeEnoughToOfferChartSupport,
-            RegattaAndRaceIdentifier selectedRaceIdentifier) {
-        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, isScreenLargeEnoughToOfferChartSupport);
+    private final Duration initialTimeAfterRaceStartInReplayMode;
+    
+    public RaceTimePanel(RaceTimePanelLifecycle componentLifecycle, UserService userService, Timer timer, TimeRangeWithZoomProvider timeRangeProvider, StringMessages stringMessages,
+            RaceTimesInfoProvider raceTimesInfoProvider, boolean canReplayWhileLiveIsPossible, boolean forcePaddingRightToAlignToCharts,
+            RegattaAndRaceIdentifier selectedRaceIdentifier, Duration initialTimeAfterRaceStartInReplayMode) {
+        super(timer, timeRangeProvider, stringMessages, canReplayWhileLiveIsPossible, forcePaddingRightToAlignToCharts);
+        this.componentLifecycle = componentLifecycle;
         this.userService = userService;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         selectedRace = null;
         autoAdjustPlayMode = true;
         selectedRace = selectedRaceIdentifier;
+        this.initialTimeAfterRaceStartInReplayMode = initialTimeAfterRaceStartInReplayMode;
         if (!raceTimesInfoProvider.containsRaceIdentifier(selectedRace)) {
             raceTimesInfoProvider.addRaceIdentifier(selectedRace, true);
         }
     }
-    
     
     @Override
     protected void onLoad() {
@@ -104,15 +109,12 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
 
     @Override
     public RaceTimePanelSettings getSettings() {
-        RaceTimePanelSettings result = new RaceTimePanelSettings();
-        result.setRefreshInterval(timer.getRefreshInterval());
-        result.setRaceTimesInfo(raceTimesInfoProvider.getRaceTimesInfo(selectedRace));
-        return result;
+        return new RaceTimePanelSettings(timer.getRefreshInterval());
     }
 
     @Override
     public SettingsDialogComponent<RaceTimePanelSettings> getSettingsDialogComponent() {
-        return new RaceTimePanelSettingsDialogComponent(getSettings(), stringMessages);
+        return componentLifecycle.getSettingsDialogComponent(getSettings());
     }
 
     private void updateTimeInfo(RaceTimesInfoDTO raceTimesInfo) {
@@ -282,7 +284,8 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         case Replay:
             // set time to start of race
             if (newRaceTimesInfo.startOfRace != null) {
-                timer.setTime(newRaceTimesInfo.startOfRace.getTime());
+                timer.setTime(newRaceTimesInfo.startOfRace.getTime() +
+                        (initialTimeAfterRaceStartInReplayMode == null ? 0l : initialTimeAfterRaceStartInReplayMode.asMillis()));
             }
             break;
         }

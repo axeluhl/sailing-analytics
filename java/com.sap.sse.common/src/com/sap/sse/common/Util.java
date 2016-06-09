@@ -253,13 +253,34 @@ public class Util {
             List<T> l = (List<T>) iterable;
             return l.get(i);
         } else {
-            Iterator<T> iter = iterable.iterator();
+            final Iterator<T> iter = iterable.iterator();
             T result = iter.next();
             for (int j=0; j<i; j++) {
                 result = iter.next();
             }
             return result;
         }
+    }
+    
+    public static <T> T first(Iterable<T> iterable) {
+        final Iterator<T> iter = iterable.iterator();
+        final T result;
+        if (iter.hasNext()) {
+            result = iter.next();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public static <T> T last(Iterable<T> iterable) {
+        final T result;
+        if (isEmpty(iterable)) {
+            result = null;
+        } else {
+            result = get(iterable, size(iterable)-1);
+        }
+        return result;
     }
 
     /**
