@@ -112,6 +112,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.MockSmartphoneImeiServi
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
@@ -119,10 +120,10 @@ import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.spi.MasterDataResource;
-import com.sap.sailing.server.impl.MediaMasterDataExportTest;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
+import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -1743,7 +1744,7 @@ public class MasterDataImportTest {
         sourceService.mediaTrackAdded(trackOnSource);
 
         Collection<String> raceColumnNames = Arrays.asList(raceName1, raceName2, raceName3, raceName4, raceName5);
-        Regatta regatta = MediaMasterDataExportTest.createTestRegatta(regattaName1, raceColumnNames);
+        Regatta regatta = TrackBasedTest.createTestRegatta(regattaName1, raceColumnNames);
         sourceService.addRegattaWithoutReplication(regatta);
         int[] discardThresholds = new int[0];
         RegattaLeaderboard leaderboard = sourceService.addRegattaLeaderboard(regatta.getRegattaIdentifier(),
@@ -1753,7 +1754,7 @@ public class MasterDataImportTest {
                 new RegattaNameAndRaceName(regattaName1, raceName3),
                 new RegattaNameAndRaceName(regattaName2, raceName4),
                 new RegattaNameAndRaceName(regattaName2, raceName5));
-        MediaMasterDataExportTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
+        TrackBasedTest.assignRacesToRegattaLeaderboardColumns(leaderboard, raceIdentifiers);
         boolean displayGroupsInReverseOrder = false;
         int[] overallLeaderboardDiscardThresholds = new int[0];
         UUID leaderboardGropuUuid = UUID.randomUUID();
@@ -1790,26 +1791,16 @@ public class MasterDataImportTest {
             os.close();
             inputStream.close();
         }
-
-        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID)
-                .getResult();
+        MasterDataImportObjectCreationCount creationCount = destService.getDataImportLock().getProgress(randomUUID).getResult();
 
         // ---Asserts---
-
         Assert.assertNotNull(creationCount);
-
         Iterable<MediaTrack> targetTracks = destService.getAllMediaTracks();
-
         Assert.assertEquals(1, Util.size(targetTracks));
-
         MediaTrack trackOnTarget = targetTracks.iterator().next();
-
         Assert.assertEquals(trackOnSource.dbId, trackOnTarget.dbId);
-
         Assert.assertEquals(trackOnSource.url, trackOnTarget.url);
-
         Assert.assertEquals(trackOnSource.assignedRaces, trackOnTarget.assignedRaces);
-
     }
 
     @Test

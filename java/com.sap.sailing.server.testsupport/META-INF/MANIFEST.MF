@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Testsupport
+Bundle-SymbolicName: com.sap.sailing.server.testsupport
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sailing.server.testsupport
+Require-Bundle: com.sap.sailing.server,
+ com.sap.sailing.domain.common,
+ com.sap.sse.common,
+ com.sap.sailing.domain,
+ com.sap.sse,
+ com.sap.sse.replication,
+ com.sap.sse.filestorage,
+ com.sap.sailing.domain.persistence

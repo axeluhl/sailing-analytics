@@ -1,4 +1,4 @@
-package com.sap.sailing.server.test;
+package com.sap.sailing.server.testsupport;
 
 import java.util.Map;
 import java.util.Set;
