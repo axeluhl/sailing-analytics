@@ -23,6 +23,17 @@
 				<h2 class="releaseHeadline">Release Notes - Administration Console</h2>
 				<div class="innerContent">
 			
+                    <h2 class="articleSubheadline">June 2016</h2>
+                    <ul class="bulletList">
+			<li>Some REST APIs have slightly changed. The /api/v1/leaderboards/{name} resource now
+			    has the "netPoints" and "totalPoints" stuff right. The "netPoints" always refer to
+			    scores which may be reduced due to discarding rules. Total points always refer to
+			    the points before applying any discarding rules. Those numeric values for which so far
+			    accidentally String types with double-quoted values were used have been changed to
+			    numeric types, represented in the JSON documents without double quotes.
+			</li>
+                    </ul>
+
                     <h2 class="articleSubheadline">May 2016</h2>
                     <ul class="bulletList">
 			<li>Smartphone tracking support has been improved. When starting to track a race that has no
