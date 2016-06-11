@@ -627,7 +627,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                   // initialize simulation canvas
                   simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
                   simulationOverlay.addToMap();
-                  simulationOverlay.setVisible(false);
+                  showSimulationOverlay(settings.isShowSimulationOverlay());
               }
               if (showHeaderPanel) {
                   createHeaderPanel(map);
@@ -2505,10 +2505,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
             settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
-            simulationOverlay.setVisible(newSettings.isShowSimulationOverlay());
-            if (newSettings.isShowSimulationOverlay()) {
-                simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
-            }
+            showSimulationOverlay(newSettings.isShowSimulationOverlay());
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
             settings.setWindUp(newSettings.isWindUp());
@@ -2525,9 +2522,15 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
             redraw();
         }
     }
-    
-    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
 
+    private void showSimulationOverlay(boolean visible) {
+        simulationOverlay.setVisible(visible);
+        if (visible) {
+            simulationOverlay.updateLeg(Math.max(lastLegNumber,1), true, -1 /* ensure ui-update */);
+        }
+    }
+
+    public static class BoatsBoundsCalculator extends LatLngBoundsCalculatorForSelected {
         @Override
         public LatLngBounds calculateNewBounds(RaceMap forMap) {
             LatLngBounds newBounds = null;

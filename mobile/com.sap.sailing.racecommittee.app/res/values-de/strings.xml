@@ -512,5 +512,6 @@
     <string name="abort_dismiss">Verwerfen</string>
     <string name="set_column_factor">Setze Faktor</string>
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
+    <string name="sync_to_minute">Sync zur Minute</string>
 
 </resources>
