@@ -12,13 +12,7 @@
 				<div class="{res.mainCss.label}" ui:field="labelUi"></div>
 			</div>
 			<div class="{local_res.css.regattaheader_content_details}" ui:field="detailsItemContainerUi">
-				<!-- <div class="{local_res.css.regattaheader_content_details_item}"></div> -->
 			</div>
 		</div>
-		<!-- IF content.isLive <div class="{local_res.css.regattaheader_update}"> 
-			<div class="{local_res.css.regattaheader_update_title}"> <img src="images/home/reload-green.png" 
-			class="{local_res.css.regattaheader_update_title_icon}"></img> <ui:text from='{i18n.lastUpdate}' 
-			/> </div> <div class="{local_res.css.regattaheader_update_timestamp}"></div> 
-			</div> IFEND content.isLive -->
 	</div>
 </ui:UiBinder>
