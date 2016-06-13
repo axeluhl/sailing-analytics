@@ -18,7 +18,9 @@ public class LeaderboardWithHeaderPerspectiveLifecycle extends AbstractPerspecti
         super();
         this.stringMessages = stringMessages;
         this.leaderboardPanelLifecycle = new LeaderboardPanelLifecycle(leaderboard, stringMessages);
-        this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " + leaderboard.getDisplayName(), stringMessages);
+        this.sapHeaderLifecycle = new SAPHeaderComponentLifecycle(stringMessages.leaderboard() +  ": " +
+                (leaderboard.getDisplayName() == null ? leaderboard.name : leaderboard.getDisplayName()),
+                        stringMessages);
         
         this.componentLifecycles.add(leaderboardPanelLifecycle);
         this.componentLifecycles.add(sapHeaderLifecycle);
