@@ -14,7 +14,10 @@ public class RaceMapLifecycle implements ComponentLifecycle<RaceMapSettings, Rac
     
     @Override
     public RaceMapSettingsDialogComponent getSettingsDialogComponent(RaceMapSettings settings) {
-        return new RaceMapSettingsDialogComponent(settings, stringMessages, false);
+        return new RaceMapSettingsDialogComponent(settings, stringMessages,
+                /* isSimulationEnabled: enable simulation because we don't know the boat class
+                 * here yet and therefore cannot reasonably judge whether polar data is
+                 * available; if in doubt, rather enable selecting it */ true);
     }
 
     @Override
