@@ -44,7 +44,7 @@ public abstract class AbstractValueSetSetting<T> extends AbstractValueCollection
     @Override
     public boolean isDefaultValue() {
         ValueCollectionValue<Set<Value>> value = getValue();
-        return (emptyIsDefault && value.isEmpty())
+        return (emptyIsDefault && (value == null || value.isEmpty()))
                 || (value.size() == defaultValues.size() && defaultValues.containsAll(value.getValues(getValueConverter())));
     }
     
