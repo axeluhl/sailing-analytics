@@ -5,9 +5,7 @@ This is a collection of frequently asked questions about the operation of the SA
 ## 1. Tracking
 
 1.1 How to handle course changes
-
-
-
+1.2 How to fix a race with missing mark passing times
 
 ## 2. Windbot
 
