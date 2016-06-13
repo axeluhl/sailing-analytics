@@ -63,7 +63,7 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Uploading Media Content|wiki/uploading-media-content]]
 * Information for Event Managers
   * [[Set up local network with replication server|wiki/event-network-with-replica]]
-  * [[Operating Igtimi WindBots/windbot-operations]]
+  * [[Operating Igtimi WindBots|wiki/windbot-operations]]
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
 * Planning and Event Information
