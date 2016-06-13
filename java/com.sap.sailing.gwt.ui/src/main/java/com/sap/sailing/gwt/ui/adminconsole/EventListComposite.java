@@ -590,10 +590,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         Pair<List<CourseAreaDTO>, List<CourseAreaDTO>> courseAreasToAddAndRemove = getCourseAreasToAdd(oldEvent, updatedEvent);
         final List<CourseAreaDTO> courseAreasToAdd = courseAreasToAddAndRemove.getA();
         final List<CourseAreaDTO> courseAreasToRemove = courseAreasToAddAndRemove.getB();
-        final List<UUID> updatedEventLeaderboardGroupIds = new ArrayList<>();
-        for (LeaderboardGroupDTO leaderboardGroup : updatedEvent.getLeaderboardGroups()) {
-            updatedEventLeaderboardGroupIds.add(leaderboardGroup.getId());
-        }
+        final Iterable<UUID> updatedEventLeaderboardGroupIds = updatedEvent.getLeaderboardGroupIds();
         sailingService.updateEvent(oldEvent.id, oldEvent.getName(), updatedEvent.getDescription(),
                 updatedEvent.startDate, updatedEvent.endDate, updatedEvent.venue,
                 updatedEvent.isPublic, updatedEventLeaderboardGroupIds,
@@ -673,7 +670,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         }
         sailingService.createEvent(newEvent.getName(), newEvent.getDescription(), newEvent.startDate, newEvent.endDate,
                 newEvent.venue.getName(), newEvent.isPublic, courseAreaNames, newEvent.getOfficialWebsiteURL(), newEvent.getSailorsInfoWebsiteURLs(),
-                newEvent.getImages(), newEvent.getVideos(), new AsyncCallback<EventDTO>() {
+                newEvent.getImages(), newEvent.getVideos(), newEvent.getLeaderboardGroupIds(), new AsyncCallback<EventDTO>() {
             @Override
             public void onFailure(Throwable t) {
                 errorReporter.reportError("Error trying to create new event " + newEvent.getName() + ": " + t.getMessage());
