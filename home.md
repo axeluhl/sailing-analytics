@@ -31,7 +31,6 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[EC2 mail relaying|wiki/mail-relaying]]
   * [[TracTrac|wiki/tractrac-lifecycle]]
   * [[Analytics on a stick|wiki/analytics-on-a-stick]]
-  * [[Operating Igtimi WindBots/windbot-operations]]
   * [[Monitoring Apache and RabbitMQ|wiki/monitoring-apache-and-rabbitmq]]
   * [[JMX Support|wiki/jmx]]
   * [[Log File Analysis|wiki/log-file-analysis]]
@@ -66,6 +65,8 @@ SAP is at the center of today’s technology revolution, developing innovations 
   * [[Operating Igtimi WindBots|wiki/windbot-operations]]
   * [[Linking Race Videos|wiki/linking-race-videos]]
   * [[Import official results|wiki/results-import]]
+* Information for League operators
+  * [[FAQ|wiki/league-operators-faq]]
 * Planning and Event Information
   * [[Project Planning (bigger development)|wiki/planning]]
   * [[General Event Planning|wiki/general-event-planning]]
