@@ -231,6 +231,10 @@ public class LeaderboardContext {
         regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
         regattaDTO.setDefaultCourseAreaId(HomeServiceUtil.getCourseAreaIdForRegatta(event, leaderboard));
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
+        
+        RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
+        forRaces(regattaRaceDataInfoCalculator);
+        regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
     }
     
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {
