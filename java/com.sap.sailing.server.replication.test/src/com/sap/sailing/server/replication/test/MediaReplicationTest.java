@@ -257,6 +257,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
         // ---Asserts---
         final Iterable<MediaTrack> targetTracksMaster = master.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksMaster);
+        waitSomeTime();
         final Iterable<MediaTrack> targetTracksReplica = replica.getAllMediaTracks();
         compareTracks(trackOnSource, targetTracksReplica);
     }
