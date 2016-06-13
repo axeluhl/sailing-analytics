@@ -119,6 +119,7 @@
   margin: .666666666666667em 0 1em;
   cursor: default;
   font-size: 1rem;
+  border-left: 1px solid #ccc;
 }
 
 .regattaheader_indicators:hover {
@@ -128,7 +129,6 @@
 .regattaheader_indicators.regattaheader_indicators_next_to_arrow {
   right: 5em;
   border-right: 1px solid #ccc;
-  border-left: 1px solid #ccc;
   cursor: inherit;
 }
 .regattaheader_indicators > div {
