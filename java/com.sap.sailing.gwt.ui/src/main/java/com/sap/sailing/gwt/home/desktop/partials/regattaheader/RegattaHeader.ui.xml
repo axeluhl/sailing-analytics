@@ -9,9 +9,6 @@
 			<div class="{res.mediaCss.grid}">
 				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 					<a class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}" ui:field="headerBodyUi"></a>
-<!-- 					<a class="{local_res.css.regattaheader_toggle}"> -->
-<!-- 						<img src="images/home/arrow-down-grey.png" class="{local_res.css.regattaheader_toggle_icon}"></img> -->
-<!-- 					</a> -->
                     <a class="{local_res.css.regattaheader_indicators}" ui:field="dataIndicatorsUi">
                         <div>
 	                        <div style="background-image:url('images/home/raw_gps_fixes.png');" ui:field="gpsDataIndicatorUi"></div>
@@ -21,9 +18,6 @@
                         </div>
                     </a>
 					<a class="{local_res.css.regattaheader_arrow}" style="display:none;" ui:field="headerArrowUi"></a>
-<!-- 					<div class="{local_res.css.regattaheader} {local_res.css.regattaheaderpadding}"></div> -->
-<!-- 					<div class="{local_res.css.regattaheader_toggle}"></div> -->
-<!-- 					<div class="{local_res.css.regattaheader_arrow}"></div> -->
 				</div>
 			</div>
 		</div>
