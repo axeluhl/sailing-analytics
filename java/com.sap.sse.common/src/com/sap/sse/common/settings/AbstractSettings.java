@@ -89,7 +89,6 @@ public abstract class AbstractSettings extends AbstractSetting implements Settin
             value = new SettingsValue();
             settings.setValue(name, value);
         }
-        settings.setValue(name, value);
         addChildSettingsInternal();
     }
     
