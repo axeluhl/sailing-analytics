@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 public class TestORCCertificateParser {
-    private static final String RESOURCES = "resources/";
+    private static final String RESOURCES = "resources/orc/";
 
     @Test
     public void testSimpleRMSFileRead() throws FileNotFoundException, IOException {
