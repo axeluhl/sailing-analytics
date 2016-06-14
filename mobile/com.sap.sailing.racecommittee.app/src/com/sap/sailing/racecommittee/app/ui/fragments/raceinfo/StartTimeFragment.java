@@ -69,7 +69,9 @@ public class StartTimeFragment extends BaseFragment
     private View mRelative;
     private Button mAbsoluteButton;
     private Button mRelativeButton;
+    private Button mSetStartAbsolute;
     private Button mSetStartRelative;
+    private int mCurrentTab;
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
@@ -153,9 +155,9 @@ public class StartTimeFragment extends BaseFragment
             syncMinute.setOnClickListener(this);
         }
 
-        View setStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
-        if (setStartAbsolute != null) {
-            setStartAbsolute.setOnClickListener(this);
+        mSetStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
+        if (mSetStartAbsolute != null) {
+            mSetStartAbsolute.setOnClickListener(this);
         }
 
         mSetStartRelative = ViewHelper.get(layout, R.id.set_start_time_relative);
@@ -221,6 +223,13 @@ public class StartTimeFragment extends BaseFragment
                     if (result != null && result.isDependentStartTime()) {
                         mStartTimeOffset = result.getStartTimeDiff();
                         mRaceId = Util.get(result.getDependingOnRaces(), 0);
+                    }
+
+                    if (mSetStartAbsolute != null) {
+                        mSetStartAbsolute.setEnabled(false);
+                    }
+                    if (mSetStartRelative != null) {
+                        mSetStartRelative.setEnabled(false);
                     }
                     break;
 
@@ -548,6 +557,7 @@ public class StartTimeFragment extends BaseFragment
     }
 
     private void showTab(int tab) {
+        mCurrentTab = tab;
         int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
         int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
 
@@ -630,6 +640,7 @@ public class StartTimeFragment extends BaseFragment
         mStartTime = mStartTime.getNearestModuloOneMinute(now);
         mListenerIgnore = true;
         setPickerTime();
+        activateSetTime();
     }
 
     @Override
@@ -637,6 +648,7 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
+            activateSetTime();
         }
         mListenerIgnore = false;
     }
@@ -646,8 +658,25 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
+            activateSetTime();
         }
         mListenerIgnore = false;
+    }
+
+    private void activateSetTime() {
+        switch (mCurrentTab) {
+            case ABSOLUTE:
+                if (mSetStartAbsolute != null) {
+                    mSetStartAbsolute.setEnabled(true);
+                }
+                break;
+
+            case RELATIVE:
+                if (mSetStartRelative != null) {
+                    mSetStartRelative.setEnabled(true);
+                }
+                break;
+        }
     }
 
     private void setSeconds() {
@@ -657,7 +686,7 @@ public class StartTimeFragment extends BaseFragment
     private void setSeconds(int sec, int msec) {
         if (mStartSeconds != null) {
             double seconds = sec + msec / (double) 1000;
-            DecimalFormat format = new DecimalFormat("0.000");
+            DecimalFormat format = new DecimalFormat("00.000");
             mStartSeconds.setDisplayedValues(new String[] { format.format(seconds) });
         }
     }
