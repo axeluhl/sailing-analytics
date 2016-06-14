@@ -45,7 +45,7 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
         /* showWindChart */false, /* showCompetitorsChart */false, 
-        /* simulationEnabled */false, /* canReplayDuringLiveRaces */false, /* chartSupportEnabled */ true, 
+        /* simulationEnabled */true, /* canReplayDuringLiveRaces */false, /* chartSupportEnabled */ true, 
         /* showChartMarkEditMediaButtonsAndVideo */ !DeviceDetector.isMobile(),
         /* initialDurationAfterRaceStartInReplay */ null);
     }
