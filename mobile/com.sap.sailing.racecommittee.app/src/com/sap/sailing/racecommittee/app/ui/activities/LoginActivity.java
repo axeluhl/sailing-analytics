@@ -362,6 +362,13 @@ public class LoginActivity extends BaseActivity
     public void onResume() {
         super.onResume();
 
+        if (preferences.needConfigRefresh()) {
+            preferences.setNeedConfigRefresh(false);
+            Intent intent = new Intent(this, getClass());
+            startActivity(intent);
+            finish();
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.INTENT_ACTION_RESET);
         filter.addAction(AppConstants.INTENT_ACTION_VALID_DATA);
@@ -426,7 +433,7 @@ public class LoginActivity extends BaseActivity
             }
         });
 
-        if (!preferences.isOfflineMode() && preferences.needConfigRefresh()) {
+        if (!preferences.isOfflineMode()) {
             // reload the configuration if needed...
             getLoaderManager().restartLoader(0, null, configurationLoader).forceLoad();
         } else {
