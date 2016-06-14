@@ -388,7 +388,6 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPause() {
         super.onPause();
-        wakeUp = true;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
     }
 
@@ -525,6 +524,10 @@ public class LoginActivity extends BaseActivity
     }
 
     private void resetData() {
+        if (backdrop.getY() != 0) {
+            return;
+        }
+
         setupDataManager();
 
         addEventListFragment();
@@ -541,12 +544,11 @@ public class LoginActivity extends BaseActivity
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (AppConstants.INTENT_ACTION_RESET.equals(action) && !wakeUp) {
+            if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
                 resetData();
-            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action) && !wakeUp) {
+            } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
                 resetData();
             }
-            wakeUp = false;
         }
     }
 
