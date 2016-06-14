@@ -10,11 +10,6 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
-import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
-import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
-import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RaceLogTrackingStateAnalyzer;
 import com.sap.sailing.domain.abstractlog.regatta.EventMappingVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
@@ -28,7 +23,6 @@ import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.Regatt
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.racelog.tracking.RaceLogTrackingState;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -46,7 +40,6 @@ import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
-import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
@@ -63,10 +56,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 public class RaceLogSensorFixTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(RaceLogSensorFixTracker.class.getName());
-    
-    public interface Owner {
-        void stopped(RaceLogSensorFixTracker tracker);
-    }
 
     protected final DynamicTrackedRace trackedRace;
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
@@ -76,37 +65,7 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
     private final RaceLogMappingWrapper<WithID> competitorMappings;
     private final AtomicInteger activeLoaders = new AtomicInteger();
     private final SensorFixMapperFactory sensorFixMapperFactory;
-    private final Owner owner;
-    private boolean tracking = false;
-
-    private final RaceLogEventVisitor raceLogEventVisitor = new BaseRaceLogEventVisitor() {
-        @Override
-        public void visit(RaceLogDenoteForTrackingEvent event) {
-            updateDenotionState();
-        }
-        @Override
-        public void visit(RaceLogRevokeEvent event) {
-            updateDenotionState();
-        }
-    };
-
-    private final RegattaLogAttachmentListener regattaLogAttachmentListener = new RegattaLogAttachmentListener() {
-        @Override
-        public void regattaLogAboutToBeAttached(RegattaLog regattaLog) {
-            synchronized (knownRegattaLogs) {
-                addRegattaLogUnlocked(regattaLog);
-            }
-            updateMappingsAndAddListeners();
-        }
-
-        @Override
-        public void onStopTracking(boolean preemptive) {
-            if (preemptive) {
-                waitForLoadingFromFixStoreToFinishRunning();
-            }
-            stop();
-        }
-    };
+    
     private final AbstractRaceChangeListener trackingTimesRaceChangeListener = new AbstractRaceChangeListener() {
         @Override
         public void startOfTrackingChanged(TimePoint oldStartOfTracking, TimePoint newStartOfTracking) {
@@ -121,6 +80,13 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
             if (newEndOfTracking == null || (oldEndOfTracking != null && newEndOfTracking.after(oldEndOfTracking))) {
                 loadFixesForExtendedTimeRange(oldEndOfTracking, newEndOfTracking);
             }
+        }
+        
+        public void regattaLogAttached(RegattaLog regattaLog) {
+            synchronized (knownRegattaLogs) {
+                addRegattaLogUnlocked(regattaLog);
+            }
+            updateMappingsAndAddListeners();
         }
     };
     private final RegattaLogEventVisitor regattaLogEventVisitor = new BaseRegattaLogEventVisitor() {
@@ -207,16 +173,10 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
             });
         }
     };
-
-    public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
-            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
-        this(trackedRace, sensorFixStore, sensorFixMapperFactory, tracker -> {});
-    }
     
     public RaceLogSensorFixTracker(DynamicTrackedRace trackedRace,
-            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory, Owner owner) {
+            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
         this.sensorFixStore = sensorFixStore;
-        this.owner = owner;
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         this.sensorFixMapperFactory = sensorFixMapperFactory;
         this.trackedRace = trackedRace;
@@ -250,29 +210,7 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
             }
         };
         
-//        trackedRace.getRaceLog(trackedRace.getRaceIdentifier()).addListener(raceLogEventVisitor);
-//        updateDenotionState();
         startTracking();
-    }
-    
-    private synchronized void updateDenotionState() {
-        RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(trackedRace.getRaceLog(trackedRace.getRaceIdentifier())).analyze();
-        boolean forTracking = raceLogTrackingState.isForTracking();
-        if(!tracking && forTracking) {
-            startTracking();
-        }
-        if(tracking && !forTracking) {
-            trackedRace.removeListener(trackingTimesRaceChangeListener);
-            trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
-            synchronized (knownRegattaLogs) {
-                knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
-                knownRegattaLogs.clear();
-            }
-            setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
-            sensorFixStore.removeListener(listener);
-            tracking = false;
-        }
-        
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<WithID> mapping) {
@@ -348,19 +286,15 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
 
     public void stop() {
         trackedRace.removeListener(trackingTimesRaceChangeListener);
-        trackedRace.removeRegattaLogAttachmentListener(regattaLogAttachmentListener);
         synchronized (knownRegattaLogs) {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
             knownRegattaLogs.clear();
         }
         setStatusAndProgress(TrackedRaceStatusEnum.FINISHED, 1.0);
         sensorFixStore.removeListener(listener);
-        tracking = false;
-        owner.stopped(this);
     }
     
     protected void startTracking() {
-        trackedRace.addRegattaLogAttachmentListener(regattaLogAttachmentListener);
         final boolean hasRegattaLogs;
         synchronized (knownRegattaLogs) {
             trackedRace.getAttachedRegattaLogs().forEach(this::addRegattaLogUnlocked);
@@ -371,7 +305,6 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
             updateMappingsAndAddListeners();
             waitForLoadingFromFixStoreToFinishRunning();
         }
-        tracking = true;
     }
     protected void waitForLoadingFromFixStoreToFinishRunning() {
         try {

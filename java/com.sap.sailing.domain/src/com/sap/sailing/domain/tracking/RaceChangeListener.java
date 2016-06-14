@@ -2,10 +2,12 @@ package com.sap.sailing.domain.tracking;
 
 import java.util.Map;
 
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogPassChangeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseListener;
 import com.sap.sailing.domain.base.Mark;
@@ -70,4 +72,10 @@ public interface RaceChangeListener extends CourseListener {
     void trackAdded(DynamicSensorFixTrack<Competitor, ?> track);
     
     void fixAdded(Competitor competitor, String trackName, SensorFix fix);
+    
+    void regattaLogAttached(RegattaLog regattaLog);
+    
+    void raceLogAttached(RaceLog raceLog);
+
+    void stopTracking(boolean preemptive);
 }

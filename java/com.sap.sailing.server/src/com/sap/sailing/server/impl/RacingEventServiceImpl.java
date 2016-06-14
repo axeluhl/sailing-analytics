@@ -58,6 +58,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorStore;
 import com.sap.sailing.domain.base.CompetitorStore.CompetitorUpdateListener;
@@ -1721,6 +1722,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             return trackedRace.getRaceIdentifier();
         }
 
+        @Override
+        public void regattaLogAttached(RegattaLog regattaLog) {
+            // no action required
+        }
+        
+        @Override
+        public void raceLogAttached(RaceLog regattaLog) {
+            // no action required
+        }
+        
+        @Override
+        public void stopTracking(boolean preemptive) {
+            // no action required
+        }
     }
 
     /**

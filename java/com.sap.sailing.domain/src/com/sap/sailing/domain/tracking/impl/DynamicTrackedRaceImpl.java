@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -287,7 +286,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
 
     @Override
     public void onStopTracking(final boolean preemptive) {
-        informListenersOnStopTracking(preemptive);
+        notifyListenersOnStopTracking(preemptive);
     }
 
     @Override
@@ -356,7 +355,8 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      * Callers iterating over the result need to synchronize on the resulting collection while iterating
      * to avoid {@link ConcurrentModificationException}s.
      */
-    private Set<RaceChangeListener> getListeners() {
+    @Override
+    protected Set<RaceChangeListener> getListeners() {
         if (listeners == null) {
             listeners = new HashSet<RaceChangeListener>();
         }
@@ -458,21 +458,6 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void setWindSourcesToExclude(Iterable<? extends WindSource> windSourcesToExclude) {
         super.setWindSourcesToExclude(windSourcesToExclude);
         notifyListenersWindSourcesToExcludeChanged(windSourcesToExclude);
-    }
-
-    private void notifyListeners(Consumer<RaceChangeListener> notifyAction) {
-        RaceChangeListener[] listeners;
-        synchronized (getListeners()) {
-            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
-        }
-        for (RaceChangeListener listener : listeners) {
-            try {
-                notifyAction.accept(listener);
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
-                logger.log(Level.SEVERE, "notifyListeners(Consumer<RaceChangeListener> notifyAction", e);
-            }
-        }
     }
 
     @Override
