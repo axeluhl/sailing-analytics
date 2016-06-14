@@ -439,7 +439,7 @@
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
-    <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
+    <string name="app_refresh_message">Please logout from the current event to load the data from the new server.</string>
     <string name="until_xray_removed">XRAY will be removed in %s</string>
     <string name="send_photos">Send Photos</string>
     <string name="error_wrong_degree_value_title">Error</string>
@@ -541,5 +541,6 @@
     <string name="set_column_factor">Set Factor</string>
     <string name="set_factor_error">There was an error while setting the factor: %s</string>
     <string name="sync_to_minute">Sync to minute</string>
+    <string name="non_public_changed_title">Non Public Events</string>
 
 </resources>

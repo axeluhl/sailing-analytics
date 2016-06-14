@@ -416,7 +416,7 @@
     <string name="theme_changed_title">Darstellungsmodus ändern</string>
     <string name="theme_changed_message">Die Änderung am Theme wird nach einem Neustart der App wirksam.</string>
     <string name="url_refresh_title">Die Server URL wurde geändert</string>
-    <string name="url_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
+    <string name="app_refresh_message">Bitte melden Sie sich vom aktuellen Event ab, um die Daten des neuen Servers zu laden.</string>
     <string name="until_xray_removed">XRAY wird eingeholt in %s</string>
     <string name="send_photos">Fotos senden</string>
     <string name="error_wrong_degree_value_title">Fehler</string>
@@ -513,5 +513,6 @@
     <string name="set_column_factor">Setze Faktor</string>
     <string name="set_factor_error">Beim Setzen des Faktors ist ein Fehler aufgetreten: %s</string>
     <string name="sync_to_minute">Sync zur Minute</string>
+    <string name="non_public_changed_title">Nicht öffentliche Events</string>
 
 </resources>
