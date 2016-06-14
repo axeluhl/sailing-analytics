@@ -3484,7 +3484,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName,
-            Iterable<ImageDTO> images, Iterable<VideoDTO> videos)
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds)
             throws MalformedURLException {
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
@@ -3496,7 +3496,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<VideoDescriptor> eventVideos = convertToVideos(videos);
         getService().apply(
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        officialWebsiteURL, sailorsInfoWebsiteURLs, eventImages, eventVideos));
+                        officialWebsiteURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
         createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
         return getEventById(eventUuid, false);
     }

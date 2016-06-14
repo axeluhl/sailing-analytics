@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.Date;
 
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
@@ -14,6 +15,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private Date endDate;
     private RegattaState state;
     private boolean flexibleLeaderboard;
+    private RaceDataInfo raceDataInfo;
     
     public RegattaMetadataDTO() {
     }
@@ -103,5 +105,43 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
 
     public void setDefaultCourseAreaId(String defaultCourseAreaId) {
         this.defaultCourseAreaId = defaultCourseAreaId;
+    }
+    
+    public RaceDataInfo getRaceDataInfo() {
+        return raceDataInfo;
+    }
+    
+    public void setRaceDataInfo(RaceDataInfo raceDataInfo) {
+        this.raceDataInfo = raceDataInfo;
+    }
+    
+    public static class RaceDataInfo implements DTO {
+        private boolean hasGPSData, hasWindData, hasVideoData, hasAudioData;
+        
+        protected RaceDataInfo() {
+        }
+        
+        public RaceDataInfo(boolean hasGPSData, boolean hasWindData, boolean hasVideoData, boolean hasAudioData) {
+            this.hasGPSData = hasGPSData;
+            this.hasWindData = hasWindData;
+            this.hasVideoData = hasVideoData;
+            this.hasAudioData = hasAudioData;
+        }
+
+        public boolean hasGPSData() {
+            return hasGPSData;
+        }
+
+        public boolean hasWindData() {
+            return hasWindData;
+        }
+
+        public boolean hasVideoData() {
+            return hasVideoData;
+        }
+
+        public boolean hasAudioData() {
+            return hasAudioData;
+        }
     }
 }

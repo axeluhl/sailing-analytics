@@ -127,7 +127,7 @@ public class SearchServiceTest {
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingsbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate,
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /* sailorsInfoWebsiteURLAsString */ null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         kiel = pfingstbusch.getVenue();
         final CourseAreaImpl kielAlpha = new CourseAreaImpl("Alpha", UUID.randomUUID());
         kiel.addCourseArea(kielAlpha);
@@ -165,7 +165,7 @@ public class SearchServiceTest {
         final TimePoint aalEndDate = new MillisecondsTimePoint(cal.getTime());
         aalEvent = server.apply(new CreateEvent("Aalregatta", /* eventDescription */ null, aalStartDate, aalEndDate,
                 "Flensburg", /* isPublic */ true, UUID.randomUUID(),  /* officialWebsiteURLAsString */ null, /*sailorsInfoWebsiteURLAsString */ null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         flensburg = aalEvent.getVenue();
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);

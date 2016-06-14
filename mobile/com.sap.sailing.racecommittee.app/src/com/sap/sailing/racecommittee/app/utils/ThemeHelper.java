@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DimenRes;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
@@ -103,6 +104,21 @@ public class ThemeHelper {
     public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor, @ColorInt int dividerColor) {
         setPickerTextColor(context, numberPicker, textColor);
         setPickerDividerColor(context, numberPicker, dividerColor);
+    }
+
+    public static void setPickerTextSize(Context context, NumberPicker numberPicker, @DimenRes int dimen) {
+        final int count = numberPicker.getChildCount();
+        for (int i = 0; i < count; i++) {
+            View child = numberPicker.getChildAt(i);
+            if (child instanceof EditText) {
+                try {
+                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(dimen));
+                    numberPicker.invalidate();
+                } catch (IllegalArgumentException e) {
+                    ExLog.w(context, TAG, "IllegalArgumentException - " + e.getMessage());
+                }
+            }
+        }
     }
 
     public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
