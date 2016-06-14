@@ -62,6 +62,7 @@ public class StartTimeFragment extends BaseFragment
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = 3;
     private static final int MAX_DIFF_MIN = 60;
+    private static final int NONE = -1;
     private static final int ABSOLUTE = 0;
     private static final int RELATIVE = 1;
 
@@ -224,13 +225,6 @@ public class StartTimeFragment extends BaseFragment
                         mStartTimeOffset = result.getStartTimeDiff();
                         mRaceId = Util.get(result.getDependingOnRaces(), 0);
                     }
-
-                    if (mSetStartAbsolute != null) {
-                        mSetStartAbsolute.setEnabled(false);
-                    }
-                    if (mSetStartRelative != null) {
-                        mSetStartRelative.setEnabled(false);
-                    }
                     break;
 
                 default: // MODE_SETUP
@@ -262,6 +256,11 @@ public class StartTimeFragment extends BaseFragment
 
         initViewsAbsolute(time);
         initViewsRelative();
+
+        // reset Set Time button after init
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == MODE_TIME_PANEL) {
+            activateSetTime(NONE);
+        }
     }
 
     @Override
@@ -685,6 +684,14 @@ public class StartTimeFragment extends BaseFragment
                     mSetStartRelative.setEnabled(true);
                 }
                 break;
+
+            default:
+                if (mSetStartAbsolute != null) {
+                    mSetStartAbsolute.setEnabled(false);
+                }
+                if (mSetStartRelative != null) {
+                    mSetStartRelative.setEnabled(false);
+                }
         }
     }
 
