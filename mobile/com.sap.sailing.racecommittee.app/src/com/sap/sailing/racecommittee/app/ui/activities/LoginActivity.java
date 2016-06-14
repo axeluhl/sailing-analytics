@@ -72,8 +72,6 @@ public class LoginActivity extends BaseActivity
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
 
-    private boolean wakeUp;
-
     private final static String TAG = LoginActivity.class.getName();
 
     private final PositionListFragment positionFragment;
