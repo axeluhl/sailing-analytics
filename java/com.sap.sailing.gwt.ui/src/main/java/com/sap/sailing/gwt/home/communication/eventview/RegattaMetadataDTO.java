@@ -115,6 +115,18 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.raceDataInfo = raceDataInfo;
     }
     
+    @Override
+    public int compareTo(RegattaReferenceDTO o) {
+        int result = 0;
+        if (o instanceof RegattaMetadataDTO) {
+            result = boatCategory.compareTo(((RegattaMetadataDTO) o).boatCategory);
+        }
+        if (result == 0) {
+            result = super.compareTo(o);
+        }
+        return result;
+    }
+
     public static class RaceDataInfo implements DTO {
         private boolean hasGPSData, hasWindData, hasVideoData, hasAudioData;
         
