@@ -913,15 +913,11 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     public void updateStartAndEndOfTracking(boolean waitForGPSFixesToLoad);
     
-    default void addRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
-    }
-    
-    default void removeRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
-    }
-    
     default void lockForSerializationRead() {
     }
     
     default void unlockAfterSerializationRead() {
     }
+    
+    Iterable<RaceLog> getAttachedRaceLogs();
 }

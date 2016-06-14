@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -126,9 +126,9 @@ import com.sap.sailing.domain.tracking.GPSTrackListener;
 import com.sap.sailing.domain.tracking.LineDetails;
 import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
+import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.RaceExecutionOrderProvider;
 import com.sap.sailing.domain.tracking.RaceListener;
-import com.sap.sailing.domain.tracking.RegattaLogAttachmentListener;
 import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackFactory;
@@ -395,8 +395,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     private transient RaceLogResolver raceLogResolver;
     
     private final NamedReentrantReadWriteLock sensorTracksLock;
-    
-    private transient Set<RegattaLogAttachmentListener> regattaLogAttachmentListeners;
 
     /**
      * Constructs the tracked race with one-design ranking.
@@ -557,8 +555,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         } catch (InterruptedException e) {
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
-        
-        regattaLogAttachmentListeners = new HashSet<>();
     }
 
     @Override
@@ -652,7 +648,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         adjustStructureToCourse();
         triggerManeuverCacheRecalculationForAllCompetitors();
         logger.info("Deserialized race " + getRace().getName());
-        regattaLogAttachmentListeners = new HashSet<>();
     }
 
     /**
@@ -3329,6 +3324,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             updateStartOfRaceCacheFields();
             updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
         }
+        notifyListenersWhenAttachingRaceLog(raceLog);
     }
 
     @Override
@@ -3378,7 +3374,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             if (attachedRegattaLogs != null) {
                 attachedRegattaLogs.put(regattaLog.getId(), regattaLog);
             }
-            informListenersBeforeAttachingRegattaLog(regattaLog);
+            notifyListenersWhenAttachingRegattaLog(regattaLog);
             // informListenersAboutAttachedRegattaLog(regattaLog);
             TrackedRaceImpl.this.notifyAll();
         }
@@ -3990,35 +3986,33 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return (TrackT) sensorTracks.get(key);
     }
     
-    @Override
-    public void addRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
-        synchronized (regattaLogAttachmentListeners) {
-            regattaLogAttachmentListeners.add(listener);
+    protected abstract Set<RaceChangeListener> getListeners();
+
+    protected void notifyListeners(Consumer<RaceChangeListener> notifyAction) {
+        RaceChangeListener[] listeners;
+        synchronized (getListeners()) {
+            listeners = getListeners().toArray(new RaceChangeListener[getListeners().size()]);
+        }
+        for (RaceChangeListener listener : listeners) {
+            try {
+                notifyAction.accept(listener);
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "RaceChangeListener " + listener + " threw exception " + e.getMessage());
+                logger.log(Level.SEVERE, "notifyListeners(Consumer<RaceChangeListener> notifyAction", e);
+            }
         }
     }
     
-    @Override
-    public void removeRegattaLogAttachmentListener(RegattaLogAttachmentListener listener) {
-        synchronized (regattaLogAttachmentListeners) {
-            regattaLogAttachmentListeners.remove(listener);
-        }
+    private void notifyListenersWhenAttachingRegattaLog(RegattaLog regattaLog) {
+        notifyListeners(listener -> listener.regattaLogAttached(regattaLog));
     }
     
-    private <T> void informRegattaLogAttachmentListeners(T regattaLog,
-            BiConsumer<RegattaLogAttachmentListener, T> listenerCaller) {
-        Iterable<RegattaLogAttachmentListener> listeners;
-        synchronized (regattaLogAttachmentListeners) {
-            listeners = new ArrayList<>(regattaLogAttachmentListeners);
-        }
-        listeners.forEach((listener) -> listenerCaller.accept(listener, regattaLog));
-    }
-    
-    private void informListenersBeforeAttachingRegattaLog(RegattaLog regattaLog) {
-        informRegattaLogAttachmentListeners(regattaLog, RegattaLogAttachmentListener::regattaLogAboutToBeAttached);
+    private void notifyListenersWhenAttachingRaceLog(RaceLog raceLog) {
+        notifyListeners(listener -> listener.raceLogAttached(raceLog));
     }
 
-    protected void informListenersOnStopTracking(boolean preemptive) {
-        informRegattaLogAttachmentListeners(preemptive, RegattaLogAttachmentListener::onStopTracking);
+    protected void notifyListenersOnStopTracking(boolean preemptive) {
+        notifyListeners(listener -> listener.stopTracking(preemptive));
     }
 
     public void lockForSerializationRead() {
@@ -4027,5 +4021,10 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     
     public void unlockAfterSerializationRead() {
         LockUtil.unlockAfterRead(getSerializationLock());
+    }
+    
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return new HashSet<>(attachedRaceLogs.values());
     }
 }

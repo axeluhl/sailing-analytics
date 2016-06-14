@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
-import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTracker;
+import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTrackerLifecycle;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
@@ -14,7 +14,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 
 public class RegattaLogSensorDataTracker {
     private final Map<RegattaAndRaceIdentifier, DynamicTrackedRace> knownTrackedRaces = new ConcurrentHashMap<>();
-    private final Map<RegattaAndRaceIdentifier, RaceLogSensorFixTracker> dataTrackers = new ConcurrentHashMap<>();
+    private final Map<RegattaAndRaceIdentifier, RaceLogSensorFixTrackerLifecycle> dataTrackers = new ConcurrentHashMap<>();
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
     private final SensorFixStore sensorFixStore;
@@ -51,13 +51,13 @@ public class RegattaLogSensorDataTracker {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            RaceLogSensorFixTracker dataTracker = new RaceLogSensorFixTracker((DynamicTrackedRace) trackedRace,
+            RaceLogSensorFixTrackerLifecycle dataTracker = new RaceLogSensorFixTrackerLifecycle((DynamicTrackedRace) trackedRace,
                     sensorFixStore, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
             dataTrackers.put(raceIdentifier, dataTracker);
         }
     }
 
-    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogSensorFixTracker tracker) {
+    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogSensorFixTrackerLifecycle tracker) {
         dataTrackers.remove(raceIdentifier, tracker);
     }
 
@@ -69,7 +69,7 @@ public class RegattaLogSensorDataTracker {
     }
 
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
-        RaceLogSensorFixTracker currentActiveDataTracker = dataTrackers.get(raceIdentifier);
+        RaceLogSensorFixTrackerLifecycle currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
             currentActiveDataTracker.stop();
             trackerStopped(raceIdentifier, currentActiveDataTracker);
