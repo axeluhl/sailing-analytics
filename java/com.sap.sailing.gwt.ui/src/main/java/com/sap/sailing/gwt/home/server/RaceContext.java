@@ -51,6 +51,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.RaceListRaceDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
+import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO.RaceDataInfo;
 import com.sap.sailing.gwt.home.communication.race.FlagStateDTO;
 import com.sap.sailing.gwt.home.communication.race.FleetMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.RaceMetadataDTO;
@@ -653,5 +654,11 @@ public class RaceContext {
     private boolean isCompetitorInFleet(Competitor competitor) {
         Fleet fleetOfCompetitor = raceColumn.getFleetOfCompetitor(competitor);
         return fleetOfCompetitor != null && Util.equalsWithNull(fleet.getName(), fleetOfCompetitor.getName());
+    }
+    
+    public RaceDataInfo getRaceDataInfo() {
+        boolean hasGPSData = getRaceTrackingState() == RaceTrackingState.TRACKED_VALID_DATA; 
+        boolean hasWindData = getWindSourceCount() > 0, hasVideo = getVideoCount() > 0, hasAudioData = getAudioCount() > 0;
+        return new RaceDataInfo(hasGPSData, hasWindData, hasVideo, hasAudioData);
     }
 }

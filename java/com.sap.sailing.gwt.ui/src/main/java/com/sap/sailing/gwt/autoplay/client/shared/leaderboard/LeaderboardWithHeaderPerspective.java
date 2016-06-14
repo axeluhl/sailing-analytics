@@ -52,14 +52,12 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
             String leaderboardName, final ErrorReporter errorReporter, final StringMessages stringMessages,
             UserAgentDetails userAgent, boolean startInFullScreenMode) {
         super(perspectiveLifecycleWithAllSettings.getPerspectiveLifecycle(), perspectiveLifecycleWithAllSettings.getPerspectiveSettings());
-
         this.stringMessages = stringMessages;
         this.componentLifecyclesAndSettings = perspectiveLifecycleWithAllSettings;
-        
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
-                if(LeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
+                if (LeaderboardWithHeaderPerspective.this.getPerspectiveSettings().isLeaderboardAutoZoom()) {
                     autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
                 }
             }
@@ -71,29 +69,21 @@ public class LeaderboardWithHeaderPerspective extends AbstractPerspectiveComposi
                 stringMessages, startInFullScreenMode);
         leaderboardPanel = createLeaderboardPanel(sailingService, asyncActionsExecutor,
                 competitorSelectionProvider, timer, leaderboardName, errorReporter, stringMessages, userAgent);
-        
         leaderboardPanel.getContentWidget().getElement().getStyle().setFontWeight(FontWeight.BOLD);
-
         components.add(sapHeader);
         components.add(leaderboardPanel);
-        
         dockPanel = new DockLayoutPanel(Unit.PX);
         dockPanel.addNorth(sapHeader, SAP_HEADER_HEIGHT);
-        
         OldLeaderboard oldLeaderboard = new OldLeaderboard(leaderboardPanel);
         leaderboardPanel.addLeaderboardUpdateListener(oldLeaderboard);
-        
         currentContentWidget = oldLeaderboard.getContentWidget();
-        
-        if(getPerspectiveSettings().isLeaderboardAutoZoom()) {
+        if (getPerspectiveSettings().isLeaderboardAutoZoom()) {
             autoZoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget);
         } else {
             Double zoom = getPerspectiveSettings().getLeaderboardZoomFactor();
             zoomContentWidget(SAP_HEADER_HEIGHT, currentContentWidget, zoom);
         }
-
         dockPanel.add(oldLeaderboard);
-        
         initWidget(dockPanel);
     }
 
