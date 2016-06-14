@@ -71,13 +71,13 @@ public class StartTimeFragment extends BaseFragment
     private Button mRelativeButton;
     private Button mSetStartAbsolute;
     private Button mSetStartRelative;
-    private int mCurrentTab;
 
     private NumberPicker mDatePicker;
     private NumberPicker mTimeOffset;
     private Spinner mLeaderBoard;
     private Spinner mFleet;
     private Spinner mRace;
+    private boolean mRaceSetupFinished;
     private TimePicker mTimePicker;
     private NumberPicker mStartSeconds;
     private TextView mCountdown;
@@ -291,7 +291,7 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                 @Override
                 public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                    activateSetTime();
+                    activateSetTime(RELATIVE);
                 }
             });
         }
@@ -419,6 +419,10 @@ public class StartTimeFragment extends BaseFragment
                     }
                     String race = mRaceAdapter.getItem(mRace.getSelectedItemPosition()).getA();
                     identifier = new SimpleRaceLogIdentifierImpl(leaderBoard, race, fleet.getA());
+                    if (mRaceSetupFinished) {
+                        activateSetTime(RELATIVE);
+                    }
+                    mRaceSetupFinished = true;
                 }
 
                 @Override
@@ -563,7 +567,6 @@ public class StartTimeFragment extends BaseFragment
     }
 
     private void showTab(int tab) {
-        mCurrentTab = tab;
         int colorGrey = ThemeHelper.getColor(getActivity(), R.attr.sap_light_gray);
         int colorOrange = ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1);
 
@@ -646,7 +649,7 @@ public class StartTimeFragment extends BaseFragment
         mStartTime = mStartTime.getNearestModuloOneMinute(now);
         mListenerIgnore = true;
         setPickerTime();
-        activateSetTime();
+        activateSetTime(ABSOLUTE);
     }
 
     @Override
@@ -654,7 +657,7 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
-            activateSetTime();
+            activateSetTime(ABSOLUTE);
         }
         mListenerIgnore = false;
     }
@@ -664,13 +667,13 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
-            activateSetTime();
+            activateSetTime(ABSOLUTE);
         }
         mListenerIgnore = false;
     }
 
-    private void activateSetTime() {
-        switch (mCurrentTab) {
+    private void activateSetTime(int tab) {
+        switch (tab) {
             case ABSOLUTE:
                 if (mSetStartAbsolute != null) {
                     mSetStartAbsolute.setEnabled(true);
