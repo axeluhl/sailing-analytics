@@ -31,7 +31,6 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.MasterDataImportObjectCreationCountImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
@@ -63,6 +62,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.masterdata.DummyTrackedRace;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 
@@ -400,18 +400,20 @@ public class ImportMasterDataOperation extends
 
     
     private void importRaceLogTrackingGPSFixes(RacingEventService toState) {
-        Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
+        Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes = masterData.getRaceLogTrackingFixes();
         if (raceLogTrackingFixes != null) {
             SensorFixStore store = toState.getSensorFixStore();
-            for (Entry<DeviceIdentifier, Set<GPSFix>> entry : raceLogTrackingFixes.entrySet()) {
+            for (Entry<DeviceIdentifier, Set<Timed>> entry : raceLogTrackingFixes.entrySet()) {
                 DeviceIdentifier device = entry.getKey();
-                for (GPSFix fixToAdd : entry.getValue()) {
+                for (Timed fixToAdd : entry.getValue()) {
                     try {
                         if (fixToAdd instanceof CompactGPSFixMovingImpl) {
-                            fixToAdd = new GPSFixMovingImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint(),
+                            CompactGPSFixMovingImpl gpsFix = (CompactGPSFixMovingImpl) fixToAdd;
+                            fixToAdd = new GPSFixMovingImpl(gpsFix.getPosition(), fixToAdd.getTimePoint(),
                                     ((CompactGPSFixMovingImpl) fixToAdd).getSpeed());
                         } else if (fixToAdd instanceof CompactGPSFixImpl) {
-                            fixToAdd = new GPSFixImpl(fixToAdd.getPosition(), fixToAdd.getTimePoint());
+                            CompactGPSFixImpl gpsFix = (CompactGPSFixImpl) fixToAdd;
+                            fixToAdd = new GPSFixImpl(gpsFix.getPosition(), fixToAdd.getTimePoint());
                         } 
                         store.storeFix(device, fixToAdd);
                     } catch (NoCorrespondingServiceRegisteredException e) {

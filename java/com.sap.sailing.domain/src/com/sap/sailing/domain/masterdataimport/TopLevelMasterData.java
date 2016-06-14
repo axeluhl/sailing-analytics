@@ -16,7 +16,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -30,23 +29,15 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
-import com.sap.sailing.domain.racelog.impl.GPSFixStoreImpl;
-import com.sap.sailing.domain.racelog.tracking.GPSFixStore;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingImpl;
-import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixMovingTrackImpl;
-import com.sap.sailing.domain.tracking.impl.DynamicGPSFixTrackImpl;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.WithID;
-import com.sap.sse.common.impl.TimeRangeImpl;
 
 /**
  * Holds all information needed for a master data import.
@@ -64,7 +55,7 @@ public class TopLevelMasterData implements Serializable {
     private final Set<LeaderboardGroup> leaderboardGroups;
     private final Set<WindTrackMasterData> windTrackMasterData;
     private final Map<LeaderboardGroup, Set<Event>> eventForLeaderboardGroup;
-    private final Map<DeviceIdentifier, Set<GPSFix>> raceLogTrackingFixes;
+    private final Map<DeviceIdentifier, Set<Timed>> raceLogTrackingFixes;
     private final Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
 
     public TopLevelMasterData(final Set<LeaderboardGroup> groupsToExport, final Iterable<Event> allEvents,
@@ -85,8 +76,8 @@ public class TopLevelMasterData implements Serializable {
         filterMediaTracks(allMediaTracks, this.filteredMediaTracks);
     }
 
-    private Map<DeviceIdentifier, Set<GPSFix>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
-        Map<DeviceIdentifier, Set<GPSFix>> relevantFixes = new HashMap<>();
+    private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
+        Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
         
         //Add fixes for regatta log mappings
         for (Regatta regatta : getAllRegattas()) {
@@ -122,7 +113,7 @@ public class TopLevelMasterData implements Serializable {
     }
 
     private void addAllFixesIfMappingEvent(SensorFixStore sensorFixStore,
-            Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
+            Map<DeviceIdentifier, Set<Timed>> relevantFixes,
             AbstractLogEvent<?> logEvent) {
         if (logEvent instanceof RegattaLogDeviceMappingEvent<?>) {
             RegattaLogDeviceMappingEvent<?> mappingEvent = (RegattaLogDeviceMappingEvent<?>) logEvent;
@@ -136,34 +127,15 @@ public class TopLevelMasterData implements Serializable {
     }
 
     private void addAllFixesForMappingEvent(SensorFixStore sensorFixStore,
-            Map<DeviceIdentifier, Set<GPSFix>> relevantFixes,
+            Map<DeviceIdentifier, Set<Timed>> relevantFixes,
             RegattaLogDeviceMappingEvent<?> mappingEvent) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        DynamicGPSFixTrack<WithID, ?> track;
-        if (isMarkMappingEvent(mappingEvent)) {
-            track = new DynamicGPSFixTrackImpl<WithID>(mappingEvent.getMappedTo(), 10000);
-        } else {
-            track = new DynamicGPSFixMovingTrackImpl<WithID>(mappingEvent.getMappedTo(), 1000);
-        }
         DeviceIdentifier device = mappingEvent.getDevice();
-        GPSFixStore gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
-        gpsFixStore.loadTrack(track, new DeviceMappingImpl<WithID>(mappingEvent.getMappedTo(), device,
-                new TimeRangeImpl(mappingEvent.getFrom(), mappingEvent.getTo()), mappingEvent.getClass()));
         if (!relevantFixes.containsKey(device)) {
             relevantFixes.put(device, new HashSet<>());
         }
-        Set<GPSFix> fixes = relevantFixes.get(device);
-        try {
-            track.lockForRead();
-            for (GPSFix fix : track.getRawFixes()) {
-                fixes.add(fix);
-            }
-        } finally {
-            track.unlockAfterRead();
-        }
-    }
-
-    private boolean isMarkMappingEvent(RegattaLogDeviceMappingEvent<?> mappingEvent) {
-        return mappingEvent instanceof RegattaLogDeviceMarkMappingEvent;
+        Set<Timed> fixes = relevantFixes.get(device);
+        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getTo(),
+                true);
     }
 
     /**
@@ -341,7 +313,7 @@ public class TopLevelMasterData implements Serializable {
         return raceIdentifiers;
     }
 
-    public Map<DeviceIdentifier, Set<GPSFix>> getRaceLogTrackingFixes() {
+    public Map<DeviceIdentifier, Set<Timed>> getRaceLogTrackingFixes() {
         return raceLogTrackingFixes;
     }
 
