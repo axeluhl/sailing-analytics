@@ -401,7 +401,7 @@
     <string name="use_previous_course_dialog_message">Soll das bisherige Kursdesign verwendet werden?</string>
     <string name="please_enter_valid_number">Bitte geben Sie eine gültige Zahl ein.</string>
     <string name="please_enter_valid_pathfinder">Bitte tragen Sie einen gültigen Pathfinder ein.</string>
-    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%s)</string>
+    <string name="error_scanning_qr">Fehler beim Scannen des QRCodes (%i)</string>
     <string name="error_scanning_qr_malformed">Ungültige Url</string>
     <string name="marks_w_placeholder">Kursmarkierungen: %s</string>
     <string name="error_no_course_to_copy">Kein Kurs zum Kopieren vorhanden</string>
