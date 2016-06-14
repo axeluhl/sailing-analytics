@@ -28,6 +28,7 @@ public abstract class SerializableSettings extends AbstractSettings implements S
     
     @GwtIncompatible
     private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
         SettingsValue innerValueObject = getInnerValueObject();
         out.writeObject(innerValueObject);
     }
