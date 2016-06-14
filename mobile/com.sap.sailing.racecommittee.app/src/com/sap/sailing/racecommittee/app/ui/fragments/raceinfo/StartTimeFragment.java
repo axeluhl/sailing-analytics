@@ -288,6 +288,12 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setMaxValue(MAX_DIFF_MIN);
             mTimeOffset.setWrapSelectorWheel(false);
             mTimeOffset.setValue((mStartTimeOffset == null) ? preferences.getDependentRacesOffset() : (int) mStartTimeOffset.asMinutes());
+            mTimeOffset.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    activateSetTime();
+                }
+            });
         }
 
         final DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
