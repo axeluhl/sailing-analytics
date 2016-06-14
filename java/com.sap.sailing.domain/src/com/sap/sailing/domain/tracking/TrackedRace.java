@@ -924,4 +924,6 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     
     default void unlockAfterSerializationRead() {
     }
+    
+    Iterable<RaceLog> getAttachedRaceLogs();
 }

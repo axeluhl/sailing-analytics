@@ -4028,4 +4028,9 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     public void unlockAfterSerializationRead() {
         LockUtil.unlockAfterRead(getSerializationLock());
     }
+    
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return new HashSet<>(attachedRaceLogs.values());
+    }
 }

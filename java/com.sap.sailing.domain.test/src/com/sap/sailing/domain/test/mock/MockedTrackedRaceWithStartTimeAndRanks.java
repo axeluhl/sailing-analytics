@@ -670,4 +670,9 @@ public class MockedTrackedRaceWithStartTimeAndRanks implements TrackedRace {
     public Iterable<RegattaLog> getAttachedRegattaLogs() {
         return Collections.emptySet();
     }
+
+    @Override
+    public Iterable<RaceLog> getAttachedRaceLogs() {
+        return Collections.emptySet();
+    }
 }
