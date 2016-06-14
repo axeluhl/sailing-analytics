@@ -305,11 +305,11 @@ public class TopLevelMasterData implements Serializable {
     }
 
     /**
-     * Copies only those media tracks from allMediaTracks to filteredMediaTracks which are 
-     * assigned to races related to the exported LeaderboardGroup.
+     * Copies only those media tracks from {@code allMediaTracks} to {@code filteredMediaTracks} which are 
+     * assigned to races related to any of  exported {@link #leaderboardGroups}.
      */
     private void filterMediaTracks(Iterable<MediaTrack> allMediaTracks, Set<MediaTrack> filteredMediaTracks) {
-        Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport();
+        final Set<RaceIdentifier> raceIdentitifiersForMediaExport = collectRaceIdentifiersForMediaExport();
         for (MediaTrack mediaTrack : allMediaTracks) {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
@@ -321,11 +321,11 @@ public class TopLevelMasterData implements Serializable {
     }
 
     /**
-     * Returns the set of races (in form of raceIdentifiers) related to the exported LeaderboardGroup.
-     * 
+     * Returns the set of races (in the form of {@link RaceIdentifier}s) related to the exported
+     * {@link #leaderboardGroups}.
      */
     private Set<RaceIdentifier> collectRaceIdentifiersForMediaExport() {
-        Set<RaceIdentifier> raceIdentifiers = new HashSet<>();
+        final Set<RaceIdentifier> raceIdentifiers = new HashSet<>();
         for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
