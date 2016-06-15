@@ -68,7 +68,7 @@ public class PageObject {
     /**
      * </p>The default timeout of 10 seconds for the lookup of other elements.</p>
      */
-    protected static final int DEFAULT_LOOKUP_TIMEOUT = 10;
+    protected static final int DEFAULT_LOOKUP_TIMEOUT = 5;
     
     /**
      * <p>The web driver to use.</p>
