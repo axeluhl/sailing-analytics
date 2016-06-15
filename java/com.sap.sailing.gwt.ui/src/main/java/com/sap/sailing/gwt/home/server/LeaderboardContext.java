@@ -217,13 +217,13 @@ public class LeaderboardContext {
     public void fillRegattaFields(RegattaMetadataDTO regattaDTO) {
         regattaDTO.setId(getLeaderboardName());
         regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
-        if(hasMultipleLeaderboardGroups(event)) {
+        if (hasMultipleLeaderboardGroups(event)) {
             regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
         regattaDTO.setBoatClass(HomeServiceUtil.getBoatClassName(leaderboard));
-        if(leaderboard instanceof RegattaLeaderboard) {
+        if (leaderboard instanceof RegattaLeaderboard) {
             regattaDTO.setStartDate(getStartDateWithEventFallback());
             regattaDTO.setEndDate(getEndDateWithEventFallback());
         }
@@ -231,6 +231,10 @@ public class LeaderboardContext {
         regattaDTO.setDefaultCourseAreaName(HomeServiceUtil.getCourseAreaNameForRegattaIdThereIsMoreThanOne(event, leaderboard));
         regattaDTO.setDefaultCourseAreaId(HomeServiceUtil.getCourseAreaIdForRegatta(event, leaderboard));
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
+        
+        RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
+        forRaces(regattaRaceDataInfoCalculator);
+        regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
     }
     
     private static boolean hasMultipleLeaderboardGroups(EventBase event) {

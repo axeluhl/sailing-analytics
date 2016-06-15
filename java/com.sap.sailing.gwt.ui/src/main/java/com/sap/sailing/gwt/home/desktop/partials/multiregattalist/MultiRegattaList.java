@@ -51,7 +51,7 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
         for (RegattaWithProgressDTO regattaWithProgress : data) {
             regattasContainerUi.add(new MultiRegattaListItem(regattaWithProgress, currentPresenter));
             String boatCategory = regattaWithProgress.getBoatCategory();
-            if(boatCategory != null) {
+            if (boatCategory != null) {
                 selectableBoatCategories.add(boatCategory);
             }
         }

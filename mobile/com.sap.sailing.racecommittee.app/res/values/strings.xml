@@ -424,7 +424,7 @@
     <string name="use_previous_course_dialog_message">Use previously published course design?</string>
     <string name="please_enter_valid_number">Please enter a valid number</string>
     <string name="please_enter_valid_pathfinder">Please enter a valid pathfinder</string>
-    <string name="error_scanning_qr">Error scanning QRCode (%s)</string>
+    <string name="error_scanning_qr">Error scanning QRCode (%i)</string>
     <string name="error_scanning_qr_malformed">Malformed url</string>
     <string name="marks_w_placeholder">Marks: %s</string>
     <string name="error_no_course_to_copy">No course available to copy</string>
@@ -439,7 +439,7 @@
     <string name="theme_changed_title">Theme Change</string>
     <string name="theme_changed_message">Changes to the theme will take action after an app restart.</string>
     <string name="url_refresh_title">Server URL Changed</string>
-    <string name="url_refresh_message">Please logout from the current event to load the data from the new server.</string>
+    <string name="app_refresh_message">Please logout from the current event to load the data from the new server.</string>
     <string name="until_xray_removed">XRAY will be removed in %s</string>
     <string name="send_photos">Send Photos</string>
     <string name="error_wrong_degree_value_title">Error</string>
@@ -540,5 +540,7 @@
     <string name="race_factor_format" translatable="false">x #.####</string>
     <string name="set_column_factor">Set Factor</string>
     <string name="set_factor_error">There was an error while setting the factor: %s</string>
+    <string name="sync_to_minute">Sync to minute</string>
+    <string name="non_public_changed_title">Non Public Events</string>
 
 </resources>
