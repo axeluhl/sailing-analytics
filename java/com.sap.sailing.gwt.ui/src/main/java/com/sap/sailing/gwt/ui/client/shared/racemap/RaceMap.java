@@ -557,7 +557,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                           // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                          settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                          settings.setZoomSettings(new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors()));
                       }
                       // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
@@ -569,7 +569,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       autoZoomIn = false;
                       autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.getZoomSettings().setTypesToConsiderOnZoom(emptyList);
+                      settings.setZoomSettings(new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors()));
                   }
               });
               map.addIdleHandler(new IdleMapHandler() {
@@ -1799,7 +1799,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                     || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
                     || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
                 // only change bounds if the new bounds don't fit into the current map zoom
-                Iterable<ZoomTypes> oldZoomSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
+                Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
                 autoZoomLatLngBounds = newBounds;
                 int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
@@ -1821,7 +1821,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 } else {
                     map.panTo(autoZoomLatLngBounds.getCenter());
                 }
-                settings.getZoomSettings().setTypesToConsiderOnZoom(oldZoomSettings);
+                settings.setZoomSettings(new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors()));
                 setAutoZoomInProgress(false);
             }
         }
