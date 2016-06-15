@@ -32,7 +32,7 @@ public class RegattaReferenceDTO implements DTO, Comparable<RegattaReferenceDTO>
     @Override
     public int compareTo(RegattaReferenceDTO o) {
         int compareByDisplayName = displayName.compareTo(o.displayName);
-        if(compareByDisplayName != 0) {
+        if (compareByDisplayName != 0) {
             return compareByDisplayName;
         }
         return id.compareTo(o.id);

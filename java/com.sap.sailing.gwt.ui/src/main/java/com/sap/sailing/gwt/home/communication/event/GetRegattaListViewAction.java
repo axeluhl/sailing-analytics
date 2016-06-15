@@ -38,6 +38,8 @@ public class GetRegattaListViewAction implements SailingAction<ResultWithTTL<Sor
                 result.add(leaderboardContext.getRegattaWithProgress());
             }
         });
+        // The following will reduce multiple occurrences of the same regatta, e.g., in different leaderboard groups,
+        // to one occurrence only, randomly picked, by means of the Comparable property of RegattaWithProgressDTO.
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
                 Duration.ONE_MINUTE.times(3)), new SortedSetResult<>(result));
     }
