@@ -69,10 +69,10 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
         return selectableBoatCategories;
     }
     
-    public void setVisibleBoatCategory(String visibleBoatCategory) {
+    public void setVisibleLeaderboardGroup(String leaderboardGroupName) {
         for (int i=0; i < regattasContainerUi.getWidgetCount(); i++) {
             MultiRegattaListItem item = (MultiRegattaListItem) regattasContainerUi.getWidget(i);
-            item.setVisibilityDependingOnBoatCategory(visibleBoatCategory);
+            item.setVisibilityDependingOnLeaderboardGroup(leaderboardGroupName);
         }
     }
 

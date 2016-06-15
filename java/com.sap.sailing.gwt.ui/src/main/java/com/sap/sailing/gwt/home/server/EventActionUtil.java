@@ -1,12 +1,12 @@
 package com.sap.sailing.gwt.home.server;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
-import com.google.gwt.dev.util.collect.HashMap;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
