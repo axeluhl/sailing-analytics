@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.eventview;
 
 import java.util.Date;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
@@ -119,7 +120,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     public int compareTo(RegattaReferenceDTO o) {
         int result = 0;
         if (o instanceof RegattaMetadataDTO) {
-            result = boatCategory.compareTo(((RegattaMetadataDTO) o).boatCategory);
+            result = Util.compareToWithNull(boatCategory, ((RegattaMetadataDTO) o).boatCategory, /* nullIsLess */ true);
         }
         if (result == 0) {
             result = super.compareTo(o);
