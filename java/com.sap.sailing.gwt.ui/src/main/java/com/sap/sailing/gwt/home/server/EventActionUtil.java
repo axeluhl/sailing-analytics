@@ -50,9 +50,9 @@ public final class EventActionUtil {
     public static LeaderboardContext getLeaderboardContext(SailingDispatchContext context, UUID eventId, String leaderboardId) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
-        for(LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for(Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if(leaderboard.getName().equals(leaderboardId)) {
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                if (leaderboard.getName().equals(leaderboardId)) {
                     return new LeaderboardContext(context, event, leaderboardGroup, leaderboard);
                 }
             }
