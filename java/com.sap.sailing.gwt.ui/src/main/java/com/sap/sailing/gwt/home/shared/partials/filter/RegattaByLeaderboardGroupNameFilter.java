@@ -9,11 +9,11 @@ public class RegattaByLeaderboardGroupNameFilter extends AbstractSelectionFilter
     
     @Override
     public Filter<RegattaMetadataDTO> getFilter() {
-        final String selectedVLeaderboardGroupName = getSelectedValue();
+        final String selectedLeaderboardGroupName = getSelectedValue();
         return new Filter<RegattaMetadataDTO>() {
             @Override
             public boolean matches(RegattaMetadataDTO object) {
-                return Util.contains(object.getLeaderboardGroupNames(), selectedVLeaderboardGroupName);
+                return selectedLeaderboardGroupName == null || Util.contains(object.getLeaderboardGroupNames(), selectedLeaderboardGroupName);
             }
 
             @Override
