@@ -55,11 +55,11 @@ public class MultiRegattaViewImpl extends AbstractEventOverview {
             this.valueChangeHandler = Arrays.asList(valueChangeHandler);
             super.addHandler(valueChangeHandler);
         }
+        
         @Override
         protected List<FilterValueChangeHandler<RegattaMetadataDTO, String>> getCurrentValueChangeHandlers() {
             return valueChangeHandler;
         }
-        
     }
 
 }

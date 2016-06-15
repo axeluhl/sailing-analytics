@@ -20,7 +20,7 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
     
     private final RegattaListView view;
     private final Map<RegattaListItem, RegattaMetadataDTO> stucture = new HashMap<>();
-    private Filter<RegattaMetadataDTO> latestBoatCategoryFilter;
+    private Filter<RegattaMetadataDTO> latestLeaderboardGroupFilter;
     
     public <V extends RegattaListView & RefreshableWidget<D>> RegattaListPresenter(V view) {
         this.view = view;
@@ -28,7 +28,7 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
 
     @Override
     public void onFilterValueChanged(Filter<RegattaMetadataDTO> filter) {
-        this.latestBoatCategoryFilter = filter;
+        this.latestLeaderboardGroupFilter = filter;
         for (Entry<RegattaListItem, RegattaMetadataDTO> entry : stucture.entrySet()) {
             entry.getKey().doFilter(!filter.matches(entry.getValue()));
         }
@@ -52,8 +52,8 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
                 stucture.clear();
                 wrappedWidget.setData(data);
                 stucture.putAll(view.getItemMap());
-                if (latestBoatCategoryFilter != null) {
-                    RegattaListPresenter.this.onFilterValueChanged(latestBoatCategoryFilter);
+                if (latestLeaderboardGroupFilter != null) {
+                    RegattaListPresenter.this.onFilterValueChanged(latestLeaderboardGroupFilter);
                 }
             }
         };
