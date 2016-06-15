@@ -329,7 +329,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
 
     private RaceMapImageManager raceMapImageManager; 
 
-    private final RaceMapSettings settings;
+    private RaceMapSettings settings;
     private final RaceMapLifecycle raceMapLifecycle;
     
     private final StringMessages stringMessages;
@@ -557,7 +557,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       if (!autoZoomIn && !autoZoomOut && !orientationChangeInProgress) {
                           // stop automatic zoom after a manual zoom event; automatic zoom in zoomMapToNewBounds will restore old settings
                           final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                          settings.setZoomSettings(new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors()));
+                          RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                          settings = new RaceMapSettings(settings, clearedZoomSettings);
                       }
                       // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed out too far
                   }
@@ -569,7 +570,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                       autoZoomIn = false;
                       autoZoomOut = false;
                       final List<RaceMapZoomSettings.ZoomTypes> emptyList = Collections.emptyList();
-                      settings.setZoomSettings(new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors()));
+                      RaceMapZoomSettings clearedZoomSettings = new RaceMapZoomSettings(emptyList, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                      settings = new RaceMapSettings(settings, clearedZoomSettings);
                   }
               });
               map.addIdleHandler(new IdleMapHandler() {
@@ -650,7 +652,7 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
      */
     protected void showAdditionalControls(MapWidget map) {
     }
-    
+
     private void setHasPolar() {
         GetPolarAction getPolar = new GetPolarAction(sailingService, raceIdentifier);
         asyncActionsExecutor.execute(getPolar, GET_POLAR_CATEGORY,
@@ -1821,7 +1823,8 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
                 } else {
                     map.panTo(autoZoomLatLngBounds.getCenter());
                 }
-                settings.setZoomSettings(new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors()));
+                RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
+                settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
             }
         }
@@ -2445,11 +2448,12 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
     @Override
     public void updateSettings(RaceMapSettings newSettings) {
         boolean maneuverTypeSelectionChanged = false;
-        boolean requiredRedraw = false;
+        boolean requiresRedraw = false;
+        boolean requiresUpdateCoordinateSystem = false;
+        
         for (ManeuverType maneuverType : ManeuverType.values()) {
             if (newSettings.isShowManeuverType(maneuverType) != settings.isShowManeuverType(maneuverType)) {
                 maneuverTypeSelectionChanged = true;
-                settings.showManeuverType(maneuverType, newSettings.isShowManeuverType(maneuverType));
             }
         }
         if (maneuverTypeSelectionChanged) {
@@ -2460,65 +2464,52 @@ public class RaceMap extends AbsolutePanel implements TimeListener, CompetitorSe
         }
         if (newSettings.isShowDouglasPeuckerPoints() != settings.isShowDouglasPeuckerPoints()) {
             if (!(timer.getPlayState() == PlayStates.Playing) && lastDouglasPeuckerResult != null && newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(true);
                 removeAllMarkDouglasPeuckerpoints();
                 showMarkDouglasPeuckerPoints(lastDouglasPeuckerResult);
             } else if (!newSettings.isShowDouglasPeuckerPoints()) {
-                settings.setShowDouglasPeuckerPoints(false);
                 removeAllMarkDouglasPeuckerpoints();
             }
         }
         if (newSettings.getTailLengthInMilliseconds() != settings.getTailLengthInMilliseconds()) {
-            settings.setTailLengthInMilliseconds(newSettings.getTailLengthInMilliseconds());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.getBuoyZoneRadiusInMeters() != settings.getBuoyZoneRadiusInMeters()) {
-            settings.setBuoyZoneRadiusInMeters(newSettings.getBuoyZoneRadiusInMeters());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowOnlySelectedCompetitors() != settings.isShowOnlySelectedCompetitors()) {
-            settings.setShowOnlySelectedCompetitors(newSettings.isShowOnlySelectedCompetitors());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowSelectedCompetitorsInfo() != settings.isShowSelectedCompetitorsInfo()) {
-            settings.setShowSelectedCompetitorsInfo(newSettings.isShowSelectedCompetitorsInfo());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (!newSettings.getZoomSettings().equals(settings.getZoomSettings())) {
-            settings.setZoomSettings(newSettings.getZoomSettings());                    
-            if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+            if (!newSettings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                 removeTransitions();
-                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(this));
+                zoomMapToNewBounds(newSettings.getZoomSettings().getNewBounds(this));
             }
         }
         if (!newSettings.getHelpLinesSettings().equals(settings.getHelpLinesSettings())) {
-            settings.setHelpLinesSettings(newSettings.getHelpLinesSettings());
-            requiredRedraw = true;
+            requiresRedraw = true;
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
-            settings.setShowWindStreamletOverlay(newSettings.isShowWindStreamletOverlay());
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
-            settings.setShowWindStreamletColors(newSettings.isShowWindStreamletColors());
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowSimulationOverlay() != settings.isShowSimulationOverlay()) {
-            settings.setShowSimulationOverlay(newSettings.isShowSimulationOverlay());
             showSimulationOverlay(newSettings.isShowSimulationOverlay());
         }
         if (newSettings.isWindUp() != settings.isWindUp()) {
-            settings.setWindUp(newSettings.isWindUp());
+            requiresUpdateCoordinateSystem = true;
+            requiresRedraw = true;
+        }
+        this.settings = newSettings;
+        
+        if (requiresUpdateCoordinateSystem) {
             updateCoordinateSystemFromSettings();
-            requiredRedraw = true;
         }
-        if (newSettings.getTransparentHoverlines() != settings.getTransparentHoverlines()) {
-            settings.setTransparentHoverlines(newSettings.getTransparentHoverlines());
-        }
-        if (newSettings.getHoverlineStrokeWeight() != settings.getHoverlineStrokeWeight()) {
-            settings.setHoverlineStrokeWeight(newSettings.getHoverlineStrokeWeight());
-        }
-        if (requiredRedraw) {
+        if (requiresRedraw) {
             redraw();
         }
     }

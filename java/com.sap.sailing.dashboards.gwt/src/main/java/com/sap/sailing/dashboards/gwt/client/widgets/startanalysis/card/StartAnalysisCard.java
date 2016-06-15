@@ -151,16 +151,26 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
             timer.setTime(startAnalysisDTO.timeOfStartInMilliSeconds);
             zoomTypes.add(ZoomTypes.BUOYS);
         }
+        RaceMapZoomSettings raceMapZoomSettings = new RaceMapZoomSettings(zoomTypes, false);
+        
         AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
-        RaceMapSettings raceMapSettings = RaceMapSettings.readSettingsFromURL();
+        RaceMapSettings defaultRaceMapSettings = RaceMapSettings.readSettingsFromURL();
+        
+        final RaceMapSettings raceMapSettings = new RaceMapSettings(raceMapZoomSettings, getHelpLineSettings(),
+                defaultRaceMapSettings.getTransparentHoverlines(), defaultRaceMapSettings.getHoverlineStrokeWeight(), 
+                startAnalysisDTO.tailLenghtInMilliseconds, defaultRaceMapSettings.isWindUp(),
+                defaultRaceMapSettings.getBuoyZoneRadiusInMeters(), defaultRaceMapSettings.isShowOnlySelectedCompetitors(),
+                defaultRaceMapSettings.isShowSelectedCompetitorsInfo(), defaultRaceMapSettings.isShowWindStreamletColors(),
+                defaultRaceMapSettings.isShowWindStreamletOverlay(), defaultRaceMapSettings.isShowSimulationOverlay(),
+                defaultRaceMapSettings.isShowMapControls(), defaultRaceMapSettings.getManeuverTypesToShow(),
+                defaultRaceMapSettings.isShowDouglasPeuckerPoints());
+
+        
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
                 asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
         raceMap = new RaceMap(new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings, sailingServiceAsync, asyncActionsExecutor, null, timer, competitorSelectionModel, 
                 StringMessages.INSTANCE, startAnalysisDTO.regattaAndRaceIdentifier,
                 raceMapResources, /* isSimulationEnabled */ false, /* showHeaderPanel */ true);
-        raceMap.getSettings().setZoomSettings(new RaceMapZoomSettings(zoomTypes, false));
-        raceMap.getSettings().setHelpLinesSettings(getHelpLineSettings());
-        raceMap.getSettings().setTailLengthInMilliseconds(startAnalysisDTO.tailLenghtInMilliseconds);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);
         raceMap.setSize("100%", "100%");
         card_map_container.getElement().getStyle().setHeight(getHeightForRaceMapInPixels(), Unit.PX);
