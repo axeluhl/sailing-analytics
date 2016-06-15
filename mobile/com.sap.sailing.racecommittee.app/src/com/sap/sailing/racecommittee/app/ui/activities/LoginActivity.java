@@ -521,8 +521,8 @@ public class LoginActivity extends BaseActivity
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
-    private void resetData() {
-        if (backdrop.getY() != 0) {
+    private void resetData(boolean force) {
+        if (!force && backdrop.getY() != 0) {
             return;
         }
 
@@ -543,9 +543,9 @@ public class LoginActivity extends BaseActivity
             String action = intent.getAction();
 
             if (AppConstants.INTENT_ACTION_RESET.equals(action)) {
-                resetData();
+                resetData(intent.getBooleanExtra(AppConstants.EXTRA_FORCE_REFRESH, false));
             } else if (AppConstants.INTENT_ACTION_VALID_DATA.equals(action)) {
-                resetData();
+                resetData(false);
             }
         }
     }
