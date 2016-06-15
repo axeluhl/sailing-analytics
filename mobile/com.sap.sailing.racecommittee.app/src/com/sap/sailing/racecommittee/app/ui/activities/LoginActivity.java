@@ -521,6 +521,11 @@ public class LoginActivity extends BaseActivity
         return ObjectAnimator.ofFloat(target, "alpha", 1f, 0f);
     }
 
+    /**
+     * Reset the data (reload from server)
+     *
+     * @param force Reload data, even if the backdrop is moved up
+     */
     private void resetData(boolean force) {
         if (!force && backdrop.getY() != 0) {
             return;
