@@ -246,6 +246,11 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             deleteAllDataFromDatabase();
             // Import in new service
             domainFactory = master.getBaseDomainFactory();
+            // ensure that this class's class loader and with it the dependency to com.sap.sailing.domain.test
+            // is known during de-serialization because anonymous inner classes from that bundle may be used
+            // in the object graph, e.g., for RankingMetricConstructor objects based on locally-instantiated lambda
+            // expressions
+            master.addMasterDataClassLoader(this.getClass().getClassLoader());
             inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, master);
             importer.importFromStream(inputStream, randomUUID, false);
