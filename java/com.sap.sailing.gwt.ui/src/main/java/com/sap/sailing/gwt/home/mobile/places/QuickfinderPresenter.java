@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
@@ -9,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class QuickfinderPresenter {
     private static final StringMessages MSG = StringMessages.INSTANCE;
@@ -116,11 +118,13 @@ public class QuickfinderPresenter {
         }
         quickfinder.addPlaceholderItem(placeholder);
         for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
-            String boatCategory = regattaMetadata.getBoatCategory();
-            if(boatCategory == null || boatCategory.isEmpty()) {
-                boatCategory = MSG.regattas();
+            Iterable<String> leaderboardGroupNames = regattaMetadata.getLeaderboardGroupNames();
+            if (leaderboardGroupNames == null || Util.isEmpty(leaderboardGroupNames)) {
+                leaderboardGroupNames = Collections.singleton(MSG.regattas());
             }
-            quickfinder.addItemToGroup(boatCategory, regattaMetadata.getDisplayName(), provider.getPlaceNavigation(regattaMetadata.getId()));
+            for (final String leaderboardGroupName : leaderboardGroupNames) {
+                quickfinder.addItemToGroup(leaderboardGroupName, regattaMetadata.getDisplayName(), provider.getPlaceNavigation(regattaMetadata.getId()));
+            }
         }
     }
     

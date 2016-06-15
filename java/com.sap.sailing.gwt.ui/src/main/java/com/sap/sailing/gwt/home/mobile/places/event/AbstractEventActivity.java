@@ -97,10 +97,11 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         Collection<RegattaMetadataDTO> regattas = eventDTO.getRegattas();
         List<RegattaMetadataDTO> sortedRegattas = new ArrayList<RegattaMetadataDTO>(regattas);
         Collections.sort(sortedRegattas, new Comparator<RegattaMetadataDTO>() {
-            private Comparator<String> bootCatComparator = new NullSafeComparableComparator<String>();
+            private Comparator<String> leaderboardGroupNamesComparator = new NullSafeComparableComparator<String>();
             @Override
             public int compare(RegattaMetadataDTO o1, RegattaMetadataDTO o2) {
-                int bootCategoryComparison = bootCatComparator.compare(o1.getBoatCategory(), o2.getBoatCategory());
+                int bootCategoryComparison = leaderboardGroupNamesComparator.compare(o1.getLeaderboardGroupNames().toString(),
+                        o2.getLeaderboardGroupNames().toString());
                 return bootCategoryComparison == 0 ? o1.compareTo(o2) : bootCategoryComparison;
             }
         });

@@ -1,15 +1,17 @@
 package com.sap.sailing.gwt.home.communication.eventview;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
 public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegattaMetadata {
     private int raceCount;
     private int competitorsCount;
     private String boatClass;
-    private String boatCategory;
+    private List<String> leaderboardGroupNames;
     private String defaultCourseAreaName;
     private String defaultCourseAreaId;
     private Date startDate;
@@ -49,12 +51,18 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     }
 
     @Override
-    public String getBoatCategory() {
-        return boatCategory;
+    public Iterable<String> getLeaderboardGroupNames() {
+        if (leaderboardGroupNames == null) {
+            leaderboardGroupNames = new ArrayList<>();
+        }
+        return Collections.unmodifiableList(leaderboardGroupNames);
     }
 
-    public void setBoatCategory(String boatCategory) {
-        this.boatCategory = boatCategory;
+    public void addLeaderboardGroupName(String leaderboardGroupName) {
+        if (leaderboardGroupNames == null) {
+            leaderboardGroupNames = new ArrayList<>();
+        }
+        leaderboardGroupNames.add(leaderboardGroupName);
     }
 
     @Override
@@ -116,18 +124,6 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.raceDataInfo = raceDataInfo;
     }
     
-    @Override
-    public int compareTo(RegattaReferenceDTO o) {
-        int result = 0;
-        if (o instanceof RegattaMetadataDTO) {
-            result = Util.compareToWithNull(boatCategory, ((RegattaMetadataDTO) o).boatCategory, /* nullIsLess */ true);
-        }
-        if (result == 0) {
-            result = super.compareTo(o);
-        }
-        return result;
-    }
-
     public static class RaceDataInfo implements DTO {
         private boolean hasGPSData, hasWindData, hasVideoData, hasAudioData;
         

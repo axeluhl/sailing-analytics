@@ -37,7 +37,7 @@ public class MultiRegattaListItem extends Composite {
     }
     
     void setVisibilityDependingOnBoatCategory(String visibleBoatCategory) {
-        setVisible(visibleBoatCategory == null || visibleBoatCategory.equals(regattaWithProgress.getBoatCategory()));
+        setVisible(visibleBoatCategory == null || visibleBoatCategory.equals(regattaWithProgress.getLeaderboardGroupNames()));
     }
 
 }

@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
@@ -37,8 +38,8 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
     public Collection<String> getFilterableValues() {
         Set<String> filterableValues = new HashSet<>();
         for (RegattaMetadataDTO regattaMetadata : stucture.values()) {
-            if (regattaMetadata.getBoatCategory() != null) {
-                filterableValues.add(regattaMetadata.getBoatCategory());
+            if (regattaMetadata.getLeaderboardGroupNames() != null) {
+                Util.addAll(regattaMetadata.getLeaderboardGroupNames(), filterableValues);
             }
         }
         return filterableValues.size() > 1 ? filterableValues : Collections.<String>emptySet();
