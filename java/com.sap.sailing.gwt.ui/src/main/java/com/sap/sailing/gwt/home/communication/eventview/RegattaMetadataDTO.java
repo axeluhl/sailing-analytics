@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.communication.eventview;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
@@ -11,7 +10,7 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
     private int raceCount;
     private int competitorsCount;
     private String boatClass;
-    private List<String> leaderboardGroupNames;
+    private ArrayList<String> leaderboardGroupNames;
     private String defaultCourseAreaName;
     private String defaultCourseAreaId;
     private Date startDate;
