@@ -3,6 +3,8 @@ package com.sap.sailing.gwt.home.mobile.places.event.races;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -44,8 +46,8 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
     }
     
     @Override
-    protected void setQuickFinderValues(Quickfinder quickfinder, Collection<RegattaMetadataDTO> regattaMetadatas) {
-        QuickfinderPresenter.getForRegattaRaces(quickfinder, currentPresenter, regattaMetadatas);
+    protected void setQuickFinderValues(Quickfinder quickfinder, Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        QuickfinderPresenter.getForRegattaRaces(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
     @Override
