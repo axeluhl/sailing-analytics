@@ -336,8 +336,13 @@ public class RaceLogSensorFixTracker implements TrackingDataLoader {
     }
 
     protected void loadFixesForExtendedTimeRange(TimePoint loadFixesFrom, TimePoint loadFixesTo) {
-        competitorMappings.forEachMapping((mapping) -> loadFixes(
-                new TimeRangeImpl(loadFixesFrom, loadFixesTo).intersection(mapping.getTimeRange()), mapping));
+        final TimeRangeImpl extendedTimeRange = new TimeRangeImpl(loadFixesFrom, loadFixesTo);
+        competitorMappings.forEachMapping((mapping) -> {
+            TimeRange timeRangeToLoad = extendedTimeRange.intersection(mapping.getTimeRange());
+            if(timeRangeToLoad != null) {
+                loadFixes(timeRangeToLoad, mapping);
+            }
+        });
     }
 
     protected void updateMappingsAndAddListeners() {

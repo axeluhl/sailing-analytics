@@ -68,17 +68,16 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             raceLog.addListener(raceLogEventVisitor);
         }
+        
+        updateDenotionState();
     }
 
     private synchronized void updateDenotionState() {
-        boolean forTracking = getForTracking();
-        if (tracker == null && forTracking) {
-            tracker = new RaceLogSensorFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
-        }
-        if (tracker != null && !forTracking) {
+        if (getForTracking()) {
+            startTracker();
+        } else {
             stopTracker();
         }
-
     }
     
     public void stop() {
@@ -87,10 +86,18 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
             raceLog.removeListener(raceLogEventVisitor);
         }
     }
+    
+    private synchronized void startTracker() {
+        if (tracker == null) {
+            tracker = new RaceLogSensorFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+        }
+    }
 
-    private void stopTracker() {
-        tracker.stop();
-        tracker = null;
+    private synchronized void stopTracker() {
+        if (tracker != null) {
+            tracker.stop();
+            tracker = null;
+        }
     }
 
     boolean getForTracking() {
