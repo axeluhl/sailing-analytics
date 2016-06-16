@@ -43,7 +43,7 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         
         final Duration ttl;
-        if(eventState == EventState.RUNNING || eventState == EventState.UPCOMING) {
+        if (eventState == EventState.RUNNING || eventState == EventState.UPCOMING) {
             EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
                 @Override
                 public void doForRace(RaceContext context) {
@@ -57,14 +57,12 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
         } else {
             ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
         }
-        
         final TreeSet<RegattaMetadataDTO> regattasWithoutRaces = new TreeSet<>();
-        for(RegattaMetadataDTO regatta : regattas.values()) {
-            if(!regattasWithRaces.containsKey(regatta)) {
+        for (RegattaMetadataDTO regatta : regattas.values()) {
+            if (!regattasWithRaces.containsKey(regatta)) {
                 regattasWithoutRaces.add(regatta);
             }
         }
-        
         return new ResultWithTTL<RegattasAndLiveRacesDTO>(ttl, new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces));
     }
 
@@ -85,7 +83,7 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
         String regattaName = context.getRegattaName();
         RegattaMetadataDTO regatta = regattas.get(regattaName);
         TreeSet<LiveRaceDTO> races = regattasWithRaces.get(regatta);
-        if(races == null) {
+        if (races == null) {
             races = new TreeSet<>();
             regattasWithRaces.put(regatta, races);
         }

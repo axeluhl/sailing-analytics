@@ -66,7 +66,7 @@ public class PageObject {
             ".//div[contains(@class, \"gwt-VerticalTabLayoutPanelTabInner\")]/div[text()=\"{0}\"]/../..");
     
     /**
-     * </p>The default timeout of 5 seconds for the lookup of other elements.</p>
+     * </p>The default timeout of 10 seconds for the lookup of other elements.</p>
      */
     protected static final int DEFAULT_LOOKUP_TIMEOUT = 5;
     
