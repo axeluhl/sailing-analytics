@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.Regat
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class RegattaHeaderBody extends UIObject {
 
@@ -40,10 +41,12 @@ public class RegattaHeaderBody extends UIObject {
         addDetailsItem(regattaMetadata.getCompetitorsCount(), I18N.competitorsCount(regattaMetadata.getCompetitorsCount()));
         addDetailsItem(regattaMetadata.getRaceCount(), I18N.racesCount(regattaMetadata.getRaceCount()));
         String defaultCourseAreaName = regattaMetadata.getDefaultCourseAreaName();
-        if(defaultCourseAreaName != null) {
+        if (defaultCourseAreaName != null) {
             addDetailsItem(I18N.courseAreaName(defaultCourseAreaName));
         }
-        addDetailsItem(regattaMetadata.getBoatCategory());
+        if (regattaMetadata.getLeaderboardGroupNames() != null && !Util.isEmpty(regattaMetadata.getLeaderboardGroupNames())) {
+            addDetailsItem(Util.joinStrings(", ", regattaMetadata.getLeaderboardGroupNames()));
+        }
         UIObject.ensureDebugId(nameUi, "RegattaNameSpan");
         UIObject.ensureDebugId(labelUi, "RegattaStateLabelDiv");
     }
@@ -55,7 +58,7 @@ public class RegattaHeaderBody extends UIObject {
     }
     
     private void addDetailsItem(String text) {
-        if(text != null) {
+        if (text != null) {
             DivElement detailsItem = DOM.createDiv().cast();
             detailsItem.addClassName(RegattaHeaderResources.INSTANCE.css().regattaheader_content_details_item());
             detailsItem.setInnerText(text);
