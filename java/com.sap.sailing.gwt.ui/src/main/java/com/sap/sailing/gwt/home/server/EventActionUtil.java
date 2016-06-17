@@ -22,6 +22,14 @@ import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * This is a convenience class, which e.g. provides static methods to iterate over leaderboards or races of an entire
+ * event or the races of a single regatta. These methods provide a {@link LeaderboardContext} or {@link RaceContext}
+ * instance to the given {@link LeaderboardCallback} or {@link RaceCallback}, respectively.
+ * 
+ * Also methods to calculate the {@link Duration time to live} based on the event state(non-live) are provided, which
+ * are used to define the refresh interval in a {@link ResultWithTTL} for different UI components.
+ */
 @GwtIncompatible
 public final class EventActionUtil {
     private EventActionUtil() {

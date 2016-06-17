@@ -37,9 +37,14 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * This class aggregates {@link Leaderboard} information by preparing {@link DTO}s for different components representing
+ * a regatta in the UI and providing convenience methods for several other required information.
+ */
 public class LeaderboardContext {
     private static final Logger logger = Logger.getLogger(LeaderboardContext.class.getName());
 
