@@ -75,15 +75,15 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
-        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+        return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
     }
 
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
-        return createGlobalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
+        return createLocalPlaceNavigation(new ConfirmationPlace(Action.RESET_EXECUTED, username));
     }
     
     public PlaceNavigation<PasswordResetPlace> getPasswordResetNavigation() {
-        return createGlobalPlaceNavigation(new PasswordResetPlace());
+        return createLocalPlaceNavigation(new PasswordResetPlace());
     }
 
     public PlaceNavigation<MultiregattaRegattasPlace> getEventRegattasNavigation(String eventUuidAsString, String baseUrl, boolean isOnRemoteServer) {
@@ -123,6 +123,6 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
-        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
+        return createLocalPlaceNavigation(new UserProfileDefaultPlace());
     }
 }

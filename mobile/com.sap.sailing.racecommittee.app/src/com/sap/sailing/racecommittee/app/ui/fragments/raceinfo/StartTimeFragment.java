@@ -62,6 +62,7 @@ public class StartTimeFragment extends BaseFragment
     private static final int FUTURE_DAYS = 25;
     private static final int PAST_DAYS = 3;
     private static final int MAX_DIFF_MIN = 60;
+    private static final int NONE = -1;
     private static final int ABSOLUTE = 0;
     private static final int RELATIVE = 1;
 
@@ -69,6 +70,7 @@ public class StartTimeFragment extends BaseFragment
     private View mRelative;
     private Button mAbsoluteButton;
     private Button mRelativeButton;
+    private Button mSetStartAbsolute;
     private Button mSetStartRelative;
 
     private NumberPicker mDatePicker;
@@ -76,6 +78,7 @@ public class StartTimeFragment extends BaseFragment
     private Spinner mLeaderBoard;
     private Spinner mFleet;
     private Spinner mRace;
+    private boolean mRaceSetupFinished;
     private TimePicker mTimePicker;
     private NumberPicker mStartSeconds;
     private TextView mCountdown;
@@ -153,9 +156,9 @@ public class StartTimeFragment extends BaseFragment
             syncMinute.setOnClickListener(this);
         }
 
-        View setStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
-        if (setStartAbsolute != null) {
-            setStartAbsolute.setOnClickListener(this);
+        mSetStartAbsolute = ViewHelper.get(layout, R.id.set_start_time_absolute);
+        if (mSetStartAbsolute != null) {
+            mSetStartAbsolute.setOnClickListener(this);
         }
 
         mSetStartRelative = ViewHelper.get(layout, R.id.set_start_time_relative);
@@ -253,6 +256,11 @@ public class StartTimeFragment extends BaseFragment
 
         initViewsAbsolute(time);
         initViewsRelative();
+
+        // reset Set Time button after init
+        if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) == MODE_TIME_PANEL) {
+            activateSetTime(NONE);
+        }
     }
 
     @Override
@@ -279,6 +287,12 @@ public class StartTimeFragment extends BaseFragment
             mTimeOffset.setMaxValue(MAX_DIFF_MIN);
             mTimeOffset.setWrapSelectorWheel(false);
             mTimeOffset.setValue((mStartTimeOffset == null) ? preferences.getDependentRacesOffset() : (int) mStartTimeOffset.asMinutes());
+            mTimeOffset.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+                @Override
+                public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                    activateSetTime(RELATIVE);
+                }
+            });
         }
 
         final DataStore manager = OnlineDataManager.create(getActivity()).getDataStore();
@@ -404,6 +418,10 @@ public class StartTimeFragment extends BaseFragment
                     }
                     String race = mRaceAdapter.getItem(mRace.getSelectedItemPosition()).getA();
                     identifier = new SimpleRaceLogIdentifierImpl(leaderBoard, race, fleet.getA());
+                    if (mRaceSetupFinished) {
+                        activateSetTime(RELATIVE);
+                    }
+                    mRaceSetupFinished = true;
                 }
 
                 @Override
@@ -630,6 +648,7 @@ public class StartTimeFragment extends BaseFragment
         mStartTime = mStartTime.getNearestModuloOneMinute(now);
         mListenerIgnore = true;
         setPickerTime();
+        activateSetTime(ABSOLUTE);
     }
 
     @Override
@@ -637,6 +656,7 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
+            activateSetTime(ABSOLUTE);
         }
         mListenerIgnore = false;
     }
@@ -646,8 +666,33 @@ public class StartTimeFragment extends BaseFragment
         if (!mListenerIgnore) {
             mStartTime = new MillisecondsTimePoint(getPickerTime().asMillis());
             setSeconds();
+            activateSetTime(ABSOLUTE);
         }
         mListenerIgnore = false;
+    }
+
+    private void activateSetTime(int tab) {
+        switch (tab) {
+            case ABSOLUTE:
+                if (mSetStartAbsolute != null) {
+                    mSetStartAbsolute.setEnabled(true);
+                }
+                break;
+
+            case RELATIVE:
+                if (mSetStartRelative != null) {
+                    mSetStartRelative.setEnabled(true);
+                }
+                break;
+
+            default:
+                if (mSetStartAbsolute != null) {
+                    mSetStartAbsolute.setEnabled(false);
+                }
+                if (mSetStartRelative != null) {
+                    mSetStartRelative.setEnabled(false);
+                }
+        }
     }
 
     private void setSeconds() {
@@ -657,7 +702,7 @@ public class StartTimeFragment extends BaseFragment
     private void setSeconds(int sec, int msec) {
         if (mStartSeconds != null) {
             double seconds = sec + msec / (double) 1000;
-            DecimalFormat format = new DecimalFormat("0.000");
+            DecimalFormat format = new DecimalFormat("00.000");
             mStartSeconds.setDisplayedValues(new String[] { format.format(seconds) });
         }
     }

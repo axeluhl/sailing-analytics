@@ -41,6 +41,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.impl.EmptyWindStore;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.testsupport.RacingEventServiceImplMock;
 
 public class RaceTrackerStartStopTest {
 
@@ -65,7 +66,7 @@ public class RaceTrackerStartStopTest {
 
     @Before
     public void setUp() {
-        racingEventService = new RacingEventServiceImplMock();
+        racingEventService = new RacingEventServiceImplMock(){};
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */

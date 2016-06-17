@@ -128,6 +128,7 @@ public class ImportMasterDataOperation extends
                 importDeviceConfigurations(toState);
             }
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
+            toState.mediaTracksImported(masterData.getFilteredMediaTracks(), override);
             return creationCount;
         } catch (Exception e) {
             logger.severe("Error during execution of ImportMasterDataOperation");

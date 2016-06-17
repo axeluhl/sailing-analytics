@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.home.server;
 
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -12,13 +16,20 @@ import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * This is a convenience class, which e.g. provides static methods to iterate over leaderboards or races of an entire
+ * event or the races of a single regatta. These methods provide a {@link LeaderboardContext} or {@link RaceContext}
+ * instance to the given {@link LeaderboardCallback} or {@link RaceCallback}, respectively.
+ * 
+ * Also methods to calculate the {@link Duration time to live} based on the event state(non-live) are provided, which
+ * are used to define the refresh interval in a {@link ResultWithTTL} for different UI components.
+ */
 @GwtIncompatible
 public final class EventActionUtil {
     private EventActionUtil() {
@@ -39,25 +50,36 @@ public final class EventActionUtil {
     public static LeaderboardContext getOverallLeaderboardContext(SailingDispatchContext context, UUID eventId) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
-        if(!HomeServiceUtil.isFakeSeries(event)) {
+        if (!HomeServiceUtil.isFakeSeries(event)) {
             throw new DispatchException("The given event is not a series event.");
         }
-        LeaderboardGroup leaderboardGroup = Util.get(event.getLeaderboardGroups(), 0);
-        Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
-        return new LeaderboardContext(context, event, leaderboardGroup, overallLeaderboard);
+        Leaderboard overallLeaderboard = null;
+        for (final LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+            if (overallLeaderboard != null) {
+                break;
+            }
+        }
+        return new LeaderboardContext(context, event, event.getLeaderboardGroups(), overallLeaderboard);
     }
     
     public static LeaderboardContext getLeaderboardContext(SailingDispatchContext context, UUID eventId, String leaderboardId) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
-        for(LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for(Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                if(leaderboard.getName().equals(leaderboardId)) {
-                    return new LeaderboardContext(context, event, leaderboardGroup, leaderboard);
+        final LinkedHashSet<LeaderboardGroup> leaderboardGroups = new LinkedHashSet<>();
+        Leaderboard leaderboard = null;
+        for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+            for (Leaderboard l : leaderboardGroup.getLeaderboards()) {
+                if (l.getName().equals(leaderboardId)) {
+                    leaderboardGroups.add(leaderboardGroup);
+                    leaderboard = l;
                 }
             }
         }
-        throw new DispatchException("The leaderboard is not part of the given event.");
+        if (leaderboardGroups.isEmpty()) {
+            throw new DispatchException("The leaderboard is not part of the given event.");
+        }
+        return new LeaderboardContext(context, event, leaderboardGroups, leaderboard);
     }
     
     public static Duration getEventStateDependentTTL(SailingDispatchContext context, UUID eventId, Duration liveTTL) {
@@ -113,10 +135,19 @@ public final class EventActionUtil {
     }
 
     public static void forLeaderboardsOfEvent(SailingDispatchContext context, Event event, LeaderboardCallback callback) {
+        final Map<Leaderboard, LinkedHashSet<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                callback.doForLeaderboard(new LeaderboardContext(context, event, leaderboardGroup, leaderboard));
+                LinkedHashSet<LeaderboardGroup> set = leaderboardGroupsForLeaderboard.get(leaderboard);
+                if (set == null) {
+                    set = new LinkedHashSet<>();
+                    leaderboardGroupsForLeaderboard.put(leaderboard, set);
+                }
+                set.add(leaderboardGroup);
             }
+        }
+        for (Entry<Leaderboard, LinkedHashSet<LeaderboardGroup>> e : leaderboardGroupsForLeaderboard.entrySet()) {
+            callback.doForLeaderboard(new LeaderboardContext(context, event, e.getValue(), e.getKey()));
         }
     }
     
