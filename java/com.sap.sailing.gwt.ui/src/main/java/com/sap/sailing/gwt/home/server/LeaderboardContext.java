@@ -1,8 +1,10 @@
 package com.sap.sailing.gwt.home.server;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,15 +45,15 @@ public class LeaderboardContext {
 
     private final TimePoint now = MillisecondsTimePoint.now();
     private final Event event;
-    private final LeaderboardGroup leaderboardGroup;
+    private final Iterable<LeaderboardGroup> leaderboardGroups;
     private final Leaderboard leaderboard;
     private final RacingEventService service;
     private Boolean hasMultipleFleets = null;
 
-    public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, LeaderboardGroup leaderboardGroup, Leaderboard leaderboard) {
+    public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, Iterable<LeaderboardGroup> leaderboardGroup, Leaderboard leaderboard) {
         this.service = dispatchContext.getRacingEventService();
         this.event = event;
-        this.leaderboardGroup = leaderboardGroup;
+        this.leaderboardGroups = leaderboardGroup;
         this.leaderboard = leaderboard;
     }
     
@@ -203,8 +205,12 @@ public class LeaderboardContext {
         return leaderboard.getName();
     }
     
-    public String getLeaderboardGroupName() {
-        return leaderboardGroup.getName();
+    public Iterable<String> getLeaderboardGroupNames() {
+        final List<String> result = new ArrayList<>();
+        for (final LeaderboardGroup lg : leaderboardGroups) {
+            result.add(lg.getName());
+        }
+        return result;
     }
 
     public RegattaMetadataDTO asRegattaMetadataDTO() {
@@ -218,7 +224,9 @@ public class LeaderboardContext {
         regattaDTO.setId(getLeaderboardName());
         regattaDTO.setDisplayName(leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : leaderboard.getName());
         if (hasMultipleLeaderboardGroups(event)) {
-            regattaDTO.setBoatCategory(leaderboardGroup.getDisplayName() != null ? leaderboardGroup.getDisplayName() : leaderboardGroup.getName());
+            for (final LeaderboardGroup lg : leaderboardGroups) {
+                regattaDTO.addLeaderboardGroupName(lg.getDisplayName() != null ? lg.getDisplayName() : lg.getName());
+            }
         }
         regattaDTO.setCompetitorsCount(HomeServiceUtil.calculateCompetitorsCount(leaderboard));
         regattaDTO.setRaceCount(HomeServiceUtil.calculateRaceCount(leaderboard));
