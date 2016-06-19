@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 public class MultiRegattaList extends Composite implements RefreshableWidget<SortedSetResult<RegattaWithProgressDTO>> {
@@ -50,9 +51,9 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
         }
         for (RegattaWithProgressDTO regattaWithProgress : data) {
             regattasContainerUi.add(new MultiRegattaListItem(regattaWithProgress, currentPresenter));
-            String boatCategory = regattaWithProgress.getBoatCategory();
-            if(boatCategory != null) {
-                selectableBoatCategories.add(boatCategory);
+            Iterable<String> leaderboardGroupNames = regattaWithProgress.getLeaderboardGroupNames();
+            if (leaderboardGroupNames != null) {
+                Util.addAll(leaderboardGroupNames, selectableBoatCategories);
             }
         }
     }
@@ -68,10 +69,10 @@ public class MultiRegattaList extends Composite implements RefreshableWidget<Sor
         return selectableBoatCategories;
     }
     
-    public void setVisibleBoatCategory(String visibleBoatCategory) {
+    public void setVisibleLeaderboardGroup(String leaderboardGroupName) {
         for (int i=0; i < regattasContainerUi.getWidgetCount(); i++) {
             MultiRegattaListItem item = (MultiRegattaListItem) regattasContainerUi.getWidget(i);
-            item.setVisibilityDependingOnBoatCategory(visibleBoatCategory);
+            item.setVisibilityDependingOnLeaderboardGroup(leaderboardGroupName);
         }
     }
 

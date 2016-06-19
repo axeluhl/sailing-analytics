@@ -1,6 +1,9 @@
 package com.sap.sailing.gwt.home.mobile.places;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
@@ -13,34 +16,37 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class QuickfinderPresenter {
     private static final StringMessages MSG = StringMessages.INSTANCE;
     
-    public static QuickfinderPresenter getForRegattaLeaderboards(Quickfinder quickfinder, 
-            final RegattaLeaderboardNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
+    public static QuickfinderPresenter getForRegattaLeaderboards(Quickfinder quickfinder,
+            final RegattaLeaderboardNavigationProvider navigator,
+            Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
         return new QuickfinderPresenter(quickfinder, MSG.resultsQuickfinder(), new RegattaPlaceNaviationProvider() {
             @Override
             public PlaceNavigation<?> getPlaceNavigation(String regattaId) {
                 return navigator.getRegattaMiniLeaderboardNavigation(regattaId);
             }
-        }, regattaMetadatas);
+        }, regattasByLeaderboardGroupName);
     }
     
-    public static QuickfinderPresenter getForRegattaRaces(Quickfinder quickfinder, 
-            final RegattaRacesNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
+    public static QuickfinderPresenter getForRegattaRaces(Quickfinder quickfinder,
+            final RegattaRacesNavigationProvider navigator,
+            Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
         return new QuickfinderPresenter(quickfinder, MSG.racesQuickfinder(), new RegattaPlaceNaviationProvider() {
             @Override
             public PlaceNavigation<?> getPlaceNavigation(String regattaId) {
                 return navigator.getRegattaRacesNavigation(regattaId);
             }
-        }, regattaMetadatas);
+        }, regattasByLeaderboardGroupName);
     }
     
-    public static QuickfinderPresenter getForRegattaOverview(Quickfinder quickfinder, 
-            final RegattaOverviewNavigationProvider navigator, Collection<RegattaMetadataDTO> regattaMetadatas) {
+    public static QuickfinderPresenter getForRegattaOverview(Quickfinder quickfinder,
+            final RegattaOverviewNavigationProvider navigator,
+            Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
         return new QuickfinderPresenter(quickfinder, MSG.regattaQuickfinder(), new RegattaPlaceNaviationProvider() {
             @Override
             public PlaceNavigation<?> getPlaceNavigation(String regattaId) {
                 return navigator.getRegattaOverviewNavigation(regattaId);
             }
-        }, regattaMetadatas);
+        }, regattasByLeaderboardGroupName);
     }
     
     public static QuickfinderPresenter getForSeriesLeaderboards(Quickfinder quickfinder, String seriesName,
@@ -109,18 +115,18 @@ public class QuickfinderPresenter {
     }
     
     private QuickfinderPresenter(Quickfinder quickfinder, String placeholder, RegattaPlaceNaviationProvider provider, 
-            Collection<RegattaMetadataDTO> regattaMetadatas) {
-        if (regattaMetadatas == null) {
+            Map<String, Set<RegattaMetadataDTO>> regattasByLeaderboardGroupName) {
+        if (regattasByLeaderboardGroupName == null) {
             quickfinder.removeFromParent();
             return;
         }
         quickfinder.addPlaceholderItem(placeholder);
-        for (RegattaMetadataDTO regattaMetadata : regattaMetadatas) {
-            String boatCategory = regattaMetadata.getBoatCategory();
-            if(boatCategory == null || boatCategory.isEmpty()) {
-                boatCategory = MSG.regattas();
+        for (Entry<String, Set<RegattaMetadataDTO>> entry : regattasByLeaderboardGroupName.entrySet()) {
+            String leaderboardGroupName = entry.getKey() == null ? MSG.regattas() : entry.getKey();
+            for (RegattaMetadataDTO regattaMetadata : entry.getValue()) {
+                quickfinder.addItemToGroup(leaderboardGroupName, regattaMetadata.getDisplayName(),
+                        provider.getPlaceNavigation(regattaMetadata.getId()));
             }
-            quickfinder.addItemToGroup(boatCategory, regattaMetadata.getDisplayName(), provider.getPlaceNavigation(regattaMetadata.getId()));
         }
     }
     

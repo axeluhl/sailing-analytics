@@ -69,7 +69,8 @@ public class RemoveLeaderboardGroupTest {
         final TimePoint pfingstbuschEndDate = new MillisecondsTimePoint(cal.getTime());
         pfingstbusch = server.apply(new CreateEvent("Pfingstbusch", /* eventDescription */ null, pfingstbuschStartDate, pfingstbuschEndDate,
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /* sailorsInfoWebsiteURLAsString */ null,
-                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList()));
+                /* images */Collections.<ImageDescriptor> emptyList(), /* videos */Collections.<VideoDescriptor> emptyList(),
+                /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
         final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, /* leaderboard names */ Collections.emptyList(),
                 new int[0], /* overallLeaderboardScoringSchemeType */ ScoringSchemeType.LOW_POINT));

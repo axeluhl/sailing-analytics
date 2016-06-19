@@ -94,15 +94,15 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
             Date endDate = eventToValidate.endDate;
             String datesErrorMessage = null;
             // remark: startDate == null and endDate == null is valid
-            if(startDate != null && endDate != null) {
-                if(startDate.after(endDate)) {
+            if (startDate != null && endDate != null) {
+                if (startDate.after(endDate)) {
                     datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate(); 
                 }
-            } else if((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
+            } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                 datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
             }
             
-            if(datesErrorMessage != null) {
+            if (datesErrorMessage != null) {
                 errorMessage = datesErrorMessage;
             } else if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
@@ -151,7 +151,7 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
                         SuggestedCourseAreaNames.suggestedCourseAreaNames, stringMessages.enterCourseAreaName(), 50));
         courseAreaNameList.addValueChangeHandler(courseAreaValueChangeHandler);
         List<String> leaderboardGroupNames = new ArrayList<>();
-        for(LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
+        for (LeaderboardGroupDTO leaderboardGroupDTO: availableLeaderboardGroups) {
             leaderboardGroupNames.add(leaderboardGroupDTO.getName());
         }
         leaderboardGroupList = new StringConstantsListEditorComposite(Collections.<String> emptyList(),
@@ -230,13 +230,24 @@ public abstract class EventDialog extends DataEntryDialogWithBootstrap<EventDTO>
         }
         formGrid.setText(rowIndex, 1, "[*] " + stringMessages.defaultSailorsInfoLinkInfoText());
         TabLayoutPanel tabPanel =  new TabLayoutPanel(30, Unit.PX);
+        tabPanel.ensureDebugId("EventDialogTabs");
         tabPanel.setHeight("525px");
         panel.add(tabPanel);
-        tabPanel.add(new ScrollPanel(formGrid), stringMessages.event());
-        tabPanel.add(new ScrollPanel(leaderboardGroupList), stringMessages.leaderboardGroups());
-        tabPanel.add(new ScrollPanel(courseAreaNameList), stringMessages.courseAreas());
-        tabPanel.add(new ScrollPanel(imagesListComposite), stringMessages.images());
-        tabPanel.add(new ScrollPanel(videosListComposite), stringMessages.videos());
+        final ScrollPanel eventTab = new ScrollPanel(formGrid);
+        eventTab.ensureDebugId("EventTab");
+        tabPanel.add(eventTab, stringMessages.event());
+        final ScrollPanel leaderboardGroupTab = new ScrollPanel(leaderboardGroupList);
+        leaderboardGroupTab.ensureDebugId("LeaderboardGroupsTab");
+        tabPanel.add(leaderboardGroupTab, stringMessages.leaderboardGroups());
+        final ScrollPanel courseAreasTab = new ScrollPanel(courseAreaNameList);
+        courseAreasTab.ensureDebugId("CourseAreasTab");
+        tabPanel.add(courseAreasTab, stringMessages.courseAreas());
+        final ScrollPanel imagesTab = new ScrollPanel(imagesListComposite);
+        imagesTab.ensureDebugId("ImagesTab");
+        tabPanel.add(imagesTab, stringMessages.images());
+        final ScrollPanel videosTab = new ScrollPanel(videosListComposite);
+        videosTab.ensureDebugId("VideosTab");
+        tabPanel.add(videosTab, stringMessages.videos());
         return panel;
     }
 

@@ -32,6 +32,15 @@
 			    accidentally String types with double-quoted values were used have been changed to
 			    numeric types, represented in the JSON documents without double quotes.
 			</li>
+			<li>It is now possible to use overlapping leaderboard groups in an event, such that one
+			    leaderboard can be part of more than one leaderboard group of the event. This comes in
+			    handy if there are different schemes by which the regattas or leaderboards may be grouped
+			    and is particularly useful for large events for filtering the regattas in the event
+			    overview. Please note that in case a leaderboard is part of a leaderboard group with
+			    an overall leaderboard ("series scoring"), the leaderboard group with the overall
+			    leaderboard must be provided as the first of the overlapping leaderboard groups in
+			    the scope of the event.
+			</li> 
                     </ul>
 
                     <h2 class="articleSubheadline">May 2016</h2>

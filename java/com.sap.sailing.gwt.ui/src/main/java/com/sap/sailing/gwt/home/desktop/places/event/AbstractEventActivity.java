@@ -229,10 +229,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     public String getRegattaId() {
         String regattaId = currentPlace.getRegattaId();
-        if(regattaId  != null) {
+        if (regattaId != null) {
             return regattaId;
         }
-        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;
