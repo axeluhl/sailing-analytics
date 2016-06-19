@@ -680,8 +680,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     protected void leaderboardSelectionChanged() {
         if (raceColumnTableSelectionModel.getSelectedSet() != null
                 && !raceColumnTableSelectionModel.getSelectedSet().isEmpty()) {
-            raceColumnTableSelectionModel.setSelected(raceColumnTableSelectionModel.getSelectedSet().iterator().next(),
-                    false);
+            // we can be sure that raceColumnTableSelectionModel is single-selection only because
+            // this class's constructor passes "false" to the super-class constructor's multi-selection
+            // constructor parameter
+            raceColumnTableSelectionModel.setSelected(raceColumnTableSelectionModel.getSelectedSet().iterator().next(), false);
         }
         
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
