@@ -33,6 +33,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
+import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateEvents;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.R;
@@ -40,6 +41,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.data.DataStore;
 import com.sap.sailing.racecommittee.app.data.ReadonlyDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.domain.impl.RaceStateEventImplParcel;
 import com.sap.sailing.racecommittee.app.services.polling.RaceLogPoller;
 import com.sap.sailing.racecommittee.app.services.sending.RaceEventSender;
 import com.sap.sailing.racecommittee.app.ui.activities.LoginActivity;
@@ -235,7 +237,8 @@ public class RaceStateService extends Service {
         }
 
         if (AppConstants.INTENT_ACTION_ALARM_ACTION.equals(action)) {
-            RaceStateEvent stateEvent = (RaceStateEvent) intent.getExtras().getSerializable(AppConstants.EXTRAS_RACE_STATE_EVENT);
+            RaceStateEventImplParcel parcel = intent.getExtras().getParcelable(AppConstants.EXTRAS_RACE_STATE_EVENT);
+            RaceStateEvent stateEvent = new RaceStateEventImpl(parcel.getTimePoint(), parcel.getEventName());
             ExLog.i(this, TAG, String.format("Processing %s", stateEvent.toString()));
             race.getState().processStateEvent(stateEvent);
             clearAlarmByName(race, stateEvent.getEventName());
@@ -367,7 +370,7 @@ public class RaceStateService extends Service {
         intent.setAction(AppConstants.INTENT_ACTION_ALARM_ACTION);
         intent.putExtra(EXTRAS_SERVICE_ID, serviceId);
         intent.putExtra(AppConstants.RACE_ID_KEY, managedRace.getId());
-        intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, event);
+        intent.putExtra(AppConstants.EXTRAS_RACE_STATE_EVENT, new RaceStateEventImplParcel(event));
         return PendingIntent.getService(this, alarmManagerRequestCode++, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -380,7 +383,7 @@ public class RaceStateService extends Service {
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, event.getTimePoint().asMillis(), intent);
         }
-        ExLog.i(this, TAG, "The alarm " + event.getEventName() + " will be fired at " + event.getTimePoint());
+        ExLog.i(this, TAG, "The alarm " + event.getEventName() + " for race " + race.getId() + " will be fired at " + event.getTimePoint());
     }
 
     public void clearAlarmByName(ManagedRace race, RaceStateEvents stateEventName) {
