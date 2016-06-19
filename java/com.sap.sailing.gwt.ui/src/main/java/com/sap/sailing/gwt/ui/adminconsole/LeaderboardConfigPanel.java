@@ -678,6 +678,12 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     
     @Override
     protected void leaderboardSelectionChanged() {
+        if (raceColumnTableSelectionModel.getSelectedSet() != null
+                && !raceColumnTableSelectionModel.getSelectedSet().isEmpty()) {
+            raceColumnTableSelectionModel.setSelected(raceColumnTableSelectionModel.getSelectedSet().iterator().next(),
+                    false);
+        }
+        
         leaderboardRemoveButton.setEnabled(!leaderboardSelectionModel.getSelectedSet().isEmpty());
         StrippedLeaderboardDTO selectedLeaderboard = getSelectedLeaderboard();
         if (leaderboardSelectionModel.getSelectedSet().size() == 1 && selectedLeaderboard != null) {
