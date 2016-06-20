@@ -8,6 +8,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sap.sailing.domain.igtimiadapter.BulkFixReceiver;
 import com.sap.sailing.domain.igtimiadapter.IgtimiWindListener;
+import com.sap.sailing.domain.igtimiadapter.LiveDataConnection;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -43,8 +45,15 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
         out.println("<body>");
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+getIgtimiMessagesRawCount()+" raw messages received)</h3>");
-        if(getIgtimiConnectionInfo() != null) {
-            out.println("<h4>Igtimi Connection info: " + getIgtimiConnectionInfo().remoteAddress.toString() + "</h4>");
+        Map<LiveDataConnection, IgtimiConnectionInfo> igtimiConnections = getIgtimiConnections();
+        if (!igtimiConnections.isEmpty()) {
+            int igtimiConnectionCounter = 1;
+            for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
+                IgtimiConnectionInfo igtimiConnectionInfo = entry.getValue();
+                out.println("<h4>Connection " + igtimiConnectionCounter +
+                        " for account " + igtimiConnectionInfo.accountName + " : " + igtimiConnectionInfo.remoteAddress.toString() + "</h4>");
+                igtimiConnectionCounter++;
+            }
         }
         if (getLastIgtimiMessages() != null && !getLastIgtimiMessages().isEmpty()) {
             for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
