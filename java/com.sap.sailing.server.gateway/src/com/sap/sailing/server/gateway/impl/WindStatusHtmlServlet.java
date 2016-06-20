@@ -43,6 +43,9 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
         out.println("<body>");
         out.println("<p>Reload wind connectors with parameter <a href=\"/sailingserver/windStatus?reloadWindReceiver=true\">reloadWindReceiver=true</a>. This will force a connection reset and a reloading of the wind receivers.</p>");
         out.println("<h3>Igtimi Wind Status ("+getIgtimiMessagesRawCount()+" raw messages received)</h3>");
+        if(getIgtimiConnectionInfo() != null) {
+            out.println("<h4>Igtimi Connection info: " + getIgtimiConnectionInfo().remoteAddress.toString() + "</h4>");
+        }
         if (getLastIgtimiMessages() != null && !getLastIgtimiMessages().isEmpty()) {
             for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
                 final Deque<IgtimiMessageInfo> copyOfLastIgtimiMessages;

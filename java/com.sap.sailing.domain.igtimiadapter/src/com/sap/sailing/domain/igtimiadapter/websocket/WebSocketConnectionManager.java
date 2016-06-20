@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.igtimiadapter.websocket;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +151,7 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
     public com.sap.sse.common.Util.Pair<TimePoint, TimePoint> getIgtimiServerTimePointAndWhenItWasReceived() {
         return new com.sap.sse.common.Util.Pair<TimePoint, TimePoint>(igtimiServerTimepoint, localTimepointWhenServerTimepointWasReceived);
     }
-    
+
     @Override
     public void addListener(BulkFixReceiver listener) {
         listeners.put(listener, listener);
@@ -249,5 +250,10 @@ public class WebSocketConnectionManager extends WebSocketAdapter implements Live
         if (lastException != null) {
             throw lastException;
         }        
+    }
+
+    @Override
+    public InetSocketAddress getRemoteAddress() {
+        return getSession().getRemoteAddress();
     }
 }

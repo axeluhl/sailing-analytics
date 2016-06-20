@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -65,7 +66,8 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     private static Map<String, Deque<IgtimiMessageInfo>> lastIgtimiMessages;
     private static IgtimiWindReceiver igtimiWindReceiver;
     private static LiveDataConnection liveDataConnection;
-
+    private static IgtimiConnectionInfo igtimiConnectionInfo;
+    
     private static boolean isExpeditionListenerRegistered;
     private static boolean isIgtimiListenerRegistered;
     
@@ -102,6 +104,7 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                             liveDataConnection.stop();
                             liveDataConnection.removeListener(igtimiWindReceiver);
                             liveDataConnection.removeListener(this);
+                            igtimiConnectionInfo = null;
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -199,6 +202,9 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
                     liveDataConnection = igtimiConnection.getOrCreateLiveConnection(igtimiConnection.getWindDevices());
                     liveDataConnection.addListener(igtimiWindReceiver);
                     liveDataConnection.addListener(this);
+                    
+                    igtimiConnectionInfo = new IgtimiConnectionInfo();
+                    igtimiConnectionInfo.remoteAddress = liveDataConnection.getRemoteAddress(); 
                     result = true;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -236,7 +242,11 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
         }
         return result;
     }
-    
+
+    protected class IgtimiConnectionInfo {
+        InetSocketAddress remoteAddress;
+    }
+
     protected class ExpeditionMessageInfo {
         Integer boatID;
         ExpeditionMessage message;
@@ -311,5 +321,9 @@ public class WindStatusServlet extends SailingServerHttpServlet implements Igtim
     @Override
     public void received(Iterable<Fix> fixes) {
         igtimiRawMessageCount += 1;
+    }
+
+    public static IgtimiConnectionInfo getIgtimiConnectionInfo() {
+        return igtimiConnectionInfo;
     }
 }
