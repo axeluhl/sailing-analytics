@@ -63,6 +63,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     protected final EventViewDTO eventDTO;
 
+    /**
+     * @param place the place of the tab to be activated
+     * @param eventDTO the basic event data
+     * @param clientFactory the {@link EventClientFactory} to use
+     * @param homePlacesNavigator the {@link DesktopPlacesNavigator} to use to navigate to other places in the application
+     */
     public AbstractEventActivity(PLACE place, EventViewDTO eventDTO, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.eventDTO = eventDTO;
