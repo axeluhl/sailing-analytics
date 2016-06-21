@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl.logtracker;
+package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -28,7 +28,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
-import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTracker;
+import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTracker;
 import com.sap.sailing.domain.racelogtracking.test.AbstractGPSFixStoreTest;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
@@ -78,7 +78,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 OneDesignRankingMetric::new, mock(RaceLogResolver.class));
         trackedRace.setStartOfTrackingReceived(new MillisecondsTimePoint(1000));
         trackedRace.setEndOfTrackingReceived(new MillisecondsTimePoint(2000));
-        new RaceLogSensorFixTracker(trackedRace, store, null);
+        new RaceLogFixTracker(trackedRace, store, null);
 
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);
@@ -132,7 +132,7 @@ public class TrackedRaceLoadsFixesTest extends AbstractGPSFixStoreTest {
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0, 0, 0,
                 /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new, mock(RaceLogResolver.class));
 
-        new RaceLogSensorFixTracker(trackedRace, store, null);
+        new RaceLogFixTracker(trackedRace, store, null);
         
         trackedRace.attachRaceLog(raceLog);
         trackedRace.attachRegattaLog(regattaLog);

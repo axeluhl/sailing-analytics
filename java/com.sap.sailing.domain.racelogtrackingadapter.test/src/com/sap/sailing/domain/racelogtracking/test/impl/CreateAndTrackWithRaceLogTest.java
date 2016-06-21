@@ -49,7 +49,7 @@ import com.sap.sailing.domain.racelog.tracking.test.mock.SmartphoneImeiIdentifie
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
-import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTracker;
+import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RaceLogFixTracker;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.Track;
@@ -191,7 +191,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogSensorFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
+        new RaceLogFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);
@@ -231,7 +231,7 @@ public class CreateAndTrackWithRaceLogTest {
         TrackedRace race = column.getTrackedRace(fleet);
         assertNotNull(race);
         
-        new RaceLogSensorFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
+        new RaceLogFixTracker((DynamicTrackedRace) race, sensorFixStore, null);
 
         race.waitForLoadingToFinish();
         addFixes1(race, comp1, dev1);

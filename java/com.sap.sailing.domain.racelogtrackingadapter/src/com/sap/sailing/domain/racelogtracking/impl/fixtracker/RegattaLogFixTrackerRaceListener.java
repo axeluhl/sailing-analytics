@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -6,21 +6,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
-import com.sap.sailing.domain.racelogtracking.impl.logtracker.RaceLogSensorFixTrackerLifecycle;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 
-public class RegattaLogSensorDataTracker {
+public class RegattaLogFixTrackerRaceListener {
     private final Map<RegattaAndRaceIdentifier, DynamicTrackedRace> knownTrackedRaces = new ConcurrentHashMap<>();
-    private final Map<RegattaAndRaceIdentifier, RaceLogSensorFixTrackerLifecycle> dataTrackers = new ConcurrentHashMap<>();
+    private final Map<RegattaAndRaceIdentifier, RaceLogFixTrackerManager> dataTrackers = new ConcurrentHashMap<>();
     private final DynamicTrackedRegatta trackedRegatta;
     private final RaceListener raceListener;
     private final SensorFixStore sensorFixStore;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RegattaLogSensorDataTracker(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore,
+    public RegattaLogFixTrackerRaceListener(final DynamicTrackedRegatta trackedRegatta, SensorFixStore sensorFixStore,
             final SensorFixMapperFactory sensorFixMapperFactory) {
         this.trackedRegatta = trackedRegatta;
         this.sensorFixStore = sensorFixStore;
@@ -28,12 +27,12 @@ public class RegattaLogSensorDataTracker {
         this.raceListener = new RaceListener() {
             @Override
             public void raceRemoved(TrackedRace trackedRace) {
-                RegattaLogSensorDataTracker.this.raceRemoved(trackedRace);
+                RegattaLogFixTrackerRaceListener.this.raceRemoved(trackedRace);
             }
 
             @Override
             public void raceAdded(TrackedRace trackedRace) {
-                RegattaLogSensorDataTracker.this.raceAdded(trackedRace);
+                RegattaLogFixTrackerRaceListener.this.raceAdded(trackedRace);
             }
         };
         trackedRegatta.addRaceListener(raceListener);
@@ -51,14 +50,14 @@ public class RegattaLogSensorDataTracker {
             if (existingRace != null) {
                 removeRaceLogSensorDataTracker(raceIdentifier);
             }
-            RaceLogSensorFixTrackerLifecycle dataTracker = new RaceLogSensorFixTrackerLifecycle((DynamicTrackedRace) trackedRace,
+            RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager((DynamicTrackedRace) trackedRace,
                     sensorFixStore, sensorFixMapperFactory, tracker -> trackerStopped(raceIdentifier, tracker));
-            dataTrackers.put(raceIdentifier, dataTracker);
+            dataTrackers.put(raceIdentifier, trackerManager);
         }
     }
 
-    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogSensorFixTrackerLifecycle tracker) {
-        dataTrackers.remove(raceIdentifier, tracker);
+    private void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogFixTrackerManager trackerManager) {
+        dataTrackers.remove(raceIdentifier, trackerManager);
     }
 
     public synchronized void stop() {
@@ -69,9 +68,9 @@ public class RegattaLogSensorDataTracker {
     }
 
     private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
-        RaceLogSensorFixTrackerLifecycle currentActiveDataTracker = dataTrackers.get(raceIdentifier);
+        RaceLogFixTrackerManager currentActiveDataTracker = dataTrackers.get(raceIdentifier);
         if (currentActiveDataTracker != null) {
-            currentActiveDataTracker.stop();
+            currentActiveDataTracker.stop(false);
             trackerStopped(raceIdentifier, currentActiveDataTracker);
         }
     }

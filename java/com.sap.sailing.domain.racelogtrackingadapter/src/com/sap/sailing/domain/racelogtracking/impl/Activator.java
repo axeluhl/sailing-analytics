@@ -20,6 +20,7 @@ import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializatio
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
+import com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.MasterDataImportClassLoaderService;
@@ -90,7 +91,7 @@ public class Activator implements BundleActivator {
         sensorFixMapperTracker = (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
 
-        RegattaLogSensorDataTrackerTrackedRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogSensorDataTrackerTrackedRegattaListener(
+        RegattaLogFixTrackerRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogFixTrackerRegattaListener(
                 racingEventServiceTracker, new SensorFixMapperFactoryImpl(sensorFixMapperTracker));
         registrations.add(context.registerService(TrackedRegattaListener.class,
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));

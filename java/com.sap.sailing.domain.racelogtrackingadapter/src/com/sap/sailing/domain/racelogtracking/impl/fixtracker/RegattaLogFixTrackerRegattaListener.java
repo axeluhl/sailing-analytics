@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl;
+package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,16 +27,16 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
-public class RegattaLogSensorDataTrackerTrackedRegattaListener implements TrackedRegattaListener,
-        ReplicableWithObjectInputStream<RegattaLogSensorDataTrackerTrackedRegattaListener, OperationWithResult<RegattaLogSensorDataTrackerTrackedRegattaListener, ?>> {
+public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListener,
+        ReplicableWithObjectInputStream<RegattaLogFixTrackerRegattaListener, OperationWithResult<RegattaLogFixTrackerRegattaListener, ?>> {
     
-    private static final Logger log = Logger.getLogger(RegattaLogSensorDataTrackerTrackedRegattaListener.class.getName());
+    private static final Logger log = Logger.getLogger(RegattaLogFixTrackerRegattaListener.class.getName());
     
-    private final Map<Serializable, RegattaLogSensorDataTracker> registeredTrackers = new HashMap<>();
+    private final Map<Serializable, RegattaLogFixTrackerRaceListener> registeredTrackers = new HashMap<>();
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
-    public RegattaLogSensorDataTrackerTrackedRegattaListener(
+    public RegattaLogFixTrackerRegattaListener(
             ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker,
             SensorFixMapperFactory sensorFixMapperFactory) {
         this.racingEventServiceTracker = racingEventServiceTracker;
@@ -48,7 +48,7 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
         final Serializable regattaId = trackedRegatta.getRegatta().getId();
         // TODO: observe isReplica, it can change!
         if (!isReplica) {
-            RegattaLogSensorDataTracker tracker = new RegattaLogSensorDataTracker((DynamicTrackedRegatta) 
+            RegattaLogFixTrackerRaceListener tracker = new RegattaLogFixTrackerRaceListener((DynamicTrackedRegatta) 
                     trackedRegatta, racingEventServiceTracker.getService().getSensorFixStore(), sensorFixMapperFactory);
             this.stopIfNotNull(registeredTrackers.put(regattaId, tracker));
             log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
@@ -67,7 +67,7 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
         }
     }
     
-    private void stopIfNotNull(RegattaLogSensorDataTracker tracker) {
+    private void stopIfNotNull(RegattaLogFixTrackerRaceListener tracker) {
         if (tracker != null) {
             try {
                 tracker.stop();
@@ -78,9 +78,9 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
     }
     
     // Replication related methods and fields
-    private final ConcurrentHashMap<OperationExecutionListener<RegattaLogSensorDataTrackerTrackedRegattaListener>, OperationExecutionListener<RegattaLogSensorDataTrackerTrackedRegattaListener>> operationExecutionListeners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<OperationExecutionListener<RegattaLogFixTrackerRegattaListener>, OperationExecutionListener<RegattaLogFixTrackerRegattaListener>> operationExecutionListeners = new ConcurrentHashMap<>();
     private final ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-    private final Set<OperationWithResultWithIdWrapper<RegattaLogSensorDataTrackerTrackedRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
+    private final Set<OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?>> operationsSentToMasterForReplication = new HashSet<>();
     private ReplicationMasterDescriptor master;
     private boolean isReplica = false;
 
@@ -105,19 +105,19 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
     }
 
     @Override
-    public Iterable<OperationExecutionListener<RegattaLogSensorDataTrackerTrackedRegattaListener>> getOperationExecutionListeners() {
+    public Iterable<OperationExecutionListener<RegattaLogFixTrackerRegattaListener>> getOperationExecutionListeners() {
         return operationExecutionListeners.keySet();
     }
 
     @Override
     public void addOperationExecutionListener(
-            OperationExecutionListener<RegattaLogSensorDataTrackerTrackedRegattaListener> listener) {
+            OperationExecutionListener<RegattaLogFixTrackerRegattaListener> listener) {
         this.operationExecutionListeners.put(listener, listener);
     }
 
     @Override
     public void removeOperationExecutionListener(
-            OperationExecutionListener<RegattaLogSensorDataTrackerTrackedRegattaListener> listener) {
+            OperationExecutionListener<RegattaLogFixTrackerRegattaListener> listener) {
         this.operationExecutionListeners.remove(listener);
     }
 
@@ -133,13 +133,13 @@ public class RegattaLogSensorDataTrackerTrackedRegattaListener implements Tracke
 
     @Override
     public void addOperationSentToMasterForReplication(
-            OperationWithResultWithIdWrapper<RegattaLogSensorDataTrackerTrackedRegattaListener, ?> operationWithResultWithIdWrapper) {
+            OperationWithResultWithIdWrapper<RegattaLogFixTrackerRegattaListener, ?> operationWithResultWithIdWrapper) {
         this.operationsSentToMasterForReplication.add(operationWithResultWithIdWrapper);
     }
 
     @Override
     public boolean hasSentOperationToMaster(
-            OperationWithResult<RegattaLogSensorDataTrackerTrackedRegattaListener, ?> operation) {
+            OperationWithResult<RegattaLogFixTrackerRegattaListener, ?> operation) {
         return operationsSentToMasterForReplication.remove(operation);
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.racelogtracking.impl.logtracker;
+package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.logging.Logger;
 
@@ -16,8 +16,15 @@ import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 
-public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
-    private static final Logger logger = Logger.getLogger(RaceLogSensorFixTrackerLifecycle.class.getName());
+/**
+ * This class manages the lifecycle of the {@link RaceLogFixTracker} by listening to
+ * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.
+ * 
+ * Once the race is stopped, it notifies its own {@link Owner}.
+ * 
+ */
+public class RaceLogFixTrackerManager implements TrackingDataLoader {
+    private static final Logger logger = Logger.getLogger(RaceLogFixTrackerManager.class.getName());
 
     private final DynamicTrackedRace trackedRace;
 
@@ -27,16 +34,24 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
 
     private final Owner owner;
     
-    private RaceLogSensorFixTracker tracker;
+    private RaceLogFixTracker tracker;
 
     private final RaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         public void raceLogAttached(RaceLog raceLog) {
             raceLog.addListener(raceLogEventVisitor);
         }
 
+        /**
+         * Stops tracking the races.
+         * 
+         * @param preemptive
+         *            if <code>false</code>, the tracker will continue to process data already received but will stop
+         *            receiving new data. If <code>true</code>, the tracker will stop processing data immediately,
+         *            ignoring (dropping) all data already received but not yet processed.
+         */
         public void stopTracking(boolean preemptive) {
-            stop();
-            owner.stopped(RaceLogSensorFixTrackerLifecycle.this);
+            stop(preemptive);
+            owner.stopped(RaceLogFixTrackerManager.this);
         }
     };
 
@@ -53,10 +68,10 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
     };
 
     public interface Owner {
-        void stopped(RaceLogSensorFixTrackerLifecycle tracker);
+        void stopped(RaceLogFixTrackerManager tracker);
     }
 
-    public RaceLogSensorFixTrackerLifecycle(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
             SensorFixMapperFactory sensorFixMapperFactory, Owner owner) {
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
@@ -76,12 +91,12 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
         if (getForTracking()) {
             startTracker();
         } else {
-            stopTracker();
+            stopTracker(false);
         }
     }
     
-    public void stop() {
-        stopTracker();
+    public void stop(boolean preemptive) {
+        stopTracker(preemptive);
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             raceLog.removeListener(raceLogEventVisitor);
         }
@@ -89,13 +104,13 @@ public class RaceLogSensorFixTrackerLifecycle implements TrackingDataLoader {
     
     private synchronized void startTracker() {
         if (tracker == null) {
-            tracker = new RaceLogSensorFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
+            tracker = new RaceLogFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
         }
     }
 
-    private synchronized void stopTracker() {
+    private synchronized void stopTracker(boolean preemptive) {
         if (tracker != null) {
-            tracker.stop();
+            tracker.stop(preemptive);
             tracker = null;
         }
     }
