@@ -22,8 +22,6 @@ public interface IgtimiConnectionFactory {
 
     IgtimiConnection connect(Account account);
     
-    IgtimiConnection getConnectionOfAccount(Account account);
-
     /**
      * Removes the account and the credentials associated with it permanently. The account is identified by the e-mail
      * address of the owner of the data to which the account granted access. See also {@link #getExistingAccountByEmail(String)}.
