@@ -23,6 +23,7 @@ public class DeviceDetector {
     private static final RegExp tabletBlacklistRegExp = RegExp.compile(
             "iPad|" // Apple ;-)
             + "Nexus 7|Nexus 10|Nexus 9|" // Google Tablets
+            + "Ryu|" // Google Pixel C
             + "PlayBook|" // Blackberry
             + "KFAPWI|" // Kindle Fire HD
             + "FZ-B|" // Panasonic ToughPad
