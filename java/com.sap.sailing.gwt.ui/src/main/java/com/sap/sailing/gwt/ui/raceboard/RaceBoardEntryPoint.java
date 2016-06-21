@@ -25,6 +25,7 @@ import com.sap.sse.gwt.client.EntryPointHelper;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveLifecycleWithAllSettings;
 
 public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
@@ -128,8 +129,12 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint {
                 Collections.singletonList(selectedRace.getRaceIdentifier()), 5000l /* requestInterval*/);
   
         RaceBoardPerspectiveLifecycle raceboardPerspectiveLifecycle = new RaceBoardPerspectiveLifecycle(null, StringMessages.INSTANCE);
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> defaultSettings = raceboardPerspectiveLifecycle.createDefaultSettings();
+        PerspectiveCompositeSettings<RaceBoardPerspectiveSettings> perspectiveCompositeSettings = 
+                new PerspectiveCompositeSettings<>(perspectiveSettings, defaultSettings.getSettingsPerComponentId());
+        
         PerspectiveLifecycleWithAllSettings<RaceBoardPerspectiveLifecycle, RaceBoardPerspectiveSettings> raceboardPerspectiveLifecyclesAndSettings = new PerspectiveLifecycleWithAllSettings<>(raceboardPerspectiveLifecycle,
-                raceboardPerspectiveLifecycle.createDefaultSettings());
+                perspectiveCompositeSettings);
 
         RaceBoardPanel raceBoardPerspective = new RaceBoardPanel(
                 raceboardPerspectiveLifecyclesAndSettings, sailingService, mediaService, getUserService(),
