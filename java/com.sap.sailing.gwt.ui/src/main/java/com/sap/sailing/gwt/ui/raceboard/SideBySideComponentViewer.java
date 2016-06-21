@@ -91,7 +91,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
         this.markPositionPanel = markPositionPanel;
-        markPositionPanel.setComponentViewer(this);
+        if (markPositionPanel != null) {
+            markPositionPanel.setComponentViewer(this);
+        }
         userService.addUserStatusEventHandler(this);
         mediaPlayerManagerComponent.setPlayerChangeListener(new PlayerChangeListener() {
             public void notifyStateChange() {
