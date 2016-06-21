@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sap.sailing.racecommittee.app"
-          android:versionCode="19"
-          android:versionName="1.11">
+    android:versionCode="19"
+    android:versionName="1.11">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -51,20 +51,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="http"
-                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="*"
-                    android:scheme="https"
-                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"/>
+                    android:pathPattern="/apps/com.sap.sailing.racecommittee.app.apk"
+                    android:scheme="http" />
+
+                <data
+                    android:host="*"
+                    android:pathPattern="apps/com.sap.sailing.racecommittee.app.apk"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity android:name=".ui.activities.RacingActivity" />
@@ -80,6 +80,14 @@
         </activity>
         <activity android:name=".ui.activities.SystemInformationActivity" />
 
+        <service android:name=".services.polling.RaceLogPollerService">
+            <intent-filter>
+                <action android:name="com.sap.sailing.racecommittee.app.action.stopPoller" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.addRace" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.removeRace" />
+                <action android:name="com.sap.sailing.racecommittee.app.action.poll" />
+            </intent-filter>
+        </service>
         <service
             android:name=".services.RaceStateService"
             android:enabled="true"
