@@ -68,6 +68,8 @@ public class MediaPage extends Composite {
             photoSectionUi.getStyle().clearDisplay();
             String photoCss = null;
 
+            // To make the image gallery look good, we use different styling if there are only few (<7) images
+            // available. If there are more images, always 4 images are shown in a row.
             switch (photosCount) {
             case 1:
                 photoCss = res.mediaCss().medium12();
@@ -142,6 +144,12 @@ public class MediaPage extends Composite {
         }
     }
 
+    /**
+     * Shows a selected video in the big viewer.
+     * 
+     * @param video the video to show in the big viewer
+     * @param autoplay true, if the video should play automatically, false otherwise
+     */
     private void putVideoOnDisplay(final SailingVideoDTO video, boolean autoplay) {
         videoDisplayUi = new VideoWithLowerThird(true, autoplay);
         videoDisplayUi.setVideo(video);
