@@ -30,6 +30,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionMessage;
 import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
+import com.sap.sse.common.Util;
 
 /**
  * Shows the state of wind receivers regardless of them being attached to a race. Currently Expedition and Igtimi are supported.
@@ -132,6 +133,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
                     IgtimiConnectionInfo newIgtimiConnectionInfo = new IgtimiConnectionInfo();
                     newIgtimiConnectionInfo.remoteAddress = newIgtimiConnection.getRemoteAddress();
                     newIgtimiConnectionInfo.accountName = account.getUser().getEmail();
+                    Util.addAll(igtimiConnection.getWindDevices(), newIgtimiConnectionInfo.deviceIDs);
                     igtimiConnections.put(newIgtimiConnection, newIgtimiConnectionInfo);
                     
                     result = true;
@@ -175,6 +177,7 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     protected class IgtimiConnectionInfo {
         InetSocketAddress remoteAddress;
         String accountName;
+        List<String> deviceIDs = new ArrayList<>();
     }
 
     protected class ExpeditionMessageInfo {

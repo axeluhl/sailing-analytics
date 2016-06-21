@@ -47,13 +47,15 @@ public class WindStatusHtmlServlet extends WindStatusServlet implements IgtimiWi
         out.println("<h3>Igtimi Wind Status ("+getIgtimiMessagesRawCount()+" raw messages received)</h3>");
         Map<LiveDataConnection, IgtimiConnectionInfo> igtimiConnections = getIgtimiConnections();
         if (!igtimiConnections.isEmpty()) {
-            int igtimiConnectionCounter = 1;
+            out.println("<h4>Igtimi accounts used</h4>");
             for (Map.Entry<LiveDataConnection, IgtimiConnectionInfo> entry: igtimiConnections.entrySet()) {
                 IgtimiConnectionInfo igtimiConnectionInfo = entry.getValue();
-                out.println("<h4>Connection " + igtimiConnectionCounter +
-                        " for account " + igtimiConnectionInfo.accountName + " : " + igtimiConnectionInfo.remoteAddress.toString() + "</h4>");
-                igtimiConnectionCounter++;
+                int deviceCount = igtimiConnectionInfo.deviceIDs.size();
+                out.println("<b>Account " + igtimiConnectionInfo.accountName + "</b><br/>");
+                out.println(deviceCount + " devices " + igtimiConnectionInfo.deviceIDs.toString() + "<br/>");
+                out.println("Connection used is " + igtimiConnectionInfo.remoteAddress.toString() + "<br/><br/>");
             }
+            out.println("<br/>");
         }
         if (getLastIgtimiMessages() != null && !getLastIgtimiMessages().isEmpty()) {
             for(Entry<String, Deque<IgtimiMessageInfo>> deviceAndMessagesList: getLastIgtimiMessages().entrySet()) {
