@@ -40,6 +40,12 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
+/**
+ * Base Activity for all desktop event pages. This includes the event page itself for multi-regatta events as well as
+ * regatta/single-regatta-event pages.
+ *
+ * @param <PLACE> The concrete {@link AbstractEventPlace} subclass, this instance is bound to.
+ */
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements
         EventView.Presenter {
 
