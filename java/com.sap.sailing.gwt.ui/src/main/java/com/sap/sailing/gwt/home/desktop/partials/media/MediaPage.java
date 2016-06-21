@@ -22,6 +22,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.GalleryImageHolder;
 import com.sap.sailing.gwt.ui.client.media.VideoThumbnail;
 
+/**
+ * Desktop page to show videos and images as a gallery.
+ */
 public class MediaPage extends Composite {
     private static MediaPageUiBinder uiBinder = GWT.create(MediaPageUiBinder.class);
 
