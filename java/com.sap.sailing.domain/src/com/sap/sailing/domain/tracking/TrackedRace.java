@@ -416,6 +416,10 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      * first obtains the mark passings read lock and later, while holding on to that lock, asks for the course's read
      * lock, a deadlock may result.<p>
      * 
+     * Furthermore, when trying to acquire both, a lock for the {@link #getMarkPassings(Competitor) mark passings for a competitor}
+     * and a lock for the {@link #getMarkPassingsInOrder(Waypoint) mark passings for a waypoint, this needs to happen in exactly
+     * this order, or a deadlock may result.<p>
+     * 
      * The {@link #unlockAfterRead(Iterable)} method will symmetrically unlock the course's read lock after releasing the
      * read lock for the mark passings.
      */

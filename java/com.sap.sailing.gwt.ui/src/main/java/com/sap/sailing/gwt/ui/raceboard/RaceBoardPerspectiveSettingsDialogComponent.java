@@ -26,15 +26,15 @@ public class RaceBoardPerspectiveSettingsDialogComponent implements SettingsDial
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
 
-        showLeaderboardCheckBox = dialog.createCheckbox(stringMessages.show() + " " + stringMessages.leaderboard());
+        showLeaderboardCheckBox = dialog.createCheckbox(stringMessages.showLeaderboard());
         showLeaderboardCheckBox.setValue(initialSettings.isShowLeaderboard());
         vp.add(showLeaderboardCheckBox);
 
-        showWindChartCheckBox = dialog.createCheckbox(stringMessages.show() + " " + stringMessages.windChart());
+        showWindChartCheckBox = dialog.createCheckbox(stringMessages.showWindChart());
         showWindChartCheckBox.setValue(initialSettings.isShowWindChart());
         vp.add(showWindChartCheckBox);        
 
-        showCompetitorsChartCheckBox = dialog.createCheckbox(stringMessages.show() + " " + stringMessages.competitorCharts());
+        showCompetitorsChartCheckBox = dialog.createCheckbox(stringMessages.showCompetitorCharts());
         showCompetitorsChartCheckBox.setValue(initialSettings.isShowCompetitorsChart());
         vp.add(showCompetitorsChartCheckBox);        
         

@@ -451,16 +451,24 @@ public class TrackedLegOfCompetitorImpl implements TrackedLegOfCompetitor {
                         if (leaderLeg == null || leg != leaderLeg.getLeg()) {
                             // add distance to next mark
                             Position nextMarkPosition = getTrackedRace().getApproximatePosition(leg.getTo(), timePoint);
-                            Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
-                                    .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
-                            result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                            if (nextMarkPosition == null) {
+                                result = null;
+                                break;
+                            } else {
+                                Distance distanceToNextMark = getTrackedRace().getTrackedLeg(leg)
+                                        .getAbsoluteWindwardDistance(currentPosition, nextMarkPosition, timePoint, windPositionMode, cache);
+                                result = new MeterDistance(result.getMeters() + distanceToNextMark.getMeters());
+                            }
                             currentPosition = nextMarkPosition;
                         } else {
                             // we're now in the same leg with leader; compute windward distance to leader
-                            result = new MeterDistance(result.getMeters()
-                                    + getTrackedRace().getTrackedLeg(leg)
-                                            .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache)
-                                            .getMeters());
+                            final Distance absoluteWindwardDistance = getTrackedRace().getTrackedLeg(leg)
+                                    .getAbsoluteWindwardDistance(currentPosition, leaderPosition, timePoint, windPositionMode, cache);
+                            if (absoluteWindwardDistance != null) {
+                                result = new MeterDistance(result.getMeters() + absoluteWindwardDistance.getMeters());
+                            } else {
+                                result = null;
+                            }
                             break;
                         }
                     }
