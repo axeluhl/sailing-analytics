@@ -50,6 +50,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
          *            ignoring (dropping) all data already received but not yet processed.
          */
         public void stopTracking(boolean preemptive) {
+            logger.fine("Got the signal to stop fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier()
+                    + "; preemptive: " + preemptive);
             stop(preemptive);
             owner.stopped(RaceLogFixTrackerManager.this);
         }
@@ -104,12 +106,14 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     
     private synchronized void startTracker() {
         if (tracker == null) {
+            logger.fine("Starting fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
             tracker = new RaceLogFixTracker(trackedRace, sensorFixStore, sensorFixMapperFactory);
         }
     }
 
     private synchronized void stopTracker(boolean preemptive) {
         if (tracker != null) {
+            logger.fine("Stopping fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
             tracker.stop(preemptive);
             tracker = null;
         }
