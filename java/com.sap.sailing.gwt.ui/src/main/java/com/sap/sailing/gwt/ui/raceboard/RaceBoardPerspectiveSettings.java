@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.google.gwt.dom.client.Document;
 import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -27,9 +26,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     private final boolean simulationEnabled;
     private final Duration initialDurationAfterRaceStartInReplay;
     
-    /** indicates whether it's enabled to display charts or not */
-    private final boolean chartSupportEnabled;
-
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
     public static final String PARAM_VIEW_SHOW_NAVIGATION_PANEL = "viewShowNavigationPanel";
@@ -45,22 +41,20 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
     public RaceBoardPerspectiveSettings() {
         this(/* activeCompetitorsFilterSetName */null, /* showLeaderboard */true,
         /* showWindChart */false, /* showCompetitorsChart */false, 
-        /* simulationEnabled */true, /* canReplayDuringLiveRaces */false, /* chartSupportEnabled */ true, 
+        /* simulationEnabled */true, /* canReplayDuringLiveRaces */false, 
         /* showChartMarkEditMediaButtonsAndVideo */ !DeviceDetector.isMobile(),
         /* initialDurationAfterRaceStartInReplay */ null);
     }
 
     public RaceBoardPerspectiveSettings(String activeCompetitorsFilterSetName, boolean showLeaderboard,
             boolean showWindChart, boolean showCompetitorsChart, boolean simulationEnabled, boolean canReplayDuringLiveRaces,
-            boolean chartSupportEnabled, boolean showChartMarkEditMediaButtonsAndVideo, 
-            Duration initialDurationAfterRaceStartInReplay) {
+            boolean showChartMarkEditMediaButtonsAndVideo, Duration initialDurationAfterRaceStartInReplay) {
         this.activeCompetitorsFilterSetName = activeCompetitorsFilterSetName;
         this.showLeaderboard = showLeaderboard;
         this.showWindChart = showWindChart;
         this.showCompetitorsChart = showCompetitorsChart;
         this.simulationEnabled = simulationEnabled;
         this.canReplayDuringLiveRaces = canReplayDuringLiveRaces;
-        this.chartSupportEnabled = chartSupportEnabled;
         this.showChartMarkEditMediaButtonsAndVideo = showChartMarkEditMediaButtonsAndVideo;
         this.initialDurationAfterRaceStartInReplay = initialDurationAfterRaceStartInReplay;
     }
@@ -89,10 +83,6 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         return canReplayDuringLiveRaces;
     }
 
-    public boolean isChartSupportEnabled() {
-        return chartSupportEnabled;
-    }
-
     public static RaceBoardPerspectiveSettings readSettingsFromURL() {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, true /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, false /* default */);
@@ -101,17 +91,11 @@ public class RaceBoardPerspectiveSettings extends AbstractSettings {
         String activeCompetitorsFilterSetName = GwtHttpRequestUtils.getStringParameter(PARAM_VIEW_COMPETITOR_FILTER, null /* default */);
         final boolean canReplayWhileLiveIsPossible = GwtHttpRequestUtils.getBooleanParameter(PARAM_CAN_REPLAY_DURING_LIVE_RACES, false /* default */);
         
-        // Determine if the screen is large enough to display charts such as the competitor chart or the wind chart.
-        // This decision is made once based on the initial screen height. Resizing the window afterwards will have
-        // no impact on the chart support, i.e. they are available/unavailable based on the initial decision.
-        boolean isScreenLargeEnoughToOfferChartSupport = Document.get().getClientHeight() >= 600;
-        final boolean chartSupportEnabled = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_CHART_SUPPORT_ENABLED, isScreenLargeEnoughToOfferChartSupport);
-
         final Duration initialDurationAfterRaceStartInReplay = parseDuration(GwtHttpRequestUtils.getStringParameter(
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
 
         return new RaceBoardPerspectiveSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
-                showCompetitorsChart, simulationEnabled, canReplayWhileLiveIsPossible, chartSupportEnabled, 
+                showCompetitorsChart, simulationEnabled, canReplayWhileLiveIsPossible,  
                 !DeviceDetector.isMobile(), initialDurationAfterRaceStartInReplay);
     }
 

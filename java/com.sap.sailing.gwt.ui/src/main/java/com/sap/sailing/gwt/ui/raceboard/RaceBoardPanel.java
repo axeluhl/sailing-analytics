@@ -264,7 +264,7 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
             }
         }
         racetimePanel = new RaceTimePanel(raceTimePanelLifecycle, userService, timer, timeRangeWithZoomModel, stringMessages, raceTimesInfoProvider,
-                getPerspectiveSettings().isCanReplayDuringLiveRaces(), getPerspectiveSettings().isChartSupportEnabled(),
+                getPerspectiveSettings().isCanReplayDuringLiveRaces(), getPerspectiveSettings().isShowChartMarkEditMediaButtonsAndVideo(),
                 selectedRaceIdentifier,  getPerspectiveSettings().getInitialDurationAfterRaceStartInReplay());
         racetimePanel.updateSettings(raceTimePanelSettings);
         timeRangeWithZoomModel.addTimeZoomChangeListener(racetimePanel);
