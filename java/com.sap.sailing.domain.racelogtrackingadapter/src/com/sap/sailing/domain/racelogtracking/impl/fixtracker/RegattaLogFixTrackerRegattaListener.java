@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -27,6 +28,18 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 
+/**
+ * This is the main entry point of the {@link SensorFixStore} based fix tracking.
+ * 
+ * This listener is informed about every {@link TrackedRegatta} by {@link RacingEventService} via the implemented
+ * {@link TrackedRegattaListener}. For every known {@link TrackedRegatta}, a {@link RegattaLogFixTrackerRaceListener} is
+ * started.
+ * 
+ * In addition this is a {@link ReplicableWithObjectInputStream} because we need to know if the current node is a
+ * replica. Replicas must not do any fix tracking because fixes are being loaded on the master and transferred to the
+ * replicas through the replication mechanism. That's why in replication state, no
+ * {@link RegattaLogFixTrackerRaceListener} instances are created at all.
+ */
 public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListener,
         ReplicableWithObjectInputStream<RegattaLogFixTrackerRegattaListener, OperationWithResult<RegattaLogFixTrackerRegattaListener, ?>> {
     

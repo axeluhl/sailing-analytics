@@ -20,8 +20,8 @@ import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
  * This class manages the lifecycle of the {@link RaceLogFixTracker} by listening to
  * {@link RaceLogDenoteForTrackingEvent}, race log attached and stop tracking race changes.
  * 
- * Once the race is stopped, it notifies its own {@link Owner}.
- * 
+ * Once the race is stopped, it notifies its own {@link Owner} so that all reference to this instance can be cleanly
+ * removed to prevent memory leaks.
  */
 public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(RaceLogFixTrackerManager.class.getName());

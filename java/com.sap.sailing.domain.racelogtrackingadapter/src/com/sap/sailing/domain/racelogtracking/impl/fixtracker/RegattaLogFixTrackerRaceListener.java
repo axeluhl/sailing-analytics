@@ -10,7 +10,16 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.TrackedRegatta;
 
+/**
+ * An instance of this class is created for every {@link TrackedRegatta} by {@link RegattaLogFixTrackerRegattaListener}.
+ * This observes the given {@link TrackedRegatta} to get to know about every {@link TrackedRace} of the
+ * {@link TrackedRegatta}.
+ * 
+ * An instance of {@link RaceLogFixTrackerManager} is created for every {@link TrackedRace}. It is ensured that
+ * {@link RaceLogFixTrackerManager} are stopped when a {@link TrackedRace} is removed from the {@link TrackedRegatta}.
+ */
 public class RegattaLogFixTrackerRaceListener {
     private final Map<RegattaAndRaceIdentifier, DynamicTrackedRace> knownTrackedRaces = new ConcurrentHashMap<>();
     private final Map<RegattaAndRaceIdentifier, RaceLogFixTrackerManager> dataTrackers = new ConcurrentHashMap<>();
@@ -60,6 +69,10 @@ public class RegattaLogFixTrackerRaceListener {
         dataTrackers.remove(raceIdentifier, trackerManager);
     }
 
+    /**
+     * Called by {@link RegattaLogFixTrackerRegattaListener} when the {@link TrackedRegatta} was removed or the
+     * {@link TrackedRegatta} shouldn't be tracked anymore (this is e.g. the case in replication state.
+     */
     public synchronized void stop() {
         trackedRegatta.removeRaceListener(raceListener);
         knownTrackedRaces.keySet().forEach(this::removeRaceLogSensorDataTracker);
