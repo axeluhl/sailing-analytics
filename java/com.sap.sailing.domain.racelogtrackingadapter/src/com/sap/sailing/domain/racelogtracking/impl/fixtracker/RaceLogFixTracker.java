@@ -330,7 +330,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         }
         sensorFixStore.removeListener(listener);
         if (preemptiveStopRequested.get()) {
-            waitForLoadingFromFixStoreToFinishRunning();
+            waitForLoadingToFinishRunning();
         }
     }
     
@@ -345,9 +345,12 @@ public class RaceLogFixTracker implements TrackingDataLoader {
             updateMappingsAndAddListeners();
         }
     }
-    protected void waitForLoadingFromFixStoreToFinishRunning() {
+
+    private synchronized void waitForLoadingToFinishRunning() {
         try {
-            waitForLoadingFromGPSFixStoreToFinishRunning();
+            while (activeLoaders.get() > 0) {
+                wait();
+            }
         } catch (InterruptedException e) {
             logger.log(Level.WARNING, "Interrupted while waiting for Fixes to be loaded", e);
         }
@@ -423,12 +426,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
             }
         };
         t.start();
-    }
-
-    private synchronized void waitForLoadingFromGPSFixStoreToFinishRunning() throws InterruptedException {
-        while (activeLoaders.get() > 0) {
-            wait();
-        }
     }
 
     /**
