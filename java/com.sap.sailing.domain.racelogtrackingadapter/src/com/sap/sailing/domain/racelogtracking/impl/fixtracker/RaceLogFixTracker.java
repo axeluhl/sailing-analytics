@@ -265,7 +265,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
             public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
                 try {
-                    // TODO: get rid of warning
                     gpsFixStore.loadCompetitorTrack(track, (DeviceMapping) mapping, getStartOfTracking(),
                             getEndOfTracking());
                 } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
@@ -280,7 +279,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 try {
                     TimePoint from = getStartOfTracking();
                     TimePoint to = getEndOfTracking();
-                    // TODO: get rid of warning
                     gpsFixStore.loadMarkTrack(track, (DeviceMapping) mapping, from, to);
                     if (track.getFirstRawFix() == null) {
                         logger.fine("Loading mark positions from outside of start/end of tracking interval (" + from
@@ -288,7 +286,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                         // got an empty track for the mark; try again without constraining the mapping interval
                         // by start/end of tracking to at least attempt to get fixes at all in case there were any
                         // within the device mapping interval specified
-                        // TODO: get rid of warning
                         gpsFixStore.loadMarkTrack(track, (DeviceMapping) mapping, /* startOfTimeWindowToLoad */ null,
                                 /* endOfTimeWindowToLoad */ null);
                     }
