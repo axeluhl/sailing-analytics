@@ -88,7 +88,7 @@ public class Activator implements BundleActivator {
                 new MasterDataImportClassLoaderServiceImpl(), null));
         registrations.add(context.registerService(SensorFixMapper.class, new BravoDataFixMapper(), null));
         
-        sensorFixMapperTracker = (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
+        sensorFixMapperTracker = createSensorFixMapperServiceTracker(context);
         racingEventServiceTracker = ServiceTrackerFactory.createAndOpen(context, RacingEventService.class);
 
         RegattaLogFixTrackerRegattaListener regattaLogSensorDataTrackerTrackedRegattaListener = new RegattaLogFixTrackerRegattaListener(
@@ -99,6 +99,11 @@ public class Activator implements BundleActivator {
                 regattaLogSensorDataTrackerTrackedRegattaListener, null));
         
         logger.log(Level.INFO, "Started "+context.getBundle().getSymbolicName());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private ServiceTracker<SensorFixMapper<?, ?, ?>, SensorFixMapper<?, ?, ?>> createSensorFixMapperServiceTracker(BundleContext context) {
+        return (ServiceTracker) ServiceTrackerFactory.createAndOpen(context, SensorFixMapper.class);
     }
 
     @Override

@@ -260,6 +260,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 }
             }
 
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
                 DynamicGPSFixTrack<Competitor, GPSFixMoving> track = trackedRace.getTrack(event.getMappedTo());
@@ -272,6 +273,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 }
             }
 
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
             public void visit(RegattaLogDeviceMarkMappingEvent event) {
                 DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());

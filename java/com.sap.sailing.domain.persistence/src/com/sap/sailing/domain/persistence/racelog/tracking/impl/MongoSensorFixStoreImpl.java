@@ -53,7 +53,7 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             DomainObjectFactory domainObjectFactory, TypeBasedServiceFinderFactory serviceFinderFactory) {
         mongoOF = (MongoObjectFactoryImpl) mongoObjectFactory;
         if (serviceFinderFactory != null) {
-            fixServiceFinder = (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
+            fixServiceFinder = createFixServiceFinder(serviceFinderFactory);
             deviceServiceFinder = serviceFinderFactory.createServiceFinder(DeviceIdentifierMongoHandler.class);
         } else {
             fixServiceFinder = null;
@@ -61,6 +61,11 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         }
         fixesCollection = mongoOF.getGPSFixCollection();
         metadataCollection = mongoOF.getGPSFixMetadataCollection();
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private TypeBasedServiceFinder<FixMongoHandler<?>> createFixServiceFinder(TypeBasedServiceFinderFactory serviceFinderFactory) {
+        return (TypeBasedServiceFinder) serviceFinderFactory.createServiceFinder(FixMongoHandler.class);
     }
 
     public <T extends Timed> T loadGPSFix(DBObject object) throws TransformationException, NoCorrespondingServiceRegisteredException {
