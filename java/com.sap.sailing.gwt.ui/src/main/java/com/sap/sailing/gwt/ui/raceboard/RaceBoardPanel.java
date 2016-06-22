@@ -350,10 +350,6 @@ public class RaceBoardPanel extends AbstractPerspectiveComposite<RaceBoardPerspe
         mainPanel.add(leaderboardAndMapViewer.getViewerWidget());
         boolean showLeaderboard = getPerspectiveSettings().isShowLeaderboard() && isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         setLeaderboardVisible(showLeaderboard);
-        if (getPerspectiveSettings().isChartSupportEnabled()) {
-            setWindChartVisible(getPerspectiveSettings().isShowWindChart());
-            setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
-        }
         if (getPerspectiveSettings().isShowChartMarkEditMediaButtonsAndVideo()) {
             setWindChartVisible(getPerspectiveSettings().isShowWindChart());
             setCompetitorChartVisible(getPerspectiveSettings().isShowCompetitorsChart());
