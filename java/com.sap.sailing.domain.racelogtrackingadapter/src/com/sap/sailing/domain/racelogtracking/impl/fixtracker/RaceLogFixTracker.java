@@ -343,7 +343,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         trackedRace.addListener(trackingTimesRaceChangeListener);
         if (hasRegattaLogs) {
             updateMappingsAndAddListeners();
-            waitForLoadingFromFixStoreToFinishRunning();
         }
     }
     protected void waitForLoadingFromFixStoreToFinishRunning() {
