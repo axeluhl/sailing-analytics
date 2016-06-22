@@ -69,7 +69,6 @@ import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
  */
 public class RaceLogFixTracker implements TrackingDataLoader {
     private static final Logger logger = Logger.getLogger(RaceLogFixTracker.class.getName());
-
     protected final DynamicTrackedRace trackedRace;
     private final Set<RegattaLog> knownRegattaLogs = new HashSet<>();
     private final NamedReentrantReadWriteLock loadingFromFixStoreLock;
@@ -95,7 +94,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 loadFixesForExtendedTimeRange(oldEndOfTracking, newEndOfTracking);
             }
         }
-        
+
         public void regattaLogAttached(RegattaLog regattaLog) {
             synchronized (knownRegattaLogs) {
                 addRegattaLogUnlocked(regattaLog);
@@ -199,9 +198,9 @@ public class RaceLogFixTracker implements TrackingDataLoader {
             });
         }
     };
-    
-    public RaceLogFixTracker(DynamicTrackedRace trackedRace,
-            SensorFixStore sensorFixStore, SensorFixMapperFactory sensorFixMapperFactory) {
+
+    public RaceLogFixTracker(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+            SensorFixMapperFactory sensorFixMapperFactory) {
         this.sensorFixStore = sensorFixStore;
         this.gpsFixStore = new GPSFixStoreImpl(sensorFixStore);
         this.sensorFixMapperFactory = sensorFixMapperFactory;
@@ -235,24 +234,21 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 // additional time range.
             }
         };
-        
         startTracking();
     }
 
     private void loadFixes(TimeRange timeRangeToLoad, DeviceMappingWithRegattaLogEvent<WithID> mapping) {
-        if (!preemptiveStopRequested.get()) {
+        if (preemptiveStopRequested.get()) {
             return;
         }
         mapping.getRegattaLogEvent().accept(new EventMappingVisitor() {
             @Override
             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-
                 SensorFixMapper<Timed, Track<?>, Competitor> mapper = sensorFixMapperFactory
                         .createCompetitorMapper(mapping.getEventType());
                 Track<?> track = mapper.getTrack(trackedRace, event.getMappedTo());
                 try {
-                        sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix),
-                                mapping.getDevice(),
+                    sensorFixStore.loadFixes((DoubleVectorFix fix) -> mapper.addFix(track, fix), mapping.getDevice(),
                             timeRangeToLoad.from(), timeRangeToLoad.to(), true);
                 } catch (NoCorrespondingServiceRegisteredException | TransformationException e) {
                     logger.log(Level.WARNING, "Could not load track for competitor: " + mapping.getMappedTo()
@@ -294,7 +290,6 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 }
             }
         });
-
     }
 
     private TimeRange getTrackingTimeRange() {
@@ -312,12 +307,11 @@ public class RaceLogFixTracker implements TrackingDataLoader {
         // add listeners for devices in mappings already present
         competitorMappings.forEachDevice((device) -> sensorFixStore.addListener(listener, device));
     }
-    
+
     public void stop(boolean preemptive) {
         preemptiveStopRequested.set(preemptive);
         stopRequested.set(true);
         trackedRace.removeListener(trackingTimesRaceChangeListener);
-
         synchronized (knownRegattaLogs) {
             knownRegattaLogs.forEach((log) -> log.removeListener(regattaLogEventVisitor));
             knownRegattaLogs.clear();
@@ -332,7 +326,7 @@ public class RaceLogFixTracker implements TrackingDataLoader {
             waitForLoadingToFinishRunning();
         }
     }
-    
+
     protected void startTracking() {
         final boolean hasRegattaLogs;
         synchronized (knownRegattaLogs) {
@@ -395,17 +389,16 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                 this.getClass().getSimpleName() + " loader for tracked race " + trackedRace.getRace().getName()) {
             @Override
             public void run() {
-                if (preemptiveStopRequested.get()) {
-                    return;
-                }
-                trackedRace.lockForSerializationRead();
-                setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
-                LockUtil.lockForWrite(loadingFromFixStoreLock);
-                synchronized (RaceLogFixTracker.this) {
-                    RaceLogFixTracker.this.notifyAll();
-                }
                 try {
-                    updateMappingsAndAddListenersImpl();
+                    if (!preemptiveStopRequested.get()) {
+                        trackedRace.lockForSerializationRead();
+                        setStatusAndProgress(TrackedRaceStatusEnum.LOADING, 0.5);
+                        LockUtil.lockForWrite(loadingFromFixStoreLock);
+                        synchronized (RaceLogFixTracker.this) {
+                            RaceLogFixTracker.this.notifyAll();
+                        }
+                        updateMappingsAndAddListenersImpl();
+                    }
                 } finally {
                     LockUtil.unlockAfterWrite(loadingFromFixStoreLock);
                     synchronized (RaceLogFixTracker.this) {
@@ -413,10 +406,8 @@ public class RaceLogFixTracker implements TrackingDataLoader {
                         currentActiveLoaders = activeLoaders.decrementAndGet();
                         RaceLogFixTracker.this.notifyAll();
                         if (currentActiveLoaders == 0) {
-                            setStatusAndProgress(
-                                    stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
-                                            : TrackedRaceStatusEnum.TRACKING,
-                                    1.0);
+                            setStatusAndProgress(stopRequested.get() ? TrackedRaceStatusEnum.FINISHED
+                                    : TrackedRaceStatusEnum.TRACKING, 1.0);
                         }
                     }
                     trackedRace.unlockAfterSerializationRead();
