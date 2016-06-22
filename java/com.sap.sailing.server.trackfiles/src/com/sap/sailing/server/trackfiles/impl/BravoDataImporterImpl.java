@@ -91,7 +91,6 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
      * @return
      */
     private DoubleVectorFixImpl parseLine(String line, Map<String, Integer> colIndices) {
-        LOG.fine("Process data line: " + line);
         String[] contentTokens = split(line);
         TimePoint fixTp;
         String epochColValue = contentTokens[2];
@@ -110,6 +109,10 @@ public class BravoDataImporterImpl implements DoubleVectorFixImporter {
             Instant instant = day.toInstant(ZoneOffset.UTC);
             fixTp = new MillisecondsTimePoint(Date.from(instant));
         }
+        // code for time adjustment for foiling test data
+        // long r16TP = ZonedDateTime.of(LocalDateTime.of(2016, 3, 19, 11, 55), ZoneId.of("Europe/Berlin"))
+        // .toEpochSecond() * 1000;
+        // fixTp = fixTp.plus(r16TP - 1461828459589l);
         double[] fixData = new double[metadata.getColumns().size()];
         for (int columnIndexInFix = 0; columnIndexInFix < fixData.length; columnIndexInFix++) {
             String columnName = metadata.getColumns().get(columnIndexInFix);
