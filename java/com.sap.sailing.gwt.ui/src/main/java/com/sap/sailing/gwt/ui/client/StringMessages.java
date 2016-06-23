@@ -1606,4 +1606,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String loadingRegattasAndRaces();
     String selectFromRacesWithOverlappingTimeRange();
     String finishTime(String timeAsString);
+    String showCompetitorCharts();
+    String showWindChart();
 }

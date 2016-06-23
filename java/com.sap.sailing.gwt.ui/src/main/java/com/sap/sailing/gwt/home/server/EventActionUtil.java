@@ -82,6 +82,19 @@ public final class EventActionUtil {
         return new LeaderboardContext(context, event, leaderboardGroups, leaderboard);
     }
     
+    /**
+     * Gets or calculates the time to live for the event with the given ID, depending on its
+     * {@link HomeServiceUtil#calculateEventState(com.sap.sailing.domain.base.EventBase) calculated state}.
+     * 
+     * @param context
+     *            {@link SailingDispatchContext} to retrieve {@link Event}
+     * @param eventId
+     *            {@link UUID} of the {@link Event} to get/calculate the time to live for
+     * @param liveTTL
+     *            the {@link Duration time to live} to use if the event is currently running
+     * @return the given liveTTL if the event is currently running, otherwise the
+     *         {@link #calculateTtlForNonLiveEvent(Event, EventState) calculated TTL}
+     */
     public static Duration getEventStateDependentTTL(SailingDispatchContext context, UUID eventId, Duration liveTTL) {
         Event event = context.getRacingEventService().getEvent(eventId);
         return getEventStateDependentTTL(event, liveTTL);
@@ -104,6 +117,25 @@ public final class EventActionUtil {
         return callback.calculateWithEvent(event);
     }
 
+    /**
+     * Calculates the time to live based on the given {@link Event}'s {@link Event#getStartDate() start time} and the
+     * given {@link HomeServiceUtil#calculateEventState(com.sap.sailing.domain.base.EventBase) calculated state}:
+     * <p><table>
+     *   <tr><th>Event state      </th><th>Start time                 </th><th>TTL               </th></tr>  
+     *   <tr><td>UPMCOMING/PLANNED</td><td>36 hours and more    before</td><td>=>          1 hour</td></tr>  
+     *   <tr><td>                 </td><td>less than 36 hours   before</td><td>=>      30 minutes</td></tr>  
+     *   <tr><td>                 </td><td>less than  3 hours   before</td><td>=>      15 minutes</td></tr>  
+     *   <tr><td>                 </td><td>less than 15 minutes before</td><td>=> time till start</td></tr>  
+     *   <tr><td>FINISHED         </td><td>any                        </td><td>=>        12 hours</td></tr>
+     *   <tr><td>RUNNING         </td><td>any                         </td><td>=>             [0]</td></tr>
+     * </table></p>
+     * 
+     * @param event
+     *            {@link Event} to calculate the time to live for
+     * @param eventState
+     *            the {@link EventState} to calculate the time to live for
+     * @return The calculated {@link Duration time to live}
+     */
     public static Duration calculateTtlForNonLiveEvent(Event event, EventState eventState) {
         TimePoint now = MillisecondsTimePoint.now();
         if(eventState == EventState.UPCOMING || eventState == EventState.PLANNED) {
