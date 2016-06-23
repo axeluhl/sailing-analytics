@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -23,20 +21,27 @@ import com.sap.sse.common.WithID;
 
 public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
 
-    
-    private final ConcurrentMap<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new ConcurrentHashMap<>();
+    private final Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappings = new HashMap<>();
     private final Map<DeviceIdentifier, List<DeviceMappingWithRegattaLogEvent<ItemT>>> mappingsByDevice = new HashMap<>();
+    
+    private synchronized Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> getMappings() {
+        return new HashMap<>(mappings);
+    }
+    
+    private synchronized Map<DeviceIdentifier, List<DeviceMappingWithRegattaLogEvent<ItemT>>> getMappingsByDevice() {
+        return new HashMap<>(mappingsByDevice);
+    }
 
     public void forEachMapping(Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
         forEachMapping((item, mapping) -> callback.accept(mapping));
     }
     
     public void forEachDevice(Consumer<DeviceIdentifier> callback) {
-        mappingsByDevice.keySet().forEach(callback::accept);
+        getMappingsByDevice().keySet().forEach(callback::accept);
     }
     
     public void forEachMapping(BiConsumer<ItemT, DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : mappings.entrySet()) {
+        for (Map.Entry<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> entry : getMappings().entrySet()) {
             ItemT item = entry.getKey();
             for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : entry.getValue()) {
                 callback.accept(item, mapping);
@@ -46,7 +51,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
     
     public void forEachMappingOfDeviceIncludingTimePoint(DeviceIdentifier device, TimePoint timePoint,
             Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice = mappingsByDevice.get(device);
+        List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice = getMappingsByDevice().get(device);
         if (mappingsForDevice != null) {
             for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsForDevice) {
                 if (mapping.getTimeRange().includes(timePoint)) {
@@ -89,9 +94,8 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
         updateMappings(newMappings, loadIfNotCovered);
     }
     
-    private void updateMappings(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings,
+    private synchronized void updateMappings(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings,
             boolean loadIfNotCovered) {
-        // TODO lock
         if (loadIfNotCovered) {
             Set<ItemT> itemsToProcess = new HashSet<ItemT>(mappings.keySet());
             itemsToProcess.addAll(newMappings.keySet());
