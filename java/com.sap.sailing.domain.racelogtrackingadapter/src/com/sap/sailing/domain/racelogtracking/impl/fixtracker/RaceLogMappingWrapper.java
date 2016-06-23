@@ -64,8 +64,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
         }
     }
     
-    protected abstract Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings()
-            throws DoesNotHaveRegattaLogException;
+    protected abstract Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings();
 
     /**
      * Adjusts the {@link #mappings} map according to the device mappings provided from the {@link #calculateMappings()}
@@ -78,8 +77,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
      * 
      * @throws DoesNotHaveRegattaLogException
      */
-    public final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered)
-            throws DoesNotHaveRegattaLogException {
+    public final <FixT extends Timed, TrackT extends DynamicTrack<FixT>> void updateMappings(boolean loadIfNotCovered) {
         // TODO remove fixes, if mappings have been removed
         // check if there are new time ranges not covered so far
         Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings = calculateMappings();
