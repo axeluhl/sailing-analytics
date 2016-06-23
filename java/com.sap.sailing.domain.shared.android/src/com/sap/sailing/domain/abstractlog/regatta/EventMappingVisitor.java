@@ -2,8 +2,12 @@ package com.sap.sailing.domain.abstractlog.regatta;
 
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorSensorDataMappingEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMarkMappingEvent;
 
+/**
+ * Used to dynamically dispatch calls for {@link RegattaLogDeviceMappingEvent}s depending on the concrete type.
+ */
 public interface EventMappingVisitor {
 
     void visit(RegattaLogDeviceMarkMappingEvent event);

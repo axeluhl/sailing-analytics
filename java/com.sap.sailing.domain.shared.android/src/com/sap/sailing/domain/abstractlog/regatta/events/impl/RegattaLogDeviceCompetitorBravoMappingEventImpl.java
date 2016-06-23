@@ -11,6 +11,9 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Mapping event for devices mapped for Bravo type fixes.
+ */
 public class RegattaLogDeviceCompetitorBravoMappingEventImpl extends RegattaLogDeviceMappingEventImpl<Competitor>
         implements RegattaLogDeviceCompetitorSensorDataMappingEvent {
     private static final long serialVersionUID = -1494030544804758753L;
