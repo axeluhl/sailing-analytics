@@ -9,13 +9,25 @@ import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.tracking.BravoFixTrack;
 import com.sap.sailing.domain.tracking.DynamicBravoFixTrack;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.WithID;
 
+/**
+ * Specific {@link SensorFixTrackImpl} used for {@link BravoFix}es.
+ *
+ * @param <ItemType> the type of item this track is mapped to
+ */
 public class BravoFixTrackImpl<ItemType extends WithID & Serializable> extends SensorFixTrackImpl<ItemType, BravoFix>
         implements DynamicBravoFixTrack<ItemType> {
     private static final long serialVersionUID = 5517848726456424386L;
 
+    /**
+     * @param trackedItem
+     *            the item this track is mapped to
+     * @param trackName
+     *            the name of the track by which it can be obtained from the {@link TrackedRace}.
+     */
     public BravoFixTrackImpl(ItemType trackedItem, String trackName) {
         super(trackedItem, trackName, BravoSensorDataMetadata.INSTANCE.getColumns(), 
                 BravoFixTrack.TRACK_NAME + " for " + trackedItem);

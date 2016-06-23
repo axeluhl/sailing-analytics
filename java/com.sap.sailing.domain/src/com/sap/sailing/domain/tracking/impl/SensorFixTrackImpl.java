@@ -5,9 +5,17 @@ import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.tracking.SensorFix;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
+import com.sap.sailing.domain.tracking.SensorFixTrack;
 import com.sap.sailing.domain.tracking.SensorFixTrackListener;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.WithID;
 
+/**
+ * Implementation of {@link SensorFixTrack} and {@link DynamicSensorFixTrack}.
+ *
+ * @param <ItemType> the type of item this track is mapped to
+ * @param <FixT> the type of fix this track holds
+ */
 public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT extends SensorFix> extends
         DynamicTrackImpl<FixT> implements DynamicSensorFixTrack<ItemType, FixT> {
 
@@ -18,6 +26,12 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
     private final String trackName;
     private final TrackListenerCollection<ItemType, FixT, SensorFixTrackListener<ItemType, FixT>> listeners;
 
+    /**
+     * @param trackedItem the item this track is mapped to
+     * @param trackName the name of the track by which it can be obtained from the {@link TrackedRace}.
+     * @param valueNames the name of the values that can be obtained by fixes contained in the track
+     * @param nameForReadWriteLock the name to use for the lock object that is used internally
+     */
     public SensorFixTrackImpl(ItemType trackedItem, String trackName, Iterable<String> valueNames,
             String nameForReadWriteLock) {
         super(nameForReadWriteLock);
