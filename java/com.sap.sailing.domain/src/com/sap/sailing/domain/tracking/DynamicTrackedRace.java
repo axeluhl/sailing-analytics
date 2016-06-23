@@ -80,9 +80,25 @@ public interface DynamicTrackedRace extends TrackedRace {
      */
     DynamicGPSFixTrack<Mark, GPSFix> getOrCreateTrack(Mark mark);
     
+    /**
+     * Gets an existing {@link DynamicSensorFixTrack} or creates and returns a new one if there is none yet.
+     * @see #getDynamicSensorTrack(Competitor, String)
+     * 
+     * @param competitor the competitor to get the track for
+     * @param trackName the name of the track to get
+     * @param newTrackFactory factory to create a new track instance if there isn't one yet for the competitor and the given track name.
+     * @return the track for the competitor and track name
+     */
     <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getOrCreateSensorTrack(
             Competitor competitor, String trackName, TrackFactory<TrackT> newTrackFactory);
     
+    /**
+     * @see TrackedRace#getSensorTrack(Competitor, String)
+     * 
+     * @param competitor the competitor to get the track for
+     * @param trackName the name of the track to get
+     * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
+     */
     <FixT extends SensorFix, TrackT extends DynamicSensorFixTrack<Competitor, FixT>> TrackT getDynamicSensorTrack(
             Competitor competitor, String trackName);
 
@@ -188,6 +204,10 @@ public interface DynamicTrackedRace extends TrackedRace {
     
     void invalidateEndTime();
 
+    /**
+     * Adds a {@link DynamicSensorFixTrack} for the given Competitor and track name.
+     * @see #getDynamicSensorTrack(Competitor, String)
+     */
     void addSensorTrack(Competitor trackedItem, String trackName, DynamicSensorFixTrack<Competitor, ?> track);
 
     void onStopTracking(boolean preemptive);

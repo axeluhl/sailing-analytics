@@ -215,6 +215,16 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     GPSFixTrack<Competitor, GPSFixMoving> getTrack(Competitor competitor);
 
+    /**
+     * {@link SensorFixTrack}s provide timed sensor data in addition to GPSFixes that are hold in {@link GPSFixTrack}s.
+     * In contrast to {@link GPSFixTrack}s there is a 1:n relation of competitors to tracks by introducing track names.
+     * So every type of track has an associated name. With this construct you can have track implementations that
+     * provide specific functionality based on the contained fix type.
+     * 
+     * @param competitor the competitor to get the track for
+     * @param trackName the name of the track to get
+     * @return the track associated to the given Competitor and name or <code>null</code> if there is none.
+     */
     <FixT extends SensorFix, TrackT extends SensorFixTrack<Competitor, FixT>> TrackT getSensorTrack(Competitor competitor, String trackName);
 
     /**
@@ -727,6 +737,9 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
      */
     void attachRegattaLog(RegattaLog regattaLog);
     
+    /**
+     * @return all currently attached {@link RegattaLog}s or an empty Iterable if there aren't any
+     */
     Iterable<RegattaLog> getAttachedRegattaLogs();
     
     /**
@@ -923,5 +936,8 @@ public interface TrackedRace extends Serializable, IsManagedByCache<SharedDomain
     default void unlockAfterSerializationRead() {
     }
     
+    /**
+     * @return all currently attached {@link RaceLog}s or an empty Iterable if there aren't any
+     */
     Iterable<RaceLog> getAttachedRaceLogs();
 }
