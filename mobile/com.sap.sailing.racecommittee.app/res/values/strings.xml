@@ -10,7 +10,7 @@
     <string name="url_google_geocoder">http://maps.googleapis.com/maps/api/geocode/json?address=</string>
     <string name="urlpart_google_geocoder_sensor">\?sensor=true</string>
     <string name="running_on_course">(on course %s)</string>
-    <string name="course_design_number_waypoints">Course has %s waypoints</string>
+    <string name="course_design_number_waypoints">Course has %d waypoints</string>
     <string name="service_info" translatable="false">SAP Sailing Race Manager Service</string>
     <string name="service_text_no_races">Waiting for races to monitor&#8230;</string>
     <string name="service_text_num_races">Currently monitoring %d races.</string>
