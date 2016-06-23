@@ -31,7 +31,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * <p>
  * NOTE: Because the news ticker section is only shown in currently running events, this action returns an empty
  * {@link ResultWithTTL result} with a {@link EventActionUtil#calculateTtlForNonLiveEvent(Event, EventState)
- * state-dependent} time to live, if the {@link Event} for the given id is not currently runnning.
+ * state-dependent} time to live, if the {@link Event} for the given id is not currently running.
  * </p>
  */
 public class GetEventOverviewNewsAction implements SailingAction<ResultWithTTL<ListResult<NewsEntryDTO>>>, IsClientCacheable {
