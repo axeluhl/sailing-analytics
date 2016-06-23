@@ -39,6 +39,8 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     private final RaceChangeListener raceChangeListener = new AbstractRaceChangeListener() {
         public void raceLogAttached(RaceLog raceLog) {
             raceLog.addListener(raceLogEventVisitor);
+
+            updateDenotionState();
         }
 
         /**
