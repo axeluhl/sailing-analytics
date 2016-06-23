@@ -61,17 +61,6 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
         }
     }
     
-    <FixT extends Timed> void recordFix(DeviceIdentifier device, FixT fix,
-            BiConsumer<DeviceMappingWithRegattaLogEvent<ItemT>, FixT> recorder) {
-        if (mappingsByDevice.get(device) != null) {
-            for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsByDevice.get(device)) {
-                if (mapping.getTimeRange().includes(fix.getTimePoint())) {
-                    recorder.accept(mapping, fix);
-                }
-            }
-        }
-    }
-    
     protected abstract Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> calculateMappings()
             throws DoesNotHaveRegattaLogException;
 
