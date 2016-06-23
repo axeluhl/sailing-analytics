@@ -106,6 +106,7 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     
     public void stop(boolean preemptive) {
         stopTracker(preemptive);
+        trackedRace.removeListener(raceChangeListener);
         for (RaceLog raceLog : trackedRace.getAttachedRaceLogs()) {
             raceLog.removeListener(raceLogEventVisitor);
         }
