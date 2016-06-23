@@ -34,6 +34,12 @@ public class GetCompetitionFormatRacesAction implements
     protected GetCompetitionFormatRacesAction() {
     }
 
+    /**
+     * Creates a {@link GetCompetitionFormatRacesAction} instance for the given event and regatta-id.
+     * 
+     * @param eventId {@link UUID} of the event to load races for
+     * @param regattaId {@link String id} of the regatta to load races for
+     */
     public GetCompetitionFormatRacesAction(UUID eventId, String regattaId) {
         this.eventId = eventId;
         this.regattaId = regattaId;
