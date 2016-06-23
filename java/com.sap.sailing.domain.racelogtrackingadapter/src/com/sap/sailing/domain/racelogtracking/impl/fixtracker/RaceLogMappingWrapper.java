@@ -51,7 +51,10 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
     
     public void forEachMappingOfDeviceIncludingTimePoint(DeviceIdentifier device, TimePoint timePoint,
             Consumer<DeviceMappingWithRegattaLogEvent<ItemT>> callback) {
-        List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice = getMappingsByDevice().get(device);
+        List<DeviceMappingWithRegattaLogEvent<ItemT>> mappingsForDevice;
+        synchronized (this) {
+            mappingsForDevice = mappingsByDevice.get(device);
+        }
         if (mappingsForDevice != null) {
             for (DeviceMappingWithRegattaLogEvent<ItemT> mapping : mappingsForDevice) {
                 if (mapping.getTimeRange().includes(timePoint)) {
