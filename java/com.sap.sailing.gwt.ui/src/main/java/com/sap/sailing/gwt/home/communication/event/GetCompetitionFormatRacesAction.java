@@ -20,7 +20,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link RaceCompetitionFormatDataCalculator} to prepare the appropriate data structure.
  * </p>
  * <p>
- * The {@link ResultWithTTL results} time to live
+ * The {@link ResultWithTTL result's} time to live
  * {@link EventActionUtil#getEventStateDependentTTL(SailingDispatchContext, UUID, Duration) depends on the event's
  * state} using a duration of <i>1 minute</i> for currently running events.
  * </p>

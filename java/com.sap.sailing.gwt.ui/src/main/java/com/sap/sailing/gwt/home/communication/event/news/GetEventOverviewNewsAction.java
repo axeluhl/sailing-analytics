@@ -26,7 +26,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
  * {@link #GetEventOverviewNewsAction(UUID, int) limited}.
  * </p>
  * <p>
- * The {@link ResultWithTTL results} time to live is <i>2 minutes</i> for currently running events.
+ * The {@link ResultWithTTL result's} time to live is <i>2 minutes</i> for currently running events.
  * </p>
  * <p>
  * NOTE: Because the news ticker section is only shown in currently running events, this action returns an empty
