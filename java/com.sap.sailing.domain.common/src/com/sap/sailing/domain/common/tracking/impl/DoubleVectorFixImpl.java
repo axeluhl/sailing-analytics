@@ -3,6 +3,9 @@ package com.sap.sailing.domain.common.tracking.impl;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Implementation of {@link DoubleVectorFix}.
+ */
 public class DoubleVectorFixImpl implements DoubleVectorFix {
 
     private static final long serialVersionUID = -425848879310273855L;

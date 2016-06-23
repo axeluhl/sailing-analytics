@@ -5,6 +5,9 @@ import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Implementation of {@link BravoFix} that wraps a {@link DoubleVectorFix} which holds the actual sensor data.
+ */
 public class BravoFixImpl implements BravoFix {
     private static final long serialVersionUID = 2033254212013221160L;
     
