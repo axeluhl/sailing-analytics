@@ -74,6 +74,11 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
     }
 
     public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
+            SensorFixMapperFactory sensorFixMapperFactory) {
+        this(trackedRace, sensorFixStore, sensorFixMapperFactory, (tracker) -> {});
+    }
+    
+    public RaceLogFixTrackerManager(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
             SensorFixMapperFactory sensorFixMapperFactory, Owner owner) {
         this.trackedRace = trackedRace;
         this.sensorFixStore = sensorFixStore;
