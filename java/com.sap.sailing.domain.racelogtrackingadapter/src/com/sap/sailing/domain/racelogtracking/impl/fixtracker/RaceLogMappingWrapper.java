@@ -140,7 +140,7 @@ public abstract class RaceLogMappingWrapper<ItemT extends WithID> {
      * This ensures that the internal state is updated and all new and changed mappings are correctly processed.
      * 
      * @param newMappings the new mappings
-     * @param loadIfNotCovered true to inform about new/changed/remoded mappings
+     * @param loadIfNotCovered true to inform about new/changed/removed mappings
      */
     private synchronized void updateMappings(Map<ItemT, List<DeviceMappingWithRegattaLogEvent<ItemT>>> newMappings,
             boolean loadIfNotCovered) {
