@@ -41,7 +41,7 @@ public class GetLiveRacesForEventAction implements SailingAction<ResultWithTTL<S
      * Creates a {@link GetLiveRacesForEventAction} instance for the given event-id.
      * 
      * @param eventId
-     *            {@link UUID} of the event to load data for
+     *            {@link UUID} of the event to load live races for
      */
     public GetLiveRacesForEventAction(UUID eventId) {
         this.eventId = eventId;
