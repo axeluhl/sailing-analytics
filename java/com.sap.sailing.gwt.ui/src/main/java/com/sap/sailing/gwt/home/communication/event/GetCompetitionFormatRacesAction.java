@@ -13,6 +13,18 @@ import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown in the competition format races view for the
+ * {@link #GetCompetitionFormatRacesAction(UUID, String) given event- and regatta-id}, using a
+ * {@link RaceCompetitionFormatDataCalculator} to prepare the appropriate data structure.
+ * </p>
+ * <p>
+ * The {@link ResultWithTTL results} time to live
+ * {@link EventActionUtil#getEventStateDependentTTL(SailingDispatchContext, UUID, Duration) depends on the event's
+ * state} using a duration of <i>1 minute</i> for currently running events.
+ * </p>
+ */
 public class GetCompetitionFormatRacesAction implements
         SailingAction<ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>>>, IsClientCacheable {
     
