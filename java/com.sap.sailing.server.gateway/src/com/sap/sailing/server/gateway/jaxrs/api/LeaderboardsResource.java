@@ -85,6 +85,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.MarkJsonSeri
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -488,11 +489,26 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-        Competitor mappedTo = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
-        if (mappedTo == null) {
-            logger.warning("No competitor found for id " + competitorId);
-            return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
-                    .type(MediaType.TEXT_PLAIN).build();
+        final NamedWithID mappedTo;
+        if (competitorId != null) {
+            final Competitor mappedToCompetitor = getService().getCompetitorStore().getExistingCompetitorByIdAsString(competitorId);
+            mappedTo = mappedToCompetitor;
+            if (mappedToCompetitor == null) {
+                logger.warning("No competitor found for id " + competitorId);
+                return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + competitorId)
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+        } else {
+            // map to mark
+            DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
+            final Mark mappedToMark = domainFactory.getExistingMarkById(Helpers.tryUuidConversion(markId));
+            mappedTo = mappedToMark;
+            if (mappedToMark == null) {
+                logger.warning("No mark found for id " + markId);
+                return Response.status(Status.BAD_REQUEST).entity("No mark found for id " + markId)
+                        .type(MediaType.TEXT_PLAIN).build();
+            }
+            
         }
         OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
@@ -505,7 +521,7 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
                 author, deviceMappingEventId, closingTimePoint);
         isRegattaLike.getRegattaLog().add(event);
-        logger.fine("Successfully checked out competitor " + mappedTo.getName());
+        logger.fine("Successfully checked out "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
         return Response.status(Status.OK).build();
     }
 
