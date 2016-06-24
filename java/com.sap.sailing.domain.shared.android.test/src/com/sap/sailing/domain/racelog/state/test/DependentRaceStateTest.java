@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedureFactory;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.RacingProcedureFactoryImpl;
 import com.sap.sailing.domain.base.configuration.ConfigurationLoader;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
@@ -34,13 +35,24 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class DependentRaceStateTest {
+    private static class RaceStateImplWithPublicRaceStateToObserve extends RaceStateImpl {
+        public RaceStateImplWithPublicRaceStateToObserve(RaceLogResolver raceLogResolver, RaceLog raceLog,
+                AbstractLogEventAuthor author, RacingProcedureFactory procedureFactory) {
+            super(raceLogResolver, raceLog, author, procedureFactory);
+        }
+
+        @Override
+        public ReadonlyRaceState getRaceStateToObserve() {
+            return super.getRaceStateToObserve();
+        }
+    }
 
     private RaceLog raceLogA;
     private RaceLog raceLogB;
     private RaceLog raceLogC;
 
     private RaceState stateA;
-    private RaceState stateB;
+    private RaceStateImplWithPublicRaceStateToObserve stateB;
     private RaceState stateC;
 
     private RaceStateChangedListener listenerA;
@@ -78,7 +90,7 @@ public class DependentRaceStateTest {
             }
         };
         stateA = new RaceStateImpl(raceLogResolver, raceLogA, author, new RacingProcedureFactoryImpl(author, configuration));
-        stateB = new RaceStateImpl(raceLogResolver, raceLogB, author, new RacingProcedureFactoryImpl(author, configuration));
+        stateB = new RaceStateImplWithPublicRaceStateToObserve(raceLogResolver, raceLogB, author, new RacingProcedureFactoryImpl(author, configuration));
         stateC = new RaceStateImpl(raceLogResolver, raceLogC, author, new RacingProcedureFactoryImpl(author, configuration));
         stateA.addChangedListener(listenerA);
         stateB.addChangedListener(listenerB);
@@ -138,7 +150,35 @@ public class DependentRaceStateTest {
      */
     @Test
     public void testLateDeliveryOfDependentStartTimeForPriorPass() {
-        // TODO
+        TimePoint now = MillisecondsTimePoint.now();
+        raceLogA.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "1", /* pass */ 0, new MillisecondsTimePoint( 5000), RaceLogRaceStatus.SCHEDULED));
+        raceLogB.add(new RaceLogStartTimeEventImpl(now, now, author, /* ID */ "2", /* pass */ 0, new MillisecondsTimePoint(10000), RaceLogRaceStatus.SCHEDULED));
+        // now B enters a new pass:
+        raceLogB.add(new RaceLogPassChangeEventImpl(now.plus(1000), author, /* pass */ 1));
+        // this is expected to reset B's start time:
+        assertNull(stateB.getStartTime());
+        // now B receives an absolute start time definition for pass 1 (the second pass):
+        raceLogB.add(new RaceLogStartTimeEventImpl(now.plus(1000), now.plus(1000), author, /* ID */ "3", /* pass */ 1, new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+        assertEquals(new MillisecondsTimePoint( 5000), stateA.getStartTime());
+        assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime());
+        // here comes a late event for B's pass 0, setting a relative start time; it is expected to not
+        // have any effect on B's current start time because B is already in pass 1; furthermore, it is
+        // expected to not have an effect on the observing relationship. No observer relationship is to
+        // be established from B to A; in particular, updating A's start time is expected to leave B's
+        // start time unmodified.
+        raceLogB.add(new RaceLogDependentStartTimeEventImpl(now.plus(500), now.plus(500), author, /* ID */ "4", /* pass */ 0,
+                new SimpleRaceLogIdentifierImpl("A", "", ""), new MillisecondsDurationImpl(5000), RaceLogRaceStatus.SCHEDULED));
+        
+        // verify that B's race state is *not* observing A's race state
+        assertNull(stateB.getRaceStateToObserve());
+        
+        // B's absolute start time in pass 1 is expected to remain unchanged
+        assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime());
+        // moving A's start time is expected to NOT move B's start time:
+        raceLogA.add(new RaceLogStartTimeEventImpl(now.plus(10000), now.plus(10000), author, /* ID */ "5", /* pass */ 0,
+                /* new start time */ new MillisecondsTimePoint(20000), RaceLogRaceStatus.SCHEDULED));
+        assertEquals(new MillisecondsTimePoint(20000), stateA.getStartTime());
+        assertEquals(new MillisecondsTimePoint(20000), stateB.getStartTime()); // no update to B's start time expected
     }
     
     /**

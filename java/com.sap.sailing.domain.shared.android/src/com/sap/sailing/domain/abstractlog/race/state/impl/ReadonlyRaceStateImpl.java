@@ -220,6 +220,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         }
         registerListenerOnDependentRaceIfDependentStartTime(dependentRaceStatesAndMe);
     }
+    
+    protected ReadonlyRaceState getRaceStateToObserve() {
+        return raceStateToObserve;
+    }
 
     protected void registerListenerOnDependentRaceIfDependentStartTime(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         // Check whether the latest known StartTimeEvent is a non-dependent or dependent start time in case of a
