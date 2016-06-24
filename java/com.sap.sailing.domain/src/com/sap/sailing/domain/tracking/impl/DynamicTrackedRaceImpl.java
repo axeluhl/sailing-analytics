@@ -23,6 +23,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.ConfirmedFinishPositioningListFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.BaseRaceStateChangedListener;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
@@ -87,6 +90,15 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private Map<Competitor, CompetitorResult> competitorResultsFromRaceLog;
 
+    /**
+     * When one or more race logs are attached, changes in those race logs, or in case of dependent start
+     * times even changes in other race logs, may impact this race's start time. This listener receives those start
+     * time changes, also those from races that this race's start time depends upon, and triggers an update of
+     * this race's start time caches. The field is transient, therefore needs no serialization support but needs
+     * to be restored during at the time of de-serialization.
+     */
+    private transient RaceStateChangedListener raceStateBasedStartTimeChangedListener;
+
     public DynamicTrackedRaceImpl(TrackedRegatta trackedRegatta, RaceDefinition race, Iterable<Sideline> sidelines,
             WindStore windStore, GPSFixStore gpsFixStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, long millisecondsOverWhichToAverageSpeed,
@@ -95,6 +107,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
         super(trackedRegatta, race, sidelines, windStore, gpsFixStore, delayToLiveInMillis,
                 millisecondsOverWhichToAverageWind, millisecondsOverWhichToAverageSpeed,
                 delayForCacheInvalidationOfWindEstimation, useInternalMarkPassingAlgorithm, rankingMetricConstructor, raceLogResolver);
+        raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         this.competitorResultsFromRaceLog = new HashMap<>();
         this.logListener = new DynamicTrackedRaceLogListener(this);
         if (markPassingCalculator != null) {
@@ -126,6 +139,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
      */
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
+        raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
         courseDesignChangedListeners = new HashSet<>();
@@ -139,6 +153,19 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             logListener.setMarkPassingUpdateListener(markPassingCalculator.getListener());
         }
         return this;
+    }
+
+    private RaceStateChangedListener createRaceStateStartTimeChangeListener() {
+        return new BaseRaceStateChangedListener() {
+            @Override
+            public void onStartTimeChanged(ReadonlyRaceState state) {
+                final TimePoint oldStartTime = getStartOfRace();
+                invalidateStartTime();
+                if (!Util.equalsWithNull(oldStartTime, getStartOfRace())) {
+                    onStartTimeChangedByRaceCommittee(getStartOfRace());
+                }
+            }
+        };
     }
 
     /**
@@ -957,15 +984,24 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     public void attachRaceLog(RaceLog raceLog) {
         logListener.addTo(raceLog);
         super.attachRaceLog(raceLog);
+        getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
     }
     
     @Override
-    public void detachRaceLog(Serializable identifier) {
-        RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
+    public RaceLog detachRaceLog(Serializable identifier) {
+        final RaceLog attachedRaceLog = attachedRaceLogs.get(identifier);
         if (attachedRaceLog != null) {
             logListener.removeFrom(attachedRaceLog);
         }
-        super.detachRaceLog(identifier);
+        final RaceLog raceLogDetached = super.detachRaceLog(identifier);
+        assert raceLogDetached == attachedRaceLog;
+        synchronized (raceStates) {
+            final ReadonlyRaceState raceState = raceStates.remove(attachedRaceLog);
+            if (raceState != null) {
+                raceState.removeChangedListener(raceStateBasedStartTimeChangedListener);
+            }
+        }
+        return attachedRaceLog;
     }
     
     @Override

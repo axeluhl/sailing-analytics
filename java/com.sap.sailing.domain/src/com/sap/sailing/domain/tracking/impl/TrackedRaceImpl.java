@@ -403,7 +403,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * must be established again after de-serialization by invoking {@link #setRaceLogResolver}.
      */
     private transient RaceLogResolver raceLogResolver;
-
+    
     /**
      * Constructs the tracked race with one-design ranking.
      */
@@ -565,7 +565,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
             logger.log(Level.SEVERE, "Waiting for loading from stores to finish was interrupted", e);
         }
     }
-
+    
     @Override
     public RankingMetric getRankingMetric() {
         return rankingMetric;
@@ -905,7 +905,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
      * and not {@link Object}.
      */
     private final String updateStartOfRaceCacheFieldsMonitor = "";
-    private void updateStartOfRaceCacheFields() {
+    protected  void updateStartOfRaceCacheFields() {
         synchronized (updateStartOfRaceCacheFieldsMonitor) {
             TimePoint newStartTime = null;
             TimePoint newStartTimeWithoutInferenceFromStartMarkPassings = null;
@@ -3513,7 +3513,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return !attachedRaceExecutionOrderProviders.isEmpty();
     }
 
-    private ReadonlyRaceState getRaceState(RaceLog raceLog) {
+    protected ReadonlyRaceState getRaceState(RaceLog raceLog) {
         ReadonlyRaceState result;
         synchronized (raceStates) {
             result = raceStates.get(raceLog);
@@ -3539,10 +3539,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
     }
 
     @Override
-    public void detachRaceLog(Serializable identifier) {
-        this.attachedRaceLogs.remove(identifier);
+    public RaceLog detachRaceLog(Serializable identifier) {
+        final RaceLog raceLog = this.attachedRaceLogs.remove(identifier);
         updateStartOfRaceCacheFields();
         updateStartAndEndOfTracking(/* waitForGPSFixesToLoad */ false);
+        return raceLog;
     }
 
     @Override
