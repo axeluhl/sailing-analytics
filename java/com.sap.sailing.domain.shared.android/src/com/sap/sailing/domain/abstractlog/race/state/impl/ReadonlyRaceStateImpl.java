@@ -231,8 +231,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     protected RacingProcedureType determineInitialProcedureType() {
         // Let's ensure there is a valid RacingProcedureType set, since a RaceState cannot live without a
         // RacingProcedure we need to have a fallback
-        RegattaConfiguration configuration = getConfiguration();
         RacingProcedureType inRaceLogType = racingProcedureAnalyzer.analyze();
+        return determineInitialProcedureType(inRaceLogType);
+    }
+    
+    private RacingProcedureType determineInitialProcedureType(RacingProcedureType inRaceLogType) {
+        RegattaConfiguration configuration = getConfiguration();
         if (inRaceLogType != RacingProcedureType.UNKNOWN) {
             return inRaceLogType;
         } else {
@@ -416,6 +420,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         RacingProcedureType type = racingProcedureAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRacingProcedureType, type) && type != RacingProcedureType.UNKNOWN) {
             cachedRacingProcedureType = type;
+            cachedRacingProcedureTypeNoFallback = determineInitialProcedureType(type);
             recreateRacingProcedure();
             changedListeners.onRacingProcedureChanged(this);
         }
@@ -432,6 +437,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onAdvancePass(this);
             // reset racing procedure to force recreate on next event!
             cachedRacingProcedureType = null;
+            cachedRacingProcedureTypeNoFallback = null;
         }
 
         StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
