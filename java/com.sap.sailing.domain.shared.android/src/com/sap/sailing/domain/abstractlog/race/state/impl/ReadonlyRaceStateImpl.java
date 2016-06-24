@@ -366,9 +366,12 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public void eventAdded(RaceLogEvent event) {
+        // FIXME the start time analyzer should be used to find out about the new start time dependency situation
         if (event instanceof RaceLogDependentStartTimeEvent) {
+            // FIXME add the listener only if the dependent start time event belongs to the current pass
             setupListenersOnDependentRace(event, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         } else if (event instanceof RaceLogStartTimeEvent) {
+            // FIXME only remove the change listener if the RaceLogStartTimeEvent belongs to the current pass
             if (raceStateToObserve != null) {
                 raceStateToObserve.removeChangedListener(raceStateToObserveListener);
                 raceStateToObserve = null;

@@ -160,7 +160,7 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             @Override
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 final TimePoint oldStartTime = getStartOfRace();
-                updateStartOfRaceCacheFields();
+                invalidateStartTime();
                 if (!Util.equalsWithNull(oldStartTime, getStartOfRace())) {
                     onStartTimeChangedByRaceCommittee(getStartOfRace());
                 }
