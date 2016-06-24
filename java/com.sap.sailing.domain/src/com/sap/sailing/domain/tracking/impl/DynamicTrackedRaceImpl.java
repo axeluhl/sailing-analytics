@@ -140,6 +140,11 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         raceStateBasedStartTimeChangedListener = createRaceStateStartTimeChangeListener();
+        // the race states are transient, therefore not serialized; they are re-constructed here when asked for;
+        // the transient raceStateBasedStartTimeChangedListener is re-added here, like it was in attachRaceLog(...)
+        for (final RaceLog raceLog : attachedRaceLogs.values()) {
+            getRaceState(raceLog).addChangedListener(raceStateBasedStartTimeChangedListener);
+        }
         listeners = new HashSet<RaceChangeListener>();
         logListener = new DynamicTrackedRaceLogListener(this);
         courseDesignChangedListeners = new HashSet<>();
