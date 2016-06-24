@@ -40,6 +40,12 @@ import com.sap.sailing.gwt.ui.raceboard.RaceBoardPerspectiveSettings;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
+/**
+ * Base Activity for all desktop event pages. This includes the event page itself for multi-regatta events as well as
+ * regatta/single-regatta-event pages.
+ *
+ * @param <PLACE> The concrete {@link AbstractEventPlace} subclass, this instance is bound to.
+ */
 public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> extends AbstractActivity implements
         EventView.Presenter {
 
@@ -57,6 +63,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
 
     protected final EventViewDTO eventDTO;
 
+    /**
+     * @param place the place of the tab to be activated
+     * @param eventDTO the basic event data
+     * @param clientFactory the {@link EventClientFactory} to use
+     * @param homePlacesNavigator the {@link DesktopPlacesNavigator} to use to navigate to other places in the application
+     */
     public AbstractEventActivity(PLACE place, EventViewDTO eventDTO, EventClientFactory clientFactory, DesktopPlacesNavigator homePlacesNavigator) {
         this.currentPlace = place;
         this.eventDTO = eventDTO;
@@ -229,10 +241,10 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
     
     public String getRegattaId() {
         String regattaId = currentPlace.getRegattaId();
-        if(regattaId  != null) {
+        if (regattaId != null) {
             return regattaId;
         }
-        if(!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
+        if (!eventDTO.getRegattas().isEmpty() && (eventDTO.getType() == EventType.SINGLE_REGATTA || eventDTO.getType() == EventType.SERIES_EVENT)) {
             return eventDTO.getRegattas().iterator().next().getId();
         }
         return null;

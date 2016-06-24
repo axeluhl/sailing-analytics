@@ -40,7 +40,7 @@ public class DeviceConfigurationUserListComposite extends DeviceConfigurationLis
         columnSortHandler.setComparator(identifierNameColumn, new Comparator<DeviceConfigurationMatcherDTO>() {
             @Override
             public int compare(DeviceConfigurationMatcherDTO r1, DeviceConfigurationMatcherDTO r2) {
-                return r1.toString().compareTo(r2.toString());
+                return r1.clients.toString().compareTo(r2.clients.toString());
             }
         });
 

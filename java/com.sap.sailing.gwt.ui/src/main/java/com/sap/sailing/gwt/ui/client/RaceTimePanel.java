@@ -246,7 +246,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         Date max = raceMinMax.getB();
         
         // never reduce max if it was already set
-        if (min != null && max != null && (getToTime() == null || getToTime().before(max))) {
+        if (min != null && max != null &&
+                (getToTime() == null || getToTime().before(max) ||
+                 getFromTime() == null || getFromTime().after(min))) {
             setMinMax(min, max, /* fireEvent */ false); // no event because we guarantee time to be between min and max
         }
     }

@@ -262,6 +262,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
             while (table.getColumnCount() > 0) {
                 table.removeColumn(0);
             }
+            regattaOverviewDataProvider.removeDataDisplay(table);
         } else {
             sortInfos.add(new ColumnSortInfo(lastUpdateColumn, false));
         }
@@ -685,8 +686,7 @@ public class RegattaRaceStatesComponent extends SimplePanel implements Component
                     if (isInfoBefore) {
                         additionalInformation.append("  /  ");
                     }
-                    additionalInformation.append("Finished at: "
-                            + (timeFormatter.format(entryDTO.raceInfo.finishedTime)));
+                    additionalInformation.append(stringMessages.finishTime((timeFormatter.format(entryDTO.raceInfo.finishedTime))));
                     isInfoBefore = true;
                 }
                 return additionalInformation.toString();
