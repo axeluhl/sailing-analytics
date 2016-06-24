@@ -513,9 +513,9 @@ public class LeaderboardsResource extends AbstractSailingServerResource {
         OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
         if (deviceMappingEventId == null) {
-            logger.warning("No corresponding open competitor to device mapping has been found");
+            logger.warning("No corresponding open mark to device mapping has been found");
             return Response.status(Status.BAD_REQUEST)
-                    .entity("No corresponding open competitor to device mapping has been found")
+                    .entity("No corresponding open mark to device mapping has been found")
                     .type(MediaType.TEXT_PLAIN).build();
         }
         RegattaLogCloseOpenEndedDeviceMappingEventImpl event = new RegattaLogCloseOpenEndedDeviceMappingEventImpl(now,
