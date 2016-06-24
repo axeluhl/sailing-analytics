@@ -127,7 +127,7 @@ public class AutoPlayController implements RaceTimesInfoProviderListener, Leader
                             sailingService, mediaService, userService, asyncActionsExecutor,
                             result.getCompetitorAndTheirBoats(), raceboardTimer, currentLiveRace, autoPlayerConfiguration.getLeaderboardName(), 
                             /** leaderboardGroupName */ null, /** eventId */ null, errorReporter,
-                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider);
+                            StringMessages.INSTANCE, userAgent, raceTimesInfoProvider, true);
 
                     playerView.setContent(raceboardPerspective);
 

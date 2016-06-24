@@ -19,6 +19,12 @@ import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.shared.media.ImageDescriptor;
 
+/**
+ * <p>
+ * {@link SailingAction} implementation to load data to be shown in the series list overview for the
+ * {@link #GetEventSeriesViewAction(UUID) given series-id}, preparing the appropriate data structure.
+ * </p>
+ */
 public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDTO>, IsClientCacheable {
     
     private UUID id;
@@ -27,6 +33,12 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
     private GetEventSeriesViewAction() {
     }
     
+    /**
+     * Creates a {@link GetEventSeriesViewAction} instance for the given series-id.
+     * 
+     * @param id
+     *            {@link UUID} of the series to load data for
+     */
     public GetEventSeriesViewAction(UUID id) {
         super();
         this.id = id;

@@ -123,6 +123,9 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
         this.raceDataInfo = raceDataInfo;
     }
     
+    /**
+     * Holder class for flags, which inform about GPS, wind, video or audio data availability. 
+     */
     public static class RaceDataInfo implements DTO {
         private boolean hasGPSData, hasWindData, hasVideoData, hasAudioData;
         

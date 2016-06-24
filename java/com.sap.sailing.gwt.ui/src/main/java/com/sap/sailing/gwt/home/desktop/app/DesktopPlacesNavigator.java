@@ -123,6 +123,6 @@ public class DesktopPlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation() {
-        return createGlobalPlaceNavigation(new UserProfileDefaultPlace());
+        return createLocalPlaceNavigation(new UserProfileDefaultPlace());
     }
 }
