@@ -28,15 +28,15 @@ import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceLogPollerService extends Service implements AppPreferences.PollingActiveChangedListener, RaceLogPollerTask.PollingResultListener {
+public class RaceLogPollingService extends Service implements AppPreferences.PollingActiveChangedListener, RaceLogPollingTask.PollingResultListener {
 
-    private static final String TAG = RaceLogPollerService.class.getName();
+    private static final String TAG = RaceLogPollingService.class.getName();
 
     private AlarmManager mAlarm;
     private PendingIntent mPendingIntent;
     private AppPreferences mAppPreferences;
     private DataStore mDataStore;
-    private Map<ManagedRace, URL> mRaces;
+    private Map<String, URL> mRaces;
 
     @Nullable
     @Override
@@ -133,9 +133,9 @@ public class RaceLogPollerService extends Service implements AppPreferences.Poll
     private void registerRace(String raceId) {
         ExLog.i(this, TAG, "registerRace: " + raceId);
         ManagedRace race = getManagedRace(raceId);
-        if (race != null) {
+        if (!mRaces.containsKey(raceId) && race != null) {
             try {
-                mRaces.put(race, createURL(race));
+                mRaces.put(raceId, createURL(race));
             } catch (MalformedURLException | UnsupportedEncodingException e) {
                 ExLog.e(this, TAG, String.format("Unable to create polling URL for race %s: %s", race.getId(), e.getMessage()));
             }
@@ -150,12 +150,9 @@ public class RaceLogPollerService extends Service implements AppPreferences.Poll
      */
     private void unregisterRace(String raceId) {
         ExLog.i(this, TAG, "unregisterRace: " + raceId);
-        ManagedRace race = getManagedRace(raceId);
-        if (race != null) {
-            if (mRaces.containsKey(race)) {
-                mRaces.remove(race);
-                scheduleNextPoll();
-            }
+        if (mRaces.containsKey(raceId)) {
+            mRaces.remove(raceId);
+            scheduleNextPoll();
         }
     }
 
@@ -185,7 +182,7 @@ public class RaceLogPollerService extends Service implements AppPreferences.Poll
         ExLog.i(this, TAG, "Polling for server-side race log changes...");
         if (mAppPreferences.isPollingActive()) {
             List<Util.Pair<String, URL>> queries = getPollingQueries();
-            RaceLogPollerTask task = new RaceLogPollerTask(this, this);
+            RaceLogPollingTask task = new RaceLogPollingTask(this, this);
             @SuppressWarnings("unchecked")
             Util.Pair<String, URL>[] param = queries.toArray(new Util.Pair[queries.size()]);
             task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, param);
@@ -194,8 +191,8 @@ public class RaceLogPollerService extends Service implements AppPreferences.Poll
 
     private List<Util.Pair<String, URL>> getPollingQueries() {
         List<Util.Pair<String, URL>> queries = new ArrayList<>();
-        for (Map.Entry<ManagedRace, URL> entry : mRaces.entrySet()) {
-            queries.add(new Util.Pair<>(entry.getKey().getId(), entry.getValue()));
+        for (Map.Entry<String, URL> entry : mRaces.entrySet()) {
+            queries.add(new Util.Pair<>(entry.getKey(), entry.getValue()));
         }
         return queries;
     }

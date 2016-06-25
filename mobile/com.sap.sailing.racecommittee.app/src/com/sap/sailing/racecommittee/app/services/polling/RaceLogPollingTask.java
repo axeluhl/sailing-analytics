@@ -12,7 +12,7 @@ import com.sap.sailing.android.shared.data.http.HttpRequest;
 import com.sap.sailing.racecommittee.app.domain.racelog.impl.RaceLogEventsCallback;
 import com.sap.sse.common.Util;
 
-public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
+public class RaceLogPollingTask extends AsyncTask<Util.Pair<String, URL>, PollingResult, Void> {
 
     public interface PollingResultListener {
         void onPollingFinished();
@@ -21,7 +21,7 @@ public class RaceLogPollerTask extends AsyncTask<Util.Pair<String, URL>, Polling
     private final PollingResultListener mListener;
     private final Context mContext;
 
-    public RaceLogPollerTask(PollingResultListener listener, Context context) {
+    public RaceLogPollingTask(PollingResultListener listener, Context context) {
         mListener = listener;
         mContext = context.getApplicationContext();
     }

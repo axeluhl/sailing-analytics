@@ -4,15 +4,24 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult.ResolutionFailed;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
+import com.sap.sailing.racecommittee.app.services.polling.RaceLogPollingService;
 
 public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>> {
 
-    public ManagedRacesDataHandler(OnlineDataManager manager) {
+    private Context context;
+
+    public ManagedRacesDataHandler(Context context, OnlineDataManager manager) {
         super(manager);
+
+        this.context = context;
     }
     
     @Override
@@ -31,7 +40,7 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
             Set<DeleteFromDataStore> deleteList = new HashSet<>();
             for (ManagedRace race : manager.getDataStore().getRaces()) {
                 if (!data.contains(race)) {
-                    deleteList.add(new DeleteFromDataStore(manager, race));
+                    deleteList.add(new DeleteFromDataStore(context, manager, race));
                 }
             }
             for (DeleteFromDataStore action : deleteList) {
@@ -68,17 +77,24 @@ public class ManagedRacesDataHandler extends DataHandler<Collection<ManagedRace>
 
     private static class DeleteFromDataStore implements Runnable {
 
-        private final OnlineDataManager mManager;
-        private final ManagedRace mRace;
+        private final Context context;
+        private final OnlineDataManager manager;
+        private final ManagedRace race;
 
-        public DeleteFromDataStore(OnlineDataManager manager, ManagedRace race) {
-            mManager = manager;
-            mRace = race;
+        public DeleteFromDataStore(Context context, OnlineDataManager manager, ManagedRace race) {
+            this.context = context;
+            this.manager = manager;
+            this.race = race;
         }
 
         @Override
         public void run() {
-            mManager.getDataStore().removeRace(mRace);
+            manager.getDataStore().removeRace(race);
+
+            Intent intent = new Intent(context, RaceLogPollingService.class);
+            intent.setAction(AppConstants.INTENT_ACTION_POLLER_RACE_REMOVE);
+            intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, race.getId());
+            context.startService(intent);
         }
     }
 }

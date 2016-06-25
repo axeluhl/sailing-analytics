@@ -32,9 +32,9 @@ import com.sap.sse.common.Util;
  * There is no multi-threading involved, everything will be done on the UI thread. Thanks Obama.
  * </p>
  */
-public class RacePositionsPoller implements PollingActiveChangedListener {
+public class RacePositionsPolling implements PollingActiveChangedListener {
 
-    protected static final String TAG = RacePositionsPoller.class.getName();
+    protected static final String TAG = RacePositionsPolling.class.getName();
 
     private final Context context;
     private final Handler pollingHandler;
@@ -43,7 +43,7 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
     private final AppPreferences appPreferences;
     private boolean hasRacesToPoll;
 
-    public RacePositionsPoller(Context context) {
+    public RacePositionsPolling(Context context) {
         this.context = context;
         // We want to use the main (UI) loop
         this.pollingHandler = new Handler(Looper.getMainLooper());
@@ -137,14 +137,14 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
     /**
      * Will be run on the main (UI) thread!
      */
-    private static class PollingWorker implements Runnable, RacePositionsPollerTask.PollingResultListener {
+    private static class PollingWorker implements Runnable, RacePositionsPollingTask.PollingResultListener {
 
-        private final RacePositionsPoller poller;
+        private final RacePositionsPolling poller;
         private final RacePositionsCallback processor;
-        private RacePositionsPollerTask task;
+        private RacePositionsPollingTask task;
         private Context context;
 
-        public PollingWorker(RacePositionsPoller poller, Context context) {
+        public PollingWorker(RacePositionsPolling poller, Context context) {
             this.poller = poller;
             this.processor = new RacePositionsCallback();
             this.context = context;
@@ -168,7 +168,7 @@ public class RacePositionsPoller implements PollingActiveChangedListener {
             }
             
             List<Util.Pair<String, URL>> queries = getPollingQueries();
-            task = new RacePositionsPollerTask(this, context);
+            task = new RacePositionsPollingTask(this, context);
             task.execute(queries.toArray(new Util.Pair[0]));
         }
 
