@@ -64,7 +64,8 @@ public class RaceFinishingFragment extends BaseFragment {
         if (getView() != null) {
             TextView first_vessel = ViewHelper.get(getView(), R.id.first_vessel);
             if (first_vessel != null && getRaceState() != null && getRaceState().getFinishingTime() != null) {
-                first_vessel.setText(getString(R.string.finishing_started, mDateFormat.format(getRaceState().getFinishingTime().asDate())));
+                String raceDuration = TimeUtils.formatTimeAgo(getActivity(), getRaceState().getFinishingTime().minus(getRaceState().getStartTime().asMillis()).asMillis());
+                first_vessel.setText(getString(R.string.finishing_started, mDateFormat.format(getRaceState().getFinishingTime().asDate()), raceDuration));
             }
         }
         notifyTick(MillisecondsTimePoint.now());
