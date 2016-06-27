@@ -34,8 +34,8 @@ extends TableWrapper<RaceColumnDTOAndFleetDTOWithNameBasedEquality, S> {
             public boolean representSameEntity(RaceColumnDTOAndFleetDTOWithNameBasedEquality dto1,
                     RaceColumnDTOAndFleetDTOWithNameBasedEquality dto2) {
                 return dto1.getC().name.equals(dto2.getC().name) &&
-                        dto1.getA().getName().toString().equals(dto2.getA().getName().toString()) &&
-                        dto1.getB().getName().toString().equals(dto2.getB().getName().toString());
+                        dto1.getA().getName().equals(dto2.getA().getName()) &&
+                        dto1.getB().getName().equals(dto2.getB().getName());
             }
 
             @Override
